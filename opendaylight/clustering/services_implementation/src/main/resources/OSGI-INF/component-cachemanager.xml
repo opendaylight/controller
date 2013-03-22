@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+               activate="start"
+               deactivate="stop"
+               immediate="true"
+               name="org.opendaylight.controller.clustering.services_implementation.internal.ClusterManager">
+  <implementation class="org.opendaylight.controller.clustering.services_implementation.internal.ClusterManager"/>
+  <service>
+    <provide interface="org.opendaylight.controller.clustering.services.IClusterServices"/>
+  </service>
+</scr:component>

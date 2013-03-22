@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>commons.opendaylight</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+    <relativePath>../../commons/opendaylight</relativePath>
+  </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>clustering.test</artifactId>
+  <version>0.4.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>org.apache.felix</groupId>
+	<artifactId>maven-bundle-plugin</artifactId>
+	<version>2.3.6</version>
+	<extensions>true</extensions>
+	<configuration>
+	  <instructions>
+	    <Import-Package>
+	      org.slf4j,
+              javax.transaction,
+              org.eclipse.osgi.framework.console,
+              ch.qos.logback.classic,
+              org.opendaylight.controller.clustering.services
+            </Import-Package>
+            <Service-Component>
+              OSGI-INF/component.xml
+            </Service-Component>
+	  </instructions>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>clustering.services</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>

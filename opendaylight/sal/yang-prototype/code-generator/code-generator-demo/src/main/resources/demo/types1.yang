@@ -1,0 +1,80 @@
+module types1 {
+	yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+    
+
+    organization "Cisco";
+
+    contact "WILL-BE-DEFINED-LATER";
+    
+    
+    leaf mybits {
+         type bits {
+             bit disable-nagle {
+                 position 0;
+             }
+             bit auto-sense-speed {
+                 position 1;
+             }
+             bit 10-Mb-only {
+                 position 2;
+             }
+         }
+         default "auto-sense-speed";
+     }
+    
+    container interfaces {
+         list ifEntry {
+             key "ifIndex";
+
+             leaf ifIndex {
+                 type uint32;
+             }
+             leaf ifDescr {
+                 type string;
+             }
+             leaf ifType {
+                 type uint8;
+             }
+             leaf ifMtu {
+                 type int32;
+             }
+         }
+     }
+    
+    
+	container topology {
+		leaf name {
+			type string;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+//	typedef my-string {
+//		type string {
+//			length "0..4";
+//        	pattern "[0-9a-fA-F]*";
+//		}
+//	}
+
+
+//	leaf completed {
+//		type types2:percent;
+//  }
+
+//	leaf testleaf {
+//		type data:my-base-int32-type;
+//	}
+
+//	leaf-list domain-search {
+//		type string;
+//		description "List of domain names to search";
+//	}
+	
+}

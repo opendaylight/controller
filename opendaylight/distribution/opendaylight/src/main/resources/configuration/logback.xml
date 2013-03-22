@@ -1,0 +1,55 @@
+<configuration scan="true">
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%date{"yyyy-MM-dd HH:mm:ss.SSS z"} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  <appender name="opendaylight.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>logs/opendaylight.log</file>
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>logs/opendaylight.%d.log.zip</fileNamePattern>
+      <maxHistory>1</maxHistory>
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>%date{"yyyy-MM-dd HH:mm:ss.SSS z"} [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="error">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="opendaylight.log" />
+  </root>
+
+  <!--  Base log level  -->
+  <logger name="org.opendaylight.controller" level="INFO"/>
+
+  <!-- OSGi logging bridge -->
+  <logger name="org.opendaylight.controller.logging.bridge" level="WARN"/>
+
+  <!-- Openflow Protocol Plugin -->
+  <logger name="org.opendaylight.controller.protocol_plugin.openflow" level="INFO"/>
+  <logger name="org.opendaylight.controller.protocol_plugin.openflow.internal.DiscoveryService" level="INFO"/>
+  <logger name="org.opendaylight.controller.protocol_plugin.openflow.internal.InventoryService" level="INFO"/>
+  <logger name="org.opendaylight.controller.protocol_plugin.openflow.internal.InventoryServiceShim" level="INFO"/>
+  <logger name="org.opendaylight.controller.protocol_plugin.openflow.internal.TopologyServices" level="INFO"/>
+  <logger name="org.opendaylight.controller.protocol_plugin.openflow.internal.TopologyServiceShim" level="INFO"/>
+  <!-- SAL  -->
+  <logger name="org.opendaylight.controller.sal" level="INFO"/>
+  <logger name="org.opendaylight.controller.sal.implementation" level="INFO"/>
+  <logger name="org.opendaylight.controller.sal.implementation.internal.Inventory" level="INFO"/>
+  <logger name="org.opendaylight.controller.sal.implementation.internal.Topology" level="INFO"/>
+  <!-- Functional Modules -->
+  <logger name="org.opendaylight.controller.arphandler" level="INFO"/>
+  <logger name="org.opendaylight.controller.hosttracker" level="INFO"/>
+  <logger name="org.opendaylight.controller.routing" level="INFO"/>
+  <logger name="org.opendaylight.controller.forwardingrulesmanager" level="INFO"/>
+  <logger name="org.opendaylight.controller.forwarding.ipswitch" level="INFO"/>
+  <logger name="org.opendaylight.controller.switchmanager" level="INFO"/>
+  <logger name="org.opendaylight.controller.topologymanager" level="INFO"/>
+  <logger name="org.opendaylight.controller.usermanager" level="INFO"/>
+  <!-- Web modules -->
+  <logger name="org.opendaylight.controller.web" level="INFO"/>	
+</configuration>

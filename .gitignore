@@ -1,0 +1,13 @@
+*.class
+**/target
+**/bin
+dist
+**/logs
+products
+repository
+workspace
+*~
+target
+.classpath
+.project
+.settings

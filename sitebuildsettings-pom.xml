@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+  <groupId>sitebuildsettings</groupId>
+  <artifactId>sitebuildsettings</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
+    <thirdpartyID>thirdparty</thirdpartyID>
+    <opendaylightID>opendaylight</opendaylightID>
+  </properties>
+</project>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+
+  <scm>
+    <connection>scm:svn:https://wwwin-svn-sjc.cisco.com/eng/csdncontroller/trunk/</connection>
+    <developerConnection>scm:svn:https://wwwin-svn-sjc.cisco.com/eng/csdncontroller/trunk/</developerConnection>
+  </scm>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>commons.opendaylight</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+    <relativePath>../../commons/opendaylight</relativePath>
+  </parent>
+
+  <repositories>
+    <!-- To get SVNKit -->
+    <repository>
+      <id>svnkit-snapshots</id>
+      <name>svnkit-snapshots</name>
+      <url>${nexusproxy}/repositories/svnkit-snapshots/</url>
+    </repository>
+  </repositories>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>distribution.opendaylight</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <modules>
+    <module>../../clustering/services</module>
+    <module>../../clustering/services_implementation</module>
+    <module>../../clustering/stub</module>
+    <module>../../clustering/test</module>
+    <module>../../../third-party/openflowj</module>
+    <module>../../../third-party/net.sf.jung2</module>
+    <module>../../../third-party/jersey-servlet</module>
+    
+    <!-- SAL bundles -->
+    <module>../../sal/api</module>
+    <module>../../sal/implementation</module>
+
+    <!-- Debug and logging -->
+    <module>../../logging/bridge</module>
+  </modules>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <doCheck>false</doCheck>
+          <doUpdate>false</doUpdate>
+          <providerImplementations>
+            <svn>javasvn</svn>
+          </providerImplementations>
+          <revisionOnScmFailure>VersionUnknown</revisionOnScmFailure>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
+            <artifactId>maven-scm-provider-svnjava</artifactId>
+            <version>2.0.5</version>
+          </dependency>
+          <dependency>
+            <groupId>org.tmatesoft.svnkit</groupId>
+            <artifactId>svnkit</artifactId>
+            <version>1.7.4-v1</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.maven.scm</groupId>
+            <artifactId>maven-scm-provider-svn-commons</artifactId>
+            <version>1.7</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.3</version>
+        <executions>
+          <execution>
+            <id>distro-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/assemble/bin.xml</descriptor>
+              </descriptors>
+              <finalName>${project.artifactId}-${build.suffix}</finalName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

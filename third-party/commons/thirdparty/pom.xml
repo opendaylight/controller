@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+  <!-- The sitebuildsettings-pom.xml contains the specific settings
+       for a site on which the build can be performed so it will
+       contain for instance reference to the local Maven proxy/host
+       server or the local sonar etc. -->
+  <parent>
+    <groupId>sitebuildsettings</groupId>
+    <artifactId>sitebuildsettings</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../../../sitebuildsettings-pom.xml</relativePath>
+  </parent>
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>commons.thirdparty</artifactId>
+  <version>1.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <siteplugin>3.2</siteplugin>
+    <projectinfo>2.6</projectinfo>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <compiler.version>2.3.2</compiler.version>
+    <surefire.version>2.13</surefire.version>
+  </properties>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central2</id>
+      <name>central2</name>
+      <url>${nexusproxy}/repositories/central2/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <profiles>
+    <profile>
+      <id>fastreassembly</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.4</version>
+            <executions>
+              <execution>
+                <id>copyfastreassembly</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>${project.groupId}</groupId>
+                      <artifactId>${project.artifactId}</artifactId>
+                      <version>${project.version}</version>
+                      <destFileName>${project.groupId}.${project.artifactId}-${project.version}.jar</destFileName>
+                    </artifactItem>
+                  </artifactItems>
+                  <outputDirectory>${fastreassembly.directory}</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+        <artifactId>maven-java-formatter-plugin</artifactId>
+        <version>0.3.1</version>
+        <configuration>
+          <excludes>
+            <exclude>**/*</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>${siteplugin}</version>
+          <configuration>
+            <reportPlugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>${projectinfo}</version>
+                <configuration>
+                  <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                  <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                </configuration>
+                <reports>
+                  <report>index</report>
+                  <report>project-team</report>
+                  <report>license</report>
+                  <report>mailing-list</report>
+                  <report>plugin-management</report>
+                  <report>cim</report>
+                  <report>issue-tracking</report>
+                  <report>scm</report>
+                  <report>summary</report>
+                </reports>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.10</version>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                  <doclet>org.jboss.apiviz.APIviz</doclet>
+                  <docletArtifact>
+                    <groupId>org.jboss.apiviz</groupId>
+                    <artifactId>apiviz</artifactId>
+                    <version>1.3.2.GA</version>
+                  </docletArtifact>
+                  <finalName>${project.artifactId}-${build.suffix}</finalName>
+                  <useStandardDocletOptions>true</useStandardDocletOptions>
+                  <charset>UTF-8</charset>
+                  <encoding>UTF-8</encoding>
+                  <docencoding>UTF-8</docencoding>
+                  <breakiterator>true</breakiterator>
+                  <version>true</version>
+                  <author>true</author>
+                  <keywords>true</keywords>
+                  <excludePackageNames>net.sf.jnetlib.*:cern.*:corejava</excludePackageNames>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                  <aggregate>true</aggregate>
+                  <linkJavadoc>true</linkJavadoc>
+                </configuration>
+              </plugin>
+            </reportPlugins>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <repositories>
+    <!-- Maven repo2 mirror -->
+    <repository>
+      <id>central2</id>
+      <name>central2</name>
+      <url>${nexusproxy}/repositories/central2/</url>
+    </repository>
+    <!-- Maven repo1 mirror -->
+    <repository>
+      <id>central</id>
+      <name>central</name>
+      <url>${nexusproxy}/repositories/central/</url>
+    </repository>
+    <!-- Third Packages hosted in local maven because not available in
+         other places -->
+    <repository>
+      <id>${thirdpartyID}</id>
+      <name>thirdparty</name>
+      <url>${nexusproxy}/repositories/thirdparty</url>
+    </repository>
+  </repositories>
+  <distributionManagement>
+    <!-- Third-party Released artifact -->
+    <repository>
+      <id>${thirdpartyID}</id>
+      <url>${nexusproxy}/repositories/thirdparty</url>
+    </repository>
+    <!-- Third-party Snapshot artifact -->
+    <snapshotRepository>
+      <id>${thirdpartyID}-snapshot</id>
+      <url>${nexusproxy}/repositories/thirdparty-snapshot</url>
+    </snapshotRepository>
+    <!-- Site deployment -->
+    <site>
+      <id>website</id>
+      <url>${sitedeploy}</url>
+    </site>
+  </distributionManagement>
+</project>

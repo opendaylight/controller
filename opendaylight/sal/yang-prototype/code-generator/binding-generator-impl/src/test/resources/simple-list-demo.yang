@@ -1,0 +1,50 @@
+module simple-list-demo {
+	yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "scd";
+
+    organization "Cisco";
+
+    contact "WILL-BE-DEFINED-LATER";
+
+    description "
+        This module contains the definitions of elements that creates network 
+        topology i.e. definition of network nodes and links. This module is
+        not designed to be used solely for network representation. This module
+        SHOULD be used as base module in defining the network topology.
+    ";
+
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+
+    container list-parent-container {
+
+    	list simple-list {
+    		key "list-key";
+
+    		leaf list-key {
+    			type int8;
+    		}
+            
+            container list-child-container {
+                leaf foo {
+                    type uint8;
+                }
+            }
+            
+    		leaf foo {
+    			type int32;
+    		}
+            
+            leaf-list simple-leaf-list {
+                type int32;
+            }
+            
+    		leaf bar {
+    			type string;
+    			config true;
+    		}	
+    	}
+    }
+}

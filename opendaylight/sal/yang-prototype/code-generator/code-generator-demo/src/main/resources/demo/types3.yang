@@ -1,0 +1,35 @@
+module types3 {
+	yang-version 1;
+    namespace "urn:simple.types3.data.demo";
+    prefix "scd";
+
+    organization "Cisco";
+
+    contact "WILL-BE-DEFINED-LATER";
+
+    description "This is types-data test description";
+
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+    
+    typedef my-decimal {
+         type decimal64 {
+         	fraction-digits 2;
+         }
+    }
+
+	typedef my-base-int32-type {
+         type int32 {
+         	range "0..32";
+         }
+    }
+    
+    typedef percent {
+         type uint8 {
+             range "0 .. 100";
+         }
+         description "Percentage";
+	}
+	
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+               activate="startUp" 
+               deactivate="shutDown" 
+               name="org.opendaylight.controller.clustering.test.internal.SimpleClient">
+  <implementation class="org.opendaylight.controller.clustering.test.internal.SimpleClient"/>
+  
+  <service>
+    <!-- Exports, can be multiple-->
+    <provide interface="org.eclipse.osgi.framework.console.CommandProvider"/>    
+  </service>
+  
+  <!-- Imports, can be multiple -->
+  <reference name="IClusterServices" 
+             bind="setIClusterServices" 
+             unbind="unsetIClusterServices" 
+             cardinality="1..1" 
+             interface="org.opendaylight.controller.clustering.services.IClusterServices"/>
+</scr:component>

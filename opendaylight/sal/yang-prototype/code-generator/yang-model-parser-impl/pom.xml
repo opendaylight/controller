@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>binding-generator</artifactId>
+    <version>1.0</version>
+  </parent>
+  <artifactId>yang-model-parser-impl</artifactId>
+  
+  <dependencies>
+  	  <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>yang-common</artifactId>
+          <version>1.0</version>
+      </dependency>
+  	  <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>yang-model-api</artifactId>
+          <version>1.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>yang-model-util</artifactId>
+          <version>1.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>binding-model-api</artifactId>
+          <version>1.0</version>
+      </dependency>
+      
+      <dependency>
+          <groupId>org.antlr</groupId>
+          <artifactId>antlr4</artifactId>
+          <version>4.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>1.7.2</version>
+      </dependency>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+          <version>1.7.2</version>
+      </dependency>
+      <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-all</artifactId>
+          <version>1.8.4</version>
+      </dependency>
+  </dependencies>
+  
+</project>

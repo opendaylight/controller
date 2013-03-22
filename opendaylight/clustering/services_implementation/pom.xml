@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>commons.opendaylight</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+    <relativePath>../../commons/opendaylight</relativePath>
+  </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>clustering.services-implementation</artifactId>
+  <version>0.4.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>org.apache.felix</groupId>
+	<artifactId>maven-bundle-plugin</artifactId>
+	<version>2.3.6</version>
+	<extensions>true</extensions>
+	<configuration>
+	  <instructions>
+	    <Import-Package>
+              org.slf4j,
+              !org.jboss.*,
+              !bsh*,
+              !net.jcip.*,
+              javax.transaction,
+              *,
+              org.opendaylight.controller.clustering.services,
+              org.opendaylight.controller.sal.core
+            </Import-Package>
+            <Bundle-Activator>
+              org.opendaylight.controller.clustering.services_implementation.internal.Activator
+            </Bundle-Activator>
+            <!-- Add in the DynamicImport-Package ONLY the packages that -->
+            <!-- contains types that MUST be unmarshalled by the -->
+            <!-- infinispan. They need to be wired at runtime even during -->
+            <!-- the bundle is already RESOLVED, but at the same time if -->
+            <!-- those are missing the bundle will still come up, this is -->
+            <!-- why those dependencies ends in the DynamicImport-Package -->
+            <!-- rather in the Import-Package  -->
+            <DynamicImport-Package>
+              *
+            </DynamicImport-Package>
+            <Embed-Dependency>
+              infinispan-core,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper;type=!pom;inline=false
+            </Embed-Dependency>
+            <Embed-Transitive>
+              true
+            </Embed-Transitive>
+	  </instructions>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-core</artifactId>
+      <version>5.2.3.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>clustering.services</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,122 @@
+module demo-topology {
+	yang-version 1;
+    namespace "";
+    prefix "tp";
+
+    organization "Cisco";
+
+    contact "WILL-BE-DEFINED-LATER";
+
+    description "
+		This module contains the definitions of elements that creates network 
+		topology i.e. definition of network nodes and links. This module is
+		not designed to be used solely for network representation. This module
+		SHOULD be used as base module in defining the network topology.
+	";
+
+    revision "2013-02-08"{
+		reference " WILL BE DEFINED LATER";
+	}
+
+	container topology {
+        description "
+			This is the model of abstract topology which contains only Network
+			Nodes and Network Links. Each topology MUST be identified by
+			unique topology-id for reason that the store could contain many
+			topologies.
+		";
+
+        leaf topology-id {
+            type string;
+            description "
+				It is presumed that datastore will contain many topologies. To
+				distinguish between topologies it is vital to have UNIQUE
+				topology identifier.
+			";
+        }
+
+        container network-nodes {
+        	list network-node {
+	            description "The list of network nodes defined for topology.";
+
+	        	key "node-id";
+
+	        	leaf node-id {
+	        		type string;
+	        		description "The Topology identifier of network-node.";
+	        	}
+                
+                list network-interface {
+                    key "interface-id";
+                    
+                    leaf interface-id {
+                        type uint8;
+                    }
+                    
+                    leaf interface-address {
+                        type string;
+                    }
+                }
+                
+	            container node-attributes {
+					description "
+						Additional attributes that can Network Node contains.
+					";
+
+					leaf geo-latitude {
+						type decimal64 {
+							fraction-digits 2;
+						}
+						config true;
+					}
+
+					leaf geo-longitude {
+						type decimal64 {
+							fraction-digits 2;
+						}
+						config true;
+					}
+				}
+        	}
+        }
+        
+        container network-links {
+        	list network-link {
+	            description "
+					The Network Link which is defined by Local (Source) and
+					Remote (Destination) Network Nodes. Every link MUST be
+					defined either by identifier and his local and remote
+					Network Nodes (in real applications it is common that many
+					links are originated from one node and end up in same
+					remote node). To ensure that we would always know to
+					distinguish between links, every link SHOULD have
+					identifier.
+				";
+	        	key "link-id";
+
+	        	leaf link-id {
+	        		type string;
+	        		description "";
+	        	}
+
+	            container source {
+					leaf node-id {
+						type string;
+						description "Source node identifier.";
+					}
+				}
+
+				container destination {
+					leaf node-id {
+						type string;
+						description "Destination node identifier.";
+					}
+				}
+
+				container link-attributes {
+					description "Aditional attributes that can Network Link contains.";
+				}
+		    }
+        }
+    }
+}

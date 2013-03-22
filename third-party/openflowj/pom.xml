@@ -1,0 +1,137 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.opendaylight.controller.thirdparty</groupId>
+  <artifactId>org.openflow.openflowj</artifactId>
+  <version>1.0.2-SNAPSHOT</version>
+  <name>OpenFlow Java</name>
+  <description>A Java implemention of the OpenFlow v1.0 protocol</description>
+
+  <!-- Get some common settings for the project we are using it in -->
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>commons.thirdparty</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <relativePath>../commons/thirdparty</relativePath>
+  </parent>
+  
+  <developers>
+    <developer>
+      <name>David Erickson</name>
+      <email>daviderickson@cs.stanford.edu</email>
+    </developer>
+    <developer>
+      <name>Rob Sherwood</name>
+      <email>rob.sherwood@stanford.edu</email>
+    </developer>
+  </developers>
+  <packaging>bundle</packaging>
+  <url>http://www.openflow.org</url>
+  <licenses>
+    <license>
+      <name>The OpenFlow License</name>
+      <url>http://www.openflowswitch.org/wp/legal/</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git://gitosis.stanford.edu:openflowj.git</connection>
+    <url>https://openflow.stanford.edu/fisheye/browse/OpenFlowJ</url>
+  </scm>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <!-- For GPG release signing, use mvn release:perform -->
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <mavenExecutorId>forked-path</mavenExecutorId>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>org.apache.felix</groupId>
+	<artifactId>maven-bundle-plugin</artifactId>
+	<version>2.3.6</version>
+	<extensions>true</extensions>
+	<configuration>
+	  <instructions>
+	    <Export-Package>
+	      org.openflow.example;version="1.0.1";
+	      uses:="org.openflow.example.cli,
+	      org.openflow.protocol,
+	      org.openflow.io,
+	      org.openflow.protocol.factory",
+	      org.openflow.io;version="1.0.1";
+	      uses:="org.openflow.protocol,
+	      org.openflow.protocol.factory",
+	      org.openflow.protocol;version="1.0.1";
+	      uses:="org.openflow.protocol.statistics,
+	      org.openflow.protocol,
+	      org.openflow.protocol.factory",
+	      org.openflow.protocol.action;version="1.0.1";
+	      uses:="org.openflow.protocol",
+	      org.openflow.protocol.factory;version="1.0.1";
+	      uses:="org.openflow.protocol.statistics,
+	      org.openflow.protocol,
+	      org.openflow.protocol.action,
+	      org.openflow.protocol.queue",
+	      org.openflow.protocol.queue;version="1.0.2";
+	      uses:="org.openflow.protocol,
+	      org.openflow.protocol.factory",
+	      org.openflow.protocol.statistics;version="1.0.1";
+	      uses:="org.openflow.protocol,
+	      org.openflow.protocol.factory",
+	      org.openflow.util;version="1.0.1"
+	    </Export-Package>
+	  </instructions>
+	</configuration>
+      </plugin>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-compiler-plugin</artifactId>
+	<version>2.3.2</version>
+	<configuration>
+	  <source>1.6</source>
+	  <target>1.6</target>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
