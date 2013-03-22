@@ -9,6 +9,11 @@
 
 package org.opendaylight.controller.sal.match;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -18,17 +23,22 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents the generic matching field
  *
- *
- *
  */
+
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.NONE)
+
 public class MatchField implements Cloneable {
     private static final Logger logger = LoggerFactory
             .getLogger(MatchField.class);
-    private MatchType type; // the field we want to match
+	private MatchType type; // the field we want to match
     private Object value; // the value of the field we want to match
     private Object mask; // the value of the mask we want to match on the specified field
     private transient boolean isValid;
 
+    // To satisfy JAXB
+    private MatchField() {
+    }
     /**
      * Mask based match constructor
      *
@@ -64,6 +74,11 @@ public class MatchField implements Cloneable {
     public Object getValue() {
         return value;
     }
+    
+    @XmlElement(name="value")
+    private String getValueString() {
+    	return type.stringify(value);
+    }
 
     /**
      * Returns the type field this match field object is for
@@ -74,6 +89,11 @@ public class MatchField implements Cloneable {
         return type;
     }
 
+    @XmlElement(name="type")
+    private String getTypeString() {
+    	return type.toString();
+    }
+
     /**
      * Returns the mask value set for this field match
      * A null mask means this is a full match
@@ -81,6 +101,11 @@ public class MatchField implements Cloneable {
      */
     public Object getMask() {
         return mask;
+    }
+    
+    @XmlElement(name="mask")
+    private String getMaskString() {
+    	return type.stringify(mask); 
     }
 
     /**
@@ -174,13 +199,6 @@ public class MatchField implements Cloneable {
 
     @Override
     public String toString() {
-        String valueString = (value == null) ? "null"
-                : (value instanceof byte[]) ? HexEncode
-                        .bytesToHexString((byte[]) value) : value.toString();
-        String maskString = (mask == null) ? "null"
-                : (mask instanceof byte[]) ? HexEncode
-                        .bytesToHexString((byte[]) mask) : mask.toString();
-
-        return type + "(" + valueString + "," + maskString + ")";
+        return type + "(" + getValueString() + "," + getMaskString() + ")";
     }
 }

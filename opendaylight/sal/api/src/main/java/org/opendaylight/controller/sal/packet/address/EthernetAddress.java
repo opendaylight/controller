@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -24,6 +25,7 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 @XmlAccessorType(XmlAccessType.NONE)
 public class EthernetAddress extends DataLinkAddress {
     private static final long serialVersionUID = 1L;
+    @XmlTransient
     private byte[] macAddress;
 
     public static final EthernetAddress BROADCASTMAC = createWellKnownAddress(new byte[] {
@@ -109,6 +111,6 @@ public class EthernetAddress extends DataLinkAddress {
 
     @XmlElement(name = "macAddress")
     public String getMacAddress() {
-        return HexEncode.bytesToHexString(macAddress);
+        return HexEncode.bytesToHexStringFormat(macAddress);
     }
 }

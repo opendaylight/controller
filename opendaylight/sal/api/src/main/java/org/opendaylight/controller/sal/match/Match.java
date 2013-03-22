@@ -14,6 +14,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -130,7 +131,6 @@ public class Match implements Cloneable {
      *
      * @return the 32 bit long mask (Refer to {@code}org.opendaylight.controller.sal.match.MatchElement)
      */
-    @XmlElement
     public int getMatches() {
         return matches;
     }
@@ -144,6 +144,16 @@ public class Match implements Cloneable {
         return new ArrayList<MatchType>(fields.keySet());
     }
 
+    /**
+     * Returns the list of MatchFields the match is set for
+     *
+     * @return List of individual MatchField values. 
+     */
+    @XmlElement(name="matchField")
+    public List<MatchField> getMatchFields() {
+    	return new ArrayList<MatchField>(fields.values());
+    }
+    
     /**
      * Returns whether this match is for an IPv6 flow
      */

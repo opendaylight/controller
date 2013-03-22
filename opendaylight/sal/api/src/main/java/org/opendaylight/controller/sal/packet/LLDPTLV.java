@@ -236,7 +236,7 @@ public class LLDPTLV extends Packet {
     static public String getHexStringValue(byte[] tlvValue, int tlvLen) {
     	byte[] cidBytes = new byte[tlvLen - chassisIDSubType.length];    	     
         System.arraycopy(tlvValue, chassisIDSubType.length, cidBytes, 0, cidBytes.length);
-    	return HexEncode.bytesToHexStringWithColumn(cidBytes);
+    	return HexEncode.bytesToHexStringFormat(cidBytes);
     }
 
     /**

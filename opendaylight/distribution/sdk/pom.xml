@@ -32,7 +32,11 @@
   <packaging>pom</packaging>
   <modules>
     <module>../../clustering/services</module>
+    <module>../../containermanager/api</module>
     <module>../../sal/api</module>
+
+    <!-- Northbound common hooks -->
+    <module>../../northbound/commons</module>
   </modules>
   
   <build>

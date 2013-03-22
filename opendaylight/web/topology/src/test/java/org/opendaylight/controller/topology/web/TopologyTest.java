@@ -1,0 +1,33 @@
+package org.opendaylight.controller.topology.web;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.Test;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.opendaylight.controller.switchmanager.SwitchConfig;
+import org.opendaylight.controller.topology.web.Topology.NodeBean;
+		
+public class TopologyTest {
+
+	@Test
+	public void testCreateNodeBean() {
+		Topology topology = new Topology();
+		Node node = NodeCreator.createOFNode(new Long(3));
+		SwitchConfig mockSwitchConfig = new SwitchConfig(node.getNodeIDString(), "foo", null, null);
+		
+		NodeBean bean = topology.createNodeBean(mockSwitchConfig, node);
+		
+		assertNotNull(bean);
+		assertEquals(bean.id, node.toString());
+		assertEquals(bean.name, "foo");
+		
+		bean = topology.createNodeBean(null, node);
+		
+		assertNotNull(bean);
+		assertEquals(bean.id, node.toString());
+		assertEquals(bean.name, bean.id);
+	}
+
+}

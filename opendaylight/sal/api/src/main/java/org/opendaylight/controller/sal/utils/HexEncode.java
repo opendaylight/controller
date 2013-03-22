@@ -74,7 +74,7 @@ public class HexEncode {
 	/**
 	 * This method converts byte array into HexString format with ":" inserted.
 	 */
-    public static String bytesToHexStringWithColumn(byte[] bytes) {
+    public static String bytesToHexStringFormat(byte[] bytes) {
         int i;
         String ret = "";
         String tmp;
