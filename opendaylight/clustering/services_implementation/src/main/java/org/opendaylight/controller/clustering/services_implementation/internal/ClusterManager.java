@@ -415,9 +415,6 @@ public class ClusterManager implements IClusterServices {
         c = manager.getCache(realCacheName);
         CacheListenerContainer cl = new CacheListenerContainer(u,
                 containerName, cacheName);
-        if (cl == null) {
-            throw new CacheListenerAddException();
-        }
         c.addListener(cl);
     }
 
