@@ -10,6 +10,14 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <!-- This is to allow to deploy this artifact -->
+  <distributionManagement>
+    <snapshotRepository>
+      <id>${opendaylightID}-snapshot</id>
+      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <properties>
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
