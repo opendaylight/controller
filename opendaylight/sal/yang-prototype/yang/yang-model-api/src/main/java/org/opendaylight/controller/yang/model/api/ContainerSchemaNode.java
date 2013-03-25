@@ -16,6 +16,4 @@ public interface ContainerSchemaNode extends DataNodeContainer,
 
     boolean isPresenceContainer();
 
-    MustDefinition getMustDefinition();
-
 }

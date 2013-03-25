@@ -1,0 +1,164 @@
+module test-model {
+	yang-version 1;
+	namespace "urn:cisco:params:xml:ns:yang:controller:network";
+	prefix "topos";
+
+	import ietf-inet-types { prefix "inet"; }
+	import iana-if-type {prefix "if-type";}
+	import mount {prefix "mnt";} 
+
+	organization "Cisco";
+
+	contact "WILL-BE-DEFINED-LATER";
+
+	description "module description";
+	reference "module reference";
+	
+	typedef topology-id {
+		type inet:uri;
+	}
+
+	typedef node-id {
+		type inet:uri;
+	}
+
+	typedef link-id {
+		type inet:uri;
+	}
+
+	typedef tp-id {
+		type inet:uri;
+		description "identifier for termination points on a port";
+	}
+
+	typedef tp-ref {
+		type leafref {
+			path "/network/topologies/topology/nodes/node/termination-points/termination-point/tp-id";
+		}
+	}
+	typedef topology-ref {
+		type leafref {
+			path "/network/topologies/topology/topology-id";
+		}
+		description "This type is used for leafs that reference topology identifier instance.";
+		// currently not used
+	}
+
+	typedef node-ref {
+		type leafref {
+			path "/network/topologies/topology/nodes/node/node-id";
+		}
+		description "This type is used for leafs that reference a node instance.";
+	}
+
+	typedef link-ref {
+		type leafref {
+			path "/network/topologies/topology/links/link/link-id";
+		}
+		description "This type is used for leafs that reference a link instance.";
+		// currently not used
+	}
+	
+	typedef network-element-ref {
+		type leafref {
+			path "/network/network-elements/network-element/element-id";
+		}
+	}
+
+
+	typedef element-id {
+		type string;
+	}
+	
+	
+	container network {
+		description "network-description";
+		reference "network-reference";
+		status obsolete;
+		config true;
+		presence "some presence text";
+		
+		mnt:mountpoint point  {
+	    	mnt:target-ref target;
+		}
+		
+		leaf-list locked-node {
+        	type instance-identifier;
+        	min-elements 1;
+        	when "a/b/c";
+        	description "List of locked nodes in the running datastore";
+      	}
+      	
+      	leaf locked-test {
+      		mandatory true;
+      	}
+	
+		container topologies {
+			list topology {
+				description "Test description of list 'topology'.";
+				key "topology-id";
+				leaf topology-id {
+					type topology-id; 
+					description "Test description of leaf 'topology-id'";
+				}
+
+				container nodes {
+					list node {
+						description "The list of network nodes defined for topology.";
+
+						key "node-id";
+						leaf node-id {
+							type node-id;
+							description "The Topology identifier of network-node.";
+						}
+
+						leaf supporting-ne {
+							type network-element-ref;
+						}
+						
+						container termination-points {
+							list termination-point {
+								key "tp-id";
+								leaf tp-id {
+									type tp-id;
+								}
+							}
+						}
+					}
+				}
+		
+				container links {
+					list link {
+						description "Test description of list 'link'.";
+						key "link-id";
+						leaf link-id {
+							type link-id;
+							description "";
+						}
+
+						container source { 
+							leaf source-node {
+								type node-ref;
+								description "Source node identifier.";
+							}
+							leaf source-tp {
+								type tp-ref;
+							}
+						}
+					
+						container destination { 
+							leaf dest-node {
+								type node-ref;
+								description "Destination node identifier.";
+							}
+							leaf dest-tp {
+								type tp-ref;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+}

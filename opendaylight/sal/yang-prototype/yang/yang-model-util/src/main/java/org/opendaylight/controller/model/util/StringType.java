@@ -14,9 +14,9 @@ import org.opendaylight.controller.model.api.type.LengthConstraint;
 import org.opendaylight.controller.model.api.type.PatternConstraint;
 import org.opendaylight.controller.model.api.type.StringTypeDefinition;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public class StringType implements StringTypeDefinition {
 
@@ -159,7 +159,7 @@ public class StringType implements StringTypeDefinition {
     }
 
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
         return Collections.emptyList();
     }
 

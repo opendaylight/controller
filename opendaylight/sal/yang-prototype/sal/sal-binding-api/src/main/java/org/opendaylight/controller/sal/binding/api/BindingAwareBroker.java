@@ -160,8 +160,9 @@ public interface BindingAwareBroker {
      */
     public interface ProviderSession extends ConsumerSession {
 
-        void addImplementation(RpcService implementation);
+        void addRpcImplementation(RpcService implementation);
 
-        void removeImplementation(RpcService implementation);
+        void removeRpcImplementation(RpcService implementation);
     }
 }
+

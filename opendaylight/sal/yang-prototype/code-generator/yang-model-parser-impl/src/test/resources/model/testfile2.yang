@@ -1,0 +1,43 @@
+module types2 {
+	yang-version 1;
+    namespace "urn:simple.types.data.demo";
+    prefix "t2";
+    
+    import types1 {
+         prefix "if";
+         revision-date 2013-02-27;
+     }
+
+    organization "Cisco";
+    contact "WILL-BE-DEFINED-LATER";
+    description "This is types-data test description";
+
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+    
+    
+     augment "/if:interfaces/if:ifEntry" {
+         when "if:ifType='ds0'";
+         leaf ds0ChannelNumber {
+             type string;
+         }
+     }
+     
+     leaf if-name {
+     	type leafref {
+        	path "/interface/name";
+        }
+     }
+     
+     leaf name {
+     	type string;
+     }
+     
+     typedef my-base-int32-type {
+		type int32 {
+        	range "0..32";
+        }
+	}
+
+}

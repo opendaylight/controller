@@ -13,6 +13,4 @@ public interface LeafListSchemaNode extends DataSchemaNode {
 
     boolean isUserOrdered();
 
-    MustDefinition getMustDefinition();
-
 }

@@ -57,8 +57,7 @@ public class GeneratorJavaFileTest {
         generator.generateToFile(PATH);
 
         // path: test-dir/com/cisco/yang
-        String[] files = new File(PATH + FS + "com" + FS + "cisco" + FS
-                + "yang").list();
+        String[] files = new File(PATH + FS + "org" + FS + "opendaylight" + FS + "controller" + FS + "gen").list();
         List<String> filesList = Arrays.asList(files);
 
         assertEquals(3, files.length);

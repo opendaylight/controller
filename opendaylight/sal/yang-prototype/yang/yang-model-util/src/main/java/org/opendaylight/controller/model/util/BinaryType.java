@@ -13,9 +13,9 @@ import java.util.List;
 import org.opendaylight.controller.model.api.type.BinaryTypeDefinition;
 import org.opendaylight.controller.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public class BinaryType implements BinaryTypeDefinition {
 
@@ -25,29 +25,28 @@ public class BinaryType implements BinaryTypeDefinition {
     private final String reference = "";
 
     private List<Byte> bytes;
-    private final LengthConstraint lengthConstraint;
+    private final List<LengthConstraint> lengthConstraints;
     private String units = "";
 
     public BinaryType() {
         super();
 
-        lengthConstraint = BaseConstraints.lengthConstraint(0L, Long.MAX_VALUE,
-                null, null);
+        lengthConstraints = Collections.emptyList();
         bytes = Collections.emptyList();
         bytes = Collections.unmodifiableList(bytes);
     }
 
     public BinaryType(final List<Byte> bytes,
-            final LengthConstraint lengthConstraint, final String units) {
+            final List<LengthConstraint> lengthConstraints, final String units) {
         super();
         this.bytes = bytes;
-        this.lengthConstraint = lengthConstraint;
+        this.lengthConstraints = lengthConstraints;
         this.units = units;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
@@ -57,7 +56,7 @@ public class BinaryType implements BinaryTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getUnits()
      */
     @Override
@@ -67,7 +66,7 @@ public class BinaryType implements BinaryTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
      */
     @Override
@@ -77,7 +76,7 @@ public class BinaryType implements BinaryTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getQName()
      */
     @Override
@@ -87,7 +86,7 @@ public class BinaryType implements BinaryTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getPath()
      */
     @Override
@@ -97,7 +96,7 @@ public class BinaryType implements BinaryTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
     @Override
@@ -107,7 +106,7 @@ public class BinaryType implements BinaryTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getReference()
      */
     @Override
@@ -117,7 +116,7 @@ public class BinaryType implements BinaryTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getStatus()
      */
     @Override
@@ -127,18 +126,18 @@ public class BinaryType implements BinaryTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.base.type.api.BinaryTypeDefinition#getLengthConstraint
      * ()
      */
     @Override
-    public LengthConstraint getLengthConstraint() {
-        return lengthConstraint;
+    public List<LengthConstraint> getLengthConstraints() {
+        return lengthConstraints;
     }
 
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
         return Collections.emptyList();
     }
 
@@ -151,7 +150,7 @@ public class BinaryType implements BinaryTypeDefinition {
                 + ((description == null) ? 0 : description.hashCode());
         result = prime
                 * result
-                + ((lengthConstraint == null) ? 0 : lengthConstraint.hashCode());
+                + ((lengthConstraints == null) ? 0 : lengthConstraints.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((path == null) ? 0 : path.hashCode());
         result = prime * result
@@ -186,11 +185,11 @@ public class BinaryType implements BinaryTypeDefinition {
         } else if (!description.equals(other.description)) {
             return false;
         }
-        if (lengthConstraint == null) {
-            if (other.lengthConstraint != null) {
+        if (lengthConstraints == null) {
+            if (other.lengthConstraints != null) {
                 return false;
             }
-        } else if (!lengthConstraint.equals(other.lengthConstraint)) {
+        } else if (!lengthConstraints.equals(other.lengthConstraints)) {
             return false;
         }
         if (name == null) {
@@ -237,8 +236,8 @@ public class BinaryType implements BinaryTypeDefinition {
         builder.append(reference);
         builder.append(", bytes=");
         builder.append(bytes);
-        builder.append(", lengthConstraint=");
-        builder.append(lengthConstraint);
+        builder.append(", lengthConstraints=");
+        builder.append(lengthConstraints);
         builder.append(", units=");
         builder.append(units);
         builder.append("]");

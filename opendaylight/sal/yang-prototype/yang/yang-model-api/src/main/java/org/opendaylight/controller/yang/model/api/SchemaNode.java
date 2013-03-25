@@ -23,5 +23,5 @@ public interface SchemaNode {
 
     public Status getStatus();
 
-    public List<ExtensionDefinition> getExtensionSchemaNodes();
+    public List<UnknownSchemaNode> getUnknownSchemaNodes();
 }

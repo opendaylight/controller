@@ -8,5 +8,5 @@
 package org.opendaylight.controller.yang.model.api;
 
 public enum Status {
-    CURRENT, DEPRECATED, OBSOLOTE
+    CURRENT, DEPRECATED, OBSOLETE
 }
