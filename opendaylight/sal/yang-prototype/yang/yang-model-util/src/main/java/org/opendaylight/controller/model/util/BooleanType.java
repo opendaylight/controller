@@ -12,9 +12,9 @@ import java.util.List;
 
 import org.opendaylight.controller.model.api.type.BooleanTypeDefinition;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public class BooleanType implements BooleanTypeDefinition {
 
@@ -137,7 +137,7 @@ public class BooleanType implements BooleanTypeDefinition {
     }
 
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
         return Collections.emptyList();
     }
 

@@ -8,8 +8,6 @@
 package org.opendaylight.controller.sal.binding.generator.impl;
 
 import java.net.URI;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -22,8 +20,11 @@ import org.opendaylight.controller.binding.generator.util.CodeGeneratorHelper;
 import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.spi.TypeProvider;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedPropertyBuilder;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTypeBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 import org.opendaylight.controller.sal.binding.yang.types.TypeProviderImpl;
@@ -35,15 +36,13 @@ import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
+import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
 public class BindingGeneratorImpl implements BindingGenerator {
 
-    private static DateFormat simpleDateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd");
     private static Calendar calendar = new GregorianCalendar();
-
     private final Map<String, Map<String, GeneratedTypeBuilder>> genTypeBuilders;
     private final List<ContainerSchemaNode> schemaContainers;
     private final List<ListSchemaNode> schemaLists;
@@ -63,22 +62,30 @@ public class BindingGeneratorImpl implements BindingGenerator {
     }
 
     @Override
-    public List<GeneratedType> generateTypes(final Module module) {
-        final List<GeneratedType> genTypes = new ArrayList<GeneratedType>();
+    public List<Type> generateTypes(final SchemaContext context) {
+        final List<Type> genTypes = new ArrayList<Type>();
+        
+        if (context != null) {
+            final Set<Module> modules = context.getModules();
+            
+            if (modules != null) {
+                for (final Module module : modules) {
+                    basePackageName = resolveBasePackageName(module.getNamespace(),
+                            module.getYangVersion());
 
-        basePackageName = resolveBasePackageName(module.getNamespace(),
-                module.getYangVersion());
+                    traverseModule(module);
+                    if (schemaContainers.size() > 0) {
+                        for (final ContainerSchemaNode container : schemaContainers) {
+                            genTypes.add(containerToGenType(container));
+                        }
+                    }
 
-        traverseModule(module);
-        if (schemaContainers.size() > 0) {
-            for (final ContainerSchemaNode container : schemaContainers) {
-                genTypes.add(containerToGenType(container));
-            }
-        }
-
-        if (schemaLists.size() > 0) {
-            for (final ListSchemaNode list : schemaLists) {
-                genTypes.add(listToGenType(list));
+                    if (schemaLists.size() > 0) {
+                        for (final ListSchemaNode list : schemaLists) {
+                            genTypes.addAll(listToGenType(list));
+                        }
+                    }
+                }
             }
         }
 
@@ -113,7 +120,8 @@ public class BindingGeneratorImpl implements BindingGenerator {
 
         for (final DataSchemaNode node : schemaNodes) {
             if (node instanceof LeafSchemaNode) {
-                resolveLeafSchemaNode(typeBuilder, (LeafSchemaNode) node);
+                resolveLeafSchemaNodeAsMethod(typeBuilder,
+                        (LeafSchemaNode) node);
             } else if (node instanceof LeafListSchemaNode) {
                 resolveLeafListSchemaNode(typeBuilder,
                         (LeafListSchemaNode) node);
@@ -128,24 +136,57 @@ public class BindingGeneratorImpl implements BindingGenerator {
         return typeBuilder.toInstance();
     }
 
-    private boolean resolveLeafSchemaNode(
-            final GeneratedTypeBuilder typeBuilder, final LeafSchemaNode node) {
-        if ((node != null) && (typeBuilder != null)) {
-            final String nodeName = node.getQName().getLocalName();
-            String nodeDesc = node.getDescription();
-            if (nodeDesc == null) {
-                nodeDesc = "";
+    private boolean resolveLeafSchemaNodeAsMethod(
+            final GeneratedTypeBuilder typeBuilder, final LeafSchemaNode leaf) {
+        if ((leaf != null) && (typeBuilder != null)) {
+            final String leafName = leaf.getQName().getLocalName();
+            String leafDesc = leaf.getDescription();
+            if (leafDesc == null) {
+                leafDesc = "";
             }
 
-            if (nodeName != null) {
-                final TypeDefinition<?> typeDef = node.getType();
+            if (leafName != null) {
+                final TypeDefinition<?> typeDef = leaf.getType();
                 final Type javaType = typeProvider
                         .javaTypeForSchemaDefinitionType(typeDef);
 
-                constructGetter(typeBuilder, nodeName, nodeDesc, javaType);
-                if (!node.isConfiguration()) {
-                    constructSetter(typeBuilder, nodeName, nodeDesc, javaType);
+                constructGetter(typeBuilder, leafName, leafDesc, javaType);
+                if (!leaf.isConfiguration()) {
+                    constructSetter(typeBuilder, leafName, leafDesc, javaType);
                 }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean resolveLeafSchemaNodeAsProperty(
+            final GeneratedTOBuilder toBuilder, final LeafSchemaNode leaf,
+            boolean isReadOnly) {
+        if ((leaf != null) && (toBuilder != null)) {
+            final String leafName = leaf.getQName().getLocalName();
+            String leafDesc = leaf.getDescription();
+            if (leafDesc == null) {
+                leafDesc = "";
+            }
+
+            if (leafName != null) {
+                final TypeDefinition<?> typeDef = leaf.getType();
+                final Type javaType = typeProvider
+                        .javaTypeForSchemaDefinitionType(typeDef);
+
+                final GeneratedPropertyBuilder propBuilder = toBuilder
+                        .addProperty(CodeGeneratorHelper
+                                .parseToClassName(leafName));
+
+                propBuilder.setReadOnly(isReadOnly);
+                propBuilder.addReturnType(javaType);
+                propBuilder.addComment(leafDesc);
+
+                toBuilder.addEqualsIdentity(propBuilder);
+                toBuilder.addHashIdentity(propBuilder);
+                toBuilder.addToStringProperty(propBuilder);
+
                 return true;
             }
         }
@@ -316,16 +357,27 @@ public class BindingGeneratorImpl implements BindingGenerator {
         return packageNameBuilder.toString();
     }
 
-    private GeneratedType listToGenType(ListSchemaNode list) {
+    private List<Type> listToGenType(final ListSchemaNode list) {
         if (list == null) {
             return null;
         }
         final GeneratedTypeBuilder typeBuilder = resolveListTypeBuilder(list);
+        final List<String> listKeys = listKeys(list);
+        GeneratedTOBuilder genTOBuilder = null;
+        if (listKeys.size() > 0) {
+            genTOBuilder = resolveListKey(list);
+        }
 
         final Set<DataSchemaNode> schemaNodes = list.getChildNodes();
         for (final DataSchemaNode node : schemaNodes) {
+
             if (node instanceof LeafSchemaNode) {
-                resolveLeafSchemaNode(typeBuilder, (LeafSchemaNode) node);
+                final LeafSchemaNode leaf = (LeafSchemaNode) node;
+                if (!isPartOfListKey(leaf, listKeys)) {
+                    resolveLeafSchemaNodeAsMethod(typeBuilder, leaf);
+                } else {
+                    resolveLeafSchemaNodeAsProperty(genTOBuilder, leaf, true);
+                }
             } else if (node instanceof LeafListSchemaNode) {
                 resolveLeafListSchemaNode(typeBuilder,
                         (LeafListSchemaNode) node);
@@ -336,7 +388,59 @@ public class BindingGeneratorImpl implements BindingGenerator {
                 resolveListSchemaNode(typeBuilder, (ListSchemaNode) node);
             }
         }
-        return typeBuilder.toInstance();
+
+        final List<Type> genTypes = new ArrayList<Type>();
+        if (genTOBuilder != null) {
+            final GeneratedTransferObject genTO = genTOBuilder.toInstance();
+            constructGetter(typeBuilder, genTO.getName(), "Returns Primary Key of Yang List Type", genTO);
+            genTypes.add(genTO);
+        }
+        genTypes.add(typeBuilder.toInstance());
+        return genTypes;
+    }
+
+    /**
+     * @param list
+     * @return
+     */
+    private GeneratedTOBuilder resolveListKey(final ListSchemaNode list) {
+        final String packageName = resolveGeneratedTypePackageName(list
+                .getPath());
+        final String listName = list.getQName().getLocalName() + "Key";
+
+        if ((packageName != null) && (list != null) && (listName != null)) {
+            final String genTOName = CodeGeneratorHelper
+                    .parseToClassName(listName);
+            final GeneratedTOBuilder newType = new GeneratedTOBuilderImpl(
+                    packageName, genTOName);
+
+            return newType;
+        }
+        return null;
+    }
+
+    private boolean isPartOfListKey(final LeafSchemaNode leaf,
+            final List<String> keys) {
+        if ((leaf != null) && (keys != null) && (leaf.getQName() != null)) {
+            final String leafName = leaf.getQName().getLocalName();
+            if (keys.contains(leafName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<String> listKeys(final ListSchemaNode list) {
+        final List<String> listKeys = new ArrayList<String>();
+
+        if (list.getKeyDefinition() != null) {
+            final List<QName> keyDefinitions = list.getKeyDefinition();
+            
+            for (final QName keyDefinition : keyDefinitions) {
+                listKeys.add(keyDefinition.getLocalName());
+            }
+        }
+        return listKeys;
     }
 
     private GeneratedTypeBuilder resolveListTypeBuilder(

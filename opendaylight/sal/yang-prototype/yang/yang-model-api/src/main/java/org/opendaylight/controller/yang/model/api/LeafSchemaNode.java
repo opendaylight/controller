@@ -8,7 +8,7 @@
 package org.opendaylight.controller.yang.model.api;
 
 public interface LeafSchemaNode extends DataSchemaNode {
-    TypeDefinition getType();
 
-    MustDefinition getMustDefinition();
+    TypeDefinition<?> getType();
+
 }

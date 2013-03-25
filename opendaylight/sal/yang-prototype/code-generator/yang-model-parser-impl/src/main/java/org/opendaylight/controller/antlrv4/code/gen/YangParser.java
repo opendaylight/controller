@@ -7,21 +7,14 @@
  */
 package org.opendaylight.controller.antlrv4.code.gen;
 
-import java.util.List;
-
-import org.antlr.v4.runtime.NoViableAltException;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.TokenStream;
-import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNSimulator;
-import org.antlr.v4.runtime.atn.ParserATNSimulator;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
+import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({ "all", "warnings", "unchecked", "unused", "cast" })
 public class YangParser extends Parser {
@@ -38,26 +31,26 @@ public class YangParser extends Parser {
             CONTAINER_KEYWORD = 62, DEVIATION_KEYWORD = 55,
             STATUS_KEYWORD = 18, IDENTITY_KEYWORD = 50, IDENTIFIER = 73,
             REFINE_KEYWORD = 23, USES_KEYWORD = 12, VALUE_KEYWORD = 11,
-            IMPORT_KEYWORD = 48, BLOCK_COMMENT = 7, INPUT_KEYWORD = 46,
-            IF_FEATURE_KEYWORD = 49, PLUS = 4, PATTERN_KEYWORD = 29,
-            LENGTH_KEYWORD = 42, FEATURE_KEYWORD = 53,
-            REQUIRE_INSTANCE_KEYWORD = 22, ORGANIZATION_KEYWORD = 32,
-            UNIQUE_KEYWORD = 14, SUBMODULE_KEYWORD = 17, TYPE_KEYWORD = 16,
-            RIGHT_BRACE = 3, ERROR_MESSAGE_KEYWORD = 57, LINE_COMMENT = 6,
-            OUTPUT_KEYWORD = 31, MIN_ELEMENTS_KEYWORD = 38, MUST_KEYWORD = 36,
-            SEMICOLON = 1, POSITION_KEYWORD = 28, PATH_KEYWORD = 30, S = 75,
-            KEY_KEYWORD = 45, EXTENSION_KEYWORD = 56, WS = 5,
+            IMPORT_KEYWORD = 48, INPUT_KEYWORD = 46, IF_FEATURE_KEYWORD = 49,
+            PLUS = 4, PATTERN_KEYWORD = 29, LENGTH_KEYWORD = 42,
+            FEATURE_KEYWORD = 53, REQUIRE_INSTANCE_KEYWORD = 22,
+            ORGANIZATION_KEYWORD = 32, UNIQUE_KEYWORD = 14,
+            SUBMODULE_KEYWORD = 17, TYPE_KEYWORD = 16, RIGHT_BRACE = 3,
+            ERROR_MESSAGE_KEYWORD = 57, LINE_COMMENT = 6, OUTPUT_KEYWORD = 31,
+            MIN_ELEMENTS_KEYWORD = 38, MUST_KEYWORD = 36, SEMICOLON = 1,
+            POSITION_KEYWORD = 28, PATH_KEYWORD = 30, S = 75, KEY_KEYWORD = 45,
+            EXTENSION_KEYWORD = 56, START_BLOCK_COMMENT = 7, WS = 5,
             MANDATORY_KEYWORD = 40, ORDERED_BY_KEYWORD = 33,
             ERROR_APP_TAG_KEYWORD = 58, INCLUDE_KEYWORD = 47,
             ANYXML_KEYWORD = 72, AUGMENT_KEYWORD = 70, DEVIATE_KEYWORD = 54,
             LEFT_BRACE = 2, YANG_VERSION_KEYWORD = 9, LIST_KEYWORD = 41,
             TYPEDEF_KEYWORD = 15, MAX_ELEMENTS_KEYWORD = 39, ENUM_KEYWORD = 59,
             CASE_KEYWORD = 66, UNITS_KEYWORD = 13, GROUPING_KEYWORD = 51,
-            BASE_KEYWORD = 69, RANGE_KEYWORD = 25,
+            END_BLOCK_COMMENT = 76, BASE_KEYWORD = 69, RANGE_KEYWORD = 25,
             FRACTION_DIGITS_KEYWORD = 52, CONFIG_KEYWORD = 64,
             BIT_KEYWORD = 67, STRING = 74;
     public static final String[] tokenNames = { "<INVALID>", "SEMICOLON",
-            "LEFT_BRACE", "'}'", "'+'", "WS", "LINE_COMMENT", "BLOCK_COMMENT",
+            "LEFT_BRACE", "'}'", "'+'", "WS", "LINE_COMMENT", "'/*'",
             "'yin-element'", "'yang-version'", "'when'", "'value'", "'uses'",
             "'units'", "'unique'", "'typedef'", "'type'", "'submodule'",
             "'status'", "'rpc'", "'revision-date'", "'revision'",
@@ -73,7 +66,7 @@ public class YangParser extends Parser {
             "'description'", "'default'", "'container'", "'contact'",
             "'config'", "'choice'", "'case'", "'bit'", "'belongs-to'",
             "'base'", "'augment'", "'argument'", "'anyxml'", "IDENTIFIER",
-            "STRING", "S" };
+            "STRING", "S", "'*/'" };
     public static final int RULE_yang = 0, RULE_string = 1,
             RULE_identifier_stmt = 2, RULE_stmtend = 3,
             RULE_deviate_replace_stmt = 4, RULE_deviate_delete_stmt = 5,
@@ -12858,7 +12851,7 @@ public class YangParser extends Parser {
         return _localctx;
     }
 
-    public static final String _serializedATN = "\2\3M\u04bd\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4"
+    public static final String _serializedATN = "\2\3N\u04bd\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4"
             + "\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20"
             + "\4\21\t\21\4\22\t\22\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27"
             + "\4\30\t\30\4\31\t\31\4\32\t\32\4\33\t\33\4\34\t\34\4\35\t\35\4\36\t\36"

@@ -11,10 +11,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public class ExtendedType implements TypeDefinition {
 
@@ -23,7 +23,7 @@ public class ExtendedType implements TypeDefinition {
     private final SchemaPath path;
     private final String description;
     private final String reference;
-    private final List<ExtensionDefinition> extensions;
+    private final List<UnknownSchemaNode> unknownSchemaNodes;
 
     private Status status;
     private String units;
@@ -37,7 +37,7 @@ public class ExtendedType implements TypeDefinition {
         private final String description;
         private final String reference;
 
-        private List<ExtensionDefinition> extensions = Collections.emptyList();;
+        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();;
         private Status status = Status.CURRENT;
         private String units = "";
         private Object defaultValue = null;
@@ -66,8 +66,8 @@ public class ExtendedType implements TypeDefinition {
             return this;
         }
 
-        public Builder extensions(final List<ExtensionDefinition> extensions) {
-            this.extensions = extensions;
+        public Builder unknownSchemaNodes(final List<UnknownSchemaNode> unknownSchemaNodes) {
+            this.unknownSchemaNodes = unknownSchemaNodes;
             return this;
         }
 
@@ -82,7 +82,7 @@ public class ExtendedType implements TypeDefinition {
         this.path = builder.path;
         this.description = builder.description;
         this.reference = builder.reference;
-        this.extensions = builder.extensions;
+        this.unknownSchemaNodes = builder.unknownSchemaNodes;
         this.status = builder.status;
         this.units = builder.units;
         this.defaultValue = builder.defaultValue;
@@ -129,8 +129,8 @@ public class ExtendedType implements TypeDefinition {
     }
 
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
-        return extensions;
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
+        return unknownSchemaNodes;
     }
 
     @Override
@@ -144,7 +144,7 @@ public class ExtendedType implements TypeDefinition {
         result = prime * result
                 + ((description == null) ? 0 : description.hashCode());
         result = prime * result
-                + ((extensions == null) ? 0 : extensions.hashCode());
+                + ((unknownSchemaNodes == null) ? 0 : unknownSchemaNodes.hashCode());
         result = prime * result + ((path == null) ? 0 : path.hashCode());
         result = prime * result
                 + ((reference == null) ? 0 : reference.hashCode());
@@ -188,11 +188,11 @@ public class ExtendedType implements TypeDefinition {
         } else if (!description.equals(other.description)) {
             return false;
         }
-        if (extensions == null) {
-            if (other.extensions != null) {
+        if (unknownSchemaNodes == null) {
+            if (other.unknownSchemaNodes != null) {
                 return false;
             }
-        } else if (!extensions.equals(other.extensions)) {
+        } else if (!unknownSchemaNodes.equals(other.unknownSchemaNodes)) {
             return false;
         }
         if (path == null) {
@@ -242,8 +242,8 @@ public class ExtendedType implements TypeDefinition {
         builder2.append(description);
         builder2.append(", reference=");
         builder2.append(reference);
-        builder2.append(", extensions=");
-        builder2.append(extensions);
+        builder2.append(", unknownSchemaNodes=");
+        builder2.append(unknownSchemaNodes);
         builder2.append(", status=");
         builder2.append(status);
         builder2.append(", units=");

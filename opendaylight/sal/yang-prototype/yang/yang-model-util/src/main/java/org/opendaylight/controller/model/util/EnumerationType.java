@@ -12,9 +12,9 @@ import java.util.List;
 
 import org.opendaylight.controller.model.api.type.EnumTypeDefinition;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public class EnumerationType implements EnumTypeDefinition {
 
@@ -133,7 +133,7 @@ public class EnumerationType implements EnumTypeDefinition {
     }
 
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
         return Collections.emptyList();
     }
 

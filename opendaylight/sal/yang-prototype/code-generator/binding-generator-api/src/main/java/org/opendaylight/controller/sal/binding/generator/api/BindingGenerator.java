@@ -9,11 +9,11 @@ package org.opendaylight.controller.sal.binding.generator.api;
 
 import java.util.List;
 
-import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
-import org.opendaylight.controller.yang.model.api.Module;
+import org.opendaylight.controller.sal.binding.model.api.Type;
+import org.opendaylight.controller.yang.model.api.SchemaContext;
 
 public interface BindingGenerator {
 
-    public List<GeneratedType> generateTypes(final Module module);
+    public List<Type> generateTypes(final SchemaContext context);
 
 }

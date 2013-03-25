@@ -12,10 +12,10 @@ import java.util.List;
 
 import org.opendaylight.controller.model.api.type.InstanceIdentifierTypeDefinition;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
@@ -122,7 +122,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getExtensionSchemaNodes()
      */
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
         return Collections.emptyList();
     }
 

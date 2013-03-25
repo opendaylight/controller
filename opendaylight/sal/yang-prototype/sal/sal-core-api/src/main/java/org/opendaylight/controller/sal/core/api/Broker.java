@@ -146,6 +146,8 @@ public interface Broker {
          */
         Future<RpcResult<CompositeNode>> rpc(QName rpc, CompositeNode input);
 
+        boolean isClosed();
+
         /**
          * Returns a session specific instance (implementation) of requested
          * service
@@ -229,5 +231,8 @@ public interface Broker {
          */
         @Override
         public void close();
+
+        @Override
+        boolean isClosed();
     }
 }

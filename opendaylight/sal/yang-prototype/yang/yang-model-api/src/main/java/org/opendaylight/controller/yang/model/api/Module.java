@@ -9,6 +9,7 @@ package org.opendaylight.controller.yang.model.api;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public interface Module extends DataNodeContainer {
@@ -42,5 +43,7 @@ public interface Module extends DataNodeContainer {
     Set<RpcDefinition> getRpcs();
 
     Set<Deviation> getDeviations();
+
+    List<ExtensionDefinition> getExtensionSchemaNodes();
 
 }

@@ -59,16 +59,21 @@ public class YangTypesConverter {
         baseYangTypes.add("bits");
         baseYangTypes.add("boolean");
         baseYangTypes.add("decimal64");
+        baseYangTypes.add("empty");
         baseYangTypes.add("enumeration");
+        baseYangTypes.add("identityref");
+        baseYangTypes.add("instance-identifier");
         baseYangTypes.add("int8");
         baseYangTypes.add("int16");
         baseYangTypes.add("int32");
         baseYangTypes.add("int64");
+        baseYangTypes.add("leafref");
         baseYangTypes.add("string");
         baseYangTypes.add("uint8");
         baseYangTypes.add("uint16");
         baseYangTypes.add("uint32");
         baseYangTypes.add("uint64");
+        baseYangTypes.add("union");
     }
 
     public static boolean isBaseYangType(String type) {

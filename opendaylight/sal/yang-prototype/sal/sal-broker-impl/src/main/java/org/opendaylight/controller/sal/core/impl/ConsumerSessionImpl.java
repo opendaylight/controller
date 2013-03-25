@@ -26,6 +26,7 @@ public class ConsumerSessionImpl implements ConsumerSession {
     private final Consumer consumer;
 
     private Map<Class<? extends BrokerService>, BrokerService> instantiatedServices = new HashMap<Class<? extends BrokerService>, BrokerService>();
+    private boolean closed = false;
 
     public Consumer getConsumer() {
         return consumer;
@@ -59,11 +60,16 @@ public class ConsumerSessionImpl implements ConsumerSession {
     @Override
     public void close() {
         Collection<BrokerService> toStop = instantiatedServices.values();
+        this.closed  = true;
         for (BrokerService brokerService : toStop) {
             brokerService.closeSession();
         }
         broker.consumerSessionClosed(this);
     }
 
-}
+    @Override
+    public boolean isClosed() {
+        return closed;
+    }
 
+}

@@ -15,9 +15,9 @@ import java.util.List;
 import org.opendaylight.controller.model.api.type.DecimalTypeDefinition;
 import org.opendaylight.controller.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public class Decimal64 implements DecimalTypeDefinition {
 
@@ -103,7 +103,7 @@ public class Decimal64 implements DecimalTypeDefinition {
     }
 
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
         return Collections.emptyList();
     }
 

@@ -20,11 +20,6 @@
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
-          <artifactId>yang-model-parser-impl</artifactId>
-          <version>1.0</version>
-      </dependency>
-      <dependency>
-          <groupId>org.opendaylight.controller</groupId>
           <artifactId>binding-java-api-generator</artifactId>
           <version>1.0</version>
       </dependency>

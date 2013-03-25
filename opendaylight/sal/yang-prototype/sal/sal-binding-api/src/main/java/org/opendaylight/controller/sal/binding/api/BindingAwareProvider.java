@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.binding.api;
 import java.util.Collection;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerSession;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderSession;
 import org.opendaylight.controller.yang.binding.RpcService;
 
 
@@ -65,4 +66,7 @@ public interface BindingAwareProvider {
 
     }
 
+    void onSessionInitiated(ProviderSession session);
+
 }
+

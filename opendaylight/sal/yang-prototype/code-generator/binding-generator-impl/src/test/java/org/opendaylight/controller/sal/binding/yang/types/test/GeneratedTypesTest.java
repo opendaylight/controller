@@ -10,73 +10,51 @@ package org.opendaylight.controller.sal.binding.yang.types.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
-import org.opendaylight.controller.antlrv4.code.gen.YangLexer;
-import org.opendaylight.controller.antlrv4.code.gen.YangParser;
-import org.opendaylight.controller.model.parser.builder.ModuleBuilder;
-import org.opendaylight.controller.model.parser.impl.YangModelParserImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.impl.BindingGeneratorImpl;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
+import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.yang.model.api.Module;
+import org.opendaylight.controller.yang.model.api.SchemaContext;
+import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
+import org.opendaylight.controller.yang.model.parser.impl.YangModelParserImpl;
 
 public class GeneratedTypesTest {
 
-    private Module resolveModuleFromFile(final String filePath) {
-        try {
-            final InputStream inStream = getClass().getResourceAsStream(
-                    filePath);
-            if (inStream != null) {
-                ANTLRInputStream input = new ANTLRInputStream(inStream);
-                final YangLexer lexer = new YangLexer(input);
-                final CommonTokenStream tokens = new CommonTokenStream(lexer);
-                final YangParser parser = new YangParser(tokens);
+    private SchemaContext resolveSchemaContextFromFiles(
+            final String... yangFiles) {
+        final YangModelParser parser = new YangModelParserImpl();
+        final Set<Module> modules = parser.parseYangModels(yangFiles);
 
-                final ParseTree tree = parser.yang();
-                final ParseTreeWalker walker = new ParseTreeWalker();
-
-                final YangModelParserImpl modelParser = new YangModelParserImpl();
-                walker.walk(modelParser, tree);
-
-                final ModuleBuilder genModule = modelParser.getModuleBuilder();
-                final Module module = genModule.build();
-
-                return module;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return parser.resolveSchemaContext(modules);
     }
 
     @Test
     public void testContainerResolving() {
-        final Module module = resolveModuleFromFile("/simple-container-demo.yang");
-        assertTrue(module != null);
+        final String filePath = getClass().getResource("/simple-container-demo.yang").getPath();
+        final SchemaContext context = resolveSchemaContextFromFiles(filePath);
+        assertTrue(context != null);
 
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
-        final List<GeneratedType> genTypes = bindingGen.generateTypes(module);
+        final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(genTypes.size(), 2);
+        assertEquals(2, genTypes.size());
 
-        final GeneratedType simpleContainer = genTypes.get(0);
-        final GeneratedType nestedContainer = genTypes.get(1);
+        final GeneratedType simpleContainer = (GeneratedType) genTypes.get(0);
+        final GeneratedType nestedContainer = (GeneratedType) genTypes.get(1);
 
-        assertEquals(simpleContainer.getName(), "SimpleContainer");
-        assertEquals(nestedContainer.getName(), "NestedContainer");
-
-        assertEquals(simpleContainer.getMethodDefinitions().size(), 4);
-        assertEquals(nestedContainer.getMethodDefinitions().size(), 4);
+        assertEquals("SimpleContainer", simpleContainer.getName());
+        assertEquals("NestedContainer", nestedContainer.getName());
+        assertEquals(4, simpleContainer.getMethodDefinitions().size());
+        assertEquals(4, nestedContainer.getMethodDefinitions().size());
 
         int methodsCount = 0;
         for (final MethodSignature method : simpleContainer
@@ -90,8 +68,8 @@ public class GeneratedTypesTest {
                 methodsCount++;
                 final MethodSignature.Parameter param = method.getParameters()
                         .get(0);
-                assertEquals(param.getName(), "foo");
-                assertEquals(param.getType().getName(), "Integer");
+                assertEquals("foo", param.getName());
+                assertEquals("Integer", param.getType().getName());
             }
 
             if (method.getName().equals("getBar")) {
@@ -104,7 +82,7 @@ public class GeneratedTypesTest {
                 methodsCount++;
             }
         }
-        assertEquals(methodsCount, 4);
+        assertEquals(4, methodsCount);
 
         methodsCount = 0;
         for (final MethodSignature method : nestedContainer
@@ -118,8 +96,8 @@ public class GeneratedTypesTest {
                 methodsCount++;
                 final MethodSignature.Parameter param = method.getParameters()
                         .get(0);
-                assertEquals(param.getName(), "foo");
-                assertEquals(param.getType().getName(), "Short");
+                assertEquals("foo", param.getName());
+                assertEquals("Short", param.getType().getName());
             }
 
             if (method.getName().equals("getBar")) {
@@ -132,30 +110,28 @@ public class GeneratedTypesTest {
                 methodsCount++;
             }
         }
-        assertEquals(methodsCount, 4);
+        assertEquals(4, methodsCount);
     }
 
     @Test
     public void testLeafListResolving() {
-        final Module module = resolveModuleFromFile("/simple-leaf-list-demo.yang");
-        assertTrue(module != null);
+        final String filePath = getClass().getResource("/simple-leaf-list-demo.yang").getPath();
+        final SchemaContext context = resolveSchemaContextFromFiles(filePath);
+        assertTrue(context != null);
 
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
-        final List<GeneratedType> genTypes = bindingGen.generateTypes(module);
+        final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(genTypes.size(), 2);
+        assertEquals(2, genTypes.size());
 
-        final GeneratedType simpleContainer = genTypes.get(0);
-        final GeneratedType nestedContainer = genTypes.get(1);
+        final GeneratedType simpleContainer = (GeneratedType) genTypes.get(0);
+        final GeneratedType nestedContainer = (GeneratedType) genTypes.get(1);
 
-        assertEquals(simpleContainer.getName(), "SimpleContainer");
-        assertEquals(nestedContainer.getName(), "NestedContainer");
-
-        // FIXME: uncomment after fix in DOM tree parser - LeafSchemaNode bad
-        // isConfig resolving
-        assertEquals(simpleContainer.getMethodDefinitions().size(), 4);
-        assertEquals(nestedContainer.getMethodDefinitions().size(), 3);
+        assertEquals("SimpleContainer", simpleContainer.getName());
+        assertEquals("NestedContainer", nestedContainer.getName());
+        assertEquals(4, simpleContainer.getMethodDefinitions().size());
+        assertEquals(3, nestedContainer.getMethodDefinitions().size());
 
         int methodsCount = 0;
         for (final MethodSignature method : simpleContainer
@@ -169,8 +145,8 @@ public class GeneratedTypesTest {
                 methodsCount++;
                 final MethodSignature.Parameter param = method.getParameters()
                         .get(0);
-                assertEquals(param.getName(), "foo");
-                assertEquals(param.getType().getName(), "List");
+                assertEquals("foo", param.getName());
+                assertEquals("List", param.getType().getName());
             }
 
             if (method.getName().equals("getBar")) {
@@ -183,7 +159,7 @@ public class GeneratedTypesTest {
                 methodsCount++;
             }
         }
-        assertEquals(methodsCount, 4);
+        assertEquals(4, methodsCount);
 
         methodsCount = 0;
         for (final MethodSignature method : nestedContainer
@@ -197,8 +173,8 @@ public class GeneratedTypesTest {
                 methodsCount++;
                 final MethodSignature.Parameter param = method.getParameters()
                         .get(0);
-                assertEquals(param.getName(), "foo");
-                assertEquals(param.getType().getName(), "Short");
+                assertEquals("foo", param.getName());
+                assertEquals("Short", param.getType().getName());
             }
 
             if (method.getName().equals("getBar")) {
@@ -206,30 +182,160 @@ public class GeneratedTypesTest {
                 methodsCount++;
             }
         }
-        assertEquals(methodsCount, 3);
+        assertEquals(3, methodsCount);
     }
 
     @Test
     public void testListResolving() {
-        final Module module = resolveModuleFromFile("/simple-list-demo.yang");
-        assertTrue(module != null);
+        final String filePath = getClass().getResource("/simple-list-demo.yang").getPath();
+        final SchemaContext context = resolveSchemaContextFromFiles(filePath);
+        assertTrue(context != null);
 
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
-        final List<GeneratedType> genTypes = bindingGen.generateTypes(module);
+        final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(genTypes.size(), 3);
+        assertEquals(4, genTypes.size());
+
+        int genTypesCount = 0;
+        int genTOsCount = 0;
+        for (final Type type : genTypes) {
+            if (type instanceof GeneratedType) {
+                final GeneratedType genType = (GeneratedType) type;
+                if (genType.getName().equals("ListParentContainer")) {
+                    assertEquals(2, genType.getMethodDefinitions().size());
+                    genTypesCount++;
+                } else if (genType.getName().equals("SimpleList")) {
+                    assertEquals(7, genType.getMethodDefinitions().size());
+                    final List<MethodSignature> methods = genType
+                            .getMethodDefinitions();
+                    int methodsCount = 0;
+                    for (final MethodSignature method : methods) {
+                        if (method.getName().equals("getSimpleListKey")) {
+                            assertEquals("SimpleListKey", method
+                                    .getReturnType().getName());
+                            methodsCount++;
+                        } else if (method.getName().equals(
+                                "getListChildContainer")) {
+                            assertEquals("ListChildContainer", method
+                                    .getReturnType().getName());
+                            methodsCount++;
+                        } else if (method.getName().equals("getFoo")) {
+                            methodsCount++;
+                        } else if (method.getName().equals("setFoo")) {
+                            methodsCount++;
+                        } else if (method.getName().equals("getSimpleLeafList")) {
+                            methodsCount++;
+                        } else if (method.getName().equals("setSimpleLeafList")) {
+                            methodsCount++;
+                        } else if (method.getName().equals("getBar")) {
+                            methodsCount++;
+                        }
+                    }
+                    assertEquals(7, methodsCount);
+                    genTypesCount++;
+                } else if (genType.getName().equals("ListChildContainer")) {
+                    assertEquals(2, genType.getMethodDefinitions().size());
+                    genTypesCount++;
+                }
+            } else if (type instanceof GeneratedTransferObject) {
+                genTOsCount++;
+                final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
+                final List<GeneratedProperty> properties = genTO
+                        .getProperties();
+                final List<GeneratedProperty> hashProps = genTO
+                        .getHashCodeIdentifiers();
+                final List<GeneratedProperty> equalProps = genTO
+                        .getEqualsIdentifiers();
+
+                assertEquals(1, properties.size());
+                assertEquals("ListKey", properties.get(0).getName());
+                assertEquals("Byte", properties.get(0).getReturnType()
+                        .getName());
+                assertEquals(true, properties.get(0).isReadOnly());
+                assertEquals(1, hashProps.size());
+                assertEquals("ListKey", hashProps.get(0).getName());
+                assertEquals("Byte", hashProps.get(0).getReturnType().getName());
+                assertEquals(1, equalProps.size());
+                assertEquals("ListKey", equalProps.get(0).getName());
+                assertEquals("Byte", equalProps.get(0).getReturnType()
+                        .getName());
+            }
+        }
+        assertEquals(3, genTypesCount);
+        assertEquals(1, genTOsCount);
+    }
+
+    @Test
+    public void testListCompositeKeyResolving() {
+        final String filePath = getClass().getResource("/list-composite-key.yang").getPath();
+        final SchemaContext context = resolveSchemaContextFromFiles(filePath);
+
+        assertTrue(context != null);
+
+        final BindingGenerator bindingGen = new BindingGeneratorImpl();
+        final List<Type> genTypes = bindingGen.generateTypes(context);
+
+        assertTrue(genTypes != null);
+        assertEquals(6, genTypes.size());
+
+        int genTypesCount = 0;
+        int genTOsCount = 0;
+        for (final Type type : genTypes) {
+            if (type instanceof GeneratedType) {
+                genTypesCount++;
+            } else if (type instanceof GeneratedTransferObject) {
+                final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
+
+                if (genTO.getName().equals("CompositeKeyListKey")) {
+                    final List<GeneratedProperty> properties = genTO
+                            .getProperties();
+                    int propertyCount = 0;
+                    for (final GeneratedProperty prop : properties) {
+                        if (prop.getName().equals("Key1")) {
+                            propertyCount++;
+                        } else if (prop.getName().equals("Key2")) {
+                            propertyCount++;
+                        }
+                    }
+                    assertEquals(2, propertyCount);
+                    genTOsCount++;
+                } else if (genTO.getName().equals("InnerListKey")) {
+                    final List<GeneratedProperty> properties = genTO
+                            .getProperties();
+                    assertEquals(1, properties.size());
+                    genTOsCount++;
+                }
+            }
+        }
+
+        assertEquals(4, genTypesCount);
+        assertEquals(2, genTOsCount);
     }
 
     @Test
     public void testGeneratedTypes() {
-        final Module module = resolveModuleFromFile("/demo-topology.yang");
-        assertTrue(module != null);
+        final String filePath = getClass().getResource("/demo-topology.yang").getPath();
+        final SchemaContext context = resolveSchemaContextFromFiles(filePath);
+        assertTrue(context != null);
 
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
-        final List<GeneratedType> genTypes = bindingGen.generateTypes(module);
+        final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(genTypes.size(), 10);
+        assertEquals(13, genTypes.size());
+
+        int genTypesCount = 0;
+        int genTOsCount = 0;
+        for (final Type type : genTypes) {
+            if (type instanceof GeneratedType) {
+                genTypesCount++;
+            } else if (type instanceof GeneratedTransferObject) {
+                genTOsCount++;
+            }
+        }
+
+        assertEquals(10, genTypesCount);
+        assertEquals(3, genTOsCount);
     }
 }

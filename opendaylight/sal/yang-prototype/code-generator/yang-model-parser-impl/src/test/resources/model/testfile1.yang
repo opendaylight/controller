@@ -1,0 +1,39 @@
+module types1 {
+	yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+    
+    import types2 {
+         prefix "data";
+         revision-date 2013-02-27;
+     }
+    
+    organization "Cisco";
+    contact "WILL-BE-DEFINED-LATER";
+    
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+    
+    container interfaces {
+         list ifEntry {
+             key "ifIndex";
+
+             leaf ifIndex {
+                 type uint32;
+                 units minutes;
+             }
+             
+             leaf ifMtu {
+                 type int32;
+             }
+         }
+     }
+     
+	leaf testleaf {
+		type data:my-base-int32-type {
+			range "11..max";
+		}
+	} 
+
+}

@@ -13,9 +13,9 @@ import java.util.List;
 import org.opendaylight.controller.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public abstract class AbstractInteger implements IntegerTypeDefinition {
 
@@ -112,7 +112,7 @@ public abstract class AbstractInteger implements IntegerTypeDefinition {
     }
 
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
         return Collections.emptyList();
     }
 

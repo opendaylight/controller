@@ -18,6 +18,7 @@ import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public class UnknownType implements UnknownTypeDefinition {
 
@@ -29,7 +30,7 @@ public class UnknownType implements UnknownTypeDefinition {
     private final List<LengthConstraint> lengthStatements;
     private final List<PatternConstraint> patterns;
     private final List<RangeConstraint> rangeStatements;
-    private final List<ExtensionDefinition> extensions;
+    private final List<UnknownSchemaNode> extensions;
     private final LengthConstraint lengthConstraint;
 
     private final Status status;
@@ -47,7 +48,7 @@ public class UnknownType implements UnknownTypeDefinition {
                 .emptyList();
         private List<PatternConstraint> patterns = Collections.emptyList();
         private List<RangeConstraint> rangeStatements = Collections.emptyList();
-        private List<ExtensionDefinition> extensions = Collections.emptyList();
+        private List<UnknownSchemaNode> extensions = Collections.emptyList();
         private LengthConstraint lengthConstraint = null;
 
         private Status status = Status.CURRENT;
@@ -94,7 +95,7 @@ public class UnknownType implements UnknownTypeDefinition {
             return this;
         }
 
-        public Builder extensions(final List<ExtensionDefinition> extensions) {
+        public Builder extensions(final List<UnknownSchemaNode> extensions) {
             this.extensions = extensions;
             return this;
         }
@@ -231,7 +232,7 @@ public class UnknownType implements UnknownTypeDefinition {
      * ()
      */
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
         return extensions;
     }
 

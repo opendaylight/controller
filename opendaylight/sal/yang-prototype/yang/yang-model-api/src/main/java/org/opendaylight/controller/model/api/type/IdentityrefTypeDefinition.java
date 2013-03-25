@@ -7,10 +7,13 @@
  */
 package org.opendaylight.controller.model.api.type;
 
+import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
 public interface IdentityrefTypeDefinition extends
         TypeDefinition<IdentityTypeDefinition> {
-
+    
+    public RevisionAwareXPath getPathStatement();
+    
     public IdentityTypeDefinition getIdentity();
 }

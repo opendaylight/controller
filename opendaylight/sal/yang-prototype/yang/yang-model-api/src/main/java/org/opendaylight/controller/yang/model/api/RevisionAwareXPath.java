@@ -8,5 +8,21 @@
 package org.opendaylight.controller.yang.model.api;
 
 public interface RevisionAwareXPath {
-
+    
+    
+    /**
+     * Returns <code>true</code> if the XPapth starts in root of Yang model, otherwise returns <code>false</cdoe>.
+     * 
+     * @return <code>true</code> if the XPapth starts in root of Yang model, otherwise returns <code>false</cdoe>
+     */
+    public boolean isAbsolute();
+    
+    /**
+     * Returns the XPath formatted string as is defined in model. 
+     * <br>
+     * For example: /prefix:container/prefix:container::cond[when()=foo]/prefix:leaf
+     * 
+     * @return the XPath formatted string as is defined in model.
+     */
+    public String toString();
 }

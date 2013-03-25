@@ -9,8 +9,6 @@ package org.opendaylight.controller.yang.model.api;
 
 public interface Deviation {
 
-    MustDefinition getMustDefinition();
-
     enum Deviate {
         NOT_SUPPORTED, ADD, REPLACE, DELETE
     }

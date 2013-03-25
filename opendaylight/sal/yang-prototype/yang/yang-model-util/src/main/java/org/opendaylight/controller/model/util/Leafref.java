@@ -12,10 +12,10 @@ import java.util.List;
 
 import org.opendaylight.controller.model.api.type.LeafrefTypeDefinition;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
 public class Leafref implements LeafrefTypeDefinition {
     private static final QName name = BaseTypes.constructQName("leafref");
@@ -116,7 +116,7 @@ public class Leafref implements LeafrefTypeDefinition {
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getExtensionSchemaNodes()
      */
     @Override
-    public List<ExtensionDefinition> getExtensionSchemaNodes() {
+    public List<UnknownSchemaNode> getUnknownSchemaNodes() {
         return Collections.emptyList();
     }
 
