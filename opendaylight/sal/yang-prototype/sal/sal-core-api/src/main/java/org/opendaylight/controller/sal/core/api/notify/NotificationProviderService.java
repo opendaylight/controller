@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.core.api.notify;
 
 import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
 
@@ -30,7 +29,7 @@ import org.opendaylight.controller.yang.data.api.CompositeNode;
  * 
  * 
  */
-public interface NotificationProviderService extends BrokerService {
+public interface NotificationProviderService extends NotificationService {
 
     /**
      * Publishes a notification.

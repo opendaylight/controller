@@ -1,6 +1,12 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.sal.binding.impl;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +23,7 @@ import org.opendaylight.controller.sal.binding.spi.SALBindingModule;
 import org.opendaylight.controller.sal.binding.spi.Mapper;
 import org.opendaylight.controller.sal.binding.spi.MappingProvider;
 import org.opendaylight.controller.sal.binding.spi.MappingProvider.MappingExtensionFactory;
-import org.opendaylight.controller.sal.core.api.Provider;
+
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.yang.binding.DataObject;
 import org.opendaylight.controller.yang.binding.Notification;
@@ -35,7 +41,10 @@ public class NotificationModule implements SALBindingModule {
     private MappingProvider mappingProvider;
 
     private Map<Class<? extends Notification>, List<NotificationListener>> listeners = new HashMap<Class<? extends Notification>, List<NotificationListener>>();
-    private static Logger log = LoggerFactory.getLogger(NotificationModule.class);
+    private Set<QName> biNotifications = new HashSet<QName>();
+    private static final Logger log = LoggerFactory
+            .getLogger(NotificationModule.class);
+    private final BindingIndependentListener biListener = new BindingIndependentListener();
 
     @Override
     public Set<Class<? extends BindingAwareService>> getProvidedServices() {
@@ -150,6 +159,31 @@ public class NotificationModule implements SALBindingModule {
         biNotifyService.sendNotification(domNotification);
     }
 
+    private void addBAListener(Class<? extends Notification> notificationType,
+            NotificationListener listener) {
+
+        BrokerUtils.addToMap(listeners, notificationType, listener);
+        Mapper<? extends Notification> mapper = mappingProvider
+                .getMapper(notificationType);
+        QName biType = mapper.getQName();
+        if (false == biNotifications.contains(biType)) {
+            // The listener is not registered for binding independent
+            // notification
+            biNotifications.add(biType);
+
+            if (biNotifyService != null) {
+                biNotifyService.addNotificationListener(biType, biListener);
+            }
+        }
+
+    }
+
+    private void removeBAListener(
+            Class<? extends Notification> notificationType,
+            NotificationListener listener) {
+        BrokerUtils.removeFromMap(listeners, notificationType, listener);
+    }
+
     private class NotificationSession implements NotificationService {
         private final ConsumerSession session;
 
@@ -163,16 +197,20 @@ public class NotificationModule implements SALBindingModule {
         public void addNotificationListener(
                 Class<? extends Notification> notificationType,
                 NotificationListener listener) {
-            // TODO Implement this method
-            throw new UnsupportedOperationException("Not implemented");
+
+            NotificationModule.this.addBAListener(notificationType, listener);
+            BrokerUtils.addToMap(sessionListeners, notificationType, listener);
+
         }
 
         @Override
         public void removeNotificationListener(
                 Class<? extends Notification> notificationType,
                 NotificationListener listener) {
-            // TODO Implement this method
-            throw new UnsupportedOperationException("Not implemented");
+            BrokerUtils.removeFromMap(sessionListeners, notificationType,
+                    listener);
+            NotificationModule.this
+                    .removeBAListener(notificationType, listener);
         }
 
     }
@@ -190,41 +228,47 @@ public class NotificationModule implements SALBindingModule {
         }
 
     }
-    
-    private class BindingIndependentListener implements org.opendaylight.controller.sal.core.api.notify.NotificationListener {
+
+    private class BindingIndependentListener
+            implements
+            org.opendaylight.controller.sal.core.api.notify.NotificationListener {
 
         @Override
         public Set<QName> getSupportedNotifications() {
-            return Collections.emptySet();
+            return biNotifications;
         }
 
         @Override
         public void onNotification(CompositeNode notification) {
-            NotificationModule.this.onBindingIndependentNotification(notification);
+            NotificationModule.this
+                    .onBindingIndependentNotification(notification);
         }
-        
+
     }
 
     private void onBindingIndependentNotification(CompositeNode biNotification) {
         QName biType = biNotification.getNodeType();
-        
+
         Mapper<DataObject> mapper = mappingProvider.getMapper(biType);
-        if(mapper == null) {
+        if (mapper == null) {
             log.info("Received notification does not have a binding defined.");
             return;
         }
         Class<DataObject> type = mapper.getDataObjectClass();
-        
+
         // We check if the received QName / type is really Notification
-        if(Notification.class.isAssignableFrom(type)) {
-            Notification notification = (Notification) mapper.objectFromDom(biNotification);
+        if (Notification.class.isAssignableFrom(type)) {
+            Notification notification = (Notification) mapper
+                    .objectFromDom(biNotification);
             notifyBindingAware(notification);
         } else {
-            // The generated type for this QName does not inherits from notification
-            // something went wrong - generated APIs and/or provider sending notification
+            // The generated type for this QName does not inherits from
+            // notification something went wrong - generated APIs and/or 
+            // provider sending notification
             // which was incorectly described in the YANG schema.
-            log.error("Received notification "+  biType +" is not binded as notification");
+            log.error("Received notification " + biType
+                    + " is not binded as notification");
         }
-        
+
     }
 }
