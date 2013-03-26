@@ -9,7 +9,6 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -172,9 +171,8 @@ public class SwitchHandler implements ISwitch {
                                 handleMessages();
                             }
                         }
-                    } catch (IOException e) {
-                        logger.error("Caught I/O Exception: " + e.toString());
-                        e.printStackTrace();
+                    } catch (Exception e) {
+                    	reportError(e);
                     }
                 }
             }
@@ -190,8 +188,9 @@ public class SwitchHandler implements ISwitch {
             this.clientSelectionKey.cancel();
             this.socket.close();
             executor.shutdown();
-        } catch (IOException e) {
-            logger.error("Caught IOException in stop()");
+        } catch (Exception e) {
+        	// do nothing since we are shutting down.
+        	return;
         }
     }
 
@@ -235,7 +234,7 @@ public class SwitchHandler implements ISwitch {
                             this.selector, SelectionKey.OP_WRITE, this);
                 }
                 logger.trace("Message sent: " + msg.toString());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 reportError(e);
             }
         }
@@ -255,7 +254,7 @@ public class SwitchHandler implements ISwitch {
                     this.clientSelectionKey = this.socket.register(
                             this.selector, SelectionKey.OP_READ, this);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 reportError(e);
             }
         }
@@ -358,7 +357,7 @@ public class SwitchHandler implements ISwitch {
         int bytesRead;
         try {
             bytesRead = socket.read(inBuffer);
-        } catch (IOException e) {
+        } catch (Exception e) {
             reportError(e);
             return null;
         }

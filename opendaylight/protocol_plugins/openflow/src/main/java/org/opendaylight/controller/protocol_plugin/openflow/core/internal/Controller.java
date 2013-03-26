@@ -154,7 +154,6 @@ public class Controller implements IController, CommandProvider {
      *
      */
     public void stop() {
-
         for (Iterator<Entry<Long, ISwitch>> it = switches.entrySet().iterator(); it
                 .hasNext();) {
             Entry<Long, ISwitch> entry = it.next();
@@ -162,7 +161,11 @@ public class Controller implements IController, CommandProvider {
             it.remove();
         }
         switchEventThread.interrupt();
-        controllerIO.shutDown();
+        try {
+        	controllerIO.shutDown();
+        } catch (IOException ex) {
+        	logger.error("Caught exception: " + ex + " during stop");
+        }
     }
 
     /**
@@ -227,8 +230,6 @@ public class Controller implements IController, CommandProvider {
             switchHandler.start();
             logger.info(instanceName + " connected: " + sc.toString());
         } catch (IOException e) {
-            logger
-                    .error("Caught I/O Exception when trying to accept a new connection");
             return;
         }
     }

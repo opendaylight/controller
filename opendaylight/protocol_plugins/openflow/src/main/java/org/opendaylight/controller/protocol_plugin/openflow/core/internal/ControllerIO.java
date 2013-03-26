@@ -76,9 +76,8 @@ public class ControllerIO {
                                         serverSelectionKey);
                             }
                         }
-                    } catch (IOException e) {
-                        logger.error("Caught I/O Exception: " + e.toString());
-                        return;
+                    } catch (Exception e) {
+                        continue;
                     }
                 }
             }
@@ -87,13 +86,9 @@ public class ControllerIO {
         logger.info("Controller is now listening on port " + openFlowPort);
     }
 
-    public void shutDown() {
+    public void shutDown() throws IOException {
         this.running = false;
         this.selector.wakeup();
-        try {
-            this.serverSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.serverSocket.close();
     }
 }
