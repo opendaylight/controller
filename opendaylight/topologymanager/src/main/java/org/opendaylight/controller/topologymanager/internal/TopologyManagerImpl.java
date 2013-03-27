@@ -94,6 +94,7 @@ public class TopologyManagerImpl implements ITopologyManager,
 
     void setTopologyManagerAware(ITopologyManagerAware s) {
         if (this.topologyManagerAware != null) {
+        	log.debug("Adding ITopologyManagerAware: " + s);
             this.topologyManagerAware.add(s);
         }
     }

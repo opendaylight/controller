@@ -25,12 +25,12 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Path;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.reader.IReadService;
 import org.opendaylight.controller.sal.routing.IListenRoutingUpdates;
 import org.opendaylight.controller.sal.routing.IRouting;
-import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
+import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
 
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
@@ -39,6 +39,7 @@ import edu.uci.ics.jung.graph.util.EdgeType;
 import java.lang.Exception;
 import java.lang.IllegalArgumentException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -48,7 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.collections15.Transformer;
 
-public class DijkstraImplementation implements IRouting, IListenTopoUpdates {
+public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
     private static Logger log = LoggerFactory
             .getLogger(DijkstraImplementation.class);
     private ConcurrentMap<Short, Graph<Node, Edge>> topologyBWAware;
@@ -56,6 +57,7 @@ public class DijkstraImplementation implements IRouting, IListenTopoUpdates {
     DijkstraShortestPath<Node, Edge> mtp; //Max Throughput Path
     private Set<IListenRoutingUpdates> routingAware;
     private ISwitchManager switchManager;
+    private ITopologyManager topologyManager;
     private IReadService readService;
     private static final long DEFAULT_LINK_SPEED = Bandwidth.BW1Gbps;
 
@@ -64,7 +66,7 @@ public class DijkstraImplementation implements IRouting, IListenTopoUpdates {
             this.routingAware = new HashSet<IListenRoutingUpdates>();
         }
         if (this.routingAware != null) {
-            log.debug("Adding routingAware listener");
+            log.debug("Adding routingAware listener: " + i);
             this.routingAware.add(i);
         }
     }
@@ -79,19 +81,6 @@ public class DijkstraImplementation implements IRouting, IListenTopoUpdates {
             // We don't have any listener lets dereference
             this.routingAware = null;
         }
-    }
-
-    @SuppressWarnings( { "unchecked", "rawtypes" })
-    public DijkstraImplementation() {
-        this.topologyBWAware = (ConcurrentMap<Short, Graph<Node, Edge>>) new ConcurrentHashMap();
-        this.sptBWAware = (ConcurrentMap<Short, DijkstraShortestPath<Node, Edge>>) new ConcurrentHashMap();
-        // Now create the default topology, which doesn't consider the
-        // BW, also create the corresponding Dijkstra calculation
-        Graph<Node, Edge> g = new SparseMultigraph();
-        Short sZero = Short.valueOf((short) 0);
-        this.topologyBWAware.put(sZero, g);
-        this.sptBWAware.put(sZero, new DijkstraShortestPath(g));
-        // Topologies for other BW will be added on a needed base
     }
 
     @Override
@@ -383,13 +372,65 @@ public class DijkstraImplementation implements IRouting, IListenTopoUpdates {
         }
     }
 
-    public void startUp() {
-        log.debug(this.getClass().getName() + ":startUp Method Called");
+    /**
+     * Function called by the dependency manager when all the required
+     * dependencies are satisfied
+     *
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void init() {
+    	log.debug("Routing init() is called");
+    	this.topologyBWAware = (ConcurrentMap<Short, Graph<Node, Edge>>) new ConcurrentHashMap();
+    	this.sptBWAware = (ConcurrentMap<Short, DijkstraShortestPath<Node, Edge>>) new ConcurrentHashMap();
+    	// Now create the default topology, which doesn't consider the
+    	// BW, also create the corresponding Dijkstra calculation
+    	Graph<Node, Edge> g = new SparseMultigraph();
+    	Short sZero = Short.valueOf((short) 0);
+    	this.topologyBWAware.put(sZero, g);
+    	this.sptBWAware.put(sZero, new DijkstraShortestPath(g));
+    	// Topologies for other BW will be added on a needed base
+    }
+    /**
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     *
+     */
+    void destroy() {
+    	log.debug("Routing destroy() is called");
     }
 
-    public void shutDown() {
-        log.debug(this.getClass().getName() + ":shutDown Method Called");
-    }
+    /**
+     * Function called by dependency manager after "init ()" is called
+     * and after the services provided by the class are registered in
+     * the service registry
+     *
+     */
+   void start() {
+	   log.debug("Routing start() is called");
+	   // build the routing database from the topology if it exists.
+	   Map<Edge, Set<Property>> edges = topologyManager.getEdges();
+	   if (edges.isEmpty()) {
+		   return;
+	   }
+	   log.debug("Creating routing database from the topology");
+	   for (Iterator<Map.Entry<Edge,Set<Property>>> i = edges.entrySet().iterator();  i.hasNext();) {
+		   Map.Entry<Edge, Set<Property>> entry = i.next();
+		   Edge e = entry.getKey();
+		   Set<Property> props = entry.getValue();
+		   edgeUpdate(e, UpdateType.ADDED, props);
+	   }
+   }
+
+    /**
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     *
+     */
+   public void stop() {
+	   log.debug("Routing stop() is called");
+   }
 
     @Override
     public void edgeOverUtilized(Edge edge) {
@@ -421,5 +462,15 @@ public class DijkstraImplementation implements IRouting, IListenTopoUpdates {
         if (this.readService == readService) {
             this.readService = null;
         }
+    }
+    
+    public void setTopologyManager(ITopologyManager tm) {
+    	this.topologyManager = tm;
+    }
+    
+    public void unsetTopologyManager(ITopologyManager tm) {
+    	if (this.topologyManager == tm) {
+    		this.topologyManager = null;
+    	}
     }
 }

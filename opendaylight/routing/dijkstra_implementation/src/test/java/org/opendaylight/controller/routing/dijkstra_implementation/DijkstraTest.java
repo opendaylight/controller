@@ -34,6 +34,7 @@ public class DijkstraTest {
     @Test
     public void testSinglePathRouteNoBw() {
         DijkstraImplementation imp = new DijkstraImplementation();
+        imp.init();
         Node node1 = NodeCreator.createOFNode((long) 1);
         Node node2 = NodeCreator.createOFNode((long) 2);
         Node node3 = NodeCreator.createOFNode((long) 3);
@@ -84,6 +85,7 @@ public class DijkstraTest {
     @Test
     public void testShortestPathRouteNoBw() {
         DijkstraImplementation imp = new DijkstraImplementation();
+        imp.init();
         Node node1 = NodeCreator.createOFNode((long) 1);
         Node node2 = NodeCreator.createOFNode((long) 2);
         Node node3 = NodeCreator.createOFNode((long) 3);
@@ -149,6 +151,7 @@ public class DijkstraTest {
     @Test
     public void testShortestPathRouteNoBwAfterLinkDelete() {
         DijkstraImplementation imp = new DijkstraImplementation();
+        imp.init();
         Node node1 = NodeCreator.createOFNode((long) 1);
         Node node2 = NodeCreator.createOFNode((long) 2);
         Node node3 = NodeCreator.createOFNode((long) 3);

@@ -35,6 +35,7 @@ public class MaxThruputTest {
     @Test
     public void testMaxThruPut() {
         DijkstraImplementation imp = new DijkstraImplementation();
+        imp.init();
         Node node1 = NodeCreator.createOFNode((long) 1);
         Node node2 = NodeCreator.createOFNode((long) 2);
         Node node3 = NodeCreator.createOFNode((long) 3);
