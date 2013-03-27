@@ -43,9 +43,9 @@ import com.google.gson.Gson;
 @RequestMapping("/")
 public class Flows implements IOneWeb {
 	private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
-    private final String WEB_NAME = "Flows";
-    private final String WEB_ID = "flows";
-    private final short WEB_ORDER = 2;
+    private static final String WEB_NAME = "Flows";
+    private static final String WEB_ID = "flows";
+    private static final short WEB_ORDER = 2;
 
     public Flows() {
         ServiceHelper.registerGlobalService(IOneWeb.class, this, null);
@@ -77,14 +77,12 @@ public class Flows implements IOneWeb {
         // fetch frm
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, "default", this);
-        if (frm == null)
-            return null;
+        if (frm == null) { return null; }
 
         // fetch sm
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, "default", this);
-        if (switchManager == null)
-            return null;
+        if (switchManager == null) { return null; }
         
         // get static flow list
         List<FlowConfig> staticFlowList = frm.getStaticFlows();
@@ -111,8 +109,7 @@ public class Flows implements IOneWeb {
     public Map<String, Object> getNodePorts() {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, "default", this);
-        if (switchManager == null)
-            return null;
+        if (switchManager == null) { return null; }
 
         Map<String, Object> nodes = new HashMap<String, Object>();
         Map<Short, String> port;
@@ -121,7 +118,7 @@ public class Flows implements IOneWeb {
             port = new HashMap<Short, String>(); // new port
             Set<NodeConnector> nodeConnectorSet = node.getNodeConnectors();
 
-            if (nodeConnectorSet != null)
+            if (nodeConnectorSet != null) {
                 for (NodeConnector nodeConnector : nodeConnectorSet) {
                     String nodeConnectorName = ((Name) switchManager
                             .getNodeConnectorProp(nodeConnector,
@@ -130,6 +127,7 @@ public class Flows implements IOneWeb {
                              nodeConnectorName + "("
                              + nodeConnector.getNodeConnectorIDString() + ")");
                 }
+            }
             
             // add ports
             Map<String, Object> entry = new HashMap<String, Object>();
@@ -183,7 +181,7 @@ public class Flows implements IOneWeb {
     @ResponseBody
     public String actionFlow(@RequestParam(required = true) String action,
             @RequestParam(required = false) String body, @RequestParam(required = true) String nodeId) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
+    	if (!isUserAuthorized(UserLevel.NETWORKADMIN)) {
     		return "Operation not authorized";
     	}
     	
@@ -195,19 +193,19 @@ public class Flows implements IOneWeb {
         FlowConfig flow = gson.fromJson(body, FlowConfig.class);
         Node node = Node.fromString(nodeId);
         flow.setNode(node);
-        Status result = null;
+        Status result = new Status(StatusCode.BADREQUEST, "Invalid request");
         if (action.equals("add")) {
             result = frm.addStaticFlow(flow, false);
         }
 
-        return result.getDescription();
+        return (result.isSuccess())? StatusCode.SUCCESS.toString(): result.getDescription();
     }
     
     @RequestMapping(value = "/flow/{nodeId}/{name}", method = RequestMethod.POST)
     @ResponseBody
     public String removeFlow(@PathVariable("nodeId") String nodeId, @PathVariable("name") String name,
     		@RequestParam(required = true) String action) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) { return "Operation not authorized"; }
+    	if (!isUserAuthorized(UserLevel.NETWORKADMIN)) { return "Operation not authorized"; }
     	
     	IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, "default", this);
@@ -215,39 +213,32 @@ public class Flows implements IOneWeb {
         
         Status result = null;
         Node node = Node.fromString(nodeId);
-        if (node == null) {
-            return null;
-        }
+        if (node == null) { return null; }
         if (action.equals("remove")) {
         	result = frm.removeStaticFlow(name, node);
         } else if (action.equals("toggle")) {
-        	FlowConfig config = frm.getStaticFlow(name, node);
-        	result = frm.toggleStaticFlowStatus(config);
+        	result = frm.toggleStaticFlowStatus(name, node);
         } else {
         	result = new Status(StatusCode.BADREQUEST, "Unknown action");
         }
         
-        return result.getDescription();
+        return (result.isSuccess())? StatusCode.SUCCESS.toString(): result.getDescription();
     }
     
     /**
-     * Is the operation permitted for the given level
+     * Returns whether the current user's level is same or above
+     * the required authorization level. 
      * 
-     * @param level
+     * @param requiredLevel the authorization level required
      */
-    private boolean authorize(UserLevel level) {
+    private boolean isUserAuthorized(UserLevel requiredLevel) {
     	IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
-        if (userManager == null) {
-        	return false;
-        }
+        if (userManager == null) { return false; }
         
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserLevel userLevel = userManager.getUserLevel(username);
-        if (userLevel.toNumber() <= level.toNumber()) {
-        	return true;
-        }
-        return false;
+        return (userLevel.ordinal() <= requiredLevel.ordinal());
     }
 
 }

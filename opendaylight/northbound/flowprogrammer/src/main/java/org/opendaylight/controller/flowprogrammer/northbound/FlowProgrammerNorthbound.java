@@ -366,9 +366,7 @@ public class FlowProgrammerNorthbound {
                     + RestMessages.NOFLOW.toString());
         }
 
-        Status status = frm.toggleStaticFlowStatus(new FlowConfig("", name,
-                node, "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                "", "", "", null));
+        Status status = frm.toggleStaticFlowStatus(staticFlow);
         if (status.isSuccess()) {
             return Response.ok().build();
         }

@@ -1451,8 +1451,20 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         return status;
     }
 
+
+
+	@Override
+	public Status toggleStaticFlowStatus(String name, Node node) {
+		return toggleStaticFlowStatus(getStaticFlow(name, node));
+	}
+	
     @Override
     public Status toggleStaticFlowStatus(FlowConfig config) {
+    	if (config == null) {
+    		String msg = "Invalid request: null flow config";
+    		log.warn(msg);
+    		return new Status(StatusCode.BADREQUEST, msg);
+    	}
         // Validity check for api3 entry point
         if (config.isInternalFlow()) {
         	String msg = "Invalid operation: Controller generated flow " +

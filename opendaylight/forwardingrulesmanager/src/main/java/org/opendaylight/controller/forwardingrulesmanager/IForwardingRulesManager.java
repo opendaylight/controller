@@ -255,6 +255,17 @@ public interface IForwardingRulesManager {
      * @return the {@code Status} object indicating the result of this action
      */
     public Status toggleStaticFlowStatus(FlowConfig configObject);
+    
+    /**
+     * Toggle the installation status of the specified configured flow
+     * If the flow configuration status is active, this call will
+     * change the flow status to inactive and vice-versa
+     *
+     * @param name for the static flow
+     * @param node on which the flow is attached
+     * @return the {@code Status} object indicating the result of this action
+     */
+    public Status toggleStaticFlowStatus(String name, Node node);
 
     public Map<String, PortGroupConfig> getPortGroupConfigs();
 
