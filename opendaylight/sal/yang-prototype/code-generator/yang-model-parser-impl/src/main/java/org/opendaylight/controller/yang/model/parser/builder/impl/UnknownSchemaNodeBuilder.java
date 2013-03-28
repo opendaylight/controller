@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
 
     private final QName qname;
     private final UnknownSchemaNodeImpl instance;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     UnknownSchemaNodeBuilder(final QName qname) {
         this.qname = qname;
@@ -29,6 +31,12 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
 
     @Override
     public UnknownSchemaNode build() {
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
         return instance;
     }
 
@@ -55,6 +63,11 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
     @Override
     public void setStatus(Status status) {
         instance.setStatus(status);
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        addedUnknownNodes.add(unknownSchemaNodeBuilder);
     }
 
     private static class UnknownSchemaNodeImpl implements UnknownSchemaNode {

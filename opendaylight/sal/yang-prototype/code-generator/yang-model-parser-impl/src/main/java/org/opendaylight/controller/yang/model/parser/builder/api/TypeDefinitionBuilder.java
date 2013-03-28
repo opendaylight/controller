@@ -20,5 +20,6 @@ public interface TypeDefinitionBuilder {
 	TypeDefinition<?> getBaseType();
 	TypeDefinition<?> build();
 	void setUnits(String units);
+	void setDefaultValue(Object defaultValue);
 
 }

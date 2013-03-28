@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +35,7 @@ public class GroupingBuilderImpl implements GroupingBuilder {
     private final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     GroupingBuilderImpl(QName qname) {
         this.instance = new GroupingDefinitionImpl(qname);
@@ -68,6 +70,13 @@ public class GroupingBuilderImpl implements GroupingBuilder {
             usesNodeDefinitions.add(builder.build());
         }
         instance.setUses(usesNodeDefinitions);
+
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
     }
@@ -120,16 +129,22 @@ public class GroupingBuilderImpl implements GroupingBuilder {
         usesNodes.add(usesBuilder);
     }
 
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        addedUnknownNodes.add(unknownSchemaNodeBuilder);
+    }
+
     private static class GroupingDefinitionImpl implements GroupingDefinition {
         private final QName qname;
         private SchemaPath path;
         private String description;
         private String reference;
         private Status status;
-        private Map<QName, DataSchemaNode> childNodes;
-        private Set<GroupingDefinition> groupings;
-        private Set<TypeDefinition<?>> typeDefinitions;
-        private Set<UsesNode> uses;
+        private Map<QName, DataSchemaNode> childNodes = Collections.emptyMap();
+        private Set<GroupingDefinition> groupings = Collections.emptySet();
+        private Set<TypeDefinition<?>> typeDefinitions = Collections.emptySet();
+        private Set<UsesNode> uses = Collections.emptySet();
+        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();
 
         private GroupingDefinitionImpl(QName qname) {
             this.qname = qname;
@@ -214,7 +229,13 @@ public class GroupingBuilderImpl implements GroupingBuilder {
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return Collections.emptyList();
+            return unknownSchemaNodes;
+        }
+
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
+            if(unknownSchemaNodes != null) {
+                this.unknownSchemaNodes = unknownSchemaNodes;
+            }
         }
 
         @Override
@@ -240,21 +261,6 @@ public class GroupingBuilderImpl implements GroupingBuilder {
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
             result = prime * result + ((path == null) ? 0 : path.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            result = prime * result
-                    + ((status == null) ? 0 : status.hashCode());
-            result = prime * result
-                    + ((childNodes == null) ? 0 : childNodes.hashCode());
-            result = prime * result
-                    + ((groupings == null) ? 0 : groupings.hashCode());
-            result = prime
-                    * result
-                    + ((typeDefinitions == null) ? 0 : typeDefinitions
-                            .hashCode());
-            result = prime * result + ((uses == null) ? 0 : uses.hashCode());
             return result;
         }
 
@@ -282,55 +288,6 @@ public class GroupingBuilderImpl implements GroupingBuilder {
                     return false;
                 }
             } else if (!path.equals(other.path)) {
-                return false;
-            }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (status == null) {
-                if (other.status != null) {
-                    return false;
-                }
-            } else if (!status.equals(other.status)) {
-                return false;
-            }
-            if (childNodes == null) {
-                if (other.childNodes != null) {
-                    return false;
-                }
-            } else if (!childNodes.equals(other.childNodes)) {
-                return false;
-            }
-            if (groupings == null) {
-                if (other.groupings != null) {
-                    return false;
-                }
-            } else if (!groupings.equals(other.groupings)) {
-                return false;
-            }
-            if (typeDefinitions == null) {
-                if (other.typeDefinitions != null) {
-                    return false;
-                }
-            } else if (!typeDefinitions.equals(other.typeDefinitions)) {
-                return false;
-            }
-            if (uses == null) {
-                if (other.uses != null) {
-                    return false;
-                }
-            } else if (!uses.equals(other.uses)) {
                 return false;
             }
             return true;

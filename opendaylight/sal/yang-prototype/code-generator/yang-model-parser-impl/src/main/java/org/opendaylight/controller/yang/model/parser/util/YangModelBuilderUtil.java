@@ -932,10 +932,12 @@ public class YangModelBuilderUtil {
             List<RangeConstraint> rangeStatements = getRangeConstraints(ctx);
             List<LengthConstraint> lengthStatements = getLengthConstraints(ctx);
             List<PatternConstraint> patternStatements = getPatternConstraint(ctx);
+            Integer fractionDigits = getFractionDigits(ctx);
 
             ut.rangeStatements(rangeStatements);
             ut.lengthStatements(lengthStatements);
             ut.patterns(patternStatements);
+            ut.fractionDigits(fractionDigits);
         }
 
         return ut.build();
@@ -973,7 +975,10 @@ public class YangModelBuilderUtil {
             type = YangTypesConverter.javaTypeForBaseYangDecimal64Type(
                     rangeStatements, fractionDigits);
         } else if (typeName.startsWith("int") || typeName.startsWith("uint")) {
-            type = YangTypesConverter.javaTypeForBaseYangIntegerType(typeName,
+            type = YangTypesConverter.javaTypeForBaseYangSignedIntegerType(typeName,
+                    rangeStatements);
+        } else if(typeName.startsWith("uint")) {
+            type = YangTypesConverter.javaTypeForBaseYangUnsignedIntegerType(typeName,
                     rangeStatements);
         } else if (typeName.equals("enumeration")) {
             type = new EnumerationType(enumConstants);
@@ -990,7 +995,7 @@ public class YangModelBuilderUtil {
             type = new Leafref(xpath);
         } else if (typeName.equals("binary")) {
             type = new BinaryType(null, lengthStatements, null);
-        } else if (typeName.equals("instanceidentifier")) {
+        } else if (typeName.equals("instance-identifier")) {
             boolean requireInstance = isRequireInstance(typeBody);
             type = new InstanceIdentifier(null, requireInstance);
         }
