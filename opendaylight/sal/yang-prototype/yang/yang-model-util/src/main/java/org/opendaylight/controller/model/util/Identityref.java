@@ -18,12 +18,17 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
+/**
+ * The <code>default</code> implementation of Identityref Type Definition interface.
+ *
+ * @see IdentityrefTypeDefinition
+ */
 public class Identityref implements IdentityrefTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("identityref");
     private final SchemaPath path = BaseTypes.schemaPath(name);
-    private final String description = "";
-    private final String reference = "";
+    private final String description = "The identityref type is used to reference an existing identity.";
+    private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.10";
 
     private final IdentityTypeDefinition identity;
     private final RevisionAwareXPath xpath;

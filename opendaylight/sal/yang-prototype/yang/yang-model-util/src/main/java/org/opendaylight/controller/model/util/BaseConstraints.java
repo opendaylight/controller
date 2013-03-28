@@ -21,8 +21,8 @@ public final class BaseConstraints {
         return new LengthConstraintImpl(min, max, description, reference);
     }
 
-    public static RangeConstraint rangeConstraint(final long min,
-            final long max, final String description, final String reference) {
+    public static RangeConstraint rangeConstraint(final Number min,
+            final Number max, final String description, final String reference) {
         return new RangeConstraintImpl(min, max, description, reference);
     }
 
@@ -172,8 +172,8 @@ public final class BaseConstraints {
     }
 
     private final static class RangeConstraintImpl implements RangeConstraint {
-        private final Long min;
-        private final Long max;
+        private final Number min;
+        private final Number max;
 
         private final String description;
         private final String reference;
@@ -181,7 +181,7 @@ public final class BaseConstraints {
         private final String errorAppTag;
         private final String errorMessage;
 
-        public RangeConstraintImpl(Long min, Long max, String description,
+        public RangeConstraintImpl(Number min, Number max, String description,
                 String reference) {
             super();
             this.min = min;
@@ -215,12 +215,12 @@ public final class BaseConstraints {
         }
 
         @Override
-        public Long getMin() {
+        public Number getMin() {
             return min;
         }
 
         @Override
-        public Long getMax() {
+        public Number getMax() {
             return max;
         }
 

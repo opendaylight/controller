@@ -13,36 +13,32 @@ import org.opendaylight.controller.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.common.QName;
 
-public class Int64 extends AbstractInteger {
+/**
+ * Implementation of Yang int64 built-in type. <br>
+ * int64  represents integer values between -9223372036854775808 and 9223372036854775807, inclusively. 
+ * The Java counterpart of Yang int64 built-in type is
+ * {@link Long}.
+ *
+ */
+public class Int64 extends AbstractSignedInteger {
 
     private static final QName name = BaseTypes.constructQName("int64");
     private Long defaultValue = null;
-    private static final String description = "";
-    private static final String reference = "";
+    private static final String description = 
+            "int64  represents integer values between -9223372036854775808 and 9223372036854775807, inclusively.";
 
     public Int64() {
-        super(name, description, reference);
+        super(name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
     }
 
     public Int64(final Long defaultValue) {
-        super(name, description, reference);
-        this.defaultValue = defaultValue;
-    }
-
-    public Int64(final List<RangeConstraint> rangeStatements,
-            final Long defaultValue) {
-        super(name, description, reference, rangeStatements);
-        this.defaultValue = defaultValue;
-    }
-
-    public Int64(final String units, final Long defaultValue) {
-        super(name, description, reference, units);
+        super(name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
         this.defaultValue = defaultValue;
     }
 
     public Int64(final List<RangeConstraint> rangeStatements,
             final String units, final Long defaultValue) {
-        super(name, description, reference, units, rangeStatements);
+        super(name, description, rangeStatements, units);
         this.defaultValue = defaultValue;
     }
 

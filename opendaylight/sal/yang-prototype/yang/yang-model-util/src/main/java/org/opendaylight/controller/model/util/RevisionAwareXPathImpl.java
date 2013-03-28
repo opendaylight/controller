@@ -9,6 +9,11 @@ package org.opendaylight.controller.model.util;
 
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 
+/**
+ * The <code>default</code> implementation of Instance Rewision Aware XPath interface.
+ * 
+ * @see RevisionAwareXPath
+ */
 public class RevisionAwareXPathImpl implements RevisionAwareXPath {
 
     private final String xpath;
@@ -22,11 +27,6 @@ public class RevisionAwareXPathImpl implements RevisionAwareXPath {
     @Override
     public boolean isAbsolute() {
         return absolute;
-    }
-
-    @Override
-    public String toString() {
-        return xpath;
     }
 
     @Override
@@ -62,5 +62,9 @@ public class RevisionAwareXPathImpl implements RevisionAwareXPath {
         }
         return false;
     }
-
+    
+    @Override
+    public String toString() {
+        return xpath;
+    }
 }

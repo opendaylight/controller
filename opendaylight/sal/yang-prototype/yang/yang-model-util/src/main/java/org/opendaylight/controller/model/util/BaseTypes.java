@@ -16,16 +16,28 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 
 public final class BaseTypes {
 
-    private BaseTypes() {
-    }
+    private BaseTypes() {}
 
     public static final URI BaseTypesNamespace = URI
             .create("urn:ietf:params:xml:ns:yang:1");
 
+    /**
+     * Construct QName for Built-in base Yang type. The namespace for
+     * built-in base yang types is defined as: urn:ietf:params:xml:ns:yang:1
+     * 
+     * @param typeName yang type name
+     * @return built-in base yang type QName.
+     */
     public static final QName constructQName(final String typeName) {
         return new QName(BaseTypesNamespace, typeName);
     }
 
+    /**
+     * Creates Schema Path from Qname.
+     * 
+     * @param typeName yang type QName
+     * @return Schema Path from Qname.
+     */
     public static final SchemaPath schemaPath(final QName typeName) {
         final List<QName> pathList = new ArrayList<QName>();
         pathList.add(typeName);

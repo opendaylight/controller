@@ -20,6 +20,7 @@ import org.opendaylight.controller.model.api.type.DecimalTypeDefinition;
 import org.opendaylight.controller.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.model.api.type.RangeConstraint;
 import org.opendaylight.controller.model.api.type.StringTypeDefinition;
+import org.opendaylight.controller.model.api.type.UnsignedIntegerTypeDefinition;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
@@ -36,10 +37,10 @@ public class YangTypesConverter {
     private static final TypeDefinition<IntegerTypeDefinition> INT32_TYPE = new Int32();
     private static final TypeDefinition<IntegerTypeDefinition> INT64_TYPE = new Int64();
     private static final TypeDefinition<StringTypeDefinition> STRING_TYPE = new StringType();
-    private static final TypeDefinition<IntegerTypeDefinition> UINT8_TYPE = new Uint8();
-    private static final TypeDefinition<IntegerTypeDefinition> UINT16_TYPE = new Int16();
-    private static final TypeDefinition<IntegerTypeDefinition> UINT32_TYPE = new Int32();
-    private static final TypeDefinition<IntegerTypeDefinition> UINT64_TYPE = new Int64();
+    private static final TypeDefinition<UnsignedIntegerTypeDefinition> UINT8_TYPE = new Uint8();
+    private static final TypeDefinition<UnsignedIntegerTypeDefinition> UINT16_TYPE = new Uint16();
+    private static final TypeDefinition<UnsignedIntegerTypeDefinition> UINT32_TYPE = new Uint32();
+    private static final TypeDefinition<UnsignedIntegerTypeDefinition> UINT64_TYPE = new Uint64();
 
     static {
         baseYangTypeMap.put("binary", BINARY);
@@ -90,24 +91,30 @@ public class YangTypesConverter {
         return type;
     }
 
-    public static TypeDefinition<IntegerTypeDefinition> javaTypeForBaseYangIntegerType(
-            String typeName, List<RangeConstraint> ranges) {
+    public static TypeDefinition<IntegerTypeDefinition> javaTypeForBaseYangSignedIntegerType(
+            String typeName) {
         if (typeName.equals("int8")) {
-            return new Int8(ranges, null);
+            return new Int8();
         } else if (typeName.equals("int16")) {
-            return new Int16(ranges, null);
+            return new Int16();
         } else if (typeName.equals("int32")) {
-            return new Int32(ranges, null);
+            return new Int32();
         } else if (typeName.equals("int64")) {
-            return new Int64(ranges, null);
-        } else if (typeName.equals("uint8")) {
-            return new Uint8(ranges, null);
+            return new Int64();
+        }
+        return null;
+    }
+
+    public static TypeDefinition<UnsignedIntegerTypeDefinition> javaTypeForBaseYangUnsignedIntegerType(
+            final String typeName) {
+        if (typeName.equals("uint8")) {
+            return new Uint8();
         } else if (typeName.equals("uint16")) {
-            return new Uint16(ranges, null);
+            return new Uint16();
         } else if (typeName.equals("uint32")) {
-            return new Uint32(ranges, null);
+            return new Uint32();
         } else if (typeName.equals("uint64")) {
-            return new Uint64(ranges, null);
+            return new Uint64();
         }
         return null;
     }

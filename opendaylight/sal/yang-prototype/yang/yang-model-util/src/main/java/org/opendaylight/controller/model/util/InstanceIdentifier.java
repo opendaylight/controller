@@ -17,12 +17,18 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
+/**
+ * The <code>default</code> implementation of Instance Identifier Type Definition interface.
+ *
+ * @see InstanceIdentifierTypeDefinition
+ */
 public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     private static final QName name = BaseTypes
             .constructQName("instance-identifier");
-    private static final String description = "";
-    private static final String reference = "";
+    private static final String description = "The instance-identifier built-in type is used to " +
+    		"uniquely identify a particular instance node in the data tree.";
+    private static final String reference = "https://tools.ietf.org/html/rfc6020#section-9.13";
 
     private final transient SchemaPath path = BaseTypes.schemaPath(name);
     private final RevisionAwareXPath xpath;

@@ -1,10 +1,10 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.model.util;
 
 import java.util.List;
@@ -13,36 +13,27 @@ import org.opendaylight.controller.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.common.QName;
 
-public class Int16 extends AbstractInteger {
+/**
+ * Implementation of Yang int16 built-in type. <br>
+ * int16 represents integer values between -32768 and 32767, inclusively. The
+ * Java counterpart of Yang int16 built-in type is {@link Short}.
+ * 
+ * @see AbstractSignedInteger
+ */
+public class Int16 extends AbstractSignedInteger {
 
     private static final QName name = BaseTypes.constructQName("int16");
     private Short defaultValue = null;
-    private static final String description = "";
-    private static final String reference = "";
+    private static final String description = 
+            "int16  represents integer values between -32768 and 32767, inclusively.";
 
     public Int16() {
-        super(name, description, reference);
-    }
-
-    public Int16(final Short defaultValue) {
-        super(name, description, reference);
-        this.defaultValue = defaultValue;
-    }
-
-    public Int16(final List<RangeConstraint> rangeStatements,
-            final Short defaultValue) {
-        super(name, description, reference, rangeStatements);
-        this.defaultValue = defaultValue;
-    }
-
-    public Int16(final String units, final Short defaultValue) {
-        super(name, description, reference, units);
-        this.defaultValue = defaultValue;
+        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
     }
 
     public Int16(final List<RangeConstraint> rangeStatements,
             final String units, final Short defaultValue) {
-        super(name, description, reference, units, rangeStatements);
+        super(name, description, rangeStatements, units);
         this.defaultValue = defaultValue;
     }
 

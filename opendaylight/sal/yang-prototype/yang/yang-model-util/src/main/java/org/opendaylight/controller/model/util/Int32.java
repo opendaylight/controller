@@ -1,10 +1,10 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.model.util;
 
 import java.util.List;
@@ -13,43 +13,42 @@ import org.opendaylight.controller.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.common.QName;
 
-public class Int32 extends AbstractInteger {
+/**
+ * Implementation of Yang int32 built-in type. <br>
+ * int32 represents integer values between -2147483648 and 2147483647,
+ * inclusively. The Java counterpart of Yang int32 built-in type is
+ * {@link Integer}.
+ * 
+ * @see AbstractSignedInteger
+ * 
+ */
+public class Int32 extends AbstractSignedInteger {
 
     private static final QName name = BaseTypes.constructQName("int32");
     private Integer defaultValue = null;
-    private static final String description = "";
-    private static final String reference = "";
+    private static final String description = 
+            "int32  represents integer values between -2147483648 and 2147483647, inclusively.";
 
     public Int32() {
-        super(name, description, reference);
+        super(name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
     }
 
     public Int32(final Integer defaultValue) {
-        super(name, description, reference);
-        this.defaultValue = defaultValue;
-    }
-
-    public Int32(final List<RangeConstraint> rangeStatements,
-            final Integer defaultValue) {
-        super(name, description, reference, rangeStatements);
-        this.defaultValue = defaultValue;
-    }
-
-    public Int32(final String units, final Integer defaultValue) {
-        super(name, description, reference, units);
+        super(name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
         this.defaultValue = defaultValue;
     }
 
     public Int32(final List<RangeConstraint> rangeStatements,
             final String units, final Integer defaultValue) {
-        super(name, description, reference, units, rangeStatements);
+        super(name, description, rangeStatements, units);
         this.defaultValue = defaultValue;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
     public IntegerTypeDefinition getBaseType() {
@@ -59,7 +58,9 @@ public class Int32 extends AbstractInteger {
     /*
      * (non-Javadoc)
      * 
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
+     * ()
      */
     @Override
     public Object getDefaultValue() {

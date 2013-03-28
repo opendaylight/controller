@@ -7,6 +7,7 @@
   */
 package org.opendaylight.controller.model.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,30 +18,54 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
+/**
+ * The <code>default</code> implementation of Binary Type Definition interface.
+ * 
+ * @see BinaryTypeDefinition
+ */
 public class BinaryType implements BinaryTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("binary");
     private final SchemaPath path = BaseTypes.schemaPath(name);
-    private final String description = "";
-    private final String reference = "";
+    private final String description = "The binary built-in type represents any binary data, i.e., a sequence of octets.";
+    private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.8";
 
     private List<Byte> bytes;
     private final List<LengthConstraint> lengthConstraints;
     private String units = "";
 
+    /**
+     * 
+     */
     public BinaryType() {
         super();
-
-        lengthConstraints = Collections.emptyList();
+        
+        final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
+        constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+        lengthConstraints = Collections.unmodifiableList(constraints);
         bytes = Collections.emptyList();
-        bytes = Collections.unmodifiableList(bytes);
     }
 
+    /**
+     * 
+     * 
+     * @param bytes
+     * @param lengthConstraints
+     * @param units
+     */
     public BinaryType(final List<Byte> bytes,
             final List<LengthConstraint> lengthConstraints, final String units) {
         super();
-        this.bytes = bytes;
-        this.lengthConstraints = lengthConstraints;
+        
+        if ((lengthConstraints == null) || (lengthConstraints.isEmpty())) {
+            final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
+            constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+            this.lengthConstraints = Collections.unmodifiableList(constraints);
+        } else {
+            this.lengthConstraints = Collections.unmodifiableList(lengthConstraints);
+        }
+        
+        this.bytes = Collections.unmodifiableList(bytes);
         this.units = units;
     }
 

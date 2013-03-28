@@ -15,7 +15,6 @@ import org.opendaylight.controller.model.api.type.PatternConstraint;
 import org.opendaylight.controller.model.api.type.RangeConstraint;
 import org.opendaylight.controller.model.api.type.UnknownTypeDefinition;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;

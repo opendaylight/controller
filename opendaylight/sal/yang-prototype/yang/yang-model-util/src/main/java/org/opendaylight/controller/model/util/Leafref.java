@@ -17,10 +17,16 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
+/**
+ * The <code>default</code> implementation of Instance Leafref Type Definition interface.
+ *
+ * @see LeafrefTypeDefinition
+ */
 public class Leafref implements LeafrefTypeDefinition {
     private static final QName name = BaseTypes.constructQName("leafref");
-    private static final String description = "";
-    private static final String reference = "";
+    private static final String description = "The leafref type is used to reference a " +
+    		"particular leaf instance in the data tree.";
+    private static final String reference = "https://tools.ietf.org/html/rfc6020#section-9.9";
     private final SchemaPath path = BaseTypes.schemaPath(name);
     private final RevisionAwareXPath xpath;
     private final String units = "";

@@ -16,12 +16,21 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
+
+/**
+ * The <code>default</code> implementation of Bits Type Definition interface.
+ * 
+ * @see BitsTypeDefinition
+ */
 public class BitsType implements BitsTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("bits");
     private final SchemaPath path = BaseTypes.schemaPath(name);
-    private final String description = "";
-    private final String reference = "";
+    private final String description = "The bits built-in type represents a bit set.  " +
+    		"That is, a bits value is a set of flags identified by small integer position " +
+    		"numbers starting at 0.  Each bit number has an assigned name.";
+    
+    private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.7";
 
     private final List<Bit> bits;
     private String units = "";
@@ -29,7 +38,6 @@ public class BitsType implements BitsTypeDefinition {
     /**
      * Default constructor. <br>
      * Instantiates Bits type as empty bits list.
-     * 
      */
     public BitsType() {
         super();
@@ -37,7 +45,7 @@ public class BitsType implements BitsTypeDefinition {
     }
 
     /**
-     * Overloaded constructor with explicit definition of bits assigned to
+     * Constructor with explicit definition of bits assigned to
      * BitsType.
      * 
      * @param bits
@@ -49,10 +57,18 @@ public class BitsType implements BitsTypeDefinition {
         this.units = "";
     }
 
+    /**
+     * Constructor with explicit definition of bits assigned to
+     * BitsType and Units.
+     * <br>
+     * The default value of Bits Type is List of bits.
+     * 
+     * @param bits The bits assigned for Bits Type
+     * @param units units for bits type
+     */
     public BitsType(List<Bit> bits, String units) {
         super();
         this.bits = Collections.unmodifiableList(bits);
-        ;
         this.units = units;
     }
 

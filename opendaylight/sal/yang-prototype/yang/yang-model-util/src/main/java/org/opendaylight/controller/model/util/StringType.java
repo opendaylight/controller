@@ -7,6 +7,7 @@
   */
 package org.opendaylight.controller.model.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +19,11 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
+/**
+ * The <code>default</code> implementation of String Type Definition interface.
+ *
+ * @see StringTypeDefinition
+ */
 public class StringType implements StringTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("string");;
@@ -29,21 +35,41 @@ public class StringType implements StringTypeDefinition {
     private final List<PatternConstraint> patterns;
     private String units = "";
 
+    /**
+     * Default Constructor.
+     */
     public StringType() {
         super();
         path = BaseTypes.schemaPath(name);
-        this.lengthStatements = Collections.emptyList();
+        final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
+        constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+        lengthStatements = Collections.unmodifiableList(constraints);
+        
         this.patterns = Collections.emptyList();
     }
 
-    public StringType(List<LengthConstraint> lengthStatements,
-            List<PatternConstraint> patterns) {
+    /**
+     * 
+     * 
+     * @param lengthStatements
+     * @param patterns
+     */
+    public StringType(final List<LengthConstraint> lengthStatements,
+            final List<PatternConstraint> patterns) {
         super();
         path = BaseTypes.schemaPath(name);
         this.lengthStatements = Collections.unmodifiableList(lengthStatements);
         this.patterns = Collections.unmodifiableList(patterns);
     }
 
+    /**
+     * 
+     * 
+     * @param defaultValue
+     * @param lengthStatements
+     * @param patterns
+     * @param units
+     */
     public StringType(final String defaultValue,
             final List<LengthConstraint> lengthStatements,
             final List<PatternConstraint> patterns, final String units) {

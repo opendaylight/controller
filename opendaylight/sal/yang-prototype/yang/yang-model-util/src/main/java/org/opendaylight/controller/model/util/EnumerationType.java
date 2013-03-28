@@ -16,6 +16,11 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
+/**
+ * The <code>default</code> implementation of Enumertaion Type Definition interface.
+ * 
+ * @see EnumTypeDefinition
+ */
 public class EnumerationType implements EnumTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("enumeration");
@@ -29,16 +34,15 @@ public class EnumerationType implements EnumTypeDefinition {
 
     public EnumerationType(final List<EnumPair> enums) {
         super();
-        this.enums = enums;
-
+        this.enums = Collections.unmodifiableList(enums);
         defaultEnum = Collections.emptyList();
     }
 
     public EnumerationType(final List<EnumPair> defaultEnum,
             final List<EnumPair> enums, final String units) {
         super();
-        this.defaultEnum = defaultEnum;
-        this.enums = enums;
+        this.defaultEnum = Collections.unmodifiableList(defaultEnum);
+        this.enums = Collections.unmodifiableList(enums);
         this.units = units;
     }
 

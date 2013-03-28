@@ -16,12 +16,18 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
+/**
+ * The <code>default</code> implementation of Identity Type Definition interface.
+ * 
+ * @see IdentityTypeDefinition
+ */
 public class IdentityType implements IdentityTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("identity");
     private final SchemaPath path = BaseTypes.schemaPath(name);
-    private final String description = "";
-    private final String reference = "";
+    private final String description = "The 'identity' statement is used to define a new " +
+    		"globally unique, abstract, and untyped identity.";
+    private final String reference = "https://tools.ietf.org/html/rfc6020#section-7.16";
 
     private String units = "";
     private final QName identityName;

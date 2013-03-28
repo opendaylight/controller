@@ -16,12 +16,17 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 
+/**
+ * The <code>default</code> implementation of Boolean Type Definition interface.
+ * 
+ * @see BooleanTypeDefinition
+ */
 public class BooleanType implements BooleanTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("boolean");
     private final SchemaPath path = BaseTypes.schemaPath(name);
-    private final String description = "";
-    private final String reference = "";
+    private final String description = "The boolean built-in type represents a boolean value.";
+    private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.5";
 
     private final Boolean defaultValue;
     private String units = "";
@@ -35,9 +40,9 @@ public class BooleanType implements BooleanTypeDefinition {
     }
 
     /**
+     * Boolean Type constructor.
      * 
-     * 
-     * @param defaultValue
+     * @param defaultValue Default Value
      */
     public BooleanType(final Boolean defaultValue) {
         super();
@@ -45,10 +50,10 @@ public class BooleanType implements BooleanTypeDefinition {
     }
 
     /**
+     * Boolean Type constructor.
      * 
-     * 
-     * @param defaultValue
-     * @param units
+     * @param defaultValue Default Value
+     * @param units Units
      */
     public BooleanType(final Boolean defaultValue, final String units) {
         super();
