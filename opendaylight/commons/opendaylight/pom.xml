@@ -5,22 +5,15 @@
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
-  <!-- The sitebuildsettings-pom.xml contains the specific settings
-       for a site on which the build can be performed so it will
-       contain for instance reference to the local Maven proxy/host
-       server or the local sonar etc. -->
-  <parent>
-    <groupId>sitebuildsettings</groupId>
-    <artifactId>sitebuildsettings</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <relativePath>../../../sitebuildsettings-pom.xml</relativePath>
-  </parent>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>commons.opendaylight</artifactId>
   <version>1.4.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
+    <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <siteplugin>3.2</siteplugin>
     <projectinfo>2.6</projectinfo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -170,12 +163,12 @@
   <distributionManagement>
     <!-- OpenDayLight Released artifact -->
     <repository>
-      <id>${opendaylightID}-release</id>
+      <id>opendaylight-release</id>
       <url>${nexusproxy}/repositories/opendaylight.release/</url>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <snapshotRepository>
-      <id>${opendaylightID}-snapshot</id>
+      <id>opendaylight-snapshot</id>
       <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
     </snapshotRepository>
     <!-- Site deployment -->
