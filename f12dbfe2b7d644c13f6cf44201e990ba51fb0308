@@ -16,6 +16,24 @@
       "revId": "f12dbfe2b7d644c13f6cf44201e990ba51fb0308",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAADX///8g\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/test/java/org/opendaylight/controller/protocol_plugin/openflow/vendorextension/v6extension/V6ExtensionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 14
+      },
+      "writtenOn": "2013-03-28T01:20:18Z",
+      "side": 1,
+      "message": "It should be IPv6. fromString is hardcoded to add 20 to matchlen, 16 for ipv6 bytes, 4 for the MatchFieldState.  I will change this line to use a ipv6 address for clarity.",
+      "parentUuid": "AAAADX///8w\u003d",
+      "revId": "f12dbfe2b7d644c13f6cf44201e990ba51fb0308",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
