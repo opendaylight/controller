@@ -10,17 +10,23 @@ package org.opendaylight.controller.yang.model.parser.builder.api;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
-
+import org.opendaylight.controller.yang.model.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 /**
  * Interface for all builders of SchemaNode nodes.
  */
 public interface SchemaNodeBuilder extends Builder {
 
-	QName getQName();
-	void setPath(SchemaPath schemaPath);
-	void setDescription(String description);
-	void setReference(String reference);
-	void setStatus(Status status);
+    QName getQName();
+
+    void setPath(SchemaPath schemaPath);
+
+    void setDescription(String description);
+
+    void setReference(String reference);
+
+    void setStatus(Status status);
+
+    void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder);
 
 }

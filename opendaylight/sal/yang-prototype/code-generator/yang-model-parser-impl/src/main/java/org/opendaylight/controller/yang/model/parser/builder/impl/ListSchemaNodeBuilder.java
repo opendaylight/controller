@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     ListSchemaNodeBuilder(QName qname) {
         super(qname);
@@ -80,6 +82,13 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
             groupingDefinitions.add(builder.build());
         }
         instance.setGroupings(groupingDefinitions);
+
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
 
         instance.setConstraints(constraintsBuilder.build());
         instance.setAvailableAugmentations(augmentations);
@@ -145,6 +154,11 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
 
     public void setUserOrdered(boolean userOrdered) {
         instance.setUserOrdered(userOrdered);
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        addedUnknownNodes.add(unknownSchemaNodeBuilder);
     }
 
     private class ListSchemaNodeImpl implements ListSchemaNode {
@@ -339,36 +353,18 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
             return unknownSchemaNodes;
         }
 
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
+            if(unknownSchemaNodes != null) {
+                this.unknownSchemaNodes = unknownSchemaNodes;
+            }
+        }
+
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
             result = prime * result + ((path == null) ? 0 : path.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            result = prime * result
-                    + ((status == null) ? 0 : status.hashCode());
-            result = prime * result
-                    + ((keyDefinition == null) ? 0 : keyDefinition.hashCode());
-            result = prime * result + (augmenting ? 1231 : 1237);
-            result = prime * result + (configuration ? 1231 : 1237);
-            result = prime * result
-                    + ((constraints == null) ? 0 : constraints.hashCode());
-            result = prime * result
-                    + ((augmentations == null) ? 0 : augmentations.hashCode());
-            result = prime * result
-                    + ((childNodes == null) ? 0 : childNodes.hashCode());
-            result = prime
-                    * result
-                    + ((typeDefinitions == null) ? 0 : typeDefinitions
-                            .hashCode());
-            result = prime * result
-                    + ((groupings == null) ? 0 : groupings.hashCode());
-            result = prime * result + ((uses == null) ? 0 : uses.hashCode());
-            result = prime * result + (userOrdered ? 1231 : 1237);
             return result;
         }
 
@@ -396,85 +392,6 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
                     return false;
                 }
             } else if (!path.equals(other.path)) {
-                return false;
-            }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (status == null) {
-                if (other.status != null) {
-                    return false;
-                }
-            } else if (!status.equals(other.status)) {
-                return false;
-            }
-            if (keyDefinition == null) {
-                if (other.keyDefinition != null) {
-                    return false;
-                }
-            } else if (!keyDefinition.equals(other.keyDefinition)) {
-                return false;
-            }
-            if (augmenting != other.augmenting) {
-                return false;
-            }
-            if (configuration != other.configuration) {
-                return false;
-            }
-            if (constraints == null) {
-                if (other.constraints != null) {
-                    return false;
-                }
-            } else if (!constraints.equals(other.constraints)) {
-                return false;
-            }
-            if (augmentations == null) {
-                if (other.augmentations != null) {
-                    return false;
-                }
-            } else if (!augmentations.equals(other.augmentations)) {
-                return false;
-            }
-            if (childNodes == null) {
-                if (other.childNodes != null) {
-                    return false;
-                }
-            } else if (!childNodes.equals(other.childNodes)) {
-                return false;
-            }
-            if (typeDefinitions == null) {
-                if (other.typeDefinitions != null) {
-                    return false;
-                }
-            } else if (!typeDefinitions.equals(other.typeDefinitions)) {
-                return false;
-            }
-            if (groupings == null) {
-                if (other.groupings != null) {
-                    return false;
-                }
-            } else if (!groupings.equals(other.groupings)) {
-                return false;
-            }
-            if (uses == null) {
-                if (other.uses != null) {
-                    return false;
-                }
-            } else if (!uses.equals(other.uses)) {
-                return false;
-            }
-            if (userOrdered != other.userOrdered) {
                 return false;
             }
             return true;

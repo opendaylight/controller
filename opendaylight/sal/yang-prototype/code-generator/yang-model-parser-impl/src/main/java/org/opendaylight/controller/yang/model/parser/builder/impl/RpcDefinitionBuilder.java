@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,7 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
     private ContainerSchemaNodeBuilder outputBuilder;
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     RpcDefinitionBuilder(QName qname) {
         this.qname = qname;
@@ -63,6 +65,13 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
             groupings.add(entry.build());
         }
         instance.setGroupings(groupings);
+
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
     }
@@ -120,6 +129,11 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
     public void addUsesNode(UsesNodeBuilder usesBuilder) {
         throw new UnsupportedOperationException(
                 "Can not add uses node to rpc definition: rpc can not contains uses nodes.");
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        addedUnknownNodes.add(unknownSchemaNodeBuilder);
     }
 
     @Override
@@ -245,26 +259,17 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
             return unknownSchemaNodes;
         }
 
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
+            if(unknownSchemaNodes != null) {
+                this.unknownSchemaNodes = unknownSchemaNodes;
+            }
+        }
+
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
-            result = prime * result + ((path == null) ? 0 : path.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            result = prime * result
-                    + ((status == null) ? 0 : status.hashCode());
-            result = prime * result
-                    + ((input == null) ? 0 : input.hashCode());
-            result = prime * result
-                    + ((output == null) ? 0 : output.hashCode());
-            result = prime * result
-                    + ((typeDefinitions == null) ? 0 : typeDefinitions.hashCode());
-            result = prime * result
-                    + ((groupings == null) ? 0 : groupings.hashCode());
             return result;
         }
 
@@ -285,62 +290,6 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
                     return false;
                 }
             } else if (!qname.equals(other.qname)) {
-                return false;
-            }
-            if (path == null) {
-                if (other.path != null) {
-                    return false;
-                }
-            } else if (!path.equals(other.path)) {
-                return false;
-            }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (status == null) {
-                if (other.status != null) {
-                    return false;
-                }
-            } else if (!status.equals(other.status)) {
-                return false;
-            }
-            if (input == null) {
-                if (other.input != null) {
-                    return false;
-                }
-            } else if (!input.equals(other.input)) {
-                return false;
-            }
-            if (output == null) {
-                if (other.output != null) {
-                    return false;
-                }
-            } else if (!output.equals(other.output)) {
-                return false;
-            }
-            if (typeDefinitions == null) {
-                if (other.typeDefinitions != null) {
-                    return false;
-                }
-            } else if (!typeDefinitions.equals(other.typeDefinitions)) {
-                return false;
-            }
-            if (groupings == null) {
-                if (other.groupings != null) {
-                    return false;
-                }
-            } else if (!groupings.equals(other.groupings)) {
                 return false;
             }
             return true;

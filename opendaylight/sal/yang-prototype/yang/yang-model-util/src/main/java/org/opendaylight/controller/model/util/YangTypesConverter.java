@@ -92,29 +92,29 @@ public class YangTypesConverter {
     }
 
     public static TypeDefinition<IntegerTypeDefinition> javaTypeForBaseYangSignedIntegerType(
-            String typeName) {
+            String typeName, List<RangeConstraint> ranges) {
         if (typeName.equals("int8")) {
-            return new Int8();
+            return new Int8(ranges, null, null);
         } else if (typeName.equals("int16")) {
-            return new Int16();
+            return new Int16(ranges, null, null);
         } else if (typeName.equals("int32")) {
-            return new Int32();
+            return new Int32(ranges, null, null);
         } else if (typeName.equals("int64")) {
-            return new Int64();
+            return new Int64(ranges, null, null);
         }
         return null;
     }
 
     public static TypeDefinition<UnsignedIntegerTypeDefinition> javaTypeForBaseYangUnsignedIntegerType(
-            final String typeName) {
+            final String typeName, List<RangeConstraint> ranges) {
         if (typeName.equals("uint8")) {
-            return new Uint8();
+            return new Uint8(ranges, null, null);
         } else if (typeName.equals("uint16")) {
-            return new Uint16();
+            return new Uint16(ranges, null, null);
         } else if (typeName.equals("uint32")) {
-            return new Uint32();
+            return new Uint32(ranges, null, null);
         } else if (typeName.equals("uint64")) {
-            return new Uint64();
+            return new Uint64(ranges, null, null);
         }
         return null;
     }

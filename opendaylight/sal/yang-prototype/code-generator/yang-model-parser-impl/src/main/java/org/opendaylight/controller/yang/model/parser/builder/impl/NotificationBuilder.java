@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
     private final NotificationDefinitionImpl instance;
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     NotificationBuilder(QName qname) {
         super(qname);
@@ -74,6 +76,13 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
         }
         instance.setUses(uses);
 
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
+
         return instance;
     }
 
@@ -105,6 +114,11 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
     @Override
     public void setStatus(Status status) {
         instance.setStatus(status);
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        addedUnknownNodes.add(unknownSchemaNodeBuilder);
     }
 
     private class NotificationDefinitionImpl implements NotificationDefinition {
@@ -214,6 +228,12 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
             return unknownSchemaNodes;
         }
 
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
+            if(unknownSchemaNodes != null) {
+                this.unknownSchemaNodes = unknownSchemaNodes;
+            }
+        }
+
         @Override
         public DataSchemaNode getDataChildByName(QName name) {
             return childNodes.get(name);
@@ -237,19 +257,6 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
             result = prime * result + ((path == null) ? 0 : path.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            result = prime * result
-                    + ((status == null) ? 0 : status.hashCode());
-            result = prime * result
-                    + ((childNodes == null) ? 0 : childNodes.hashCode());
-            result = prime * result
-                    + ((groupings == null) ? 0 : groupings.hashCode());
-            result = prime * result
-                    + ((typeDefinitions == null) ? 0 : typeDefinitions.hashCode());
-            result = prime * result + ((uses == null) ? 0 : uses.hashCode());
             return result;
         }
 
@@ -279,55 +286,6 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
             } else if (!path.equals(other.path)) {
                 return false;
             }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (status == null) {
-                if (other.status != null) {
-                    return false;
-                }
-            } else if (!status.equals(other.status)) {
-                return false;
-            }
-            if (childNodes == null) {
-                if (other.childNodes != null) {
-                    return false;
-                }
-            } else if (!childNodes.equals(other.childNodes)) {
-                return false;
-            }
-            if (groupings == null) {
-                if (other.groupings != null) {
-                    return false;
-                }
-            } else if (!groupings.equals(other.groupings)) {
-                return false;
-            }
-            if (typeDefinitions == null) {
-                if (other.typeDefinitions != null) {
-                    return false;
-                }
-            } else if (!typeDefinitions.equals(other.typeDefinitions)) {
-                return false;
-            }
-            if (uses == null) {
-                if (other.uses != null) {
-                    return false;
-                }
-            } else if (!uses.equals(other.uses)) {
-                return false;
-            }
             return true;
         }
 
@@ -335,7 +293,7 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
         public String toString() {
             StringBuilder sb = new StringBuilder(
                     NotificationDefinitionImpl.class.getSimpleName());
-            sb.append("[qname=" + qname + "]");
+            sb.append("[qname=" + qname + ", path="+ path +"]");
             return sb.toString();
         }
     }

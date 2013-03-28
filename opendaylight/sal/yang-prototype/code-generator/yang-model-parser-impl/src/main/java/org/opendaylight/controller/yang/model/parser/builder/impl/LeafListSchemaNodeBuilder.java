@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,13 +27,13 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
 
     private final LeafListSchemaNodeImpl instance;
     private final QName qname;
-    private final ConstraintsBuilder constraintsBuilder;
+    private final ConstraintsBuilder constraintsBuilder = new ConstraintsBuilder();
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private TypeDefinition<?> type;
 
     LeafListSchemaNodeBuilder(QName qname) {
         this.qname = qname;
         instance = new LeafListSchemaNodeImpl(qname);
-        constraintsBuilder = new ConstraintsBuilder();
     }
 
     @Override
@@ -96,6 +97,11 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
 
     public void setUserOrdered(boolean userOrdered) {
         instance.setUserOrdered(userOrdered);
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        addedUnknownNodes.add(unknownSchemaNodeBuilder);
     }
 
     private class LeafListSchemaNodeImpl implements LeafListSchemaNode {
@@ -206,24 +212,18 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
             return unknownSchemaNodes;
         }
 
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
+            if(unknownSchemaNodes != null) {
+                this.unknownSchemaNodes = unknownSchemaNodes;
+            }
+        }
+
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
             result = prime * result + ((path == null) ? 0 : path.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            result = prime * result
-                    + ((status == null) ? 0 : status.hashCode());
-            result = prime * result + (augmenting ? 1231 : 1237);
-            result = prime * result + (configuration ? 1231 : 1237);
-            result = prime * result
-                    + ((constraints == null) ? 0 : constraints.hashCode());
-            result = prime * result + ((type == null) ? 0 : type.hashCode());
-            result = prime * result + (userOrdered ? 1231 : 1237);
             return result;
         }
 
@@ -251,50 +251,6 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
                     return false;
                 }
             } else if (!path.equals(other.path)) {
-                return false;
-            }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (status == null) {
-                if (other.status != null) {
-                    return false;
-                }
-            } else if (!status.equals(other.status)) {
-                return false;
-            }
-            if (augmenting != other.augmenting) {
-                return false;
-            }
-            if (configuration != other.configuration) {
-                return false;
-            }
-            if (constraints == null) {
-                if (other.constraints != null) {
-                    return false;
-                }
-            } else if (!constraints.equals(other.constraints)) {
-                return false;
-            }
-            if (type == null) {
-                if (other.type != null) {
-                    return false;
-                }
-            } else if (!type.equals(other.type)) {
-                return false;
-            }
-            if (userOrdered != other.userOrdered) {
                 return false;
             }
             return true;

@@ -22,12 +22,12 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
 
     private final ExtensionDefinitionImpl instance;
     private final QName qname;
-    private final List<UnknownSchemaNodeBuilder> addedExtensions;
+    private final List<UnknownSchemaNodeBuilder> addedExtensions = new ArrayList<UnknownSchemaNodeBuilder>();
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     ExtensionBuilder(QName qname) {
         this.qname = qname;
         instance = new ExtensionDefinitionImpl(qname);
-        addedExtensions = new ArrayList<UnknownSchemaNodeBuilder>();
     }
 
     @Override
@@ -71,6 +71,11 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
     @Override
     public void setStatus(Status status) {
         instance.setStatus(status);
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        addedUnknownNodes.add(unknownSchemaNodeBuilder);
     }
 
     private static class ExtensionDefinitionImpl implements ExtensionDefinition {

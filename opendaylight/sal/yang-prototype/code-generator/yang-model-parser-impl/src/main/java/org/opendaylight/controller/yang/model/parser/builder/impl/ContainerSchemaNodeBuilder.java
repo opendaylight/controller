@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,6 +44,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     ContainerSchemaNodeBuilder(QName qname) {
         super(qname);
@@ -79,6 +81,13 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
             uses.add(builder.build());
         }
         instance.setUses(uses);
+
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
 
         instance.setConstraints(constraintsBuilder.build());
         instance.setAvailableAugmentations(augmentations);
@@ -140,6 +149,11 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         instance.setPresenceContainer(presence);
     }
 
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        addedUnknownNodes.add(unknownSchemaNodeBuilder);
+    }
+
     private class ContainerSchemaNodeImpl implements ContainerSchemaNode {
 
         private final QName qname;
@@ -155,6 +169,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         private Set<GroupingDefinition> groupings = Collections.emptySet();
         private Set<TypeDefinition<?>> typeDefinitions = Collections.emptySet();
         private Set<UsesNode> uses = Collections.emptySet();
+        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();
         private boolean presence;
 
         private ContainerSchemaNodeImpl(QName qname) {
@@ -315,7 +330,13 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return Collections.emptyList();
+            return unknownSchemaNodes;
+        }
+
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
+            if(unknownSchemaNodes != null) {
+                this.unknownSchemaNodes = unknownSchemaNodes;
+            }
         }
 
         @Override
@@ -323,6 +344,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
             final int prime = 31;
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
+            result = prime * result + ((path == null) ? 0 : path.hashCode());
             return result;
         }
 
@@ -343,6 +365,13 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
                     return false;
                 }
             } else if (!qname.equals(other.qname)) {
+                return false;
+            }
+            if (path == null) {
+                if (other.path != null) {
+                    return false;
+                }
+            } else if (!path.equals(other.path)) {
                 return false;
             }
             return true;

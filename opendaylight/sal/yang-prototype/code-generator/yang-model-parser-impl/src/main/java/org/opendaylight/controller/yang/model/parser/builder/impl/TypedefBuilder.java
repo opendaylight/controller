@@ -32,6 +32,7 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
     private String reference;
     private Status status;
     private String units;
+    private Object defaultValue;
 
     TypedefBuilder(QName qname) {
         this.qname = qname;
@@ -53,6 +54,7 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
                 instance.setPath(schemaPath);
                 instance.setBaseType(baseType);
                 instance.setUnits(units);
+                instance.setDefaultValue(defaultValue);
                 return instance;
             } else {
                 // type
@@ -97,6 +99,11 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
     }
 
     @Override
+    public void setDefaultValue(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    @Override
     public TypeDefinition<?> getType() {
         return baseType;
     }
@@ -111,6 +118,11 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
         return baseType;
     }
 
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        // TODO
+    }
+
     private static class TypeDefinitionImpl<T extends TypeDefinition<T>>
             implements TypeDefinition<T> {
 
@@ -119,6 +131,7 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
         private String description;
         private String reference;
         private Status status = Status.CURRENT;
+        private Object defaultValue;
         private T baseType;
         private String units;
         private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();
@@ -188,8 +201,11 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
 
         @Override
         public Object getDefaultValue() {
-            // TODO Auto-generated method stub
-            return null;
+            return defaultValue;
+        }
+
+        private void setDefaultValue(Object defaultValue) {
+            this.defaultValue = defaultValue;
         }
 
         @Override

@@ -10,15 +10,19 @@ package org.opendaylight.controller.yang.model.parser.builder.api;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
-
 /**
  * Interface for builders of 'typedef' statement.
  */
 public interface TypeDefinitionBuilder {
 
-	QName getQName();
-	TypeDefinition<?> getBaseType();
-	TypeDefinition<?> build();
-	void setUnits(String units);
+    QName getQName();
+
+    TypeDefinition<?> getBaseType();
+
+    TypeDefinition<?> build();
+
+    void setUnits(String units);
+
+    void setDefaultValue(Object defaultValue);
 
 }

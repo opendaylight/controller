@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class FeatureBuilder implements SchemaNodeBuilder {
 
     private final FeatureDefinitionImpl instance;
     private final QName qname;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     FeatureBuilder(QName qname) {
         this.qname = qname;
@@ -29,6 +31,13 @@ public class FeatureBuilder implements SchemaNodeBuilder {
 
     @Override
     public FeatureDefinitionImpl build() {
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
+
         return instance;
     }
 
@@ -55,6 +64,11 @@ public class FeatureBuilder implements SchemaNodeBuilder {
     @Override
     public void setStatus(Status status) {
         instance.setStatus(status);
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+        addedUnknownNodes.add(unknownSchemaNodeBuilder);
     }
 
     private static class FeatureDefinitionImpl implements FeatureDefinition {
@@ -117,18 +131,18 @@ public class FeatureBuilder implements SchemaNodeBuilder {
             return unknownSchemaNodes;
         }
 
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
+            if(unknownSchemaNodes != null) {
+                this.unknownSchemaNodes = unknownSchemaNodes;
+            }
+        }
+
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
             result = prime * result + ((path == null) ? 0 : path.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            result = prime * result
-                    + ((status == null) ? 0 : status.hashCode());
             return result;
         }
 
@@ -158,27 +172,6 @@ public class FeatureBuilder implements SchemaNodeBuilder {
             } else if (!path.equals(other.path)) {
                 return false;
             }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (status == null) {
-                if (other.status != null) {
-                    return false;
-                }
-            } else if (!status.equals(other.status)) {
-                return false;
-            }
             return true;
         }
 
@@ -187,10 +180,7 @@ public class FeatureBuilder implements SchemaNodeBuilder {
             StringBuilder sb = new StringBuilder(
                     FeatureDefinitionImpl.class.getSimpleName());
             sb.append("[name=" + qname);
-            sb.append(", path=" + path);
-            sb.append(", description=" + description);
-            sb.append(", reference=" + reference);
-            sb.append(", status=" + status + "]");
+            sb.append(", path=" + path + "]");
             return sb.toString();
         }
     }

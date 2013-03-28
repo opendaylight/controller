@@ -31,6 +31,7 @@ public class UnknownType implements UnknownTypeDefinition {
     private final List<RangeConstraint> rangeStatements;
     private final List<UnknownSchemaNode> extensions;
     private final LengthConstraint lengthConstraint;
+    private final Integer fractionDigits;
 
     private final Status status;
     private final String units;
@@ -49,6 +50,7 @@ public class UnknownType implements UnknownTypeDefinition {
         private List<RangeConstraint> rangeStatements = Collections.emptyList();
         private List<UnknownSchemaNode> extensions = Collections.emptyList();
         private LengthConstraint lengthConstraint = null;
+        private Integer fractionDigits = null;
 
         private Status status = Status.CURRENT;
         private String units = "";
@@ -104,6 +106,11 @@ public class UnknownType implements UnknownTypeDefinition {
             return this;
         }
 
+        public Builder fractionDigits(final Integer fractionDigits) {
+            this.fractionDigits = fractionDigits;
+            return this;
+        }
+
         public Builder status(Status status) {
             this.status = status;
             return this;
@@ -137,11 +144,12 @@ public class UnknownType implements UnknownTypeDefinition {
         this.status = builder.status;
         this.units = builder.units;
         this.defaultValue = builder.defaultValue;
+        this.fractionDigits = builder.fractionDigits;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
@@ -152,7 +160,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getUnits()
      */
     @Override
@@ -162,7 +170,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
      * ()
@@ -174,7 +182,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getQName()
      */
     @Override
@@ -184,7 +192,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getPath()
      */
     @Override
@@ -194,7 +202,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
@@ -205,7 +213,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getReference()
      */
     @Override
@@ -215,7 +223,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getStatus()
      */
     @Override
@@ -225,7 +233,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.SchemaNode#getExtensionSchemaNodes
      * ()
@@ -237,7 +245,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.type.UnknownTypeDefinition
      * #getRangeStatements()
@@ -249,7 +257,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.type.UnknownTypeDefinition
      * #getLengthStatements()
@@ -261,7 +269,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.type.UnknownTypeDefinition
      * #getPatterns()
@@ -273,7 +281,7 @@ public class UnknownType implements UnknownTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.type.UnknownTypeDefinition
      * #getLengthConstraint()
@@ -281,6 +289,11 @@ public class UnknownType implements UnknownTypeDefinition {
     @Override
     public LengthConstraint getLengthConstraint() {
         return lengthConstraint;
+    }
+
+    @Override
+    public Integer getFractionDigits() {
+        return fractionDigits;
     }
 
     @Override
@@ -437,4 +450,5 @@ public class UnknownType implements UnknownTypeDefinition {
         builder2.append("]");
         return builder2.toString();
     }
+
 }

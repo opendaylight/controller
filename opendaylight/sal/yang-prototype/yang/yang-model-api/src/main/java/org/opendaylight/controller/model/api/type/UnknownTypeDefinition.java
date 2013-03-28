@@ -14,11 +14,14 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 public interface UnknownTypeDefinition extends
         TypeDefinition<UnknownTypeDefinition> {
 
-    public List<RangeConstraint> getRangeStatements();
+    List<RangeConstraint> getRangeStatements();
 
-    public List<LengthConstraint> getLengthStatements();
+    List<LengthConstraint> getLengthStatements();
 
-    public List<PatternConstraint> getPatterns();
+    List<PatternConstraint> getPatterns();
 
-    public LengthConstraint getLengthConstraint();
+    LengthConstraint getLengthConstraint();
+
+    Integer getFractionDigits();
+
 }
