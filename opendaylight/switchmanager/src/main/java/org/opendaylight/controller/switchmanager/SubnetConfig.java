@@ -11,7 +11,6 @@ package org.opendaylight.controller.switchmanager;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.GUIField;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 
 /**
@@ -36,10 +36,6 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 public class SubnetConfig implements Serializable {
     //static fields are by default excluded by Gson parser
     private static final long serialVersionUID = 1L;
-    private static final String regexIP = "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-            + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-            + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-            + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])[/](\\d|[12]\\d|3[0-2])$";
     private static final String prettyFields[] = { GUIField.NAME.toString(),
             GUIField.GATEWAYIP.toString(), GUIField.NODEPORTS.toString() };
 
@@ -94,28 +90,6 @@ public class SubnetConfig implements Serializable {
         return maskLen;
     }
 
-    public boolean isIPv6AddressValid() {
-        if (subnet == null)
-            return false;
-        String values[] = subnet.split("/");
-        try {
-            //when given an IP address, InetAddress.getByName validates the ip address
-            InetAddress addr = InetAddress.getByName(values[0]);
-            if (!(addr instanceof Inet6Address)) {
-                return false;
-            }
-        } catch (UnknownHostException ex) {
-            return false;
-        }
-        if (values.length >= 2) {
-            int prefix = Integer.valueOf(values[1]);
-            if ((prefix < 0) || (prefix > 128)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private Set<Short> getPortList(String ports) {
         /*
          * example:
@@ -142,9 +116,9 @@ public class SubnetConfig implements Serializable {
 
     private boolean hasValidIP() {
         if (subnet != null) {
-            if (subnet.matches(regexIP)) {
+            if (NetUtils.isIPv4AddressValid(subnet)) {
                 return true;
-            } else if (isIPv6AddressValid()) {
+            } else if (NetUtils.isIPv6AddressValid(subnet)) {
                 return true;
             }
         }
@@ -190,18 +164,6 @@ public class SubnetConfig implements Serializable {
             return true;
         }
         return false;
-    }
-
-    public static List<String> getFieldsNames() {
-        List<String> fieldList = new ArrayList<String>();
-        for (Field fld : SubnetConfig.class.getDeclaredFields()) {
-            fieldList.add(fld.getName());
-        }
-        //remove the four static fields
-        for (short i = 0; i < 3; i++) {
-            fieldList.remove(0);
-        }
-        return fieldList;
     }
 
     public static List<String> getGuiFieldsNames() {
