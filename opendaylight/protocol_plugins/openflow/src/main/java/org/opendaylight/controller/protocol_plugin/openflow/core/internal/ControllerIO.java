@@ -35,7 +35,7 @@ public class ControllerIO {
     public ControllerIO(IController l) {
         this.listener = l;
         this.openFlowPort = defaultOpenFlowPort;
-        String portString = System.getProperty("port");
+        String portString = System.getProperty("of.listenPort");
         if (portString != null) {
             try {
                 openFlowPort = Short.decode(portString).shortValue();

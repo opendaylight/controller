@@ -62,8 +62,7 @@ public class SwitchHandler implements ISwitch {
             .getLogger(SwitchHandler.class);
     private static final int SWITCH_LIVENESS_TIMER = 5000;
     private static final int SWITCH_LIVENESS_TIMEOUT = 2 * SWITCH_LIVENESS_TIMER + 500;
-    private static final int SYNCHRONOUS_FLOW_TIMEOUT = 2000;
-    private static final int STATS_COLLECTION_TIMEOUT = 2000;
+    private int MESSAGE_RESPONSE_TIMER = 2000;
     private static final int bufferSize = 1024 * 1024;
 
     private String instanceName;
@@ -92,6 +91,7 @@ public class SwitchHandler implements ISwitch {
     private ConcurrentHashMap<Integer, Callable<Object>> messageWaitingDone;
     private boolean running;
     private Thread switchHandlerThread;
+    private Integer responseTimerValue;
 
     private enum SwitchState {
         NON_OPERATIONAL(0), WAIT_FEATURES_REPLY(1), WAIT_CONFIG_REPLY(2), OPERATIONAL(
@@ -132,6 +132,16 @@ public class SwitchHandler implements ISwitch {
         this.messageWaitingDone = new ConcurrentHashMap<Integer, Callable<Object>>();
         this.inBuffer = ByteBuffer.allocateDirect(bufferSize);
         this.outBuffer = ByteBuffer.allocateDirect(bufferSize);
+        this.responseTimerValue = MESSAGE_RESPONSE_TIMER;
+        String rTimer = System.getProperty("of.messageResponseTimer");
+        if (rTimer != null) {
+            try {
+                responseTimerValue = Integer.decode(rTimer);
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid of.messageResponseTimer:" + rTimer + ", use default("
+                        + MESSAGE_RESPONSE_TIMER+ ")");
+            }
+        }
     }
 
     public void start() {
@@ -532,7 +542,7 @@ public class SwitchHandler implements ISwitch {
         Object result = null;
         try {
             result = submit
-                    .get(STATS_COLLECTION_TIMEOUT, TimeUnit.MILLISECONDS);
+                    .get(MESSAGE_RESPONSE_TIMER, TimeUnit.MILLISECONDS);
             return result;
         } catch (Exception e) {
             logger.warn("Timeout while waiting for " + req.getType()
@@ -552,7 +562,7 @@ public class SwitchHandler implements ISwitch {
         Future<Object> submit = executor.submit(worker);
         try {
             result = submit
-                    .get(SYNCHRONOUS_FLOW_TIMEOUT, TimeUnit.MILLISECONDS);
+                    .get(responseTimerValue, TimeUnit.MILLISECONDS);
             messageWaitingDone.remove(xid);
             if (result == null) {
                 // if result  is null, then it means the switch can handle this message successfully
