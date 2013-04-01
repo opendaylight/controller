@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAADX///3g\u003d",
+        "filename": "opendaylight/forwardingrulesmanager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/FlowConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-04-01T22:42:48Z",
+      "side": 1,
+      "message": "We need to change this magic word approach of using ** to signify an internally generated flow. \nSince it is not originated via this Changeset, we can take it up as part of another commit.",
+      "revId": "48c293350f30f1d0104adcb548d233d7d79efd80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAADX///3c\u003d",
+        "filename": "opendaylight/forwardingrulesmanager/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1310,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-04-01T22:42:48Z",
+      "side": 1,
+      "message": "Can you check on tab spacing ?",
+      "revId": "48c293350f30f1d0104adcb548d233d7d79efd80",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
