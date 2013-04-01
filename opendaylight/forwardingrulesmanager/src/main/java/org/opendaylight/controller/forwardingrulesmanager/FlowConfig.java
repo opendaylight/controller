@@ -10,7 +10,6 @@
 package org.opendaylight.controller.forwardingrulesmanager;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Configuration Java Object which represents a flow configuration information
- * for Forwarding Rrules Manager.
+ * for Forwarding Rules Manager.
  */
 
 @XmlRootElement
@@ -224,9 +223,7 @@ public class FlowConfig implements Serializable {
 
     public boolean isInternalFlow() {
         // Controller generated static flows have name starting with "**"
-        if (this.name == null)
-            return false;
-        return this.name.startsWith("**");
+    	return (this.name != null && this.name.startsWith("**"));
     }
 
     public String getName() {
@@ -413,18 +410,6 @@ public class FlowConfig implements Serializable {
 
     public void setActions(List<String> actions) {
         this.actions = actions;
-    }
-
-    public static List<String> getFieldsNames() {
-        List<String> fieldList = new ArrayList<String>();
-        for (Field fld : FlowConfig.class.getDeclaredFields()) {
-            fieldList.add(fld.getName());
-        }
-        // Remove 4 static fields + 2 internal field
-        for (int i = 0; i < 6; i++)
-            fieldList.remove(0);
-
-        return fieldList;
     }
 
     public boolean isPortGroupEnabled() {

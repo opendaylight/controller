@@ -93,6 +93,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         IConfigurationContainerAware, IInventoryListener, IObjectReader,
         ICacheUpdateAware<Long, String>, CommandProvider {
     private static final String SAVE = "Save";
+    private static final String NODEDOWN = "Node is Down";
     private static final Logger log = LoggerFactory
             .getLogger(ForwardingRulesManagerImpl.class);
     private Map<Long, String> flowsSaveEvent;
@@ -1303,14 +1304,28 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     private void updateStaticFlowConfigsOnNodeDown(Node node) {
         log.trace("Updating Static Flow configs on node down: " + node);
 
-        for (FlowConfig config : staticFlows.values()) {
+        List<Integer> toRemove = new ArrayList<Integer>();
+        for (Entry<Integer,FlowConfig> entry : staticFlows.entrySet()) {
+
+        	FlowConfig config = entry.getValue();
+
             if (config.isPortGroupEnabled()) {
                 continue;
             }
+            
             if (config.installInHw() && config.getNode().equals(node)) {
-                config.setStatus("Node is down");
+            	if (config.isInternalFlow()) {
+            		// Take note of this controller generated static flow
+            		toRemove.add(entry.getKey());
+            	} else {
+            		config.setStatus(NODEDOWN);
+            	}
             }
         }
+        // Remove controller generated static flows for this node 
+        for (Integer index : toRemove) {
+        	staticFlows.remove(index);
+        }        
     }
 
     private void updateStaticFlowConfigsOnContainerModeChange(UpdateType update) {
@@ -1657,8 +1672,10 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         ConcurrentHashMap<Integer, FlowConfig> nonDynamicFlows = new ConcurrentHashMap<Integer, FlowConfig>();
         for (Integer ordinal : staticFlows.keySet()) {
             FlowConfig config = staticFlows.get(ordinal);
-            if (config.isDynamic())
+            // Do not save dynamic and controller generated static flows
+            if (config.isDynamic() || config.isInternalFlow()) {
                 continue;
+            }
             nonDynamicFlows.put(ordinal, config);
         }
         objWriter.write(nonDynamicFlows, frmFileName);
@@ -1802,10 +1819,10 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     public void notifyNode(Node node, UpdateType type,
             Map<String, Property> propMap) {
         switch (type) {
-        case ADDED:
+        case ADDED: 
             addStaticFlowsToSwitch(node);
             break;
-        case REMOVED:
+        case REMOVED:        	
             cleanDatabaseForNode(node);
             updateStaticFlowConfigsOnNodeDown(node);
             break;
@@ -1816,7 +1833,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
 
     @Override
     public void notifyNodeConnector(NodeConnector nodeConnector,
-            UpdateType type, Map<String, Property> propMap) {
+    		UpdateType type, Map<String, Property> propMap) {
     }
 
     private FlowConfig getDerivedFlowConfig(FlowConfig original,
@@ -2049,7 +2066,6 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      *
      */
     void init() {
-        log.info("Init");
         frmAware = Collections
                 .synchronizedSet(new HashSet<IForwardingRulesManagerAware>());
         frmFileName = GlobalConstants.STARTUPHOME.toString() + "frm_staticflows_"
@@ -2085,7 +2101,6 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      *
      */
     void destroy() {
-        log.info("Destroy");
         destroyCaches();
     }
 
@@ -2095,7 +2110,6 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      *
      */
     void start() {
-        log.info("Start");
         /*
          * Read startup and build database if we have not already gotten the
          * configurations synced from another node
@@ -2112,7 +2126,6 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      *
      */
     void stop() {
-        log.info("Stop");
     }
 
     public void setFlowProgrammerService(IFlowProgrammerService service) {
@@ -2330,7 +2343,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         boolean verbose = false;
         String verboseCheck = ci.nextArgument();
         if (verboseCheck != null) {
-            verbose = verboseCheck.equals("true");
+            verbose = verboseCheck.equalsIgnoreCase("true");
         }
 
         // Dump per node database
