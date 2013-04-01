@@ -49,6 +49,10 @@ public class SwitchConfig implements Serializable {
         return mode;
     }
 
+    public boolean isProactive() {
+    	return Integer.parseInt(mode) != 0;
+    }
+    
     public static long getSerialversionuid() {
         return serialVersionUID;
     }

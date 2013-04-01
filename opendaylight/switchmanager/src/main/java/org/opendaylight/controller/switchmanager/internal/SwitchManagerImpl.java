@@ -585,8 +585,9 @@ public class SwitchManagerImpl implements ISwitchManager,
         boolean modeChange = false;
 
         SwitchConfig sc = nodeConfigList.get(cfgObject.getNodeId());
-        if ((sc == null) || !cfgObject.getMode().equals(sc.getMode()))
+        if ((sc == null) || !cfgObject.getMode().equals(sc.getMode())) {
             modeChange = true;
+        }
 
         nodeConfigList.put(cfgObject.getNodeId(), cfgObject);
         try {
@@ -610,8 +611,7 @@ public class SwitchManagerImpl implements ISwitchManager,
                         .getMode());
 
                 if (modeChange) {
-                    notifyModeChange(node, (Integer.parseInt(cfgObject
-                            .getMode()) != 0));
+                    notifyModeChange(node, cfgObject.isProactive());
                 }
             }
         } catch (Exception e) {
@@ -714,8 +714,9 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     private void addNode(Node node, Set<Property> props) {
         log.trace("{} added", node);
-        if (nodeProps == null)
+        if (nodeProps == null) {
             return;
+        }
 
         Map<String, Property> propMap;
         if (nodeProps.get(node) != null) {
@@ -732,6 +733,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         }
 
         // copy node properties from config
+        boolean proactiveForwarding = false;
         if (nodeConfigList != null) {
             String nodeId = node.getNodeIDString();
             for (SwitchConfig conf : nodeConfigList.values()) {
@@ -740,6 +742,7 @@ public class SwitchManagerImpl implements ISwitchManager,
                     propMap.put(name.getName(), name);
                     Property tier = new Tier(Integer.parseInt(conf.getTier()));
                     propMap.put(tier.getName(), tier);
+                    proactiveForwarding = conf.isProactive();
                     break;
                 }
             }
@@ -749,8 +752,13 @@ public class SwitchManagerImpl implements ISwitchManager,
         // check if span ports are configed
         addSpanPorts(node);
 
-        /* notify node listeners */
+        // notify node listeners
         notifyNode(node, UpdateType.ADDED, propMap);
+        
+        // notify proactive mode forwarding
+        if (proactiveForwarding) {
+        	notifyModeChange(node, true);
+        }
     }
 
     private void removeNode(Node node) {
@@ -816,8 +824,9 @@ public class SwitchManagerImpl implements ISwitchManager,
 
         log.trace("{} {}", nodeConnector, type);
 
-        if (nodeConnectorProps == null)
+        if (nodeConnectorProps == null) {
             return;
+        }
 
         switch (type) {
         case ADDED:
@@ -862,7 +871,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         Set<Node> nodes = getNodes();
         if (nodes != null) {
             for (Node node : nodes) {
-                if (id == (Long) node.getID()) {
+                if (id.equals((Long)node.getID())) {
                     return node;
                 }
             }
@@ -1384,8 +1393,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         for (Node node : getNodes()) {
             SwitchConfig sc = getSwitchConfig(node.toString());
             if ((sc != null) && isDefaultContainer) {
-                service.modeChangeNotify(node,
-                        (Integer.parseInt(sc.getMode()) != 0));
+                service.modeChangeNotify(node, sc.isProactive());
             }
         }
     }
@@ -1647,10 +1655,10 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     @Override
     public boolean isSpecial(NodeConnector p) {
-        if (p.equals(NodeConnectorIDType.CONTROLLER) ||
-            p.equals(NodeConnectorIDType.ALL) ||
-            p.equals(NodeConnectorIDType.SWSTACK) ||
-            p.equals(NodeConnectorIDType.HWPATH)) {
+        if (p.getType().equals(NodeConnectorIDType.CONTROLLER) ||
+            p.getType().equals(NodeConnectorIDType.ALL) ||
+            p.getType().equals(NodeConnectorIDType.SWSTACK) ||
+            p.getType().equals(NodeConnectorIDType.HWPATH)) {
             return true;
         }
         return false;
