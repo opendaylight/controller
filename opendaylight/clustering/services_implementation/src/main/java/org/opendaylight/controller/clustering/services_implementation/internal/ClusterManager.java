@@ -62,7 +62,7 @@ public class ClusterManager implements IClusterServices {
             .getLogger(ClusterManager.class);
     private DefaultCacheManager cm;
     GossipRouter gossiper;
-    private HashSet roleChangeListeners;
+    private HashSet<IListenRoleChange> roleChangeListeners;
     private ViewChangedListener cacheManagerListener;
 
     private static String loopbackAddress = "127.0.0.1";
@@ -97,10 +97,10 @@ public class ClusterManager implements IClusterServices {
         if (supernodes.hasMoreTokens()) {
             // Populate the list of my addresses
             try {
-                Enumeration e = NetworkInterface.getNetworkInterfaces();
+                Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
                 while (e.hasMoreElements()) {
                     NetworkInterface n = (NetworkInterface) e.nextElement();
-                    Enumeration ee = n.getInetAddresses();
+                    Enumeration<InetAddress> ee = n.getInetAddresses();
                     while (ee.hasMoreElements()) {
                         InetAddress i = (InetAddress) ee.nextElement();
                         myAddresses.add(i);
@@ -289,7 +289,7 @@ public class ClusterManager implements IClusterServices {
             String cacheName, Set<cacheMode> cMode) throws CacheExistException,
             CacheConfigException {
         EmbeddedCacheManager manager = this.cm;
-        Cache c;
+        Cache<Object,Object> c;
         String realCacheName = "{" + containerName + "}_{" + cacheName + "}";
         if (manager == null) {
             return null;
@@ -322,7 +322,7 @@ public class ClusterManager implements IClusterServices {
     @Override
     public ConcurrentMap<?, ?> getCache(String containerName, String cacheName) {
         EmbeddedCacheManager manager = this.cm;
-        Cache c;
+        Cache<Object,Object> c;
         String realCacheName = "{" + containerName + "}_{" + cacheName + "}";
         if (manager == null) {
             return null;
@@ -359,7 +359,7 @@ public class ClusterManager implements IClusterServices {
 
     @Override
     public Set<String> getCacheList(String containerName) {
-        Set<String> perContainerCaches = new HashSet();
+        Set<String> perContainerCaches = new HashSet<String>();
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
             return null;
@@ -403,7 +403,7 @@ public class ClusterManager implements IClusterServices {
     public void addListener(String containerName, String cacheName,
             IGetUpdates<?, ?> u) throws CacheListenerAddException {
         EmbeddedCacheManager manager = this.cm;
-        Cache c;
+        Cache<Object,Object> c;
         String realCacheName = "{" + containerName + "}_{" + cacheName + "}";
         if (manager == null) {
             return;
@@ -422,7 +422,7 @@ public class ClusterManager implements IClusterServices {
     public Set<IGetUpdates<?, ?>> getListeners(String containerName,
             String cacheName) {
         EmbeddedCacheManager manager = this.cm;
-        Cache c;
+        Cache<Object,Object> c;
         String realCacheName = "{" + containerName + "}_{" + cacheName + "}";
         if (manager == null) {
             return null;
@@ -433,7 +433,7 @@ public class ClusterManager implements IClusterServices {
         }
         c = manager.getCache(realCacheName);
 
-        Set<IGetUpdates<?, ?>> res = new HashSet();
+        Set<IGetUpdates<?, ?>> res = new HashSet<IGetUpdates<?, ?>>();
         Set<Object> listeners = c.getListeners();
         for (Object listener : listeners) {
             if (listener instanceof CacheListenerContainer) {
@@ -449,7 +449,7 @@ public class ClusterManager implements IClusterServices {
     public void removeListener(String containerName, String cacheName,
             IGetUpdates<?, ?> u) {
         EmbeddedCacheManager manager = this.cm;
-        Cache c;
+        Cache<Object,Object> c;
         String realCacheName = "{" + containerName + "}_{" + cacheName + "}";
         if (manager == null) {
             return;
@@ -536,7 +536,7 @@ public class ClusterManager implements IClusterServices {
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
             // In case we cannot fetch the information, lets assume we
-            // are standby, so to have less responsability.
+            // are standby, so to have less responsibility.
             return true;
         }
         return (!manager.isCoordinator());
@@ -546,7 +546,7 @@ public class ClusterManager implements IClusterServices {
         EmbeddedCacheManager manager = this.cm;
         if ((manager == null) || (a == null)) {
             // In case we cannot fetch the information, lets assume we
-            // are standby, so to have less responsability.
+            // are standby, so to have less responsibility.
             return null;
         }
         Transport t = manager.getTransport();
@@ -600,7 +600,7 @@ public class ClusterManager implements IClusterServices {
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
             // In case we cannot fetch the information, lets assume we
-            // are standby, so to have less responsability.
+            // are standby, so to have less responsibility.
             return null;
         }
 
@@ -613,12 +613,12 @@ public class ClusterManager implements IClusterServices {
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
             // In case we cannot fetch the information, lets assume we
-            // are standby, so to have less responsability.
+            // are standby, so to have less responsibility.
             throw new ListenRoleChangeAddException();
         }
 
         if (this.roleChangeListeners == null) {
-            this.roleChangeListeners = new HashSet();
+            this.roleChangeListeners = new HashSet<IListenRoleChange>();
             this.cacheManagerListener = new ViewChangedListener(
                     this.roleChangeListeners);
             manager.addListener(this.cacheManagerListener);
@@ -634,7 +634,7 @@ public class ClusterManager implements IClusterServices {
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
             // In case we cannot fetch the information, lets assume we
-            // are standby, so to have less responsability.
+            // are standby, so to have less responsibility.
             return;
         }
 
