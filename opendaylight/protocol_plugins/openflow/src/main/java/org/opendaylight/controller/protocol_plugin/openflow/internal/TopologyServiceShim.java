@@ -226,7 +226,7 @@ public class TopologyServiceShim implements IDiscoveryService,
 
         for (NodeConnector connector : globalContainerEdges.keySet()) {
             // Skip if node connector belongs to production switch
-            if (connector.getType() == NodeConnector.NodeConnectorIDType.PRODUCTION) {
+            if (connector.getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)) {
                 continue;
             }
 
@@ -326,7 +326,8 @@ public class TopologyServiceShim implements IDiscoveryService,
             return;
         }
         if ((this.topologyServiceShimListeners != null)
-                && !this.topologyServiceShimListeners.containsKey(s)) {
+                && !this.topologyServiceShimListeners
+                	.containsKey(containerName)) {
             this.topologyServiceShimListeners.put(containerName, s);
             logger.trace("Added topologyServiceShimListener for container:"
                     + containerName);
@@ -345,7 +346,11 @@ public class TopologyServiceShim implements IDiscoveryService,
             return;
         }
         if ((this.topologyServiceShimListeners != null)
-                && this.topologyServiceShimListeners.containsKey(s)) {
+                && this.topologyServiceShimListeners
+                .containsKey(containerName)
+                && this.topologyServiceShimListeners
+                .get(containerName).equals(s)
+                ) {
             this.topologyServiceShimListeners.remove(containerName);
             logger.trace("Removed topologyServiceShimListener for container: "
                     + containerName);

@@ -9,12 +9,12 @@
 
 package org.opendaylight.controller.sal.match;
 
+import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +39,9 @@ import org.opendaylight.controller.sal.utils.NetUtils;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class Match implements Cloneable {
-    private static final Map<MatchType, MatchType> reversableMatches;
+public class Match implements Cloneable, Serializable {
+	private static final long serialVersionUID = 1L;
+	private static final Map<MatchType, MatchType> reversableMatches;
     static {
         Map<MatchType, MatchType> map = new HashMap<MatchType, MatchType>();
         map.put(MatchType.DL_SRC, MatchType.DL_DST);

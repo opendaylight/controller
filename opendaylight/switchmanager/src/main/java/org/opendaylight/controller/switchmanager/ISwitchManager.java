@@ -170,7 +170,7 @@ public interface ISwitchManager {
      *
      * @param node {@link org.opendaylight.controller.sal.core.Node}
      * @return map of {@link org.opendaylight.controller.sal.core.Property} such as
-     *   	   {@link org.opendaylight.controller.sal.core.Name} and/or
+     *   	   {@link org.opendaylight.controller.sal.core.Description} and/or
      * 		   {@link org.opendaylight.controller.sal.core.Tier} etc.
      */
     public Map<String, Property> getNodeProps(Node node);
@@ -238,7 +238,7 @@ public interface ISwitchManager {
      *
      * @param nodeConnector {@link org.opendaylight.controller.sal.core.NodeConnector}
      * @return map of {@link org.opendaylight.controller.sal.core.Property} such as
-     * 		   {@link org.opendaylight.controller.sal.core.Name} and/or
+     * 		   {@link org.opendaylight.controller.sal.core.Description} and/or
      * 		   {@link org.opendaylight.controller.sal.core.State} etc.
      */
     public Map<String, Property> getNodeConnectorProps(
@@ -308,17 +308,6 @@ public interface ISwitchManager {
     public Boolean isNodeConnectorEnabled(NodeConnector nodeConnector);
 
     /**
-     * Return the list of mapping "nodeId"/"nodeName" for each connected node. 
-     * Each map contains two string keys: "nodeId", "nodeName". 
-     * Value associated to "nodeId" is the node id in string hex format. 
-     * Value associated to "nodeName" is the name of the node. If no name was set, 
-     * it will be the node id in string hex format.
-     *
-     * @return list of map
-     */
-    public List<Map<String, String>> getListNodeIdNameMap();
-
-    /**
      * Return controller MAC address
 	 *
      * @return MAC address in byte array
@@ -358,4 +347,15 @@ public interface ISwitchManager {
 	 * @return {@link org.opendaylight.controller.sal.core.Property}
 	 */
     public Property createProperty(String propName, String propValue);
+    
+    /**
+     * Returns the description for the specified node. It is either the one 
+     * configured by user or the description advertised by the node.
+     * 
+     * @param node the network node identifier
+     * @return the description of the specified node. If no description is 
+     * configured and the network node does not provide its description,
+     * an empty string is returned.
+     */
+    public String getNodeDescription(Node node);
 }

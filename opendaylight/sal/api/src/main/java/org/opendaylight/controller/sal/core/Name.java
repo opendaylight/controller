@@ -18,8 +18,6 @@ import javax.xml.bind.annotation.XmlElement;
 
 /**
  * The class represents the Name property of an element.
- *
- *
  */
 @XmlRootElement
 @SuppressWarnings("serial")

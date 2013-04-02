@@ -18,23 +18,19 @@
  */
 package org.opendaylight.controller.sal.core;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Set;
-import java.math.BigInteger;
-
 import java.io.Serializable;
-import java.lang.String;
+import java.math.BigInteger;
+import java.util.Set;
 import java.util.UUID;
-import java.lang.Long;
-import java.lang.Class;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.opendaylight.controller.sal.utils.HexEncode;
+import java.util.concurrent.ConcurrentHashMap;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.opendaylight.controller.sal.utils.HexEncode;
 
 /**
  * Describe a generic network element in multiple SDNs technologies. A

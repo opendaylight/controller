@@ -30,13 +30,18 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IOFInventoryService;
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
+import org.opendaylight.controller.protocol_plugin.openflow.IStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6StatsReply;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6StatsRequest;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.utils.HexEncode;
 import org.openflow.protocol.OFError;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.OFPort;
@@ -57,22 +62,10 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.controller.sal.core.Name;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
-import org.opendaylight.controller.sal.utils.HexEncode;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
-
 /**
  * It periodically polls the different OF statistics from the OF switches
  * and caches them for quick retrieval for the above layers' modules
  * It also provides an API to directly query the switch about the statistics
- *
- *
- *
  */
 public class OFStatisticsManager implements IOFStatisticsManager,
         IInventoryShimExternalListener, CommandProvider {
@@ -82,7 +75,6 @@ public class OFStatisticsManager implements IOFStatisticsManager,
     private static final long flowStatsPeriod = 10000;
     private static final long descriptionStatsPeriod = 60000;
     private static final long portStatsPeriod = 5000;
-    private long statisticsTimeout = 4000;
     private static final long tickPeriod = 1000;
     private static short statisticsTickNumber = (short) (flowStatsPeriod / tickPeriod);
     private static short descriptionTickNumber = (short) (descriptionStatsPeriod / tickPeriod);
@@ -102,8 +94,8 @@ public class OFStatisticsManager implements IOFStatisticsManager,
     private Timer statisticsTimer;
     private TimerTask statisticsTimerTask;
     private ConcurrentMap<Long, Boolean> switchSupportsVendorExtStats;
-    private Map<Long, String> switchNamesDB;
     private Map<Long, Map<Short, TxRates>> txRates; // Per port sampled (every portStatsPeriod) transmit rate
+    private Set<IStatisticsListener> descriptionListeners;
 
     /**
      * The object containing the latest factoredSamples tx rate samples
@@ -166,6 +158,59 @@ public class OFStatisticsManager implements IOFStatisticsManager,
      *
      */
     void init() {
+    	flowStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
+        descStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
+        portStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
+        dummyList = new ArrayList<OFStatistics>(1);
+        statisticsTimerTicks = new ConcurrentHashMap<Long, StatisticsTicks>(
+                initialSize);
+        pendingStatsRequests = new LinkedBlockingQueue<StatsRequest>(
+                initialSize);
+        switchPortStatsUpdated = new LinkedBlockingQueue<Long>(initialSize);
+        switchSupportsVendorExtStats = new ConcurrentHashMap<Long, Boolean>(
+                initialSize);
+        txRates = new HashMap<Long, Map<Short, TxRates>>(initialSize);
+        descriptionListeners = new HashSet<IStatisticsListener>();
+
+        // Initialize managed timers
+        statisticsTimer = new Timer();
+        statisticsTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                decrementTicks();
+            }
+        };
+
+        // Initialize Statistics collector thread
+        statisticsCollector = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        StatsRequest req = pendingStatsRequests.take();
+                        acquireStatistics(req.switchId, req.type);
+                    } catch (InterruptedException e) {
+                        log.warn("Flow Statistics Collector thread " +
+                        		"interrupted");
+                    }
+                }
+            }
+        }, "Statistics Collector");
+
+        // Initialize Tx Rate Updater thread
+        txRatesUpdater = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        long switchId = switchPortStatsUpdated.take();
+                        updatePortsTxRate(switchId);
+                    } catch (InterruptedException e) {
+                        log.warn("TX Rate Updater thread interrupted");
+                    }
+                }
+            }
+        }, "TX Rate Updater");
     }
 
     /**
@@ -208,64 +253,16 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         statisticsTimer.cancel();
     }
 
-    public OFStatisticsManager() {
-        flowStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
-        descStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
-        portStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
-        dummyList = new ArrayList<OFStatistics>(1);
-        switchNamesDB = new HashMap<Long, String>();
-        statisticsTimerTicks = new ConcurrentHashMap<Long, StatisticsTicks>(
-                initialSize);
-        pendingStatsRequests = new LinkedBlockingQueue<StatsRequest>(
-                initialSize);
-        switchPortStatsUpdated = new LinkedBlockingQueue<Long>(initialSize);
-        switchSupportsVendorExtStats = new ConcurrentHashMap<Long, Boolean>(
-                initialSize);
-        txRates = new HashMap<Long, Map<Short, TxRates>>(initialSize);
-
-        // Initialize managed timers
-        statisticsTimer = new Timer();
-        statisticsTimerTask = new TimerTask() {
-            @Override
-            public void run() {
-                decrementTicks();
-            }
-        };
-
-        // Initialize Statistics collector thread
-        statisticsCollector = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        StatsRequest req = pendingStatsRequests.take();
-                        acquireStatistics(req.switchId, req.type,
-                                statisticsTimeout);
-                    } catch (InterruptedException e) {
-                        log
-                                .warn("Flow Statistics Collector thread interrupted");
-                    }
-                }
-            }
-        }, "Statistics Collector");
-
-        // Initialize Tx Rate Updater thread
-        txRatesUpdater = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        long switchId = switchPortStatsUpdated.take();
-                        updatePortsTxRate(switchId);
-                    } catch (InterruptedException e) {
-                        log.warn("TX Rate Updater thread interrupted");
-                    }
-                }
-            }
-        }, "TX Rate Updater");
-
+    public void setStatisticsListener(IStatisticsListener s) {
+    	this.descriptionListeners.add(s);
     }
-
+    
+    public void unsetStatisticsListener(IStatisticsListener s) {
+    	if (s != null) {
+    		this.descriptionListeners.remove(s);
+    	}
+    }
+    
     private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
                 .getBundleContext();
@@ -456,12 +453,11 @@ public class OFStatisticsManager implements IOFStatisticsManager,
                 + HexString.toHexString(switchId));
     }
 
-    private void acquireStatistics(Long switchId, OFStatisticsType statType,
-            long timeout) {
+    private void acquireStatistics(Long switchId, OFStatisticsType statType) {
 
         // Query the switch on all matches
         List<OFStatistics> values = this.acquireStatistics(switchId, statType,
-                null, timeout);
+                null);
 
         // Update local caching database if got a valid response
         if (values != null && !values.isEmpty()) {
@@ -469,31 +465,10 @@ public class OFStatisticsManager implements IOFStatisticsManager,
                     || (statType == OFStatisticsType.VENDOR)) {
                 flowStatistics.put(switchId, values);
             } else if (statType == OFStatisticsType.DESC) {
-                if ((switchNamesDB != null)
-                        && switchNamesDB.containsKey(switchId)) {
-                    // Check if user manually configured a name for the switch
-                    for (OFStatistics entry : values) {
-                        OFDescriptionStatistics reply = (OFDescriptionStatistics) entry;
-                        reply.setSerialNumber(switchNamesDB.get(switchId));
-                    }
-                }
-                // check if notification is needed
-                if (descStatistics.get(switchId) == null
-                        || !(descStatistics.get(switchId).get(0).equals(values
-                                .get(0)))) {
-                    IOFInventoryService inventory = (IOFInventoryService) ServiceHelper
-                            .getInstance(IOFInventoryService.class,
-                                    GlobalConstants.DEFAULT.toString(), this);
-                    if (inventory != null) {
-                        // Notify Inventory Service about the name update
-                        Set<Property> propSet = new HashSet<Property>(1);
-                        Name name = new Name(((OFDescriptionStatistics) values
-                                .get(0)).getSerialNumber());
-                        propSet.add(name);
-                        inventory.updateSwitchProperty(switchId, propSet);
-                    }
-                }
-                // overwrite cache
+            	// Notify who may be interested in a description change
+           		notifyDescriptionListeners(switchId, values);
+            	
+                // Overwrite cache
                 descStatistics.put(switchId, values);
             } else if (statType == OFStatisticsType.PORT) {
                 // Overwrite cache with new port statistics for this switch
@@ -505,12 +480,20 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         }
     }
 
+    private void notifyDescriptionListeners(Long switchId,
+    								List<OFStatistics> values) {
+		for (IStatisticsListener l : this.descriptionListeners) {
+			l.descriptionRefreshed(switchId, 
+					((OFDescriptionStatistics)values.get(0)));
+		}
+    }
+    
     /*
      * Generic function to get the statistics form a OF switch
      */
     @SuppressWarnings("unchecked")
     private List<OFStatistics> acquireStatistics(Long switchId,
-            OFStatisticsType statsType, Object target, long timeout) {
+            OFStatisticsType statsType, Object target) {
         List<OFStatistics> values = null;
         String type = null;
         ISwitch sw = controller.getSwitch(switchId);
@@ -742,7 +725,7 @@ public class OFStatisticsManager implements IOFStatisticsManager,
 
     @Override
     public List<OFStatistics> queryStatistics(Long switchId,
-            OFStatisticsType statType, Object target, long timeout) {
+            OFStatisticsType statType, Object target) {
         /*
          * Caller does not know and it is not supposed to know whether
          * this switch supports vendor extension. We adjust the target for him
@@ -754,7 +737,7 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         }
 
         List<OFStatistics> list = this.acquireStatistics(switchId, statType,
-                target, timeout);
+                target);
 
         return (list == null) ? null
                 : (statType == OFStatisticsType.VENDOR) ? v6StatsListToOFStatsList(list)
@@ -877,17 +860,9 @@ public class OFStatisticsManager implements IOFStatisticsManager,
     @Override
     public String getHelp() {
         StringBuffer help = new StringBuffer();
-        help.append("---OF Switch ID to Name Mapping---\n");
-        help
-                .append("\t ofaddname              - Add a switchId to name mapping entry\n");
-        help
-                .append("\t ofdeletename           - Delete a switchId from the mapping db\n");
-        help.append("\t ofprintnames           - Print the mapping db\n");
         help.append("---OF Statistics Manager utilities---\n");
-        help
-                .append("\t ofdumpstatsmgr         - Print Internal Stats Mgr db\n");
-        help
-                .append("\t ofstatstimeout         - Change Statistics request's timeout value\n");
+        help.append("\t ofdumpstatsmgr         - " + 
+        			"Print Internal Stats Mgr db\n");
         return help.toString();
     }
 
@@ -918,43 +893,6 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         return Long.parseLong(switchString, radix);
     }
 
-    public void _ofaddname(CommandInterpreter ci) {
-        if (switchNamesDB == null)
-            switchNamesDB = new HashMap<Long, String>();
-        String switchId = ci.nextArgument();
-        if (!isValidSwitchId(switchId)) {
-            ci.println("Please provide a valid SwithcId");
-            return;
-        }
-        Long sid = getSwitchIDLong(switchId);
-        String switchName = ci.nextArgument();
-        if (switchName == null) {
-            ci.println("Please provide a valid Switch name");
-            return;
-        }
-        switchNamesDB.put(sid, switchName);
-    }
-
-    public void _ofdeletename(CommandInterpreter ci) {
-        if (switchNamesDB == null)
-            return;
-        String switchId = ci.nextArgument();
-        if (!isValidSwitchId(switchId)) {
-            ci.println("Please provide a valid SwitchId");
-            return;
-        }
-        Long sid = getSwitchIDLong(switchId);
-        switchNamesDB.remove(sid);
-    }
-
-    public void _ofprintnames(CommandInterpreter ci) {
-        if (switchNamesDB == null)
-            return;
-        for (Long key : switchNamesDB.keySet()) {
-            ci.println(key + " -> " + switchNamesDB.get(key) + "\n");
-        }
-    }
-
     /*
      * Internal information dump code
      */
@@ -983,24 +921,6 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         ci.println("Flow Stats Period: " + statisticsTickNumber + " s");
         ci.println("Desc Stats Period: " + descriptionTickNumber + " s");
         ci.println("Port Stats Period: " + portTickNumber + " s");
-        ci.println("Stats request timeout: " + Float.valueOf(statisticsTimeout)
-                / 1000.0 + " s");
-    }
-
-    public void _ofstatstimeout(CommandInterpreter ci) {
-        String timeoutString = ci.nextArgument();
-        if (timeoutString == null || !timeoutString.matches("^[0-9]+$")) {
-            ci.println("Invalid value. Has to be numeric.");
-            return;
-        }
-
-        long newTimeout = Long.valueOf(timeoutString);
-        if (newTimeout < 50 || newTimeout > 60000) {
-            ci.println("Invalid value. Valid range is [50-60000]ms");
-            return;
-        }
-        this.statisticsTimeout = newTimeout;
-        ci.println("New value: " + statisticsTimeout + " ms");
     }
 
     public void _resetSwitchCapability(CommandInterpreter ci) {
@@ -1053,10 +973,9 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         String averageWindow = ci.nextArgument();
         short seconds = 0;
         if (averageWindow == null) {
-            ci
-                    .println("Insert the length in seconds of the average window for tx rate");
-            ci
-                    .println("Current: " + factoredSamples * portTickNumber
+            ci.println("Insert the length in seconds of the median " + 
+            		"window for tx rate");
+            ci.println("Current: " + factoredSamples * portTickNumber
                             + " secs");
             return;
         }
@@ -1065,8 +984,40 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         } catch (NumberFormatException e) {
             ci.println("Invalid period.");
         }
-        OFStatisticsManager.factoredSamples = (short) (seconds / portTickNumber);
+        OFStatisticsManager.factoredSamples = (short) (seconds/portTickNumber);
         ci.println("New: " + factoredSamples * portTickNumber + " secs");
+    }
+
+    public void _ofstatsmgrintervals(CommandInterpreter ci) {
+        String flowStatsInterv = ci.nextArgument();
+        String portStatsInterv = ci.nextArgument();
+        
+        if (flowStatsInterv == null || portStatsInterv == null) {
+
+            ci.println("Usage: ostatsmgrintervals <fP> <pP> (in seconds)");
+            ci.println("Current Values: fP=" + statisticsTickNumber +
+            		"s pP=" + portTickNumber + "s");
+            return;
+        }
+        Short fP, pP;
+        try {
+        	fP = Short.parseShort(flowStatsInterv);
+        	pP = Short.parseShort(portStatsInterv);
+        } catch (Exception e) {
+        	ci.println("Invalid format values: " + e.getMessage());
+        	return;
+        }
+
+        if (pP <= 1 || fP <=1) {
+        	ci.println("Invalid values. fP and pP have to be greater than 1.");
+        	return;
+        }
+        
+        statisticsTickNumber = fP;
+        portTickNumber = pP;
+        
+        ci.println("New Values: fP=" + statisticsTickNumber +
+        		"s pP=" + portTickNumber + "s");
     }
 
 }

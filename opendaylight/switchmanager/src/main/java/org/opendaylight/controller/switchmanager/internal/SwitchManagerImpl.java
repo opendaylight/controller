@@ -41,6 +41,7 @@ import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Config;
+import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -601,8 +602,8 @@ public class SwitchManagerImpl implements ISwitchManager,
                 } else {
                     propMap = new HashMap<String, Property>();
                 }
-                Property name = new Name(cfgObject.getNodeName());
-                propMap.put(name.getName(), name);
+                Property desc = new Description(cfgObject.getNodeDescription());
+                propMap.put(desc.getName(), desc);
                 Property tier = new Tier(Integer.parseInt(cfgObject.getTier()));
                 propMap.put(tier.getName(), tier);
                 addNodeProps(node, propMap);
@@ -738,8 +739,8 @@ public class SwitchManagerImpl implements ISwitchManager,
             String nodeId = node.getNodeIDString();
             for (SwitchConfig conf : nodeConfigList.values()) {
                 if (conf.getNodeId().equals(nodeId)) {
-                    Property name = new Name(conf.getNodeName());
-                    propMap.put(name.getName(), name);
+                    Property description = new Description(conf.getNodeDescription());
+                    propMap.put(description.getName(), description);
                     Property tier = new Tier(Integer.parseInt(conf.getTier()));
                     propMap.put(tier.getName(), tier);
                     proactiveForwarding = conf.isProactive();
@@ -1032,24 +1033,6 @@ public class SwitchManagerImpl implements ISwitchManager,
             String propName) {
         Map<String, Property> propMap = getNodeConnectorProps(nodeConnector);
         return (propMap != null) ? propMap.get(propName) : null;
-    }
-
-    @Override
-    public List<Map<String, String>> getListNodeIdNameMap() {
-        List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-        Set<Node> nset = this.nodeProps.keySet();
-        if (nset == null) {
-            return list;
-        }
-        for (Node node : nset) {
-            Map<String, String> map = new HashMap<String, String>(2);
-            Name nodeName = (Name) getNodeProp(node, Name.NamePropName);
-            map.put("nodeId", node.toString());
-            map.put("nodeName", ((nodeName == null) || nodeName.getValue()
-                    .equals("")) ? node.toString() : nodeName.getValue());
-            list.add(map);
-        }
-        return list;
     }
 
     private byte[] getHardwareMAC() {
@@ -1470,9 +1453,9 @@ public class SwitchManagerImpl implements ISwitchManager,
             return;
         }
         for (Node node : nodeSet) {
-            Name name = ((Name) getNodeProp(node, Name.NamePropName));
+        	Description desc = ((Description) getNodeProp(node, Description.propertyName));
             Tier tier = ((Tier) getNodeProp(node, Tier.TierPropName));
-            String nodeName = (name == null) ? "" : name.getValue();
+            String nodeName = (desc == null) ? "" : desc.getValue();
             int tierNum = (tier == null) ? 0 : tier.getValue();
             ci.println(node + "            " + node.getType()
                     + "            " + nodeName + "            " + tierNum);
@@ -1762,8 +1745,8 @@ public class SwitchManagerImpl implements ISwitchManager,
 		}
 		
 		try {
-			if (propName.equalsIgnoreCase(Name.NamePropName)) {
-				return new Name(propValue);
+			if (propName.equalsIgnoreCase(Description.propertyName)) {
+				return new Description(propValue);
 			} else if (propName.equalsIgnoreCase(Tier.TierPropName)) {
 				int tier = Integer.parseInt(propValue);
 				return new Tier(tier);
@@ -1778,5 +1761,22 @@ public class SwitchManagerImpl implements ISwitchManager,
 		}
 
 		return null;
+    }
+	
+	@Override
+	public String getNodeDescription(Node node) {
+    	// Check first if user configured a name
+        SwitchConfig config = getSwitchConfig(node.getNodeIDString());
+        if (config != null) {
+        	String configuredDesc = config.getNodeDescription();
+        	if (configuredDesc != null && !configuredDesc.isEmpty()) {
+        		return configuredDesc;
+        	}
+        }
+        
+        // No name configured by user, get the node advertised name
+        Description desc = (Description) getNodeProp(node, Description.propertyName);
+        return (desc == null /*|| desc.getValue().equalsIgnoreCase("none")*/) ?	
+        				"" : desc.getValue();
     }
 }

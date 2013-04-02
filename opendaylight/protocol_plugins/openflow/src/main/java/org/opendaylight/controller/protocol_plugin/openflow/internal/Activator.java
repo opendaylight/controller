@@ -9,7 +9,6 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
-import org.opendaylight.controller.sal.core.IContainerListener;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -18,18 +17,16 @@ import org.opendaylight.controller.protocol_plugin.openflow.IDataPacketListen;
 import org.opendaylight.controller.protocol_plugin.openflow.IDataPacketMux;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IOFInventoryService;
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
 import org.opendaylight.controller.protocol_plugin.openflow.IPluginReadServiceFilter;
 import org.opendaylight.controller.protocol_plugin.openflow.IRefreshInternalProvider;
+import org.opendaylight.controller.protocol_plugin.openflow.IStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShimListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.opendaylight.controller.sal.core.IContainerListener;
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.discovery.IDiscoveryService;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
@@ -40,6 +37,8 @@ import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Openflow protocol plugin Activator
@@ -117,7 +116,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // export the service
             c.setInterface(new String[] {
                     IPluginInInventoryService.class.getName(),
-                    IOFInventoryService.class.getName(),
+                    IStatisticsListener.class.getName(),
                     IInventoryShimInternalListener.class.getName() }, null);
 
             // Now lets add a service dependency to make sure the
@@ -239,6 +238,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(IController.class,
                     "(name=Controller)").setCallbacks("setController",
                     "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(
+            		IStatisticsListener.class)
+            		.setCallbacks("setStatisticsListener",
+                    "unsetStatisticsListener").setRequired(false));
         }
 
         if (imp.equals(DiscoveryService.class)) {
@@ -299,10 +302,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IInventoryShimExternalListener.class).setCallbacks(
                     "setInventoryShimExternalListener",
                     "unsetInventoryShimExternalListener").setRequired(false));
-            c.add(createServiceDependency().setService(
-                    IOFStatisticsManager.class).setCallbacks(
-                    "setStatisticsManager", "unsetStatisticsManager")
-                    .setRequired(false));
         }
 
         if (imp.equals(TopologyServiceShim.class)) {

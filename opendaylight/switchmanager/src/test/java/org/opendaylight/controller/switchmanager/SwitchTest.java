@@ -129,7 +129,7 @@ public class SwitchTest {
         Assert.assertNull(sc.getMode());
         Assert.assertNull(sc.getNodeId());
         Assert.assertNull(sc.getTier());
-        Assert.assertNull(sc.getNodeName());
+        Assert.assertNull(sc.getNodeDescription());
         
         SwitchConfig sc3 = new SwitchConfig("123", "name", "tier", "mode");
         SwitchConfig sc4 = new SwitchConfig("123", "name", "tier", "mode");
@@ -137,7 +137,7 @@ public class SwitchTest {
         Assert.assertTrue(sc3.equals(sc4));
         
         Assert.assertTrue(sc3.getNodeId().equals("123"));
-        Assert.assertTrue(sc3.getNodeName().equals("name"));
+        Assert.assertTrue(sc3.getNodeDescription().equals("name"));
         Assert.assertTrue(sc3.getTier().equals("tier"));
         Assert.assertTrue(sc3.getMode().equals("mode"));
     }

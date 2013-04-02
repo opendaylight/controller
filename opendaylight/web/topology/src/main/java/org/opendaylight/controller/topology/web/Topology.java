@@ -151,7 +151,7 @@ public class Topology {
             	Map<String, Object> nodeEntry = cache.get(node.id());
             	if (config != null) {
             		Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
-            		data.put("$desc", config.getNodeName());
+            		data.put("$desc", config.getNodeDescription());
             		nodeEntry.put("data", data);
             	}
             	stage.put(node.id(), nodeEntry);
@@ -164,7 +164,7 @@ public class Topology {
     protected NodeBean createNodeBean(SwitchConfig config, Node node) {
     	NodeBean bean = null;
     	if (config != null) {
-    		bean = new NodeBean(node.toString(), config.getNodeName(), NodeType.NODE);
+    		bean = new NodeBean(node.toString(), config.getNodeDescription(), NodeType.NODE);
     	} else {
     		bean = new NodeBean(node.toString(), node.toString(), NodeType.NODE);
     	}
@@ -183,7 +183,7 @@ public class Topology {
     			Map<String, Object> nodeEntry = cache.get(node.id());
     			if (config != null) {
     				Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
-            		data.put("$desc", config.getNodeName());
+            		data.put("$desc", config.getNodeDescription());
             		nodeEntry.put("data", data);
     			}
             	stage.put(node.id(), nodeEntry);

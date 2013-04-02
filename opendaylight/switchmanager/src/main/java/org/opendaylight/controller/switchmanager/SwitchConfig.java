@@ -21,14 +21,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class SwitchConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     String nodeId;
-    String nodeName;
+    String description;
     String tier;
     String mode;
 
-    public SwitchConfig(String nodeId, String nodeName, String tier, String mode) {
+    public SwitchConfig(String nodeId, String description, String tier, String mode) {
         super();
         this.nodeId = nodeId;
-        this.nodeName = nodeName;
+        this.description = description;
         this.tier = tier;
         this.mode = mode;
     }
@@ -37,8 +37,8 @@ public class SwitchConfig implements Serializable {
         return nodeId;
     }
 
-    public String getNodeName() {
-        return nodeName;
+    public String getNodeDescription() {
+        return description;
     }
 
     public String getTier() {
