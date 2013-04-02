@@ -66,7 +66,7 @@ public class ActionTest {
         Assert.assertFalse(action.isValid());
 
         action = new SetVlanId(1);
-        Assert.assertFalse(action.isValid());
+        Assert.assertTrue(action.isValid());
 
         action = new SetVlanId(4096);
         Assert.assertFalse(action.isValid());
@@ -184,7 +184,7 @@ public class ActionTest {
         Assert.assertTrue(action.isValid());
 
         action = new SetTpDst(0);
-        Assert.assertTrue(action.isValid());
+        Assert.assertFalse(action.isValid());
 
         action = new SetTpSrc(-1);
         Assert.assertFalse(action.isValid());

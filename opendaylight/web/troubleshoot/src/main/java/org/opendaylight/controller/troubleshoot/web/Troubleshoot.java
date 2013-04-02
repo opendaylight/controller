@@ -35,7 +35,6 @@ import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
-import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.web.IOneWeb;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,15 +84,11 @@ public class Troubleshoot implements IOneWeb {
         Set<Node> nodeSet = null;
         if (switchManager != null) {
             nodeSet = switchManager.getNodes();
-        } else {
-            // TODO: Change to use logger instead.
-            System.out.println("SwitchManager reference is NULL");
         }
         if (nodeSet != null) {
             for (Node node : nodeSet) {
                 HashMap<String, String> device = new HashMap<String, String>();
-                SwitchConfig switchConfig = switchManager.getSwitchConfig(node.getNodeIDString());
-                device.put("nodeName", switchConfig == null ? "" : switchConfig.getNodeName());
+                device.put("nodeName", switchManager.getNodeDescription(node));
                 device.put("nodeId", node.toString());
                 lines.add(device);
             }
@@ -101,7 +96,7 @@ public class Troubleshoot implements IOneWeb {
         TroubleshootingJsonBean result = new TroubleshootingJsonBean();
 
         List<String> guiFieldNames = new ArrayList<String>();
-        guiFieldNames.add("Node Names");
+        guiFieldNames.add("Node");
         guiFieldNames.add("Node ID");
         guiFieldNames.add("Statistics");
 
@@ -119,15 +114,11 @@ public class Troubleshoot implements IOneWeb {
         Set<Node> nodeSet = null;
         if (switchManager != null) {
             nodeSet = switchManager.getNodes();
-        } else {
-            // TODO: Change to use logger instead.
-            System.out.println("SwitchManager reference is NULL");
         }
         if (nodeSet != null) {
             for (Node node : nodeSet) {
                 HashMap<String, String> device = new HashMap<String, String>();
-                SwitchConfig switchConfig = switchManager.getSwitchConfig(node.getNodeIDString());
-                device.put("nodeName", switchConfig == null ? "" : switchConfig.getNodeName());
+                device.put("nodeName", switchManager.getNodeDescription(node));
                 device.put("nodeId", node.toString());
                 TimeStamp timeStamp = (TimeStamp) switchManager.getNodeProp(
                         node, TimeStamp.TimeStampPropName);
@@ -140,7 +131,7 @@ public class Troubleshoot implements IOneWeb {
         TroubleshootingJsonBean result = new TroubleshootingJsonBean();
 
         List<String> guiFieldNames = new ArrayList<String>();
-        guiFieldNames.add("Node Names");
+        guiFieldNames.add("Node");
         guiFieldNames.add("Node ID");
         guiFieldNames.add("Connected");
 
@@ -228,7 +219,13 @@ public class Troubleshoot implements IOneWeb {
         HashMap<String, String> row = new HashMap<String, String>();
         Flow flow = flowOnNode.getFlow();
         Match match = flow.getMatch();
-        row.put("nodeName", getNodeName(node));
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
+                .getInstance(ISwitchManager.class, containerName, this);
+        String desc = (switchManager == null)? 
+        		"" : switchManager.getNodeDescription(node);
+        desc = (desc.isEmpty() || desc.equalsIgnoreCase("none"))? 
+        		node.toString(): desc;
+        row.put("nodeName", desc);
         if (match.isPresent(MatchType.IN_PORT)) {
             row.put(MatchType.IN_PORT.id(), ((NodeConnector) flow.getMatch()
                     .getField(MatchType.IN_PORT).getValue()).getID().toString());
@@ -350,17 +347,4 @@ public class Troubleshoot implements IOneWeb {
         return row;
     }
 
-    private String getNodeName(Node node) {
-        String nodeName = "";
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, containerName, this);
-        if (switchManager != null) {
-            SwitchConfig config = switchManager.getSwitchConfig(node
-                    .getNodeIDString());
-            if (config != null) {
-                nodeName = config.getNodeName();
-            }
-        }
-        return nodeName;
-    }
 }

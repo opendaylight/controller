@@ -25,9 +25,9 @@ public enum MatchType {
     IN_PORT("inPort", 1 << 0, NodeConnector.class, 1, 0), 
     DL_SRC("dlSrc", 1 << 1, Byte[].class, 0, 0xffffffffffffL), 
     DL_DST("dlDst", 1 << 2, Byte[].class, 0, 0xffffffffffffL), 
-    DL_VLAN("dlVlan", 1 << 3, Short.class, 2, 0xfff), // 2 bytes
+    DL_VLAN("dlVlan", 1 << 3, Short.class, 1, 0xfff), // 2 bytes
     DL_VLAN_PR("dlVlanPriority", 1 << 4, Byte.class, 0, 0x7), // 3 bits
-    DL_OUTER_VLAN("dlOuterVlan", 1 << 5, Short.class, 2, 0xfff), 
+    DL_OUTER_VLAN("dlOuterVlan", 1 << 5, Short.class, 1, 0xfff), 
     DL_OUTER_VLAN_PR("dlOuterVlanPriority", 1 << 6, Short.class, 0, 0x7), 
     DL_TYPE("dlType", 1 << 7, Short.class, 0, 0xffff), // 2 bytes
     NW_TOS("nwTOS", 1 << 8, Byte.class, 0, 0xff), // 1 byte
@@ -215,6 +215,8 @@ public enum MatchType {
 			if ((Short)value < 0) {
 				return ((Integer) (((Short)value).intValue() & 0x7FFF | 0x8000)).toString();
 			}
+			break;
+		default:
 			break;
 		}
 		return value.toString();

@@ -21,26 +21,27 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IOFInventoryService;
+import org.opendaylight.controller.protocol_plugin.openflow.IStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.opendaylight.controller.sal.core.Actions;
+import org.opendaylight.controller.sal.core.Buffers;
+import org.opendaylight.controller.sal.core.Capabilities;
 import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.sal.core.Tables;
-import org.opendaylight.controller.sal.core.Actions;
-import org.opendaylight.controller.sal.core.Buffers;
-import org.opendaylight.controller.sal.core.Capabilities;
+import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.openflow.protocol.statistics.OFDescriptionStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class describes inventory service protocol plugin. One instance per
@@ -51,7 +52,7 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
  *
  */
 public class InventoryService implements IInventoryShimInternalListener,
-        IPluginInInventoryService, IOFInventoryService {
+        IPluginInInventoryService, IStatisticsListener {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryService.class);
     private Set<IPluginOutInventoryService> pluginOutInventoryServices = Collections
@@ -224,31 +225,31 @@ public class InventoryService implements IInventoryShimInternalListener,
                 + type.getName() + " for Node id "
                 + nodeConnector.getNode().getID());
 
-        if (nodeConnectorProps == null)
+        if (nodeConnectorProps == null) {
             return;
+        }
 
-        synchronized (nodeConnectorProps) {
-            Map<String, Property> propMap = nodeConnectorProps
-                    .get(nodeConnector);
-            switch (type) {
-            case ADDED:
-            case CHANGED:
-                if (propMap == null)
-                    propMap = new HashMap<String, Property>();
 
-                if (props != null) {
-                    for (Property prop : props) {
-                        propMap.put(prop.getName(), prop);
-                    }
+        Map<String, Property> propMap = nodeConnectorProps
+                .get(nodeConnector);
+        switch (type) {
+        case ADDED:
+        case CHANGED:
+            if (propMap == null)
+                propMap = new HashMap<String, Property>();
+
+            if (props != null) {
+                for (Property prop : props) {
+                    propMap.put(prop.getName(), prop);
                 }
-                nodeConnectorProps.put(nodeConnector, propMap);
-                break;
-            case REMOVED:
-                nodeConnectorProps.remove(nodeConnector);
-                break;
-            default:
-                return;
             }
+            nodeConnectorProps.put(nodeConnector, propMap);
+            break;
+        case REMOVED:
+            nodeConnectorProps.remove(nodeConnector);
+            break;
+        default:
+            return;
         }
 
         // update sal and discovery
@@ -305,27 +306,33 @@ public class InventoryService implements IInventoryShimInternalListener,
         }
     }
 
-    /*
-     * Function called by other protocol plugin modules to notify Inventory Service
-     * that a property has changed for the specified switch
-     */
-    @Override
-    public void updateSwitchProperty(Long switchId, Set<Property> propSet) {
+
+    private void updateSwitchProperty(Long switchId, Set<Property> propSet) {
         // update local cache
-        Node node = OFSwitchToNode(controller.getSwitches().get(switchId));
+        Node node = OFSwitchToNode(controller.getSwitch(switchId));
         Map<String, Property> propMap = nodeProps.get(node);
-        if (propMap == null)
+        if (propMap == null) {
             propMap = new HashMap<String, Property>();
+        }
+        
+        boolean change = false;
         for (Property prop : propSet) {
-            propMap.put(prop.getName(), prop);
+        	String propertyName = prop.getName();
+        	Property currentProp = propMap.get(propertyName);
+        	if (!prop.equals(currentProp)) {
+        		change = true;
+        		propMap.put(propertyName, prop);
+        	}
         }
         nodeProps.put(node, propMap);
 
-        // update sal
-        synchronized (pluginOutInventoryServices) {
-            for (IPluginOutInventoryService service : pluginOutInventoryServices) {
-                service.updateNode(node, UpdateType.CHANGED, propSet);
-            }
+        // Update sal if any of the properties has changed
+        if (change) {
+	        synchronized (pluginOutInventoryServices) {
+	            for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+	                service.updateNode(node, UpdateType.CHANGED, propSet);
+	            }
+	        }
         }
     }
 
@@ -342,4 +349,15 @@ public class InventoryService implements IInventoryShimInternalListener,
             break;
         }
     }
+
+	@Override
+	public void descriptionRefreshed(Long switchId,
+			OFDescriptionStatistics descriptionStats) {
+		
+		Set<Property> propSet = new HashSet<Property>(1);
+  		Description desc = 
+				new Description(descriptionStats.getDatapathDescription());
+       propSet.add(desc);
+       this.updateSwitchProperty(switchId, propSet);
+	}
 }

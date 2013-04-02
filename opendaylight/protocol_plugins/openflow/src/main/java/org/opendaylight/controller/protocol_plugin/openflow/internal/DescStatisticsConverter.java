@@ -38,7 +38,7 @@ public class DescStatisticsConverter {
             hwDesc.setManufacturer(ofDesc.getManufacturerDescription());
             hwDesc.setHardware(ofDesc.getHardwareDescription());
             hwDesc.setSoftware(ofDesc.getSoftwareDescription());
-            hwDesc.setSdnProtocolDescription(ofDesc.getDatapathDescription());
+            hwDesc.setDescription(ofDesc.getDatapathDescription());
             hwDesc.setSerialNumber(ofDesc.getSerialNumber());
         }
         return hwDesc;

@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.sal.flowprogrammer;
 
+import java.io.Serializable;
 import java.net.Inet6Address;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,8 +36,9 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class Flow implements Cloneable {
-    @XmlElement
+public class Flow implements Cloneable, Serializable {
+	private static final long serialVersionUID = 1L;
+	@XmlElement
     private Match match;
     @XmlElement
     private List<Action> actions;

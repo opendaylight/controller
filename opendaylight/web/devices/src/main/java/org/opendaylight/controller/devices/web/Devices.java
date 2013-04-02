@@ -89,12 +89,11 @@ public class Devices implements IOneWeb {
         for (Switch device : switchManager.getNetworkDevices()) {
             HashMap<String, String> nodeDatum = new HashMap<String, String>();
             Node node = device.getNode();
-            SwitchConfig switchConfig = switchManager.getSwitchConfig(node.getNodeIDString());
             Tier tier = (Tier) switchManager.getNodeProp(node,
                     Tier.TierPropName);
-            String swName = switchConfig == null ? null : switchConfig.getNodeName();
+
             nodeDatum.put("containerName", containerName);
-            nodeDatum.put("nodeName", swName);
+            nodeDatum.put("nodeName", switchManager.getNodeDescription(node));
             nodeDatum.put("nodeId", node.getNodeIDString());
             int tierNumber = (tier == null) ? TierHelper.unknownTierNumber
                     : tier.getValue();
@@ -442,7 +441,7 @@ public class Devices implements IOneWeb {
                     config.put(name, config_data.get(name));
                     // Add switch name value (non-configuration field)
                     config.put("nodeName",
-                            getNodeName(config_data.get("nodeId")));
+                            getNodeDesc(config_data.get("nodeId")));
                 }
                 config.put("json", config_json);
                 spanConfigs.add(config);
@@ -551,22 +550,19 @@ public class Devices implements IOneWeb {
         return resultBean;
     }
 
-    private String getNodeName(String nodeId) {
-        String nodeName = nodeId;
+    private String getNodeDesc(String nodeId) {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
-
-        Node node = Node.fromString(nodeId);
+        String description = "";
         if (switchManager != null) {
-            SwitchConfig config = switchManager.getSwitchConfig(node
-                    .getNodeIDString());
-            if (config != null) {
-                nodeName = config.getNodeName();
-            }
+        	description = switchManager
+        			.getNodeDescription(Node.fromString(nodeId));
         }
-        return nodeName;
+        return (description.isEmpty() || description.equalsIgnoreCase("none"))?
+        		nodeId : description;
     }
 
+    
     /**
      * Is the operation permitted for the given level
      * 

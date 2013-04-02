@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -46,6 +47,7 @@ public class Flows implements IOneWeb {
     private static final String WEB_NAME = "Flows";
     private static final String WEB_ID = "flows";
     private static final short WEB_ORDER = 2;
+    private final String containerName = GlobalConstants.DEFAULT.toString();
 
     public Flows() {
         ServiceHelper.registerGlobalService(IOneWeb.class, this, null);
@@ -76,12 +78,12 @@ public class Flows implements IOneWeb {
     public Set<Map<String, Object>> getFlows() {
         // fetch frm
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
-                .getInstance(IForwardingRulesManager.class, "default", this);
+                .getInstance(IForwardingRulesManager.class, containerName, this);
         if (frm == null) { return null; }
 
         // fetch sm
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, "default", this);
+                .getInstance(ISwitchManager.class, containerName, this);
         if (switchManager == null) { return null; }
         
         // get static flow list
@@ -91,12 +93,12 @@ public class Flows implements IOneWeb {
         	Map<String, Object> entry = new HashMap<String, Object>();
         	entry.put("flow", flowConfig);
         	entry.put("name", flowConfig.getName());
-        	
-        	Node node = flowConfig.getNode(); 
-        	SwitchConfig switchConfig = switchManager.getSwitchConfig(node.getNodeIDString());
-        	String nodeName = node.toString();
-        	if (switchConfig != null) { nodeName = switchConfig.getNodeName(); }
-        	entry.put("node", nodeName);
+        	Node node = flowConfig.getNode();
+        	String description = switchManager.getNodeDescription(node);
+        	entry.put("node", 
+        			(description.isEmpty() || 
+        					description.equalsIgnoreCase("none"))? 
+        							node.toString() : description);
         	entry.put("nodeId", node.toString());
         	output.add(entry);
         }
@@ -108,7 +110,7 @@ public class Flows implements IOneWeb {
     @ResponseBody
     public Map<String, Object> getNodePorts() {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, "default", this);
+                .getInstance(ISwitchManager.class, containerName, this);
         if (switchManager == null) { return null; }
 
         Map<String, Object> nodes = new HashMap<String, Object>();
@@ -134,12 +136,11 @@ public class Flows implements IOneWeb {
             entry.put("ports", port);
             
             // add name
-            String nodeName = node.getNode().toString();
-            SwitchConfig config = switchManager.getSwitchConfig(node.getNode().getNodeIDString());
-            if (config != null) {
-            	nodeName = config.getNodeName();
-            }
-            entry.put("name", nodeName);
+            String description = switchManager
+            		.getNodeDescription(node.getNode());
+            entry.put("name", (description.isEmpty() || 
+            		description.equalsIgnoreCase("none"))? 
+            		node.getNode().toString() : description);
             
             // add to the node
             nodes.put(node.getNode().toString(), entry);
@@ -152,7 +153,7 @@ public class Flows implements IOneWeb {
     @ResponseBody
     public Map<String, Object> getNodeFlows() {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, "default", this);
+                .getInstance(ISwitchManager.class, containerName, this);
         if (switchManager == null) { return null; }
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, "default", this);
@@ -165,13 +166,13 @@ public class Flows implements IOneWeb {
             
             List<FlowConfig> flows = frm.getStaticFlows(node);
             
-            String nodeName = node.toString();
+            String nodeDesc = node.toString();
             SwitchConfig config = switchManager.getSwitchConfig(node.getNodeIDString());
             if (config != null) {
-            	nodeName = config.getNodeName();
+            	nodeDesc = config.getNodeDescription();
             }
             
-            nodes.put(nodeName, flows.size());
+            nodes.put(nodeDesc, flows.size());
         }
 
         return nodes;
@@ -186,7 +187,7 @@ public class Flows implements IOneWeb {
     	}
     	
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
-                .getInstance(IForwardingRulesManager.class, "default", this);
+                .getInstance(IForwardingRulesManager.class, containerName, this);
         if (frm == null) { return null; }
 
         Gson gson = new Gson();
@@ -208,7 +209,7 @@ public class Flows implements IOneWeb {
     	if (!isUserAuthorized(UserLevel.NETWORKADMIN)) { return "Operation not authorized"; }
     	
     	IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
-                .getInstance(IForwardingRulesManager.class, "default", this);
+                .getInstance(IForwardingRulesManager.class, containerName, this);
         if (frm == null) { return null; }
         
         Status result = null;

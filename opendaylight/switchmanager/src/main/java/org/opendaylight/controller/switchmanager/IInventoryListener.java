@@ -26,7 +26,7 @@ public interface IInventoryListener {
      * @param node	 		{@link org.opendaylight.controller.sal.core.Node} being updated
      * @param type   		{@link org.opendaylight.controller.sal.core.UpdateType}
      * @param propMap   	map of {@link org.opendaylight.controller.sal.core.Property} such as
-     * 						{@link org.opendaylight.controller.sal.core.Name} and/or
+     * 						{@link org.opendaylight.controller.sal.core.Description} and/or
      * 						{@link org.opendaylight.controller.sal.core.Tier} etc.
      */
     public void notifyNode(Node node, UpdateType type,
@@ -38,7 +38,7 @@ public interface IInventoryListener {
      * @param nodeConnector	{@link org.opendaylight.controller.sal.core.NodeConnector} being updated
      * @param type   		{@link org.opendaylight.controller.sal.core.UpdateType}
      * @param propMap   	map of {@link org.opendaylight.controller.sal.core.Property} such as
-     * 						{@link org.opendaylight.controller.sal.core.Name} and/or
+     * 						{@link org.opendaylight.controller.sal.core.Description} and/or
      * 						{@link org.opendaylight.controller.sal.core.State} etc.
      */
     public void notifyNodeConnector(NodeConnector nodeConnector,

@@ -360,7 +360,6 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                 updateTopo(e, (short) bw.getValue(), add);
             }
             if (this.routingAware != null) {
-                log.info("Invoking routingAware listeners");
                 for (IListenRoutingUpdates ra : this.routingAware) {
                     try {
                         ra.recalculateDone();

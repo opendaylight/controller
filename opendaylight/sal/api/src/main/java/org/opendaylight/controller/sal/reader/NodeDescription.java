@@ -9,20 +9,16 @@
 
 package org.opendaylight.controller.sal.reader;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
- * Represents the switch description information
- *
- *
- *
+ * Represents the network node description information
  */
 public class NodeDescription {
     private String manufacturer;
     private String hardware;
     private String software;
     private String serialNumber;
-    private String sdnProtocolDescription;
+    private String description;
 
     public NodeDescription() {
 
@@ -60,17 +56,18 @@ public class NodeDescription {
         this.serialNumber = serialNumber;
     }
 
-    public String getSdnProtocolDescription() {
-        return sdnProtocolDescription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSdnProtocolDescription(String sdnProtocolDescription) {
-        this.sdnProtocolDescription = sdnProtocolDescription;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
     public String toString() {
-        return "HwDescription[" + ReflectionToStringBuilder.toString(this)
-                + "]";
+        return "HwDescription[manufacturer=" + manufacturer + ", hardware="
+        		+ hardware + ", software=" + software + ", serialNumber=" 
+        		+ serialNumber + ", description=" + description + "]";
     }
 }

@@ -20,35 +20,30 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateListener;
-import org.openflow.protocol.OFMessage;
-import org.openflow.protocol.OFPortStatus;
-import org.openflow.protocol.OFPortStatus.OFPortReason;
-import org.openflow.protocol.OFType;
-import org.openflow.protocol.statistics.OFDescriptionStatistics;
-import org.openflow.protocol.statistics.OFStatistics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerListener;
-import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Tables;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.Tables;
 import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.openflow.protocol.OFMessage;
+import org.openflow.protocol.OFPortStatus;
+import org.openflow.protocol.OFPortStatus.OFPortReason;
+import org.openflow.protocol.OFType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class describes a shim layer that bridges inventory events from Openflow
@@ -65,7 +60,6 @@ public class InventoryServiceShim implements IContainerListener,
     private ConcurrentMap<String, IInventoryShimInternalListener> inventoryShimInternalListeners = new ConcurrentHashMap<String, IInventoryShimInternalListener>();
     private List<IInventoryShimExternalListener> inventoryShimExternalListeners = new CopyOnWriteArrayList<IInventoryShimExternalListener>();
     private ConcurrentMap<NodeConnector, List<String>> containerMap = new ConcurrentHashMap<NodeConnector, List<String>>();
-    private IOFStatisticsManager statsMgr;
 
     void setController(IController s) {
         this.controller = s;
@@ -74,16 +68,6 @@ public class InventoryServiceShim implements IContainerListener,
     void unsetController(IController s) {
         if (this.controller == s) {
             this.controller = null;
-        }
-    }
-
-    void setStatisticsManager(IOFStatisticsManager s) {
-        this.statsMgr = s;
-    }
-
-    void unsetStatisticsManager(IOFStatisticsManager s) {
-        if (this.statsMgr == s) {
-            this.statsMgr = null;
         }
     }
 
@@ -99,7 +83,7 @@ public class InventoryServiceShim implements IContainerListener,
             return;
         }
         if ((this.inventoryShimInternalListeners != null)
-                && !this.inventoryShimInternalListeners.containsKey(s)) {
+                && !this.inventoryShimInternalListeners.containsValue(s)) {
             this.inventoryShimInternalListeners.put(containerName, s);
             logger.trace("Added inventoryShimInternalListener for container:"
                     + containerName);
@@ -118,7 +102,10 @@ public class InventoryServiceShim implements IContainerListener,
             return;
         }
         if ((this.inventoryShimInternalListeners != null)
-                && this.inventoryShimInternalListeners.containsKey(s)) {
+                && this.inventoryShimInternalListeners
+                	.get(containerName) != null
+                && this.inventoryShimInternalListeners
+                	.get(containerName).equals(s)) {
             this.inventoryShimInternalListeners.remove(containerName);
             logger
                     .trace("Removed inventoryShimInternalListener for container: "
@@ -390,16 +377,6 @@ public class InventoryServiceShim implements IContainerListener,
                 .getTime();
         props.add(new TimeStamp(connectedSinceTime, "connectedSince"));
 
-        String name = "";
-        if (statsMgr != null && statsMgr.getOFDescStatistics(sid) != null) {
-            List<OFStatistics> stats = statsMgr.getOFDescStatistics(sid);
-            if (stats.size() > 0) {
-                name = ((OFDescriptionStatistics) stats.get(0))
-                        .getSerialNumber();
-            }
-        }
-        props.add(new Name(name));
-        
         byte tables = sw.getTables();
         Tables t = new Tables(tables);
         if (t != null) {

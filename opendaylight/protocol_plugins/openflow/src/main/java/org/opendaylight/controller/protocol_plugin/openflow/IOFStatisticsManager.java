@@ -86,7 +86,7 @@ public interface IOFStatisticsManager {
      * @return the list of openflow statistics
      */
     List<OFStatistics> queryStatistics(Long switchId,
-            OFStatisticsType statType, Object target, long timeout);
+            OFStatisticsType statType, Object target);
 
     /**
      * Returns the averaged transmit rate for the passed switch port

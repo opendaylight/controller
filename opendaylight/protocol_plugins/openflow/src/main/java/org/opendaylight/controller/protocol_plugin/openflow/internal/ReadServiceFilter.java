@@ -128,7 +128,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         OFMatch ofMatch = new FlowConverter(flow).getOFMatch();
         List<OFStatistics> ofList = (cached == true) ? statsMgr
                 .getOFFlowStatistics(sid, ofMatch) : statsMgr.queryStatistics(
-                sid, OFStatisticsType.FLOW, ofMatch, 6000);
+                sid, OFStatisticsType.FLOW, ofMatch);
 
         /*
          * Convert and filter the statistics per container
@@ -149,7 +149,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         long sid = (Long) node.getID();
         List<OFStatistics> ofList = (cached == true) ? statsMgr
                 .getOFFlowStatistics(sid) : statsMgr.queryStatistics(sid,
-                OFStatisticsType.FLOW, null, 6000);
+                OFStatisticsType.FLOW, null);
 
         /*
          * Convert and filter the statistics per container
@@ -174,7 +174,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         long sid = (Long) node.getID();
         List<OFStatistics> ofList = (cached == true) ? statsMgr
                 .getOFDescStatistics(sid) : statsMgr.queryStatistics(sid,
-                OFStatisticsType.DESC, null, 6000);
+                OFStatisticsType.DESC, null);
 
         return new DescStatisticsConverter(ofList).getHwDescription();
     }
@@ -382,7 +382,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         short portId = (Short) connector.getID();
         List<OFStatistics> ofList = (cached == true) ? statsMgr
                 .getOFPortStatistics(sid, portId) : statsMgr.queryStatistics(
-                sid, OFStatisticsType.PORT, portId, 6000);
+                sid, OFStatisticsType.PORT, portId);
 
         List<NodeConnectorStatistics> ncStatistics = new PortStatisticsConverter(
                 sid, ofList).getNodeConnectorStatsList();
@@ -397,7 +397,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         long sid = (Long) node.getID();
         List<OFStatistics> ofList = (cached == true) ? statsMgr
                 .getOFPortStatistics(sid) : statsMgr.queryStatistics(sid,
-                OFStatisticsType.FLOW, null, 6000);
+                OFStatisticsType.FLOW, null);
 
         List<OFStatistics> filteredList = filterPortListPerContainer(
                 containerName, sid, ofList);

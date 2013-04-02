@@ -9,6 +9,8 @@
 
 package org.opendaylight.controller.sal.match;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -16,7 +18,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.opendaylight.controller.sal.utils.HexEncode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +29,9 @@ import org.slf4j.LoggerFactory;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class MatchField implements Cloneable {
-    private static final Logger logger = LoggerFactory
+public class MatchField implements Cloneable, Serializable {
+	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LoggerFactory
             .getLogger(MatchField.class);
 	private MatchType type; // the field we want to match
     private Object value; // the value of the field we want to match

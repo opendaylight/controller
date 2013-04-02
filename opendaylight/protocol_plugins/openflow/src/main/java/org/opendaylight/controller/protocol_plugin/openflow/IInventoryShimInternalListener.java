@@ -29,7 +29,7 @@ public interface IInventoryShimInternalListener {
      * @param node	 		{@link org.opendaylight.controller.sal.core.Node} being updated
      * @param type   		{@link org.opendaylight.controller.sal.core.UpdateType}
      * @param props   		set of {@link org.opendaylight.controller.sal.core.Property} such as
-     * 						{@link org.opendaylight.controller.sal.core.Name} and/or
+     * 						{@link org.opendaylight.controller.sal.core.Description} and/or
      * 						{@link org.opendaylight.controller.sal.core.Tier} etc.
      */
     public void updateNode(Node node, UpdateType type, Set<Property> props);
@@ -40,7 +40,7 @@ public interface IInventoryShimInternalListener {
      * @param nodeConnector	{@link org.opendaylight.controller.sal.core.NodeConnector} being updated
      * @param type   		{@link org.opendaylight.controller.sal.core.UpdateType}
      * @param props   		set of {@link org.opendaylight.controller.sal.core.Property} such as
-     * 						{@link org.opendaylight.controller.sal.core.Name} and/or
+     * 						{@link org.opendaylight.controller.sal.core.Description} and/or
      * 						{@link org.opendaylight.controller.sal.core.State} etc.
      */
     public void updateNodeConnector(NodeConnector nodeConnector,
