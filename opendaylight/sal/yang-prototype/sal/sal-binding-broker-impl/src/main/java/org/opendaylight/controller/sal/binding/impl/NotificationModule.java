@@ -7,11 +7,9 @@
  */
 package org.opendaylight.controller.sal.binding.impl;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
@@ -33,18 +31,22 @@ import org.opendaylight.controller.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 public class NotificationModule implements SALBindingModule {
 
     private ProviderSession biSession;
     private org.opendaylight.controller.sal.core.api.notify.NotificationProviderService biNotifyService;
-    private BindingAwareBroker broker;
     private MappingProvider mappingProvider;
 
-    private Map<Class<? extends Notification>, List<NotificationListener>> listeners = new HashMap<Class<? extends Notification>, List<NotificationListener>>();
+    private Multimap<Class<? extends Notification>, NotificationListener> listeners = HashMultimap
+            .create();
     private Set<QName> biNotifications = new HashSet<QName>();
     private static final Logger log = LoggerFactory
             .getLogger(NotificationModule.class);
     private final BindingIndependentListener biListener = new BindingIndependentListener();
+    private BindingAwareBroker broker;
 
     @Override
     public Set<Class<? extends BindingAwareService>> getProvidedServices() {
@@ -113,7 +115,7 @@ public class NotificationModule implements SALBindingModule {
 
     private void notifyBindingAware(Notification notification) {
         Class<? extends Notification> type = notification.getClass();
-        List<NotificationListener> toNotify = listeners.get(type);
+        Collection<NotificationListener> toNotify = listeners.get(type);
 
         // Invocation of notification on registered listeners
         if (toNotify != null) {
@@ -153,7 +155,8 @@ public class NotificationModule implements SALBindingModule {
 
         // FIXME: Somehow we need to resolve this for class hierarchy.
         // probably use type.getInterfaces()
-        Mapper<? extends Notification> mapper = mappingProvider.getMapper(type);
+        Mapper<? extends Notification> mapper = mappingProvider
+                .mapperForClass(type);
         CompositeNode domNotification = mapper.domFromObject(notification);
 
         biNotifyService.sendNotification(domNotification);
@@ -162,9 +165,9 @@ public class NotificationModule implements SALBindingModule {
     private void addBAListener(Class<? extends Notification> notificationType,
             NotificationListener listener) {
 
-        BrokerUtils.addToMap(listeners, notificationType, listener);
+        listeners.put(notificationType, listener);
         Mapper<? extends Notification> mapper = mappingProvider
-                .getMapper(notificationType);
+                .mapperForClass(notificationType);
         QName biType = mapper.getQName();
         if (false == biNotifications.contains(biType)) {
             // The listener is not registered for binding independent
@@ -181,17 +184,17 @@ public class NotificationModule implements SALBindingModule {
     private void removeBAListener(
             Class<? extends Notification> notificationType,
             NotificationListener listener) {
-        BrokerUtils.removeFromMap(listeners, notificationType, listener);
+        listeners.remove(notificationType, listener);
     }
 
     private class NotificationSession implements NotificationService {
         private final ConsumerSession session;
+        private Multimap<Class<? extends Notification>, NotificationListener> sessionListeners = HashMultimap
+                .create();
 
         public NotificationSession(ConsumerSession session) {
             this.session = session;
         }
-
-        private Map<Class<? extends Notification>, List<NotificationListener>> sessionListeners = new HashMap<Class<? extends Notification>, List<NotificationListener>>();
 
         @Override
         public void addNotificationListener(
@@ -199,7 +202,7 @@ public class NotificationModule implements SALBindingModule {
                 NotificationListener listener) {
 
             NotificationModule.this.addBAListener(notificationType, listener);
-            BrokerUtils.addToMap(sessionListeners, notificationType, listener);
+            sessionListeners.put(notificationType, listener);
 
         }
 
@@ -207,8 +210,7 @@ public class NotificationModule implements SALBindingModule {
         public void removeNotificationListener(
                 Class<? extends Notification> notificationType,
                 NotificationListener listener) {
-            BrokerUtils.removeFromMap(sessionListeners, notificationType,
-                    listener);
+            sessionListeners.remove(notificationType, listener);
             NotificationModule.this
                     .removeBAListener(notificationType, listener);
         }
@@ -249,7 +251,7 @@ public class NotificationModule implements SALBindingModule {
     private void onBindingIndependentNotification(CompositeNode biNotification) {
         QName biType = biNotification.getNodeType();
 
-        Mapper<DataObject> mapper = mappingProvider.getMapper(biType);
+        Mapper<DataObject> mapper = mappingProvider.mapperForQName(biType);
         if (mapper == null) {
             log.info("Received notification does not have a binding defined.");
             return;
@@ -263,7 +265,7 @@ public class NotificationModule implements SALBindingModule {
             notifyBindingAware(notification);
         } else {
             // The generated type for this QName does not inherits from
-            // notification something went wrong - generated APIs and/or 
+            // notification something went wrong - generated APIs and/or
             // provider sending notification
             // which was incorectly described in the YANG schema.
             log.error("Received notification " + biType
