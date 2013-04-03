@@ -12,6 +12,8 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -22,10 +24,10 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.antlrv4.code.gen.YangLexer;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser;
+import org.opendaylight.controller.model.util.Leafref;
 import org.opendaylight.controller.model.util.UnknownType;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
@@ -43,32 +45,69 @@ import org.opendaylight.controller.yang.model.parser.builder.impl.ModuleBuilder;
 
 public class YangModelParserListenerTest {
 
-    private final String testFile = "/test-model.yang";
-    ModuleBuilder builder;
-    Module module;
+    @Test
+    public void testParseImport() throws Exception {
+        Module module = getModule("/abstract-topology.yang");
 
+        Set<ModuleImport> imports = module.getImports();
+        assertEquals(1, imports.size());
+        ModuleImport moduleImport = imports.iterator().next();
 
-    @Before
-    public void init() throws IOException {
-        builder = getBuilder(testFile);
-        module = builder.build();
+        assertEquals("inet", moduleImport.getPrefix());
+
+        DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        Date expectedDate = simpleDateFormat.parse("2010-09-24");
+        assertEquals(expectedDate, moduleImport.getRevision());
+    }
+
+    @Test
+    public void testParseHeaders() throws Exception {
+        Module module = getModule("/abstract-topology.yang");
+
+        URI namespace = module.getNamespace();
+        URI expectedNS = URI.create("");
+        assertEquals(expectedNS, namespace);
+
+        DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        Date expectedDate = simpleDateFormat.parse("2013-02-08");
+        assertEquals(expectedDate, module.getRevision());
+
+        String prefix = module.getPrefix();
+        String expectedPrefix = "tp";
+        assertEquals(expectedPrefix, prefix);
+
+        String expectedDescription = "This module contains the definitions of elements that creates network";
+        assertTrue(module.getDescription().contains(expectedDescription));
+
+        String expectedReference = "~~~ WILL BE DEFINED LATER";
+        assertEquals(expectedReference, module.getReference());
+
+        assertEquals("1", module.getYangVersion());
+    }
+
+    @Test
+    public void testParseLeafref() throws Exception {
+        Module module = getModule("/abstract-topology.yang");
+
+        Set<TypeDefinition<?>> typedefs = module.getTypeDefinitions();
+        assertEquals(2, typedefs.size());
+        for(TypeDefinition<?> td : typedefs) {
+            Leafref baseType = (Leafref)td.getBaseType();
+            if(td.getQName().getLocalName().equals("network-node-id-ref")) {
+                assertEquals("/tp:topology/tp:network-nodes/tp:network-node/tp:node-id", baseType.getPathStatement().toString());
+            } else {
+                assertEquals("/tp:topology/tp:network-links/tp:network-link/tp:link-id", baseType.getPathStatement().toString());
+            }
+        }
     }
 
     @Test
     public void testParseModule() throws IOException {
-        Set<ModuleImport> imports = module.getImports();
-        assertEquals(3, imports.size());
+        Module module = getModule("/test-model.yang");
 
         URI namespace = module.getNamespace();
-        URI expectedNS = URI.create("urn:cisco:params:xml:ns:yang:controller:network");
-        assertEquals(expectedNS, namespace);
-
         Date revision = module.getRevision();
-        assertNull(revision);
-
         String prefix = module.getPrefix();
-        String expectedPrefix = "topos";
-        assertEquals(expectedPrefix, prefix);
 
         String expectedDescription = "module description";
         assertEquals(expectedDescription, module.getDescription());
@@ -93,7 +132,9 @@ public class YangModelParserListenerTest {
     }
 
     @Test
-    public void testParseContainer() {
+    public void testParseContainer() throws IOException {
+        Module module = getModule("/test-model.yang");
+
         URI namespace = module.getNamespace();
         Date revision = module.getRevision();
         String prefix = module.getPrefix();
@@ -120,7 +161,9 @@ public class YangModelParserListenerTest {
     }
 
     @Test
-    public void testParseList() {
+    public void testParseList() throws IOException {
+        Module module = getModule("/test-model.yang");
+
         URI namespace = module.getNamespace();
         Date revision = module.getRevision();
         String prefix = module.getPrefix();
@@ -156,7 +199,9 @@ public class YangModelParserListenerTest {
     }
 
     @Test
-    public void testParseLeaf() {
+    public void testParseLeaf() throws IOException {
+        Module module = getModule("/test-model.yang");
+
         URI namespace = module.getNamespace();
         Date revision = module.getRevision();
         String prefix = module.getPrefix();
@@ -192,6 +237,11 @@ public class YangModelParserListenerTest {
         assertEquals(expectedDescription, tested.getDescription());
         assertEquals(expectedReference, tested.getReference());
         assertEquals(expectedStatus, tested.getStatus());
+    }
+
+    private Module getModule(String testFile) throws IOException {
+        ModuleBuilder builder = getBuilder(testFile);
+        return builder.build();
     }
 
     private ModuleBuilder getBuilder(String fileName) throws IOException {
