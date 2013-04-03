@@ -158,7 +158,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
         /* ARP Refresh Timer to go off every 5 seconds to implement ARP aging */
         arp_refresh_timer = new Timer();
         arp_refresh_timer.schedule(new ARPRefreshHandler(), 5000, 5000);
-        logger.info("startUp: Caches created, timers started");
+        logger.debug("startUp: Caches created, timers started");
     }
 
     @SuppressWarnings("deprecation")
@@ -168,7 +168,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                     .error("un-initialized clusterContainerService, can't create cache");
             return;
         }
-        logger.info("Creating Cache for HostTracker");
+        logger.debug("Creating Cache for HostTracker");
         try {
             this.clusterContainerService.createCache("hostTrackerAH", EnumSet
                     .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
@@ -181,7 +181,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
             logger
                     .error("Cache for HostTracker already exists, destroy and recreate");
         }
-        logger.info("Cache successfully created for HostTracker");
+        logger.debug("Cache successfully created for HostTracker");
     }
 
     @SuppressWarnings({ "unchecked", "deprecation" })
@@ -191,20 +191,20 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                     .error("un-initialized clusterContainerService, can't retrieve cache");
             return;
         }
-        logger.info("Retrieving cache for HostTrackerAH");
+        logger.debug("Retrieving cache for HostTrackerAH");
         hostsDB = (ConcurrentMap<InetAddress, HostNodeConnector>) this.clusterContainerService
                 .getCache("hostTrackerAH");
         if (hostsDB == null) {
             logger.error("Cache couldn't be retrieved for HostTracker");
         }
-        logger.info("Cache was successfully retrieved for HostTracker");
-        logger.info("Retrieving cache for HostTrackerIH");
+        logger.debug("Cache was successfully retrieved for HostTracker");
+        logger.debug("Retrieving cache for HostTrackerIH");
         inactiveStaticHosts = (ConcurrentMap<NodeConnector, HostNodeConnector>) this.clusterContainerService
                 .getCache("hostTrackerIH");
         if (hostsDB == null) {
             logger.error("Cache couldn't be retrieved for HostTrackerIH");
         }
-        logger.info("Cache was successfully retrieved for HostTrackerIH");
+        logger.debug("Cache was successfully retrieved for HostTrackerIH");
     }
 
     public void nonClusterObjectCreate() {
@@ -218,7 +218,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
             logger.error("un-initialized clusterMger, can't destroy cache");
             return;
         }
-        logger.info("Destroying Cache for HostTracker");
+        logger.debug("Destroying Cache for HostTracker");
         this.clusterContainerService.destroyCache("hostTrackerAH");
         this.clusterContainerService.destroyCache("hostTrackerIH");
         nonClusterObjectCreate();
@@ -241,7 +241,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
 
     public void unsetArpHandler(IHostFinder hostFinder) {
         if (this.hostFinder == hostFinder) {
-            logger.info("Arp Handler Service removed!");
+            logger.debug("Arp Handler Service removed!");
             this.hostFinder = null;
         }
     }
@@ -252,7 +252,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
 
     public void unsetTopologyManager(ITopologyManager s) {
         if (this.topologyManager == s) {
-            logger.info("Topology Manager Service removed!");
+            logger.debug("Topology Manager Service removed!");
             this.topologyManager = null;
         }
     }
@@ -334,7 +334,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
          */
 
         if (hostFinder == null) {
-            logger.info("Exiting hostFind, null hostFinder");
+            logger.debug("Exiting hostFind, null hostFinder");
             return null;
         }
 
@@ -719,7 +719,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
             for (String switchName : hierarchy) {
                 buf.append(switchName + "/");
             }
-            logger.debug(getContainerName() + " -> " + buf.toString());
+            logger.debug("{} -> {}", getContainerName(), buf.toString());
             num++;
         }
     }
@@ -1235,7 +1235,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
     private void handleNodeConnectorStatusUp(NodeConnector nodeConnector) {
         ARPPending arphost;
 
-        logger.info("handleNodeConnectorStatusUp {}", nodeConnector);
+        logger.debug("handleNodeConnectorStatusUp {}", nodeConnector);
 
         for (int i = 0; i < failedARPReqList.size(); i++) {
             arphost = failedARPReqList.get(i);
@@ -1277,19 +1277,19 @@ public class HostTracker implements IfIptoHost, IfHostListener,
 
     void unsetClusterContainerService(IClusterContainerServices s) {
         if (this.clusterContainerService == s) {
-            logger.info("Cluster Service removed!");
+            logger.debug("Cluster Service removed!");
             this.clusterContainerService = null;
         }
     }
 
     void setSwitchManager(ISwitchManager s) {
-        logger.info("SwitchManager set");
+        logger.debug("SwitchManager set");
         this.switchManager = s;
     }
 
     void unsetSwitchManager(ISwitchManager s) {
         if (this.switchManager == s) {
-            logger.info("SwitchManager removed!");
+            logger.debug("SwitchManager removed!");
             this.switchManager = null;
         }
     }
@@ -1309,7 +1309,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
         Dictionary<?, ?> props = c.getServiceProperties();
         if (props != null) {
             this.containerName = (String) props.get("containerName");
-            logger.debug("Running containerName:" + this.containerName);
+            logger.debug("Running containerName: {}", this.containerName);
         } else {
             // In the Global instance case the containerName is empty
             this.containerName = "";
