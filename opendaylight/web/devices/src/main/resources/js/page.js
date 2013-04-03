@@ -50,7 +50,7 @@ one.f.menu = {
 
 /**Devices Modules */
 one.f.switchmanager = {
-	rootUrl: "one/devices",
+	rootUrl: "controller/web/devices",
 	createTable: function(columnNames, body) {
 		var tableAttributes = ["table-striped", "table-bordered", "table-condensed"];
 		var $table = one.lib.dashlet.table.table(tableAttributes);

@@ -14,9 +14,12 @@ package org.opendaylight.controller.sal.utils;
  *
  */
 public enum GlobalConstants {
-    DEFAULT("default"), CONTAINERMANAGER("containermanager"), CONTAINERNAME(
-            "name"), STATICVLAN("staticvlan"), CLUSTERINGSERVICES("clusteringservices"), ONECONTROLLER(
-            "onecontroller"), STARTUPHOME("configuration/startup/");
+    DEFAULT("default"), 
+    CONTAINERMANAGER("containermanager"), 
+    CONTAINERNAME("name"), 
+    STATICVLAN("staticvlan"), 
+    CLUSTERINGSERVICES("clusteringservices"), 
+    STARTUPHOME("configuration/startup/");
 
     private GlobalConstants(String name) {
         this.name = name;

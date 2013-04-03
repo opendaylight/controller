@@ -63,7 +63,7 @@ $(one.f.menu.right.bottom).each(function(index, value) {
 
 /**Troubleshoot modules*/
 one.f.troubleshooting = {
-	rootUrl: "/one/troubleshoot",
+	rootUrl: "/controller/web/troubleshoot",
 	rightBottomDashlet: { 
 		get: function() {
 			var $rightBottomDashlet = $("#right-bottom").find(".dashlet");

@@ -290,7 +290,7 @@ one.main = {};
 one.main.constants = {
     address : {
         menu : "/web.json",
-        prefix : "/one",
+        prefix : "/controller/web",
         save : "/save"
     }
 }

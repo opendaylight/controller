@@ -3,7 +3,7 @@
     xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.26.xsd">
   
   <services>
-    <rest defaultRestSubcontext="/one/nb/v2/host"/>
+    <rest defaultRestSubcontext="/controller/nb/v2/host"/>
   </services>
 
   <modules>

@@ -58,7 +58,7 @@
             </Import-Package>
             <Export-Package>
             </Export-Package>
-            <Web-ContextPath>/one/nb/v2/flow</Web-ContextPath>
+            <Web-ContextPath>/controller/nb/v2/flow</Web-ContextPath>
           </instructions>
         </configuration>
       </plugin>

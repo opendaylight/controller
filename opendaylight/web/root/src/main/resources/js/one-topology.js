@@ -134,7 +134,7 @@ one.topology.init = function(json) {
 				var data = {};
 				data['x'] = ps.x;
 				data['y'] = ps.y;
-				$.post('/one/topology/node/' + did, data);
+				$.post('/controller/web/topology/node/' + did, data);
 			},
 			onClick: function(node, eventInfo, e) {
 				return false;
@@ -207,12 +207,12 @@ one.topology.init = function(json) {
 
 one.topology.update = function() {
 	$('#topology').empty();
-	$.getJSON(one.global.remoteAddress+"one/topology/visual.json", function(data) {
+	$.getJSON(one.global.remoteAddress+"controller/web/topology/visual.json", function(data) {
 		one.topology.init(data);
 	});
 }
 
 /** INIT */
-$.getJSON(one.global.remoteAddress+"one/topology/visual.json", function(data) {
+$.getJSON(one.global.remoteAddress+"controller/web/topology/visual.json", function(data) {
 	one.topology.init(data);
 });

@@ -94,7 +94,7 @@
 							org.springframework.security.web.authentication.logout,
 							org.springframework.dao
 						</Import-Package>
-						<Web-ContextPath>/one/flows</Web-ContextPath>
+						<Web-ContextPath>/controller/web/flows</Web-ContextPath>
 					</instructions>
 				</configuration>
 			</plugin>

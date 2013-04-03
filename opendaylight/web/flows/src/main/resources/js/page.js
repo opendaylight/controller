@@ -44,7 +44,7 @@ one.f.menu = {
 };
 
 one.f.address = {
-    root : "/one/flows",
+    root : "/controller/web/flows",
     flows : {
         main : "/main",
 		flows : "/node-flows",

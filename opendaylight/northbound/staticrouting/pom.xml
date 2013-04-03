@@ -60,7 +60,7 @@
             </Import-Package>
             <Export-Package>
             </Export-Package>
-            <Web-ContextPath>/one/nb/v2/staticroute</Web-ContextPath>
+            <Web-ContextPath>/controller/nb/v2/staticroute</Web-ContextPath>
           </instructions>
         </configuration>
       </plugin>

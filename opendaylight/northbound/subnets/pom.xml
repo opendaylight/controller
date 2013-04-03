@@ -74,7 +74,7 @@
             </Import-Package>
             <Export-Package>
             </Export-Package>
-            <Web-ContextPath>/one/nb/v2/subnet</Web-ContextPath>
+            <Web-ContextPath>/controller/nb/v2/subnet</Web-ContextPath>
           </instructions>
         </configuration>
       </plugin>

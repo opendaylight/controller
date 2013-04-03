@@ -61,7 +61,7 @@
               org.springframework.security.web.authentication.www,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
-            <Web-ContextPath>/one/nb/v2/topology</Web-ContextPath>
+            <Web-ContextPath>/controller/nb/v2/topology</Web-ContextPath>
           </instructions>
           </configuration>
       </plugin>

@@ -10,9 +10,9 @@
 	<http pattern="/js/**" security="none" />
 	<http pattern="/images/**" security="none" />
 	<http pattern="/favicon.ico" security="none" />
-	<http pattern="/one/css/**" security="none" />
-	<http pattern="/one/js/**" security="none" />
-	<http pattern="/one/images/**" security="none" />
+	<http pattern="/controller/web/css/**" security="none" />
+	<http pattern="/controller/web/js/**" security="none" />
+	<http pattern="/controller/web/images/**" security="none" />
 
 
 	<http auto-config="false" authentication-manager-ref="authenticationManager"

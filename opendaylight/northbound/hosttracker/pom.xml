@@ -59,7 +59,7 @@
               org.slf4j,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
-            <Web-ContextPath>/one/nb/v2/host</Web-ContextPath>
+            <Web-ContextPath>/controller/nb/v2/host</Web-ContextPath>
           </instructions>
         </configuration>
       </plugin>
