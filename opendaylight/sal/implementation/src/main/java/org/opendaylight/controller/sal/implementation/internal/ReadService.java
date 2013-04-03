@@ -109,8 +109,8 @@ public class ReadService implements IReadService, CommandProvider {
         String type = null;
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:(" + entry.getKey() + ") value:("
-                    + entry.getValue() + ")");
+            logger.trace("Prop key:({}) value:({})", entry.getKey(),
+            		entry.getValue());
         }
 
         Object value = props.get("protocolPluginType");
@@ -122,7 +122,7 @@ public class ReadService implements IReadService, CommandProvider {
                     + "protocolPluginType provided");
         } else {
             this.pluginReader.put(type, s);
-            logger.debug("Stored the pluginReader for type:" + type);
+            logger.debug("Stored the pluginReader for type: {}", type);
         }
     }
 
@@ -136,8 +136,8 @@ public class ReadService implements IReadService, CommandProvider {
         logger.debug("Received unsetpluginReader request");
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:(" + entry.getKey() + ") value:("
-                    + entry.getValue() + ")");
+            logger.trace("Prop key:({}) value:({})", entry.getKey(),
+                    	entry.getValue());
         }
 
         Object value = props.get("protocoloPluginType");
@@ -149,7 +149,7 @@ public class ReadService implements IReadService, CommandProvider {
                     + "protocolPluginType provided");
         } else if (this.pluginReader.get(type).equals(s)) {
             this.pluginReader.remove(type);
-            logger.debug("Removed the pluginReader for type:" + type);
+            logger.debug("Removed the pluginReader for type: {}", type);
         }
     }
 
@@ -161,7 +161,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readFlow(node, flow, true);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -173,7 +173,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readFlow(node, flow, false);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -185,7 +185,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readAllFlow(node, true);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -197,7 +197,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readAllFlow(node, false);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -209,7 +209,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readDescription(node, true);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -221,7 +221,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readDescription(node, false);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -234,7 +234,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readNodeConnector(connector, true);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -248,7 +248,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readNodeConnector(connector, false);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -260,7 +260,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readAllNodeConnector(node, true);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -272,7 +272,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .readAllNodeConnector(node, false);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return null;
     }
 
@@ -285,7 +285,7 @@ public class ReadService implements IReadService, CommandProvider {
                     .getTransmitRate(connector);
             }
         }
-        logger.warn("Plugin unuvailable");
+        logger.warn("Plugin unavailable");
         return 0;
     }
 

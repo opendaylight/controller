@@ -113,8 +113,8 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         String type = null;
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:(" + entry.getKey() + ") value:("
-                    + entry.getValue() + ")");
+            logger.trace("Prop key:({}) value:({})",entry.getKey(),
+                    	  entry.getValue());
         }
 
         Object value = props.get("protocolPluginType");
@@ -126,7 +126,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
                     + "protocolPluginType provided");
         } else {
             this.pluginFlowProgrammer.put(type, s);
-            logger.debug("Stored the pluginFlowProgrammer for type:" + type);
+            logger.debug("Stored the pluginFlowProgrammer for type: {}",type);
         }
     }
 
@@ -141,8 +141,8 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         logger.debug("Received unsetpluginFlowProgrammer request");
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:(" + entry.getKey() + ") value:("
-                    + entry.getValue() + ")");
+            logger.trace("Prop key:({}) value:({})",entry.getKey(),
+                    	entry.getValue());
         }
 
         Object value = props.get("protocoloPluginType");
@@ -154,7 +154,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
                     + "protocolPluginType provided");
         } else if (this.pluginFlowProgrammer.get(type).equals(s)) {
             this.pluginFlowProgrammer.remove(type);
-            logger.debug("Removed the pluginFlowProgrammer for type:" + type);
+            logger.debug("Removed the pluginFlowProgrammer for type: {}", type);
         }
     }
 

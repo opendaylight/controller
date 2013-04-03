@@ -178,7 +178,7 @@ abstract public class ComponentActivatorAbstractBase implements
     public void containerCreate(String containerName) {
         try {
             Object[] imps = getImplementations();
-            logger.trace("Creating instance " + containerName);
+            logger.trace("Creating instance {}", containerName);
             if (imps != null) {
                 for (int i = 0; i < imps.length; i++) {
                     ImmutablePair<String, Object> key = new ImmutablePair<String, Object>(
@@ -193,9 +193,8 @@ abstract public class ComponentActivatorAbstractBase implements
                         // Set the implementation so the component can manage
                         // its lifecycle
                         if (c.getService() == null) {
-                            logger
-                                    .trace("Setting implementation to:"
-                                            + imps[i]);
+                            logger.trace("Setting implementation to: {}",
+                                          imps[i]);
                             c.setImplementation(imps[i]);
                         }
 
@@ -246,7 +245,7 @@ abstract public class ComponentActivatorAbstractBase implements
     public void containerDestroy(String containerName) {
         try {
             Object[] imps = getImplementations();
-            logger.trace("Destroying instance " + containerName);
+            logger.trace("Destroying instance {}", containerName);
             if (imps != null) {
                 for (int i = 0; i < imps.length; i++) {
                     ImmutablePair<String, Object> key = new ImmutablePair<String, Object>(
@@ -330,8 +329,8 @@ abstract public class ComponentActivatorAbstractBase implements
                             // Set the implementation so the component
                             // can manage its lifesycle
                             if (c.getService() == null) {
-                                logger.trace("Setting implementation to:"
-                                        + imps[i]);
+                                logger.trace("Setting implementation to: {}",
+                                        imps[i]);
                                 c.setImplementation(imps[i]);
                             }
 
@@ -397,8 +396,8 @@ abstract public class ComponentActivatorAbstractBase implements
                 try {
                     Component c = this.dbInstances.get(key);
                     if (c != null) {
-                        logger.trace("Remove component on container:"
-                                + key.getLeft() + " Object:" + key.getRight());
+                        logger.trace("Remove component on container: {} Object: {}",
+                                key.getLeft(), key.getRight());
                         this.dm.remove(c);
                     }
                 } catch (Exception nex) {
@@ -415,7 +414,7 @@ abstract public class ComponentActivatorAbstractBase implements
                 try {
                     Component c = this.dbGlobalInstances.get(key);
                     if (c != null) {
-                        logger.trace("Remove component for Object:" + key);
+                        logger.trace("Remove component for Object: {}" , key);
                         this.dm.remove(c);
                     }
                 } catch (Exception nex) {

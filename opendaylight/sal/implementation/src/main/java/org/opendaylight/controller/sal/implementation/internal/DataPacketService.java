@@ -236,8 +236,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
         logger.trace("Received setPluginInDataService request");
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:(" + entry.getKey() + ") value:("
-                    + entry.getValue() + ")");
+            logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
         }
 
         Object value = props.get("protocolPluginType");
@@ -249,7 +248,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
                     + "protocolPluginType provided");
         } else {
             this.pluginInDataService.put(type, s);
-            logger.debug("Stored the PluginInDataService for type:" + type);
+            logger.debug("Stored the PluginInDataService for type: {}", type);
         }
     }
 
@@ -263,8 +262,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
         logger.trace("Received unsetPluginInDataService request");
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:(" + entry.getKey() + ") value:("
-                    + entry.getValue() + ")");
+            logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
         }
 
         Object value = props.get("protocoloPluginType");
@@ -276,7 +274,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
                     + "protocolPluginType provided");
         } else if (this.pluginInDataService.get(type).equals(s)) {
             this.pluginInDataService.remove(type);
-            logger.debug("Removed the PluginInDataService for type:" + type);
+            logger.debug("Removed the PluginInDataService for type: {}", type);
         }
     }
 
@@ -288,8 +286,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
         logger.trace("Received setListenDataPacket request");
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:(" + entry.getKey() + ") value:("
-                    + entry.getValue() + ")");
+            logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
         }
 
         String listenerName = null;
@@ -331,7 +328,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
             if (this.indexDataPacket.contains(l)) {
                 logger.error("trying to add an existing element");
             } else {
-                logger.debug("adding listener: " + listenerName);
+                logger.debug("adding listener: {}", listenerName);
                 CopyOnWriteArrayList<DataPacketListener> serialListeners = new CopyOnWriteArrayList<DataPacketListener>();
                 serialListeners.add(l);
                 this.listenDataPacket.add(serialListeners);
@@ -343,7 +340,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
             if (this.indexDataPacket.contains(l)) {
                 logger.error("trying to add an existing element");
             } else {
-                logger.debug("adding listener: " + listenerName);
+                logger.debug("adding listener: {}", listenerName);
                 // Lets find the set with the dependency in it, if we
                 // find it lets just add our dependency at the end of
                 // the list.
@@ -373,8 +370,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
         logger.trace("Received UNsetListenDataPacket request");
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:(" + entry.getKey() + ") value:("
-                    + entry.getValue() + ")");
+            logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
         }
 
         String listenerName = null;
@@ -395,7 +391,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
         if (!this.indexDataPacket.contains(l)) {
             logger.error("trying to remove a non-existing element");
         } else {
-            logger.debug("removing listener: " + listenerName);
+            logger.debug("removing listener: {}", listenerName);
             for (List<DataPacketListener> serialListeners : this.listenDataPacket) {
                 int i = 0;
                 boolean done = false;

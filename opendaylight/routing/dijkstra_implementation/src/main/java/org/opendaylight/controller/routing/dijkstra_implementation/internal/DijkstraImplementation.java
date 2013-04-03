@@ -66,7 +66,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
             this.routingAware = new HashSet<IListenRoutingUpdates>();
         }
         if (this.routingAware != null) {
-            log.debug("Adding routingAware listener: " + i);
+            log.debug("Adding routingAware listener: {}", i);
             this.routingAware.add(i);
         }
     }
@@ -140,10 +140,8 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                             : avlDstThruPut;
 
                     if (avlThruPut <= 0) {
-                        log
-                                .trace(
-                                        "Edge {}: Available Throughput {} is Zero/Negative",
-                                        e, avlThruPut);
+                        log.debug("Edge {}: Available Throughput {} <= 0!",
+                        		  e, avlThruPut);
                         return (double) -1;
                     }
                     return (double) (Bandwidth.BW1Pbps / avlThruPut);
@@ -177,8 +175,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
     @Override
     public synchronized Path getMaxThroughputRoute(Node src, Node dst) {
         if (mtp == null) {
-            log
-                    .error("Max Throughput Path Calculation has not been Initialized!");
+            log.error("Max Throughput Path Calculation Uninitialized!");
             return null;
         }
 
@@ -186,16 +183,16 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         try {
             path = mtp.getMaxThroughputPath(src, dst);
         } catch (IllegalArgumentException ie) {
-            log.debug("A vertex is yet not known between " + src.toString()
-                    + " " + dst.toString());
+            log.debug("A vertex is yet not known between {} {}", src.toString(),
+            		   dst.toString());
             return null;
         }
         Path res;
         try {
             res = new Path(path);
         } catch (ConstructionException e) {
-            log.debug("A vertex is yet not known between " + src.toString()
-                    + " " + dst.toString());
+            log.debug("A vertex is yet not known between {} {}", src.toString(),
+            		  dst.toString());
             return null;
         }
         return res;
@@ -210,16 +207,16 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         try {
             path = spt.getPath(src, dst);
         } catch (IllegalArgumentException ie) {
-            log.debug("A vertex is yet not known between " + src.toString()
-                    + " " + dst.toString());
+        	log.debug("A vertex is yet not known between {} {}", src.toString(),
+         		   dst.toString());
             return null;
         }
         Path res;
         try {
             res = new Path(path);
         } catch (ConstructionException e) {
-            log.debug("A vertex is yet not known between " + src.toString()
-                    + " " + dst.toString());
+        	log.debug("A vertex is yet not known between {} {}", src.toString(),
+          		   dst.toString());
             return null;
         }
         return res;
@@ -298,14 +295,14 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                 if (topo.containsVertex(src.getNode())
                         && topo.inDegree(src.getNode()) == 0
                         && topo.outDegree(src.getNode()) == 0) {
-                    log.debug("Removing vertex " + src);
+                    log.debug("Removing vertex {}", src);
                     topo.removeVertex(src.getNode());
                 }
 
                 if (topo.containsVertex(dst.getNode())
                         && topo.inDegree(dst.getNode()) == 0
                         && topo.outDegree(dst.getNode()) == 0) {
-                    log.debug("Removing vertex " + dst);
+                    log.debug("Removing vertex {}", dst);
                     topo.removeVertex(dst.getNode());
                 }
             }
@@ -314,8 +311,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                 clearMaxThroughput();
             }
         } else {
-            log.error("Cannot find topology for BW " + bw
-                    + " this is unexpected!");
+            log.error("Cannot find topology for BW {} this is unexpected!", bw);
         }
         return edgePresentInGraph;
     }
@@ -348,7 +344,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         if (props != null)
             props.remove(bw);
 
-        log.debug("edgeUpdate: " + e.toString() + " bw: " + bw.getValue());
+        log.debug("edgeUpdate: {} bw: {}", e.toString(), bw.getValue());
 
         Short baseBW = Short.valueOf((short) 0);
         boolean add = (type == UpdateType.ADDED) ? true : false;

@@ -94,7 +94,7 @@ public class DataPacketMuxDemux implements IContainerListener,
             // replication is done in the SAL implementation toward
             // the different APPS
             this.pluginOutDataPacketServices.put(containerName, s);
-            logger.debug("New outService for container:" + containerName);
+            logger.debug("New outService for container: {}", containerName);
         }
     }
 
@@ -111,7 +111,7 @@ public class DataPacketMuxDemux implements IContainerListener,
         }
         if (this.pluginOutDataPacketServices != null) {
             this.pluginOutDataPacketServices.remove(containerName);
-            logger.debug("Removed outService for container:" + containerName);
+            logger.debug("Removed outService for container: {}", containerName);
         }
     }
 
@@ -158,6 +158,8 @@ public class DataPacketMuxDemux implements IContainerListener,
         if (sw == null || msg == null
                 || this.pluginOutDataPacketServices == null) {
             // Something fishy, we cannot do anything
+        	logger.debug("sw: {} and/or msg: {} and/or pluginOutDataPacketServices: {} is null!",
+        				new Object[]{sw, msg, this.pluginOutDataPacketServices});
             return;
         }
         if (msg instanceof OFPacketIn) {
@@ -191,10 +193,8 @@ public class DataPacketMuxDemux implements IContainerListener,
                         .get(GlobalConstants.DEFAULT.toString());
                 if (defaultOutService != null) {
                     defaultOutService.receiveDataPacket(dataPacket);
-                    logger.trace("Dispatched to apps a frame of size: "
-                            + ofPacket.getPacketData().length
-                            + " on container: "
-                            + GlobalConstants.DEFAULT.toString());
+                    logger.trace("Dispatched to apps a frame of size: {} on container: {}",
+                            ofPacket.getPacketData().length, GlobalConstants.DEFAULT.toString());
                 }
                 // Now check the mapping between nodeConnector and
                 // Container and later on optinally filter based on
@@ -208,9 +208,8 @@ public class DataPacketMuxDemux implements IContainerListener,
                         if (s != null) {
                             // TODO add filtering on a per-flowSpec base
                             s.receiveDataPacket(dataPacket);
-                            logger.trace("Dispatched to apps a frame of size: "
-                                    + ofPacket.getPacketData().length
-                                    + " on container: " + container);
+                            logger.trace("Dispatched to apps a frame of size: {} on container: {}",
+                                    ofPacket.getPacketData().length, GlobalConstants.DEFAULT.toString());
 
                         }
                     }
@@ -234,17 +233,20 @@ public class DataPacketMuxDemux implements IContainerListener,
     public void transmitDataPacket(RawPacket outPkt) {
         // Sanity check area
         if (outPkt == null) {
+        	logger.debug("outPkt is null!");
             return;
         }
 
         NodeConnector outPort = outPkt.getOutgoingNodeConnector();
         if (outPort == null) {
+        	logger.debug("outPort is null! outPkt: {}", outPkt);
             return;
         }
 
         if (!outPort.getType().equals(
                 NodeConnector.NodeConnectorIDType.OPENFLOW)) {
             // The output Port is not of type OpenFlow
+        	logger.debug("outPort is not OF Type! outPort: {}", outPort);
             return;
         }
 
@@ -255,6 +257,7 @@ public class DataPacketMuxDemux implements IContainerListener,
         if (sw == null) {
             // If we cannot get the controller descriptor we cannot even
             // send out the frame
+        	logger.debug("swID: {} - sw is null!", swID);
             return;
         }
 
@@ -272,29 +275,37 @@ public class DataPacketMuxDemux implements IContainerListener,
         po.setPacketData(data);
 
         sw.asyncSend(po);
-        logger.trace("Transmitted a frame of size:" + data.length);
+        logger.trace("Transmitted a frame of size: {}", data.length);
     }
 
     public void addNode(Node node, Set<Property> props) {
-        if (node == null)
+        if (node == null) {
+        	logger.debug("node is null!");
             return;
+        } 
 
         long sid = (Long) node.getID();
         ISwitch sw = controller.getSwitches().get(sid);
-        if (sw != null) {
-            this.swID2ISwitch.put(sw.getId(), sw);
+        if (sw == null) {
+        	logger.debug("sid: {} - sw is null!", sid);
+        	return;
         }
+        this.swID2ISwitch.put(sw.getId(), sw);
     }
 
     public void removeNode(Node node) {
-        if (node == null)
+        if (node == null) {
+        	logger.debug("node is null!");
             return;
+        }
 
         long sid = (Long) node.getID();
         ISwitch sw = controller.getSwitches().get(sid);
-        if (sw != null) {
-            this.swID2ISwitch.remove(sw.getId());
+        if (sw == null) {
+        	logger.debug("sid: {} - sw is null!", sid);
+        	return;
         }
+        this.swID2ISwitch.remove(sw.getId());
     }
 
     @Override
@@ -315,7 +326,6 @@ public class DataPacketMuxDemux implements IContainerListener,
         if (fSpecs == null) {
             fSpecs = new CopyOnWriteArrayList<ContainerFlow>();
         }
-        boolean updateMap = false;
         switch (t) {
         case ADDED:
             if (!fSpecs.contains(previousFlow)) {
@@ -329,13 +339,6 @@ public class DataPacketMuxDemux implements IContainerListener,
             break;
         case CHANGED:
             break;
-        }
-        if (updateMap) {
-            if (fSpecs.isEmpty()) {
-                this.container2FlowSpecs.remove(containerName);
-            } else {
-                this.container2FlowSpecs.put(containerName, fSpecs);
-            }
         }
     }
 
