@@ -19,13 +19,14 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  * uint64 represents integer values between 0 and 18446744073709551615,
  * inclusively. The Java counterpart of Yang uint64 built-in type is
  * {@link BigInteger}.
- * 
+ *
  */
 public class Uint64 extends AbstractUnsignedInteger {
 
     private static final QName name = BaseTypes.constructQName("uint64");
+
     private BigInteger defaultValue = null;
-    private static final String description = 
+    private static final String description =
             "uint64 represents integer values between 0 and 18446744073709551615, inclusively.";
 
     public Uint64() {
@@ -45,7 +46,7 @@ public class Uint64 extends AbstractUnsignedInteger {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
@@ -56,7 +57,7 @@ public class Uint64 extends AbstractUnsignedInteger {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
      * ()
