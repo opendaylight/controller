@@ -10,9 +10,9 @@ package org.opendaylight.controller.yang.model.parser.api;
 import java.io.InputStream;
 import java.util.Set;
 
-import org.opendaylight.controller.model.api.type.UnknownTypeDefinition;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
+import org.opendaylight.controller.yang.model.api.type.UnknownTypeDefinition;
 
 /**
  * Yang Model Parser interface is designed for parsing yang models and convert

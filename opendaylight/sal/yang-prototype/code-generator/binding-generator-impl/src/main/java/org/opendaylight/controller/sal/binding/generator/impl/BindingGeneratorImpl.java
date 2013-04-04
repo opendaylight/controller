@@ -91,7 +91,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
 
         return genTypes;
     }
-
+    
     private String resolveGeneratedTypePackageName(final SchemaPath schemaPath) {
         final StringBuilder builder = new StringBuilder();
         builder.append(basePackageName);
@@ -327,13 +327,6 @@ public class BindingGeneratorImpl implements BindingGenerator {
         setMethod.addReturnType(Types.voidType());
 
         return setMethod;
-    }
-
-    private boolean isCompositeKey(final String keyDefinition) {
-        if (keyDefinition.contains(" ")) {
-            return true;
-        }
-        return false;
     }
 
     private String resolveBasePackageName(final URI moduleNamespace,

@@ -12,10 +12,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.opendaylight.controller.data.util.Nodes;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.notify.NotificationProviderService;
 import org.opendaylight.controller.yang.data.api.Node;
+import org.opendaylight.controller.yang.data.util.Nodes;
 
 
 public class DemoProviderImpl implements

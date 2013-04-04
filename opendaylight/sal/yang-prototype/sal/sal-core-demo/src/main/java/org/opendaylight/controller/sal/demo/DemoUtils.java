@@ -11,9 +11,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 
-import org.opendaylight.controller.data.util.Nodes;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.Node;
+import org.opendaylight.controller.yang.data.util.Nodes;
 
 
 public class DemoUtils {

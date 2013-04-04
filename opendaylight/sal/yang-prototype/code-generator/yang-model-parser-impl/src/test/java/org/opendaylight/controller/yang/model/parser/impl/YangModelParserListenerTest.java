@@ -27,8 +27,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 import org.opendaylight.controller.antlrv4.code.gen.YangLexer;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser;
-import org.opendaylight.controller.model.util.Leafref;
-import org.opendaylight.controller.model.util.UnknownType;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.controller.yang.model.api.DataNodeContainer;
@@ -42,6 +40,8 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ModuleBuilder;
+import org.opendaylight.controller.yang.model.util.Leafref;
+import org.opendaylight.controller.yang.model.util.UnknownType;
 
 public class YangModelParserListenerTest {
 
