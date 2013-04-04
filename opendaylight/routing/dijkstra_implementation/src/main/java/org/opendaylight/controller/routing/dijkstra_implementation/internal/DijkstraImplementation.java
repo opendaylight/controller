@@ -61,7 +61,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
     private IReadService readService;
     private static final long DEFAULT_LINK_SPEED = Bandwidth.BW1Gbps;
 
-    public void setLIstenRoutingUpdates(IListenRoutingUpdates i) {
+    public void setListenRoutingUpdates(IListenRoutingUpdates i) {
         if (this.routingAware == null) {
             this.routingAware = new HashSet<IListenRoutingUpdates>();
         }

@@ -36,7 +36,7 @@ public class Switch implements Serializable {
      * As we are adding switches on per event basis in a map, we do not need a default constructor
      * This way we can keep the validations internal, in the proper constructor
     public Switch() {
-        this.swPorts = new HashSet<ONESwitchPortTuple>();
+        this.swPorts = new HashSet<SwitchPortTuple>();
         this.spanPorts = new ArrayList<Short>(2);
     }
      */

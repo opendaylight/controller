@@ -34,8 +34,8 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
-	<display-name>Cisco ONE Controller</display-name>
-	<description>Cisco ONE Controller</description>
+	<display-name>OpenDaylight Controller</display-name>
+	<description>OpenDaylight Controller</description>
 
 	<listener>
 		<listener-class>org.opendaylight.controller.web.ControllerUISessionManager</listener-class>

@@ -23,7 +23,7 @@ import org.openflow.util.U16;
  * This Class processes the OpenFlow Vendor Extension Reply message of a Stats
  * Request. It parses the reply message and initializes fields of  V6StatsReply
  * object. Multiple instances of this class objects are created and used by 
- * ONE Controller's Troubleshooting Application.
+ * OpenDaylight's Troubleshooting Application.
  * 
  */
 

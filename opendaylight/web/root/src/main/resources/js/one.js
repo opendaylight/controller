@@ -284,7 +284,7 @@ one.lib.alert = function(alert) {
 	INITIALIZATION
 	executable JS code starts here
 */
-//ONE root page
+//OpenDaylight root page
 one.main = {};
 
 one.main.constants = {
