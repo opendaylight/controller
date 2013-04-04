@@ -13,6 +13,7 @@ import java.net.InetAddress;
 
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.HexEncode;
+import org.opendaylight.controller.sal.utils.NetUtils;
 
 /**
  * Represents the binding between the id, the value and mask type and the range values
@@ -30,7 +31,7 @@ public enum MatchType {
     DL_OUTER_VLAN("dlOuterVlan", 1 << 5, Short.class, 1, 0xfff), 
     DL_OUTER_VLAN_PR("dlOuterVlanPriority", 1 << 6, Short.class, 0, 0x7), 
     DL_TYPE("dlType", 1 << 7, Short.class, 0, 0xffff), // 2 bytes
-    NW_TOS("nwTOS", 1 << 8, Byte.class, 0, 0xff), // 1 byte
+    NW_TOS("nwTOS", 1 << 8, Byte.class, 0, 0x3f), // 6 bits (DSCP field)
     NW_PROTO("nwProto", 1 << 9, Byte.class, 0, 0xff), // 1 byte
     NW_SRC("nwSrc", 1 << 10, InetAddress.class, 0, 0), 
     NW_DST("nwDst", 1 << 11, InetAddress.class, 0, 0), 
@@ -203,19 +204,18 @@ public enum MatchType {
 			return HexEncode.bytesToHexStringFormat((byte[])value);
 		case DL_TYPE:
 		case DL_VLAN:
-			if ((Short)value < 0) {
-				return ((Integer) (((Short)value).intValue() & 0x7FFF | 0x8000)).toString();
-			}
-			break;
+			return ((Integer) NetUtils.getUnsignedShort((Short)value))
+					.toString();
 		case NW_SRC:
 		case NW_DST:
 			return ((InetAddress)value).getHostAddress();
+		case NW_TOS:
+			return ((Integer) NetUtils.getUnsignedByte((Byte)value))
+					.toString();
 		case TP_SRC:
 		case TP_DST:
-			if ((Short)value < 0) {
-				return ((Integer) (((Short)value).intValue() & 0x7FFF | 0x8000)).toString();
-			}
-			break;
+			return ((Integer) NetUtils.getUnsignedShort((Short)value))
+					.toString();
 		default:
 			break;
 		}

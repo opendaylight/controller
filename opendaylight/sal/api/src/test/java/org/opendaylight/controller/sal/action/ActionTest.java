@@ -163,9 +163,12 @@ public class ActionTest {
         action = new SetNwTos(0xf);
         Assert.assertTrue(action.isValid());
 
-        action = new SetNwTos(0xff);
+        action = new SetNwTos(0x3f);
         Assert.assertTrue(action.isValid());
 
+        action = new SetNwTos(0x40);
+        Assert.assertFalse(action.isValid());
+        
         action = new SetNwTos(0xff1);
         Assert.assertFalse(action.isValid());
 

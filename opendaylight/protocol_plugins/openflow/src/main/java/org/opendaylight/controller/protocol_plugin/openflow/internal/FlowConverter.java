@@ -172,12 +172,17 @@ public class FlowConverter {
                 }
             }
             if (match.isPresent(MatchType.NW_TOS)) {
+                /*
+                 *  OF 1.0 switch expects the TOS as the 6 msb in the byte.
+                 *  it is actually the DSCP field followed by a zero ECN
+                 */
                 byte tos = (Byte) match.getField(MatchType.NW_TOS).getValue();
+                byte dscp = (byte)((int)tos << 2);
                 if (!isIPv6) {
-                    ofMatch.setNetworkTypeOfService(tos);
+                    ofMatch.setNetworkTypeOfService(dscp);
                     wildcards &= ~OFMatch.OFPFW_NW_TOS;
                 } else {
-                    ((V6Match) ofMatch).setNetworkTypeOfService(tos, (byte) 0);
+                    ((V6Match) ofMatch).setNetworkTypeOfService(dscp, (byte) 0);
                 }
             }
             if (match.isPresent(MatchType.NW_PROTO)) {
@@ -420,7 +425,7 @@ public class FlowConverter {
      * @param port
      * @return
      */
-    public OFMessage getOFFlowMod(/*ISwitch sw, */short command, OFPort port) {
+    public OFMessage getOFFlowMod(short command, OFPort port) {
         OFMessage fm = (isIPv6) ? new V6FlowMod() : new OFFlowMod();
         if (this.ofMatch == null) {
             getOFMatch();
@@ -523,8 +528,10 @@ public class FlowConverter {
                                                         false));
                     }
                     if (ofMatch.getNetworkTypeOfService() != 0) {
-                        salMatch.setField(MatchType.NW_TOS, ofMatch
-                                .getNetworkTypeOfService());
+                    	int dscp = NetUtils.getUnsignedByte(
+                    			ofMatch.getNetworkTypeOfService());
+                    	byte tos = (byte)(dscp >> 2);
+                        salMatch.setField(MatchType.NW_TOS, tos);
                     }
                     if (ofMatch.getNetworkProtocol() != 0) {
                         salMatch.setField(MatchType.NW_PROTO, ofMatch
@@ -584,8 +591,10 @@ public class FlowConverter {
                                 .getNetworkDestinationMask());
                     }
                     if (v6Match.getNetworkTypeOfService() != 0) {
-                        salMatch.setField(MatchType.NW_TOS, v6Match
-                                .getNetworkTypeOfService());
+                    	int dscp = NetUtils.getUnsignedByte(
+                    			v6Match.getNetworkTypeOfService());
+                    	byte tos = (byte) (dscp >> 2);
+                        salMatch.setField(MatchType.NW_TOS, tos);
                     }
                     if (v6Match.getNetworkProtocol() != 0) {
                         salMatch.setField(MatchType.NW_PROTO, v6Match
@@ -678,14 +687,12 @@ public class FlowConverter {
                     } else if (ofAction instanceof OFActionTransportLayerSource) {
                         Short port = ((OFActionTransportLayerSource) ofAction)
                                 .getTransportPort();
-                        int intPort = (port < 0) ? (port.intValue() & 0x7FFF | 0x8000)
-                                : port;
+                        int intPort = NetUtils.getUnsignedShort(port);
                         salAction = new SetTpSrc(intPort);
                     } else if (ofAction instanceof OFActionTransportLayerDestination) {
                         Short port = ((OFActionTransportLayerDestination) ofAction)
                                 .getTransportPort();
-                        int intPort = (port < 0) ? (port.intValue() & 0x7FFF | 0x8000)
-                                : port;
+                        int intPort = NetUtils.getUnsignedShort(port);
                         salAction = new SetTpDst(intPort);
                     }
                     salActionList.add(salAction);
@@ -696,4 +703,5 @@ public class FlowConverter {
         }
         return flow;
     }
+
 }

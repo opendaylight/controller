@@ -32,6 +32,7 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.IPProtocols;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
@@ -288,26 +289,16 @@ public class Troubleshoot implements IOneWeb {
         if (match.isPresent(MatchType.TP_SRC)) {
             Short tpSrc = (Short) (flow.getMatch().getField(MatchType.TP_SRC)
                     .getValue());
-            if (tpSrc < 0) {
-                row.put(MatchType.TP_SRC.id(),
-                        ((Integer) (tpSrc.intValue() & 0x7FFF | 0x8000))
-                                .toString());
-            } else {
-                row.put(MatchType.TP_SRC.id(), tpSrc.toString());
-            }
+            row.put(MatchType.TP_SRC.id(),
+            		String.valueOf(NetUtils.getUnsignedShort(tpSrc)));
         } else {
             row.put(MatchType.TP_SRC.id(), "*");
         }
         if (match.isPresent(MatchType.TP_DST)) {
             Short tpDst = (Short) (flow.getMatch().getField(MatchType.TP_DST)
                     .getValue());
-            if (tpDst < 0) {
-                row.put(MatchType.TP_DST.id(),
-                        ((Integer) (tpDst.intValue() & 0x7FFF | 0x8000))
-                                .toString());
-            } else {
-                row.put(MatchType.TP_DST.id(), tpDst.toString());
-            }
+            row.put(MatchType.TP_DST.id(),
+            		String.valueOf(NetUtils.getUnsignedShort(tpDst)));
         } else {
             row.put(MatchType.TP_DST.id(), "*");
         }

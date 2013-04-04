@@ -14,6 +14,7 @@ import org.openflow.protocol.OFPort;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 
 /**
@@ -24,14 +25,15 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
  *
  */
 public abstract class PortConverter {
-    private static final int maxOFPhysicalPort = (OFPort.OFPP_MAX.getValue() & 0x7FFF) | 0x8000;
+    private static final int maxOFPhysicalPort =
+    		NetUtils.getUnsignedShort(OFPort.OFPP_MAX.getValue());
 
     /**
      * Converts the Openflow port number to the equivalent NodeConnector.
      */
     public static NodeConnector toNodeConnector(short ofPort, Node node) {
         // Restore original OF unsigned 16 bits value for the comparison
-        int unsignedOFPort = (ofPort & 0x7FFF) | 0x8000;
+        int unsignedOFPort = NetUtils.getUnsignedShort(ofPort);
 
         if (unsignedOFPort > maxOFPhysicalPort) {
             if (ofPort == OFPort.OFPP_LOCAL.getValue()) {

@@ -338,4 +338,29 @@ public abstract class NetUtils {
         }
         return true;
     }
+    
+    /*
+     * Following utilities are useful when you need to 
+     * compare or bit shift java primitive type variable
+     * which are inerently signed
+     */
+    /**
+     * Returns the unsigned value of the passed byte variable
+     * 
+     * @param b	the byte value
+     * @return the int variable containing the unsigned byte value
+     */
+    public static int getUnsignedByte(byte b) {
+		return (b > 0)? (int)b : ((int)b & 0x7F | 0x80);
+	}
+	
+    /**
+     * Return the unsigned value of the passed short variable
+     * 
+     * @param s the short value
+     * @return the int variable containing the unsigned short value
+     */
+	public static int getUnsignedShort(short s) {
+		return (s > 0)? (int)s : ((int)s & 0x7FFF | 0x8000);
+	}
 }

@@ -29,7 +29,7 @@ public enum ActionType {
     PUSH_VLAN("pushVlan", 0, 0xffff), // Push (the max value only takes into account the TCI portion of the 802.1q header)
     SET_DL_TYPE("setDlType", 0, 0xffff), // Set ethertype/length field
     SET_NW_SRC("setNwSrc", 0, 0), SET_NW_DST("setNwDst", 0, 0), SET_NW_TOS(
-            "setNwTos", 0, 0xff), SET_TP_SRC("setTpSrc", 1, 0xffff), SET_TP_DST(
+            "setNwTos", 0, 0x3f), SET_TP_SRC("setTpSrc", 1, 0xffff), SET_TP_DST(
             "setTpDst", 1, 0xffff), SET_NEXT_HOP("setNextHop", 0, 0);
 
     private String id;
