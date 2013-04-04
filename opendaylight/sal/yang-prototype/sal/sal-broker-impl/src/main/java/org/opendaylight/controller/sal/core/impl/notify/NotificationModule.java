@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.sal.core.impl.notify;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -24,28 +23,30 @@ import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
 import org.opendaylight.controller.sal.core.api.notify.NotificationProviderService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationService;
 import org.opendaylight.controller.sal.core.impl.BrokerServiceImpl;
-import org.opendaylight.controller.sal.core.impl.Utils;
 import org.opendaylight.controller.sal.core.spi.BrokerModule;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 
 public class NotificationModule implements BrokerModule {
     private static Logger log = LoggerFactory
             .getLogger(NotificationModule.class);
 
-    private Map<QName, List<NotificationListener>> listeners = new HashMap<QName, List<NotificationListener>>();
+    private Multimap<QName, NotificationListener> listeners = HashMultimap
+            .create();
+
+    private static final Set<Class<? extends BrokerService>> providedServices = ImmutableSet
+            .of((Class<? extends BrokerService>) NotificationService.class,
+                    NotificationProviderService.class);
 
     @Override
     public Set<Class<? extends BrokerService>> getProvidedServices() {
-        // FIXME Refactor
-        Set<Class<? extends BrokerService>> ret = new HashSet<Class<? extends BrokerService>>();
-        ret.add(NotificationService.class);
-        ret.add(NotificationProviderService.class);
-        return ret;
+        return providedServices;
     }
 
     @Override
@@ -77,7 +78,7 @@ public class NotificationModule implements BrokerModule {
 
     private void sendNotification(CompositeNode notification) {
         QName type = notification.getNodeType();
-        List<NotificationListener> toNotify = listeners.get(type);
+        Collection<NotificationListener> toNotify = listeners.get(type);
         log.info("Publishing notification " + type);
 
         if (toNotify == null) {
@@ -109,7 +110,8 @@ public class NotificationModule implements BrokerModule {
     private class NotificationConsumerSessionImpl extends BrokerServiceImpl
             implements NotificationService {
 
-        Map<QName, List<NotificationListener>> consumerListeners = new HashMap<QName, List<NotificationListener>>();
+        private Multimap<QName, NotificationListener> consumerListeners = HashMultimap
+                .create();
         private boolean closed = false;
 
         @Override
@@ -124,8 +126,8 @@ public class NotificationModule implements BrokerModule {
                 throw new IllegalArgumentException("Listener must not be null.");
             }
 
-            Utils.addToMap(consumerListeners, notification, listener);
-            Utils.addToMap(listeners, notification, listener);
+            consumerListeners.put(notification, listener);
+            listeners.put(notification, listener);
             log.info("Registered listener for notification: " + notification);
         }
 
@@ -140,17 +142,18 @@ public class NotificationModule implements BrokerModule {
             if (listener == null) {
                 throw new IllegalArgumentException("Listener must not be null.");
             }
-            Utils.removeFromMap(consumerListeners, notification, listener);
-            Utils.removeFromMap(listeners, notification, listener);
+            consumerListeners.remove(notification, listener);
+            listeners.remove(notification, listener);
         }
 
         @Override
         public void closeSession() {
             closed = true;
-            Set<Entry<QName, List<NotificationListener>>> toRemove = consumerListeners
-                    .entrySet();
-            for (Entry<QName, List<NotificationListener>> entry : toRemove) {
-                listeners.get(entry.getKey()).removeAll(entry.getValue());
+            Map<QName, Collection<NotificationListener>> toRemove = consumerListeners
+                    .asMap();
+            for (Entry<QName, Collection<NotificationListener>> entry : toRemove
+                    .entrySet()) {
+                listeners.remove(entry.getKey(), entry.getValue());
             }
         }
 
@@ -179,4 +182,3 @@ public class NotificationModule implements BrokerModule {
         return Collections.emptySet();
     }
 }
-
