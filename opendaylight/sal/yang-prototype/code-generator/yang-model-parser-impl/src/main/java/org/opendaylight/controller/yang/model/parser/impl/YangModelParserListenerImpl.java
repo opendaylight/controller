@@ -22,6 +22,7 @@ import java.util.TreeMap;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser;
+import org.opendaylight.controller.antlrv4.code.gen.YangParser.Base_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Contact_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Container_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Description_stmtContext;
@@ -58,6 +59,7 @@ import org.opendaylight.controller.yang.model.parser.builder.impl.ContainerSchem
 import org.opendaylight.controller.yang.model.parser.builder.impl.DeviationBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ExtensionBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.FeatureBuilder;
+import org.opendaylight.controller.yang.model.parser.builder.impl.IdentitySchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.LeafListSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ListSchemaNodeBuilder;
@@ -304,8 +306,6 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
                 break;
             }
         }
-
-
 
         // if this is base yang type...
         if(YangTypesConverter.isBaseYangType(typeName)) {
@@ -648,6 +648,33 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
     public void enterConfig_stmt(YangParser.Config_stmtContext ctx) {
         boolean configuration = parseConfig(ctx);
         moduleBuilder.addConfiguration(configuration, actualPath);
+    }
+
+    @Override
+    public void enterIdentity_stmt(YangParser.Identity_stmtContext ctx) {
+        final String identityName = stringFromNode(ctx);
+        final QName identityQName = new QName(namespace, revision,
+                yangModelPrefix, identityName);
+        IdentitySchemaNodeBuilder builder = moduleBuilder.addIdentity(identityQName);
+        updatePath(identityName);
+
+        builder.setPath(createActualSchemaPath(actualPath, namespace,
+                revision, yangModelPrefix));
+        parseSchemaNodeArgs(ctx, builder);
+
+        for(int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree child = ctx.getChild(i);
+            if(child instanceof Base_stmtContext) {
+                String baseIdentityName = stringFromNode(child);
+                builder.setBaseIdentityName(baseIdentityName);
+            }
+        }
+    }
+
+    @Override
+    public void exitIdentity_stmt(YangParser.Identity_stmtContext ctx) {
+        final String actContainer = actualPath.pop();
+        logger.debug("exiting " + actContainer);
     }
 
     public ModuleBuilder getModuleBuilder() {

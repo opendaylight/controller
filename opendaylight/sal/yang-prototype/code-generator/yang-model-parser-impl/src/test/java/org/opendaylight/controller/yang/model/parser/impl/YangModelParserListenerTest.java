@@ -93,7 +93,7 @@ public class YangModelParserListenerTest {
         assertEquals(2, typedefs.size());
         for(TypeDefinition<?> td : typedefs) {
             Leafref baseType = (Leafref)td.getBaseType();
-            if(td.getQName().getLocalName().equals("network-node-id-ref")) {
+            if(td.getQName().getLocalName().equals("node-id-ref")) {
                 assertEquals("/tp:topology/tp:network-nodes/tp:network-node/tp:node-id", baseType.getPathStatement().toString());
             } else {
                 assertEquals("/tp:topology/tp:network-links/tp:network-link/tp:link-id", baseType.getPathStatement().toString());

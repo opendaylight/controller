@@ -622,9 +622,25 @@ public class YangModelBuilderUtil {
                 reference = stringFromNode(child);
             }
         }
-        String pattern = stringFromNode(ctx);
+        String pattern = patternStringFromNode(ctx);
         return BaseConstraints.patternConstraint(pattern, description,
                 reference);
+    }
+
+    public static String patternStringFromNode(final Pattern_stmtContext treeNode) {
+        String result = "";
+        for (int i = 0; i < treeNode.getChildCount(); ++i) {
+            ParseTree child = treeNode.getChild(i);
+            if (child instanceof StringContext) {
+                for(int j = 0; j < child.getChildCount(); j++) {
+                    if(j % 2 == 0) {
+                        String patternToken = child.getChild(j).getText();
+                        result += patternToken.substring(1, patternToken.length()-1);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     private static Integer getFractionDigits(Type_body_stmtsContext ctx) {
@@ -974,7 +990,7 @@ public class YangModelBuilderUtil {
         if (typeName.equals("decimal64")) {
             type = YangTypesConverter.javaTypeForBaseYangDecimal64Type(
                     rangeStatements, fractionDigits);
-        } else if (typeName.startsWith("int") || typeName.startsWith("uint")) {
+        } else if (typeName.startsWith("int")) {
             type = YangTypesConverter.javaTypeForBaseYangSignedIntegerType(typeName,
                     rangeStatements);
         } else if(typeName.startsWith("uint")) {

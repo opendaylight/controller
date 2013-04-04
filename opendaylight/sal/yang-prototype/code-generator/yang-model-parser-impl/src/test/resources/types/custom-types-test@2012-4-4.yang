@@ -1,0 +1,29 @@
+module custom-types-test {
+
+	yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "iit";
+    
+    organization "Cisco";
+    contact "WILL-BE-DEFINED-LATER";
+     
+    leaf inst-id-leaf1 {
+        type instance-identifier {
+     	    require-instance false;
+        }
+    }
+     
+    leaf inst-id-leaf2 {
+        type instance-identifier;
+    }
+
+    identity crypto-base {
+        description "crypto-base description";
+    }
+     
+    identity crypto-alg {
+        base "crypto-base";
+        description "crypto-alg description";
+    }
+	
+}

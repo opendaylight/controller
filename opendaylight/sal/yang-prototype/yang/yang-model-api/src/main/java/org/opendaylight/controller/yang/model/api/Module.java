@@ -44,6 +44,8 @@ public interface Module extends DataNodeContainer {
 
     Set<Deviation> getDeviations();
 
+    Set<IdentitySchemaNode> getIdentities();
+
     List<ExtensionDefinition> getExtensionSchemaNodes();
 
 }

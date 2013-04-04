@@ -19,7 +19,7 @@ module abstract-topology {
         reference "~~~ WILL BE DEFINED LATER";
     }
     
-    typedef network-node-id-ref {
+    typedef node-id-ref {
         type leafref {
             path "/tp:topology/tp:network-nodes/tp:network-node/tp:node-id";
         }

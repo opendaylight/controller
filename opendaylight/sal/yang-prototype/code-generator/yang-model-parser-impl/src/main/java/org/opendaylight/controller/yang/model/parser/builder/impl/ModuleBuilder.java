@@ -24,6 +24,7 @@ import org.opendaylight.controller.yang.model.api.Deviation;
 import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.FeatureDefinition;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
+import org.opendaylight.controller.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.ModuleImport;
 import org.opendaylight.controller.yang.model.api.NotificationDefinition;
@@ -71,6 +72,7 @@ public class ModuleBuilder implements Builder {
     private final Map<List<String>, UsesNodeBuilder> addedUsesNodes = new HashMap<List<String>, UsesNodeBuilder>();
     private final Map<List<String>, RpcDefinitionBuilder> addedRpcs = new HashMap<List<String>, RpcDefinitionBuilder>();
     private final Set<NotificationBuilder> addedNotifications = new HashSet<NotificationBuilder>();
+    private final Set<IdentitySchemaNodeBuilder> addedIdentities = new HashSet<IdentitySchemaNodeBuilder>();
     private final Map<List<String>, FeatureBuilder> addedFeatures = new HashMap<List<String>, FeatureBuilder>();
     private final Map<String, DeviationBuilder> addedDeviations = new HashMap<String, DeviationBuilder>();
     private final Map<List<String>, TypeDefinitionBuilder> addedTypedefs = new HashMap<List<String>, TypeDefinitionBuilder>();
@@ -83,7 +85,6 @@ public class ModuleBuilder implements Builder {
         this.name = name;
         instance = new ModuleImpl(name);
     }
-
 
 
     /**
@@ -142,6 +143,13 @@ public class ModuleBuilder implements Builder {
         }
         instance.setExtensionSchemaNodes(extensions);
 
+        // IDENTITIES
+        final Set<IdentitySchemaNode> identities = new HashSet<IdentitySchemaNode>();
+        for(IdentitySchemaNodeBuilder idBuilder : addedIdentities) {
+            identities.add(idBuilder.build());
+        }
+        instance.setIdentities(identities);
+
         return instance;
     }
 
@@ -151,6 +159,14 @@ public class ModuleBuilder implements Builder {
 
     public Map<List<String>, TypeAwareBuilder> getDirtyNodes() {
         return dirtyNodes;
+    }
+
+    public Set<AugmentationSchemaBuilder> getAddedAugments() {
+        return addedAugments;
+    }
+
+    public Set<IdentitySchemaNodeBuilder> getAddedIdentities() {
+        return addedIdentities;
     }
 
     public String getName() {
@@ -163,10 +179,6 @@ public class ModuleBuilder implements Builder {
 
     public Date getRevision() {
         return revision;
-    }
-
-    public Set<AugmentationSchemaBuilder> getAddedAugments() {
-        return addedAugments;
     }
 
     public void addDirtyNode(List<String> path) {
@@ -468,6 +480,13 @@ public class ModuleBuilder implements Builder {
         return builder;
     }
 
+    public IdentitySchemaNodeBuilder addIdentity(QName qname) {
+        IdentitySchemaNodeBuilder builder = new IdentitySchemaNodeBuilder(qname);
+        addedIdentities.add(builder);
+
+        return builder;
+    }
+
     public void addConfiguration(boolean configuration, List<String> parentPath) {
         Builder builder = moduleNodes.get(parentPath);
         if (builder instanceof DeviationBuilder) {
@@ -506,6 +525,7 @@ public class ModuleBuilder implements Builder {
         private Set<GroupingDefinition> groupings = Collections.emptySet();
         private Set<UsesNode> uses = Collections.emptySet();
         private List<ExtensionDefinition> extensionSchemaNodes = Collections.emptyList();
+        private Set<IdentitySchemaNode> identities = Collections.emptySet();
 
         private ModuleImpl(String name) {
             this.name = name;
@@ -706,6 +726,17 @@ public class ModuleBuilder implements Builder {
         private void setExtensionSchemaNodes(List<ExtensionDefinition> extensionSchemaNodes) {
             if(extensionSchemaNodes != null) {
                 this.extensionSchemaNodes = extensionSchemaNodes;
+            }
+        }
+
+        @Override
+        public Set<IdentitySchemaNode> getIdentities() {
+            return identities;
+        }
+
+        private void setIdentities(Set<IdentitySchemaNode> identities) {
+            if(identities != null) {
+                this.identities = identities;
             }
         }
 

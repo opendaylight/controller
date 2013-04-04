@@ -41,14 +41,13 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BinaryTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.api.type.DecimalTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang.model.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.AugmentationTargetBuilder;
@@ -56,6 +55,7 @@ import org.opendaylight.controller.yang.model.parser.builder.api.ChildNodeBuilde
 import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
+import org.opendaylight.controller.yang.model.parser.builder.impl.IdentitySchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.UnionTypeBuilder;
 import org.opendaylight.controller.yang.model.util.BaseConstraints;
@@ -102,14 +102,15 @@ public class YangModelParserImpl implements YangModelParser {
     private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuildersFromStreams(
             String... yangFiles) {
         InputStream[] streams = new InputStream[yangFiles.length];
-        for(int i = 0; i < yangFiles.length; i++) {
+        for (int i = 0; i < yangFiles.length; i++) {
             final String yangFileName = yangFiles[i];
             final File yangFile = new File(yangFileName);
             FileInputStream inStream = null;
             try {
                 inStream = new FileInputStream(yangFile);
-            } catch(FileNotFoundException e) {
-                logger.warn("Exception while reading yang stream: " + inStream, e);
+            } catch (FileNotFoundException e) {
+                logger.warn("Exception while reading yang stream: " + inStream,
+                        e);
             }
             streams[i] = inStream;
         }
@@ -138,14 +139,12 @@ public class YangModelParserImpl implements YangModelParser {
             if (builderRevision == null) {
                 builderRevision = createEpochTime();
             }
-
             TreeMap<Date, ModuleBuilder> builderByRevision = modules
                     .get(builderName);
             if (builderByRevision == null) {
                 builderByRevision = new TreeMap<Date, ModuleBuilder>();
             }
             builderByRevision.put(builderRevision, builder);
-
             modules.put(builderName, builderByRevision);
         }
         return modules;
@@ -205,6 +204,7 @@ public class YangModelParserImpl implements YangModelParser {
             ModuleBuilder builder) {
         resolveTypedefs(modules, builder);
         resolveAugments(modules, builder);
+        resolveIdentities(modules, builder);
     }
 
     /**
@@ -219,8 +219,7 @@ public class YangModelParserImpl implements YangModelParser {
     private void resolveTypedefs(
             Map<String, TreeMap<Date, ModuleBuilder>> modules,
             ModuleBuilder module) {
-        Map<List<String>, TypeAwareBuilder> dirtyNodes = module
-                .getDirtyNodes();
+        Map<List<String>, TypeAwareBuilder> dirtyNodes = module.getDirtyNodes();
         if (dirtyNodes.size() == 0) {
             return;
         } else {
@@ -244,7 +243,6 @@ public class YangModelParserImpl implements YangModelParser {
     private UnionTypeBuilder resolveUnionTypeBuilder(
             Map<String, TreeMap<Date, ModuleBuilder>> modules,
             ModuleBuilder builder, UnionTypeBuilder unionTypeBuilderToResolve) {
-
         List<TypeDefinition<?>> resolvedTypes = new ArrayList<TypeDefinition<?>>();
         List<TypeDefinition<?>> typesToRemove = new ArrayList<TypeDefinition<?>>();
 
@@ -277,26 +275,42 @@ public class YangModelParserImpl implements YangModelParser {
                 .iterator().next().getValue();
 
         TypeDefinition<?> targetTypeBaseType = targetType.getBaseType();
-        String targetTypeBaseTypeName = targetTypeBaseType.getQName()
-                .getLocalName();
 
         // RANGE
         List<RangeConstraint> ranges = ut.getRangeStatements();
         resolveRanges(ranges, targetType, modules, builder);
-
         // LENGTH
         List<LengthConstraint> lengths = ut.getLengthStatements();
         resolveLengths(lengths, targetType, modules, builder);
-
         // PATTERN
         List<PatternConstraint> patterns = ut.getPatterns();
-
         // Fraction Digits
         Integer fractionDigits = ut.getFractionDigits();
 
-        // MERGE CONSTRAINTS (enumeration and leafref omitted
-        // because
-        // they have no restrictions)
+        targetTypeBaseType = mergeConstraints(targetTypeBaseType, constraints, ranges, lengths,
+                patterns, fractionDigits);
+
+        return targetTypeBaseType;
+    }
+
+    /**
+     * Merge curent constraints with founded type constraints
+     *
+     * @param targetTypeBaseType
+     * @param constraints
+     * @param ranges
+     * @param lengths
+     * @param patterns
+     * @param fractionDigits
+     */
+    private TypeDefinition<?> mergeConstraints(TypeDefinition<?> targetTypeBaseType,
+            TypeConstraints constraints, List<RangeConstraint> ranges,
+            List<LengthConstraint> lengths, List<PatternConstraint> patterns,
+            Integer fractionDigits) {
+        String targetTypeBaseTypeName = targetTypeBaseType.getQName()
+                .getLocalName();
+        // enumeration, leafref and identityref omitted because they have no
+        // restrictions
         if (targetTypeBaseType instanceof DecimalTypeDefinition) {
             List<RangeConstraint> fullRanges = new ArrayList<RangeConstraint>();
             fullRanges.addAll(constraints.getRanges());
@@ -332,14 +346,7 @@ public class YangModelParserImpl implements YangModelParser {
             targetTypeBaseType = new BitsType(bits);
         } else if (targetTypeBaseType instanceof BinaryTypeDefinition) {
             targetTypeBaseType = new BinaryType(null, lengths, null);
-        } else if (targetTypeBaseTypeName.equals("instance-identifier")) {
-            // TODO: instance-identifier
-            /*
-             * boolean requireInstance = isRequireInstance(typeBody); type = new
-             * InstanceIdentifier(null, requireInstance);
-             */
         }
-
         return targetTypeBaseType;
     }
 
@@ -362,10 +369,14 @@ public class YangModelParserImpl implements YangModelParser {
      * Traverse through all referenced types chain until base YANG type is
      * founded.
      *
-     * @param constraints current type constraints
-     * @param modules all available modules
-     * @param unknownType unknown type
-     * @param builder current module
+     * @param constraints
+     *            current type constraints
+     * @param modules
+     *            all available modules
+     * @param unknownType
+     *            unknown type
+     * @param builder
+     *            current module
      * @return map, where key is type referenced and value is its constraints
      */
     private Map<TypeDefinitionBuilder, TypeConstraints> findTypeDefinitionBuilderWithConstraints(
@@ -373,8 +384,6 @@ public class YangModelParserImpl implements YangModelParser {
             Map<String, TreeMap<Date, ModuleBuilder>> modules,
             UnknownType unknownType, ModuleBuilder builder) {
         Map<TypeDefinitionBuilder, TypeConstraints> result = new HashMap<TypeDefinitionBuilder, TypeConstraints>();
-
-        // TypeDefinition<?> unknownType = typeBuilder.getType();
         QName unknownTypeQName = unknownType.getQName();
         String unknownTypeName = unknownTypeQName.getLocalName();
         String unknownTypePrefix = unknownTypeQName.getPrefix();
@@ -384,19 +393,8 @@ public class YangModelParserImpl implements YangModelParser {
         if (unknownTypePrefix.equals(builder.getPrefix())) {
             dependentModuleBuilder = builder;
         } else {
-            ModuleImport dependentModuleImport = getModuleImport(builder,
+            dependentModuleBuilder = findDependentModule(modules, builder,
                     unknownTypePrefix);
-            String dependentModuleName = dependentModuleImport.getModuleName();
-            Date dependentModuleRevision = dependentModuleImport.getRevision();
-            TreeMap<Date, ModuleBuilder> moduleBuildersByRevision = modules
-                    .get(dependentModuleName);
-            if (dependentModuleRevision == null) {
-                dependentModuleBuilder = moduleBuildersByRevision.lastEntry()
-                        .getValue();
-            } else {
-                dependentModuleBuilder = moduleBuildersByRevision
-                        .get(dependentModuleRevision);
-            }
         }
 
         // pull all typedef statements from dependent module...
@@ -445,10 +443,7 @@ public class YangModelParserImpl implements YangModelParser {
             } else if (referencedType instanceof BinaryTypeDefinition) {
                 constraints.addLengths(((BinaryTypeDefinition) referencedType)
                         .getLengthConstraints());
-            } else if (referencedType instanceof InstanceIdentifierTypeDefinition) {
-                // TODO: instance-identifier
             }
-
             result.put(lookedUpBuilder, constraints);
             return result;
         }
@@ -474,27 +469,17 @@ public class YangModelParserImpl implements YangModelParser {
             SchemaPath augmentTargetSchemaPath = augmentBuilder.getTargetPath();
             String prefix = null;
             List<String> augmentTargetPath = new ArrayList<String>();
+
             for (QName pathPart : augmentTargetSchemaPath.getPath()) {
                 prefix = pathPart.getPrefix();
                 augmentTargetPath.add(pathPart.getLocalName());
             }
-            ModuleImport dependentModuleImport = getModuleImport(module,
-                    prefix);
-            String dependentModuleName = dependentModuleImport.getModuleName();
-            augmentTargetPath.add(0, dependentModuleName);
+            ModuleBuilder dependentModule = findDependentModule(modules,
+                    module, prefix);
+            //
+            augmentTargetPath.add(0, dependentModule.getName());
+            //
 
-            Date dependentModuleRevision = dependentModuleImport.getRevision();
-
-            TreeMap<Date, ModuleBuilder> moduleBuildersByRevision = modules
-                    .get(dependentModuleName);
-            ModuleBuilder dependentModule;
-            if (dependentModuleRevision == null) {
-                dependentModule = moduleBuildersByRevision.lastEntry()
-                        .getValue();
-            } else {
-                dependentModule = moduleBuildersByRevision
-                        .get(dependentModuleRevision);
-            }
 
             AugmentationTargetBuilder augmentTarget = (AugmentationTargetBuilder) dependentModule
                     .getNode(augmentTargetPath);
@@ -521,6 +506,82 @@ public class YangModelParserImpl implements YangModelParser {
     }
 
     /**
+     * Go through identity statements defined in current module and resolve
+     * their 'base' statement if present.
+     *
+     * @param modules
+     *            all modules
+     * @param module
+     *            module being resolved
+     */
+    private void resolveIdentities(
+            Map<String, TreeMap<Date, ModuleBuilder>> modules,
+            ModuleBuilder module) {
+        Set<IdentitySchemaNodeBuilder> identities = module.getAddedIdentities();
+        for (IdentitySchemaNodeBuilder identity : identities) {
+            String baseIdentityName = identity.getBaseIdentityName();
+            if (baseIdentityName != null) {
+                String baseIdentityPrefix = null;
+                String baseIdentityLocalName = null;
+                if (baseIdentityName.contains(":")) {
+                    String[] splitted = baseIdentityName.split(":");
+                    baseIdentityPrefix = splitted[0];
+                    baseIdentityLocalName = splitted[1];
+                } else {
+                    baseIdentityPrefix = module.getPrefix();
+                    baseIdentityLocalName = baseIdentityName;
+                }
+                ModuleBuilder dependentModule;
+                if (baseIdentityPrefix.equals(module.getPrefix())) {
+                    dependentModule = module;
+                } else {
+                    dependentModule = findDependentModule(modules, module,
+                            baseIdentityPrefix);
+                }
+
+                Set<IdentitySchemaNodeBuilder> dependentModuleIdentities = dependentModule
+                        .getAddedIdentities();
+                for (IdentitySchemaNodeBuilder idBuilder : dependentModuleIdentities) {
+                    if (idBuilder.getQName().getLocalName()
+                            .equals(baseIdentityLocalName)) {
+                        identity.setBaseIdentity(idBuilder);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Find dependent module based on given prefix
+     *
+     * @param modules
+     *            all available modules
+     * @param module
+     *            current module
+     * @param prefix
+     *            target module prefix
+     * @return dependent module builder
+     */
+    private ModuleBuilder findDependentModule(
+            Map<String, TreeMap<Date, ModuleBuilder>> modules,
+            ModuleBuilder module, String prefix) {
+        ModuleImport dependentModuleImport = getModuleImport(module, prefix);
+        String dependentModuleName = dependentModuleImport.getModuleName();
+        Date dependentModuleRevision = dependentModuleImport.getRevision();
+
+        TreeMap<Date, ModuleBuilder> moduleBuildersByRevision = modules
+                .get(dependentModuleName);
+        ModuleBuilder dependentModule;
+        if (dependentModuleRevision == null) {
+            dependentModule = moduleBuildersByRevision.lastEntry().getValue();
+        } else {
+            dependentModule = moduleBuildersByRevision
+                    .get(dependentModuleRevision);
+        }
+        return dependentModule;
+    }
+
+    /**
      * Get module import referenced by given prefix.
      *
      * @param builder
@@ -544,10 +605,14 @@ public class YangModelParserImpl implements YangModelParser {
      * Helper method for resolving special 'min' or 'max' values in range
      * constraint
      *
-     * @param ranges ranges to resolve
-     * @param targetType target type
-     * @param modules all available modules
-     * @param builder current module
+     * @param ranges
+     *            ranges to resolve
+     * @param targetType
+     *            target type
+     * @param modules
+     *            all available modules
+     * @param builder
+     *            current module
      */
     private void resolveRanges(List<RangeConstraint> ranges,
             TypeDefinitionBuilder targetType,
@@ -584,10 +649,14 @@ public class YangModelParserImpl implements YangModelParser {
      * Helper method for resolving special 'min' or 'max' values in length
      * constraint
      *
-     * @param lengths lengths to resolve
-     * @param targetType target type
-     * @param modules all available modules
-     * @param builder current module
+     * @param lengths
+     *            lengths to resolve
+     * @param targetType
+     *            target type
+     * @param modules
+     *            all available modules
+     * @param builder
+     *            current module
      */
     private void resolveLengths(List<LengthConstraint> lengths,
             TypeDefinitionBuilder targetType,
