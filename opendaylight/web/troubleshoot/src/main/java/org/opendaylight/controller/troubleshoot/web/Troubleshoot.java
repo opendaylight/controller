@@ -36,7 +36,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
-import org.opendaylight.controller.web.IOneWeb;
+import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/")
-public class Troubleshoot implements IOneWeb {
+public class Troubleshoot implements IDaylightWeb {
     private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
     private final String WEB_NAME = "Troubleshoot";
     private final String WEB_ID = "troubleshoot";
@@ -53,7 +53,7 @@ public class Troubleshoot implements IOneWeb {
     private final String containerName = GlobalConstants.DEFAULT.toString();
 
     public Troubleshoot() {
-        ServiceHelper.registerGlobalService(IOneWeb.class, this, null);
+        ServiceHelper.registerGlobalService(IDaylightWeb.class, this, null);
     }
 
     @Override

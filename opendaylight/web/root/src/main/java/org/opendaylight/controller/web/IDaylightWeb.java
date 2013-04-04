@@ -15,7 +15,7 @@ import org.opendaylight.controller.sal.authorization.UserLevel;
  *
  *
  */
-public interface IOneWeb {
+public interface IDaylightWeb {
     public String getWebName();
 
     public String getWebId();

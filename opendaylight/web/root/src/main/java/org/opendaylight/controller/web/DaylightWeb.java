@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/")
-public class OneWeb {
+public class DaylightWeb {
     @RequestMapping(value = "")
     public String index(Model model) {
     	IUserManager userManager = (IUserManager) ServiceHelper
@@ -48,15 +48,15 @@ public class OneWeb {
     @RequestMapping(value = "web.json")
     @ResponseBody
     public Map<String, Map<String, Object>> bundles() {
-        Object[] instances = ServiceHelper.getGlobalInstances(IOneWeb.class,
+        Object[] instances = ServiceHelper.getGlobalInstances(IDaylightWeb.class,
                 this, null);
         Map<String, Map<String, Object>> bundles = new HashMap<String, Map<String, Object>>();
         Map<String, Object> entry;
-        IOneWeb bundle;
+        IDaylightWeb bundle;
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         IUserManager userManger = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         for (Object instance : instances) {
-            bundle = (IOneWeb) instance;
+            bundle = (IDaylightWeb) instance;
             if (userManger != null &&
             		bundle.isAuthorized(userManger.getUserLevel(userName))) {
 	            entry = new HashMap<String, Object>();

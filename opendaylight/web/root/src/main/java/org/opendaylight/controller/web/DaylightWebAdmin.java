@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 
 @Controller
 @RequestMapping("/admin")
-public class OneWebAdmin {
+public class DaylightWebAdmin {
     @RequestMapping("/users")
     @ResponseBody
     public List<UserConfig> getUsers() {

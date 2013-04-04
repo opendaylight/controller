@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.opendaylight.controller.usermanager.IUserManager;
-import org.opendaylight.controller.web.IOneWeb;
+import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,7 +48,7 @@ import com.google.gson.Gson;
 
 @Controller
 @RequestMapping("/")
-public class Devices implements IOneWeb {
+public class Devices implements IDaylightWeb {
     private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
     private final String WEB_NAME = "Devices";
     private final String WEB_ID = "devices";
@@ -56,7 +56,7 @@ public class Devices implements IOneWeb {
     private final String containerName = GlobalConstants.DEFAULT.toString();
 
     public Devices() {
-        ServiceHelper.registerGlobalService(IOneWeb.class, this, null);
+        ServiceHelper.registerGlobalService(IDaylightWeb.class, this, null);
     }
 
     @Override

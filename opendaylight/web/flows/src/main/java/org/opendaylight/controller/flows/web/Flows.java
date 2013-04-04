@@ -29,7 +29,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.usermanager.IUserManager;
-import org.opendaylight.controller.web.IOneWeb;
+import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +42,7 @@ import com.google.gson.Gson;
 
 @Controller
 @RequestMapping("/")
-public class Flows implements IOneWeb {
+public class Flows implements IDaylightWeb {
 	private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
     private static final String WEB_NAME = "Flows";
     private static final String WEB_ID = "flows";
@@ -50,7 +50,7 @@ public class Flows implements IOneWeb {
     private final String containerName = GlobalConstants.DEFAULT.toString();
 
     public Flows() {
-        ServiceHelper.registerGlobalService(IOneWeb.class, this, null);
+        ServiceHelper.registerGlobalService(IDaylightWeb.class, this, null);
     }
 
     @Override
