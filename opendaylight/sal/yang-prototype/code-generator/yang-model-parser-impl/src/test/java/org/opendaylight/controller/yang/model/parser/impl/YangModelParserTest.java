@@ -15,19 +15,19 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.model.api.type.IntegerTypeDefinition;
-import org.opendaylight.controller.model.api.type.PatternConstraint;
-import org.opendaylight.controller.model.api.type.RangeConstraint;
-import org.opendaylight.controller.model.util.Decimal64;
-import org.opendaylight.controller.model.util.Int32;
-import org.opendaylight.controller.model.util.StringType;
 import org.opendaylight.controller.yang.model.api.AugmentationSchema;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
+import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
+import org.opendaylight.controller.yang.model.util.Decimal64;
+import org.opendaylight.controller.yang.model.util.Int32;
+import org.opendaylight.controller.yang.model.util.StringType;
 
 public class YangModelParserTest {
 

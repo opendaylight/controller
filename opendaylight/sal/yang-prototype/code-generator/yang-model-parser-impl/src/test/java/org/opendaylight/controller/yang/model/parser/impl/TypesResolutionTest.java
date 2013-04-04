@@ -15,11 +15,11 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.model.api.type.EnumTypeDefinition.EnumPair;
-import org.opendaylight.controller.model.util.EnumerationType;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
+import org.opendaylight.controller.yang.model.util.EnumerationType;
 
 public class TypesResolutionTest {
 
