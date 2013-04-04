@@ -77,6 +77,7 @@ public class ModuleBuilder implements Builder {
     private final List<ExtensionBuilder> addedExtensions = new ArrayList<ExtensionBuilder>();
 
     private final Map<List<String>, TypeAwareBuilder> dirtyNodes = new HashMap<List<String>, TypeAwareBuilder>();
+    private final Map<List<String>, UnionTypeBuilder> unionTypes = new HashMap<List<String>, UnionTypeBuilder>();
 
     public ModuleBuilder(String name) {
         this.name = name;
@@ -449,6 +450,18 @@ public class ModuleBuilder implements Builder {
         parent.setType(type);
     }
 
+    public void addUnionType(List<String> parentPath) {
+        TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes.get(parentPath);
+        UnionTypeBuilder union = new UnionTypeBuilder();
+        parent.setType(union.build());
+
+        List<String> path = new ArrayList<String>(parentPath);
+        path.add("union");
+
+        unionTypes.put(path, union);
+        moduleNodes.put(path, union);
+    }
+
     public DeviationBuilder addDeviation(String targetPath) {
         DeviationBuilder builder = new DeviationBuilder(targetPath);
         addedDeviations.put(targetPath, builder);
@@ -581,7 +594,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setImports(Set<ModuleImport> imports) {
-            this.imports = imports;
+            if(imports != null) {
+                this.imports = imports;
+            }
         }
 
         @Override
@@ -590,7 +605,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setFeatures(Set<FeatureDefinition> features) {
-            this.features = features;
+            if(features != null) {
+                this.features = features;
+            }
         }
 
         @Override
@@ -599,7 +616,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setTypeDefinitions(Set<TypeDefinition<?>> typeDefinitions) {
-            this.typeDefinitions = typeDefinitions;
+            if(typeDefinitions != null) {
+                this.typeDefinitions = typeDefinitions;
+            }
         }
 
         @Override
@@ -608,7 +627,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setNotifications(Set<NotificationDefinition> notifications) {
-            this.notifications = notifications;
+            if(notifications != null) {
+                this.notifications = notifications;
+            }
         }
 
         @Override
@@ -617,7 +638,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setAugmentations(Set<AugmentationSchema> augmentations) {
-            this.augmentations = augmentations;
+            if(augmentations != null) {
+                this.augmentations = augmentations;
+            }
         }
 
         @Override
@@ -626,7 +649,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setRpcs(Set<RpcDefinition> rpcs) {
-            this.rpcs = rpcs;
+            if(rpcs != null) {
+                this.rpcs = rpcs;
+            }
         }
 
         @Override
@@ -635,7 +660,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setDeviations(Set<Deviation> deviations) {
-            this.deviations = deviations;
+            if(deviations != null) {
+                this.deviations = deviations;
+            }
         }
 
         @Override
@@ -644,7 +671,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setChildNodes(Map<QName, DataSchemaNode> childNodes) {
-            this.childNodes = childNodes;
+            if(childNodes != null) {
+                this.childNodes = childNodes;
+            }
         }
 
         @Override
@@ -653,7 +682,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setGroupings(Set<GroupingDefinition> groupings) {
-            this.groupings = groupings;
+            if(groupings != null) {
+                this.groupings = groupings;
+            }
         }
 
         @Override
@@ -662,7 +693,9 @@ public class ModuleBuilder implements Builder {
         }
 
         private void setUses(Set<UsesNode> uses) {
-            this.uses = uses;
+            if(uses != null) {
+                this.uses = uses;
+            }
         }
 
         @Override
@@ -702,21 +735,6 @@ public class ModuleBuilder implements Builder {
             result = prime * result + ((revision == null) ? 0 : revision.hashCode());
             result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
             result = prime * result + ((yangVersion == null) ? 0 : yangVersion.hashCode());
-            result = prime * result + ((description == null) ? 0 : description.hashCode());
-            result = prime * result + ((reference == null) ? 0 : reference.hashCode());
-
-            result = prime * result + ((organization == null) ? 0 : organization.hashCode());
-            result = prime * result + ((contact == null) ? 0 : contact.hashCode());
-            result = prime * result + ((imports == null) ? 0 : imports.hashCode());
-            result = prime * result + ((features == null) ? 0 : features.hashCode());
-            result = prime * result + ((typeDefinitions == null) ? 0 : typeDefinitions.hashCode());
-            result = prime * result + ((notifications == null) ? 0 : notifications.hashCode());
-            result = prime * result + ((augmentations == null) ? 0 : augmentations.hashCode());
-            result = prime * result + ((rpcs == null) ? 0 : rpcs.hashCode());
-            result = prime * result + ((deviations == null) ? 0 : deviations.hashCode());
-            result = prime * result + ((childNodes == null) ? 0 : childNodes.hashCode());
-            result = prime * result + ((groupings == null) ? 0 : groupings.hashCode());
-            result = prime * result + ((uses == null) ? 0 : uses.hashCode());
             return result;
         }
 
@@ -765,104 +783,6 @@ public class ModuleBuilder implements Builder {
                     return false;
                 }
             } else if (!yangVersion.equals(other.yangVersion)) {
-                return false;
-            }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (organization == null) {
-                if (other.organization != null) {
-                    return false;
-                }
-            } else if (!organization.equals(other.organization)) {
-                return false;
-            }
-            if (contact == null) {
-                if (other.contact != null) {
-                    return false;
-                }
-            } else if (!contact.equals(other.contact)) {
-                return false;
-            }
-            if (imports == null) {
-                if (other.imports != null) {
-                    return false;
-                }
-            } else if (!imports.equals(other.imports)) {
-                return false;
-            }
-            if (features == null) {
-                if (other.features != null) {
-                    return false;
-                }
-            } else if (!features.equals(other.features)) {
-                return false;
-            }
-            if (typeDefinitions == null) {
-                if (other.typeDefinitions != null) {
-                    return false;
-                }
-            } else if (!typeDefinitions.equals(other.typeDefinitions)) {
-                return false;
-            }
-            if (notifications == null) {
-                if (other.notifications != null) {
-                    return false;
-                }
-            } else if (!notifications.equals(other.notifications)) {
-                return false;
-            }
-            if (augmentations == null) {
-                if (other.augmentations != null) {
-                    return false;
-                }
-            } else if (!augmentations.equals(other.augmentations)) {
-                return false;
-            }
-            if (rpcs == null) {
-                if (other.rpcs != null) {
-                    return false;
-                }
-            } else if (!rpcs.equals(other.rpcs)) {
-                return false;
-            }
-            if (deviations == null) {
-                if (other.deviations != null) {
-                    return false;
-                }
-            } else if (!deviations.equals(other.deviations)) {
-                return false;
-            }
-            if (childNodes == null) {
-                if (other.childNodes != null) {
-                    return false;
-                }
-            } else if (!childNodes.equals(other.childNodes)) {
-                return false;
-            }
-            if (groupings == null) {
-                if (other.groupings != null) {
-                    return false;
-                }
-            } else if (!groupings.equals(other.groupings)) {
-                return false;
-            }
-            if (uses == null) {
-                if (other.uses != null) {
-                    return false;
-                }
-            } else if (!uses.equals(other.uses)) {
                 return false;
             }
             return true;

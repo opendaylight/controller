@@ -13,10 +13,12 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Stack;
+import java.util.TreeMap;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser;
@@ -44,6 +46,7 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.Revision_stmtCont
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Revision_stmtsContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Status_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Type_body_stmtsContext;
+import org.opendaylight.controller.antlrv4.code.gen.YangParser.Union_specificationContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yang_version_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParserBaseListener;
 import org.opendaylight.controller.model.util.YangTypesConverter;
@@ -164,16 +167,30 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
 
     @Override
     public void enterRevision_stmts(Revision_stmtsContext ctx) {
+        TreeMap<Date, Revision_stmtContext> revisions = new TreeMap<Date, Revision_stmtContext>();
+
         for (int i = 0; i < ctx.getChildCount(); ++i) {
             final ParseTree treeNode = ctx.getChild(i);
             if (treeNode instanceof Revision_stmtContext) {
                 final String revisionDateStr = stringFromNode(treeNode);
                 try {
-                    revision = simpleDateFormat.parse(revisionDateStr);
-                    moduleBuilder.setRevision(revision);
+                    Date revision = simpleDateFormat.parse(revisionDateStr);
+                    revisions.put(revision, (Revision_stmtContext)treeNode);
+
                 } catch (ParseException e) {
                     final String message = "Failed to parse revision string: "+ revisionDateStr;
                     logger.warn(message);
+                }
+            }
+        }
+        if(revisions.size() > 0) {
+            Revision_stmtContext revisionCtx = revisions.firstEntry().getValue();
+            moduleBuilder.setRevision(revisions.firstKey());
+
+            for(int i = 0; i < revisionCtx.getChildCount(); i++) {
+                ParseTree child = revisionCtx.getChild(i);
+                if(child instanceof Reference_stmtContext) {
+                    moduleBuilder.setReference(stringFromNode(child));
                 }
             }
         }
@@ -288,22 +305,41 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
             }
         }
 
+
+
         // if this is base yang type...
         if(YangTypesConverter.isBaseYangType(typeName)) {
             if (typeBody == null) {
                 // if there are no constraints, just grab default base yang type
                 type = YangTypesConverter.javaTypeForBaseYangType(typeName);
+                moduleBuilder.setType(type, actualPath);
             } else {
-                type = parseTypeBody(typeName, typeBody, actualPath, namespace, revision, yangModelPrefix);
+                if(typeName.equals("union")) {
+                    List<String> types = new ArrayList<String>();
+                    for(int i = 0; i < typeBody.getChildCount(); i++) {
+                        ParseTree unionSpec = typeBody.getChild(i);
+                        if(unionSpec instanceof Union_specificationContext) {
+                            for(int j = 0; j < unionSpec.getChildCount(); j++) {
+                                ParseTree typeSpec = unionSpec.getChild(j);
+                                types.add(stringFromNode(typeSpec));
+                            }
+                        }
+                    }
+                    moduleBuilder.addUnionType(actualPath);
+                } else {
+                    type = parseTypeBody(typeName, typeBody, actualPath, namespace, revision, yangModelPrefix);
+                    moduleBuilder.setType(type, actualPath);
+                }
             }
         } else {
             type = parseUnknownTypeBody(typeQName, typeBody);
             // mark parent node of this type statement as dirty
             moduleBuilder.addDirtyNode(actualPath);
+            moduleBuilder.setType(type, actualPath);
         }
 
-        moduleBuilder.setType(type, actualPath);
         updatePath(typeName);
+
     }
 
     @Override
