@@ -10,8 +10,6 @@ package org.opendaylight.controller.yang.model.parser.builder.impl;
 import java.util.Collections;
 import java.util.List;
 
-import org.opendaylight.controller.model.util.UnknownType;
-import org.opendaylight.controller.model.util.YangTypesConverter;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
@@ -20,6 +18,8 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
+import org.opendaylight.controller.yang.model.util.UnknownType;
+import org.opendaylight.controller.yang.model.util.YangTypesConverter;
 
 public class TypedefBuilder implements TypeDefinitionBuilder,
         SchemaNodeBuilder, TypeAwareBuilder {

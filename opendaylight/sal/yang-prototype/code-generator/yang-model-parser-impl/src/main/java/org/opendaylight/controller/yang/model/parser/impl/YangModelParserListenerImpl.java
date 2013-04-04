@@ -49,7 +49,6 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.Type_body_stmtsCo
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Union_specificationContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yang_version_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParserBaseListener;
-import org.opendaylight.controller.model.util.YangTypesConverter;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
@@ -67,6 +66,7 @@ import org.opendaylight.controller.yang.model.parser.builder.impl.NotificationBu
 import org.opendaylight.controller.yang.model.parser.builder.impl.RpcDefinitionBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.TypedefBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.UnknownSchemaNodeBuilder;
+import org.opendaylight.controller.yang.model.util.YangTypesConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

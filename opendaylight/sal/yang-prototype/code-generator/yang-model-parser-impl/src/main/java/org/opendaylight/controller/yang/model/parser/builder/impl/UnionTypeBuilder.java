@@ -10,12 +10,12 @@ package org.opendaylight.controller.yang.model.parser.builder.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendaylight.controller.model.util.UnionType;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
+import org.opendaylight.controller.yang.model.util.UnionType;
 
 public class UnionTypeBuilder implements TypeAwareBuilder, TypeDefinitionBuilder, Builder {
 

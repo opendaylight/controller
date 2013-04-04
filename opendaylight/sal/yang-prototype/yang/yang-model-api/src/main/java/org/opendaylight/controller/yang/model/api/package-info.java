@@ -23,14 +23,14 @@
  *   <dd>{@link org.opendaylight.controller.yang.model.api.AugmentationSchema}
  * 
  * <dt>base
- *   <dd>{@link org.opendaylight.controller.model.api.type.IdentityrefTypeDefinition#getIdentity()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition#getIdentity()}
  * 
  * <dt>belongs-to
  *   <dd>
  * 
  * <dt>bit
- *   <dd>{@link org.opendaylight.controller.model.api.type.BitsTypeDefinition.Bit}
- *   <dd>{@link org.opendaylight.controller.model.api.type.BitsTypeDefinition#getBits()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition#getBits()}
  * 
  * <dt>case
  *   <dd>{@link org.opendaylight.controller.yang.model.api.ChoiceCaseNode}
@@ -55,8 +55,8 @@
  *   <dd>{@link org.opendaylight.controller.yang.model.api.ConstraintMetaDefinition#getDescription()}
  * 
  * <dt>enum
- *   <dd>{@link org.opendaylight.controller.model.api.type.EnumTypeDefinition.EnumPair}
- *   <dd>{@link org.opendaylight.controller.model.api.type.EnumTypeDefinition#getValues()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition#getValues()}
  * 
  * <dt>error-app-tag
  *   <dd>{@link org.opendaylight.controller.yang.model.api.ConstraintMetaDefinition#getErrorAppTag()}
@@ -77,7 +77,7 @@
  *   <dd>{@link org.opendaylight.controller.yang.model.api.FeatureDefinition}
  * 
  * <dt>fraction-digits
- *   <dd>{@link org.opendaylight.controller.model.api.type.DecimalTypeDefinition#getFractionDigits()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.DecimalTypeDefinition#getFractionDigits()}
  * 
  * <dt>grouping
  *   <dd>{@link org.opendaylight.controller.yang.model.api.GroupingDefinition}
@@ -107,8 +107,8 @@
  *   <dd>{@link org.opendaylight.controller.yang.model.api.LeafListSchemaNode}
  * 
  * <dt>length
- *   <dd>{@link org.opendaylight.controller.model.api.type.LengthConstraint}
- *   <dd>{@link org.opendaylight.controller.model.api.type.StringTypeDefinition#getLengthStatements()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.LengthConstraint}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.StringTypeDefinition#getLengthStatements()}
  * 
  * <dt>list
  *   <dd>{@link org.opendaylight.controller.yang.model.api.ListSchemaNode}
@@ -146,14 +146,14 @@
  *   <dd>{@link org.opendaylight.controller.yang.model.api.RpcDefinition#getOutput()}
  * 
  * <dt>path
- *   <dd>{@link org.opendaylight.controller.model.api.type.LeafrefTypeDefinition#getPathStatement()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition#getPathStatement()}
  * 
  * <dt>pattern
  *   <dd>{@link org.opendaylight.controller.yang.model.base.type.api.PatternConstraint}
- *   <dd>{@link org.opendaylight.controller.model.api.type.StringTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.StringTypeDefinition}
  * 
  * <dt>position
- *   <dd>{@link org.opendaylight.controller.model.api.type.BitsTypeDefinition.Bit#getPosition()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit#getPosition()}
  * 
  * <dt>prefix
  *   <dd>{@link org.opendaylight.controller.yang.model.api.Module#getPrefix()}
@@ -163,9 +163,9 @@
  *   <dd>{@link org.opendaylight.controller.yang.model.api.ContainerSchemaNode#isPresenceContainer()}
  * 
  * <dt>range
- *   <dd>{@link org.opendaylight.controller.model.api.type.RangeConstraint}
- *   <dd>{@link org.opendaylight.controller.model.api.type.IntegerTypeDefinition#getRangeStatements()}
- *   <dd>{@link org.opendaylight.controller.model.api.type.UnsignedIntegerTypeDefinition#getRangeStatements()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.RangeConstraint}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition#getRangeStatements()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition#getRangeStatements()}
  * 
  * <dt>reference
  *   <dd>{@link org.opendaylight.controller.yang.model.api.SchemaNode#getReference()}
@@ -174,7 +174,7 @@
  *   <dd>
  * 
  * <dt>require-instance
- *   <dd>{@link org.opendaylight.controller.model.api.type.InstanceIdentifierTypeDefinition#requireInstance()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition#requireInstance()}
  * 
  * <dt>revision
  *   <dd>{@link org.opendaylight.controller.yang.model.api.Module#getRevision()}
@@ -210,7 +210,7 @@
  *   <dd>{@link org.opendaylight.controller.yang.model.api.DataNodeContainere#getUses()}
  * 
  * <dt>value
- *   <dd>{@link org.opendaylight.controller.model.api.type.EnumTypeDefinition.EnumPair#getValue()}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair#getValue()}
  * 
  * <dt>when
  *   <dd>{@link org.opendaylight.controller.yang.model.api.ConstraintDefinition#getWhenCondition()}
@@ -272,39 +272,39 @@
  * 
  * <dl>
  * <dt>Integer built-in type
- *   <dd>{@link org.opendaylight.controller.model.api.type.IntegerTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition}
  * 
  * <dt>Unsigned integer built-in type
- *   <dd>{@link org.opendaylight.controller.model.api.type.UnsignedIntegerTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition}
  * 
  * <dt>Decimal64 built-ib type
- *   <dd>{@link org.opendaylight.controller.model.api.type.DecimalTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.DecimalTypeDefinition}
  * 
  * <dt>Boolean built-in type
- *   <dd>{@link org.opendaylight.controller.model.api.type.BooleanTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.BooleanTypeDefinition}
  *   
  * <dt>Enumeration built-in type
- *   <dd>{@link org.opendaylight.controller.model.api.type.EnumTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition}
  *   
  * <dt>Bits Built-In Type
- *   <dd>{@link org.opendaylight.controller.model.api.type.BitsTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition}
  * 
  * <dt>The binary Built-In Type
- *   <dd>{@link org.opendaylight.controller.model.api.type.BinaryTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.BinaryTypeDefinition}
  *   
  * <dt>The leafref Built-In Type
- *   <dd>{@link org.opendaylight.controller.model.api.type.LeafrefTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition}
  * 
  * <dt>The identityref Built-In Type
- *   <dd>{@link org.opendaylight.controller.model.api.type.IdentityrefTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition}
  *   
  * <dt>The empty Built-In Type
- *   <dd>{@link org.opendaylight.controller.model.api.type.EmptyTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.EmptyTypeDefinition}
  *   
  * <dt>The union Built-In Type
- *   <dd>{@link org.opendaylight.controller.model.api.type.UnionTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.UnionTypeDefinition}
  * <dt>The instance-identifier Built-In Type
- *   <dd>{@link org.opendaylight.controller.model.api.type.InstanceIdentifierTypeDefinition}
+ *   <dd>{@link org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition}
  * 
  * </dl>
  */

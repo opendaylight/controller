@@ -11,12 +11,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.opendaylight.controller.model.util.RevisionAwareXPathImpl;
 import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.parser.builder.api.Builder;
+import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
 
 public class ConstraintsBuilder implements Builder {
 
