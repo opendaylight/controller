@@ -36,6 +36,9 @@
   <logger name="org.opendaylight.controller.protocol_plugin.openflow.internal.InventoryServiceShim" level="INFO"/>
   <logger name="org.opendaylight.controller.protocol_plugin.openflow.internal.TopologyServices" level="INFO"/>
   <logger name="org.opendaylight.controller.protocol_plugin.openflow.internal.TopologyServiceShim" level="INFO"/>
+  <logger name="org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller" level="INFO"/>
+  <logger name="org.opendaylight.controller.protocol_plugin.openflow.core.internal.SwitchHandler" level="INFO"/>
+  <logger name="org.opendaylight.controller.protocol_plugin.openflow.core.internal.SwitchIOSecureService" level="INFO"/>
   <!-- SAL  -->
   <logger name="org.opendaylight.controller.sal" level="INFO"/>
   <logger name="org.opendaylight.controller.sal.implementation" level="INFO"/>
