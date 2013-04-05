@@ -825,12 +825,20 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     @Override
     public UserLevel getUserLevel(String username) {
         // Returns the controller well-know user level for the passed user
-        if (!activeUsers.containsKey(username)) {
-            return UserLevel.NOUSER;
-        }
+    	String roleName = null;
 
+    	// First check in active users then in local configured users
+        if (activeUsers.containsKey(username)) {
+        	roleName = activeUsers.get(username).getUserRoles().get(0);
+        } else if (localUserConfigList.containsKey(username)) {
+        	roleName = localUserConfigList.get(username).getRole();
+        }
+        
+        if (roleName == null) {
+        	return UserLevel.NOUSER;
+        }
+        
         // For now only one role per user is allowed
-        String roleName = activeUsers.get(username).getUserRoles().get(0);
         if (roleName.equals(UserLevel.SYSTEMADMIN.toString())) {
             return UserLevel.SYSTEMADMIN;
         }
@@ -851,7 +859,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             }
         }
         return UserLevel.NOUSER;
-
     }
 
     @Override

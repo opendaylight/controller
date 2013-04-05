@@ -12,6 +12,8 @@ package org.opendaylight.controller.sal.authorization;
 import java.util.List;
 import java.util.Set;
 
+import org.opendaylight.controller.sal.utils.Status;
+
 /**
  * Interface for applications which maintain an authorization
  * database for their resources. Respective application web bundle
@@ -25,9 +27,18 @@ public interface IResourceAuthorization {
      *
      * @param role	the role name
      * @param userLevel	the user level in the application context
-     */
-    public void createRole(String role, AppRoleLevel userLevel);
+	 * @return the status of the request
+	 */
+    public Status createRole(String role, AppRoleLevel userLevel);
 
+    /**
+     * Remove a Role
+     * 
+     * @param role the role name
+     * @return the status of the request
+     */
+    public Status removeRole(String role);
+    
     /**
      * Return the list of roles configured for the application
      *
@@ -59,15 +70,17 @@ public interface IResourceAuthorization {
      *
      * @param groupName the name for the resource group
      * @param resources the list of resources for the group
+     * @return the status of the request
      */
-    public void createResourceGroup(String groupName, List<Object> resources);
+    public Status createResourceGroup(String groupName, List<Object> resources);
 
     /**
      * Removes a resource group
      *
      * @param groupName the name of the group
+     * @return the status of the request
      */
-    public void removeResourceGroup(String groupName);
+    public Status removeResourceGroup(String groupName);
 
     /**
      * Returns the list of resource groups configured for the application
@@ -81,10 +94,20 @@ public interface IResourceAuthorization {
      *
      * @param groupName the object expressing the resource group name and the access privilege
      * @param role the user group (role) name
+     * @return the status of the request
      */
-    public void assignResourceGroupToRole(String groupName,
+    public Status assignResourceGroupToRole(String groupName,
             Privilege privilege, String role);
 
+    /**
+     * Unassign the passed resource group from the specified role
+     * 
+     * @param group
+     * @param role
+     * @return the status of the request
+     */
+    public Status unassignResourceGroupFromRole(String group, String role);
+    
     /**
      * Returns the list of resource groups the given Role is authorized to use
      * The returning object expresses the resource group name and the access
@@ -146,7 +169,7 @@ public interface IResourceAuthorization {
      *
      * @param userName
      * @param resource
-     * @return
+     * @return the privilege the user has on the passed resource
      */
     public Privilege getResourcePrivilege(String userName, Object resource);
 
