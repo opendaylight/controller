@@ -1,0 +1,57 @@
+module types1 {
+	yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+    
+    import types2 {
+         prefix "data";
+         revision-date 2013-02-27;
+     }
+    
+    organization "Cisco";
+    contact "WILL-BE-DEFINED-LATER";
+    
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+    
+    container interfaces {
+         list ifEntry {
+             key "ifIndex";
+
+             leaf ifIndex {
+                 type uint32;
+                 units minutes;
+             }
+             
+             leaf ifMtu {
+                 type int32;
+             }
+         }
+     }
+     
+	leaf testleaf {
+		type data:my-base-int32-type {
+			range "min..max";
+		}
+	}
+	
+	leaf test-string-leaf {
+		type data:my-string-type-ext;
+	}
+	
+	leaf test-int-leaf {
+		type data:my-int-type-ext;
+	}
+	
+	leaf test-decimal-leaf {
+		type data:my-decimal-type {
+			fraction-digits 4;
+		}
+	}
+	
+	leaf test-decimal-leaf2 {
+		type data:my-decimal-type-ext;
+	}
+
+}
