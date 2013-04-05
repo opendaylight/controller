@@ -7,9 +7,20 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
+/**
+ * Trigger for refreshing of the data exposed by the {@link Provider}
+ * 
+ * 
+ * 
+ */
+public interface DataRefresher extends
+        BindingAwareProvider.ProviderFunctionality {
 
-public interface DataRefresher extends ProviderFunctionality {
-
+    /**
+     * Fired when some component explicitly requested the data refresh.
+     * 
+     * The provider which exposed the {@link DataRefresher} should republish its
+     * provided data by editing the data in all affected data stores.
+     */
     void refreshData();
 }

@@ -62,24 +62,6 @@ public interface DataProviderService extends DataBrokerService {
      * @param store
      * @param refresher
      */
-    void removeRefresher(DataStoreIdentifier store, DataRefresher refresher);
-
-    /**
-     * Trigger for refreshing of the data exposed by the {@link Provider}
-     * 
-
-     * 
-     */
-    public interface DataRefresher extends
-            BindingAwareProvider.ProviderFunctionality {
-
-        /**
-         * Fired when some component explicitly requested the data refresh.
-         * 
-         * The provider which exposed the {@link DataRefresher} should republish
-         * its provided data by editing the data in all affected data stores.
-         */
-        void refreshData();
-    }
+   void removeRefresher(DataStoreIdentifier store, DataRefresher refresher);
 
 }
