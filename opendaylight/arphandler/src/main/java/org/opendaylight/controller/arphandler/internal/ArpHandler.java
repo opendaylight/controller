@@ -71,7 +71,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
 
     void unsetDataPacketService(IDataPacketService s) {
         if (this.dataPacketService == s) {
-            this.dataPacketService = s;
+            this.dataPacketService = null;
         }
     }
 
