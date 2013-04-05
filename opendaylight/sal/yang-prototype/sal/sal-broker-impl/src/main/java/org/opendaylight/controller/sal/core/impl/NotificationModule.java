@@ -22,7 +22,6 @@ import org.opendaylight.controller.sal.core.api.Provider.ProviderFunctionality;
 import org.opendaylight.controller.sal.core.api.notify.NotificationListener;
 import org.opendaylight.controller.sal.core.api.notify.NotificationProviderService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationService;
-import org.opendaylight.controller.sal.core.impl.BrokerServiceImpl;
 import org.opendaylight.controller.sal.core.spi.BrokerModule;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
@@ -40,21 +39,25 @@ public class NotificationModule implements BrokerModule {
     private Multimap<QName, NotificationListener> listeners = HashMultimap
             .create();
 
-    private static final Set<Class<? extends BrokerService>> providedServices = ImmutableSet
+    private static final Set<Class<? extends BrokerService>> PROVIDED_SERVICE_TYPE = ImmutableSet
             .of((Class<? extends BrokerService>) NotificationService.class,
                     NotificationProviderService.class);
 
+    private static final Set<Class<? extends ConsumerFunctionality>> SUPPORTED_CONSUMER_FUNCTIONALITY = ImmutableSet
+            .of((Class<? extends ConsumerFunctionality>) NotificationListener.class,
+                    NotificationListener.class); // Workaround: if we use the
+                                                 // version of method with only
+                                                 // one argument, the generics
+                                                 // inference will not work
+
     @Override
     public Set<Class<? extends BrokerService>> getProvidedServices() {
-        return providedServices;
+        return PROVIDED_SERVICE_TYPE;
     }
 
     @Override
     public Set<Class<? extends ConsumerFunctionality>> getSupportedConsumerFunctionality() {
-        // FIXME Refactor
-        Set<Class<? extends ConsumerFunctionality>> ret = new HashSet<Class<? extends ConsumerFunctionality>>();
-        ret.add(NotificationListener.class);
-        return ret;
+        return SUPPORTED_CONSUMER_FUNCTIONALITY;
     }
 
     @Override
@@ -107,8 +110,8 @@ public class NotificationModule implements BrokerModule {
         return new NotificationProviderSessionImpl();
     }
 
-    private class NotificationConsumerSessionImpl extends BrokerServiceImpl
-            implements NotificationService {
+    private class NotificationConsumerSessionImpl implements
+            NotificationService {
 
         private Multimap<QName, NotificationListener> consumerListeners = HashMultimap
                 .create();

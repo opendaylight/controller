@@ -7,15 +7,15 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>sal-common</module>
+		<module>sal-common-util</module>
 		<module>sal-core-api</module>
 		<module>sal-data-api</module>
 		<module>sal-binding-api</module>
 		<module>sal-binding-spi</module>
 		<module>sal-binding-broker-impl</module>
 		<module>sal-schema-repository-api</module>
-		<module>sal-common</module>
 		<module>sal-core-spi</module>
-		<module>../yang</module>
 		<module>sal-broker-impl</module>
 		<module>sal-core-demo</module>
 	</modules>
@@ -33,6 +33,11 @@
 				<artifactId>slf4j-api</artifactId>
 				<version>1.7.2</version>
 			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.10</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -40,7 +45,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.10</version>
 			<scope>test</scope>
 			<optional>true</optional>
 		</dependency>

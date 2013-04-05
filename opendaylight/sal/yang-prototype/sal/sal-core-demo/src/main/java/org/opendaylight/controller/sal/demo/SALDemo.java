@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.opendaylight.controller.sal.core.impl.BrokerImpl;
-import org.opendaylight.controller.sal.core.impl.notify.NotificationModule;
+import org.opendaylight.controller.sal.core.impl.NotificationModule;
 
 
 public class SALDemo {

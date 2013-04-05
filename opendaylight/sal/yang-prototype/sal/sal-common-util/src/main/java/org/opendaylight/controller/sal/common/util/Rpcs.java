@@ -5,38 +5,17 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.core.impl;
+package org.opendaylight.controller.sal.common.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.common.RpcError;
 import org.opendaylight.controller.yang.common.RpcResult;
-import org.opendaylight.controller.yang.data.api.CompositeNode;
 
-
-public class RpcUtils {
-
-    Callable<RpcResult<CompositeNode>> callableFor(
-            final RpcImplementation implemenation, final QName rpc,
-            final CompositeNode input) {
-
-        return new Callable<RpcResult<CompositeNode>>() {
-
-            @Override
-            public RpcResult<CompositeNode> call() throws Exception {
-                return implemenation.invokeRpc(rpc, input);
-            }
-        };
-    }
-
+public class Rpcs {
     public static <T> RpcResult<T> getRpcResult(boolean successful, T result,
-            List<RpcError> errors) {
+            Collection<RpcError> errors) {
         RpcResult<T> ret = new RpcResultTO<T>(successful, result, errors);
         return ret;
     }
@@ -47,7 +26,8 @@ public class RpcUtils {
         private final T result;
         private final boolean successful;
 
-        public RpcResultTO(boolean successful, T result, List<RpcError> errors) {
+        public RpcResultTO(boolean successful, T result,
+                Collection<RpcError> errors) {
             this.successful = successful;
             this.result = result;
             this.errors = Collections.unmodifiableList(new ArrayList<RpcError>(
@@ -71,4 +51,3 @@ public class RpcUtils {
 
     }
 }
-

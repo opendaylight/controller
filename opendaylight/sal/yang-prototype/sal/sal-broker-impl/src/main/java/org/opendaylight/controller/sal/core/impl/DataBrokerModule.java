@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.core.impl.data;
+package org.opendaylight.controller.sal.core.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,9 +13,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
+import org.opendaylight.controller.sal.common.util.Rpcs;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
@@ -27,7 +29,6 @@ import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.data.DataValidator;
 import org.opendaylight.controller.sal.core.api.data.DataCommitHandler.CommitTransaction;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService.DataRefresher;
-import org.opendaylight.controller.sal.core.impl.RpcUtils;
 import org.opendaylight.controller.sal.core.spi.BrokerModule;
 import org.opendaylight.controller.yang.common.RpcError;
 import org.opendaylight.controller.yang.common.RpcResult;
@@ -36,33 +37,40 @@ import org.opendaylight.controller.yang.data.api.CompositeNodeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableSet;
 
 public class DataBrokerModule implements BrokerModule {
 
     private static final Logger log = LoggerFactory
             .getLogger(DataBrokerModule.class);
 
+    private static final Set<Class<? extends ProviderFunctionality>> SUPPORTED_PROVIDER_FUNCTIONALITY = ImmutableSet
+            .of((Class<? extends ProviderFunctionality>) DataValidator.class,
+                    DataRefresher.class, DataCommitHandler.class);
+
+    private static final Set<Class<? extends BrokerService>> PROVIDED_SESSION_SERVICES = ImmutableSet
+            .of((Class<? extends BrokerService>) DataBrokerService.class,
+                    DataProviderService.class);
+
     private Map<DataStoreIdentifier, StoreContext> storeContext;
 
+    private ExecutorService executor;
+    
     private SequentialCommitHandlerCoordinator coordinator = new SequentialCommitHandlerCoordinator();
 
     @Override
     public Set<Class<? extends BrokerService>> getProvidedServices() {
-        // FIXME: Refactor
-        Set<Class<? extends BrokerService>> ret = new HashSet<Class<? extends BrokerService>>();
-        ret.add(DataBrokerService.class);
-        ret.add(DataProviderService.class);
-        return ret;
+        return PROVIDED_SESSION_SERVICES;
     }
 
     @Override
     public Set<Class<? extends ProviderFunctionality>> getSupportedProviderFunctionality() {
-        // FIXME Refactor
-        Set<Class<? extends ProviderFunctionality>> ret = new HashSet<Class<? extends ProviderFunctionality>>();
-        ret.add(DataValidator.class);
-        ret.add(DataCommitHandler.class);
-        ret.add(DataRefresher.class);
-        return ret;
+        return SUPPORTED_PROVIDER_FUNCTIONALITY;
+    }
+
+    @Override
+    public Set<Class<? extends ConsumerFunctionality>> getSupportedConsumerFunctionality() {
+        return Collections.emptySet();
     }
 
     @Override
@@ -85,25 +93,24 @@ public class DataBrokerModule implements BrokerModule {
     }
 
     private DataProviderService newDataProviderService(ConsumerSession session) {
-        // TODO Implement this method
-        throw new UnsupportedOperationException("Not implemented");
+        return new DataProviderSession();
     }
 
     private DataBrokerService newDataConsumerService(ConsumerSession session) {
-        // TODO Implement this method
-        throw new UnsupportedOperationException("Not implemented");
+        return new DataConsumerSession();
     }
 
-    @Override
-    public Set<Class<? extends ConsumerFunctionality>> getSupportedConsumerFunctionality() {
-        // TODO Implement this method
-        throw new UnsupportedOperationException("Not implemented");
+    private StoreContext context(DataStoreIdentifier store) {
+        return storeContext.get(store);
     }
 
     private static class StoreContext {
-        private Set<DataCommitHandler> commitHandlers = new HashSet<DataCommitHandler>();
-        private Set<DataValidator> validators = new HashSet<DataValidator>();
-        private Set<DataRefresher> refreshers = new HashSet<DataRefresher>();
+        private Set<DataCommitHandler> commitHandlers = Collections
+                .synchronizedSet(new HashSet<DataCommitHandler>());
+        private Set<DataValidator> validators = Collections
+                .synchronizedSet(new HashSet<DataValidator>());
+        private Set<DataRefresher> refreshers = Collections
+                .synchronizedSet(new HashSet<DataRefresher>());
     }
 
     private class DataConsumerSession implements DataBrokerService {
@@ -153,10 +160,12 @@ public class DataBrokerModule implements BrokerModule {
             throw new UnsupportedOperationException("Not implemented");
         }
 
-    }
+        @Override
+        public Set<DataStoreIdentifier> getDataStores() {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
-    private StoreContext context(DataStoreIdentifier store) {
-        return storeContext.get(store);
     }
 
     private class DataProviderSession extends DataConsumerSession implements
@@ -265,7 +274,7 @@ public class DataBrokerModule implements BrokerModule {
             }
             CommitTransaction transaction = new SequentialCommitTransaction(
                     store, transactions);
-            return RpcUtils.getRpcResult(successful, transaction, errors);
+            return Rpcs.getRpcResult(successful, transaction, errors);
         }
 
         @Override
@@ -306,7 +315,7 @@ public class DataBrokerModule implements BrokerModule {
                     break;
             }
 
-            return RpcUtils.getRpcResult(successful, null, errors);
+            return Rpcs.getRpcResult(successful, null, errors);
         }
 
         @Override
@@ -330,7 +339,7 @@ public class DataBrokerModule implements BrokerModule {
                     break;
             }
 
-            return RpcUtils.getRpcResult(successful, null, errors);
+            return Rpcs.getRpcResult(successful, null, errors);
         }
 
         @Override
@@ -374,7 +383,7 @@ public class DataBrokerModule implements BrokerModule {
                     break;
             }
 
-            return RpcUtils.getRpcResult(successful, null, errors);
+            return Rpcs.getRpcResult(successful, null, errors);
         }
 
         @Override
@@ -408,4 +417,3 @@ public class DataBrokerModule implements BrokerModule {
         }
     }
 }
-

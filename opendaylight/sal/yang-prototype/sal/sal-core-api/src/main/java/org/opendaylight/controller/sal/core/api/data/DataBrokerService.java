@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.core.api.data;
 
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
@@ -29,6 +30,9 @@ import org.opendaylight.controller.yang.data.api.Node;
  */
 public interface DataBrokerService extends BrokerService {
 
+    
+    Set<DataStoreIdentifier> getDataStores();
+    
     /**
      * Returns a data from specified Data Store.
      * 
