@@ -1,0 +1,100 @@
+module types2 {
+	yang-version 1;
+    namespace "urn:simple.types.data.demo";
+    prefix "t2";
+    
+    import types1 {
+         prefix "if";
+         revision-date 2013-02-27;
+     }
+
+    organization "Cisco";
+    contact "WILL-BE-DEFINED-LATER";
+    description "This is types-data test description";
+
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+    
+    typedef my-base-int32-type {
+		type int32 {
+        	range "2..20";
+        }
+	}
+
+     typedef my-type1 {
+     	type my-base-int32-type {
+        	range "11..max";
+    	}
+	}
+	
+	typedef my-string-type {
+		type string {
+			pattern "[a-k]*";
+		}
+	}
+	
+	typedef my-string-type2 {
+		type my-string-type {
+			pattern "[b-u]*";
+		}
+	}
+	
+	typedef my-string-type-ext {
+		type my-string-type2 {
+			pattern "[e-z]*";
+		}
+	}
+	
+	typedef my-int-type {
+		type int32 {
+			range "10..20";
+		}
+	}
+	
+	typedef my-int-type2 {
+		type my-int-type {
+			range "12..18";
+		}
+	}
+	
+	typedef my-int-type-ext {
+		type my-int-type2 {
+			range "14..16";
+		}
+	}
+	
+	typedef my-decimal-type {
+		type decimal64 {
+			fraction-digits 6;
+		}
+	}
+	
+	typedef my-decimal-type-ext {
+		type decimal64 {
+			fraction-digits 5;
+		}
+	}
+
+    augment "/if:interfaces/if:ifEntry" {
+    	when "if:ifType='ds0'";
+        leaf ds0ChannelNumber {
+        	type string;
+        }
+	}
+
+    leaf if-name {
+    	type leafref {
+        	path "/interface/name";
+        }
+    }
+     
+    leaf name {
+    	type string;
+    }
+     
+	leaf nested-type-leaf {
+		type my-type1;
+	}
+
+}
