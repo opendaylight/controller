@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 public enum AppRoleLevel implements Serializable {
     APPADMIN(0, "App-Admin", "Application Administrator"), APPUSER(1,
-            "App-User", "Application User"), APPOPERATOR(2, "Network-Operator",
+            "App-User", "Application User"), APPOPERATOR(2, "App-Operator",
             "Application Operator"), NOUSER(255, "Unknown User", "Unknown User");
 
     private int userLevel;
@@ -43,4 +43,13 @@ public enum AppRoleLevel implements Serializable {
     public String toStringPretty() {
         return this.prettyLevel;
     }
-}
+    
+    public static AppRoleLevel fromString(String levelString) {
+    	for (AppRoleLevel level : AppRoleLevel.values()) {
+    		if (level.toString().equals(levelString)) {
+    			return level;
+    		}
+    	}
+    	return null;    		
+    }
+} 

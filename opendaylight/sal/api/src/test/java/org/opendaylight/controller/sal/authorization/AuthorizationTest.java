@@ -52,7 +52,7 @@ import org.opendaylight.controller.sal.utils.NodeCreator;
 	@Test
 	public void testAppRoleLevel() {
 		AppRoleLevel appRoleLevel = AppRoleLevel.APPOPERATOR;
-		Assert.assertTrue(appRoleLevel.toString().equals("Network-Operator"));
+		Assert.assertTrue(appRoleLevel.toString().equals("App-Operator"));
 		Assert.assertTrue(appRoleLevel.toNumber() == 2);
 		Assert.assertTrue(appRoleLevel.toStringPretty().equals("Application Operator"));
 	}
@@ -63,5 +63,15 @@ import org.opendaylight.controller.sal.utils.NodeCreator;
 		Assert.assertTrue(userLevel.toString().equals("System-Admin"));
 		Assert.assertTrue(userLevel.toNumber() == 0);
 		Assert.assertTrue(userLevel.toStringPretty().equals("System Administrator"));
+	}
+	
+	@Test
+	public void testAppRoleLevelFromString() {
+		Assert.assertTrue(AppRoleLevel.fromString("App-Admin") == AppRoleLevel.APPADMIN);
+		Assert.assertTrue(AppRoleLevel.fromString("App-User") == AppRoleLevel.APPUSER);
+		Assert.assertTrue(AppRoleLevel.fromString("App-Operator") == AppRoleLevel.APPOPERATOR);
+		Assert.assertTrue(AppRoleLevel.fromString(" ") == null);
+		Assert.assertTrue(AppRoleLevel.fromString("") == null);
+		Assert.assertTrue(AppRoleLevel.fromString("App-Admini") == null);		
 	}
 }
