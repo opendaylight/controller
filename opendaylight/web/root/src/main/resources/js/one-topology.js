@@ -108,10 +108,14 @@ one.topology.init = function(json) {
 			enable: true,
 			type: 'Native',
 			onMouseEnter: function(node, eventInfo, e) {
-				if (node.id != undefined) // if node
+				// if node
+				if (node.id != undefined) {
 					one.topology.graph.canvas.getElement().style.cursor = 'move';
-				else if (eventInfo.edge != undefined && eventInfo.edge.nodeTo.data["$type"] == "swtch" && eventInfo.edge.nodeFrom.data["$type"] == "swtch")
+				} else if (eventInfo.edge != undefined && 
+						eventInfo.edge.nodeTo.data["$type"] == "swtch" && 
+						eventInfo.edge.nodeFrom.data["$type"] == "swtch") {
 					one.topology.graph.canvas.getElement().style.cursor = 'pointer';
+				}
 			},
 			onMouseLeave: function(node, eventInfo, e) {
 				one.topology.graph.canvas.getElement().style.cursor = '';
@@ -137,7 +141,11 @@ one.topology.init = function(json) {
 				$.post('/controller/web/topology/node/' + did, data);
 			},
 			onClick: function(node, eventInfo, e) {
-				return false;
+				if(one.f.topology === undefined) {
+					return false;
+				} else {
+					one.f.topology.Events.onClick(node, eventInfo);
+				}
 			}
 		},
 		iterations: 200,
@@ -177,6 +185,7 @@ one.topology.init = function(json) {
 			style.textAlign = "center";
 		}
 	});
+
 	one.topology.graph.loadJSON(json);
 	// compute positions incrementally and animate.
 	one.topology.graph.computeIncremental({
@@ -194,7 +203,7 @@ one.topology.init = function(json) {
 					node.setPos(new $jit.Complex(x, y), "end");
 				}
 			}
-			console.log('done');
+                        console.log('done');
 			one.topology.graph.animate({
 				modes: ['linear'],
 				transition: $jit.Trans.Elastic.easeOut,
