@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAADn///8E\u003d",
+        "filename": "opendaylight/routing/dijkstra_implementation/src/main/resources/OSGI-INF/component.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-04-05T00:06:35Z",
+      "side": 0,
+      "message": "We dont use component.xml anymore.\nEssentially, due to few limitations in Declarative Services definitions, we have moved towards the Activator approach and cleaned up the component.xml from all the bundles.\nI guess we missed this bundle.\nWill approve this diffs, but we will clean this file as well.",
+      "revId": "b7a34b47e39a9fe25617c9e536817858e58b2558",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
