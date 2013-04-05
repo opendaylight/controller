@@ -13,8 +13,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
@@ -227,5 +229,20 @@ public class UserManagerImplTest {
 	@Test
 	public void testReadObject() {
 		// fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testGetUserLevel() {
+		um.addLocalUser(new UserConfig("Jack", "password",
+				UserLevel.SYSTEMADMIN.toString()));
+		um.authenticate("Jack", "password");
+		
+		um.addLocalUser(new UserConfig("John", "password",
+				UserLevel.NETWORKOPERATOR.toString()));
+		// Run the check on authenticated user
+		Assert.assertTrue(um.getUserLevel("Jack") == UserLevel.SYSTEMADMIN);
+		// Run the check on configured users
+		Assert.assertTrue(um.getUserLevel("John") == UserLevel.NETWORKOPERATOR);
+		Assert.assertTrue(um.getUserLevel("Andrew") == UserLevel.NOUSER);
 	}
 }
