@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAADn///6s\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/sal-broker-impl/src/main/java/org/opendaylight/controller/sal/core/impl/BrokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-05T13:06:24Z",
+      "side": 1,
+      "message": "You may want to use the parameters here, as advised by the logging best practice Lukas sent sometime ago.",
+      "revId": "1d01212bc66db4193eb67007267b105fc02cbd71",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
