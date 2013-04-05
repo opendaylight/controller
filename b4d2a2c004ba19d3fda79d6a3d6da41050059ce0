@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAADn///7A\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/yang-to-sources-plugin-it/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-05T12:48:43Z",
+      "side": 1,
+      "message": "Please in all the pom file, avoid the tabs, and use spaces.",
+      "revId": "b4d2a2c004ba19d3fda79d6a3d6da41050059ce0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAADn///68\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/yang-to-sources/.gitignore",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-05T12:48:43Z",
+      "side": 1,
+      "message": "Just wondering why not to simply have a .gitignore at the root, seems like all this .gitignore are similar. Nothing wrong with it, but simply repetitive and error prone",
+      "revId": "b4d2a2c004ba19d3fda79d6a3d6da41050059ce0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
