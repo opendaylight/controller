@@ -84,7 +84,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // provider of service exists
             c.add(createContainerServiceDependency(containerName).setService(
                     IListenRoutingUpdates.class).setCallbacks(
-                    "setLIstenRoutingUpdates", "unsetLIstenRoutingUpdates")
+                    "setListenRoutingUpdates", "unsetListenRoutingUpdates")
                     .setRequired(false));
 
             c.add(createContainerServiceDependency(containerName).setService(

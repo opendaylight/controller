@@ -71,7 +71,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         }
     }
 
-    public void unsetRoutingUpdates(IListenRoutingUpdates i) {
+    public void unsetListenRoutingUpdates(IListenRoutingUpdates i) {
         if (this.routingAware == null) {
             return;
         }
