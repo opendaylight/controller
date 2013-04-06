@@ -86,6 +86,8 @@
 	
     <!-- Samples -->
     <module>../../samples/simpleforwarding</module>
+    <module>../../samples/loadbalancer</module>
+    <module>../../samples/northbound/loadbalancer</module>
   </modules>
   
   <build>
