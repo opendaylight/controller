@@ -73,31 +73,9 @@
 							org.springframework.web.servlet.config,
 							org.springframework.web.servlet.view,
 							org.springframework.web.servlet.view.json,
-
 							org.springframework.web.filter,
 							org.springframework.web.context,
-							org.springframework.security.core,
-							org.springframework.security.core.userdetails,
-							org.springframework.security.core.authority,
-							org.springframework.security.core.context,
-							org.springframework.security.authentication,
-							org.springframework.security.config,
-							org.springframework.security.config.authentication,
-							org.springframework.security.taglibs.authz,
-							org.springframework.security.web,
-							org.springframework.security.web.context,
-							org.springframework.security.web.authentication,
-							org.springframework.security.web.authentication.www,
-							org.springframework.security.provisioning,
-							org.springframework.security.web.util,
-							org.springframework.security.web.authentication.rememberme,
-							org.springframework.security.web.authentication.logout,
-							org.springframework.dao,
-							org.springframework.security.web.savedrequest,
-							org.springframework.security.access,
 							org.springframework.util
-
-
 						</Import-Package>
 						<Export-Package>
 							org.opendaylight.controller.web

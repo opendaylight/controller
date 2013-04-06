@@ -706,9 +706,9 @@ $("#logout").click(function() {
 
 $.ajaxSetup({
     complete : function(xhr,textStatus) {
-        var page = xhr.getResponseHeader('X-Page-Location');
-        if(page == '/login') {
-            location.href = '/login';
+    	var mime = xhr.getResponseHeader('Content-Type');
+        if (mime.substring(0, 9) == 'text/html') {
+            location.href = '/';
         }
     }
 });

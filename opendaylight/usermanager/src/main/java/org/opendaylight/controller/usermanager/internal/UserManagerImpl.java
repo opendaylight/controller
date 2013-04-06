@@ -985,4 +985,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     public void setSessionMgr(ISessionManager sessionMgr) {
         this.sessionMgr = sessionMgr;
     }
+    
+    public String getPassword(String username) {
+        return localUserConfigList.get(username).getPassword();
+    }
 }

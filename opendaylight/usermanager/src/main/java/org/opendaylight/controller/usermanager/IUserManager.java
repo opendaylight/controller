@@ -204,5 +204,8 @@ public interface IUserManager extends UserDetailsService {
 
     // Session manager to implement session mgmt across web-apps
     public ISessionManager getSessionManager();
+    
+    
+    public String getPassword(String username);
 
 }

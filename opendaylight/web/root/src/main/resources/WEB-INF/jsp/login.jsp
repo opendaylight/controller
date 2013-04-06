@@ -34,7 +34,7 @@
 	<script src="/js/less-1.3.3.min.js"></script>
 </head>
 <body>
-  <form action="<c:url value='j_spring_security_check' />" id="form" method="post">
+  <form action="<c:url value='j_security_check' />" id="form" method="post">
 
   <div class="container">
     <div class="content">

@@ -48,6 +48,9 @@
     <module>../../statisticsmanager</module>
     <module>../../topologymanager</module>
     <module>../../usermanager</module>
+    <module>../../security</module>
+    
+    
     <module>../../../third-party/openflowj</module>
     <module>../../../third-party/net.sf.jung2</module>
     <module>../../../third-party/jersey-servlet</module>
@@ -64,6 +67,8 @@
     <module>../../web/topology</module>
     
     <!-- Northbound bundles -->
+    
+     
     <module>../../northbound/commons</module>
     <module>../../northbound/topology</module>
     <module>../../northbound/staticrouting</module>
@@ -72,7 +77,7 @@
     <module>../../northbound/hosttracker</module>
     <module>../../northbound/subnets</module>
     <module>../../northbound/switchmanager</module>
-
+    
     <!-- Debug and logging -->
     <module>../../logging/bridge</module>
 

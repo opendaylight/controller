@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Edge;
@@ -33,7 +35,6 @@ import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.usermanager.IUserManager;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -274,8 +275,8 @@ public class Topology {
     @RequestMapping(value = "/node/{nodeId}", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> post(@PathVariable String nodeId, @RequestParam(required = true) String x,
-    		@RequestParam(required = true) String y) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
+    		@RequestParam(required = true) String y, HttpServletRequest request) {
+    	if (!authorize(UserLevel.NETWORKADMIN, request)) {
     		return new HashMap<String, Object>(); // silently disregard new node position
     	}
     	
@@ -427,14 +428,14 @@ public class Topology {
     	public static final String HOST = "host";
     }
     
-    private boolean authorize(UserLevel level) {
+    private boolean authorize(UserLevel level, HttpServletRequest request) {
     	IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
         	return false;
         }
         
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = request.getUserPrincipal().getName();
         UserLevel userLevel = userManager.getUserLevel(username);
         if (userLevel.toNumber() <= level.toNumber()) {
         	return true;

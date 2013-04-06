@@ -24,7 +24,6 @@ import javax.servlet.http.HttpSessionEvent;
 import org.opendaylight.controller.usermanager.ISessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContext;
 
 public class SessionManager implements ISessionManager {
 
@@ -32,7 +31,6 @@ public class SessionManager implements ISessionManager {
             .getLogger(SessionManager.class);
 
     private Map<ServletContext, Set<HttpSession>> sessionMap = new HashMap<ServletContext, Set<HttpSession>>();
-    public static final String SPRING_SECURITY_CONTEXT_KEY = "SPRING_SECURITY_CONTEXT";
 
     @Override
     public void sessionCreated(HttpSessionEvent se) {
@@ -84,22 +82,8 @@ public class SessionManager implements ISessionManager {
                 while (sessIterator.hasNext()) {
                     HttpSession session = sessIterator.next();
                     if (session != null && sessionId != null && session.getId() != null && !session.getId().equals(sessionId)) {
-                        Object contextFromSession = session
-                                .getAttribute(SPRING_SECURITY_CONTEXT_KEY);
-                        if (contextFromSession != null
-                                && contextFromSession instanceof SecurityContext) {
-                            String storedUserName = ((SecurityContext) contextFromSession)
-                                    .getAuthentication().getName();
-                            if (storedUserName != null && storedUserName.equals(username)) {                                
-                                sessionsList.add(session);                                
-                                sessIterator.remove();
-                            }
-                            else {
-                                logger.debug("storedUserName is null or did not match username " + username);
-                            }
-                        } else {
-                            logger.debug("contextFromSession is null or not instance of SecurityContext");
-                        }
+                        sessionsList.add(session);                                
+                        sessIterator.remove();
                     }
                     else {
                         logger.debug(" session or sessionId is null ");

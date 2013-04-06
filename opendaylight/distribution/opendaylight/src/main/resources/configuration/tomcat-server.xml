@@ -48,7 +48,9 @@
       <Host name="localhost" appBase=""
             unpackWARs="false" autoDeploy="false"
             deployOnStartup="false" createDirs="false">
-
+        <Realm className="org.opendaylight.controller.security.ControllerCustomRealm" />
+	    <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+     
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
 			prefix="web_access_log_" suffix=".txt" resolveHosts="false"
 			rotatable="true" fileDateFormat="yyyy-MM"

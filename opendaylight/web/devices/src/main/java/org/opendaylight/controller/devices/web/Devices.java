@@ -16,11 +16,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.web.IDaylightWeb;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -116,10 +117,10 @@ public class Devices implements IDaylightWeb {
                 Map<Short, String> portList = new HashMap<Short, String>();
                 for (NodeConnector nodeConnector : nodeConnectorSet) {
                     nodeConnectorNumberToStr = nodeConnector.getID().toString();
-                    Name ncName = ((Name) switchManager
-                            .getNodeConnectorProp(nodeConnector,
-                                    Name.NamePropName));
-                    nodeConnectorName = (ncName != null) ? ncName.getValue() : "";
+                    Name ncName = ((Name) switchManager.getNodeConnectorProp(
+                            nodeConnector, Name.NamePropName));
+                    nodeConnectorName = (ncName != null) ? ncName.getValue()
+                            : "";
                     portList.put(Short.parseShort(nodeConnectorNumberToStr),
                             nodeConnectorName);
                 }
@@ -141,7 +142,7 @@ public class Devices implements IDaylightWeb {
         columnNames.add("Tier");
         columnNames.add("Mac Address");
         columnNames.add("Ports");
-        
+
         result.setColumnNames(columnNames);
         return result;
     }
@@ -151,19 +152,20 @@ public class Devices implements IDaylightWeb {
     public List<String> getTiers() {
         return TierHelper.getTiers();
     }
-    
+
     @RequestMapping(value = "/nodesLearnt/update", method = RequestMethod.GET)
     @ResponseBody
     public StatusJsonBean updateLearntNode(
             @RequestParam("nodeName") String nodeName,
             @RequestParam("nodeId") String nodeId,
             @RequestParam("tier") String tier,
-            @RequestParam("operationMode") String operationMode) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
-    		return unauthorizedMessage();
-    	}
-    	
-    	StatusJsonBean resultBean = new StatusJsonBean();
+            @RequestParam("operationMode") String operationMode,
+            HttpServletRequest request) {
+        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            return unauthorizedMessage();
+        }
+
+        StatusJsonBean resultBean = new StatusJsonBean();
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
@@ -185,7 +187,8 @@ public class Devices implements IDaylightWeb {
     public DevicesJsonBean getStaticRoutes() {
         Gson gson = new Gson();
         IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
-                .getInstance(IForwardingStaticRouting.class, containerName, this);
+                .getInstance(IForwardingStaticRouting.class, containerName,
+                        this);
         List<Map<String, String>> staticRoutes = new ArrayList<Map<String, String>>();
         ConcurrentMap<String, StaticRouteConfig> routeConfigs = staticRouting
                 .getStaticRouteConfigs();
@@ -212,11 +215,11 @@ public class Devices implements IDaylightWeb {
     public StatusJsonBean addStaticRoute(
             @RequestParam("routeName") String routeName,
             @RequestParam("staticRoute") String staticRoute,
-            @RequestParam("nextHop") String nextHop) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
-    		return unauthorizedMessage();
-    	}
-    	
+            @RequestParam("nextHop") String nextHop, HttpServletRequest request) {
+        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            return unauthorizedMessage();
+        }
+
         StatusJsonBean result = new StatusJsonBean();
         try {
             IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
@@ -244,11 +247,12 @@ public class Devices implements IDaylightWeb {
     @RequestMapping(value = "/staticRoute/delete", method = RequestMethod.GET)
     @ResponseBody
     public StatusJsonBean deleteStaticRoute(
-            @RequestParam("routesToDelete") String routesToDelete) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
-    		return unauthorizedMessage();
-    	}
-    	
+            @RequestParam("routesToDelete") String routesToDelete,
+            HttpServletRequest request) {
+        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            return unauthorizedMessage();
+        }
+
         StatusJsonBean resultBean = new StatusJsonBean();
         try {
             IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
@@ -295,15 +299,16 @@ public class Devices implements IDaylightWeb {
         result.setNodeData(subnets);
         return result;
     }
-    
+
     @RequestMapping(value = "/subnetGateway/add", method = RequestMethod.GET)
     @ResponseBody
     public StatusJsonBean addSubnetGateways(
             @RequestParam("gatewayName") String gatewayName,
-            @RequestParam("gatewayIPAddress") String gatewayIPAddress) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
-    		return unauthorizedMessage();
-    	}
+            @RequestParam("gatewayIPAddress") String gatewayIPAddress,
+            HttpServletRequest request) {
+        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            return unauthorizedMessage();
+        }
 
         StatusJsonBean resultBean = new StatusJsonBean();
         try {
@@ -329,11 +334,12 @@ public class Devices implements IDaylightWeb {
     @RequestMapping(value = "/subnetGateway/delete", method = RequestMethod.GET)
     @ResponseBody
     public StatusJsonBean deleteSubnetGateways(
-            @RequestParam("gatewaysToDelete") String gatewaysToDelete) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
-    		return unauthorizedMessage();
-    	}
-    	
+            @RequestParam("gatewaysToDelete") String gatewaysToDelete,
+            HttpServletRequest request) {
+        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            return unauthorizedMessage();
+        }
+
         StatusJsonBean resultBean = new StatusJsonBean();
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
@@ -361,11 +367,11 @@ public class Devices implements IDaylightWeb {
     public StatusJsonBean addSubnetGatewayPort(
             @RequestParam("portsName") String portsName,
             @RequestParam("ports") String ports,
-            @RequestParam("nodeId") String nodeId) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
-    		return unauthorizedMessage();
-    	}
-    	
+            @RequestParam("nodeId") String nodeId, HttpServletRequest request) {
+        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            return unauthorizedMessage();
+        }
+
         StatusJsonBean resultBean = new StatusJsonBean();
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
@@ -392,11 +398,12 @@ public class Devices implements IDaylightWeb {
     @ResponseBody
     public StatusJsonBean deleteSubnetGatewayPort(
             @RequestParam("gatewayName") String gatewayName,
-            @RequestParam("nodePort") String nodePort) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
-    		return unauthorizedMessage();
-    	}
-    	
+            @RequestParam("nodePort") String nodePort,
+            HttpServletRequest request) {
+        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            return unauthorizedMessage();
+        }
+
         StatusJsonBean resultBean = new StatusJsonBean();
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
@@ -487,11 +494,13 @@ public class Devices implements IDaylightWeb {
 
     @RequestMapping(value = "/spanPorts/add", method = RequestMethod.GET)
     @ResponseBody
-    public StatusJsonBean addSpanPort(@RequestParam("jsonData") String jsonData) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
-    		return unauthorizedMessage();
-    	}
-    	
+    public StatusJsonBean addSpanPort(
+            @RequestParam("jsonData") String jsonData,
+            HttpServletRequest request) {
+        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            return unauthorizedMessage();
+        }
+
         StatusJsonBean resultBean = new StatusJsonBean();
         try {
             Gson gson = new Gson();
@@ -517,11 +526,12 @@ public class Devices implements IDaylightWeb {
     @RequestMapping(value = "/spanPorts/delete", method = RequestMethod.GET)
     @ResponseBody
     public StatusJsonBean deleteSpanPorts(
-            @RequestParam("spanPortsToDelete") String spanPortsToDelete) {
-    	if (!authorize(UserLevel.NETWORKADMIN)) {
-    		return unauthorizedMessage();
-    	}
-    	
+            @RequestParam("spanPortsToDelete") String spanPortsToDelete,
+            HttpServletRequest request) {
+        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            return unauthorizedMessage();
+        }
+
         StatusJsonBean resultBean = new StatusJsonBean();
         try {
             Gson gson = new Gson();
@@ -555,39 +565,56 @@ public class Devices implements IDaylightWeb {
                 .getInstance(ISwitchManager.class, containerName, this);
         String description = "";
         if (switchManager != null) {
-        	description = switchManager
-        			.getNodeDescription(Node.fromString(nodeId));
+            description = switchManager.getNodeDescription(Node
+                    .fromString(nodeId));
         }
-        return (description.isEmpty() || description.equalsIgnoreCase("none"))?
-        		nodeId : description;
+        return (description.isEmpty() || description.equalsIgnoreCase("none")) ? nodeId
+                : description;
     }
 
-    
     /**
      * Is the operation permitted for the given level
      * 
      * @param level
      */
-    private boolean authorize(UserLevel level) {
-    	IUserManager userManager = (IUserManager) ServiceHelper
+    private boolean authorize(UserLevel level, HttpServletRequest request) {
+        IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
-        	return false;
+            return false;
         }
-        
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        String username = request.getUserPrincipal().getName();
         UserLevel userLevel = userManager.getUserLevel(username);
         if (userLevel.toNumber() <= level.toNumber()) {
-        	return true;
+            return true;
         }
         return false;
     }
-    
+
     private StatusJsonBean unauthorizedMessage() {
-    	StatusJsonBean message = new StatusJsonBean();
-    	message.setStatus(false);
-    	message.setMessage("Operation not authorized");
-    	return message;
+        StatusJsonBean message = new StatusJsonBean();
+        message.setStatus(false);
+        message.setMessage("Operation not authorized");
+        return message;
+    }
+
+    @RequestMapping(value = "login")
+    public String login(final HttpServletRequest request,
+            final HttpServletResponse response) {
+        // response.setHeader("X-Page-Location", "/login");
+        /*
+         * IUserManager userManager = (IUserManager) ServiceHelper
+         * .getGlobalInstance(IUserManager.class, this); if (userManager ==
+         * null) { return "User Manager is not available"; }
+         * 
+         * String username = request.getUserPrincipal().getName();
+         * 
+         * 
+         * model.addAttribute("username", username); model.addAttribute("role",
+         * userManager.getUserLevel(username).toNumber());
+         */
+        return "forward:" + "/";
     }
 
 }

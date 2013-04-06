@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -15,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.sal.authorization.UserLevel;
@@ -30,7 +31,6 @@ import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.web.IDaylightWeb;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,7 +43,7 @@ import com.google.gson.Gson;
 @Controller
 @RequestMapping("/")
 public class Flows implements IDaylightWeb {
-	private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
+    private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
     private static final String WEB_NAME = "Flows";
     private static final String WEB_ID = "flows";
     private static final short WEB_ORDER = 2;
@@ -68,41 +68,43 @@ public class Flows implements IDaylightWeb {
         return WEB_ORDER;
     }
 
-	@Override
-	public boolean isAuthorized(UserLevel userLevel) {
-		return userLevel.ordinal() <= AUTH_LEVEL.ordinal();
-	}
-	
+    @Override
+    public boolean isAuthorized(UserLevel userLevel) {
+        return userLevel.ordinal() <= AUTH_LEVEL.ordinal();
+    }
+
     @RequestMapping(value = "/main")
     @ResponseBody
     public Set<Map<String, Object>> getFlows() {
         // fetch frm
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, containerName, this);
-        if (frm == null) { return null; }
+        if (frm == null) {
+            return null;
+        }
 
         // fetch sm
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
-        if (switchManager == null) { return null; }
-        
+        if (switchManager == null) {
+            return null;
+        }
+
         // get static flow list
         List<FlowConfig> staticFlowList = frm.getStaticFlows();
         Set<Map<String, Object>> output = new HashSet<Map<String, Object>>();
         for (FlowConfig flowConfig : staticFlowList) {
-        	Map<String, Object> entry = new HashMap<String, Object>();
-        	entry.put("flow", flowConfig);
-        	entry.put("name", flowConfig.getName());
-        	Node node = flowConfig.getNode();
-        	String description = switchManager.getNodeDescription(node);
-        	entry.put("node", 
-        			(description.isEmpty() || 
-        					description.equalsIgnoreCase("none"))? 
-        							node.toString() : description);
-        	entry.put("nodeId", node.toString());
-        	output.add(entry);
+            Map<String, Object> entry = new HashMap<String, Object>();
+            entry.put("flow", flowConfig);
+            entry.put("name", flowConfig.getName());
+            Node node = flowConfig.getNode();
+            String description = switchManager.getNodeDescription(node);
+            entry.put("node", (description.isEmpty() || description
+                    .equalsIgnoreCase("none")) ? node.toString() : description);
+            entry.put("nodeId", node.toString());
+            output.add(entry);
         }
-        
+
         return output;
     }
 
@@ -111,7 +113,9 @@ public class Flows implements IDaylightWeb {
     public Map<String, Object> getNodePorts() {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
-        if (switchManager == null) { return null; }
+        if (switchManager == null) {
+            return null;
+        }
 
         Map<String, Object> nodes = new HashMap<String, Object>();
         Map<Short, String> port;
@@ -125,53 +129,58 @@ public class Flows implements IDaylightWeb {
                     String nodeConnectorName = ((Name) switchManager
                             .getNodeConnectorProp(nodeConnector,
                                     Name.NamePropName)).getValue();
-                    port.put((Short) nodeConnector.getID(),
-                             nodeConnectorName + "("
-                             + nodeConnector.getNodeConnectorIDString() + ")");
+                    port.put((Short) nodeConnector.getID(), nodeConnectorName
+                            + "(" + nodeConnector.getNodeConnectorIDString()
+                            + ")");
                 }
             }
-            
+
             // add ports
             Map<String, Object> entry = new HashMap<String, Object>();
             entry.put("ports", port);
-            
+
             // add name
-            String description = switchManager
-            		.getNodeDescription(node.getNode());
-            entry.put("name", (description.isEmpty() || 
-            		description.equalsIgnoreCase("none"))? 
-            		node.getNode().toString() : description);
-            
+            String description = switchManager.getNodeDescription(node
+                    .getNode());
+            entry.put("name", (description.isEmpty() || description
+                    .equalsIgnoreCase("none")) ? node.getNode().toString()
+                    : description);
+
             // add to the node
             nodes.put(node.getNode().toString(), entry);
         }
 
         return nodes;
     }
-    
+
     @RequestMapping(value = "/node-flows")
     @ResponseBody
     public Map<String, Object> getNodeFlows() {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
-        if (switchManager == null) { return null; }
+        if (switchManager == null) {
+            return null;
+        }
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, "default", this);
-        if (frm == null) { return null; }
+        if (frm == null) {
+            return null;
+        }
 
         Map<String, Object> nodes = new HashMap<String, Object>();
 
         for (Switch sw : switchManager.getNetworkDevices()) {
             Node node = sw.getNode();
-            
+
             List<FlowConfig> flows = frm.getStaticFlows(node);
-            
+
             String nodeDesc = node.toString();
-            SwitchConfig config = switchManager.getSwitchConfig(node.getNodeIDString());
+            SwitchConfig config = switchManager.getSwitchConfig(node
+                    .getNodeIDString());
             if (config != null) {
-            	nodeDesc = config.getNodeDescription();
+                nodeDesc = config.getNodeDescription();
             }
-            
+
             nodes.put(nodeDesc, flows.size());
         }
 
@@ -181,14 +190,18 @@ public class Flows implements IDaylightWeb {
     @RequestMapping(value = "/flow", method = RequestMethod.POST)
     @ResponseBody
     public String actionFlow(@RequestParam(required = true) String action,
-            @RequestParam(required = false) String body, @RequestParam(required = true) String nodeId) {
-    	if (!isUserAuthorized(UserLevel.NETWORKADMIN)) {
-    		return "Operation not authorized";
-    	}
-    	
+            @RequestParam(required = false) String body,
+            @RequestParam(required = true) String nodeId,
+            HttpServletRequest request) {
+        if (!isUserAuthorized(UserLevel.NETWORKADMIN, request)) {
+            return "Operation not authorized";
+        }
+
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, containerName, this);
-        if (frm == null) { return null; }
+        if (frm == null) {
+            return null;
+        }
 
         Gson gson = new Gson();
         FlowConfig flow = gson.fromJson(body, FlowConfig.class);
@@ -199,45 +212,60 @@ public class Flows implements IDaylightWeb {
             result = frm.addStaticFlow(flow, false);
         }
 
-        return (result.isSuccess())? StatusCode.SUCCESS.toString(): result.getDescription();
+        return (result.isSuccess()) ? StatusCode.SUCCESS.toString() : result
+                .getDescription();
     }
-    
+
     @RequestMapping(value = "/flow/{nodeId}/{name}", method = RequestMethod.POST)
     @ResponseBody
-    public String removeFlow(@PathVariable("nodeId") String nodeId, @PathVariable("name") String name,
-    		@RequestParam(required = true) String action) {
-    	if (!isUserAuthorized(UserLevel.NETWORKADMIN)) { return "Operation not authorized"; }
-    	
-    	IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
+    public String removeFlow(@PathVariable("nodeId") String nodeId,
+            @PathVariable("name") String name,
+            @RequestParam(required = true) String action,
+            HttpServletRequest request) {
+        if (!isUserAuthorized(UserLevel.NETWORKADMIN, request)) {
+
+            return "Operation not authorized";
+        }
+
+        IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, containerName, this);
-        if (frm == null) { return null; }
-        
+        if (frm == null) {
+            return null;
+        }
+
         Status result = null;
         Node node = Node.fromString(nodeId);
-        if (node == null) { return null; }
-        if (action.equals("remove")) {
-        	result = frm.removeStaticFlow(name, node);
-        } else if (action.equals("toggle")) {
-        	result = frm.toggleStaticFlowStatus(name, node);
-        } else {
-        	result = new Status(StatusCode.BADREQUEST, "Unknown action");
+        if (node == null) {
+            return null;
         }
-        
-        return (result.isSuccess())? StatusCode.SUCCESS.toString(): result.getDescription();
+        if (action.equals("remove")) {
+            result = frm.removeStaticFlow(name, node);
+        } else if (action.equals("toggle")) {
+            result = frm.toggleStaticFlowStatus(name, node);
+        } else {
+            result = new Status(StatusCode.BADREQUEST, "Unknown action");
+        }
+
+        return (result.isSuccess()) ? StatusCode.SUCCESS.toString() : result
+                .getDescription();
     }
-    
+
     /**
-     * Returns whether the current user's level is same or above
-     * the required authorization level. 
+     * Returns whether the current user's level is same or above the required
+     * authorization level.
      * 
-     * @param requiredLevel the authorization level required
+     * @param requiredLevel
+     *            the authorization level required
      */
-    private boolean isUserAuthorized(UserLevel requiredLevel) {
-    	IUserManager userManager = (IUserManager) ServiceHelper
+    private boolean isUserAuthorized(UserLevel requiredLevel,
+            HttpServletRequest request) {
+        IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
-        if (userManager == null) { return false; }
-        
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (userManager == null) {
+            return false;
+        }
+
+        String username = request.getUserPrincipal().getName();
         UserLevel userLevel = userManager.getUserLevel(username);
         return (userLevel.ordinal() <= requiredLevel.ordinal());
     }
