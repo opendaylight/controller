@@ -66,19 +66,51 @@ public interface ISwitch {
 	public Date getConnectedDate();
 
 	/**
-	 * Sends the message. A unique XID is generated automatically and inserted into the message.
-	 * @param msg TheOF message to be sent
+	 * This method puts the message in an outgoing priority queue with normal
+	 * priority. It will be served after high priority messages. The method
+	 * should be used for non-critical messages such as statistics request,
+	 * discovery packets, etc. An unique XID is generated automatically and
+	 * inserted into the message.
+	 * 
+	 * @param msg The OF message to be sent
 	 * @return The XID used
 	 */
 	public Integer asyncSend(OFMessage msg);
 
 	/**
-	 * Sends the message with the specified XID.
+	 * This method puts the message in an outgoing priority queue with normal
+	 * priority. It will be served after high priority messages. The method
+	 * should be used for non-critical messages such as statistics request,
+	 * discovery packets, etc. The specified XID is inserted into the message.
+	 * 
 	 * @param msg The OF message to be Sent
 	 * @param xid The XID to be used in the message
 	 * @return The XID used
 	 */
 	public Integer asyncSend(OFMessage msg, int xid);
+
+	/**
+	 * This method puts the message in an outgoing priority queue with high
+	 * priority. It will be served first before normal priority messages. The
+	 * method should be used for critical messages such as hello, echo reply
+	 * etc. An unique XID is generated automatically and inserted into the
+	 * message.
+	 * 
+	 * @param msg The OF message to be sent
+	 * @return The XID used
+	 */
+	public Integer asyncFastSend(OFMessage msg);
+
+	/**
+	 * This method puts the message in an outgoing priority queue with high
+	 * priority. It will be served first before normal priority messages. The
+	 * method should be used for critical messages such as hello, echo reply
+	 * etc. The specified XID is inserted into the message.
+	 * 
+	 * @param msg The OF message to be sent
+	 * @return The XID used
+	 */
+	public Integer asyncFastSend(OFMessage msg, int xid);
 
 	/**
 	 * Sends the OF message followed by a Barrier Request with a unique XID which is automatically generated,
