@@ -5,12 +5,13 @@
  - terms of the Eclipse Public License v1.0 which accompanies this distribution, 
  - and is available at http://www.eclipse.org/legal/epl-v10.html
 --%>
+<%@ page import="java.net.URL" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
 <html>
 
 <head>
-	<title>OpenDaylight</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<!-- Bootstrap CSS - 1 -->
@@ -19,6 +20,18 @@
 	<!-- Core CSS - 2 -->
 	<link rel="stylesheet/less" type="text/css" href="/css/one.less">
 
+<c:set var="version" value="Version 0.1" scope="application"/>
+<c:set var="name" value="OpenDaylight" scope="application"/>
+
+<%	
+    String filePath = "/WEB-INF/jsp/custommain.jsp"; 
+    URL fileURL = pageContext.getServletContext().getResource(filePath);
+    if(fileURL!=null) {
+%>
+	  <jsp:include page="<%=filePath%>" flush="true"/>
+<% } %>
+
+    <title>${name}</title>
 	<!-- jQuery - 1 -->
 	<script src="/js/jquery-1.9.1.min.js"></script>
 	
@@ -42,7 +55,7 @@
 <div id="menu" class="navbar navbar-fixed-top">
 	<div class="navbar-inner row-fluid">
 		<div class="span10">
-			<a class="brand" href="/" title="Version 0.1">OpenDaylight</a> 
+			<a class="brand" href="/" title="${version}">${name}</a> 
 			<ul class="nav nav-tabs">
 			</ul>
 		</div>
