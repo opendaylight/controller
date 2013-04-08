@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,7 +59,8 @@ import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionB
 import org.opendaylight.controller.yang.model.parser.builder.impl.IdentitySchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.UnionTypeBuilder;
-import org.opendaylight.controller.yang.model.util.BaseConstraints;
+import org.opendaylight.controller.yang.model.parser.util.TypeConstraints;
+import org.opendaylight.controller.yang.model.parser.util.YangParseException;
 import org.opendaylight.controller.yang.model.util.BinaryType;
 import org.opendaylight.controller.yang.model.util.BitsType;
 import org.opendaylight.controller.yang.model.util.StringType;
@@ -120,15 +122,12 @@ public class YangModelParserImpl implements YangModelParser {
     private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuildersFromStreams(
             InputStream... yangFiles) {
         final Map<String, TreeMap<Date, ModuleBuilder>> modules = new HashMap<String, TreeMap<Date, ModuleBuilder>>();
-
-        final YangModelParserListenerImpl yangModelParser = new YangModelParserListenerImpl();
         final ParseTreeWalker walker = new ParseTreeWalker();
-
-        List<ParseTree> trees = parseStreams(yangFiles);
-
-        ModuleBuilder[] builders = new ModuleBuilder[trees.size()];
+        final List<ParseTree> trees = parseStreams(yangFiles);
+        final ModuleBuilder[] builders = new ModuleBuilder[trees.size()];
 
         for (int i = 0; i < trees.size(); i++) {
+            final YangModelParserListenerImpl yangModelParser = new YangModelParserListenerImpl();
             walker.walk(yangModelParser, trees.get(i));
             builders[i] = yangModelParser.getModuleBuilder();
         }
@@ -173,7 +172,7 @@ public class YangModelParserImpl implements YangModelParser {
     }
 
     private Set<Module> build(Map<String, TreeMap<Date, ModuleBuilder>> modules) {
-        // first validate
+        // validate
         for (Map.Entry<String, TreeMap<Date, ModuleBuilder>> entry : modules
                 .entrySet()) {
             for (Map.Entry<Date, ModuleBuilder> childEntry : entry.getValue()
@@ -182,7 +181,7 @@ public class YangModelParserImpl implements YangModelParser {
                 validateBuilder(modules, moduleBuilder);
             }
         }
-        // then build
+        // build
         final Set<Module> result = new HashSet<Module>();
         for (Map.Entry<String, TreeMap<Date, ModuleBuilder>> entry : modules
                 .entrySet()) {
@@ -267,102 +266,29 @@ public class YangModelParserImpl implements YangModelParser {
             Map<String, TreeMap<Date, ModuleBuilder>> modules,
             ModuleBuilder builder) {
 
-        Map<TypeDefinitionBuilder, TypeConstraints> foundedTypeDefinitionBuilder = findTypeDefinitionBuilderWithConstraints(
-                modules, ut, builder);
-        TypeDefinitionBuilder targetType = foundedTypeDefinitionBuilder
-                .entrySet().iterator().next().getKey();
-        TypeConstraints constraints = foundedTypeDefinitionBuilder.entrySet()
-                .iterator().next().getValue();
-
-        TypeDefinition<?> targetTypeBaseType = targetType.getBaseType();
-
+        TypeConstraints constraints = new TypeConstraints();
         // RANGE
         List<RangeConstraint> ranges = ut.getRangeStatements();
-        resolveRanges(ranges, targetType, modules, builder);
+        constraints.addRanges(ranges);
         // LENGTH
         List<LengthConstraint> lengths = ut.getLengthStatements();
-        resolveLengths(lengths, targetType, modules, builder);
+        constraints.addLengths(lengths);
         // PATTERN
         List<PatternConstraint> patterns = ut.getPatterns();
+        constraints.addPatterns(patterns);
         // Fraction Digits
         Integer fractionDigits = ut.getFractionDigits();
 
-        targetTypeBaseType = mergeConstraints(targetTypeBaseType, constraints, ranges, lengths,
-                patterns, fractionDigits);
+        Map<TypeDefinitionBuilder, TypeConstraints> foundedTypeDefinitionBuilder = findTypeDefinitionBuilderWithConstraints(
+                constraints, modules, ut, builder);
+        TypeDefinitionBuilder targetType = foundedTypeDefinitionBuilder
+                .entrySet().iterator().next().getKey();
+
+        TypeDefinition<?> targetTypeBaseType = targetType.getBaseType();
+        targetTypeBaseType = mergeConstraints(targetTypeBaseType, constraints,
+                fractionDigits);
 
         return targetTypeBaseType;
-    }
-
-    /**
-     * Merge curent constraints with founded type constraints
-     *
-     * @param targetTypeBaseType
-     * @param constraints
-     * @param ranges
-     * @param lengths
-     * @param patterns
-     * @param fractionDigits
-     */
-    private TypeDefinition<?> mergeConstraints(TypeDefinition<?> targetTypeBaseType,
-            TypeConstraints constraints, List<RangeConstraint> ranges,
-            List<LengthConstraint> lengths, List<PatternConstraint> patterns,
-            Integer fractionDigits) {
-        String targetTypeBaseTypeName = targetTypeBaseType.getQName()
-                .getLocalName();
-        // enumeration, leafref and identityref omitted because they have no
-        // restrictions
-        if (targetTypeBaseType instanceof DecimalTypeDefinition) {
-            List<RangeConstraint> fullRanges = new ArrayList<RangeConstraint>();
-            fullRanges.addAll(constraints.getRanges());
-            fullRanges.addAll(ranges);
-            Integer fd = fractionDigits == null ? constraints
-                    .getFractionDigits() : fractionDigits;
-            targetTypeBaseType = YangTypesConverter
-                    .javaTypeForBaseYangDecimal64Type(fullRanges, fd);
-        } else if (targetTypeBaseType instanceof IntegerTypeDefinition) {
-            List<RangeConstraint> fullRanges = new ArrayList<RangeConstraint>();
-            fullRanges.addAll(constraints.getRanges());
-            fullRanges.addAll(ranges);
-            if (targetTypeBaseTypeName.startsWith("int")) {
-                targetTypeBaseType = YangTypesConverter
-                        .javaTypeForBaseYangSignedIntegerType(
-                                targetTypeBaseTypeName, fullRanges);
-            } else {
-                targetTypeBaseType = YangTypesConverter
-                        .javaTypeForBaseYangUnsignedIntegerType(
-                                targetTypeBaseTypeName, fullRanges);
-            }
-        } else if (targetTypeBaseType instanceof StringTypeDefinition) {
-            List<LengthConstraint> fullLengths = new ArrayList<LengthConstraint>();
-            fullLengths.addAll(constraints.getLengths());
-            fullLengths.addAll(lengths);
-            List<PatternConstraint> fullPatterns = new ArrayList<PatternConstraint>();
-            fullPatterns.addAll(constraints.getPatterns());
-            fullPatterns.addAll(patterns);
-            targetTypeBaseType = new StringType(fullLengths, fullPatterns);
-        } else if (targetTypeBaseType instanceof BitsTypeDefinition) {
-            BitsTypeDefinition bitsType = (BitsTypeDefinition) targetTypeBaseType;
-            List<Bit> bits = bitsType.getBits();
-            targetTypeBaseType = new BitsType(bits);
-        } else if (targetTypeBaseType instanceof BinaryTypeDefinition) {
-            targetTypeBaseType = new BinaryType(null, lengths, null);
-        }
-        return targetTypeBaseType;
-    }
-
-    private TypeDefinitionBuilder findTypeDefinitionBuilder(
-            Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            UnknownType unknownType, ModuleBuilder builder) {
-        Map<TypeDefinitionBuilder, TypeConstraints> result = findTypeDefinitionBuilderWithConstraints(
-                modules, unknownType, builder);
-        return result.entrySet().iterator().next().getKey();
-    }
-
-    private Map<TypeDefinitionBuilder, TypeConstraints> findTypeDefinitionBuilderWithConstraints(
-            Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            UnknownType unknownType, ModuleBuilder builder) {
-        return findTypeDefinitionBuilderWithConstraints(new TypeConstraints(),
-                modules, unknownType, builder);
     }
 
     /**
@@ -389,32 +315,17 @@ public class YangModelParserImpl implements YangModelParser {
         String unknownTypePrefix = unknownTypeQName.getPrefix();
 
         // search for module which contains referenced typedef
-        ModuleBuilder dependentModuleBuilder;
-        if (unknownTypePrefix.equals(builder.getPrefix())) {
-            dependentModuleBuilder = builder;
-        } else {
-            dependentModuleBuilder = findDependentModule(modules, builder,
-                    unknownTypePrefix);
-        }
+        ModuleBuilder dependentModuleBuilder = findDependentModule(modules,
+                builder, unknownTypePrefix);
 
-        // pull all typedef statements from dependent module...
-        final Set<TypeDefinitionBuilder> typedefs = dependentModuleBuilder
-                .getModuleTypedefs();
-        // and search for referenced typedef
-        TypeDefinitionBuilder lookedUpBuilder = null;
-        for (TypeDefinitionBuilder tdb : typedefs) {
-            QName qname = tdb.getQName();
-            if (qname.getLocalName().equals(unknownTypeName)) {
-                lookedUpBuilder = tdb;
-                break;
-            }
-        }
+        TypeDefinitionBuilder lookedUpBuilder = findTypedefBuilder(
+                dependentModuleBuilder.getModuleTypedefs(), unknownTypeName);
 
         // if referenced type is UnknownType again, search recursively with
         // current constraints
         TypeDefinition<?> referencedType = lookedUpBuilder.getBaseType();
         if (referencedType instanceof UnknownType) {
-            UnknownType unknown = (UnknownType) lookedUpBuilder.getBaseType();
+            UnknownType unknown = (UnknownType) referencedType;
 
             final List<RangeConstraint> ranges = unknown.getRangeStatements();
             constraints.addRanges(ranges);
@@ -426,26 +337,112 @@ public class YangModelParserImpl implements YangModelParser {
             return findTypeDefinitionBuilderWithConstraints(constraints,
                     modules, unknown, dependentModuleBuilder);
         } else {
-            // pull restriction from this base type and add them to
-            // 'constraints'
-            if (referencedType instanceof DecimalTypeDefinition) {
-                constraints.addRanges(((DecimalTypeDefinition) referencedType)
-                        .getRangeStatements());
-                constraints
-                        .setFractionDigits(((DecimalTypeDefinition) referencedType)
-                                .getFractionDigits());
-            } else if (referencedType instanceof IntegerTypeDefinition) {
-                constraints.addRanges(((IntegerTypeDefinition) referencedType)
-                        .getRangeStatements());
-            } else if (referencedType instanceof StringTypeDefinition) {
-                constraints.addPatterns(((StringTypeDefinition) referencedType)
-                        .getPatterns());
-            } else if (referencedType instanceof BinaryTypeDefinition) {
-                constraints.addLengths(((BinaryTypeDefinition) referencedType)
-                        .getLengthConstraints());
-            }
+            mergeConstraints(referencedType, constraints);
             result.put(lookedUpBuilder, constraints);
             return result;
+        }
+    }
+
+    /**
+     * Go through all typedef statements from given module and search for one
+     * with given name
+     *
+     * @param typedefs
+     *            typedef statements to search
+     * @param name
+     *            name of searched typedef
+     * @return typedef with name equals to given name
+     */
+    private TypeDefinitionBuilder findTypedefBuilder(
+            Set<TypeDefinitionBuilder> typedefs, String name) {
+        TypeDefinitionBuilder result = null;
+        for (TypeDefinitionBuilder td : typedefs) {
+            if (td.getQName().getLocalName().equals(name)) {
+                result = td;
+                break;
+            }
+        }
+        if (result == null) {
+            throw new YangParseException(
+                    "Target module does not contain typedef '" + name + "'.");
+        }
+        return result;
+    }
+
+    /**
+     * Merge curent constraints with founded type constraints
+     *
+     * @param targetTypeBaseType
+     * @param constraints
+     * @param fractionDigits
+     * @return
+     */
+    private TypeDefinition<?> mergeConstraints(
+            TypeDefinition<?> targetTypeBaseType, TypeConstraints constraints,
+            Integer fractionDigits) {
+        String targetTypeBaseTypeName = targetTypeBaseType.getQName()
+                .getLocalName();
+        // enumeration, leafref and identityref omitted because they have no
+        // restrictions
+        if (targetTypeBaseType instanceof DecimalTypeDefinition) {
+            List<RangeConstraint> ranges = constraints.getRange();
+            Integer fd = fractionDigits == null ? constraints
+                    .getFractionDigits() : fractionDigits;
+            targetTypeBaseType = YangTypesConverter
+                    .javaTypeForBaseYangDecimal64Type(ranges, fd);
+        } else if (targetTypeBaseType instanceof IntegerTypeDefinition) {
+            List<RangeConstraint> ranges = constraints.getRange();
+            if (targetTypeBaseTypeName.startsWith("int")) {
+                targetTypeBaseType = YangTypesConverter
+                        .javaTypeForBaseYangSignedIntegerType(
+                                targetTypeBaseTypeName, ranges);
+            } else {
+                targetTypeBaseType = YangTypesConverter
+                        .javaTypeForBaseYangUnsignedIntegerType(
+                                targetTypeBaseTypeName, ranges);
+            }
+        } else if (targetTypeBaseType instanceof StringTypeDefinition) {
+            List<LengthConstraint> lengths = constraints.getLength();
+            List<PatternConstraint> patterns = constraints.getPatterns();
+            targetTypeBaseType = new StringType(lengths, patterns);
+        } else if (targetTypeBaseType instanceof BitsTypeDefinition) {
+            BitsTypeDefinition bitsType = (BitsTypeDefinition) targetTypeBaseType;
+            List<Bit> bits = bitsType.getBits();
+            targetTypeBaseType = new BitsType(bits);
+        } else if (targetTypeBaseType instanceof BinaryTypeDefinition) {
+            List<LengthConstraint> lengths = constraints.getLength();
+            List<Byte> bytes = Collections.emptyList();
+            targetTypeBaseType = new BinaryType(bytes, lengths, null);
+        }
+        return targetTypeBaseType;
+    }
+
+    /**
+     * Pull restriction from base type and add them to given constraints
+     *
+     * @param referencedType
+     * @param constraints
+     */
+    private void mergeConstraints(TypeDefinition<?> referencedType,
+            TypeConstraints constraints) {
+
+        if (referencedType instanceof DecimalTypeDefinition) {
+            constraints.addRanges(((DecimalTypeDefinition) referencedType)
+                    .getRangeStatements());
+            constraints
+                    .setFractionDigits(((DecimalTypeDefinition) referencedType)
+                            .getFractionDigits());
+        } else if (referencedType instanceof IntegerTypeDefinition) {
+            constraints.addRanges(((IntegerTypeDefinition) referencedType)
+                    .getRangeStatements());
+        } else if (referencedType instanceof StringTypeDefinition) {
+            constraints.addPatterns(((StringTypeDefinition) referencedType)
+                    .getPatterns());
+            constraints.addLengths(((StringTypeDefinition) referencedType)
+                    .getLengthStatements());
+        } else if (referencedType instanceof BinaryTypeDefinition) {
+            constraints.addLengths(((BinaryTypeDefinition) referencedType)
+                    .getLengthConstraints());
         }
     }
 
@@ -476,10 +473,7 @@ public class YangModelParserImpl implements YangModelParser {
             }
             ModuleBuilder dependentModule = findDependentModule(modules,
                     module, prefix);
-            //
             augmentTargetPath.add(0, dependentModule.getName());
-            //
-
 
             AugmentationTargetBuilder augmentTarget = (AugmentationTargetBuilder) dependentModule
                     .getNode(augmentTargetPath);
@@ -531,13 +525,8 @@ public class YangModelParserImpl implements YangModelParser {
                     baseIdentityPrefix = module.getPrefix();
                     baseIdentityLocalName = baseIdentityName;
                 }
-                ModuleBuilder dependentModule;
-                if (baseIdentityPrefix.equals(module.getPrefix())) {
-                    dependentModule = module;
-                } else {
-                    dependentModule = findDependentModule(modules, module,
-                            baseIdentityPrefix);
-                }
+                ModuleBuilder dependentModule = findDependentModule(modules,
+                        module, baseIdentityPrefix);
 
                 Set<IdentitySchemaNodeBuilder> dependentModuleIdentities = dependentModule
                         .getAddedIdentities();
@@ -560,23 +549,41 @@ public class YangModelParserImpl implements YangModelParser {
      *            current module
      * @param prefix
      *            target module prefix
-     * @return dependent module builder
+     * @return
      */
     private ModuleBuilder findDependentModule(
             Map<String, TreeMap<Date, ModuleBuilder>> modules,
             ModuleBuilder module, String prefix) {
-        ModuleImport dependentModuleImport = getModuleImport(module, prefix);
-        String dependentModuleName = dependentModuleImport.getModuleName();
-        Date dependentModuleRevision = dependentModuleImport.getRevision();
+        ModuleBuilder dependentModule = null;
+        Date dependentModuleRevision = null;
 
-        TreeMap<Date, ModuleBuilder> moduleBuildersByRevision = modules
-                .get(dependentModuleName);
-        ModuleBuilder dependentModule;
-        if (dependentModuleRevision == null) {
-            dependentModule = moduleBuildersByRevision.lastEntry().getValue();
+        if (prefix.equals(module.getPrefix())) {
+            dependentModule = module;
         } else {
-            dependentModule = moduleBuildersByRevision
-                    .get(dependentModuleRevision);
+            ModuleImport dependentModuleImport = getModuleImport(module, prefix);
+            if (dependentModuleImport == null) {
+                throw new YangParseException("No import found with prefix '"
+                        + prefix + "' in module " + module.getName() + "'.");
+            }
+            String dependentModuleName = dependentModuleImport.getModuleName();
+            dependentModuleRevision = dependentModuleImport.getRevision();
+
+            TreeMap<Date, ModuleBuilder> moduleBuildersByRevision = modules
+                    .get(dependentModuleName);
+            if (dependentModuleRevision == null) {
+                dependentModule = moduleBuildersByRevision.lastEntry()
+                        .getValue();
+            } else {
+                dependentModule = moduleBuildersByRevision
+                        .get(dependentModuleRevision);
+            }
+        }
+
+        if (dependentModule == null) {
+            throw new YangParseException(
+                    "Failed to find dependent module with prefix '" + prefix
+                            + "' and revision '" + dependentModuleRevision
+                            + "'.");
         }
         return dependentModule;
     }
@@ -599,121 +606,6 @@ public class YangModelParserImpl implements YangModelParser {
             }
         }
         return moduleImport;
-    }
-
-    /**
-     * Helper method for resolving special 'min' or 'max' values in range
-     * constraint
-     *
-     * @param ranges
-     *            ranges to resolve
-     * @param targetType
-     *            target type
-     * @param modules
-     *            all available modules
-     * @param builder
-     *            current module
-     */
-    private void resolveRanges(List<RangeConstraint> ranges,
-            TypeDefinitionBuilder targetType,
-            Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            ModuleBuilder builder) {
-        if (ranges != null && ranges.size() > 0) {
-            Long min = (Long) ranges.get(0).getMin();
-            Long max = (Long) ranges.get(ranges.size() - 1).getMax();
-            // if range contains one of the special values 'min' or 'max'
-            if (min.equals(Long.MIN_VALUE) || max.equals(Long.MAX_VALUE)) {
-                Long[] values = parseRangeConstraint(targetType, modules,
-                        builder);
-                if (min.equals(Long.MIN_VALUE)) {
-                    min = values[0];
-                    RangeConstraint oldFirst = ranges.get(0);
-                    RangeConstraint newFirst = BaseConstraints.rangeConstraint(
-                            min, oldFirst.getMax(), oldFirst.getDescription(),
-                            oldFirst.getReference());
-                    ranges.set(0, newFirst);
-                }
-                if (max.equals(Long.MAX_VALUE)) {
-                    max = values[1];
-                    RangeConstraint oldLast = ranges.get(ranges.size() - 1);
-                    RangeConstraint newLast = BaseConstraints.rangeConstraint(
-                            oldLast.getMin(), max, oldLast.getDescription(),
-                            oldLast.getReference());
-                    ranges.set(ranges.size() - 1, newLast);
-                }
-            }
-        }
-    }
-
-    /**
-     * Helper method for resolving special 'min' or 'max' values in length
-     * constraint
-     *
-     * @param lengths
-     *            lengths to resolve
-     * @param targetType
-     *            target type
-     * @param modules
-     *            all available modules
-     * @param builder
-     *            current module
-     */
-    private void resolveLengths(List<LengthConstraint> lengths,
-            TypeDefinitionBuilder targetType,
-            Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            ModuleBuilder builder) {
-        if (lengths != null && lengths.size() > 0) {
-            Long min = lengths.get(0).getMin();
-            Long max = lengths.get(lengths.size() - 1).getMax();
-            // if length contains one of the special values 'min' or 'max'
-            if (min.equals(Long.MIN_VALUE) || max.equals(Long.MAX_VALUE)) {
-                Long[] values = parseRangeConstraint(targetType, modules,
-                        builder);
-                if (min.equals(Long.MIN_VALUE)) {
-                    min = values[0];
-                    LengthConstraint oldFirst = lengths.get(0);
-                    LengthConstraint newFirst = BaseConstraints
-                            .lengthConstraint(min, oldFirst.getMax(),
-                                    oldFirst.getDescription(),
-                                    oldFirst.getReference());
-                    lengths.set(0, newFirst);
-                }
-                if (max.equals(Long.MAX_VALUE)) {
-                    max = values[1];
-                    LengthConstraint oldLast = lengths.get(lengths.size() - 1);
-                    LengthConstraint newLast = BaseConstraints
-                            .lengthConstraint(oldLast.getMin(), max,
-                                    oldLast.getDescription(),
-                                    oldLast.getReference());
-                    lengths.set(lengths.size() - 1, newLast);
-                }
-            }
-        }
-    }
-
-    private Long[] parseRangeConstraint(TypeDefinitionBuilder targetType,
-            Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            ModuleBuilder builder) {
-        TypeDefinition<?> targetBaseType = targetType.getBaseType();
-
-        if (targetBaseType instanceof IntegerTypeDefinition) {
-            IntegerTypeDefinition itd = (IntegerTypeDefinition) targetBaseType;
-            List<RangeConstraint> ranges = itd.getRangeStatements();
-            Long min = (Long) ranges.get(0).getMin();
-            Long max = (Long) ranges.get(ranges.size() - 1).getMax();
-            return new Long[] { min, max };
-        } else if (targetBaseType instanceof DecimalTypeDefinition) {
-            DecimalTypeDefinition dtd = (DecimalTypeDefinition) targetBaseType;
-            List<RangeConstraint> ranges = dtd.getRangeStatements();
-            Long min = (Long) ranges.get(0).getMin();
-            Long max = (Long) ranges.get(ranges.size() - 1).getMax();
-            return new Long[] { min, max };
-        } else {
-            return parseRangeConstraint(
-                    findTypeDefinitionBuilder(modules,
-                            (UnknownType) targetBaseType, builder), modules,
-                    builder);
-        }
     }
 
     private Date createEpochTime() {
@@ -768,47 +660,6 @@ public class YangModelParserImpl implements YangModelParser {
                 extensions.addAll(m.getExtensionSchemaNodes());
             }
             return extensions;
-        }
-    }
-
-    private static class TypeConstraints {
-        private final List<RangeConstraint> ranges = new ArrayList<RangeConstraint>();
-        private final List<LengthConstraint> lengths = new ArrayList<LengthConstraint>();
-        private final List<PatternConstraint> patterns = new ArrayList<PatternConstraint>();
-        private Integer fractionDigits;
-
-        public List<RangeConstraint> getRanges() {
-            return ranges;
-        }
-
-        public void addRanges(List<RangeConstraint> ranges) {
-            this.ranges.addAll(0, ranges);
-        }
-
-        public List<LengthConstraint> getLengths() {
-            return lengths;
-        }
-
-        public void addLengths(List<LengthConstraint> lengths) {
-            this.lengths.addAll(0, lengths);
-        }
-
-        public List<PatternConstraint> getPatterns() {
-            return patterns;
-        }
-
-        public void addPatterns(List<PatternConstraint> patterns) {
-            this.patterns.addAll(0, patterns);
-        }
-
-        public Integer getFractionDigits() {
-            return fractionDigits;
-        }
-
-        public void setFractionDigits(Integer fractionDigits) {
-            if (fractionDigits != null) {
-                this.fractionDigits = fractionDigits;
-            }
         }
     }
 

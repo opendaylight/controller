@@ -44,13 +44,13 @@ public class StringType implements StringTypeDefinition {
         final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
         constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
         lengthStatements = Collections.unmodifiableList(constraints);
-        
+
         this.patterns = Collections.emptyList();
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param lengthStatements
      * @param patterns
      */
@@ -58,13 +58,19 @@ public class StringType implements StringTypeDefinition {
             final List<PatternConstraint> patterns) {
         super();
         path = BaseTypes.schemaPath(name);
-        this.lengthStatements = Collections.unmodifiableList(lengthStatements);
+        if(lengthStatements == null || lengthStatements.size() == 0) {
+            final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
+            constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+            this.lengthStatements = Collections.unmodifiableList(constraints);
+        } else {
+            this.lengthStatements = Collections.unmodifiableList(lengthStatements);
+        }
         this.patterns = Collections.unmodifiableList(patterns);
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param defaultValue
      * @param lengthStatements
      * @param patterns
@@ -76,14 +82,20 @@ public class StringType implements StringTypeDefinition {
         super();
         path = BaseTypes.schemaPath(name);
         this.defaultValue = defaultValue;
-        this.lengthStatements = lengthStatements;
+        if(lengthStatements == null || lengthStatements.size() == 0) {
+            final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
+            constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+            this.lengthStatements = Collections.unmodifiableList(constraints);
+        } else {
+            this.lengthStatements = Collections.unmodifiableList(lengthStatements);
+        }
         this.patterns = patterns;
         this.units = units;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
@@ -93,7 +105,7 @@ public class StringType implements StringTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getUnits()
      */
     @Override
@@ -103,7 +115,7 @@ public class StringType implements StringTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
      */
     @Override
@@ -113,7 +125,7 @@ public class StringType implements StringTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getQName()
      */
     @Override
@@ -123,7 +135,7 @@ public class StringType implements StringTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getPath()
      */
     @Override
@@ -133,7 +145,7 @@ public class StringType implements StringTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
     @Override
@@ -143,7 +155,7 @@ public class StringType implements StringTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getReference()
      */
     @Override
@@ -153,7 +165,7 @@ public class StringType implements StringTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getStatus()
      */
     @Override
@@ -163,7 +175,7 @@ public class StringType implements StringTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.csico.yang.model.base.type.api.StringTypeDefinition#getLengthStatements
      * ()
@@ -175,7 +187,7 @@ public class StringType implements StringTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.csico.yang.model.base.type.api.StringTypeDefinition#getPatterns()
      */
