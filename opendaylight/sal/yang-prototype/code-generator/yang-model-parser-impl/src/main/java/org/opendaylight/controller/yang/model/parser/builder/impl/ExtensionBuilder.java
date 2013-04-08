@@ -48,6 +48,10 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
         instance.setYinElement(yin);
     }
 
+    public void setArgument(String argument) {
+        instance.setArgument(argument);
+    }
+
     @Override
     public QName getQName() {
         return qname;
@@ -80,6 +84,7 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
 
     private static class ExtensionDefinitionImpl implements ExtensionDefinition {
         private final QName qname;
+        private String argument;
         private SchemaPath schemaPath;
         private String description;
         private String reference;
@@ -149,7 +154,11 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
 
         @Override
         public String getArgument() {
-            return qname.getLocalName();
+            return argument;
+        }
+
+        private void setArgument(String argument) {
+            this.argument = argument;
         }
 
         @Override
@@ -247,7 +256,8 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
             StringBuilder sb = new StringBuilder(
                     ExtensionDefinitionImpl.class.getSimpleName());
             sb.append("[");
-            sb.append("qname=" + qname);
+            sb.append("argument="+ argument);
+            sb.append(", qname=" + qname);
             sb.append(", schemaPath=" + schemaPath);
             sb.append(", description=" + description);
             sb.append(", reference=" + reference);

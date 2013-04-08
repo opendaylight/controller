@@ -21,9 +21,10 @@ import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
+import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang.model.util.Decimal64;
 import org.opendaylight.controller.yang.model.util.Int32;
@@ -99,9 +100,9 @@ public class YangModelParserTest {
         assertTrue(testleaf.getType().getBaseType() instanceof Int32);
         Int32 baseTypeCast = (Int32)baseType;
         List<RangeConstraint> ranges = baseTypeCast.getRangeStatements();
-        assertEquals(2, ranges.size());
+        assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
-        assertEquals(2L, range.getMin());
+        assertEquals(11L, range.getMin());
         assertEquals(20L, range.getMax());
     }
 
@@ -150,22 +151,15 @@ public class YangModelParserTest {
         }
         assertNotNull(m1);
 
-        LeafSchemaNode testleaf = (LeafSchemaNode)m1.getDataChildByName("test-int-leaf");
+        LeafSchemaNode testleaf = (LeafSchemaNode)m1.getDataChildByName("leaf-with-length");
         TypeDefinition<?> baseType = testleaf.getType().getBaseType();
-        assertTrue(testleaf.getType().getBaseType() instanceof IntegerTypeDefinition);
-        Int32 baseTypeCast = (Int32)baseType;
+        assertTrue(testleaf.getType().getBaseType() instanceof StringTypeDefinition);
+        StringType baseTypeCast = (StringType)baseType;
 
-        Long[][] expectedRanges = new Long[3][2];
-        expectedRanges[0] = new Long[]{10L, 20L};
-        expectedRanges[1] = new Long[]{12L, 18L};
-        expectedRanges[2] = new Long[]{14L, 16L};
-
-        List<RangeConstraint> actualRanges = baseTypeCast.getRangeStatements();
-        assertEquals(3, actualRanges.size());
-        for(int i = 0; i < actualRanges.size(); i++) {
-            assertEquals(expectedRanges[i][0], actualRanges.get(i).getMin());
-            assertEquals(expectedRanges[i][1], actualRanges.get(i).getMax());
-        }
+        List<LengthConstraint> actualLengths = baseTypeCast.getLengthStatements();
+        assertEquals(1, actualLengths.size());
+        assertEquals(7L, actualLengths.get(0).getMin());
+        assertEquals(10L, actualLengths.get(0).getMax());
     }
 
     @Test
@@ -186,9 +180,9 @@ public class YangModelParserTest {
         assertTrue(testleaf.getType().getBaseType() instanceof Int32);
         Int32 baseTypeCast = (Int32)baseType;
         List<RangeConstraint> ranges = baseTypeCast.getRangeStatements();
-        assertEquals(2, ranges.size());
+        assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
-        assertEquals(2L, range.getMin());
+        assertEquals(11L, range.getMin());
         assertEquals(20L, range.getMax());
     }
 

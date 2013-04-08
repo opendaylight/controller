@@ -16,8 +16,8 @@ public final class BaseConstraints {
     private BaseConstraints() {
     }
 
-    public static LengthConstraint lengthConstraint(final long min,
-            final long max, final String description, final String reference) {
+    public static LengthConstraint lengthConstraint(final Number min,
+            final Number max, final String description, final String reference) {
         return new LengthConstraintImpl(min, max, description, reference);
     }
 
@@ -33,8 +33,8 @@ public final class BaseConstraints {
 
     private static final class LengthConstraintImpl implements LengthConstraint {
 
-        private final long min;
-        private final long max;
+        private final Number min;
+        private final Number max;
 
         private final String description;
         private final String reference;
@@ -42,7 +42,7 @@ public final class BaseConstraints {
         private final String errorAppTag;
         private final String errorMessage;
 
-        public LengthConstraintImpl(long min, long max,
+        public LengthConstraintImpl(Number min, Number max,
                 final String description, final String reference) {
             super();
             this.min = min;
@@ -76,12 +76,12 @@ public final class BaseConstraints {
         }
 
         @Override
-        public Long getMin() {
+        public Number getMin() {
             return min;
         }
 
         @Override
-        public Long getMax() {
+        public Number getMax() {
             return max;
         }
 
@@ -95,8 +95,8 @@ public final class BaseConstraints {
                     + ((errorAppTag == null) ? 0 : errorAppTag.hashCode());
             result = prime * result
                     + ((errorMessage == null) ? 0 : errorMessage.hashCode());
-            result = prime * result + (int) (max ^ (max >>> 32));
-            result = prime * result + (int) (min ^ (min >>> 32));
+            result = prime * result + ((max == null) ? 0 : max.hashCode());
+            result = prime * result + ((min == null) ? 0 : min.hashCode());
             result = prime * result
                     + ((reference == null) ? 0 : reference.hashCode());
             return result;

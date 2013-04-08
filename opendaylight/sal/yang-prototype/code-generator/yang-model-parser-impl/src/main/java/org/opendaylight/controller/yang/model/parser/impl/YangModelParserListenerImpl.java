@@ -13,7 +13,6 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +21,7 @@ import java.util.TreeMap;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser;
+import org.opendaylight.controller.antlrv4.code.gen.YangParser.Argument_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Base_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Contact_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Container_stmtContext;
@@ -47,7 +47,6 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.Revision_stmtCont
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Revision_stmtsContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Status_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Type_body_stmtsContext;
-import org.opendaylight.controller.antlrv4.code.gen.YangParser.Union_specificationContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yang_version_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParserBaseListener;
 import org.opendaylight.controller.yang.common.QName;
@@ -188,6 +187,7 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
         if(revisions.size() > 0) {
             Revision_stmtContext revisionCtx = revisions.firstEntry().getValue();
             moduleBuilder.setRevision(revisions.firstKey());
+            revision = revisions.firstKey();
 
             for(int i = 0; i < revisionCtx.getChildCount(); i++) {
                 ParseTree child = revisionCtx.getChild(i);
@@ -253,10 +253,23 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
 
     @Override
     public void enterExtension_stmt(YangParser.Extension_stmtContext ctx) {
-        String argument = stringFromNode(ctx);
-        QName qname = new QName(namespace, revision, yangModelPrefix, argument);
+        String extName = stringFromNode(ctx);
+        QName qname = new QName(namespace, revision, yangModelPrefix, extName);
         ExtensionBuilder builder = moduleBuilder.addExtension(qname);
         parseSchemaNodeArgs(ctx, builder);
+
+        String argument = null;
+        boolean yin = false;
+        for(int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree child = ctx.getChild(i);
+            if(child instanceof Argument_stmtContext) {
+                argument = stringFromNode(child);
+                yin = parseYinValue((Argument_stmtContext)child);
+                break;
+            }
+        }
+        builder.setArgument(argument);
+        builder.setYinElement(yin);
     }
 
     @Override
@@ -283,20 +296,7 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
     @Override
     public void enterType_stmt(YangParser.Type_stmtContext ctx) {
         String typeName = stringFromNode(ctx);
-        QName typeQName;
-        if (typeName.contains(":")) {
-            String[] splittedName = typeName.split(":");
-            String prefix = splittedName[0];
-            String name = splittedName[1];
-            if (prefix.equals(yangModelPrefix)) {
-                typeQName = new QName(namespace, revision, prefix, name);
-            } else {
-                typeQName = new QName(null, null, prefix, name);
-            }
-        } else {
-            typeQName = new QName(namespace, revision, yangModelPrefix,
-                    typeName);
-        }
+        QName typeQName = parseQName(typeName);
 
         TypeDefinition<?> type = null;
         Type_body_stmtsContext typeBody = null;
@@ -315,16 +315,6 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
                 moduleBuilder.setType(type, actualPath);
             } else {
                 if(typeName.equals("union")) {
-                    List<String> types = new ArrayList<String>();
-                    for(int i = 0; i < typeBody.getChildCount(); i++) {
-                        ParseTree unionSpec = typeBody.getChild(i);
-                        if(unionSpec instanceof Union_specificationContext) {
-                            for(int j = 0; j < unionSpec.getChildCount(); j++) {
-                                ParseTree typeSpec = unionSpec.getChild(j);
-                                types.add(stringFromNode(typeSpec));
-                            }
-                        }
-                    }
                     moduleBuilder.addUnionType(actualPath);
                 } else {
                     type = parseTypeBody(typeName, typeBody, actualPath, namespace, revision, yangModelPrefix);
@@ -339,7 +329,24 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
         }
 
         updatePath(typeName);
+    }
 
+    private QName parseQName(String typeName) {
+        QName typeQName;
+        if (typeName.contains(":")) {
+            String[] splittedName = typeName.split(":");
+            String prefix = splittedName[0];
+            String name = splittedName[1];
+            if (prefix.equals(yangModelPrefix)) {
+                typeQName = new QName(namespace, revision, prefix, name);
+            } else {
+                typeQName = new QName(null, null, prefix, name);
+            }
+        } else {
+            typeQName = new QName(namespace, revision, yangModelPrefix,
+                    typeName);
+        }
+        return typeQName;
     }
 
     @Override
