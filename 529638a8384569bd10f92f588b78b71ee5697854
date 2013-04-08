@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEH////8\u003d",
+        "filename": "opendaylight/samples/loadbalancer/src/main/java/org/opendaylight/controller/samples/loadbalancer/ConfigManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-08T18:23:46Z",
+      "side": 1,
+      "message": "Can you please avoid to use the tabs and use spaces? For this we have created an eclipse formatter that can be loaded in eclipse, that is available at:\nopendaylight/commons/opendaylight/sun_coding_style.xml",
+      "revId": "529638a8384569bd10f92f588b78b71ee5697854",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
