@@ -28,16 +28,22 @@ module types1 {
                  type int32;
              }
          }
-     }
+    }
      
     leaf testleaf {
-        type data:my-base-int32-type {
+        type data:my-type1 {
             range "min..max";
         }
     }
     
     leaf test-string-leaf {
         type data:my-string-type-ext;
+    }
+    
+    leaf leaf-with-length {
+    	type data:my-string-type {
+    		length "7..max";
+    	}
     }
     
     leaf test-int-leaf {
@@ -52,6 +58,10 @@ module types1 {
     
     leaf test-decimal-leaf2 {
         type data:my-decimal-type-ext;
+    }
+    
+    container ext {
+        data:c-define "MY_INTERFACES";
     }
 
 }

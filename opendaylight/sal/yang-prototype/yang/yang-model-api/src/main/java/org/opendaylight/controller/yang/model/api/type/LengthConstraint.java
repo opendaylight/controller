@@ -27,7 +27,7 @@ import org.opendaylight.controller.yang.model.api.ConstraintMetaDefinition;
  * This interface was modeled according to definition in <a
  * href="https://tools.ietf.org/html/rfc6020#section-9.4.4">[RFC-6020] The
  * length Statement</a>.
- * 
+ *
  * @see ConstraintMetaDefinition
  */
 public interface LengthConstraint extends ConstraintMetaDefinition {
@@ -35,16 +35,16 @@ public interface LengthConstraint extends ConstraintMetaDefinition {
     /**
      * Returns the length-restricting lower bound value. <br>
      * The value MUST NOT be negative.
-     * 
+     *
      * @return the length-restricting lower bound value.
      */
-    Long getMin();
+    Number getMin();
 
     /**
      * Returns the length-restricting upper bound value. <br>
      * The value MUST NOT be negative.
-     * 
+     *
      * @return length-restricting upper bound value.
      */
-    Long getMax();
+    Number getMax();
 }

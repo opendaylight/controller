@@ -16,6 +16,18 @@ module types2 {
         reference " WILL BE DEFINED LATER";
     }
     
+    typedef ranges1 {
+    	type int32 {
+    		range "10..20";
+    	}
+    }
+    
+    typedef ranges2 {
+    	type ranges1 {
+    		range "12..max";
+    	}
+    }
+    
     typedef my-base-int32-type {
         type int32 {
             range "2..20";
@@ -29,8 +41,16 @@ module types2 {
     }
     
     typedef my-string-type {
-        type string {
+        type my-custom-string {
             pattern "[a-k]*";
+            length "5..10";
+        }
+    }
+    
+    typedef my-custom-string {
+    	type string {
+            pattern "[a-k]*";
+            length "5..11";
         }
     }
     
@@ -95,6 +115,16 @@ module types2 {
      
     leaf nested-type-leaf {
         type my-type1;
+    }
+    
+    extension c-define {
+        description
+        "Takes as argument a name string.
+        Makes the code generator use the given name in the
+        #define.";
+        argument "name" {
+            yin-element "true";
+        }
     }
 
 }
