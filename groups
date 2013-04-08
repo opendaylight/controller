@@ -1,5 +1,7 @@
 # UUID                                  	Group Name
 #
 227663715bf3a0fe396ca06104524501b0de4410	Non-Interactive Controller Users
+2aea574ae226c183d73bd176350575dedcee76ce	netvirt-platform committers
 b5b0f7499d13ce0e64da591e9773cfa0da904cbc	controller-committers
 ldap:cn=gerrit-controller-commiters,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-controller-commiters
+ldap:cn=gerrit-netvirt-platform-commiters,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-netvirt-platform-commiters
