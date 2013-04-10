@@ -3,5 +3,7 @@
 227663715bf3a0fe396ca06104524501b0de4410	Non-Interactive Controller Users
 2373512464abcee3eaf50f265c4a4e428dab634e	Administrators
 b5b0f7499d13ce0e64da591e9773cfa0da904cbc	controller-committers
+global:Anonymous-Users                  	Anonymous Users
+global:Registered-Users                 	Registered Users
 ldap:cn=gerrit-controller-access,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-controller-access
 ldap:cn=gerrit-controller-commiters,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-controller-commiters
