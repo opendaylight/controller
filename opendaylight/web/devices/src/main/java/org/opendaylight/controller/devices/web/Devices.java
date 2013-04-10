@@ -95,7 +95,7 @@ public class Devices implements IDaylightWeb {
 
             nodeDatum.put("containerName", containerName);
             nodeDatum.put("nodeName", switchManager.getNodeDescription(node));
-            nodeDatum.put("nodeId", node.getNodeIDString());
+            nodeDatum.put("nodeId", node.toString());//.getNodeIDString());
             int tierNumber = (tier == null) ? TierHelper.unknownTierNumber
                     : tier.getValue();
             nodeDatum.put("tierName", TierHelper.getTierName(tierNumber)

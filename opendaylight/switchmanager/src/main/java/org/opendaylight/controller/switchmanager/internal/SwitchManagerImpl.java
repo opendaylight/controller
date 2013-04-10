@@ -582,6 +582,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         }
     }
 
+    @Override
     public void updateSwitchConfig(SwitchConfig cfgObject) {
         boolean modeChange = false;
 
@@ -736,7 +737,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         // copy node properties from config
         boolean proactiveForwarding = false;
         if (nodeConfigList != null) {
-            String nodeId = node.getNodeIDString();
+            String nodeId = node.toString();
             for (SwitchConfig conf : nodeConfigList.values()) {
                 if (conf.getNodeId().equals(nodeId)) {
                     Property description = new Description(conf.getNodeDescription());
