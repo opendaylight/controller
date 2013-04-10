@@ -23,7 +23,7 @@ package org.opendaylight.controller.clustering.services;
 /**
  * Set of services and application will expect from the
  * clustering services provider. This interface is per-container and so
- * the container parameter is implicitely known
+ * the container parameter is implicitly known
  *
  */
 public interface IClusterContainerServices extends IClusterServicesCommon {

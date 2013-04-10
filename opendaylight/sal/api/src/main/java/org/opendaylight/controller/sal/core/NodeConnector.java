@@ -61,7 +61,7 @@ public class NodeConnector implements Serializable {
         /**
          * Special port describing ALL the ports in the system,
          * should be used for flooding like mechanism but better
-         * to be carefull with it
+         * to be careful with it
          */
         public static String ALL = "ALL";
         /**
@@ -460,13 +460,13 @@ public class NodeConnector implements Serializable {
     }
 
     /**
-     * return a NodeConnector from a string not containing explicitely
+     * return a NodeConnector from a string not containing explicitly
      * the Node portion which has to be supplied as parameter
      *
      * @param str String to be parsed in a NodeConnector
      * @param n Node to which the NodeConnector is attached
      *
-     * @return the NodeConnector if parse is succesfull, null otherwise
+     * @return the NodeConnector if parse is successful, null otherwise
      */
     public static NodeConnector fromStringNoNode(String str, Node n) {
         if (str == null) {
