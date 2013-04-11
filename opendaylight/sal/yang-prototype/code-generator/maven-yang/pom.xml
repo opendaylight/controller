@@ -6,7 +6,7 @@
         <groupId>org.opendaylight.controller</groupId>
         <version>1.0</version>
     </parent>
-    <artifactId>yang-to-sources</artifactId>
+    <artifactId>maven-yang</artifactId>
 
     <dependencies>
         <dependency>

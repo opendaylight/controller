@@ -12,7 +12,7 @@
         <plugins>
             <plugin>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>yang-to-sources-plugin</artifactId>
+                <artifactId>maven-yang-plugin</artifactId>
                 <version>1.0</version>
                 <executions>
                     <execution>
@@ -22,10 +22,27 @@
                         <configuration>
                             <yangFilesRootDir>${basedir}/../Correct</yangFilesRootDir>
                             <resourceProviders>
+                                <provider>
+                                    <resourceProviderClass>
+                                        org.opendaylight.controller.yang2sources.spi.ResourceProviderTestImpl
+                                    </resourceProviderClass>
+                                    <outputBaseDir>
+                                        outDir/
+                                    </outputBaseDir>
+                                </provider>
                             </resourceProviders>
                         </configuration>
                     </execution>
                 </executions>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.opendaylight.controller</groupId>
+                        <artifactId>yang-to-sources</artifactId>
+                        <version>1.0</version>
+                        <type>test-jar</type>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

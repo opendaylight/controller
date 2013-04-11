@@ -12,7 +12,7 @@
         <plugins>
             <plugin>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>yang-to-sources-plugin</artifactId>
+                <artifactId>maven-yang-plugin</artifactId>
                 <version>1.0</version>
                 <executions>
                     <execution>
@@ -20,29 +20,12 @@
                             <goal>generate-sources</goal>
                         </goals>
                         <configuration>
-                            <yangFilesRootDir>${basedir}</yangFilesRootDir>
+                            <yangFilesRootDir>${basedir}/../Correct</yangFilesRootDir>
                             <codeGenerators>
-                                <generator>
-                                    <codeGeneratorClass>
-                                        org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl
-                                    </codeGeneratorClass>
-                                    <outputBaseDir>
-                                        outDir/
-                                    </outputBaseDir>
-                                </generator>
                             </codeGenerators>
                         </configuration>
                     </execution>
                 </executions>
-
-                <dependencies>
-                    <dependency>
-                        <groupId>org.opendaylight.controller</groupId>
-                        <artifactId>yang-to-sources</artifactId>
-                        <version>1.0</version>
-                        <type>test-jar</type>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

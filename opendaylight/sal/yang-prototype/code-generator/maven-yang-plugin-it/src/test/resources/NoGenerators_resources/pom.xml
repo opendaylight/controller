@@ -12,17 +12,17 @@
         <plugins>
             <plugin>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>yang-to-sources-plugin</artifactId>
+                <artifactId>maven-yang-plugin</artifactId>
                 <version>1.0</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>generate-sources</goal>
+                            <goal>generate-resources</goal>
                         </goals>
                         <configuration>
                             <yangFilesRootDir>${basedir}/../Correct</yangFilesRootDir>
-                            <codeGenerators>
-                            </codeGenerators>
+                            <resourceProviders>
+                            </resourceProviders>
                         </configuration>
                     </execution>
                 </executions>

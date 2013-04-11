@@ -12,33 +12,25 @@
         <plugins>
             <plugin>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>yang-to-sources-plugin</artifactId>
+                <artifactId>maven-yang-plugin</artifactId>
                 <version>1.0</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>generate-resources</goal>
+                            <goal>generate-sources</goal>
                         </goals>
                         <configuration>
-                            <yangFilesRootDir>${basedir}/../Correct</yangFilesRootDir>
-                            <resourceProviders>
-                                <provider>
-                                    <resourceProviderClass>
-                                        org.opendaylight.controller.yang2sources.spi.ResourceProviderTestImpl
-                                    </resourceProviderClass>
+                            <yangFilesRootDir>${basedir}</yangFilesRootDir>
+                            <codeGenerators>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl
+                                    </codeGeneratorClass>
                                     <outputBaseDir>
                                         outDir/
                                     </outputBaseDir>
-                                </provider>
-                                <provider>
-                                    <resourceProviderClass>
-                                        unknown
-                                    </resourceProviderClass>
-                                    <outputBaseDir>
-                                        outDir/
-                                    </outputBaseDir>
-                                </provider>
-                            </resourceProviders>
+                                </generator>
+                            </codeGenerators>
                         </configuration>
                     </execution>
                 </executions>
