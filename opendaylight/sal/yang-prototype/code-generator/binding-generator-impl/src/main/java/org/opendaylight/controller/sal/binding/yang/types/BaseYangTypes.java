@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.binding.yang.types;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class BaseYangTypes {
     public static final Type UINT8_TYPE = Types.typeForClass(Short.class);
     public static final Type UINT16_TYPE = Types.typeForClass(Integer.class);
     public static final Type UINT32_TYPE = Types.typeForClass(Long.class);
-    public static final Type UINT64_TYPE = Types.typeForClass(BigDecimal.class);
+    public static final Type UINT64_TYPE = Types.typeForClass(BigInteger.class);
 
     static {
         typeMap.put("boolean", BOOLEAN_TYPE);
@@ -44,7 +45,6 @@ public class BaseYangTypes {
         typeMap.put("uint16", UINT16_TYPE);
         typeMap.put("uint32", UINT32_TYPE);
         typeMap.put("uint64", UINT64_TYPE);
-
     }
 
     public static final TypeProvider BASE_YANG_TYPES_PROVIDER = new TypeProvider() {
