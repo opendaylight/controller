@@ -1,11 +1,13 @@
 package org.opendaylight.controller.security;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.catalina.realm.GenericPrincipal;
 import org.apache.catalina.realm.RealmBase;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
+import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.slf4j.Logger;
@@ -38,8 +40,11 @@ public class ControllerCustomRealm  extends RealmBase {
         IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
         if (userManager != null) {
-            final List<String> roles = userManager.getUserRoles(username);
-            return new GenericPrincipal(username, getPassword(username), roles);
+            final List<String> levels = new ArrayList<String>(); 
+            UserLevel level = userManager.getUserLevel(username);
+            if (level == null) level = UserLevel.NOUSER;
+            levels.add(level.toString());
+            return new GenericPrincipal(username, "", levels);
         } else
             throw new RuntimeException("User Manager reference is null");
 

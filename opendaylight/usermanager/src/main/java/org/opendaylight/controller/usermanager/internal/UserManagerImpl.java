@@ -726,6 +726,39 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             ci.println(conf.getUser() + " " + conf.getRole());
         }
     }
+    
+    public void _addAAAServer (CommandInterpreter ci) {
+        String server = ci.nextArgument();
+        String secret = ci.nextArgument();
+        String protocol = ci.nextArgument();
+        
+        if (server == null || secret == null || protocol == null) {
+        	ci.println("Usage : addAAAServer <server> <secret> <protocol>");
+        	return;
+        }
+        ServerConfig s = new ServerConfig(server, secret, protocol);
+        addAAAServer(s);
+    }
+    
+    public void _removeAAAServer (CommandInterpreter ci) {
+        String server = ci.nextArgument();
+        String secret = ci.nextArgument();
+        String protocol = ci.nextArgument();
+        
+        if (server == null || secret == null || protocol == null) {
+        	ci.println("Usage : addAAAServer <server> <secret> <protocol>");
+        	return;
+        }
+        ServerConfig s = new ServerConfig(server, secret, protocol);
+        removeAAAServer(s);
+    }
+
+    public void _printAAAServers (CommandInterpreter ci) {
+        for (ServerConfig aaaServer : remoteServerConfigList.values()) {
+            String protocol = aaaServer.getProtocol();
+            ci.println(aaaServer.getAddress() + "-" + aaaServer.getProtocol());
+        }
+    }
 
     @Override
     public String getHelp() {
