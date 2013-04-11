@@ -243,6 +243,7 @@ public class SimpleClient implements CommandProvider {
         }
     }
 
+    @SuppressWarnings("deprecation") //IGetUpdates intentionally deprecated
     public void _unlisten(CommandInterpreter ci) {
         if (this.icluster == null) {
             ci.println("\nNo Clustering services available");
@@ -370,7 +371,7 @@ public class SimpleClient implements CommandProvider {
     }
 
     public void _dumper(CommandInterpreter ci) {
-        ConcurrentMap c;
+        ConcurrentMap<Object, Object> c;
         String containerName = ci.nextArgument();
         if (containerName == null) {
             ci.println("containerName not supplied");
@@ -381,10 +382,10 @@ public class SimpleClient implements CommandProvider {
             ci.println("Cache not supplied");
             return;
         }
-        c = (ConcurrentMap) this.icluster.getCache(containerName, cacheName);
+        c = (ConcurrentMap<Object, Object>) this.icluster.getCache(containerName, cacheName);
         if (c != null) {
-            for (Object e : c.entrySet()) {
-                Map.Entry entry = (Map.Entry) e;
+            for (Map.Entry<Object, Object> e : c.entrySet()) {
+                Map.Entry<Object, Object> entry = e;
                 Object v = entry.getValue();
                 String res = "<NOT KNOWN>";
                 if (v != null) {
@@ -437,6 +438,7 @@ public class SimpleClient implements CommandProvider {
         }
     }
 
+    @SuppressWarnings("deprecation") //TODO: remove call to deprecated amIStandby
     public void _getRole(CommandInterpreter ci) {
         if (this.icluster == null) {
             ci.println("\nNo Clustering services available");
@@ -449,6 +451,7 @@ public class SimpleClient implements CommandProvider {
         ci.println("My role is: " + role);
     }
 
+    @SuppressWarnings("deprecation") //TODO: remove call to deprecated getActiveAddres
     public void _getActive(CommandInterpreter ci) {
         if (this.icluster == null) {
             ci.println("\nNo Clustering services available");
@@ -458,6 +461,7 @@ public class SimpleClient implements CommandProvider {
                 + this.icluster.getActiveAddress());
     }
 
+    @SuppressWarnings("deprecation") //TODO: remove use of deprecated listenRoleChange
     public void _listenActive(CommandInterpreter ci) {
         if (this.icluster == null) {
             ci.println("\nNo Clustering services available");
@@ -473,6 +477,7 @@ public class SimpleClient implements CommandProvider {
         ci.println("Register listenRoleChanges");
     }
 
+    @SuppressWarnings("deprecation") //TODO: remove deprecated call to unlistenRoleChange
     public void _unlistenActive(CommandInterpreter ci) {
         if (this.icluster == null) {
             ci.println("\nNo Clustering services available");

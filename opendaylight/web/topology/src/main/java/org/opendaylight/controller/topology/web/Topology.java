@@ -259,7 +259,7 @@ public class Topology {
             }
         }
         
-        CircleLayout layout = new CircleLayout(graph);
+        CircleLayout<String,String> layout = new CircleLayout<String,String>(graph);
         layout.setSize(new Dimension(1200, 365));
         for (Map.Entry<String, Map<String, Object>> v : newNodes.entrySet()) {
             Double x = layout.transform(v.getKey()).getX();

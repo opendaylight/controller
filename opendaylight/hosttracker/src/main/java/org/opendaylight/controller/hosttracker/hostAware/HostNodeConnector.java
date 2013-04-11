@@ -43,6 +43,7 @@ public class HostNodeConnector extends Host {
     /**
      * Private constructor used for JAXB mapping
      */
+    @SuppressWarnings("unused")
     private HostNodeConnector() {
     }
 
