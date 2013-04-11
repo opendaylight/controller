@@ -263,7 +263,7 @@ public class HostTrackerNorthbound {
      *
      * @param containerName Name of the Container. The Container name for the base controller is "default".
      * @param networkAddress   IP Address
-     * @return Response as dictated by the HTTP Response code
+     * @return Response as dictated by the HTTP Response code.
      */
 
     @Path("/{containerName}/{networkAddress}")
