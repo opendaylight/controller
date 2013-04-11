@@ -371,6 +371,9 @@ one.main.menu = {
 
 one.main.page = {
     load : function(page) {
+		if (one.f !== undefined && one.f.cleanUp !== undefined) {
+		    one.f.cleanUp();
+		}   	
         // clear page related
         delete one.f;
         $('.dashlet', '#main').empty();
