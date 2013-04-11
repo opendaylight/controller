@@ -1430,22 +1430,17 @@ public class SwitchManagerImpl implements ISwitchManager,
         StringBuffer help = new StringBuffer();
         help.append("---Switch Manager---\n");
         help.append("\t pns                    - Print connected nodes\n");
-        help
-                .append("\t pncs <node id>         - Print node connectors for a given node\n");
-        help
-                .append("\t pencs <node id>        - Print enabled node connectors for a given node\n");
-        help
-                .append("\t pdm <node id>          - Print switch ports in device map\n");
+        help.append("\t pncs <node id>         - Print node connectors for a given node\n");
+        help.append("\t pencs <node id>        - Print enabled node connectors for a given node\n");
+        help.append("\t pdm <node id>          - Print switch ports in device map\n");
         help.append("\t snt <node id> <tier>   - Set node tier number\n");
-        help
-                .append("\t hostRefresh <on/off/?> - Enable/Disable/Query host refresh\n");
+        help.append("\t hostRefresh <on/off/?> - Enable/Disable/Query host refresh\n");
         help.append("\t hostRetry <count>      - Set host retry count\n");
         return help.toString();
     }
 
     public void _pns(CommandInterpreter ci) {
-        ci
-                .println("           Node                       Type             Name             Tier");
+        ci.println("           Node                       Type             Name             Tier");
         if (nodeProps == null) {
             return;
         }
@@ -1461,6 +1456,7 @@ public class SwitchManagerImpl implements ISwitchManager,
             ci.println(node + "            " + node.getType()
                     + "            " + nodeName + "            " + tierNum);
         }
+        ci.println("Total number of Nodes: " + nodeSet.size());
     }
 
     public void _pencs(CommandInterpreter ci) {
@@ -1482,6 +1478,7 @@ public class SwitchManagerImpl implements ISwitchManager,
             }
             ci.println(nodeConnector);
         }
+        ci.println("Total number of NodeConnectors: " + nodeConnectorSet.size());
     }
 
     public void _pncs(CommandInterpreter ci) {
@@ -1514,6 +1511,7 @@ public class SwitchManagerImpl implements ISwitchManager,
             out += (state != null) ? state.getValue() : " ";
             ci.println(out);
         }
+        ci.println("Total number of NodeConnectors: " + nodeConnectorSet.size());
     }
 
     public void _pdm(CommandInterpreter ci) {
@@ -1525,8 +1523,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         Object id = Long.decode(st);
         Switch sw = getSwitchByNode(NodeCreator.createOFNode((Long) id));
 
-        ci
-                .println("          NodeConnector                        Name");
+        ci.println("          NodeConnector                        Name");
         if (sw == null) {
             return;
         }
@@ -1557,13 +1554,13 @@ public class SwitchManagerImpl implements ISwitchManager,
                     }
                 }
 
-                ci
-                        .println(nodeConnector
-                                + "            "
-                                + ((nodeConnectorName == null) ? ""
-                                        : nodeConnectorName) + "("
-                                + nodeConnector.getID() + ")");
+                ci.println(nodeConnector
+                		+ "            "
+                		+ ((nodeConnectorName == null) ? ""
+                				: nodeConnectorName) + "("
+                        + nodeConnector.getID() + ")");
             }
+            ci.println("Total number of NodeConnectors: " + nodeConnectorSet.size());
         }
     }
 

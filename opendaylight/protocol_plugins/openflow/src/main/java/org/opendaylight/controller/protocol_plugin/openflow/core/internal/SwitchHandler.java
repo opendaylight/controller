@@ -428,7 +428,11 @@ public class SwitchHandler implements ISwitch {
     }
 
     private void reportError(Exception e) {
-        logger.debug("Caught exception ", e);
+    	if (e instanceof AsynchronousCloseException) {
+    		logger.debug("Caught exception {}", e.getMessage());
+    	} else {
+    		logger.warn("Caught exception {}", e.getMessage());
+    	}
         // notify core of this error event and disconnect the switch
         ((Controller) core).takeSwitchEventError(this);
     }

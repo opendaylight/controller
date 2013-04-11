@@ -69,8 +69,8 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
     private void createSecureChannel(SocketChannel socket) throws Exception {
      	String keyStoreFile = System.getProperty("controllerKeyStore");
     	String keyStorePassword = System.getProperty("controllerKeyStorePassword");
-     	String trustStoreFile = System.getProperty("controllerTrustStore");;
-    	String trustStorePassword = System.getProperty("controllerTrustStorePassword");;
+     	String trustStoreFile = System.getProperty("controllerTrustStore");
+    	String trustStorePassword = System.getProperty("controllerTrustStorePassword");
 
         KeyStore ks = KeyStore.getInstance("JKS");
         KeyStore ts = KeyStore.getInstance("JKS");
@@ -204,6 +204,7 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
 
     	bytesRead = socket.read(peerNetData);
     	if (bytesRead < 0) {
+    		logger.debug("Message read operation failed");
 			throw new AsynchronousCloseException();
     	}
 

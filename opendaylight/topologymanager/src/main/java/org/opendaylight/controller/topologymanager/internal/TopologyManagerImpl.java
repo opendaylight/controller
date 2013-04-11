@@ -37,14 +37,15 @@ import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
-import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
@@ -543,71 +544,22 @@ public class TopologyManagerImpl implements ITopologyManager,
     }
 
     private Edge getReverseLinkTuple(TopologyUserLinkConfig link) {
-        TopologyUserLinkConfig rLink = new TopologyUserLinkConfig(link
-                .getName(), link.getDstSwitchId(), link.getDstPort(), link
-                .getSrcSwitchId(), link.getSrcPort());
+		TopologyUserLinkConfig rLink = new TopologyUserLinkConfig(
+				link.getName(), link.getDstNodeIDType(), link.getDstSwitchId(),
+				link.getDstNodeConnectorIDType(), link.getDstPort(),
+				link.getSrcNodeIDType(), link.getSrcSwitchId(),
+				link.getSrcNodeConnectorIDType(), link.getSrcPort());
         return getLinkTuple(rLink);
     }
 
     private Edge getLinkTuple(TopologyUserLinkConfig link) {
         Edge linkTuple = null;
-        Long sID = link.getSrcSwitchIDLong();
-        Long dID = link.getDstSwitchIDLong();
-        Short srcPort = Short.valueOf((short) 0);
-        Short dstPort = Short.valueOf((short) 0);
-        if (link.isSrcPortByName()) {
-            // TODO find the inventory service to do this, for now 0
-            //srcPort = srcSw.getPortNumber(link.getSrcPort());
-        } else {
-            srcPort = Short.parseShort(link.getSrcPort());
-        }
-
-        if (link.isDstPortByName()) {
-            //dstPort = dstSw.getPortNumber(link.getDstPort());;
-        } else {
-            dstPort = Short.parseShort(link.getDstPort());
-        }
 
         // if atleast 1 link exists for the srcPort and atleast 1 link exists for the dstPort
         // that makes it ineligible for the Manual link addition
         // This is just an extra protection to avoid mis-programming.
         boolean srcLinkExists = false;
         boolean dstLinkExists = false;
-        /**
-         * Disabling this optimization for now to understand the real benefit of doing this.
-         * Since this is a Manual Link addition, the user knows what he is doing and it is
-         * not good to restrict such creativity...
-         */
-        /*
-          Set <Edge> links = oneTopology.getLinks().keySet();
-          if (links != null) {
-          for (Edge eLink : links) {
-          if (!eLink.isUserCreated() &&
-          eLink.getSrc().getSid().equals(link.getSrcSwitchIDLong()) &&
-          eLink.getSrc().getPort().equals(srcPort)) {
-          srcLinkExists = true;
-          }
-
-          if (!eLink.isUserCreated() &&
-          eLink.getSrc().getSid().equals(link.getSrcSwitchIDLong()) &&
-          eLink.getSrc().getPort().equals(srcPort)) {
-          dstLinkExists = true;
-          }
-
-          if (!eLink.isUserCreated() &&
-          eLink.getDst().getSid().equals(link.getSrcSwitchIDLong()) &&
-          eLink.getDst().getPort().equals(srcPort)) {
-          srcLinkExists = true;
-          }
-
-          if (!eLink.isUserCreated() &&
-          eLink.getDst().getSid().equals(link.getSrcSwitchIDLong()) &&
-          eLink.getDst().getPort().equals(srcPort)) {
-          dstLinkExists = true;
-          }
-          }
-          }
-         */
         //TODO check a way to validate the port with inventory services
         //if (srcSw.getPorts().contains(srcPort) &&
         //dstSw.getPorts().contains(srcPort) &&
@@ -617,17 +569,49 @@ public class TopologyManagerImpl implements ITopologyManager,
             NodeConnector sPort = null;
             NodeConnector dPort = null;
             linkTuple = null;
+            String srcNodeIDType = link.getSrcNodeIDType();
+            String srcNodeConnectorIDType = link.getSrcNodeConnectorIDType();
+            String dstNodeIDType = link.getDstNodeIDType();
+            String dstNodeConnectorIDType = link.getDstNodeConnectorIDType();
             try {
-                sNode = new Node(Node.NodeIDType.OPENFLOW, sID);
-                dNode = new Node(Node.NodeIDType.OPENFLOW, dID);
-                sPort = new NodeConnector(
-                        NodeConnector.NodeConnectorIDType.OPENFLOW, srcPort,
-                        sNode);
-                dPort = new NodeConnector(
-                        NodeConnector.NodeConnectorIDType.OPENFLOW, dstPort,
-                        dNode);
+            	if (srcNodeIDType.equals(NodeIDType.OPENFLOW)) {
+                    sNode = new Node(srcNodeIDType, link.getSrcSwitchIDLong());
+            	} else {
+                    sNode = new Node(srcNodeIDType, link.getSrcSwitchId());            		
+            	}
+
+            	if (dstNodeIDType.equals(NodeIDType.OPENFLOW)) {
+                    dNode = new Node(dstNodeIDType, link.getDstSwitchIDLong());
+            	} else {
+                    dNode = new Node(dstNodeIDType, link.getDstSwitchId());            		
+            	}
+    	
+            	if (srcNodeConnectorIDType.equals(NodeConnectorIDType.OPENFLOW)) {
+                    Short srcPort = Short.valueOf((short) 0);
+	        		if (!link.isSrcPortByName()) {
+	        			srcPort = Short.parseShort(link.getSrcPort());
+	        		}
+					sPort = new NodeConnector(srcNodeConnectorIDType, 
+							srcPort, sNode);
+            	} else {
+    				sPort = new NodeConnector(srcNodeConnectorIDType,
+    						link.getSrcPort(), sNode);            		
+            	}
+
+            	if (dstNodeConnectorIDType.equals(NodeConnectorIDType.OPENFLOW)) {
+                    Short dstPort = Short.valueOf((short) 0);
+	        		if (!link.isDstPortByName()) {
+	                    dstPort = Short.parseShort(link.getDstPort());
+	                }
+					dPort = new NodeConnector(dstNodeConnectorIDType,
+							dstPort, dNode);
+            	} else {
+					dPort = new NodeConnector(dstNodeConnectorIDType,
+							link.getDstPort(), dNode);
+            	}
                 linkTuple = new Edge(sPort, dPort);
             } catch (ConstructionException cex) {
+            	log.warn("Caught exception ", cex);
             }
             return linkTuple;
         }
@@ -664,14 +648,8 @@ public class TopologyManagerImpl implements ITopologyManager,
         Edge linkTuple = getLinkTuple(link);
         if (linkTuple != null) {
             try {
-                // TODO The onetopology will be gone too, topology
-                //manager is the master of the topology at this point
-                //if (oneTopology.addUserConfiguredLink(linkTuple)) {
                 linkTuple = getReverseLinkTuple(link);
-                //if (oneTopology.addUserConfiguredLink(linkTuple)) {
                 link.setStatus(TopologyUserLinkConfig.STATUS.SUCCESS);
-                //}
-                //}
             } catch (Exception e) {
                 return new Status(StatusCode.INTERNALERROR,
                 		"Exception while adding custom link : " + 
@@ -723,16 +701,20 @@ public class TopologyManagerImpl implements ITopologyManager,
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---Topology Manager---\n");
-        help
-                .append("\t addTopo name <src-sw-id> <port-number> <dst-sw-id> <port-number>\n");
+		help.append("\t addTopo name <NodeIDType> <src-sw-id> <NodeConnectorIDType> <port-number> <NodeIDType> <dst-sw-id> <NodeConnectorIDType> <port-number>\n");
         help.append("\t delTopo name\n");
-        help.append("\t _printTopo\n");
+        help.append("\t printTopo\n");
+        help.append("\t printNodeEdges\n");
         return help.toString();
     }
 
     public void _printTopo(CommandInterpreter ci) {
         for (String name : this.userLinks.keySet()) {
-            ci.println(name + " : " + userLinks.get(name));
+        	TopologyUserLinkConfig linkConfig = userLinks.get(name);
+            ci.println("Name : " + name);
+            ci.println(linkConfig);
+            ci.println("Edge " +  getLinkTuple(linkConfig));
+            ci.println("Reverse Edge " +  getReverseLinkTuple(linkConfig));
         }
     }
 
@@ -743,43 +725,56 @@ public class TopologyManagerImpl implements ITopologyManager,
             return;
         }
 
-        String dpid = ci.nextArgument();
-        if (dpid == null) {
-            ci.println("Invalid Switch ID. Format xx:xx:xx:xx:xx:xx:xx:xx");
+        String srcNodeIDType = ci.nextArgument();
+        if (srcNodeIDType == null) {
+            ci.println("Null source node ID Type. Example: OF or PR");
             return;
         }
-        try {
-            HexEncode.stringToLong(dpid);
-        } catch (Exception e) {
-            ci.println("Invalid Switch ID. Format xx:xx:xx:xx:xx:xx:xx:xx");
+
+        String dpid = ci.nextArgument();
+        if (dpid == null) {
+            ci.println("Null source ndoe id");
+            return;
+        }
+
+        String srcNodeConnectorIDType = ci.nextArgument();
+        if (srcNodeConnectorIDType == null) {
+            ci.println("Null source node connector ID Type. Example: OF or PR");
             return;
         }
 
         String port = ci.nextArgument();
         if (port == null) {
-            ci.println("Invalid port number");
+            ci.println("Null source port number");
+            return;
+        }
+
+        String dstNodeIDType = ci.nextArgument();
+        if (dstNodeIDType == null) {
+            ci.println("Null destination node ID Type. Example: OF or PR");
             return;
         }
 
         String ddpid = ci.nextArgument();
         if (ddpid == null) {
-            ci.println("Invalid Switch ID. Format xx:xx:xx:xx:xx:xx:xx:xx");
+            ci.println("Null destination node ID");
             return;
         }
-        try {
-            HexEncode.stringToLong(ddpid);
-        } catch (Exception e) {
-            ci.println("Invalid Switch ID. Format xx:xx:xx:xx:xx:xx:xx:xx");
+
+        String dstNodeConnectorIDType = ci.nextArgument();
+        if (dstNodeConnectorIDType == null) {
+            ci.println("Null destination node connector ID Type. Example: OF or PR");
             return;
         }
 
         String dport = ci.nextArgument();
         if (dport == null) {
-            ci.println("Invalid port number");
+            ci.println("Null destination port number");
             return;
         }
-        TopologyUserLinkConfig config = new TopologyUserLinkConfig(name,
-                dpid, port, ddpid, dport);
+		TopologyUserLinkConfig config = new TopologyUserLinkConfig(name,
+				srcNodeIDType, dpid, srcNodeConnectorIDType, port,
+				dstNodeIDType, ddpid, dstNodeConnectorIDType, dport);
         ci.println(this.addUserLink(config));
     }
 
@@ -790,6 +785,27 @@ public class TopologyManagerImpl implements ITopologyManager,
             return;
         }
         this.deleteUserLink(name);
+    }
+
+    public void _printNodeEdges(CommandInterpreter ci) {
+    	Map<Node, Set<Edge>> nodeEdges = getNodeEdges();    	
+    	if (nodeEdges == null) {
+    		return;
+    	}
+    	Set<Node> nodeSet = nodeEdges.keySet();
+    	if (nodeSet == null) {
+    		return;
+    	}
+        ci.println("        Node                                         Edge");
+    	for (Node node : nodeSet) {
+    		Set<Edge> edgeSet = nodeEdges.get(node);
+    		if (edgeSet == null) {
+    			continue;
+    		}
+    		for (Edge edge : edgeSet) {
+    			ci.println(node + "             " + edge);
+    		}
+        }
     }
 
     @Override

@@ -12,12 +12,25 @@ package org.opendaylight.controller.topologymanager;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
+import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
+import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.GUIField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Interface class that provides methods to manipulate user configured link
  */
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.NONE)
 public class TopologyUserLinkConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String regexDatapathID = "^([0-9a-fA-F]{1,2}[:-]){7}[0-9a-fA-F]{1,2}$";
@@ -26,6 +39,8 @@ public class TopologyUserLinkConfig implements Serializable {
             GUIField.NAME.toString(), GUIField.SRCNODE.toString(),
             GUIField.SRCPORT.toString(), GUIField.DSTNODE.toString(),
             GUIField.DSTPORT.toString() };
+    private static final Logger logger = LoggerFactory
+    .getLogger(TopologyUserLinkConfig.class);
 
     public enum STATUS {
         SUCCESS("Success"), LINKDOWN("Link Down"), INCORRECT(
@@ -53,11 +68,25 @@ public class TopologyUserLinkConfig implements Serializable {
         }
     }
 
+    @XmlElement
     private String status;
+    @XmlElement
     private String name;
+    @XmlElement
+    private String srcNodeIDType;
+    @XmlElement
     private String srcSwitchId;
+    @XmlElement
+    private String srcNodeConnectorIDType;
+    @XmlElement
     private String srcPort;
+    @XmlElement
+    private String dstNodeIDType;
+    @XmlElement
     private String dstSwitchId;
+    @XmlElement
+    private String dstNodeConnectorIDType;
+    @XmlElement
     private String dstPort;
 
     public TopologyUserLinkConfig() {
@@ -65,17 +94,55 @@ public class TopologyUserLinkConfig implements Serializable {
         status = STATUS.LINKDOWN.toString();
     }
 
-    public TopologyUserLinkConfig(String name, String srcSwitchId,
-            String srcPort, String dstSwitchId, String dstPort) {
+	public TopologyUserLinkConfig(String name, String srcNodeIDType,
+			String srcSwitchId, String srcNodeConnectorIDType, String srcPort,
+			String dstNodeIDType, String dstSwitchId,
+			String dstNodeConnectorIDType, String dstPort) {
         super();
         this.name = name;
+        this.srcNodeIDType = srcNodeIDType;
         this.srcSwitchId = srcSwitchId;
+        this.dstNodeIDType = dstNodeIDType;
         this.dstSwitchId = dstSwitchId;
+        this.srcNodeConnectorIDType = srcNodeConnectorIDType;
         this.srcPort = srcPort;
+        this.dstNodeConnectorIDType = dstNodeConnectorIDType;
         this.dstPort = dstPort;
     }
 
-    public String getName() {
+    public String getSrcNodeIDType() {
+		return srcNodeIDType;
+	}
+
+	public void setSrcNodeIDType(String srcNodeIDType) {
+		this.srcNodeIDType = srcNodeIDType;
+	}
+
+	public String getSrcNodeConnectorIDType() {
+		return srcNodeConnectorIDType;
+	}
+
+	public void setSrcNodeConnectorIDType(String srcNodeConnectorIDType) {
+		this.srcNodeConnectorIDType = srcNodeConnectorIDType;
+	}
+
+	public String getDstNodeIDType() {
+		return dstNodeIDType;
+	}
+
+	public void setDstNodeIDType(String dstNodeIDType) {
+		this.dstNodeIDType = dstNodeIDType;
+	}
+
+	public String getDstNodeConnectorIDType() {
+		return dstNodeConnectorIDType;
+	}
+
+	public void setDstNodeConnectorIDType(String dstNodeConnectorIDType) {
+		this.dstNodeConnectorIDType = dstNodeConnectorIDType;
+	}
+
+	public String getName() {
         return name;
     }
 
@@ -136,6 +203,28 @@ public class TopologyUserLinkConfig implements Serializable {
                 .matches(regexDatapathIDLong)));
     }
 
+    private boolean isValidSwitchId(String switchId, String typeStr) {
+        if (typeStr.equals(NodeIDType.OPENFLOW)) {
+            return isValidSwitchId(switchId);
+        } else if (typeStr.equals(NodeIDType.ONEPK) || 
+        		   typeStr.equals(NodeIDType.PCEP) || 
+        		   typeStr.equals(NodeIDType.PRODUCTION)) {
+            return true;
+        } else {
+			logger.warn("Invalid node id type {}", typeStr);
+        	return false;
+        }
+    }
+
+    private boolean isValidPortId(String portId, String nodeConnectorType) {
+		if (NodeConnectorIDType.getClassType(nodeConnectorType) == null) {
+			logger.warn("Invalid node connector id type {}", nodeConnectorType);
+			return false; 
+		}
+		
+		return true;
+	}
+
     private long getSwitchIDLong(String switchId) {
         int radix = 16;
         String switchString = "0";
@@ -156,12 +245,26 @@ public class TopologyUserLinkConfig implements Serializable {
     }
 
     public boolean isValid() {
-        if (name == null || srcSwitchId == null || dstSwitchId == null
-                || srcPort == null || dstPort == null)
+		if (name == null || srcSwitchId == null || dstSwitchId == null
+				|| srcPort == null || dstPort == null || srcNodeIDType == null
+				|| dstNodeIDType == null || srcNodeConnectorIDType == null
+				|| dstNodeConnectorIDType == null) {
             return false;
-        if (!isValidSwitchId(srcSwitchId) || !isValidSwitchId(dstSwitchId))
-            return false;
-        return true;
+		}
+		
+		if (!isValidSwitchId(srcSwitchId, srcNodeIDType) || 
+			!isValidSwitchId(dstSwitchId, dstNodeIDType)) {
+			logger.warn("Invalid switch id");
+			return false;
+		}
+		
+		if (!isValidPortId(srcPort, srcNodeConnectorIDType) || 
+			!isValidPortId(dstPort, dstNodeConnectorIDType)) {
+			logger.warn("Invalid port id");
+			return false;
+		}
+			
+		return true;
     }
 
     public boolean isSrcPortByName() {
@@ -192,22 +295,18 @@ public class TopologyUserLinkConfig implements Serializable {
 
     @Override
     public String toString() {
-        return "ITopologyUserLinkConfig [status=" + status + ", name=" + name
-                + ", srcSwitchId=" + srcSwitchId + ", srcPort=" + srcPort
-                + ", dstSwitchId=" + dstSwitchId + ", dstPort=" + dstPort + "]";
+		return "ITopologyUserLinkConfig [status=" + status + ", name=" + name
+				+ ", srcNodeIDType=" + srcNodeIDType + ", srcSwitchId="
+				+ srcSwitchId + ", srcNodeConnectorIDType="
+				+ srcNodeConnectorIDType + ", srcPort=" + srcPort
+				+ ", dstNodeIDType=" + dstNodeIDType + ", dstId="
+				+ dstSwitchId + ", dstNodeConnectorIDType="
+				+ dstNodeConnectorIDType + ", dstPort=" + dstPort + "]";
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((dstPort == null) ? 0 : dstPort.hashCode());
-        result = prime * result
-                + ((dstSwitchId == null) ? 0 : dstSwitchId.hashCode());
-        result = prime * result + ((srcPort == null) ? 0 : srcPort.hashCode());
-        result = prime * result
-                + ((srcSwitchId == null) ? 0 : srcSwitchId.hashCode());
-        return result;
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     public boolean equals(Long srcNid, String srcPortName, Long dstNid,

@@ -49,6 +49,7 @@
               com.sun.jersey.spi.container.servlet,
               javax.ws.rs,
               javax.ws.rs.core,
+              javax.xml.bind,
               javax.xml.bind.annotation,
               org.slf4j,
               com.sun.jersey.spi.spring.container.servlet,

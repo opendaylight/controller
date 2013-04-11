@@ -27,6 +27,7 @@
 	      org.opendaylight.controller.topologymanager
 	    </Export-Package>
 	    <Import-Package>
+          javax.xml.bind.annotation,
 	      org.opendaylight.controller.sal.core,
 	      org.opendaylight.controller.sal.utils,
 	      org.opendaylight.controller.sal.packet,
@@ -36,6 +37,7 @@
           org.osgi.service.component,
 	      org.slf4j,
           org.apache.felix.dm,
+          org.apache.commons.lang3.builder,
           org.apache.commons.lang3.tuple,
 		  org.eclipse.osgi.framework.console,
           org.osgi.framework

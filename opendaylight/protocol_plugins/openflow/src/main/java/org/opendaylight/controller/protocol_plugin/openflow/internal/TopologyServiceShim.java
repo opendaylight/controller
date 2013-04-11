@@ -557,14 +557,14 @@ public class TopologyServiceShim implements IDiscoveryService,
         }
 
         ci.println("Container: " + container);
-        ci
-                .println("                             Edge                                          Bandwidth");
+        ci.println("                             Edge                                          Bandwidth");
 
         Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropsMap = edgeMap
                 .get(container);
         if (edgePropsMap == null) {
             return;
         }
+        int count = 0;
         for (Pair<Edge, Set<Property>> edgeProps : edgePropsMap.values()) {
             if (edgeProps == null) {
                 continue;
@@ -576,9 +576,10 @@ public class TopologyServiceShim implements IDiscoveryService,
                     bw = ((Bandwidth) prop).getValue();
                 }
             }
-
+            count++;
             ci.println(edgeProps.getLeft() + "          " + bw);
         }
+        ci.println("Total number of Edges: " + count);
     }
 
     public void _bwfactor(CommandInterpreter ci) {

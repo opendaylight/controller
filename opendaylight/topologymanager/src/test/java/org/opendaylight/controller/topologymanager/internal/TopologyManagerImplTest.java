@@ -173,10 +173,10 @@ public class TopologyManagerImplTest {
 	
 	@Test
 	public void testAddDeleteUserLink () {
-		TopologyUserLinkConfig link1 = new TopologyUserLinkConfig("default1", "1", "2", "1", "2"); 
-		TopologyUserLinkConfig link2 = new TopologyUserLinkConfig("default1", "10", "20", "10", "20"); 
-		TopologyUserLinkConfig link3 = new TopologyUserLinkConfig("default2", "1", "2", "1", "2"); 
-		TopologyUserLinkConfig link4 = new TopologyUserLinkConfig("default20", "10", "20", "10", "20"); 
+		TopologyUserLinkConfig link1 = new TopologyUserLinkConfig("default1", "OF", "1", "OF", "2", "OF", "1", "OF", "2"); 
+		TopologyUserLinkConfig link2 = new TopologyUserLinkConfig("default1", "OF", "10", "OF", "20", "OF", "10", "OF", "20"); 
+		TopologyUserLinkConfig link3 = new TopologyUserLinkConfig("default2", "OF", "1", "OF", "2", "OF", "1", "OF", "2"); 
+		TopologyUserLinkConfig link4 = new TopologyUserLinkConfig("default20", "OF", "10", "OF", "20", "OF", "10", "OF", "20"); 
 		
 		TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
 		topoManagerImpl.nonClusterObjectCreate();
@@ -201,28 +201,40 @@ public class TopologyManagerImplTest {
 		topoManagerImpl.nonClusterObjectCreate();
 		
 		String name = null;
+		String srcNodeIDType = null;
 		String srcSwitchId = null;
+		String srcNodeConnectorIDType = null;
 		String srcPort = null;
+		String dstNodeIDType = null;
 		String dstSwitchId = null;
+		String dstNodeConnectorIDType = null;
 		String dstPort = null;
 		
 		/*Creating userlinks and checking for their validity*/
-		link[0] = new TopologyUserLinkConfig(name, srcSwitchId, srcPort, dstSwitchId, dstPort);
+		link[0] = new TopologyUserLinkConfig(name, srcNodeIDType, srcSwitchId,
+				srcNodeConnectorIDType, srcPort, dstNodeIDType, dstSwitchId,
+				dstNodeConnectorIDType, dstPort);
 		Assert.assertTrue(link[0].isValid() == false);
 		
-		srcSwitchId = "Z";
-		link[0] = new TopologyUserLinkConfig(name, srcSwitchId, srcPort, dstSwitchId, dstPort); 
+		srcSwitchId = "1";
+		link[0] = new TopologyUserLinkConfig(name, srcNodeIDType, srcSwitchId,
+				srcNodeConnectorIDType, srcPort, dstNodeIDType, dstSwitchId,
+				dstNodeConnectorIDType, dstPort);
 		Assert.assertTrue(link[0].isValid() == false);
 		
-		dstSwitchId = null;
-		link[0] = new TopologyUserLinkConfig(name, srcSwitchId, srcPort, dstSwitchId, dstPort); 
+		dstSwitchId = "2";
+		link[0] = new TopologyUserLinkConfig(name, srcNodeIDType, srcSwitchId,
+				srcNodeConnectorIDType, srcPort, dstNodeIDType, dstSwitchId,
+				dstNodeConnectorIDType, dstPort);
 		Assert.assertTrue(link[0].isValid() == false);
 
 		
 		Integer i;
 		
 		for (i = 0; i < 5; i++) {
-			link[i] = new TopologyUserLinkConfig(name, srcSwitchId, srcPort, dstSwitchId, dstPort); 
+			link[i] = new TopologyUserLinkConfig(name, srcNodeIDType,
+					srcSwitchId, srcNodeConnectorIDType, srcPort,
+					dstNodeIDType, dstSwitchId, dstNodeConnectorIDType, dstPort);
 
 			name = Integer.toString(i + 1);
 			srcSwitchId = Integer.toString(i + 1);
@@ -236,9 +248,21 @@ public class TopologyManagerImplTest {
 			link[i].setDstSwitchId(dstSwitchId);
 			link[i].setDstPort(dstPort);
 			
+			Assert.assertTrue(link[i].isValid() == false);
+			
+			link[i].setSrcNodeIDType("OF");
+			link[i].setSrcNodeConnectorIDType("OF");
+
+			Assert.assertTrue(link[i].isValid() == false);
+
+			link[i].setDstNodeIDType("OF");
+			link[i].setDstNodeConnectorIDType("OF");
+			
 			Assert.assertTrue(link[i].isValid() == true);
 
-			reverseLink[i] = new TopologyUserLinkConfig(name, dstSwitchId, dstPort, srcSwitchId, srcPort); 
+			reverseLink[i] = new TopologyUserLinkConfig(name, dstNodeIDType,
+					dstSwitchId, dstNodeConnectorIDType, dstPort,
+					srcNodeIDType, srcSwitchId, srcNodeConnectorIDType, srcPort);
 
 			topoManagerImpl.addUserLink(link[i]);
 		}
