@@ -51,14 +51,6 @@
               com.sun.jersey.spi.container.servlet,
               org.opendaylight.controller.northbound.commons,
               org.opendaylight.controller.northbound.commons.exception,
-              com.sun.jersey.spi.spring.container.servlet,
-              org.springframework.web.context,
-              org.springframework.web,
-              org.springframework.web.servlet,
-              org.springframework.web.filter,
-              org.springframework.security.config,
-              org.springframework.security.web.authentication,
-              org.springframework.security.web.authentication.www,
               javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind.annotation,
@@ -102,28 +94,7 @@
 	  <artifactId>commons.northbound</artifactId>
 	  <version>0.4.0-SNAPSHOT</version>
 	</dependency>
-        
-	<dependency>
-		<groupId>org.springframework</groupId>
-		<artifactId>spring-web</artifactId>
-		<version>${spring.version}</version>
-		<scope>provided</scope>
-	</dependency>
-
-	<dependency>
-		<groupId>org.springframework.security</groupId>
-		<artifactId>spring-security-config</artifactId>
-		<version>${spring-security.version}</version>
-		<scope>provided</scope>
-	</dependency>
-	
-	<dependency>
-		<groupId>org.springframework.security</groupId>
-		<artifactId>spring-security-web</artifactId>
-		<version>${spring-security.version}</version>
-		<scope>provided</scope>
-	</dependency>
-        
+    
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-core-annotations</artifactId>
