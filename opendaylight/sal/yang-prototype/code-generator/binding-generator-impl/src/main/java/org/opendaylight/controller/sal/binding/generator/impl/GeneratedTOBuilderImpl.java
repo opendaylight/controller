@@ -8,8 +8,11 @@
 package org.opendaylight.controller.sal.binding.generator.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opendaylight.controller.sal.binding.model.api.AccessModifier;
 import org.opendaylight.controller.sal.binding.model.api.Constant;
@@ -24,8 +27,21 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedP
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 
 final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
+    
+    private static final String[] SET_VALUES = new String[] { "abstract",
+        "assert", "boolean", "break", "byte", "case", "catch", "char",
+        "class", "const", "continue", "default", "double", "do", "else",
+        "enum", "extends", "false", "final", "finally", "float", "for",
+        "goto", "if", "implements", "import", "instanceof", "int",
+        "interface", "long", "native", "new", "null", "package", "private",
+        "protected", "public", "return", "short", "static", "strictfp",
+        "super", "switch", "synchronized", "this", "throw", "throws",
+        "transient", "true", "try", "void", "volatile", "while" };
 
-    private final String packageName;
+    public static final Set<String> JAVA_RESERVED_WORDS = new HashSet<String>(
+            Arrays.asList(SET_VALUES));
+    
+    private String packageName;
     private final String name;
 
     private final List<EnumBuilder> enumerations = new ArrayList<EnumBuilder>();
@@ -36,10 +52,10 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
 
     public GeneratedTOBuilderImpl(String packageName, String name) {
         super();
-        this.packageName = packageName;
+        this.packageName = GeneratedTypeBuilderImpl.validatePackage(packageName);
         this.name = name;
     }
-
+    
     @Override
     public String getPackageName() {
         return packageName;
@@ -49,7 +65,7 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     public String getName() {
         return name;
     }
-
+    
     @Override
     public EnumBuilder addEnumeration(String name) {
         final EnumBuilder builder = new EnumerationBuilderImpl(packageName,
@@ -83,6 +99,7 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
 
     @Override
     public GeneratedTransferObject toInstance() {
+       
         return new GeneratedTransferObjectImpl(packageName, name, enumerations,
                 properties, equalsProperties, hashProperties,
                 toStringProperties);

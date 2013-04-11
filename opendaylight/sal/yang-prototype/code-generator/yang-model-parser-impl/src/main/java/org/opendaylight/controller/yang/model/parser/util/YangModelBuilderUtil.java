@@ -16,7 +16,6 @@ import java.util.Stack;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser;
-import org.opendaylight.controller.antlrv4.code.gen.YangParser.Argument_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Bit_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Bits_specificationContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Config_argContext;
@@ -50,8 +49,6 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.String_restrictio
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Type_body_stmtsContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Units_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.When_stmtContext;
-import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yin_element_argContext;
-import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yin_element_stmtContext;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
@@ -59,11 +56,11 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
+import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ConstraintsBuilder;
 import org.opendaylight.controller.yang.model.util.BaseConstraints;
@@ -79,7 +76,7 @@ import org.opendaylight.controller.yang.model.util.YangTypesConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class YangModelBuilderUtil {
+public class YangModelBuilderUtil {
 
     private static final Logger logger = LoggerFactory
             .getLogger(YangModelBuilderUtil.class);
@@ -307,6 +304,7 @@ public final class YangModelBuilderUtil {
         result.description = description;
         result.reference = reference;
         result.status = status;
+        // TODO: extensionSchemaNodes
         result.name = name;
         result.value = value;
         return result;
@@ -502,8 +500,8 @@ public final class YangModelBuilderUtil {
         String[] splittedRange = trimmed.split("\\|");
         for (String rangeDef : splittedRange) {
             String[] splittedRangeDef = rangeDef.split("\\.\\.");
-            Number min;
-            Number max;
+            Long min;
+            Long max;
             if (splittedRangeDef.length == 1) {
                 min = max = parseRangeValue(splittedRangeDef[0]);
             } else {
@@ -556,8 +554,8 @@ public final class YangModelBuilderUtil {
         String[] splittedRange = trimmed.split("\\|");
         for (String rangeDef : splittedRange) {
             String[] splittedRangeDef = rangeDef.split("\\.\\.");
-            Number min;
-            Number max;
+            Long min;
+            Long max;
             if (splittedRangeDef.length == 1) {
                 min = max = parseRangeValue(splittedRangeDef[0]);
             } else {
@@ -572,10 +570,12 @@ public final class YangModelBuilderUtil {
         return lengthConstraints;
     }
 
-    private static Number parseRangeValue(String value) {
-        Number result = null;
-        if(value.equals("min") || value.equals("max")) {
-            result = new UnknownBoundaryNumber(value);
+    private static Long parseRangeValue(String value) {
+        Long result = null;
+        if (value.equals("min")) {
+            result = Long.MIN_VALUE;
+        } else if (value.equals("max")) {
+            result = Long.MAX_VALUE;
         } else {
             result = Long.valueOf(value);
         }
@@ -627,15 +627,10 @@ public final class YangModelBuilderUtil {
                 reference);
     }
 
-    /**
-     * Parse given context and return pattern value.
-     * @param ctx context to parse
-     * @return pattern value as String
-     */
-    public static String patternStringFromNode(final Pattern_stmtContext ctx) {
+    public static String patternStringFromNode(final Pattern_stmtContext treeNode) {
         String result = "";
-        for (int i = 0; i < ctx.getChildCount(); ++i) {
-            ParseTree child = ctx.getChild(i);
+        for (int i = 0; i < treeNode.getChildCount(); ++i) {
+            ParseTree child = treeNode.getChild(i);
             if (child instanceof StringContext) {
                 for(int j = 0; j < child.getChildCount(); j++) {
                     if(j % 2 == 0) {
@@ -727,7 +722,7 @@ public final class YangModelBuilderUtil {
                 String positionStr = stringFromNode(child);
                 position = Long.valueOf(positionStr);
                 if (position < 0 || position > 4294967295L) {
-                    throw new YangParseException(
+                    throw new IllegalArgumentException(
                             "position value MUST be in the range 0 to 4294967295, but was: "
                                     + position);
                 }
@@ -740,10 +735,9 @@ public final class YangModelBuilderUtil {
             }
         }
 
-        final List<UnknownSchemaNode> extensionSchemaNodes = Collections
-                .emptyList();
+        // TODO: extensionDefinitions
         return createBit(qname, schemaPath, description, reference, status,
-                extensionSchemaNodes, position);
+                null, position);
     }
 
     private static BitsTypeDefinition.Bit createBit(final QName qname,
@@ -1014,10 +1008,9 @@ public final class YangModelBuilderUtil {
             final boolean absolute = path.startsWith("/");
             RevisionAwareXPath xpath = new RevisionAwareXPathImpl(path,
                     absolute);
-            type = new Leafref(xpath);
+            type = new Leafref(actualPath, namespace, revision, xpath);
         } else if (typeName.equals("binary")) {
-            List<Byte> bytes = Collections.emptyList();
-            type = new BinaryType(bytes, lengthStatements, null);
+            type = new BinaryType(null, lengthStatements, null);
         } else if (typeName.equals("instance-identifier")) {
             boolean requireInstance = isRequireInstance(typeBody);
             type = new InstanceIdentifier(null, requireInstance);
@@ -1117,32 +1110,6 @@ public final class YangModelBuilderUtil {
                 constraintsBuilder.addWhenCondition(stringFromNode(childNode));
             }
         }
-    }
-
-    /**
-     * Parse given context and return yin value.
-     * @param ctx context to parse
-     * @return true if value is 'true', false otherwise
-     */
-    public static boolean parseYinValue(Argument_stmtContext ctx) {
-        boolean yinValue = false;
-        outer:
-        for(int j = 0; j < ctx.getChildCount(); j++) {
-            ParseTree yin = ctx.getChild(j);
-            if(yin instanceof Yin_element_stmtContext) {
-                for(int k = 0; k < yin.getChildCount(); k++) {
-                    ParseTree yinArg = yin.getChild(k);
-                    if(yinArg instanceof Yin_element_argContext) {
-                        String yinString = stringFromNode(yinArg);
-                        if(yinString.equals("true")) {
-                            yinValue = true;
-                            break outer;
-                        }
-                    }
-                }
-            }
-        }
-        return yinValue;
     }
 
 }

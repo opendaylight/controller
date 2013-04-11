@@ -1,13 +1,15 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -18,32 +20,53 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
 
 /**
- * The <code>default</code> implementation of Instance Leafref Type Definition interface.
- *
+ * The <code>default</code> implementation of Instance Leafref Type Definition
+ * interface.
+ * 
  * @see LeafrefTypeDefinition
  */
 public class Leafref implements LeafrefTypeDefinition {
     private static final QName name = BaseTypes.constructQName("leafref");
-    private static final String description = "The leafref type is used to reference a " +
-    		"particular leaf instance in the data tree.";
+    private static final String description = "The leafref type is used to reference a "
+            + "particular leaf instance in the data tree.";
     private static final String reference = "https://tools.ietf.org/html/rfc6020#section-9.9";
-    private final SchemaPath path = BaseTypes.schemaPath(name);
+    private final SchemaPath path;
     private final RevisionAwareXPath xpath;
     private final String units = "";
+    private final LeafrefTypeDefinition baseType;
 
-    public Leafref(RevisionAwareXPath xpath) {
-        super();
+    private Leafref(final RevisionAwareXPath xpath) {
         this.xpath = xpath;
+        this.path = BaseTypes.schemaPath(name);
+        this.baseType = this;
+    }
+    
+    public Leafref(final List<String> actualPath, final URI namespace,
+            final Date revision, final RevisionAwareXPath xpath) {
+        super();
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.xpath = xpath;
+        baseType = new Leafref(xpath);
+    }
+    
+    public Leafref(final List<String> actualPath, final URI namespace,
+            final Date revision, final LeafrefTypeDefinition baseType,
+            final RevisionAwareXPath xpath) {
+        super();
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.xpath = xpath;
+        this.baseType = baseType;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
     public LeafrefTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*
@@ -59,7 +82,9 @@ public class Leafref implements LeafrefTypeDefinition {
     /*
      * (non-Javadoc)
      * 
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
+     * ()
      */
     @Override
     public Object getDefaultValue() {
@@ -89,7 +114,8 @@ public class Leafref implements LeafrefTypeDefinition {
     /*
      * (non-Javadoc)
      * 
-     * @see org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
+     * @see
+     * org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
     @Override
     public String getDescription() {
@@ -119,7 +145,9 @@ public class Leafref implements LeafrefTypeDefinition {
     /*
      * (non-Javadoc)
      * 
-     * @see org.opendaylight.controller.yang.model.api.SchemaNode#getExtensionSchemaNodes()
+     * @see
+     * org.opendaylight.controller.yang.model.api.SchemaNode#getExtensionSchemaNodes
+     * ()
      */
     @Override
     public List<UnknownSchemaNode> getUnknownSchemaNodes() {
@@ -130,7 +158,8 @@ public class Leafref implements LeafrefTypeDefinition {
      * (non-Javadoc)
      * 
      * @see
-     * org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition#getPathStatement()
+     * org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition
+     * #getPathStatement()
      */
     @Override
     public RevisionAwareXPath getPathStatement() {

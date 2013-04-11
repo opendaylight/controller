@@ -7,12 +7,16 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface UsesNode {
 
     SchemaPath getGroupingPath();
+    
     Set<AugmentationSchema> getAugmentations();
+    
     boolean isAugmenting();
-
+    
+    Map<SchemaPath, SchemaNode> getRefines();
 }

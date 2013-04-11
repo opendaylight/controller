@@ -1,6 +1,6 @@
 module abstract-topology {
     yang-version 1;
-    namespace "";
+    namespace "urn:model:abstract:topology";
     prefix "tp";
 
     import ietf-inet-types { 
@@ -16,6 +16,10 @@ module abstract-topology {
     topology i.e. definition of network nodes and links. This module is not designed to be used solely for network representation. This module SHOULD be used as base module in defining the network topology.";
 
     revision "2013-02-08" {
+        reference "~~~ WILL BE DEFINED LATER";
+    }
+    
+    revision "2013-01-01" {
         reference "~~~ WILL BE DEFINED LATER";
     }
     

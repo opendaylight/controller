@@ -12,6 +12,6 @@ import java.io.Writer;
 
 public interface CodeGenerator {
 
-    Writer generate(GeneratedType type) throws IOException;
+    Writer generate(Type type) throws IOException;
 
 }

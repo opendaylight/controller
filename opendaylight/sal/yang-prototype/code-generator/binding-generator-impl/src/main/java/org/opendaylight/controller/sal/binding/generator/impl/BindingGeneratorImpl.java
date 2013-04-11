@@ -43,33 +43,30 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 public class BindingGeneratorImpl implements BindingGenerator {
 
     private static Calendar calendar = new GregorianCalendar();
-    private final Map<String, Map<String, GeneratedTypeBuilder>> genTypeBuilders;
-    private final List<ContainerSchemaNode> schemaContainers;
-    private final List<ListSchemaNode> schemaLists;
-
-    private final TypeProvider typeProvider;
-
+    private Map<String, Map<String, GeneratedTypeBuilder>> genTypeBuilders;
+    private List<ContainerSchemaNode> schemaContainers;
+    private List<ListSchemaNode> schemaLists;
+    private TypeProvider typeProvider;
     private String basePackageName;
 
     public BindingGeneratorImpl() {
         super();
-        genTypeBuilders = new HashMap<String, Map<String, GeneratedTypeBuilder>>();
-        schemaContainers = new ArrayList<ContainerSchemaNode>();
-        schemaLists = new ArrayList<ListSchemaNode>();
-
-        // TODO: reimplement in better way
-        typeProvider = new TypeProviderImpl();
     }
 
     @Override
     public List<Type> generateTypes(final SchemaContext context) {
         final List<Type> genTypes = new ArrayList<Type>();
         
+        typeProvider = new TypeProviderImpl(context);
         if (context != null) {
             final Set<Module> modules = context.getModules();
             
             if (modules != null) {
                 for (final Module module : modules) {
+                    genTypeBuilders = new HashMap<String, Map<String, GeneratedTypeBuilder>>();
+                    schemaContainers = new ArrayList<ContainerSchemaNode>();
+                    schemaLists = new ArrayList<ListSchemaNode>();
+                    
                     basePackageName = resolveBasePackageName(module.getNamespace(),
                             module.getYangVersion());
 
@@ -97,7 +94,8 @@ public class BindingGeneratorImpl implements BindingGenerator {
         builder.append(basePackageName);
         if ((schemaPath != null) && (schemaPath.getPath() != null)) {
             final List<QName> pathToNode = schemaPath.getPath();
-            for (int i = 0; i < pathToNode.size(); ++i) {
+            final int traversalSteps = (pathToNode.size() - 1); 
+            for (int i = 0; i < traversalSteps; ++i) {
                 builder.append(".");
                 String nodeLocalName = pathToNode.get(i).getLocalName();
 
@@ -172,6 +170,8 @@ public class BindingGeneratorImpl implements BindingGenerator {
 
             if (leafName != null) {
                 final TypeDefinition<?> typeDef = leaf.getType();
+                
+                //TODO: properly resolve enum types
                 final Type javaType = typeProvider
                         .javaTypeForSchemaDefinitionType(typeDef);
 
@@ -281,7 +281,6 @@ public class BindingGeneratorImpl implements BindingGenerator {
                     builders.put(genTypeName, newType);
                 }
             }
-
             return newType;
         }
         return null;
@@ -333,7 +332,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
             final String yangVersion) {
         final StringBuilder packageNameBuilder = new StringBuilder();
 
-        packageNameBuilder.append("com.cisco.yang.gen.v");
+        packageNameBuilder.append("org.opendaylight.yang.gen.v");
         packageNameBuilder.append(yangVersion);
         packageNameBuilder.append(".rev");
         packageNameBuilder.append(calendar.get(Calendar.YEAR));

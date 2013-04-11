@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.impl.BindingGeneratorImpl;
@@ -36,27 +35,73 @@ public class GeneratedTypesTest {
 
         return parser.resolveSchemaContext(modules);
     }
-    
+
     @Test
     public void testMultipleModulesResolving() {
-        final String topologyPath = getClass().getResource("/abstract-topology.yang").getPath();
-        final String typesPath = getClass().getResource("/ietf-inet-types@2010-09-24.yang").getPath();
-        final SchemaContext context = resolveSchemaContextFromFiles(topologyPath, typesPath);
+        final String topologyPath = getClass().getResource(
+                "/abstract-topology.yang").getPath();
+        final String typesPath = getClass().getResource(
+                "/ietf-inet-types@2010-09-24.yang").getPath();
+        final SchemaContext context = resolveSchemaContextFromFiles(
+                topologyPath, typesPath);
         assertTrue(context != null);
+
+        final BindingGenerator bindingGen = new BindingGeneratorImpl();
+        final List<Type> genTypes = bindingGen.generateTypes(context);
+
+        assertTrue(genTypes != null);
+        assertEquals(11, genTypes.size());
+    }
+    
+    @Test
+    public void testLeafrefResolving() {
+        final String topologyPath = getClass().getResource(
+                "/leafref-test-models/abstract-topology@2013-02-08.yang")
+                .getPath();
+        final String interfacesPath = getClass().getResource(
+                "/leafref-test-models/ietf-interfaces@2012-11-15.yang")
+                .getPath();
+//        final String ifTypePath = getClass().getResource(
+//                "/leafref-test-models/iana-if-type@2012-06-05.yang").getPath();
+        final String inetTypesPath = getClass().getResource(
+                "/leafref-test-models/ietf-inet-types@2010-09-24.yang")
+                .getPath();
+        final String yangTypesPath = getClass().getResource(
+                "/leafref-test-models/ietf-yang-types@2010-09-24.yang")
+                .getPath();
+
+        assertTrue(topologyPath != null);
+        assertTrue(interfacesPath != null);
+//        assertTrue(ifTypePath != null);
+        assertTrue(inetTypesPath != null);
+        assertTrue(yangTypesPath != null);
+
+//        final SchemaContext context = resolveSchemaContextFromFiles(
+//                topologyPath, interfacesPath, ifTypePath, inetTypesPath, yangTypesPath);
+        final SchemaContext context = resolveSchemaContextFromFiles(
+                topologyPath, interfacesPath, inetTypesPath, yangTypesPath);
+        assertTrue(context != null);
+        assertEquals(4, context.getModules().size());
         
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
         final List<Type> genTypes = bindingGen.generateTypes(context);
         
+        assertEquals(21, genTypes.size());
         assertTrue(genTypes != null);
-        assertEquals(11, genTypes.size());
         
-        
+        for (final Type genType : genTypes) {
+            if (genType.getName().equals("Interface") && genType instanceof GeneratedType) {
+//                System.out.println(((GeneratedType)genType).getMethodDefinitions().toString());
+            } else if (genType.getName().equals("NetworkLink") && genType instanceof GeneratedType) {
+//                System.out.println(((GeneratedType)genType).getMethodDefinitions().toString());
+            } 
+        }
     }
-    
-    @Ignore
+
     @Test
     public void testContainerResolving() {
-        final String filePath = getClass().getResource("/simple-container-demo.yang").getPath();
+        final String filePath = getClass().getResource(
+                "/simple-container-demo.yang").getPath();
         final SchemaContext context = resolveSchemaContextFromFiles(filePath);
         assertTrue(context != null);
 
@@ -131,10 +176,10 @@ public class GeneratedTypesTest {
         assertEquals(4, methodsCount);
     }
 
-    @Ignore
     @Test
     public void testLeafListResolving() {
-        final String filePath = getClass().getResource("/simple-leaf-list-demo.yang").getPath();
+        final String filePath = getClass().getResource(
+                "/simple-leaf-list-demo.yang").getPath();
         final SchemaContext context = resolveSchemaContextFromFiles(filePath);
         assertTrue(context != null);
 
@@ -204,10 +249,10 @@ public class GeneratedTypesTest {
         assertEquals(3, methodsCount);
     }
 
-    @Ignore
     @Test
     public void testListResolving() {
-        final String filePath = getClass().getResource("/simple-list-demo.yang").getPath();
+        final String filePath = getClass()
+                .getResource("/simple-list-demo.yang").getPath();
         final SchemaContext context = resolveSchemaContextFromFiles(filePath);
         assertTrue(context != null);
 
@@ -286,10 +331,10 @@ public class GeneratedTypesTest {
         assertEquals(1, genTOsCount);
     }
 
-    @Ignore
     @Test
     public void testListCompositeKeyResolving() {
-        final String filePath = getClass().getResource("/list-composite-key.yang").getPath();
+        final String filePath = getClass().getResource(
+                "/list-composite-key.yang").getPath();
         final SchemaContext context = resolveSchemaContextFromFiles(filePath);
 
         assertTrue(context != null);
@@ -334,10 +379,10 @@ public class GeneratedTypesTest {
         assertEquals(2, genTOsCount);
     }
 
-    @Ignore
     @Test
     public void testGeneratedTypes() {
-        final String filePath = getClass().getResource("/demo-topology.yang").getPath();
+        final String filePath = getClass().getResource("/demo-topology.yang")
+                .getPath();
         final SchemaContext context = resolveSchemaContextFromFiles(filePath);
         assertTrue(context != null);
 
