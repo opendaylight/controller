@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///9Q\u003d",
+        "filename": "opendaylight/security/src/main/java/org/opendaylight/controller/security/ControllerCustomRealm.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-04-11T20:16:54Z",
+      "side": 1,
+      "message": "getUserLevel() only and always returns a valid UserLevel instance and this can be made more explicit in its Javadoc. For example for unknown or null username it already returns UserLevel.NOUSER.. But I believe you want to follow a very conservative approach of always checking for the null object returned. I will approve.",
+      "revId": "d4489fe02637f4cc5c5fd79f218b5ebe43dbe84c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
