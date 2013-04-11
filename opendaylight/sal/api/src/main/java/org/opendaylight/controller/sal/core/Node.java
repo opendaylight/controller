@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -39,6 +40,7 @@ import org.opendaylight.controller.sal.utils.HexEncode;
  *
  */
 @XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement
 public class Node implements Serializable {
     private static final long serialVersionUID = 1L;
 
