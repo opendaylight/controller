@@ -120,8 +120,8 @@ public class TypesResolutionTest {
         List<LengthConstraint> lengths = baseType.getLengthStatements();
         assertEquals(1, lengths.size());
         LengthConstraint length = baseType.getLengthStatements().get(0);
-        assertEquals(1L, length.getMin());
-        assertEquals(253L, length.getMax());
+        assertEquals(1L, length.getMin().longValue());
+        assertEquals(253L, length.getMax().longValue());
     }
 
     @Test

@@ -11,10 +11,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.AugmentationSchema;
+import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.AugmentationSchemaBuilder;
@@ -101,11 +103,18 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
         public boolean isAugmenting() {
             return augmenting;
         }
-
+        
         private void setAugmenting(boolean augmenting) {
             this.augmenting = augmenting;
         }
+        
 
+        @Override
+        public Map<SchemaPath, SchemaNode> getRefines() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -155,7 +164,5 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
             sb.append("[groupingPath=" + groupingPath +"]");
             return sb.toString();
         }
-
     }
-
 }

@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.binding.yang.types.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.sal.binding.generator.spi.TypeProvider;
@@ -31,7 +32,7 @@ public class BaseTypeProvider {
         ParameterizedType stringBooleanMap = Types.mapTypeFor(
                 provider.javaTypeForYangType("string"),
                 provider.javaTypeForYangType("boolean"));
-        assertTrue(stringBooleanMap instanceof ConcreteType);
+        assertTrue(!(stringBooleanMap instanceof ConcreteType));
         assertEquals("java.util", stringBooleanMap.getPackageName());
         assertEquals("Map", stringBooleanMap.getName());
         assertEquals(2, stringBooleanMap.getActualTypeArguments().length);

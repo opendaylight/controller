@@ -7,61 +7,107 @@
  */
 package org.opendaylight.controller.sal.java.api.generator;
 
-import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.CLASS;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.COMMA;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.ENUM;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.FINAL;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.GAP;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.IFC;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.LB;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.LCB;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.NL;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.PKG;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.PRIVATE;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.PUBLIC;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.RB;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.RCB;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.SC;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.STATIC;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.TAB;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
+import org.opendaylight.controller.sal.binding.model.api.Enumeration.Pair;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
+import org.opendaylight.controller.sal.binding.model.api.MethodSignature.Parameter;
 import org.opendaylight.controller.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.sal.binding.model.api.Enumeration.Pair;
-import org.opendaylight.controller.sal.binding.model.api.MethodSignature.Parameter;
 
 public class GeneratorUtil {
+
+    private static final String[] SET_VALUES = new String[] { "abstract",
+            "assert", "boolean", "break", "byte", "case", "catch", "char",
+            "class", "const", "continue", "default", "double", "do", "else",
+            "enum", "extends", "false", "final", "finally", "float", "for",
+            "goto", "if", "implements", "import", "instanceof", "int",
+            "interface", "long", "native", "new", "null", "package", "private",
+            "protected", "public", "return", "short", "static", "strictfp",
+            "super", "switch", "synchronized", "this", "throw", "throws",
+            "transient", "true", "try", "void", "volatile", "while" };
+
+    public static final Set<String> JAVA_RESERVED_WORDS = new HashSet<String>(
+            Arrays.asList(SET_VALUES));
 
     private GeneratorUtil() {
     }
 
-    public static String createIfcDeclarationWithPkgName(String packageName,
-            String name, String indent) {
-        return createFileDeclarationWithPkgName(IFC, packageName, name, indent);
+    private static String validateParamName(final String paramName) {
+        if (paramName != null) {
+            if (JAVA_RESERVED_WORDS.contains(paramName)) {
+                return "_" + paramName;
+            }
+        }
+        return paramName;
     }
 
-    public static String createClassDeclarationWithPkgName(String packageName,
-            String name, String indent) {
-        return createFileDeclarationWithPkgName(CLASS, packageName, name,
-                indent);
+    public static String createIfcDeclarationWithPkgName(
+            final String packageName, final String name, final String indent) {
+        return createFileDeclarationWithPkgName(IFC,
+                packageName, validateParamName(name), indent);
     }
 
-    private static String createFileDeclarationWithPkgName(String type,
-            String packageName, String name, String indent) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PKG + GAP + packageName + SC);
-        sb.append(NL);
-        sb.append(NL);
-        sb.append(PUBLIC + GAP + type + GAP + name + GAP + LCB);
-        return sb.toString();
+    public static String createClassDeclarationWithPkgName(
+            final String packageName, final String name, final String indent) {
+        return createFileDeclarationWithPkgName(CLASS,
+                packageName, validateParamName(name), indent);
     }
 
-    public static String createConstant(Constant constant, String indent) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(indent + PUBLIC + GAP + STATIC + GAP + FINAL + GAP);
-        sb.append(getExplicitType(constant.getType()) + GAP
+    private static String createFileDeclarationWithPkgName(final String type,
+            final String packageName, final String name, final String indent) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(PKG + GAP + packageName + SC);
+        builder.append(NL);
+        builder.append(NL);
+        builder.append(PUBLIC + GAP + type + GAP + validateParamName(name) + GAP + LCB);
+        return builder.toString();
+    }
+
+    public static String createConstant(final Constant constant,
+            final String indent) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(indent + PUBLIC + GAP + STATIC + GAP + FINAL + GAP);
+        builder.append(getExplicitType(constant.getType()) + GAP
                 + constant.getName());
-        sb.append(GAP + "=" + GAP);
-        sb.append(constant.getValue() + SC);
-        return sb.toString();
+        builder.append(GAP + "=" + GAP);
+        builder.append(constant.getValue() + SC);
+        return builder.toString();
     }
 
-    public static String createField(Constant field, String indent) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(indent + PRIVATE + GAP);
-        sb.append(getExplicitType(field.getType()) + GAP + field.getName());
-        sb.append(GAP + "=" + GAP);
-        sb.append(field.getValue() + SC);
-        return sb.toString();
+    public static String createField(final GeneratedProperty property,
+            final String indent) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(indent + PRIVATE + GAP);
+        builder.append(getExplicitType(property.getReturnType()) + GAP
+                + property.getName());
+        builder.append(SC);
+        return builder.toString();
     }
 
     /**
@@ -71,197 +117,271 @@ public class GeneratorUtil {
      * @param indent
      * @return
      */
-    public static String createMethodDeclaration(MethodSignature method,
-            String indent) {
-        String comment = method.getComment();
-        Type type = method.getReturnType();
-        String name = method.getName();
-        List<Parameter> parameters = method.getParameters();
+    public static String createMethodDeclaration(final MethodSignature method,
+            final String indent) {
+        final String comment = method.getComment();
+        final Type type = method.getReturnType();
+        final String name = method.getName();
+        final List<Parameter> parameters = method.getParameters();
 
-        StringBuilder sb = new StringBuilder();
-        createComment(sb, comment, indent);
+        final StringBuilder builder = new StringBuilder();
+        createComment(builder, comment, indent);
 
-        sb.append(indent + getExplicitType(type) + GAP + name);
-        sb.append(LB);
+        builder.append(indent + getExplicitType(type) + GAP + name);
+        builder.append(LB);
         for (int i = 0; i < parameters.size(); i++) {
             Parameter p = parameters.get(i);
             String separator = COMMA;
             if (i + 1 == parameters.size()) {
                 separator = "";
             }
-            sb.append(getExplicitType(p.getType()) + GAP + p.getName()
+            builder.append(getExplicitType(p.getType()) + GAP + validateParamName(p.getName())
                     + separator);
         }
-        sb.append(RB);
-        sb.append(SC);
+        builder.append(RB);
+        builder.append(SC);
 
-        return sb.toString();
+        return builder.toString();
     }
 
-    public static String createGetter(Constant field, String indent) {
-        StringBuilder sb = new StringBuilder();
+    public static String createConstructor(
+            GeneratedTransferObject genTransferObject, final String indent) {
+        final StringBuilder builder = new StringBuilder();
 
-        Type type = field.getType();
-        String varName = field.getName();
-        char first = Character.toUpperCase(varName.charAt(0));
-        String methodName = "get" + first + varName.substring(1);
+        final List<GeneratedProperty> properties = genTransferObject
+                .getProperties();
+        builder.append(indent);
+        builder.append(PUBLIC);
+        builder.append(GAP);
+        builder.append(genTransferObject.getName());
+        builder.append(LB);
 
-        sb.append(indent + PUBLIC + GAP + getExplicitType(type) + GAP
+        boolean first = true;
+        if (properties != null) {
+            for (final GeneratedProperty property : properties) {
+                if (first) {
+                    builder.append(getExplicitType(property.getReturnType()));
+                    builder.append(" ");
+                    builder.append(property.getName());
+                    first = false;
+                } else {
+                    builder.append(", ");
+                    builder.append(getExplicitType(property.getReturnType()));
+                    builder.append(builder.append(" "));
+                    builder.append(property.getName());
+                }
+            }
+        }
+
+        builder.append(RB);
+        builder.append(GAP);
+        builder.append(LCB);
+        builder.append(NL);
+        builder.append(indent);
+        builder.append(TAB);
+        builder.append("super();");
+        builder.append(NL);
+
+        if (properties != null) {
+            for (final GeneratedProperty property : properties) {
+                builder.append(indent);
+                builder.append(TAB);
+                builder.append("this.");
+                builder.append(property.getName());
+                builder.append(" = ");
+                builder.append(property.getName());
+                builder.append(SC);
+                builder.append(NL);
+            }
+        }
+
+        builder.append(indent);
+        builder.append(RCB);
+
+        return builder.toString();
+    }
+
+    public static String createGetter(final GeneratedProperty property,
+            final String indent) {
+        final StringBuilder builder = new StringBuilder();
+
+        final Type type = property.getReturnType();
+        final String varName = property.getName();
+        final char first = Character.toUpperCase(varName.charAt(0));
+        final String methodName = "get" + first + varName.substring(1);
+
+        builder.append(indent + PUBLIC + GAP + getExplicitType(type) + GAP
                 + methodName);
-        sb.append(LB + RB + LCB + NL);
+        builder.append(LB + RB + LCB + NL);
 
         String currentIndent = indent + TAB;
 
-        sb.append(currentIndent + "return " + varName + SC + NL);
+        builder.append(currentIndent + "return " + varName + SC + NL);
 
-        sb.append(indent + RCB);
-        return sb.toString();
+        builder.append(indent + RCB);
+        return builder.toString();
     }
 
-    public static String createHashCode(List<Constant> fields, String indent) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(indent + "public int hashCode() {" + NL);
-        sb.append(indent + TAB + "final int prime = 31;" + NL);
-        sb.append(indent + TAB + "int result = 1;" + NL);
+    public static String createHashCode(
+            final List<GeneratedProperty> properties, final String indent) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(indent + "public int hashCode() {" + NL);
+        builder.append(indent + TAB + "final int prime = 31;" + NL);
+        builder.append(indent + TAB + "int result = 1;" + NL);
 
-        for (Constant field : fields) {
-            String fieldName = field.getName();
-            sb.append(indent + TAB + "result = prime * result + ((" + fieldName
-                    + " == null) ? 0 : " + fieldName + ".hashCode());" + NL);
+        for (GeneratedProperty property : properties) {
+            String fieldName = property.getName();
+            builder.append(indent + TAB + "result = prime * result + (("
+                    + fieldName + " == null) ? 0 : " + fieldName
+                    + ".hashCode());" + NL);
         }
 
-        sb.append(indent + TAB + "return result;" + NL);
-        sb.append(indent + RCB + NL);
-        return sb.toString();
+        builder.append(indent + TAB + "return result;" + NL);
+        builder.append(indent + RCB + NL);
+        return builder.toString();
     }
 
-    public static String createEquals(Type type, List<Constant> fields,
-            String indent) {
-        StringBuilder sb = new StringBuilder();
+    public static String createEquals(final GeneratedTransferObject type,
+            final List<GeneratedProperty> properties, final String indent) {
+        StringBuilder builder = new StringBuilder();
         final String indent1 = indent + TAB;
         final String indent2 = indent + TAB + TAB;
         final String indent3 = indent + TAB + TAB + TAB;
 
-        sb.append(indent + "public boolean equals(Object obj) {" + NL);
-        sb.append(indent1 + "if (this == obj) {" + NL);
-        sb.append(indent2 + "return true;" + NL);
-        sb.append(indent1 + "}" + NL);
-        sb.append(indent1 + "if (obj == null) {" + NL);
-        sb.append(indent2 + "return false;" + NL);
-        sb.append(indent1 + "}" + NL);
-        sb.append(indent1 + "if (getClass() != obj.getClass()) {" + NL);
-        sb.append(indent2 + "return false;" + NL);
-        sb.append(indent1 + "}" + NL);
+        builder.append(indent + "public boolean equals(Object obj) {" + NL);
+        builder.append(indent1 + "if (this == obj) {" + NL);
+        builder.append(indent2 + "return true;" + NL);
+        builder.append(indent1 + "}" + NL);
+        builder.append(indent1 + "if (obj == null) {" + NL);
+        builder.append(indent2 + "return false;" + NL);
+        builder.append(indent1 + "}" + NL);
+        builder.append(indent1 + "if (getClass() != obj.getClass()) {" + NL);
+        builder.append(indent2 + "return false;" + NL);
+        builder.append(indent1 + "}" + NL);
 
         String typeStr = type.getPackageName() + "." + type.getName();
-        sb.append(indent1 + typeStr + " other = (" + typeStr + ") obj;" + NL);
+        builder.append(indent1 + typeStr + " other = (" + typeStr + ") obj;"
+                + NL);
 
-        for (Constant field : fields) {
-            String fieldName = field.getName();
-            sb.append(indent1 + "if (" + fieldName + " == null) {" + NL);
-            sb.append(indent2 + "if (other." + fieldName + " != null) {" + NL);
-            sb.append(indent3 + "return false;" + NL);
-            sb.append(indent2 + "}" + NL);
-            sb.append(indent1 + "} else if (!" + fieldName + ".equals(other."
-                    + fieldName + ")) {" + NL);
-            sb.append(indent2 + "return false;" + NL);
-            sb.append(indent1 + "}" + NL);
+        for (GeneratedProperty property : properties) {
+            String fieldName = property.getName();
+            builder.append(indent1 + "if (" + fieldName + " == null) {" + NL);
+            builder.append(indent2 + "if (other." + fieldName + " != null) {"
+                    + NL);
+            builder.append(indent3 + "return false;" + NL);
+            builder.append(indent2 + "}" + NL);
+            builder.append(indent1 + "} else if (!" + fieldName
+                    + ".equals(other." + fieldName + ")) {" + NL);
+            builder.append(indent2 + "return false;" + NL);
+            builder.append(indent1 + "}" + NL);
         }
 
-        sb.append(indent1 + "return true;" + NL);
+        builder.append(indent1 + "return true;" + NL);
 
-        sb.append(indent + RCB + NL);
-        return sb.toString();
+        builder.append(indent + RCB + NL);
+        return builder.toString();
     }
 
-    public static String createToString(Type type, List<Constant> fields,
-            String indent) {
-        StringBuilder sb = new StringBuilder();
-        String typeStr = type.getPackageName() + "." + type.getName();
-
-        sb.append(indent + "public String toString() {" + NL);
-        sb.append(indent + TAB + "return \"" + typeStr + "[");
+    public static String createToString(final GeneratedTransferObject type,
+            final List<GeneratedProperty> properties, final String indent) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(indent);
+        builder.append("public String toString() {");
+        builder.append(NL);
+        builder.append(indent);
+        builder.append(TAB);
+        builder.append("StringBuilder builder = new StringBuilder();");
+        builder.append(NL);
+        builder.append(indent);
+        builder.append(TAB);
+        builder.append("builder.append(\"");
+        builder.append(type.getName());
+        builder.append(" [");
 
         boolean first = true;
-        for (Constant field : fields) {
-            String fieldName = field.getName();
-            String fieldType = field.getType().getPackageName() + "."
-                    + field.getType().getName();
+        for (GeneratedProperty property : properties) {
             if (first) {
-                if (fieldType.equals("java.lang.String")) {
-                    sb.append(fieldName + "=\\\""
-                            + parseStringValue((String) field.getValue())
-                            + "\\\"");
-                } else {
-                    sb.append(fieldName + "=" + field.getValue() + "");
-                }
+                builder.append(property.getName());
+                builder.append("=\");");
+                builder.append(NL);
+                builder.append(indent);
+                builder.append(TAB);
+                builder.append("builder.append(");
+                builder.append(property.getName());
+                builder.append(");");
+                first = false;
             } else {
-                if (fieldType.equals("java.lang.String")) {
-                    sb.append(", " + fieldName + "=\\\""
-                            + parseStringValue((String) field.getValue())
-                            + "\\\"");
-                } else {
-                    sb.append(", " + fieldName + "=" + field.getValue() + "");
-                }
-
+                builder.append(NL);
+                builder.append(indent);
+                builder.append(TAB);
+                builder.append("builder.append(\", ");
+                builder.append(property.getName());
+                builder.append("=\");");
+                builder.append(NL);
+                builder.append(indent);
+                builder.append(TAB);
+                builder.append("builder.append(\", ");
+                builder.append(property.getName());
+                builder.append(");");
             }
-            first = false;
         }
-        sb.append("]\"" + SC + NL);
+        builder.append(NL);
+        builder.append(indent);
+        builder.append(TAB);
+        builder.append("builder.append(\"]\");");
+        builder.append(NL);
+        builder.append(indent);
+        builder.append(TAB);
+        builder.append("return builder.toString();");
 
-        sb.append(indent + RCB + NL);
-        return sb.toString();
+        builder.append(NL);
+        builder.append(indent);
+        builder.append(RCB);
+        builder.append(NL);
+        return builder.toString();
     }
 
-    /**
-     * Remove starting and ending quote sign
-     * 
-     * @param o
-     * @return
-     */
-    private static String parseStringValue(String str) {
-        return str.substring(1, str.length() - 1);
-    }
-
-    public static String createEnum(Enumeration e, String indent) {
-        StringBuilder sb = new StringBuilder(indent + ENUM + GAP + e.getName()
-                + GAP + LCB + NL);
+    public static String createEnum(final Enumeration enumeration,
+            final String indent) {
+        final StringBuilder builder = new StringBuilder(indent + ENUM + GAP
+                + enumeration.getName() + GAP + LCB + NL);
 
         String separator = COMMA;
-        List<Pair> values = e.getValues();
-        sb.append(indent + TAB);
+        final List<Pair> values = enumeration.getValues();
+        builder.append(indent + TAB);
         for (int i = 0; i < values.size(); i++) {
             if (i + 1 == values.size()) {
                 separator = SC;
             }
-            sb.append(values.get(i).getName() + separator);
+            builder.append(values.get(i).getName() + separator);
         }
-        sb.append(NL);
-        sb.append(indent + RCB);
-        return sb.toString();
+        builder.append(NL);
+        builder.append(indent + RCB);
+        return builder.toString();
     }
 
-    private static String getExplicitType(Type type) {
+    private static String getExplicitType(final Type type) {
         String packageName = type.getPackageName();
         if (packageName.endsWith(".")) {
             packageName = packageName.substring(0, packageName.length() - 1);
         }
-        StringBuilder sb = new StringBuilder(packageName + "." + type.getName());
+        final StringBuilder builder = new StringBuilder(packageName + "."
+                + type.getName());
         if (type instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) type;
             Type[] pTypes = pType.getActualTypeArguments();
-            sb.append("<");
-            sb.append(getParameters(pTypes));
-            sb.append(">");
+            builder.append("<");
+            builder.append(getParameters(pTypes));
+            builder.append(">");
         }
-        if (sb.toString().equals("java.lang.Void")) {
+        if (builder.toString().equals("java.lang.Void")) {
             return "void";
         }
-        return sb.toString();
+        return builder.toString();
     }
 
-    private static String getParameters(Type[] pTypes) {
-        StringBuilder sb = new StringBuilder();
+    private static String getParameters(final Type[] pTypes) {
+        final StringBuilder builder = new StringBuilder();
         for (int i = 0; i < pTypes.length; i++) {
             Type t = pTypes[i];
 
@@ -269,17 +389,17 @@ public class GeneratorUtil {
             if (i + 1 == pTypes.length) {
                 separator = "";
             }
-            sb.append(getExplicitType(t) + separator);
+            builder.append(getExplicitType(t) + separator);
         }
-        return sb.toString();
+        return builder.toString();
     }
 
-    private static void createComment(StringBuilder sb, String comment,
-            String indent) {
+    private static void createComment(final StringBuilder builder,
+            final String comment, final String indent) {
         if (comment != null && comment.length() > 0) {
-            sb.append(indent + "/*" + NL);
-            sb.append(indent + comment + NL);
-            sb.append(indent + "*/" + NL);
+            builder.append(indent + "/*" + NL);
+            builder.append(indent + comment + NL);
+            builder.append(indent + "*/" + NL);
         }
     }
 

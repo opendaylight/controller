@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.sal.java.api.generator;
 
-import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.NL;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.RCB;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.TAB;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -15,39 +17,43 @@ import java.io.Writer;
 import java.util.List;
 
 import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
-import org.opendaylight.controller.sal.binding.model.api.Constant;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
+import org.opendaylight.controller.sal.binding.model.api.Type;
 
 public class CompositeKeyGenerator implements CodeGenerator {
 
     @Override
-    public Writer generate(GeneratedType type) throws IOException {
+    public Writer generate(Type type) throws IOException {
         final Writer writer = new StringWriter();
-        final List<Constant> fields = type.getConstantDefinitions();
+        if (type instanceof GeneratedTransferObject) {
+            GeneratedTransferObject genTO = (GeneratedTransferObject)type;
+            final List<GeneratedProperty> fields = genTO.getProperties();
 
-        writer.write(GeneratorUtil.createClassDeclarationWithPkgName(
-                type.getPackageName(), type.getName(), ""));
-        writer.write(NL);
-        writer.write(NL);
-
-        if (fields != null) {
-            for (Constant field : fields) {
-                writer.write(GeneratorUtil.createField(field, TAB) + NL);
-            }
+            writer.write(GeneratorUtil.createClassDeclarationWithPkgName(
+                    type.getPackageName(), type.getName(), ""));
             writer.write(NL);
-
-            for (Constant field : fields) {
-                writer.write(GeneratorUtil.createGetter(field, TAB) + NL);
-            }
             writer.write(NL);
+            
+            if (fields != null) {
+                for (GeneratedProperty field : fields) {
+                    writer.write(GeneratorUtil.createField(field, TAB) + NL);
+                }
+                writer.write(NL);
+                writer.write(GeneratorUtil.createConstructor(genTO, TAB) + NL);
+                writer.write(NL);
+                for (GeneratedProperty field : fields) {
+                    writer.write(GeneratorUtil.createGetter(field, TAB) + NL);
+                }
+                writer.write(NL);
 
-            writer.write(GeneratorUtil.createHashCode(fields, TAB) + NL);
-            writer.write(GeneratorUtil.createEquals(type, fields, TAB) + NL);
-            writer.write(GeneratorUtil.createToString(type, fields, TAB) + NL);
+                writer.write(GeneratorUtil.createHashCode(genTO.getHashCodeIdentifiers(), TAB) + NL);
+                writer.write(GeneratorUtil.createEquals(genTO, genTO.getEqualsIdentifiers(), TAB) + NL);
+                writer.write(GeneratorUtil.createToString(genTO, genTO.getToStringIdentifiers(), TAB) + NL);
 
-            writer.write(RCB);
+                writer.write(RCB);
+            }
         }
-
         return writer;
     }
 
