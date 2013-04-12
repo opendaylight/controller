@@ -52,14 +52,6 @@
               javax.xml.bind,
               javax.xml.bind.annotation,
               org.slf4j,
-              com.sun.jersey.spi.spring.container.servlet,
-              org.springframework.web.context,
-              org.springframework.web,
-              org.springframework.web.servlet,
-              org.springframework.web.filter,
-              org.springframework.security.config,
-              org.springframework.security.web.authentication,
-              org.springframework.security.web.authentication.www,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Web-ContextPath>/controller/nb/v2/topology</Web-ContextPath>
