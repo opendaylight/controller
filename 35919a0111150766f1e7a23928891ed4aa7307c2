@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///8E\u003d",
+        "filename": "opendaylight/samples/northbound/loadbalancer/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-04-12T04:30:37Z",
+      "side": 1,
+      "message": "Now that Spring Security is out, We dont even need the spring container for Jersey anymore.Can you please remove this from all the POM\u0027s import needs ?",
+      "revId": "35919a0111150766f1e7a23928891ed4aa7307c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
