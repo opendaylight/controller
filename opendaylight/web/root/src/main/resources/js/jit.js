@@ -6115,10 +6115,10 @@ var MultiNodeHelper = {
 				};
 			} else {
 				ctx.drawImage(img,pos.x-32,pos.y-32);
+				img.onload = function() {
+					ctx.drawImage(img,pos.x-32,pos.y-32);
+				};
 			}
-			/*var width = 64, height = 55;
-			ctx.fillStyle = "rgba(0,0,0,0)";
-			ctx.fillRect(pos.x - width / 2, pos.y - height / 2, width, height);*/
 		},
 		'contains': function(npos, pos) {
 			var width = 64, height = 55;
@@ -6137,10 +6137,10 @@ var MultiNodeHelper = {
 				};
 			} else {
 				ctx.drawImage(img,pos.x-32,pos.y-32);
+				img.onload = function() {
+					ctx.drawImage(img,pos.x-32,pos.y-32);
+				};
 			}
-			/*var width = 64, height = 45;
-			ctx.fillStyle = "rgba(0,0,0,0)";
-			ctx.fillRect(pos.x - width / 2, pos.y - height / 2, width, height);*/
 		},
 		'contains': function(npos, pos) {
 			var width = 64, height = 45;
