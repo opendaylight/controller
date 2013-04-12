@@ -51,7 +51,7 @@ import edu.uci.ics.jung.graph.SparseMultigraph;
 public class Topology {
 
     protected Map<String, Map<String, Object>> cache = new HashMap<String, Map<String, Object>>();
-    protected Map<String, Map<String, Object>> stage;
+    protected Map<String, Map<String, Object>> stagedNodes;
     protected Map<String, Map<String, Object>> newNodes;
     protected Integer nodeHash = null;
     protected Integer hostHash = null;
@@ -101,7 +101,7 @@ public class Topology {
         nodeSingleHash = nodes.hashCode();
         nodeConfigurationHash = switchConfigurations.hashCode();
         
-        stage = new HashMap<String, Map<String, Object>>();
+        stagedNodes = new HashMap<String, Map<String, Object>>();
         newNodes = new HashMap<String, Map<String, Object>>();
 
         // nodeEdges addition
@@ -149,13 +149,18 @@ public class Topology {
             
             node.setLinks(adjacencies);
             if (cache.containsKey(node.id())) {
+            	// retrieve node from cache
             	Map<String, Object> nodeEntry = cache.get(node.id());
+            	// update node name when appropriate
             	if (config != null) {
             		Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
             		data.put("$desc", config.getNodeDescription());
             		nodeEntry.put("data", data);
             	}
-            	stage.put(node.id(), nodeEntry);
+            	// always update adjacencies
+            	nodeEntry.put("adjacencies", adjacencies);
+            	// stage this cached node (with position)
+            	stagedNodes.put(node.id(), nodeEntry);
             } else {
             	newNodes.put(node.id(), node.out());
             }
@@ -178,16 +183,21 @@ public class Topology {
     	for (Switch sw : nodes) {
     		Node n = sw.getNode();
     		SwitchConfig config = switchManager.getSwitchConfig(n.getNodeIDString());
-    		if (cache.containsKey(n.toString()) || newNodes.containsKey(n.toString())) continue;
+    		
+    		if ((stagedNodes.containsKey(n.toString()) && cache.containsKey(n.toString())) || newNodes.containsKey(n.toString())) {
+    			continue;
+    		}
     		NodeBean node = createNodeBean(config, n);
-    		if (cache.containsKey(node.id())) {
+    		
+    		// FIXME still doesn't display standalone node when last remaining link is removed
+    		if (cache.containsKey(node.id()) && !stagedNodes.containsKey(node.id())) {
     			Map<String, Object> nodeEntry = cache.get(node.id());
     			if (config != null) {
     				Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
             		data.put("$desc", config.getNodeDescription());
             		nodeEntry.put("data", data);
     			}
-            	stage.put(node.id(), nodeEntry);
+            	stagedNodes.put(node.id(), nodeEntry);
             } else {
             	newNodes.put(node.id(), node.out());
             }
@@ -213,15 +223,18 @@ public class Topology {
                 addressByteBuffer.rewind();
                 
                 long hid = addressByteBuffer.getLong();
+                String hostId = String.valueOf(hid);
                 
-                NodeBean hostBean = new NodeBean(String.valueOf(hid), host.getNetworkAddressAsString(), NodeType.HOST);
+                NodeBean hostBean = new NodeBean(hostId, host.getNetworkAddressAsString(), NodeType.HOST);
                 List<Map<String, Object>> adjacencies = new LinkedList<Map<String, Object>>();
                 EdgeBean edge = new EdgeBean(connector, hid);
                 adjacencies.add(edge.out());
                 hostBean.setLinks(adjacencies);
                 
-                if (cache.containsKey(String.valueOf(hid))) {
-                	stage.put(String.valueOf(hid), cache.get(String.valueOf(hid)));
+                if (cache.containsKey(hostId)) {
+                	Map<String, Object> hostEntry = cache.get(hostId);
+                	hostEntry.put("adjacencies", adjacencies);
+                	stagedNodes.put(hostId, hostEntry);
                 } else {
                 	newNodes.put(String.valueOf(hid), hostBean.out());
                 }
@@ -235,7 +248,7 @@ public class Topology {
     private void repositionTopology() {
         Graph<String, String> graph = new SparseMultigraph<String, String>();
         cache.clear();
-        cache.putAll(stage);
+        cache.putAll(stagedNodes);
         cache.putAll(newNodes);
         for (Map<String, Object> on : cache.values()) {
             graph.addVertex(on.toString());
