@@ -45,7 +45,9 @@
     <module>../../containermanager/api</module>
     <module>../../containermanager/implementation</module>
     <module>../../switchmanager</module>
-    <module>../../statisticsmanager</module>
+    <module>../../statisticsmanager/api</module>
+    <module>../../statisticsmanager/implementation</module>
+     <module>../../statisticsmanager/integrationtest</module>
     <module>../../topologymanager</module>
     <module>../../usermanager</module>
     <module>../../../third-party/openflowj</module>
@@ -78,6 +80,7 @@
 
 	<!-- Southbound bundles -->
     <module>../../protocol_plugins/openflow</module>
+    <module>../../protocol_plugins/stub</module>
 	
     <!-- Samples -->
     <module>../../samples/simpleforwarding</module>
