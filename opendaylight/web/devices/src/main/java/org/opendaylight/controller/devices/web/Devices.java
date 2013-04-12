@@ -95,14 +95,14 @@ public class Devices implements IDaylightWeb {
 
             nodeDatum.put("containerName", containerName);
             nodeDatum.put("nodeName", switchManager.getNodeDescription(node));
-            nodeDatum.put("nodeId", node.toString());//.getNodeIDString());
+            nodeDatum.put("nodeId", node.toString());
             int tierNumber = (tier == null) ? TierHelper.unknownTierNumber
                     : tier.getValue();
             nodeDatum.put("tierName", TierHelper.getTierName(tierNumber)
                     + " (Tier-" + tierNumber + ")");
             nodeDatum.put("tier", tierNumber + "");
             SwitchConfig sc = switchManager.getSwitchConfig(device.getNode()
-                    .getNodeIDString());
+                    .toString());
             String modeStr = (sc != null) ? sc.getMode() : "0";
             nodeDatum.put("mode", modeStr);
 

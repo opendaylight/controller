@@ -29,6 +29,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.packet.address.EthernetAddress;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
@@ -83,7 +84,7 @@ public class Topology {
         List<SwitchConfig> switchConfigurations = new ArrayList<SwitchConfig>();
         for(Switch sw : nodes) {
         	Node n = sw.getNode();
-        	SwitchConfig config = switchManager.getSwitchConfig(n.getNodeIDString());
+        	SwitchConfig config = switchManager.getSwitchConfig(n.toString());
         	switchConfigurations.add(config);
         }
         
@@ -131,8 +132,8 @@ public class Topology {
         
         for (Map.Entry<Node, Set<Edge>> e : nodeEdges.entrySet()) {
             Node n = e.getKey();
-            SwitchConfig config = switchManager.getSwitchConfig(n.getNodeIDString());
-            NodeBean node = createNodeBean(config, n);
+            String description = switchManager.getNodeDescription(n);
+            NodeBean node = createNodeBean(description, n);
             
             List<Map<String, Object>> adjacencies = new LinkedList<Map<String, Object>>();
             Set<Edge> links = e.getValue();
@@ -150,11 +151,9 @@ public class Topology {
             node.setLinks(adjacencies);
             if (cache.containsKey(node.id())) {
             	Map<String, Object> nodeEntry = cache.get(node.id());
-            	if (config != null) {
-            		Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
-            		data.put("$desc", config.getNodeDescription());
-            		nodeEntry.put("data", data);
-            	}
+        		Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
+        		data.put("$desc", description);
+        		nodeEntry.put("data", data);
             	stage.put(node.id(), nodeEntry);
             } else {
             	newNodes.put(node.id(), node.out());
@@ -162,31 +161,27 @@ public class Topology {
         }
     }
     
-    protected NodeBean createNodeBean(SwitchConfig config, Node node) {
-    	NodeBean bean = null;
-    	if (config != null) {
-    		bean = new NodeBean(node.toString(), config.getNodeDescription(), NodeType.NODE);
-    	} else {
-    		bean = new NodeBean(node.toString(), node.toString(), NodeType.NODE);
-    	}
-    	
-    	return bean;
+    protected NodeBean createNodeBean(String description, Node node) {
+    	String name = (description == null || 
+    			description.trim().isEmpty() ||
+    			description.equalsIgnoreCase("none"))?
+    					node.toString() : description;
+   		return  new NodeBean(node.toString(), name, NodeType.NODE);
     }
     
-    private void addSingleNodes(List<Switch> nodes, ISwitchManager switchManager) {
+    @SuppressWarnings("unchecked")
+	private void addSingleNodes(List<Switch> nodes, ISwitchManager switchManager) {
     	if (nodes == null) return;
     	for (Switch sw : nodes) {
     		Node n = sw.getNode();
-    		SwitchConfig config = switchManager.getSwitchConfig(n.getNodeIDString());
+    		String description = switchManager.getNodeDescription(n);
     		if (cache.containsKey(n.toString()) || newNodes.containsKey(n.toString())) continue;
-    		NodeBean node = createNodeBean(config, n);
+    		NodeBean node = createNodeBean(description, n);
     		if (cache.containsKey(node.id())) {
     			Map<String, Object> nodeEntry = cache.get(node.id());
-    			if (config != null) {
-    				Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
-            		data.put("$desc", config.getNodeDescription());
-            		nodeEntry.put("data", data);
-    			}
+				Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
+        		data.put("$desc", description);
+        		nodeEntry.put("data", data);
             	stage.put(node.id(), nodeEntry);
             } else {
             	newNodes.put(node.id(), node.out());

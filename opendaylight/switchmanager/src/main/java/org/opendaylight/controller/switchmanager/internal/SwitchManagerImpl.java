@@ -1764,7 +1764,7 @@ public class SwitchManagerImpl implements ISwitchManager,
 	@Override
 	public String getNodeDescription(Node node) {
     	// Check first if user configured a name
-        SwitchConfig config = getSwitchConfig(node.getNodeIDString());
+        SwitchConfig config = getSwitchConfig(node.toString());
         if (config != null) {
         	String configuredDesc = config.getNodeDescription();
         	if (configuredDesc != null && !configuredDesc.isEmpty()) {
