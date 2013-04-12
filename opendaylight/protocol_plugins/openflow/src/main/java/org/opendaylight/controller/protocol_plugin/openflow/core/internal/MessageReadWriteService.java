@@ -139,4 +139,10 @@ public class MessageReadWriteService implements IMessageReadWrite {
         }
         return msgs;
     }
+
+	@Override
+	public void stop() {
+		inBuffer = null;
+		outBuffer = null;
+	}
 }

@@ -246,6 +246,7 @@ public class Controller implements IController, CommandProvider {
             }
         }
         ((SwitchHandler) sw).stop();
+        sw = null;
     }
 
     private void notifySwitchAdded(ISwitch sw) {
@@ -264,8 +265,7 @@ public class Controller implements IController, CommandProvider {
         try {
             this.switchEvents.put(event);
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            logger.error("Interrupt Exception " + e.toString());
+            logger.debug("SwitchEvent caught Interrupt Exception");
         }
     }
 

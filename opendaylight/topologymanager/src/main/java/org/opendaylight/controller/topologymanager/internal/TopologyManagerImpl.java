@@ -733,7 +733,7 @@ public class TopologyManagerImpl implements ITopologyManager,
 
         String dpid = ci.nextArgument();
         if (dpid == null) {
-            ci.println("Null source ndoe id");
+            ci.println("Null source node id");
             return;
         }
 
