@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
+import java.io.IOException;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -186,17 +187,33 @@ public class SwitchHandler implements ISwitch {
     }
 
     public void stop() {
-        try {
-            running = false;
-            selector.wakeup();
-            cancelSwitchTimer();
-            this.selector.close();
-            this.socket.close();
-            executor.shutdown();
-        } catch (Exception e) {
-        	// do nothing since we are shutting down.
-        	return;
-        }
+    	running = false;
+    	cancelSwitchTimer();
+    	try {
+    		selector.wakeup();
+    		selector.close();
+		} catch (Exception e) {
+		}
+    	try {
+			socket.close();
+		} catch (Exception e) {
+		}
+    	try {
+			msgReadWriteService.stop();
+		} catch (Exception e) {
+		}
+    	executor.shutdown();
+    	
+    	selector = null;
+    	socket = null;
+		msgReadWriteService = null;
+		
+		if (switchHandlerThread != null) {
+			switchHandlerThread.interrupt();
+		}
+		if (transmitThread != null) {
+			transmitThread.interrupt();
+		}
     }
 
     @Override
@@ -713,7 +730,8 @@ public class SwitchHandler implements ISwitch {
 	 */
     class PriorityMessageTransmit implements Runnable {
         public void run() {
-            while (true) {
+            running = true;
+            while (running) {
             	try {
             		if (!transmitQ.isEmpty()) {
             			PriorityMessage pmsg = transmitQ.poll();
@@ -725,6 +743,7 @@ public class SwitchHandler implements ISwitch {
             		reportError(e);
             	}
             }
+        	transmitQ = null;
         }
     }
 
@@ -762,7 +781,7 @@ public class SwitchHandler implements ISwitch {
     }
     
     private IMessageReadWrite getMessageReadWriteService() throws Exception {
-    	String str = System.getProperty("secureChannelEnabled");
+    	String str = System.getProperty("secureChannelEnabled").trim();
         return ((str != null) && (str.equalsIgnoreCase("true"))) ? 
         		new SecureMessageReadWriteService(socket, selector) : 
         		new MessageReadWriteService(socket, selector);

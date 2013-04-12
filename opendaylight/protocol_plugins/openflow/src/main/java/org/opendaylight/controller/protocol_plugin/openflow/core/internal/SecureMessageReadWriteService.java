@@ -10,6 +10,7 @@
 package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SelectionKey;
@@ -50,14 +51,20 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
     private ByteBuffer myNetData;   			// encrypted message to be sent
     private ByteBuffer peerAppData;				// clear text message received from the switch
     private ByteBuffer peerNetData; 			// encrypted message from the switch
+    private FileInputStream kfd = null, tfd = null;
 
     public SecureMessageReadWriteService(SocketChannel socket, Selector selector) throws Exception {
     	this.socket = socket;
     	this.selector = selector;
     	this.factory = new BasicFactory();
 
-    	createSecureChannel(socket);
-    	createBuffers(sslEngine);
+    	try {
+    		createSecureChannel(socket);
+    		createBuffers(sslEngine);
+    	} catch (Exception e) {
+    		stop();
+    		throw e;
+    	}
     }
 
 	/**
@@ -67,17 +74,19 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
 	 * @throws Exception
 	 */
     private void createSecureChannel(SocketChannel socket) throws Exception {
-     	String keyStoreFile = System.getProperty("controllerKeyStore");
-    	String keyStorePassword = System.getProperty("controllerKeyStorePassword");
-     	String trustStoreFile = System.getProperty("controllerTrustStore");
-    	String trustStorePassword = System.getProperty("controllerTrustStorePassword");
+     	String keyStoreFile = System.getProperty("controllerKeyStore").trim();
+    	String keyStorePassword = System.getProperty("controllerKeyStorePassword").trim();
+     	String trustStoreFile = System.getProperty("controllerTrustStore").trim();
+    	String trustStorePassword = System.getProperty("controllerTrustStorePassword").trim();
 
         KeyStore ks = KeyStore.getInstance("JKS");
         KeyStore ts = KeyStore.getInstance("JKS");
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-        ks.load(new FileInputStream(keyStoreFile), keyStorePassword.toCharArray());
-        ts.load(new FileInputStream(trustStoreFile), trustStorePassword.toCharArray());
+        kfd = new FileInputStream(keyStoreFile);
+        tfd = new FileInputStream(trustStoreFile);
+        ks.load(kfd, keyStorePassword.toCharArray());
+        ts.load(tfd, trustStorePassword.toCharArray());
         kmf.init(ks, keyStorePassword.toCharArray());
         tmf.init(ts);
 
@@ -344,4 +353,23 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
     	this.myNetData = ByteBuffer.allocate(session.getPacketBufferSize());
     	this.peerNetData = ByteBuffer.allocate(session.getPacketBufferSize());
     }
+
+	@Override
+	public void stop() throws IOException {
+		this.sslEngine = null;
+		this.sslEngineResult = null;
+		this.myAppData = null;
+		this.myNetData = null;
+		this.peerAppData = null;
+		this.peerNetData = null;
+	    
+	    if (this.kfd != null) {
+	    	this.kfd.close();
+	    	this.kfd = null;
+		}
+		if (this.tfd != null) {
+			this.tfd.close();
+			this.tfd = null;
+		}
+	}
 }
