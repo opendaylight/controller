@@ -23,15 +23,21 @@ public class TopologyTest {
 	public void testCreateNodeBean() {
 		Topology topology = new Topology();
 		Node node = NodeCreator.createOFNode(new Long(3));
-		SwitchConfig mockSwitchConfig = new SwitchConfig(node.getNodeIDString(), "foo", null, null);
+		String description = "foo";
 		
-		NodeBean bean = topology.createNodeBean(mockSwitchConfig, node);
+		NodeBean bean = topology.createNodeBean(description, node);
 		
 		assertNotNull(bean);
 		assertEquals(bean.id, node.toString());
 		assertEquals(bean.name, "foo");
 		
 		bean = topology.createNodeBean(null, node);
+		
+		assertNotNull(bean);
+		assertEquals(bean.id, node.toString());
+		assertEquals(bean.name, bean.id);
+		
+		bean = topology.createNodeBean("   ", node);
 		
 		assertNotNull(bean);
 		assertEquals(bean.id, node.toString());

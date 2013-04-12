@@ -176,7 +176,7 @@ public class Flows implements IDaylightWeb {
 
             String nodeDesc = node.toString();
             SwitchConfig config = switchManager.getSwitchConfig(node
-                    .getNodeIDString());
+                    .toString());
             if (config != null) {
                 nodeDesc = config.getNodeDescription();
             }
