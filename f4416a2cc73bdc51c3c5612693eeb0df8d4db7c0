@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///4M\u003d",
+        "filename": "opendaylight/distribution/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-13T03:35:34Z",
+      "side": 1,
+      "message": "Can you please create the integrationtest as a child of the statisticsmanager? That means that the statisticsmanager need to travel also on level down so the directory structure will look like:\nopendaylight/statisticmanager/integrationtest\nopendaylight/statisticmanager/implementation\n\nSo we place all the related aspects for statisticmanager in one place",
+      "revId": "f4416a2cc73bdc51c3c5612693eeb0df8d4db7c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///4I\u003d",
+        "filename": "opendaylight/distribution/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-13T03:35:34Z",
+      "side": 1,
+      "message": "Can we rename it to be \"stub\" instead of \"stubs\"? In the end is only one plugin.",
+      "revId": "f4416a2cc73bdc51c3c5612693eeb0df8d4db7c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///4E\u003d",
+        "filename": "opendaylight/protocol_plugins/stubs/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-13T03:35:34Z",
+      "side": 1,
+      "message": "It would be great if tabs where not present here.",
+      "revId": "f4416a2cc73bdc51c3c5612693eeb0df8d4db7c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///4A\u003d",
+        "filename": "opendaylight/protocol_plugins/stubs/src/main/java/org/opendaylight/controller/protocol_plugins/stubs/internal/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-13T03:35:34Z",
+      "side": 1,
+      "message": "This doesn\u0027t seem indented, can you please use the java formatter:\nopendaylight/commons/opendaylight/sun_coding_style.xml",
+      "revId": "f4416a2cc73bdc51c3c5612693eeb0df8d4db7c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///38\u003d",
+        "filename": "opendaylight/statisticsmanager-integrationtest/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-13T03:35:34Z",
+      "side": 1,
+      "message": "We are compiling all the code with version 1.6, why is this 1.5?",
+      "revId": "f4416a2cc73bdc51c3c5612693eeb0df8d4db7c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
