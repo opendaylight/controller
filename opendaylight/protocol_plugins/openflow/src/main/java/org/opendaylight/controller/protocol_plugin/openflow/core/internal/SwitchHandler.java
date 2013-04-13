@@ -781,8 +781,8 @@ public class SwitchHandler implements ISwitch {
     }
     
     private IMessageReadWrite getMessageReadWriteService() throws Exception {
-    	String str = System.getProperty("secureChannelEnabled").trim();
-        return ((str != null) && (str.equalsIgnoreCase("true"))) ? 
+    	String str = System.getProperty("secureChannelEnabled");
+        return ((str != null) && (str.trim().equalsIgnoreCase("true"))) ? 
         		new SecureMessageReadWriteService(socket, selector) : 
         		new MessageReadWriteService(socket, selector);
     }
