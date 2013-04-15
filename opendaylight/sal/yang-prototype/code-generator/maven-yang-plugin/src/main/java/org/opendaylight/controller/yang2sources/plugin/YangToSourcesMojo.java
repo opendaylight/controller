@@ -29,14 +29,37 @@ import org.opendaylight.controller.yang2sources.spi.CodeGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 
+/**
+ * Generate sources from yang files using user provided set of
+ * {@link CodeGenerator}s. Steps of this process:
+ * <ol>
+ * <li>List yang files from {@link #yangFilesRootDir}</li>
+ * <li>Process yang files using {@link YangModelParserImpl}</li>
+ * <li>For each {@link CodeGenerator} from {@link #codeGenerators}:</li>
+ * <ol>
+ * <li>Instantiate using default constructor</li>
+ * <li>Call {@link CodeGenerator#generateSources(SchemaContext, File)}</li>
+ * </ol>
+ * </ol>
+ */
 @Mojo(name = "generate-sources", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public final class YangToSourcesMojo extends AbstractMojo {
 
     private static final String LOG_PREFIX = "yang-to-sources:";
 
+    /**
+     * Classes implementing {@link CodeGenerator} interface. An instance will be
+     * created out of every class using default constructor. Method
+     * {@link CodeGenerator#generateSources(SchemaContext, File)} will be called
+     * on every instance.
+     */
     @Parameter(required = true)
     private CodeGeneratorArg[] codeGenerators;
 
+    /**
+     * Source directory that will be recursively searched for yang files (ending
+     * with .yang suffix).
+     */
     @Parameter(required = true)
     private String yangFilesRootDir;
 

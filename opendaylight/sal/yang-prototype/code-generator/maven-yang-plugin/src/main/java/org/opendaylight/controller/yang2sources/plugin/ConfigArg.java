@@ -12,7 +12,7 @@ import java.io.File;
 import com.google.common.base.Preconditions;
 
 /**
- * Complex configuration arguments
+ * Base complex configuration arguments
  */
 public abstract class ConfigArg {
 
@@ -31,6 +31,9 @@ public abstract class ConfigArg {
 
     public abstract void check();
 
+    /**
+     * Configuration argument for resource generator class and output directory.
+     */
     public static final class ResourceProviderArg extends ConfigArg {
         private String resourceProviderClass;
 
@@ -59,7 +62,7 @@ public abstract class ConfigArg {
     }
 
     /**
-     * Transfer object for code generator class and output directory.
+     * Configuration argument for code generator class and output directory.
      */
     public static final class CodeGeneratorArg extends ConfigArg {
         private String codeGeneratorClass;

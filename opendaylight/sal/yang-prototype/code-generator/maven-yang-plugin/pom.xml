@@ -9,6 +9,14 @@
 
     <artifactId>maven-yang-plugin</artifactId>
     <packaging>maven-plugin</packaging>
+    <description>
+        This plugin is a wrapper for "yang to source code" generation.
+        It can be configured by a set of third-party code generators and resource providers.
+        For further info see available goals.
+        Sample usage:
+
+        TODO: add sample usage when finished
+    </description>
 
     <dependencies>
         <dependency>
@@ -54,6 +62,16 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.2</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <build>
         <plugins>

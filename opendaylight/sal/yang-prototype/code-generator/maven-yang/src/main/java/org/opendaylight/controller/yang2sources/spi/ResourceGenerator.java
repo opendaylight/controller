@@ -10,7 +10,20 @@ package org.opendaylight.controller.yang2sources.spi;
 import java.io.File;
 import java.util.Collection;
 
+/**
+ * Classes implementing this interface can be submitted to maven-yang-plugin's
+ * generate-resources goal.
+ */
 public interface ResourceGenerator {
 
+    /**
+     * Generate resources (e.g. copy files into resources folder) from provided
+     * list of yang files
+     * 
+     * @param resources
+     *            list of parsed yang files
+     * @param outputBaseDir
+     *            expected output directory for resources configured by user
+     */
     void generateResourceFiles(Collection<File> resources, File outputBaseDir);
 }
