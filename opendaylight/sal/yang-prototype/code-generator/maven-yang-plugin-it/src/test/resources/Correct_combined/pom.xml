@@ -49,7 +49,7 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
-                        <artifactId>yang-to-sources</artifactId>
+                        <artifactId>maven-yang</artifactId>
                         <version>1.0</version>
                         <type>test-jar</type>
                     </dependency>
