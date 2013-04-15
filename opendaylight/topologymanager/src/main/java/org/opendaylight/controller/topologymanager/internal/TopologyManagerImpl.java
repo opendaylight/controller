@@ -95,23 +95,26 @@ public class TopologyManagerImpl implements ITopologyManager,
 
     void setTopologyManagerAware(ITopologyManagerAware s) {
         if (this.topologyManagerAware != null) {
-        	log.debug("Adding ITopologyManagerAware: " + s);
+        	log.debug("Adding ITopologyManagerAware: {}", s);
             this.topologyManagerAware.add(s);
         }
     }
 
     void unsetTopologyManagerAware(ITopologyManagerAware s) {
         if (this.topologyManagerAware != null) {
+        	log.debug("Removing ITopologyManagerAware: {}", s);
             this.topologyManagerAware.remove(s);
         }
     }
 
     void setTopoService(ITopologyService s) {
+    	log.debug("Adding ITopologyService: {}", s);
         this.topoService = s;
     }
 
     void unsetTopoService(ITopologyService s) {
         if (this.topoService == s) {
+        	log.debug("Removing ITopologyService: {}", s);
             this.topoService = null;
         }
     }
@@ -229,7 +232,7 @@ public class TopologyManagerImpl implements ITopologyManager,
         this.clusterContainerService
                 .destroyCache("topologymanager.nodeConnectorDB");
         this.nodeConnectorsDB = null;
-        log.debug("Topology Manager DB DE-allocated");
+        log.debug("Topology Manager DB Deallocated");
     }
 
     @SuppressWarnings("unchecked")
@@ -408,7 +411,7 @@ public class TopologyManagerImpl implements ITopologyManager,
         if (this.hostsDB == null) {
             return;
         }
-
+        
         switch (t) {
         case ADDED:
         case CHANGED:
@@ -470,6 +473,7 @@ public class TopologyManagerImpl implements ITopologyManager,
                     new HashSet<Property>());
             this.nodeConnectorsDB.put(e.getTailNodeConnector(),
                     new HashSet<Property>());
+            log.trace("Edge {}  {}", e.toString(), type.name());
             break;
         case REMOVED:
             // Now remove the edge from edgesDB
@@ -484,6 +488,7 @@ public class TopologyManagerImpl implements ITopologyManager,
             // should be safe to assume that won't happen.
             this.nodeConnectorsDB.remove(e.getHeadNodeConnector());
             this.nodeConnectorsDB.remove(e.getTailNodeConnector());
+            log.trace("Edge {}  {}", e.toString(), type.name());
             break;
         case CHANGED:
             Set<Property> old_props = this.edgesDB.get(e);
@@ -530,6 +535,7 @@ public class TopologyManagerImpl implements ITopologyManager,
 
             // Finally update
             this.edgesDB.put(e, props);
+            log.trace("Edge {}  {}", e.toString(), type.name());
             break;
         }
 
@@ -675,16 +681,16 @@ public class TopologyManagerImpl implements ITopologyManager,
                 //oneTopology.deleteUserConfiguredLink(linkTuple);
             } catch (Exception e) {
                 log
-                        .warn("Harmless : Exception while Deleting User Configured link "
-                                + link + " " + e.toString());
+                        .warn("Harmless : Exception while Deleting User Configured link {} {}",
+                                link, e.toString());
             }
             linkTuple = getReverseLinkTuple(link);
             try {
                 //oneTopology.deleteUserConfiguredLink(linkTuple);
             } catch (Exception e) {
                 log
-                        .error("Harmless : Exception while Deleting User Configured Reverse link "
-                                + link + " " + e.toString());
+                        .error("Harmless : Exception while Deleting User Configured Reverse link {} {}",
+                                link, e.toString());
             }
         }
         return new Status(StatusCode.SUCCESS, null);
@@ -822,12 +828,12 @@ public class TopologyManagerImpl implements ITopologyManager,
 
     @Override
     public void edgeOverUtilized(Edge edge) {
-        log.warn("Link Utilization above normal: " + edge);
+        log.warn("Link Utilization above normal: {}", edge);
     }
 
     @Override
     public void edgeUtilBackToNormal(Edge edge) {
-        log.warn("Link Utilization back to normal: " + edge);
+        log.warn("Link Utilization back to normal: {}", edge);
     }
 
 }
