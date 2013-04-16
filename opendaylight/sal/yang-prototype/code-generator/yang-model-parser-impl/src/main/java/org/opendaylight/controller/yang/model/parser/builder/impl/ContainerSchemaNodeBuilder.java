@@ -55,28 +55,28 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
     @Override
     public ContainerSchemaNode build() {
         // CHILD NODES
-        Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+        final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
         for (DataSchemaNodeBuilder node : childNodes) {
             childs.put(node.getQName(), node.build());
         }
         instance.setChildNodes(childs);
 
         // GROUPINGS
-        Set<GroupingDefinition> groupingDefinitions = new HashSet<GroupingDefinition>();
+        final Set<GroupingDefinition> groupingDefinitions = new HashSet<GroupingDefinition>();
         for (GroupingBuilder builder : groupings) {
             groupingDefinitions.add(builder.build());
         }
         instance.setGroupings(groupingDefinitions);
 
         // TYPEDEFS
-        Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
+        final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
         for (TypeDefinitionBuilder entry : addedTypedefs) {
             typedefs.add(entry.build());
         }
         instance.setTypeDefinitions(typedefs);
 
         // USES
-        Set<UsesNode> uses = new HashSet<UsesNode>();
+        final Set<UsesNode> uses = new HashSet<UsesNode>();
         for (UsesNodeBuilder builder : addedUsesNodes) {
             uses.add(builder.build());
         }
@@ -84,7 +84,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
 
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
             unknownNodes.add(b.build());
         }
         instance.setUnknownSchemaNodes(unknownNodes);
@@ -169,7 +169,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         private Set<GroupingDefinition> groupings = Collections.emptySet();
         private Set<TypeDefinition<?>> typeDefinitions = Collections.emptySet();
         private Set<UsesNode> uses = Collections.emptySet();
-        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();
+        private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
         private boolean presence;
 
         private ContainerSchemaNodeImpl(QName qname) {
@@ -330,12 +330,13 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return unknownSchemaNodes;
+            return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
-            if(unknownSchemaNodes != null) {
-                this.unknownSchemaNodes = unknownSchemaNodes;
+        private void setUnknownSchemaNodes(
+                List<UnknownSchemaNode> unknownSchemaNodes) {
+            if (unknownSchemaNodes != null) {
+                this.unknownNodes = unknownSchemaNodes;
             }
         }
 

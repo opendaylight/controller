@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,18 +16,25 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.api.TypeAwareBuilder;
+import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
+import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
+import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
+import org.opendaylight.controller.yang.model.parser.builder.api.AbstractTypeAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
+import org.opendaylight.controller.yang.model.parser.util.YangParseException;
+import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.UnknownType;
-import org.opendaylight.controller.yang.model.util.YangTypesConverter;
 
-public class TypedefBuilder implements TypeDefinitionBuilder,
-        SchemaNodeBuilder, TypeAwareBuilder {
-
+public class TypedefBuilder extends AbstractTypeAwareBuilder implements
+        TypeDefinitionBuilder {
     private final QName qname;
     private SchemaPath schemaPath;
-    private TypeDefinition<?> baseType;
+
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    private List<RangeConstraint> ranges = Collections.emptyList();
+    private List<LengthConstraint> lengths = Collections.emptyList();
+    private List<PatternConstraint> patterns = Collections.emptyList();
+    private Integer fractionDigits = null;
 
     private String description;
     private String reference;
@@ -34,36 +42,41 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
     private String units;
     private Object defaultValue;
 
-    TypedefBuilder(QName qname) {
+    public TypedefBuilder(QName qname) {
         this.qname = qname;
     }
 
     @Override
     public TypeDefinition<? extends TypeDefinition<?>> build() {
-        final TypeDefinition<?> type = YangTypesConverter
-                .javaTypeForBaseYangType(qname);
-        if (type != null) {
-            return type;
-        } else {
-            if (baseType != null) {
-                // typedef
-                TypeDefinitionImpl instance = new TypeDefinitionImpl(qname);
-                instance.setDescription(description);
-                instance.setReference(reference);
-                instance.setStatus(status);
-                instance.setPath(schemaPath);
-                instance.setBaseType(baseType);
-                instance.setUnits(units);
-                instance.setDefaultValue(defaultValue);
-                return instance;
-            } else {
-                // type
-                final UnknownType.Builder unknownBuilder = new UnknownType.Builder(
-                        qname, description, reference);
-                unknownBuilder.status(status);
-                return unknownBuilder.build();
-            }
+        TypeDefinition<?> result = null;
+        ExtendedType.Builder typeBuilder = null;
+        if ((type == null || type instanceof UnknownType) && typedef == null) {
+            throw new YangParseException("Unresolved type: '"
+                    + qname.getLocalName() + "'.");
         }
+        if (type == null || type instanceof UnknownType) {
+            typeBuilder = new ExtendedType.Builder(qname, typedef.build(),
+                    description, reference);
+        } else {
+            typeBuilder = new ExtendedType.Builder(qname, type, description,
+                    reference);
+        }
+        typeBuilder.status(status);
+        typeBuilder.units(units);
+        typeBuilder.defaultValue(defaultValue);
+
+        typeBuilder.ranges(ranges);
+        typeBuilder.lengths(lengths);
+        typeBuilder.patterns(patterns);
+
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        typeBuilder.unknownSchemaNodes(unknownNodes);
+        result = typeBuilder.build();
+        return result;
     }
 
     @Override
@@ -72,8 +85,18 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
     }
 
     @Override
+    public SchemaPath getPath() {
+        return schemaPath;
+    }
+
+    @Override
     public void setPath(final SchemaPath schemaPath) {
         this.schemaPath = schemaPath;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
     }
 
     @Override
@@ -82,8 +105,18 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
     }
 
     @Override
+    public String getReference() {
+        return reference;
+    }
+
+    @Override
     public void setReference(final String reference) {
         this.reference = reference;
+    }
+
+    @Override
+    public Status getStatus() {
+        return status;
     }
 
     @Override
@@ -94,8 +127,18 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
     }
 
     @Override
+    public String getUnits() {
+        return units;
+    }
+
+    @Override
     public void setUnits(String units) {
         this.units = units;
+    }
+
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
     @Override
@@ -104,210 +147,72 @@ public class TypedefBuilder implements TypeDefinitionBuilder,
     }
 
     @Override
-    public TypeDefinition<?> getType() {
-        return baseType;
+    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+        return addedUnknownNodes;
     }
 
     @Override
-    public void setType(TypeDefinition<?> baseType) {
-        this.baseType = baseType;
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
     }
 
     @Override
-    public TypeDefinition<?> getBaseType() {
-        return baseType;
+    public List<RangeConstraint> getRanges() {
+        return ranges;
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
-        // TODO
+    public void setRanges(List<RangeConstraint> ranges) {
+        if (ranges != null) {
+            this.ranges = ranges;
+        }
     }
 
-    private static class TypeDefinitionImpl<T extends TypeDefinition<T>>
-            implements TypeDefinition<T> {
+    @Override
+    public List<LengthConstraint> getLengths() {
+        return lengths;
+    }
 
-        private final QName qname;
-        private SchemaPath path;
-        private String description;
-        private String reference;
-        private Status status = Status.CURRENT;
-        private Object defaultValue;
-        private T baseType;
-        private String units;
-        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();
-
-        private TypeDefinitionImpl(QName qname) {
-            this.qname = qname;
+    @Override
+    public void setLengths(List<LengthConstraint> lengths) {
+        if (lengths != null) {
+            this.lengths = lengths;
         }
+    }
 
-        @Override
-        public QName getQName() {
-            return qname;
-        }
+    @Override
+    public List<PatternConstraint> getPatterns() {
+        return patterns;
+    }
 
-        @Override
-        public SchemaPath getPath() {
-            return path;
+    @Override
+    public void setPatterns(List<PatternConstraint> patterns) {
+        if (patterns != null) {
+            this.patterns = patterns;
         }
+    }
 
-        private void setPath(SchemaPath path) {
-            this.path = path;
-        }
+    @Override
+    public Integer getFractionDigits() {
+        return fractionDigits;
+    }
 
-        @Override
-        public String getDescription() {
-            return description;
-        }
+    @Override
+    public void setFractionDigits(Integer fractionDigits) {
+        this.fractionDigits = fractionDigits;
+    }
 
-        private void setDescription(String description) {
-            this.description = description;
+    @Override
+    public String toString() {
+        String result = "TypedefBuilder[" + qname.getLocalName();
+        result += ", type=";
+        if (type == null) {
+            result += typedef;
+        } else {
+            result += type;
         }
-
-        @Override
-        public String getReference() {
-            return reference;
-        }
-
-        private void setReference(String reference) {
-            this.reference = reference;
-        }
-
-        @Override
-        public Status getStatus() {
-            return status;
-        }
-
-        private void setStatus(Status status) {
-            this.status = status;
-        }
-
-        @Override
-        public T getBaseType() {
-            return baseType;
-        }
-
-        private void setBaseType(T type) {
-            this.baseType = type;
-        }
-
-        @Override
-        public String getUnits() {
-            return units;
-        }
-
-        private void setUnits(String units) {
-            this.units = units;
-        }
-
-        @Override
-        public Object getDefaultValue() {
-            return defaultValue;
-        }
-
-        private void setDefaultValue(Object defaultValue) {
-            this.defaultValue = defaultValue;
-        }
-
-        @Override
-        public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return unknownSchemaNodes;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((qname == null) ? 0 : qname.hashCode());
-            result = prime * result + ((path == null) ? 0 : path.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            result = prime * result
-                    + ((status == null) ? 0 : status.hashCode());
-            result = prime * result
-                    + ((baseType == null) ? 0 : baseType.hashCode());
-            result = prime * result + ((units == null) ? 0 : units.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            TypeDefinitionImpl other = (TypeDefinitionImpl) obj;
-            if (qname == null) {
-                if (other.qname != null) {
-                    return false;
-                }
-            } else if (!qname.equals(other.qname)) {
-                return false;
-            }
-            if (path == null) {
-                if (other.path != null) {
-                    return false;
-                }
-            } else if (!path.equals(other.path)) {
-                return false;
-            }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (status == null) {
-                if (other.status != null) {
-                    return false;
-                }
-            } else if (!status.equals(other.status)) {
-                return false;
-            }
-            if (baseType == null) {
-                if (other.baseType != null) {
-                    return false;
-                }
-            } else if (!baseType.equals(other.baseType)) {
-                return false;
-            }
-            if (units == null) {
-                if (other.units != null) {
-                    return false;
-                }
-            } else if (!units.equals(other.units)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder(
-                    TypeDefinitionImpl.class.getSimpleName());
-            sb.append("[");
-            sb.append("qname=" + qname);
-            sb.append(", path=" + path);
-            sb.append(", description=" + description);
-            sb.append(", reference=" + reference);
-            sb.append(", status=" + status);
-            sb.append(", baseType=" + baseType + "]");
-            return sb.toString();
-        }
+        result += "]";
+        return result;
     }
 
 }

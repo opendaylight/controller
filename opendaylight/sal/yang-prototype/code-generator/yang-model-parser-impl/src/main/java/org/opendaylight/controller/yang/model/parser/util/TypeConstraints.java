@@ -8,6 +8,7 @@
 package org.opendaylight.controller.yang.model.parser.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
@@ -29,6 +30,11 @@ public final class TypeConstraints {
     }
 
     public List<RangeConstraint> getRange() {
+        if(ranges.isEmpty()) {
+            List<RangeConstraint> result = Collections.emptyList();
+            return result;
+        }
+
         List<RangeConstraint> resolved = ranges.get(0);
         RangeConstraint firstRange = resolved.get(0);
         RangeConstraint lastRange = resolved.get(resolved.size() - 1);
@@ -103,6 +109,11 @@ public final class TypeConstraints {
     }
 
     public List<LengthConstraint> getLength() {
+        if(lengths.isEmpty()) {
+            List<LengthConstraint> result = Collections.emptyList();
+            return result;
+        }
+
         List<LengthConstraint> resolved = lengths.get(0);
         LengthConstraint firstLength = resolved.get(0);
         LengthConstraint lastLength = resolved.get(resolved.size() - 1);
@@ -185,7 +196,7 @@ public final class TypeConstraints {
     }
 
     public void setFractionDigits(Integer fractionDigits) {
-        if (fractionDigits != null) {
+        if (this.fractionDigits == null) {
             this.fractionDigits = fractionDigits;
         }
     }

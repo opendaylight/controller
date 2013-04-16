@@ -8,7 +8,7 @@ module types1 {
          revision-date 2013-02-27;
      }
     
-    organization "Cisco";
+    organization "opendaylight";
     contact "WILL-BE-DEFINED-LATER";
     
     revision "2013-02-27" {
@@ -62,6 +62,20 @@ module types1 {
     
     container ext {
         data:c-define "MY_INTERFACES";
+    }
+    
+    leaf union-leaf {
+    	type data:my-union-ext;
+    }
+    
+    deviation /data:system/data:user {
+        deviate add {
+            default "admin"; // new users are 'admin' by default
+        }
+    }
+    
+    leaf nested-union-leaf {
+    	type data:nested-union1;
     }
 
 }

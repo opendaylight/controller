@@ -15,7 +15,12 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
  */
 public interface TypeAwareBuilder {
 
-	TypeDefinition<?> getType();
-	void setType(TypeDefinition<?> type);
+    TypeDefinition<?> getType();
+
+    TypeDefinitionBuilder getTypedef();
+
+    void setType(TypeDefinition<?> type);
+
+    void setType(TypeDefinitionBuilder typedef);
 
 }

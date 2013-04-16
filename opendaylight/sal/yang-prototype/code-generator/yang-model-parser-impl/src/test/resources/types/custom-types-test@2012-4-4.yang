@@ -4,8 +4,32 @@ module custom-types-test {
     namespace "urn:simple.container.demo";
     prefix "iit";
     
-    organization "Cisco";
+    organization "opendaylight";
     contact "WILL-BE-DEFINED-LATER";
+    
+    
+    typedef access-operations-type {
+        type bits {
+            bit create {
+                description "Any protocol operation that creates a new data node.";
+            }
+            bit read {
+                description "Any protocol operation or notification that returns the value of a data node.";
+                position 500;
+            }
+            bit update {
+                description "Any protocol operation that alters an existing data node.";
+            }
+            bit delete {
+                description "Any protocol operation that removes a data node.";
+                position 365;
+            }
+            bit exec {
+                description "Execution access to the specified protocol operation.";
+            }
+        }
+        description "NETCONF Access Operation.";
+    }
      
     leaf inst-id-leaf1 {
         type instance-identifier {
@@ -24,6 +48,21 @@ module custom-types-test {
     identity crypto-alg {
         base "crypto-base";
         description "crypto-alg description";
+    }
+    
+    leaf mybits {
+        type bits {
+            bit disable-nagle {
+                position 0;
+            }
+            bit auto-sense-speed {
+                position 1;
+            }
+            bit 10-Mb-only {
+                position 2;
+            }
+        }
+        default "auto-sense-speed";
     }
 	
 }

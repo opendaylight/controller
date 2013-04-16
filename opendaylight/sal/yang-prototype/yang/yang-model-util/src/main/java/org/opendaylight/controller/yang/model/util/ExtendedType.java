@@ -15,6 +15,9 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
+import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
+import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
 public class ExtendedType implements TypeDefinition {
 
@@ -24,6 +27,12 @@ public class ExtendedType implements TypeDefinition {
     private final String description;
     private final String reference;
     private final List<UnknownSchemaNode> unknownSchemaNodes;
+
+    private List<RangeConstraint> ranges = Collections.emptyList();
+    private List<LengthConstraint> lengths = Collections.emptyList();
+    private List<PatternConstraint> patterns = Collections.emptyList();
+    private Integer fractionDigits = null;
+
 
     private Status status;
     private String units;
@@ -41,6 +50,11 @@ public class ExtendedType implements TypeDefinition {
         private Status status = Status.CURRENT;
         private String units = "";
         private Object defaultValue = null;
+
+        private List<RangeConstraint> ranges = Collections.emptyList();
+        private List<LengthConstraint> lengths = Collections.emptyList();
+        private List<PatternConstraint> patterns = Collections.emptyList();
+        private Integer fractionDigits = null;
 
         public Builder(final QName typeName, TypeDefinition<?> baseType,
                 final String description, final String reference) {
@@ -71,6 +85,32 @@ public class ExtendedType implements TypeDefinition {
             return this;
         }
 
+        public Builder ranges(final List<RangeConstraint> ranges) {
+            if(ranges != null) {
+                this.ranges = ranges;
+            }
+            return this;
+        }
+
+        public Builder lengths(final List<LengthConstraint> lengths) {
+            if(lengths != null) {
+                this.lengths = lengths;
+            }
+            return this;
+        }
+
+        public Builder patterns(final List<PatternConstraint> patterns) {
+            if(patterns != null) {
+                this.patterns = patterns;
+            }
+            return this;
+        }
+
+        public Builder fractionDigits(final Integer fractionDigits) {
+            this.fractionDigits = fractionDigits;
+            return this;
+        }
+
         public ExtendedType build() {
             return new ExtendedType(this);
         }
@@ -86,6 +126,11 @@ public class ExtendedType implements TypeDefinition {
         this.status = builder.status;
         this.units = builder.units;
         this.defaultValue = builder.defaultValue;
+
+        this.ranges = builder.ranges;
+        this.lengths = builder.lengths;
+        this.patterns = builder.patterns;
+        this.fractionDigits = builder.fractionDigits;
     }
 
     @Override
@@ -252,5 +297,21 @@ public class ExtendedType implements TypeDefinition {
         builder2.append(defaultValue);
         builder2.append("]");
         return builder2.toString();
+    }
+
+    public List<RangeConstraint> getRanges() {
+        return ranges;
+    }
+
+    public List<LengthConstraint> getLengths() {
+        return lengths;
+    }
+
+    public List<PatternConstraint> getPatterns() {
+        return patterns;
+    }
+
+    public Integer getFractionDigits() {
+        return fractionDigits;
     }
 }
