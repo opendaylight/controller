@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -9,6 +8,7 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -53,7 +53,8 @@ public class Controller implements IController, CommandProvider {
     private AtomicInteger switchInstanceNumber;
 
     /*
-     * this thread monitors the switchEvents queue for new incoming events from switch
+     * this thread monitors the switchEvents queue for new incoming events from
+     * switch
      */
     private class EventHandler implements Runnable {
         @Override
@@ -65,7 +66,8 @@ public class Controller implements IController, CommandProvider {
                     SwitchEvent.SwitchEventType eType = ev.getEventType();
                     ISwitch sw = ev.getSwitch();
                     if (eType != SwitchEvent.SwitchEventType.SWITCH_MESSAGE) {
-                        //logger.debug("Received " + ev.toString() + " from " + sw.toString());
+                        // logger.debug("Received " + ev.toString() + " from " +
+                        // sw.toString());
                     }
                     switch (eType) {
                     case SWITCH_ADD:
@@ -111,7 +113,7 @@ public class Controller implements IController, CommandProvider {
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     public void init() {
         logger.debug("OpenFlowCore init");
@@ -125,10 +127,9 @@ public class Controller implements IController, CommandProvider {
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
-     *
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     * 
      */
     public void start() {
         logger.debug("OpenFlowCore start() is called");
@@ -148,10 +149,10 @@ public class Controller implements IController, CommandProvider {
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
-     *
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     * 
      */
     public void stop() {
         for (Iterator<Entry<Long, ISwitch>> it = switches.entrySet().iterator(); it
@@ -162,17 +163,17 @@ public class Controller implements IController, CommandProvider {
         }
         switchEventThread.interrupt();
         try {
-        	controllerIO.shutDown();
+            controllerIO.shutDown();
         } catch (IOException ex) {
-        	logger.error("Caught exception: " + ex + " during stop");
+            logger.error("Caught exception: " + ex + " during stop");
         }
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     public void destroy() {
     }
@@ -241,8 +242,8 @@ public class Controller implements IController, CommandProvider {
                 logger.warn(sw.toString() + " is disconnected");
                 notifySwitchDeleted(sw);
             } else {
-                //logger.warn(sw.toString() + " has been replaced by " +
-                //	this.switches.get(sid));
+                // logger.warn(sw.toString() + " has been replaced by " +
+                // this.switches.get(sid));
             }
         }
         ((SwitchHandler) sw).stop();
@@ -318,7 +319,8 @@ public class Controller implements IController, CommandProvider {
         while (iter.hasNext()) {
             Long sid = iter.next();
             Date date = switches.get(sid).getConnectedDate();
-            String switchInstanceName = ((SwitchHandler) switches.get(sid)).getInstanceName();
+            String switchInstanceName = ((SwitchHandler) switches.get(sid))
+                    .getInstanceName();
             s.append(switchInstanceName + "/" + HexString.toHexString(sid)
                     + " connected since " + date.toString() + "\n");
         }
@@ -338,6 +340,28 @@ public class Controller implements IController, CommandProvider {
         }
     }
 
+    public void _controllerShowConnConfig(CommandInterpreter ci) {
+        String str = System.getProperty("secureChannelEnabled");
+        if ((str != null) && (str.trim().equalsIgnoreCase("true"))) {
+            ci.print("The Controller and Switch should communicate through TLS connetion.\n");
+
+            String keyStoreFile = System.getProperty("controllerKeyStore");
+            String trustStoreFile = System.getProperty("controllerTrustStore");
+            if ((keyStoreFile == null) || keyStoreFile.trim().isEmpty()) {
+                ci.print("controllerKeyStore not specified in ./configuration/config.ini\n");
+            } else {
+                ci.print("controllerKeyStore=" + keyStoreFile + "\n");
+            }
+            if ((trustStoreFile == null) || trustStoreFile.trim().isEmpty()) {
+                ci.print("controllerTrustStore not specified in ./configuration/config.ini\n");
+            } else {
+                ci.print("controllerTrustStore=" + trustStoreFile + "\n");
+            }
+        } else {
+            ci.print("The Controller and Switch should communicate through TCP connetion.\n");
+        }
+    }
+
     private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
                 .getBundleContext();
@@ -351,6 +375,7 @@ public class Controller implements IController, CommandProvider {
         help.append("--Open Flow Controller --\n");
         help.append("\tcontrollerShowSwitches\n");
         help.append("\tcontrollerReset\n");
+        help.append("\tcontrollerShowConnConfig\n");
         return help.toString();
     }
 }
