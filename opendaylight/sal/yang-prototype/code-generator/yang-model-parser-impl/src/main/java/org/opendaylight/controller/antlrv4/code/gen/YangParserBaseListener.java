@@ -759,14 +759,6 @@ public class YangParserBaseListener implements YangParserListener {
     }
 
     @Override
-    public void enterRefune_pom(YangParser.Refune_pomContext ctx) {
-    }
-
-    @Override
-    public void exitRefune_pom(YangParser.Refune_pomContext ctx) {
-    }
-
-    @Override
     public void enterPresence_stmt(YangParser.Presence_stmtContext ctx) {
     }
 
@@ -840,6 +832,14 @@ public class YangParserBaseListener implements YangParserListener {
 
     @Override
     public void exitRevision_stmt(YangParser.Revision_stmtContext ctx) {
+    }
+
+    @Override
+    public void enterRefine_pom(YangParser.Refine_pomContext ctx) {
+    }
+
+    @Override
+    public void exitRefine_pom(YangParser.Refine_pomContext ctx) {
     }
 
     @Override
