@@ -201,7 +201,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
         logger.debug("Retrieving cache for HostTrackerIH");
         inactiveStaticHosts = (ConcurrentMap<NodeConnector, HostNodeConnector>) this.clusterContainerService
                 .getCache("hostTrackerIH");
-        if (hostsDB == null) {
+        if (inactiveStaticHosts == null) {
             logger.error("Cache couldn't be retrieved for HostTrackerIH");
         }
         logger.debug("Cache was successfully retrieved for HostTrackerIH");
