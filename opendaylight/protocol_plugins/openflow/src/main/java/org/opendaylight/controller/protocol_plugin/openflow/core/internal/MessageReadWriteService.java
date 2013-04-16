@@ -69,6 +69,8 @@ public class MessageReadWriteService implements IMessageReadWrite {
     			newBuffer.put(outBuffer);
     			outBuffer = newBuffer;
     		}
+    	}
+    	synchronized (outBuffer) {
     		msg.writeTo(outBuffer);
 
     		if (!socket.isOpen()) {

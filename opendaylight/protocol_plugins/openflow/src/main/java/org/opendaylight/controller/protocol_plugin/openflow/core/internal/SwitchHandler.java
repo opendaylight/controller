@@ -9,7 +9,7 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
-import java.io.IOException;
+import java.net.SocketException;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -249,7 +249,9 @@ public class SwitchHandler implements ISwitch {
     @Override
     public Integer asyncSend(OFMessage msg, int xid) {
     	msg.setXid(xid);
-    	transmitQ.add(new PriorityMessage(msg, 0));
+    	if (transmitQ != null) {
+    		transmitQ.add(new PriorityMessage(msg, 0));
+    	}
         return xid;
     }
 
@@ -280,13 +282,17 @@ public class SwitchHandler implements ISwitch {
     @Override
     public Integer asyncFastSend(OFMessage msg, int xid) {
     	msg.setXid(xid);
-    	transmitQ.add(new PriorityMessage(msg, 1));
+    	if (transmitQ != null) {
+    		transmitQ.add(new PriorityMessage(msg, 1));
+    	}
         return xid;
     }
 
    public void resumeSend() {
         try {
-			msgReadWriteService.resumeSend();
+        	if (msgReadWriteService != null) {
+        		msgReadWriteService.resumeSend();
+        	}
 		} catch (Exception e) {
 			reportError(e);
 		}
@@ -445,7 +451,9 @@ public class SwitchHandler implements ISwitch {
     }
 
     private void reportError(Exception e) {
-    	if (e instanceof AsynchronousCloseException) {
+    	if (e instanceof AsynchronousCloseException ||
+        	e instanceof InterruptedException ||
+    		e instanceof SocketException) {
     		logger.debug("Caught exception {}", e.getMessage());
     	} else {
     		logger.warn("Caught exception {}", e.getMessage());
@@ -739,6 +747,8 @@ public class SwitchHandler implements ISwitch {
             			logger.trace("Message sent: {}", pmsg.toString());
             		}
             		Thread.sleep(10);
+            	} catch (InterruptedException ie) {
+            		reportError(new InterruptedException("PriorityMessageTransmit thread interrupted"));
             	} catch (Exception e) {
             		reportError(e);
             	}

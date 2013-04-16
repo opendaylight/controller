@@ -10,6 +10,7 @@
 package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousCloseException;
@@ -74,11 +75,36 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
 	 * @throws Exception
 	 */
     private void createSecureChannel(SocketChannel socket) throws Exception {
-     	String keyStoreFile = System.getProperty("controllerKeyStore").trim();
-    	String keyStorePassword = System.getProperty("controllerKeyStorePassword").trim();
-     	String trustStoreFile = System.getProperty("controllerTrustStore").trim();
-    	String trustStorePassword = System.getProperty("controllerTrustStorePassword").trim();
-
+     	String keyStoreFile = System.getProperty("controllerKeyStore");
+    	String keyStorePassword = System.getProperty("controllerKeyStorePassword");
+     	String trustStoreFile = System.getProperty("controllerTrustStore");
+    	String trustStorePassword = System.getProperty("controllerTrustStorePassword");
+    	
+    	if (keyStoreFile != null) {
+    		keyStoreFile = keyStoreFile.trim();
+    	}
+    	if ((keyStoreFile == null) || keyStoreFile.isEmpty()) {
+     		throw new FileNotFoundException("controllerKeyStore not specified in ./configuration/config.ini");
+    	}
+    	if (keyStorePassword != null) {
+    		keyStorePassword = keyStorePassword.trim();
+    	} 
+    	if ((keyStorePassword == null) || keyStorePassword.isEmpty()) {
+    		throw new FileNotFoundException("controllerKeyStorePassword not specified in ./configuration/config.ini");
+    	}
+    	if (trustStoreFile != null) {
+    		trustStoreFile = trustStoreFile.trim();
+    	}
+    	if ((trustStoreFile == null) || trustStoreFile.isEmpty()) {    	
+    		throw new FileNotFoundException("controllerTrustStore not specified in ./configuration/config.ini");
+    	}
+    	if (trustStorePassword != null) {
+    		trustStorePassword = trustStorePassword.trim();
+    	}
+        if ((trustStorePassword == null) || trustStorePassword.isEmpty()) {
+    		throw new FileNotFoundException("controllerTrustStorePassword not specified in ./configuration/config.ini");
+    	}
+    	
         KeyStore ks = KeyStore.getInstance("JKS");
         KeyStore ts = KeyStore.getInstance("JKS");
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
@@ -126,6 +152,8 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
     			newBuffer.put(myAppData);
     			myAppData = newBuffer;
     		}
+    	}
+    	synchronized (myAppData) {
     		msg.writeTo(myAppData);
     		myAppData.flip();
     		sslEngineResult = sslEngine.wrap(myAppData, myNetData);
