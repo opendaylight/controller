@@ -22,7 +22,7 @@ final class EnumerationBuilderImpl implements EnumBuilder {
 
     public EnumerationBuilderImpl(final String packageName, final String name) {
         super();
-        this.packageName = GeneratedTypeBuilderImpl.validatePackage(packageName);
+        this.packageName = packageName;
         this.name = name;
         values = new ArrayList<Enumeration.Pair>();
     }
