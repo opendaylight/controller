@@ -156,11 +156,21 @@
 </div>
 <!-- END modal -->
 
-<!-- Core JS - 6 -->
-<script src="/js/one.js"></script>
+<!-- Lib JS - 6 -->
+<script src="/js/lib.js"></script>
+<%	
+    String jsPath = "/WEB-INF/jsp/customjs.jsp"; 
+    URL jsURL = pageContext.getServletContext().getResource(jsPath);
+    if(jsURL!=null) {
+%>
+	  <jsp:include page="<%=jsPath%>" flush="true"/>
+<% } else { %>
+<!-- Core JS - 7 -->
+<script src="/js/open.js"></script>
 
-<!-- Topology JS - 7 -->
-<script src="/js/one-topology.js"></script>
+<!-- Topology JS - 8 -->
+<script src="/js/open-topology.js"></script>
+<% } %>
 
 </body>
 
