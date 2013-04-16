@@ -5,6 +5,8 @@ module custom-types-test {
     prefix "iit";
     
     organization "opendaylight";
+    revision 2012-04-16 {
+    }
     contact "WILL-BE-DEFINED-LATER";
     
     

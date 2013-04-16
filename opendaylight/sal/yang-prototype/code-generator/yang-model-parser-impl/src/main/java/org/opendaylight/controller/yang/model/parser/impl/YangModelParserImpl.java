@@ -119,6 +119,21 @@ public class YangModelParserImpl implements YangModelParser {
         final List<ParseTree> trees = parseStreams(yangFiles);
         final ModuleBuilder[] builders = new ModuleBuilder[trees.size()];
 
+	// validation
+        // if validation fails with any file, do not continue and throw
+        // exception
+        for (int i = 0; i < trees.size(); i++) {
+            try {
+                final YangModelValidationListener yangModelParser = new YangModelValidationListener();
+                walker.walk(yangModelParser, trees.get(i));
+            } catch (IllegalStateException e) {
+                // wrap exception to add information about which file failed
+                throw new YangValidationException(
+                        "Yang validation failed for file" + yangFiles[i], e);
+            }
+        }
+
+
         YangModelParserListenerImpl yangModelParser = null;
         for (int i = 0; i < trees.size(); i++) {
             yangModelParser = new YangModelParserListenerImpl();
