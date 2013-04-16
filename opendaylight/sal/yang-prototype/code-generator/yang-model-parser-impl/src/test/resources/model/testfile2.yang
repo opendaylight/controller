@@ -16,41 +16,30 @@ module types2 {
         reference " WILL BE DEFINED LATER";
     }
     
-    typedef ranges1 {
-    	type int32 {
-    		range "10..20";
-    	}
-    }
-    
-    typedef ranges2 {
-    	type ranges1 {
-    		range "12..max";
-    	}
-    }
-    
     typedef my-base-int32-type {
         type int32 {
             range "2..20";
         }
     }
 
-     typedef my-type1 {
-         type my-base-int32-type {
+    typedef my-type1 {
+        type my-base-int32-type {
             range "11..max";
+        }
+        units "mile";
+        default "11";
+    }
+    
+    typedef my-custom-string {
+        type string {
+            pattern "[a-k]*";
+            length "5..11";
         }
     }
     
     typedef my-string-type {
         type my-custom-string {
-            pattern "[a-k]*";
             length "5..10";
-        }
-    }
-    
-    typedef my-custom-string {
-    	type string {
-            pattern "[a-k]*";
-            length "5..11";
         }
     }
     
@@ -59,13 +48,13 @@ module types2 {
             pattern "[b-u]*";
         }
     }
-    
+
     typedef my-string-type-ext {
         type my-string-type2 {
             pattern "[e-z]*";
         }
     }
-    
+
     typedef my-int-type {
         type int32 {
             range "10..20";
@@ -96,6 +85,30 @@ module types2 {
         }
     }
 
+    typedef my-union {
+    	type union {
+    		type int16 {
+    			range "1..100";
+    		}
+    		type int32;
+    	}
+    }
+
+    typedef my-union-ext {
+    	type my-union;
+    }
+
+    typedef nested-union1 {
+    	type nested-union2;
+    }
+
+    typedef nested-union2 {
+    	type union {
+    		type my-union-ext;
+    		type string;
+    	}
+    }
+
     augment "/if:interfaces/if:ifEntry" {
         when "if:ifType='ds0'";
         leaf ds0ChannelNumber {
@@ -124,6 +137,12 @@ module types2 {
         #define.";
         argument "name" {
             yin-element "true";
+        }
+    }
+    
+    container system {
+        leaf user {
+            type string;
         }
     }
 

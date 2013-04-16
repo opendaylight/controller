@@ -40,6 +40,7 @@ import org.opendaylight.controller.yang.model.parser.builder.api.TypeAwareBuilde
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.model.parser.util.YangParseException;
 
 /**
  * This builder builds Module object. If this module is dependent on external
@@ -79,7 +80,6 @@ public class ModuleBuilder implements Builder {
     private final List<ExtensionBuilder> addedExtensions = new ArrayList<ExtensionBuilder>();
 
     private final Map<List<String>, TypeAwareBuilder> dirtyNodes = new HashMap<List<String>, TypeAwareBuilder>();
-    private final Map<List<String>, UnionTypeBuilder> unionTypes = new HashMap<List<String>, UnionTypeBuilder>();
 
     public ModuleBuilder(String name) {
         this.name = name;
@@ -107,8 +107,8 @@ public class ModuleBuilder implements Builder {
         instance.setGroupings(groupings);
 
         // USES
-        final Set<UsesNode> usesNodeDefinitions = buildUsesNodes(addedUsesNodes);
-        instance.setUses(usesNodeDefinitions);
+        final Set<UsesNode> usesDefinitions = buildUsesNodes(addedUsesNodes);
+        instance.setUses(usesDefinitions);
 
         // FEATURES
         final Set<FeatureDefinition> features = buildModuleFeatures(addedFeatures);
@@ -238,8 +238,7 @@ public class ModuleBuilder implements Builder {
     }
 
     public ExtensionBuilder addExtension(QName qname) {
-        ExtensionBuilder builder = new ExtensionBuilder(qname);
-        return builder;
+        return new ExtensionBuilder(qname);
     }
 
     public ContainerSchemaNodeBuilder addContainerNode(QName containerName,
@@ -372,9 +371,6 @@ public class ModuleBuilder implements Builder {
 
         ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes.get(pathToUses);
         if (parent != null) {
-            if(parent instanceof AugmentationSchemaBuilder) {
-                usesBuilder.setAugmenting(true);
-            }
             parent.addUsesNode(usesBuilder);
         }
 
@@ -415,14 +411,14 @@ public class ModuleBuilder implements Builder {
             List<String> parentPath) {
         List<String> pathToNotification = new ArrayList<String>(parentPath);
 
-        NotificationBuilder notificationBuilder = new NotificationBuilder(
+        NotificationBuilder builder = new NotificationBuilder(
                 notificationName);
 
         pathToNotification.add(notificationName.getLocalName());
-        moduleNodes.put(pathToNotification, notificationBuilder);
-        addedNotifications.add(notificationBuilder);
+        moduleNodes.put(pathToNotification, builder);
+        addedNotifications.add(builder);
 
-        return notificationBuilder;
+        return builder;
     }
 
     public FeatureBuilder addFeature(QName featureName, List<String> parentPath) {
@@ -459,18 +455,20 @@ public class ModuleBuilder implements Builder {
 
     public void setType(TypeDefinition<?> type, List<String> parentPath) {
         TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes.get(parentPath);
+        if(parent == null) {
+            throw new YangParseException("Failed to set type '"+ type.getQName().getLocalName() +"'. Parent node not found.");
+        }
         parent.setType(type);
     }
 
     public void addUnionType(List<String> parentPath) {
         TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes.get(parentPath);
         UnionTypeBuilder union = new UnionTypeBuilder();
-        parent.setType(union.build());
+        parent.setType(union);
 
         List<String> path = new ArrayList<String>(parentPath);
         path.add("union");
 
-        unionTypes.put(path, union);
         moduleNodes.put(path, union);
     }
 
@@ -483,7 +481,6 @@ public class ModuleBuilder implements Builder {
     public IdentitySchemaNodeBuilder addIdentity(QName qname) {
         IdentitySchemaNodeBuilder builder = new IdentitySchemaNodeBuilder(qname);
         addedIdentities.add(builder);
-
         return builder;
     }
 
@@ -499,8 +496,7 @@ public class ModuleBuilder implements Builder {
     }
 
     public UnknownSchemaNodeBuilder addUnknownSchemaNode(QName qname, List<String> parentPath) {
-        UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(qname);
-        return builder;
+        return new UnknownSchemaNodeBuilder(qname);
     }
 
 
@@ -524,7 +520,7 @@ public class ModuleBuilder implements Builder {
         private Map<QName, DataSchemaNode> childNodes = Collections.emptyMap();
         private Set<GroupingDefinition> groupings = Collections.emptySet();
         private Set<UsesNode> uses = Collections.emptySet();
-        private List<ExtensionDefinition> extensionSchemaNodes = Collections.emptyList();
+        private List<ExtensionDefinition> extensionNodes = Collections.emptyList();
         private Set<IdentitySchemaNode> identities = Collections.emptySet();
 
         private ModuleImpl(String name) {
@@ -720,12 +716,12 @@ public class ModuleBuilder implements Builder {
 
         @Override
         public List<ExtensionDefinition> getExtensionSchemaNodes() {
-            return extensionSchemaNodes;
+            return extensionNodes;
         }
 
         private void setExtensionSchemaNodes(List<ExtensionDefinition> extensionSchemaNodes) {
             if(extensionSchemaNodes != null) {
-                this.extensionSchemaNodes = extensionSchemaNodes;
+                this.extensionNodes = extensionSchemaNodes;
             }
         }
 
@@ -935,11 +931,12 @@ public class ModuleBuilder implements Builder {
     private Map<QName, DataSchemaNode> buildModuleChildNodes(
             Map<List<String>, DataSchemaNodeBuilder> addedChilds) {
         final Map<QName, DataSchemaNode> childNodes = new HashMap<QName, DataSchemaNode>();
-        for (Map.Entry<List<String>, DataSchemaNodeBuilder> entry : addedChilds
-                .entrySet()) {
-            if (entry.getKey().size() == 2) {
-                DataSchemaNode node = entry.getValue().build();
-                QName qname = entry.getValue().getQName();
+        for (Map.Entry<List<String>, DataSchemaNodeBuilder> entry : addedChilds.entrySet()) {
+            List<String> path = entry.getKey();
+            DataSchemaNodeBuilder child = entry.getValue();
+            if (path.size() == 2) {
+                DataSchemaNode node = child.build();
+                QName qname = node.getQName();
                 childNodes.put(qname, node);
             }
         }
@@ -996,11 +993,11 @@ public class ModuleBuilder implements Builder {
     private Set<TypeDefinition<?>> buildModuleTypedefs(
             Map<List<String>, TypeDefinitionBuilder> addedTypedefs) {
         Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
-        for (Map.Entry<List<String>, TypeDefinitionBuilder> entry : addedTypedefs
-                .entrySet()) {
-            if (entry.getKey().size() == 2) {
-                TypeDefinition<? extends TypeDefinition<?>> node = entry
-                        .getValue().build();
+        for (Map.Entry<List<String>, TypeDefinitionBuilder> entry : addedTypedefs.entrySet()) {
+            List<String> key = entry.getKey();
+            TypeDefinitionBuilder typedefBuilder = entry.getValue();
+            if (key.size() == 2) {
+                TypeDefinition<? extends TypeDefinition<?>> node = typedefBuilder.build();
                 typedefs.add(node);
             }
         }

@@ -8,7 +8,7 @@
 package org.opendaylight.controller.yang.model.api;
 
 
-public interface TypeDefinition<T extends TypeDefinition<T>> extends SchemaNode {
+public interface TypeDefinition<T extends TypeDefinition<?>> extends SchemaNode {
 
     T getBaseType();
 
