@@ -156,10 +156,13 @@
 </div>
 <!-- END modal -->
 
-<!-- Core JS - 6 -->
+<!-- Lib JS - 6 -->
+<script src="/js/lib.js"></script>
+
+<!-- Core JS - 7 -->
 <script src="/js/one.js"></script>
 
-<!-- Topology JS - 7 -->
+<!-- Topology JS - 8 -->
 <script src="/js/one-topology.js"></script>
 
 </body>
