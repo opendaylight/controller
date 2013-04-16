@@ -111,22 +111,14 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                             .getNodeConnectorProp(dstNC,
                                     Bandwidth.BandwidthPropName);
 
-                    if ((bwSrc == null) || (bwDst == null)) {
-                        log.error("bwSrc:{} or bwDst:{} is null", bwSrc, bwDst);
-                        return (double) -1;
+                    long srcLinkSpeed = 0, dstLinkSpeed = 0;
+                    if ((bwSrc == null) || ((srcLinkSpeed = bwSrc.getValue()) == 0)) {
+                        log.debug("srcNC: {} - Setting srcLinkSpeed to Default!",srcNC);
+                         srcLinkSpeed = DEFAULT_LINK_SPEED;
                     }
-
-                    long srcLinkSpeed = bwSrc.getValue();
-                    if (srcLinkSpeed == 0) {
-                        log.trace("Edge {}: srcLinkSpeed is 0. Setting to {}!",
-                                e, DEFAULT_LINK_SPEED);
-                        srcLinkSpeed = DEFAULT_LINK_SPEED;
-                    }
-
-                    long dstLinkSpeed = bwDst.getValue();
-                    if (dstLinkSpeed == 0) {
-                        log.trace("Edge {}: dstLinkSpeed is 0. Setting to {}!",
-                                e, DEFAULT_LINK_SPEED);
+ 
+                    if ((bwDst == null) || ((dstLinkSpeed = bwDst.getValue()) == 0)) {
+                        log.debug("dstNC: {} - Setting dstLinkSpeed to Default!",dstNC);
                         dstLinkSpeed = DEFAULT_LINK_SPEED;
                     }
 

@@ -11,7 +11,7 @@
  * @file   Path.java
  *
  * @brief  Describe a path as a sequence of Edge such that from
- * each of its Tail Node there is an link to the next Head Node in the sequence
+ * each of its Head Node there is an link to the next Tail Node in the sequence
  *
  */
 package org.opendaylight.controller.sal.core;
@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 /**
  * Describe a path as a sequence of Edge such that from
- * each of its Tail Node there is an link to the next Head Node in the
+ * each of its Head Node there is an link to the next Tail Node in the
  * sequence
  *
  */
@@ -50,15 +50,15 @@ public class Path implements Serializable {
     /**
      * Construct an object representing a path, the constructor will
      * check if the passed list of edges is such that for every
-     * consecutive edges the tailnode of the first edge coincide with
-     * the head node of the subsequent in order for connectivity to be there.
+     * consecutive edges the head node of the first edge coincide with
+     * the tail node of the subsequent in order for connectivity to be there.
      *
      * @param edges Edges of the path
      *
      */
     public Path(List<Edge> edges) throws ConstructionException {
-        // Lets check if the list of edges is such that the tail node
-        // of an edge is also the head node of the subsequent one
+        // Lets check if the list of edges is such that the head node
+        // of an edge is also the tail node of the subsequent one
         boolean sequential = true;
         if (edges.size() >= 2) {
             for (int i = 0; i < edges.size() - 1; i++) {
