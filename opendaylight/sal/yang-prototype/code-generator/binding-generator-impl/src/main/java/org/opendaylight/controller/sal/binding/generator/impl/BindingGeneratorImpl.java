@@ -9,9 +9,11 @@ package org.opendaylight.controller.sal.binding.generator.impl;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +43,20 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
 public class BindingGeneratorImpl implements BindingGenerator {
+    
+    private static final String[] SET_VALUES = new String[] { "abstract",
+        "assert", "boolean", "break", "byte", "case", "catch", "char",
+        "class", "const", "continue", "default", "double", "do", "else",
+        "enum", "extends", "false", "final", "finally", "float", "for",
+        "goto", "if", "implements", "import", "instanceof", "int",
+        "interface", "long", "native", "new", "null", "package", "private",
+        "protected", "public", "return", "short", "static", "strictfp",
+        "super", "switch", "synchronized", "this", "throw", "throws",
+        "transient", "true", "try", "void", "volatile", "while" };
 
+    public static final Set<String> JAVA_RESERVED_WORDS = new HashSet<String>(
+            Arrays.asList(SET_VALUES));
+    
     private static Calendar calendar = new GregorianCalendar();
     private Map<String, Map<String, GeneratedTypeBuilder>> genTypeBuilders;
     private List<ContainerSchemaNode> schemaContainers;
@@ -52,7 +67,27 @@ public class BindingGeneratorImpl implements BindingGenerator {
     public BindingGeneratorImpl() {
         super();
     }
-
+    
+    private static String validatePackage(final String packageName) {
+        if (packageName != null) {
+            final String[] packNameParts = packageName.split("\\.");
+            if (packNameParts != null) {
+                final StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < packNameParts.length; ++i) {
+                    if (JAVA_RESERVED_WORDS.contains(packNameParts[i])) {
+                        packNameParts[i] = "_" + packNameParts[i];
+                    } 
+                    if (i > 0) {
+                        builder.append(".");
+                    }
+                    builder.append(packNameParts[i]);
+                }
+                return builder.toString();
+            }
+        }
+        return packageName;
+    }
+    
     @Override
     public List<Type> generateTypes(final SchemaContext context) {
         final List<Type> genTypes = new ArrayList<Type>();
@@ -98,13 +133,13 @@ public class BindingGeneratorImpl implements BindingGenerator {
             for (int i = 0; i < traversalSteps; ++i) {
                 builder.append(".");
                 String nodeLocalName = pathToNode.get(i).getLocalName();
-
+                
                 // TODO: create method
                 nodeLocalName = nodeLocalName.replace(":", ".");
                 nodeLocalName = nodeLocalName.replace("-", ".");
                 builder.append(nodeLocalName);
             }
-            return builder.toString();
+            return validatePackage(builder.toString());
         }
         return null;
     }

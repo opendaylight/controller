@@ -191,8 +191,6 @@ public interface YangParserVisitor<T> extends ParseTreeVisitor<T> {
 
     T visitRevision_date_stmt(YangParser.Revision_date_stmtContext ctx);
 
-    T visitRefune_pom(YangParser.Refune_pomContext ctx);
-
     T visitPresence_stmt(YangParser.Presence_stmtContext ctx);
 
     T visitFraction_digits_stmt(YangParser.Fraction_digits_stmtContext ctx);
@@ -210,6 +208,8 @@ public interface YangParserVisitor<T> extends ParseTreeVisitor<T> {
     T visitIf_feature_stmt(YangParser.If_feature_stmtContext ctx);
 
     T visitRevision_stmt(YangParser.Revision_stmtContext ctx);
+
+    T visitRefine_pom(YangParser.Refine_pomContext ctx);
 
     T visitLength_stmt(YangParser.Length_stmtContext ctx);
 

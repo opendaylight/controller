@@ -468,11 +468,6 @@ public class YangParserBaseVisitor<T> extends AbstractParseTreeVisitor<T>
     }
 
     @Override
-    public T visitRefune_pom(YangParser.Refune_pomContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
     public T visitPresence_stmt(YangParser.Presence_stmtContext ctx) {
         return visitChildren(ctx);
     }
@@ -516,6 +511,11 @@ public class YangParserBaseVisitor<T> extends AbstractParseTreeVisitor<T>
 
     @Override
     public T visitRevision_stmt(YangParser.Revision_stmtContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public T visitRefine_pom(YangParser.Refine_pomContext ctx) {
         return visitChildren(ctx);
     }
 

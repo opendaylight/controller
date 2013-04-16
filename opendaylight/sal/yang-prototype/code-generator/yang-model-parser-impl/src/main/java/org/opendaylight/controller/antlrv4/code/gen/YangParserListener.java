@@ -376,10 +376,6 @@ public interface YangParserListener extends ParseTreeListener {
 
     void exitRevision_date_stmt(YangParser.Revision_date_stmtContext ctx);
 
-    void enterRefune_pom(YangParser.Refune_pomContext ctx);
-
-    void exitRefune_pom(YangParser.Refune_pomContext ctx);
-
     void enterPresence_stmt(YangParser.Presence_stmtContext ctx);
 
     void exitPresence_stmt(YangParser.Presence_stmtContext ctx);
@@ -417,6 +413,10 @@ public interface YangParserListener extends ParseTreeListener {
     void enterRevision_stmt(YangParser.Revision_stmtContext ctx);
 
     void exitRevision_stmt(YangParser.Revision_stmtContext ctx);
+
+    void enterRefine_pom(YangParser.Refine_pomContext ctx);
+
+    void exitRefine_pom(YangParser.Refine_pomContext ctx);
 
     void enterLength_stmt(YangParser.Length_stmtContext ctx);
 
