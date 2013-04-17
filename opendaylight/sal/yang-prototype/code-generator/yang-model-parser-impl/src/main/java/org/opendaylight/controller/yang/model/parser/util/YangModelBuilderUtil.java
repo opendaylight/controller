@@ -193,7 +193,7 @@ public final class YangModelBuilderUtil {
             URI namespace, Date revision, String prefix) {
         final List<QName> path = new ArrayList<QName>();
         QName qname;
-        // start from index 1 - module name ommited
+        // start from index 1 - module name omitted
         for (int i = 1; i < actualPath.size(); i++) {
             qname = new QName(namespace, revision, prefix, actualPath.get(i));
             path.add(qname);
@@ -974,7 +974,7 @@ public final class YangModelBuilderUtil {
             final boolean absolute = path.startsWith("/");
             RevisionAwareXPath xpath = new RevisionAwareXPathImpl(path,
                     absolute);
-            type = new Leafref(xpath);
+            type = new Leafref(actualPath, namespace, revision, xpath);
         } else if ("binary".equals(typeName)) {
             List<Byte> bytes = Collections.emptyList();
             type = new BinaryType(bytes, lengthStatements, null);

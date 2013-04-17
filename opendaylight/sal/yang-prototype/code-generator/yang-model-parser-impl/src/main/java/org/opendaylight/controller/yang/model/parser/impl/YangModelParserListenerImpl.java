@@ -13,6 +13,7 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -321,7 +322,9 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
                 if ("union".equals(typeName)) {
                     moduleBuilder.addUnionType(getActualPath());
                 } else {
-                    type = parseTypeBody(typeName, typeBody, getActualPath(),
+                    List<String> typePath = new ArrayList<String>(actualPath);
+                    typePath.remove(0);
+                    type = parseTypeBody(typeName, typeBody, typePath,
                             namespace, revision, yangModelPrefix);
                     moduleBuilder.setType(type, getActualPath());
                 }

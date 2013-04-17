@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
+import java.net.URI;
+import java.util.Date;
 import java.util.Set;
 
 
@@ -25,4 +27,8 @@ public interface SchemaContext {
     Set<RpcDefinition> getOperations();
     
     Set<ExtensionDefinition> getExtensions();
+    
+    Module findModuleByName(final String name, final Date revision);
+    
+    Module findModuleByNamespace(final URI namespace);
 }

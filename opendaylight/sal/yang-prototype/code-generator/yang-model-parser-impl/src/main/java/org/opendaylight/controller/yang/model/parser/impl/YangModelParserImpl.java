@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -96,20 +97,47 @@ public class YangModelParserImpl implements YangModelParser {
 
     private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuildersFromStreams(
             String... yangFiles) {
-        InputStream[] streams = new InputStream[yangFiles.length];
-        FileInputStream inStream = null;
+        final InputStream[] streams = loadStreams(yangFiles);
+
+        if (streams != null) {
+            final Map<String, TreeMap<Date, ModuleBuilder>> result = resolveModuleBuildersFromStreams(streams);
+            cloaseStreams(streams);
+
+            if (result != null) {
+                return result;
+            }
+        }
+        return new HashMap<String, TreeMap<Date, ModuleBuilder>>();
+    }
+
+    private InputStream[] loadStreams(final String... yangFiles) {
+        final InputStream[] streams = new InputStream[yangFiles.length];
         for (int i = 0; i < yangFiles.length; i++) {
             final String yangFileName = yangFiles[i];
             final File yangFile = new File(yangFileName);
             try {
-                inStream = new FileInputStream(yangFile);
+                streams[i] = new FileInputStream(yangFile);
             } catch (FileNotFoundException e) {
-                logger.warn("Exception while reading yang stream: " + inStream,
-                        e);
+                logger.warn("Exception while reading yang stream: "
+                        + streams[i], e);
             }
-            streams[i] = inStream;
         }
-        return resolveModuleBuildersFromStreams(streams);
+        return streams;
+    }
+
+    private void cloaseStreams(final InputStream[] streams) {
+        if (streams != null) {
+            for (int i = 0; i < streams.length; ++i) {
+                try {
+                    if (streams[i] != null) {
+                        streams[i].close();
+                    }
+                } catch (IOException e) {
+                    logger.warn("Exception while closing yang stream: "
+                            + streams[i], e);
+                }
+            }
+        }
     }
 
     private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuildersFromStreams(
@@ -203,7 +231,7 @@ public class YangModelParserImpl implements YangModelParser {
     /**
      * Search for dirty nodes (node which contains UnknownType) and resolve
      * unknown types.
-     *
+     * 
      * @param modules
      *            all available modules
      * @param module
@@ -516,7 +544,7 @@ public class YangModelParserImpl implements YangModelParser {
     /**
      * Go through all typedef statements from given module and search for one
      * with given name
-     *
+     * 
      * @param typedefs
      *            typedef statements to search
      * @param name
@@ -541,7 +569,7 @@ public class YangModelParserImpl implements YangModelParser {
 
     /**
      * Pull restriction from referenced type and add them to given constraints
-     *
+     * 
      * @param referencedType
      * @param constraints
      */
@@ -571,7 +599,7 @@ public class YangModelParserImpl implements YangModelParser {
     /**
      * Go through all augmentation definitions and resolve them. This means find
      * referenced node and add child nodes to it.
-     *
+     * 
      * @param modules
      *            all available modules
      * @param module
@@ -609,7 +637,7 @@ public class YangModelParserImpl implements YangModelParser {
 
     /**
      * Add all augment's child nodes to given target.
-     *
+     * 
      * @param augment
      * @param target
      */
@@ -624,7 +652,7 @@ public class YangModelParserImpl implements YangModelParser {
     /**
      * Go through identity statements defined in current module and resolve
      * their 'base' statement if present.
-     *
+     * 
      * @param modules
      *            all modules
      * @param module
@@ -664,7 +692,7 @@ public class YangModelParserImpl implements YangModelParser {
 
     /**
      * Find dependent module based on given prefix
-     *
+     * 
      * @param modules
      *            all available modules
      * @param module
@@ -712,7 +740,7 @@ public class YangModelParserImpl implements YangModelParser {
 
     /**
      * Get module import referenced by given prefix.
-     *
+     * 
      * @param builder
      *            module to search
      * @param prefix
@@ -782,6 +810,31 @@ public class YangModelParserImpl implements YangModelParser {
                 extensions.addAll(m.getExtensionSchemaNodes());
             }
             return extensions;
+        }
+
+        @Override
+        public Module findModuleByName(final String name, final Date revision) {
+            if ((name != null) && (revision != null)) {
+                for (final Module module : modules) {
+                    if (module.getName().equals(name)
+                            && module.getRevision().equals(revision)) {
+                        return module;
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Module findModuleByNamespace(URI namespace) {
+            if (namespace != null) {
+                for (final Module module : modules) {
+                    if (module.getNamespace().equals(namespace)) {
+                        return module;
+                    }
+                }
+            }
+            return null;
         }
     }
 
