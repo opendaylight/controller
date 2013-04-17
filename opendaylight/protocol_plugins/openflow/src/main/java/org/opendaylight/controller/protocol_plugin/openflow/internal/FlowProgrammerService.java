@@ -9,8 +9,10 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
+import java.nio.ByteBuffer;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
+import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Error;
 import org.openflow.protocol.OFError;
 import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFMessage;
@@ -22,6 +24,8 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.Status;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents the openflow plugin component in charge of programming the flows
@@ -31,6 +35,8 @@ import org.opendaylight.controller.sal.utils.Status;
  *
  */
 public class FlowProgrammerService implements IPluginInFlowProgrammerService {
+	private static final Logger log = LoggerFactory
+    .getLogger(FlowProgrammerService.class);
     private IController controller;
 
     public FlowProgrammerService() {
@@ -107,9 +113,21 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService {
                                     errorString(null, action,
                                             "Request Timed Out"));
                 } else if (result instanceof OFError) {
+                	OFError res = (OFError) result;
+                	if (res.getErrorType() == V6Error.NICIRA_VENDOR_ERRORTYPE) {
+                		V6Error er = new V6Error(res);
+                		byte[] b = res.getError();
+                		ByteBuffer bb = ByteBuffer.allocate(b.length);
+                		bb.put(b);
+                		bb.rewind();
+                		er.readFrom(bb);
+                		log.trace("V6Error {}",er);
+                		return new Status(StatusCode.INTERNALERROR,
+                                errorString("program", action, "Vendor Extension Internal Error"));
+                	}
                     return new Status(StatusCode.INTERNALERROR,
                             errorString("program", action, Utils
-                            .getOFErrorString((OFError) result)));
+                            .getOFErrorString(res)));
                 } else {
                     return new Status(StatusCode.INTERNALERROR,
                             errorString("send", action, "Internal Error"));
