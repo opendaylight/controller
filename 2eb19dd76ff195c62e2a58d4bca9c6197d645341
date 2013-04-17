@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///1k\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/yang-model-parser-impl/src/test/resources/model/testfile1.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-17T06:03:24Z",
+      "side": 1,
+      "message": "Can this be changed to be opendaylight, we want vendor neutral code.",
+      "revId": "2eb19dd76ff195c62e2a58d4bca9c6197d645341",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///1g\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/yang-model-parser-impl/src/test/resources/model/testfile2.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-17T06:03:24Z",
+      "side": 1,
+      "message": "Ditto, change to vendor neutral code",
+      "revId": "2eb19dd76ff195c62e2a58d4bca9c6197d645341",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///1c\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/yang-model-parser-impl/src/test/resources/types/custom-types-test@2012-4-4.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-17T06:03:24Z",
+      "side": 1,
+      "message": "Also here, remove the vendor",
+      "revId": "2eb19dd76ff195c62e2a58d4bca9c6197d645341",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
