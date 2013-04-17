@@ -30,6 +30,7 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
+import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.Leafref;
 
 public class TypeProviderImpl implements TypeProvider {
@@ -54,25 +55,44 @@ public class TypeProviderImpl implements TypeProvider {
     }
 
     @Override
-    public Type javaTypeForSchemaDefinitionType(final TypeDefinition<?> type) {
+    public Type javaTypeForSchemaDefinitionType(final TypeDefinition<?> typeDefinition) {
         Type returnType = null;
-        if (type != null) {
-            if (type instanceof Leafref) {
-                final LeafrefTypeDefinition leafref = (LeafrefTypeDefinition) type;
+        if (typeDefinition != null) {
+            if (typeDefinition instanceof Leafref) {
+                final LeafrefTypeDefinition leafref = (LeafrefTypeDefinition) typeDefinition;
                 returnType = provideTypeForLeafref(leafref);
-            } else if (type instanceof IdentityrefTypeDefinition) {
+            } else if (typeDefinition instanceof IdentityrefTypeDefinition) {
 
-            } else {
-                returnType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
-                        .javaTypeForSchemaDefinitionType(type);
+            } else if (typeDefinition instanceof ExtendedType) {
+                final TypeDefinition<?> baseType = typeDefinition.getBaseType(); 
+                return javaTypeForSchemaDefinitionType(baseType);
+            }
+            else {
+                returnType = baseTypeForExtendedType(typeDefinition);
             }
         }
         return returnType;
     }
-
+    
+    public Type baseTypeForExtendedType(final TypeDefinition<?> typeDefinition) {
+        Type returnType = null;
+        if (typeDefinition != null) {
+            if (typeDefinition instanceof ExtendedType) {
+                final TypeDefinition<?> extType = typeDefinition.getBaseType(); 
+                return baseTypeForExtendedType(extType);
+            } else {
+                returnType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
+                        .javaTypeForSchemaDefinitionType(typeDefinition);
+            }
+        }
+        return returnType;
+    }
+    
     public Type provideTypeForLeafref(final LeafrefTypeDefinition leafrefType) {
         Type returnType = null;
-        if ((leafrefType != null) && (leafrefType.getPathStatement() != null)) {
+        if ((leafrefType != null) && (leafrefType.getPathStatement() != null)
+                && (leafrefType.getPath() != null)) {
+
             final RevisionAwareXPath xpath = leafrefType.getPathStatement();
             final String strXPath = xpath.toString();
 
@@ -80,7 +100,7 @@ public class TypeProviderImpl implements TypeProvider {
                 if (strXPath.matches(".*//[.* | .*//].*")) {
                     returnType = Types.typeForClass(Object.class);
                 } else {
-                    final Module module = resolveModuleFromSchemaContext(leafrefType
+                    final Module module = resolveModuleFromSchemaPath(leafrefType
                             .getPath());
                     if (module != null) {
                         Queue<String> leafrefPath;
@@ -88,9 +108,9 @@ public class TypeProviderImpl implements TypeProvider {
                             leafrefPath = resolveRelativeXPath(xpath,
                                     leafrefType.getPath());
                         } else {
-                            leafrefPath = xpathToPrefixedPath(strXPath, module.getName());
+                            leafrefPath = xpathToPrefixedPath(strXPath,
+                                    module.getName());
                         }
-
                         if (leafrefPath != null) {
                             final DataSchemaNode dataNode = findSchemaNodeForGivenPath(
                                     module, leafrefPath);
@@ -127,15 +147,10 @@ public class TypeProviderImpl implements TypeProvider {
     private DataSchemaNode findSchemaNodeForGivenPath(final Module module,
             final Queue<String> prefixedPath) {
         if ((module != null) && (prefixedPath != null)) {
+            DataNodeContainer nextContainer = module;
             final String modulePrefix = module.getPrefix();
-            String childNodeName = prefixedPath.poll();
-            DataNodeContainer nextContainer = null;
-
-            if ((childNodeName != null)
-                    && childNodeName.equals(module.getName())) {
-                nextContainer = module;
-            }
-
+            
+            String childNodeName = null;
             DataSchemaNode schemaNode = null;
             while ((nextContainer != null) && (prefixedPath.size() > 0)) {
                 childNodeName = prefixedPath.poll();
@@ -143,25 +158,23 @@ public class TypeProviderImpl implements TypeProvider {
                     final String[] prefixedChildNode = childNodeName.split(":");
                     if ((modulePrefix != null)
                             && modulePrefix.equals(prefixedChildNode[0])) {
-                        
+
                         childNodeName = prefixedChildNode[1];
                     } else {
                         final Module nextModule = resolveModuleForPrefix(
                                 prefixedChildNode[0], module);
                         final Queue<String> nextModulePrefixedPath = new LinkedList<String>();
-                        
-                        nextModulePrefixedPath.add(nextModule.getName());
                         nextModulePrefixedPath.add(childNodeName);
                         nextModulePrefixedPath.addAll(prefixedPath);
                         prefixedPath.clear();
-                        
+
                         schemaNode = findSchemaNodeForGivenPath(nextModule,
                                 nextModulePrefixedPath);
-                        
+
                         return schemaNode;
                     }
                 }
-                
+
                 schemaNode = nextContainer.getDataChildByName(childNodeName);
                 if (schemaNode instanceof ContainerSchemaNode) {
                     nextContainer = (ContainerSchemaNode) schemaNode;
@@ -176,35 +189,24 @@ public class TypeProviderImpl implements TypeProvider {
         return null;
     }
 
-    private Module resolveModuleFromSchemaContext(final SchemaPath schemaPath) {
-        final Set<Module> modules = schemaContext.getModules();
-        final String moduleName = resolveModuleName(schemaPath);
-        if ((moduleName != null) && (modules != null)) {
-            for (final Module module : modules) {
-                if (module.getName().equals(moduleName)) {
-                    return module;
-                }
+    private Module resolveModuleFromSchemaPath(final SchemaPath schemaPath) {
+        if ((schemaPath != null) && (schemaPath.getPath() != null)) {
+            final QName qname = schemaPath.getPath().get(0);
+
+            if ((qname != null) && (qname.getNamespace() != null)) {
+                return schemaContext
+                        .findModuleByNamespace(qname.getNamespace());
             }
         }
         return null;
     }
 
-    private String resolveModuleName(final SchemaPath schemaPath) {
-        if ((schemaPath != null) && (schemaPath.getPath() != null)) {
-            final QName qname = schemaPath.getPath().get(0);
-            if ((qname != null) && (qname.getLocalName() != null)) {
-                return qname.getLocalName();
-            }
-        }
-        return "";
-    }
-
-    private Queue<String> xpathToPrefixedPath(final String xpath, final String moduleName) {
+    private Queue<String> xpathToPrefixedPath(final String xpath,
+            final String moduleName) {
         final Queue<String> retQueue = new LinkedList<String>();
         if ((xpath != null) && (moduleName != null)) {
             final String[] prefixedPath = xpath.split("/");
-            
-            retQueue.add(moduleName);
+
             if (prefixedPath != null) {
                 for (int i = 0; i < prefixedPath.length; ++i) {
                     if (!prefixedPath[i].isEmpty()) {

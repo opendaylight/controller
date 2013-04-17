@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.yang.types.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.impl.BindingGeneratorImpl;
@@ -53,7 +54,6 @@ public class GeneratedTypesTest {
         assertEquals(11, genTypes.size());
     }
 
-    @Ignore
     @Test
     public void testLeafrefResolving() {
         final String topologyPath = getClass().getResource(
@@ -62,8 +62,8 @@ public class GeneratedTypesTest {
         final String interfacesPath = getClass().getResource(
                 "/leafref-test-models/ietf-interfaces@2012-11-15.yang")
                 .getPath();
-//        final String ifTypePath = getClass().getResource(
-//                "/leafref-test-models/iana-if-type@2012-06-05.yang").getPath();
+        // final String ifTypePath = getClass().getResource(
+        // "/leafref-test-models/iana-if-type@2012-06-05.yang").getPath();
         final String inetTypesPath = getClass().getResource(
                 "/leafref-test-models/ietf-inet-types@2010-09-24.yang")
                 .getPath();
@@ -73,12 +73,13 @@ public class GeneratedTypesTest {
 
         assertTrue(topologyPath != null);
         assertTrue(interfacesPath != null);
-//        assertTrue(ifTypePath != null);
+        // assertTrue(ifTypePath != null);
         assertTrue(inetTypesPath != null);
         assertTrue(yangTypesPath != null);
 
-//        final SchemaContext context = resolveSchemaContextFromFiles(
-//                topologyPath, interfacesPath, ifTypePath, inetTypesPath, yangTypesPath);
+        // final SchemaContext context = resolveSchemaContextFromFiles(
+        // topologyPath, interfacesPath, ifTypePath, inetTypesPath,
+        // yangTypesPath);
         final SchemaContext context = resolveSchemaContextFromFiles(
                 topologyPath, interfacesPath, inetTypesPath, yangTypesPath);
         assertTrue(context != null);
@@ -89,14 +90,120 @@ public class GeneratedTypesTest {
 
         assertEquals(21, genTypes.size());
         assertTrue(genTypes != null);
+        
+        int resolvedLeafrefCount = 0;
+        for (final Type type : genTypes) {
+            if (type.getName().equals("InterfaceKey")
+                    && type instanceof GeneratedTransferObject) {
+                final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
+                final List<GeneratedProperty> properties = genTO
+                        .getProperties();
+                
+                assertTrue(properties != null);
+                for (final GeneratedProperty property : properties) {
+                    if (property.getName().equals("InterfaceId")) {
+                        assertTrue(property.getReturnType() != null);
+                        assertFalse(property.getReturnType().equals(
+                                "java.lang.Void"));
+                        assertTrue(property.getReturnType().getName()
+                                .equals("String"));
+                        resolvedLeafrefCount++;
+                    }
+                }
 
-        for (final Type genType : genTypes) {
-            if (genType.getName().equals("Interface") && genType instanceof GeneratedType) {
-//                System.out.println(((GeneratedType)genType).getMethodDefinitions().toString());
-            } else if (genType.getName().equals("NetworkLink") && genType instanceof GeneratedType) {
-//                System.out.println(((GeneratedType)genType).getMethodDefinitions().toString());
+            } else if (type.getName().equals("Interface")
+                    && type instanceof GeneratedType) {
+                final GeneratedType genType = (GeneratedType) type;
+                final List<MethodSignature> methods = genType
+                        .getMethodDefinitions();
+
+                assertTrue(methods != null);
+                for (final MethodSignature method : methods) {
+                    if (method.getName().equals("getInterfaceKey")) {
+                        assertTrue(method.getReturnType() != null);
+                        assertFalse(method.getReturnType().equals(
+                                "java.lang.Void"));
+                        assertTrue(method.getReturnType().getName()
+                                .equals("InterfaceKey"));
+                        resolvedLeafrefCount++;
+                    } else if (method.getName().equals("getHigherLayerIf")) {
+                        assertTrue(method.getReturnType() != null);
+                        assertFalse(method.getReturnType().equals(
+                                "java.lang.Void"));
+                        assertTrue(method.getReturnType().getName()
+                                .equals("List"));
+                        resolvedLeafrefCount++;
+                    }
+                }
+            } else if (type.getName().equals("NetworkLink")
+                    && type instanceof GeneratedType) {
+                final GeneratedType genType = (GeneratedType) type;
+                final List<MethodSignature> methods = genType
+                        .getMethodDefinitions();
+                assertTrue(methods != null);
+                for (MethodSignature method : methods) {
+                    if (method.getName().equals("getInterface")) {
+                        assertTrue(method.getReturnType() != null);
+                        assertFalse(method.getReturnType().equals(
+                                "java.lang.Void"));
+                        assertTrue(method.getReturnType().getName()
+                                .equals("String"));
+                        resolvedLeafrefCount++;
+                    }
+                }
+            } else if ((type.getName().equals("SourceNode") || type.getName()
+                    .equals("DestinationNode"))
+                    && type instanceof GeneratedType) {
+                final GeneratedType genType = (GeneratedType) type;
+                final List<MethodSignature> methods = genType
+                        .getMethodDefinitions();
+                assertTrue(methods != null);
+                for (MethodSignature method : methods) {
+                    if (method.getName().equals("getId")) {
+                        assertTrue(method.getReturnType() != null);
+                        assertFalse(method.getReturnType().equals(
+                                "java.lang.Void"));
+                        assertTrue(method.getReturnType().getName()
+                                .equals("String"));
+                        resolvedLeafrefCount++;
+                    }
+                }
+            } else if (type.getName().equals("Tunnel")
+                    && type instanceof GeneratedType) {
+                final GeneratedType genType = (GeneratedType) type;
+                final List<MethodSignature> methods = genType
+                        .getMethodDefinitions();
+                assertTrue(methods != null);
+                for (MethodSignature method : methods) {
+                    if (method.getName().equals("getTunnelKey")) {
+                        assertTrue(method.getReturnType() != null);
+                        assertFalse(method.getReturnType().equals(
+                                "java.lang.Void"));
+                        assertTrue(method.getReturnType().getName()
+                                .equals("TunnelKey"));
+                        resolvedLeafrefCount++;
+                    }
+                }
+            } else if (type.getName().equals("TunnelKey")
+                    && type instanceof GeneratedTransferObject) {
+                final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
+                final List<GeneratedProperty> properties = genTO
+                        .getProperties();
+
+                assertTrue(properties != null);
+                for (final GeneratedProperty property : properties) {
+                    if (property.getName().equals("TunnelId")) {
+                        assertTrue(property.getReturnType() != null);
+                        assertFalse(property.getReturnType().equals(
+                                "java.lang.Void"));
+                        assertTrue(property.getReturnType().getName()
+                                .equals("String"));
+                        resolvedLeafrefCount++;
+                    }
+                }
             }
         }
+        assertEquals(10, resolvedLeafrefCount);
     }
 
     @Test
