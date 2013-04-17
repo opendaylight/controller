@@ -23,14 +23,40 @@ import org.opendaylight.controller.yang2sources.spi.ResourceGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 
+/**
+ * Generate resources from yang files using user provided set of
+ * {@link ResourceGenerator}s. Can be used to copy yang files that served as
+ * blueprint for code generation into resources directory. Steps of this
+ * process:
+ * <ol>
+ * <li>List yang files from {@link #yangFilesRootDir} (If this goal is in the
+ * same execution as generate-sources, the same cached list will be used and the
+ * root folder will not be searched for yang files twice)</li>
+ * <li>For each {@link ResourceGenerator} from {@link #resourceProviders}:</li>
+ * <ol>
+ * <li>Instantiate using default constructor</li>
+ * <li>Call {@link ResourceGenerator#generateResourceFiles(Collection, File)}</li>
+ * </ol>
+ * </ol>
+ */
 @Mojo(name = "generate-resources", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public final class YangToResourcesMojo extends AbstractMojo {
 
     private static final String LOG_PREFIX = "yang-to-resources:";
 
+    /**
+     * Classes implementing {@link ResourceGenerator} interface. An instance
+     * will be created out of every class using default constructor. Method
+     * {@link ResourceGenerator#generateResourceFiles(Collection, File)} will be
+     * called on every instance.
+     */
     @Parameter(required = true)
     private ResourceProviderArg[] resourceProviders;
 
+    /**
+     * Source directory that will be recursively searched for yang files (ending
+     * with .yang suffix).
+     */
     @Parameter(required = true)
     private String yangFilesRootDir;
 

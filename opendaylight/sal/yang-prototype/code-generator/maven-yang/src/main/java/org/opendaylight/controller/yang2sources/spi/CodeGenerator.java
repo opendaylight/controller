@@ -12,7 +12,21 @@ import java.util.Collection;
 
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 
+/**
+ * Classes implementing this interface can be submitted to maven-yang-plugin's
+ * generate-sources goal.
+ */
 public interface CodeGenerator {
 
+    /**
+     * Generate sources from provided {@link SchemaContext}
+     * 
+     * @param context
+     *            parsed from yang files
+     * @param outputBaseDir
+     *            expected output directory for generated sources configured by
+     *            user
+     * @return collection of files that were generated from schema context
+     */
     Collection<File> generateSources(SchemaContext context, File outputBaseDir);
 }
