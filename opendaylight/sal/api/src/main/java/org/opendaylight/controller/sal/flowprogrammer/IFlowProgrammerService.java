@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -13,15 +12,13 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
- * Interface for installing/removing flows on a network node
- *
- *
- *
+ * Interface that defines the methods available to the functional modules above
+ * SAL for installing/modifying/removing flows on a network node
  */
 public interface IFlowProgrammerService {
     /**
      * Add a flow to the network node
-     *
+     * 
      * @param node
      * @param flow
      */
@@ -29,7 +26,7 @@ public interface IFlowProgrammerService {
 
     /**
      * Modify existing flow on the switch
-     *
+     * 
      * @param node
      * @param flow
      */
@@ -37,6 +34,7 @@ public interface IFlowProgrammerService {
 
     /**
      * Remove the flow from the network node
+     * 
      * @param node
      * @param flow
      */
@@ -44,6 +42,7 @@ public interface IFlowProgrammerService {
 
     /**
      * Remove all flows present on the network node
+     * 
      * @param node
      */
     Status removeAllFlows(Node node);
