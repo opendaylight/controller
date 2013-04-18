@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -71,9 +70,6 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 
 /**
  * Utility class for converting a SAL Flow into the OF flow and vice-versa
- *
- *
- *
  */
 public class FlowConverter {
     private Flow flow; // SAL Flow
@@ -99,8 +95,9 @@ public class FlowConverter {
     }
 
     /**
-     * Returns the match in OF 1.0 (OFMatch) form or OF 1.0 + IPv6 extensions form (V6Match)
-     *
+     * Returns the match in OF 1.0 (OFMatch) form or OF 1.0 + IPv6 extensions
+     * form (V6Match)
+     * 
      * @return
      */
     public OFMatch getOFMatch() {
@@ -173,11 +170,11 @@ public class FlowConverter {
             }
             if (match.isPresent(MatchType.NW_TOS)) {
                 /*
-                 *  OF 1.0 switch expects the TOS as the 6 msb in the byte.
-                 *  it is actually the DSCP field followed by a zero ECN
+                 * OF 1.0 switch expects the TOS as the 6 msb in the byte. it is
+                 * actually the DSCP field followed by a zero ECN
                  */
                 byte tos = (Byte) match.getField(MatchType.NW_TOS).getValue();
-                byte dscp = (byte)((int)tos << 2);
+                byte dscp = (byte) ((int) tos << 2);
                 if (!isIPv6) {
                     ofMatch.setNetworkTypeOfService(dscp);
                     wildcards &= ~OFMatch.OFPFW_NW_TOS;
@@ -261,6 +258,7 @@ public class FlowConverter {
 
     /**
      * Returns the list of actions in OF 1.0 form
+     * 
      * @return
      */
     public List<OFAction> getOFActions() {
@@ -303,7 +301,8 @@ public class FlowConverter {
                 if (action.getType() == ActionType.CONTROLLER) {
                     OFActionOutput ofAction = new OFActionOutput();
                     ofAction.setPort(OFPort.OFPP_CONTROLLER.getValue());
-                    // We want the whole frame hitting the match be sent to the controller
+                    // We want the whole frame hitting the match be sent to the
+                    // controller
                     ofAction.setMaxLength((short) 0xffff);
                     actionsList.add(ofAction);
                     actionsLength += OFActionOutput.MINIMUM_LENGTH;
@@ -408,7 +407,7 @@ public class FlowConverter {
                     continue;
                 }
                 if (action.getType() == ActionType.SET_NEXT_HOP) {
-                    //TODO
+                    // TODO
                     continue;
                 }
             }
@@ -417,9 +416,9 @@ public class FlowConverter {
     }
 
     /**
-     * Utility to convert a SAL flow to an OF 1.0 (OFFlowMod) or
-     * to an OF 1.0 + IPv6 extension (V6FlowMod) Flow modifier Message
-     *
+     * Utility to convert a SAL flow to an OF 1.0 (OFFlowMod) or to an OF 1.0 +
+     * IPv6 extension (V6FlowMod) Flow modifier Message
+     * 
      * @param sw
      * @param command
      * @param port
@@ -447,6 +446,14 @@ public class FlowConverter {
             if (port != null) {
                 ((OFFlowMod) fm).setOutPort(port);
             }
+            if (command == OFFlowMod.OFPFC_ADD
+                    || command == OFFlowMod.OFPFC_MODIFY
+                    || command == OFFlowMod.OFPFC_MODIFY_STRICT) {
+                if (flow.getIdleTimeout() != 0 || flow.getHardTimeout() != 0) {
+                    // Instruct switch to let controller know when flow expires
+                    ((OFFlowMod) fm).setFlags((short) 1);
+                }
+            }
         } else {
             ((V6FlowMod) fm).setVendor();
             ((V6FlowMod) fm).setMatch((V6Match) ofMatch);
@@ -463,6 +470,14 @@ public class FlowConverter {
             if (port != null) {
                 ((V6FlowMod) fm).setOutPort(port);
             }
+            if (command == OFFlowMod.OFPFC_ADD
+                    || command == OFFlowMod.OFPFC_MODIFY
+                    || command == OFFlowMod.OFPFC_MODIFY_STRICT) {
+                if (flow.getIdleTimeout() != 0 || flow.getHardTimeout() != 0) {
+                    // Instruct switch to let controller know when flow expires
+                    ((V6FlowMod) fm).setFlags((short) 1);
+                }
+            }
         }
         return fm;
     }
@@ -472,8 +487,8 @@ public class FlowConverter {
             Match salMatch = new Match();
 
             /*
-             * Installed flow may not have a Match defined
-             * like in case of a drop all flow
+             * Installed flow may not have a Match defined like in case of a
+             * drop all flow
              */
             if (ofMatch != null) {
                 if (!isIPv6) {
@@ -512,38 +527,35 @@ public class FlowConverter {
                     if (ofMatch.getNetworkSource() != 0) {
                         salMatch.setField(MatchType.NW_SRC, NetUtils
                                 .getInetAddress(ofMatch.getNetworkSource()),
-                                NetUtils.getInetNetworkMask(ofMatch
-                                        .getNetworkSourceMaskLen(), false));
+                                NetUtils.getInetNetworkMask(
+                                        ofMatch.getNetworkSourceMaskLen(),
+                                        false));
                     }
                     if (ofMatch.getNetworkDestination() != 0) {
-                        salMatch
-                                .setField(
-                                        MatchType.NW_DST,
-                                        NetUtils.getInetAddress(ofMatch
-                                                .getNetworkDestination()),
-                                        NetUtils
-                                                .getInetNetworkMask(
-                                                        ofMatch
-                                                                .getNetworkDestinationMaskLen(),
-                                                        false));
+                        salMatch.setField(MatchType.NW_DST,
+                                NetUtils.getInetAddress(ofMatch
+                                        .getNetworkDestination()),
+                                NetUtils.getInetNetworkMask(
+                                        ofMatch.getNetworkDestinationMaskLen(),
+                                        false));
                     }
                     if (ofMatch.getNetworkTypeOfService() != 0) {
-                    	int dscp = NetUtils.getUnsignedByte(
-                    			ofMatch.getNetworkTypeOfService());
-                    	byte tos = (byte)(dscp >> 2);
+                        int dscp = NetUtils.getUnsignedByte(ofMatch
+                                .getNetworkTypeOfService());
+                        byte tos = (byte) (dscp >> 2);
                         salMatch.setField(MatchType.NW_TOS, tos);
                     }
                     if (ofMatch.getNetworkProtocol() != 0) {
-                        salMatch.setField(MatchType.NW_PROTO, ofMatch
-                                .getNetworkProtocol());
+                        salMatch.setField(MatchType.NW_PROTO,
+                                ofMatch.getNetworkProtocol());
                     }
                     if (ofMatch.getTransportSource() != 0) {
-                        salMatch.setField(MatchType.TP_SRC, ((Short) ofMatch
-                                .getTransportSource()));
+                        salMatch.setField(MatchType.TP_SRC,
+                                ((Short) ofMatch.getTransportSource()));
                     }
                     if (ofMatch.getTransportDestination() != 0) {
-                        salMatch.setField(MatchType.TP_DST, ((Short) ofMatch
-                                .getTransportDestination()));
+                        salMatch.setField(MatchType.TP_DST,
+                                ((Short) ofMatch.getTransportDestination()));
                     }
                 } else {
                     // Compute OF1.0 + IPv6 extensions Match
@@ -581,32 +593,32 @@ public class FlowConverter {
                                 .getDataLayerVirtualLanPriorityCodePoint());
                     }
                     if (v6Match.getNetworkSrc() != null) {
-                        salMatch.setField(MatchType.NW_SRC, v6Match
-                                .getNetworkSrc(), v6Match
-                                .getNetworkSourceMask());
+                        salMatch.setField(MatchType.NW_SRC,
+                                v6Match.getNetworkSrc(),
+                                v6Match.getNetworkSourceMask());
                     }
                     if (v6Match.getNetworkDest() != null) {
-                        salMatch.setField(MatchType.NW_DST, v6Match
-                                .getNetworkDest(), v6Match
-                                .getNetworkDestinationMask());
+                        salMatch.setField(MatchType.NW_DST,
+                                v6Match.getNetworkDest(),
+                                v6Match.getNetworkDestinationMask());
                     }
                     if (v6Match.getNetworkTypeOfService() != 0) {
-                    	int dscp = NetUtils.getUnsignedByte(
-                    			v6Match.getNetworkTypeOfService());
-                    	byte tos = (byte) (dscp >> 2);
+                        int dscp = NetUtils.getUnsignedByte(v6Match
+                                .getNetworkTypeOfService());
+                        byte tos = (byte) (dscp >> 2);
                         salMatch.setField(MatchType.NW_TOS, tos);
                     }
                     if (v6Match.getNetworkProtocol() != 0) {
-                        salMatch.setField(MatchType.NW_PROTO, v6Match
-                                .getNetworkProtocol());
+                        salMatch.setField(MatchType.NW_PROTO,
+                                v6Match.getNetworkProtocol());
                     }
                     if (v6Match.getTransportSource() != 0) {
-                        salMatch.setField(MatchType.TP_SRC, ((Short) v6Match
-                                .getTransportSource()));
+                        salMatch.setField(MatchType.TP_SRC,
+                                ((Short) v6Match.getTransportSource()));
                     }
                     if (v6Match.getTransportDestination() != 0) {
-                        salMatch.setField(MatchType.TP_DST, ((Short) v6Match
-                                .getTransportDestination()));
+                        salMatch.setField(MatchType.TP_DST,
+                                ((Short) v6Match.getTransportDestination()));
                     }
                 }
             }
@@ -635,10 +647,12 @@ public class FlowConverter {
                         } else if (ofPort == OFPort.OFPP_NORMAL.getValue()) {
                             salAction = new HwPath();
                         } else if (ofPort == OFPort.OFPP_TABLE.getValue()) {
-                            salAction = new HwPath(); //TODO: we do not handle table in sal for now
+                            salAction = new HwPath(); // TODO: we do not handle
+                                                      // table in sal for now
                         } else {
-                            salAction = new Output(NodeConnectorCreator
-                                    .createOFNodeConnector(ofPort, node));
+                            salAction = new Output(
+                                    NodeConnectorCreator.createOFNodeConnector(
+                                            ofPort, node));
                         }
                     } else if (ofAction instanceof OFActionVirtualLanIdentifier) {
                         salAction = new SetVlanId(

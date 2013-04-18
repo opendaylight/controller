@@ -305,6 +305,49 @@ public class MatchTest {
     }
 
     @Test
+    public void testEqualityNetMask() throws Exception {
+
+        InetAddress srcIP = InetAddress.getByName("1.1.1.1");
+        InetAddress ipMask = InetAddress.getByName("255.255.255.255");
+        InetAddress srcIP2 = InetAddress.getByName("1.1.1.1");
+        InetAddress ipMask2 = null;
+        short ethertype = EtherTypes.IPv4.shortValue();
+        short ethertype2 = EtherTypes.IPv4.shortValue();
+       
+        /*
+         * Create a SAL Flow aFlow
+         */
+        Match match1 = new Match();
+        Match match2 = new Match();
+        
+        match1.setField(MatchType.DL_TYPE, ethertype);
+        match1.setField(MatchType.NW_SRC, srcIP, ipMask);
+
+        match2.setField(MatchType.DL_TYPE, ethertype2);
+        match2.setField(MatchType.NW_SRC, srcIP2, ipMask2);
+
+        Assert.assertTrue(match1.equals(match2));
+        
+        ipMask2 = InetAddress.getByName("255.255.255.255");
+        match2.setField(MatchType.NW_SRC, srcIP2, ipMask2);
+
+        srcIP = InetAddress.getByName("2001:420:281:1004:407a:57f4:4d15:c355");
+        srcIP2 = InetAddress.getByName("2001:420:281:1004:407a:57f4:4d15:c355");
+        ipMask = null;
+        ipMask2 = InetAddress.getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
+        ethertype = EtherTypes.IPv6.shortValue();
+        ethertype2 = EtherTypes.IPv6.shortValue();
+ 
+        match1.setField(MatchType.DL_TYPE, ethertype);
+        match1.setField(MatchType.NW_SRC, srcIP, ipMask);
+
+        match2.setField(MatchType.DL_TYPE, ethertype2);
+        match2.setField(MatchType.NW_SRC, srcIP2, ipMask2);
+
+        Assert.assertTrue(match1.equals(match2));
+    }
+    
+    @Test
     public void testCloning() throws Exception {
         Node node = NodeCreator.createOFNode(7l);
         NodeConnector port = NodeConnectorCreator.createOFNodeConnector(

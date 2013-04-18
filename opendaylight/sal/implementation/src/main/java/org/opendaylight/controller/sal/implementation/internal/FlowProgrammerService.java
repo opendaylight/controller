@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -14,7 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -29,8 +30,10 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
+import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
+import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -44,35 +47,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The SAL Flow Programmer Service. It dispatches the flow programming
- * requests to the proper SDN protocol plugin
- *
- *
- *
+ * The SAL Flow Programmer Service. It dispatches the flow programming requests
+ * to the proper SDN protocol plugin and it notifies about asynchronous messages
+ * received from the network node related to flow programming.
  */
 public class FlowProgrammerService implements IFlowProgrammerService,
-        CommandProvider {
+        IPluginOutFlowProgrammerService, CommandProvider {
 
     protected static final Logger logger = LoggerFactory
             .getLogger(FlowProgrammerService.class);
-    private ConcurrentHashMap<String, IPluginInFlowProgrammerService>
-        pluginFlowProgrammer =
-        new ConcurrentHashMap<String, IPluginInFlowProgrammerService>();
+    private ConcurrentHashMap<String, IPluginInFlowProgrammerService> pluginFlowProgrammer;
+    private Set<IFlowProgrammerListener> listener;
+
+    public FlowProgrammerService() {
+        pluginFlowProgrammer = new ConcurrentHashMap<String, IPluginInFlowProgrammerService>();
+        listener = new HashSet<IFlowProgrammerListener>();
+    }
 
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
         logger.debug("INIT called!");
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
         // Clear previous registration to avoid they are left hanging
@@ -81,10 +86,9 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
-     *
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     * 
      */
     void start() {
         logger.debug("START called!");
@@ -93,10 +97,10 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
-     *
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     * 
      */
     void stop() {
         logger.debug("STOP called!");
@@ -113,8 +117,8 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         String type = null;
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:({}) value:({})",entry.getKey(),
-                    	  entry.getValue());
+            logger.trace("Prop key:({}) value:({})", entry.getKey(),
+                    entry.getValue());
         }
 
         Object value = props.get("protocolPluginType");
@@ -126,12 +130,11 @@ public class FlowProgrammerService implements IFlowProgrammerService,
                     + "protocolPluginType provided");
         } else {
             this.pluginFlowProgrammer.put(type, s);
-            logger.debug("Stored the pluginFlowProgrammer for type: {}",type);
+            logger.debug("Stored the pluginFlowProgrammer for type: {}", type);
         }
     }
 
-    public void unsetService(Map props,
-                             IPluginInFlowProgrammerService s) {
+    public void unsetService(Map props, IPluginInFlowProgrammerService s) {
         if (this.pluginFlowProgrammer == null) {
             logger.error("pluginFlowProgrammer store null");
             return;
@@ -141,8 +144,8 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         logger.debug("Received unsetpluginFlowProgrammer request");
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:({}) value:({})",entry.getKey(),
-                    	entry.getValue());
+            logger.trace("Prop key:({}) value:({})", entry.getKey(),
+                    entry.getValue());
         }
 
         Object value = props.get("protocoloPluginType");
@@ -158,12 +161,20 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         }
     }
 
+    public void setListener(IFlowProgrammerListener s) {
+        this.listener.add(s);
+    }
+
+    public void unsetListener(IFlowProgrammerListener s) {
+        this.listener.remove(s);
+    }
+
     @Override
     public Status addFlow(Node node, Flow flow) {
         if (pluginFlowProgrammer != null) {
             if (this.pluginFlowProgrammer.get(node.getType()) != null) {
-                return this.pluginFlowProgrammer.get(node.getType())
-                    .addFlow(node, flow);
+                return this.pluginFlowProgrammer.get(node.getType()).addFlow(
+                        node, flow);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -174,7 +185,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         if (pluginFlowProgrammer != null) {
             if (this.pluginFlowProgrammer.get(node.getType()) != null) {
                 return this.pluginFlowProgrammer.get(node.getType())
-                    .removeFlow(node, flow);
+                        .removeFlow(node, flow);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -185,7 +196,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         if (pluginFlowProgrammer != null) {
             if (this.pluginFlowProgrammer.get(node.getType()) != null) {
                 return this.pluginFlowProgrammer.get(node.getType())
-                    .removeAllFlows(node);
+                        .removeAllFlows(node);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
@@ -196,10 +207,17 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         if (pluginFlowProgrammer != null) {
             if (this.pluginFlowProgrammer.get(node.getType()) != null) {
                 return this.pluginFlowProgrammer.get(node.getType())
-                    .modifyFlow(node, oldFlow, newFlow);
+                        .modifyFlow(node, oldFlow, newFlow);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
+    }
+
+    @Override
+    public void flowRemoved(Node node, Flow flow) {
+        for (IFlowProgrammerListener l : listener) {
+            l.flowRemoved(node, flow);
+        }
     }
 
     // ---------------- OSGI TEST CODE ------------------------------//
@@ -215,10 +233,8 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---SAL Flow Programmer testing commands---\n");
-        help
-                .append("\t addflow <sid> - Add a sample flow to the openflow switch <sid>\n");
-        help
-                .append("\t removeflow <sid> - Remove the sample flow from the openflow switch <sid>\n");
+        help.append("\t addflow <sid> - Add a sample flow to the openflow switch <sid>\n");
+        help.append("\t removeflow <sid> - Remove the sample flow from the openflow switch <sid>\n");
         return help.toString();
     }
 
@@ -256,8 +272,8 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         Flow flowA = getSampleFlow(node);
         Flow flowB = getSampleFlow(node);
         Match matchB = flowB.getMatch();
-        matchB.setField(MatchType.NW_DST, InetAddress
-                .getByName("190.190.190.190"));
+        matchB.setField(MatchType.NW_DST,
+                InetAddress.getByName("190.190.190.190"));
         flowB.setMatch(matchB);
         ci.println(this.modifyFlow(node, flowA, flowB));
     }
@@ -380,15 +396,17 @@ public class FlowProgrammerService implements IFlowProgrammerService,
                 .getByName("2001:420:281:1004:407a:57f4:4d15:c355");
         InetAddress dstIP = InetAddress
                 .getByName("2001:420:281:1004:e123:e688:d655:a1b0");
-        InetAddress ipMask = null; //InetAddress.getByName("ffff:ffff:ffff:ffff:0:0:0:0"); V6Match implementation assumes no mask is specified
-        InetAddress ipMask2 = null; //InetAddress.getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:0");
+        InetAddress ipMask = null; // InetAddress.getByName("ffff:ffff:ffff:ffff:0:0:0:0");
+                                   // V6Match implementation assumes no mask is
+                                   // specified
+        InetAddress ipMask2 = null; // InetAddress.getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:0");
         short ethertype = EtherTypes.IPv6.shortValue();
         short vlan = (short) 27;
         byte vlanPr = (byte) 3;
         Byte tos = 4;
         byte proto = IPProtocols.UDP.byteValue();
         short src = (short) 5500;
-        //short dst = 80;
+        // short dst = 80;
 
         /*
          * Create a SAL Flow aFlow
@@ -399,13 +417,16 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         match.setField(MatchType.DL_DST, dstMac);
         match.setField(MatchType.DL_TYPE, ethertype);
         match.setField(MatchType.DL_VLAN, vlan);
-        match.setField(MatchType.DL_VLAN_PR, vlanPr); //V6Match does not handle this properly...
+        match.setField(MatchType.DL_VLAN_PR, vlanPr); // V6Match does not handle
+                                                      // this properly...
         match.setField(MatchType.NW_SRC, srcIP, ipMask);
         match.setField(MatchType.NW_DST, dstIP, ipMask2);
         match.setField(MatchType.NW_TOS, tos);
         match.setField(MatchType.NW_PROTO, proto);
-        match.setField(MatchType.TP_SRC, src); //V6Match does not handle this properly...
-        //match.setField(MatchType.TP_DST, dst); V6Match does not handle this properly...
+        match.setField(MatchType.TP_SRC, src); // V6Match does not handle this
+                                               // properly...
+        // match.setField(MatchType.TP_DST, dst); V6Match does not handle this
+        // properly...
 
         List<Action> actions = new ArrayList<Action>();
         actions.add(new Output(oport));
@@ -418,4 +439,5 @@ public class FlowProgrammerService implements IFlowProgrammerService,
 
         return flow;
     }
+
 }

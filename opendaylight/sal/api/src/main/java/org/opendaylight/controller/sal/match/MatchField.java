@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -16,48 +15,51 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Represents the generic matching field
- *
+ * 
  */
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class MatchField implements Cloneable, Serializable {
-	private static final long serialVersionUID = 1L;
-	private static final Logger logger = LoggerFactory
+    private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory
             .getLogger(MatchField.class);
-	private MatchType type; // the field we want to match
+    private MatchType type; // the field we want to match
     private Object value; // the value of the field we want to match
-    private Object mask; // the value of the mask we want to match on the specified field
+    private Object mask; // the value of the mask we want to match on the
+                         // specified field
     private transient boolean isValid;
 
     // To satisfy JAXB
+    @SuppressWarnings("unused")
     private MatchField() {
     }
+
     /**
      * Mask based match constructor
-     *
+     * 
      * @param type
      * @param value
-     * @param mask   has to be of the same class type of value. A null mask means full match
+     * @param mask
+     *            has to be of the same class type of value. A null mask means
+     *            full match
      */
     public MatchField(MatchType type, Object value, Object mask) {
         this.type = type;
         this.value = value;
         this.mask = mask;
-        this.isValid = checkValueType() && checkValues(); // Keep this logic, value checked only if type check is fine
+        // Keep this logic, value checked only if type check is fine
+        this.isValid = checkValueType() && checkValues();
     }
 
     /**
      * Full match constructor
-     *
+     * 
      * @param type
      * @param value
      */
@@ -65,54 +67,56 @@ public class MatchField implements Cloneable, Serializable {
         this.type = type;
         this.value = value;
         this.mask = null;
-        this.isValid = checkValueType() && checkValues(); // Keep this logic, value checked only if type check is fine
+        // Keep this logic, value checked only if type check is fine
+        this.isValid = checkValueType() && checkValues();
     }
 
     /**
      * Returns the value set for this match field
-     *
+     * 
      * @return
      */
     public Object getValue() {
         return value;
     }
-    
-    @XmlElement(name="value")
+
+    @XmlElement(name = "value")
     private String getValueString() {
-    	return type.stringify(value);
+        return type.stringify(value);
     }
 
     /**
      * Returns the type field this match field object is for
-     *
+     * 
      * @return
      */
     public MatchType getType() {
         return type;
     }
 
-    @XmlElement(name="type")
+    @XmlElement(name = "type")
     private String getTypeString() {
-    	return type.toString();
+        return type.toString();
     }
 
     /**
-     * Returns the mask value set for this field match
-     * A null mask means this is a full match
+     * Returns the mask value set for this field match A null mask means this is
+     * a full match
+     * 
      * @return
      */
     public Object getMask() {
         return mask;
     }
-    
-    @XmlElement(name="mask")
+
+    @XmlElement(name = "mask")
     private String getMaskString() {
-    	return type.stringify(mask); 
+        return type.stringify(mask);
     }
 
     /**
      * Returns the bitmask set for this field match
-     *
+     * 
      * @return
      */
     public long getBitMask() {
@@ -121,7 +125,7 @@ public class MatchField implements Cloneable, Serializable {
 
     /**
      * Returns whether the field match configuration is valid or not
-     *
+     * 
      * @return
      */
     public boolean isValid() {
@@ -190,17 +194,36 @@ public class MatchField implements Cloneable, Serializable {
     }
 
     @Override
+    public String toString() {
+        return type + "(" + getValueString() + "," + getMaskString() + ")";
+    }
+
+    @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((mask == null) ? 0 : mask.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
-    }
-
-    @Override
-    public String toString() {
-        return type + "(" + getValueString() + "," + getMaskString() + ")";
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        MatchField other = (MatchField) obj;
+        if (type != other.type) {
+            return false;
+        }
+        return (type.equalValues(this.value, other.value) && type.equalMasks(
+                this.mask, other.mask));
     }
 }
