@@ -18,7 +18,7 @@ import org.opendaylight.controller.sal.utils.Status;
  * Interface for applications which maintain an authorization
  * database for their resources. Respective application web bundle
  * and User Manager make use of this interface to retrieve
- * authorization information at user or and role level
+ * authorization information at user or and role level.
  */
 public interface IResourceAuthorization {
 
@@ -90,15 +90,27 @@ public interface IResourceAuthorization {
     public List<String> getResourceGroups();
 
     /**
-     * Assign a resource group to a user group (role)
+     * Assign a resource group to a role
      *
-     * @param groupName the object expressing the resource group name and the access privilege
-     * @param role the user group (role) name
+     * @param groupName the name of the resource group
+     * @param privilege the access privilege role will have on the resource group
+     * @param role the role name
      * @return the status of the request
      */
+    @Deprecated
     public Status assignResourceGroupToRole(String groupName,
             Privilege privilege, String role);
 
+    /**
+     * Assign a resource group to a role. The access privilege on the resources
+     * is inferred by the AppRoleLevel associated to role.
+     *
+     * @param groupName the name of the resource group
+     * @param role the role name
+     * @return the status of the request
+     */
+    public Status assignResourceGroupToRole(String groupName, String role);
+    
     /**
      * Unassign the passed resource group from the specified role
      * 

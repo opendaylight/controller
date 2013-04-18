@@ -10,6 +10,7 @@
 package org.opendaylight.controller.sal.match;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -173,7 +174,6 @@ public enum MatchType {
             byte mac[] = (byte[]) mask;
             long bitmask = 0;
             for (short i = 0; i < 6; i++) {
-                //				bitmask |= (((long)mac[i] & 0xffL) << (long)((5-i)*8));
                 bitmask |= (((long) mac[i] & 0xffL) << ((5 - i) * 8));
             }
             return bitmask;
@@ -220,5 +220,41 @@ public enum MatchType {
 			break;
 		}
 		return value.toString();
+	}
+	
+	public boolean equalValues(Object a, Object b) {
+		if (a == b) { return true; }
+		if (a == null || b == null) { return false; }
+		switch (this) {
+			case DL_DST:
+			case DL_SRC:
+				return Arrays.equals((byte[])a, (byte[])b);
+			default:
+				return a.equals(b);
+		}
+	}
+	
+	public boolean equalMasks(Object a, Object b) {
+		if (a == b) { return true; }
+		switch (this) {
+		case NW_SRC:
+		case NW_DST:
+			/*
+			 * For network address mask, network node may return full mask
+			 * for flows the controller generated with a null mask object 
+			 */
+			byte maskBytes[] = null;
+			if (a == null) {
+				maskBytes = ((InetAddress)b).getAddress();
+			} else if (b == null) {
+				maskBytes = ((InetAddress)a).getAddress();
+			}
+			if (maskBytes != null) {
+				return (NetUtils.getSubnetMaskLength(maskBytes) == 0);
+			}
+		default:
+			if (a == null) { return false; }
+			return a.equals(b);
+		}
 	}
 }

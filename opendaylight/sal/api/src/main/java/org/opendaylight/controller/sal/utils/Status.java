@@ -18,7 +18,10 @@ public class Status {
 	String description;
 	
 	/**
-	 * Generates an instance of the Status class.
+	 * Generates an instance of the Status class. This is used as return
+	 * code for internal API2 function calls. This constructor allows to
+	 * specify, beside the Status Code, a custom human readable description
+	 * to add more information about the status.
 	 * 
 	 * @param errorCode The status code. If passed as null, code will be 
 	 * stored as {@code StatusCode.UNDEFINED}
@@ -26,6 +29,19 @@ public class Status {
 	 * as null, description will be inferred by the code
 	 */
 	public Status(StatusCode errorCode, String description) {
+		this.code = (errorCode != null)? errorCode : StatusCode.UNDEFINED;
+		this.description = (description != null)? description : this.code.toString();
+	}
+	
+	/**
+	 * Generates an instance of the Status class based on the passed 
+	 * StatusCode only. The description field of the Status object will
+	 * be inferred by the status code. 
+	 * 
+	 * @param errorCode The status code. If passed as null, code will be 
+	 * stored as {@code StatusCode.UNDEFINED}
+	 */
+	public Status(StatusCode errorCode) {
 		this.code = (errorCode != null)? errorCode : StatusCode.UNDEFINED;
 		this.description = (description != null)? description : this.code.toString();
 	}

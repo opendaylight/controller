@@ -13,14 +13,13 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.openflow.protocol.OFPacketOut;
 import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFVendor;
 import org.openflow.protocol.action.OFAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
  * This class is used to create IPv6 Vendor Extension messages. Specfically, It
@@ -149,6 +148,22 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     }
     
     /**
+     * Get flags
+     * @return
+     */
+    public short getFlags() {
+        return flags;
+    }
+
+    /**
+     * Set flags
+     * @param flags
+     */
+    public void setFlags(short flags) {
+        this.flags = flags;
+    }
+    
+    /**
      * This method forms the Vendor extension IPv6 Flow Mod message.It uses the
      * fields in V6FlowMod class, and writes the data according to vendor 
      * extension format. The fields include flow properties (cookie, timeout,
@@ -167,7 +182,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
         data.putShort(this.priority);
         data.putInt(OFPacketOut.BUFFER_ID_NONE);
         data.putShort(outPort); /* output_port */
-        data.putShort((short) 0); /* flags */
+        data.putShort(flags); /* flags */
         match_len = this.match.getIPv6MatchLen();
         data.putShort(match_len);
         byte[] pad = new byte[6];

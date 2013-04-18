@@ -21,6 +21,7 @@ import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManage
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.IContainerListener;
+import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
@@ -98,14 +99,16 @@ public class Activator extends ComponentActivatorAbstractBase {
                         IForwardingRulesManager.class.getName(),
                         IInventoryListener.class.getName(),
                         ICacheUpdateAware.class.getName(),
-                        IConfigurationContainerAware.class.getName() };
+                        IConfigurationContainerAware.class.getName(),
+                        IFlowProgrammerListener.class.getName()};
             } else {
                 interfaces = new String[] {
                         ISwitchManagerAware.class.getName(),
                         IForwardingRulesManager.class.getName(),
                         IInventoryListener.class.getName(),
                         ICacheUpdateAware.class.getName(),
-                        IConfigurationContainerAware.class.getName() };
+                        IConfigurationContainerAware.class.getName(),
+                        IFlowProgrammerListener.class.getName()};
             }
 
             c.setInterface(interfaces, props);

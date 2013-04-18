@@ -16,8 +16,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +37,10 @@ public class MatchField implements Cloneable, Serializable {
     private transient boolean isValid;
 
     // To satisfy JAXB
-    private MatchField() {
+    @SuppressWarnings("unused")
+	private MatchField() {
     }
+    
     /**
      * Mask based match constructor
      *
@@ -190,17 +190,28 @@ public class MatchField implements Cloneable, Serializable {
     }
 
     @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
-    }
-
-    @Override
     public String toString() {
         return type + "(" + getValueString() + "," + getMaskString() + ")";
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((mask == null) ? 0 : mask.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) { return true; }
+		if (obj == null) { return false; }
+		if (getClass() != obj.getClass()) { return false; }
+		MatchField other = (MatchField) obj;
+		if (type != other.type) { return false; }
+		return (type.equalValues(this.value, other.value) && 
+				type.equalMasks(this.mask, other.mask));
+	}
 }
