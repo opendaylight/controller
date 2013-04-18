@@ -5,13 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.yang.model.parser.impl;
+package org.opendaylight.controller.yang.model.parser.util;
 
 /**
  * Unchecked exception thrown if yang definition is not valid according to
- * {@link YangModelValidationListener}
+ * {@link YangModelBasicValidationListener}
  */
-public class YangValidationException extends RuntimeException {
+public final class YangValidationException extends RuntimeException {
 
     private static final long serialVersionUID = 7414330400390825381L;
 

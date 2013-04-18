@@ -78,6 +78,7 @@ import org.opendaylight.controller.yang.model.parser.util.YangParseException;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.IdentityrefType;
 import org.opendaylight.controller.yang.model.util.UnknownType;
+import org.opendaylight.controller.yang.model.validator.YangModelBasicValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,19 +162,8 @@ public class YangModelParserImpl implements YangModelParser {
         final List<ParseTree> trees = parseStreams(yangFiles);
         final ModuleBuilder[] builders = new ModuleBuilder[trees.size()];
 
-        // validation
-        // if validation fails with any file, do not continue and throw
-        // exception
-        for (int i = 0; i < trees.size(); i++) {
-            try {
-                final YangModelValidationListener yangModelParser = new YangModelValidationListener();
-                walker.walk(yangModelParser, trees.get(i));
-            } catch (IllegalStateException e) {
-                // wrap exception to add information about which file failed
-                throw new YangValidationException(
-                        "Yang validation failed for file" + yangFiles[i], e);
-            }
-        }
+        // validate yang
+        new YangModelBasicValidator(walker).validate(trees);
 
         YangModelParserListenerImpl yangModelParser = null;
         for (int i = 0; i < trees.size(); i++) {
