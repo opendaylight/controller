@@ -7,22 +7,59 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.api;
 
+import java.util.List;
+
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
+import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
+import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
+import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
+import org.opendaylight.controller.yang.model.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 /**
  * Interface for builders of 'typedef' statement.
  */
-public interface TypeDefinitionBuilder {
-
-    QName getQName();
-
-    TypeDefinition<?> getBaseType();
+public interface TypeDefinitionBuilder extends TypeAwareBuilder,
+        SchemaNodeBuilder {
 
     TypeDefinition<?> build();
 
-    void setUnits(String units);
+    QName getQName();
+
+    SchemaPath getPath();
+
+    String getDescription();
+
+    String getReference();
+
+    Status getStatus();
+
+    List<RangeConstraint> getRanges();
+
+    void setRanges(List<RangeConstraint> ranges);
+
+    List<LengthConstraint> getLengths();
+
+    void setLengths(List<LengthConstraint> lengths);
+
+    List<PatternConstraint> getPatterns();
+
+    void setPatterns(List<PatternConstraint> patterns);
+
+    Integer getFractionDigits();
+
+    void setFractionDigits(Integer fractionDigits);
+
+    List<UnknownSchemaNodeBuilder> getUnknownNodes();
+
+    Object getDefaultValue();
 
     void setDefaultValue(Object defaultValue);
+
+    String getUnits();
+
+    void setUnits(String units);
 
 }

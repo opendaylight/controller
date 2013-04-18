@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.sal.binding.yang.types.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.impl.BindingGeneratorImpl;
@@ -52,7 +52,8 @@ public class GeneratedTypesTest {
         assertTrue(genTypes != null);
         assertEquals(11, genTypes.size());
     }
-    
+
+    @Ignore
     @Test
     public void testLeafrefResolving() {
         final String topologyPath = getClass().getResource(
@@ -82,19 +83,19 @@ public class GeneratedTypesTest {
                 topologyPath, interfacesPath, inetTypesPath, yangTypesPath);
         assertTrue(context != null);
         assertEquals(4, context.getModules().size());
-        
+
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
         final List<Type> genTypes = bindingGen.generateTypes(context);
-        
+
         assertEquals(21, genTypes.size());
         assertTrue(genTypes != null);
-        
+
         for (final Type genType : genTypes) {
             if (genType.getName().equals("Interface") && genType instanceof GeneratedType) {
 //                System.out.println(((GeneratedType)genType).getMethodDefinitions().toString());
             } else if (genType.getName().equals("NetworkLink") && genType instanceof GeneratedType) {
 //                System.out.println(((GeneratedType)genType).getMethodDefinitions().toString());
-            } 
+            }
         }
     }
 

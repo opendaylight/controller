@@ -22,7 +22,7 @@ import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
 /**
  * The <code>default</code> implementation of Instance Leafref Type Definition
  * interface.
- * 
+ *
  * @see LeafrefTypeDefinition
  */
 public class Leafref implements LeafrefTypeDefinition {
@@ -35,12 +35,12 @@ public class Leafref implements LeafrefTypeDefinition {
     private final String units = "";
     private final LeafrefTypeDefinition baseType;
 
-    private Leafref(final RevisionAwareXPath xpath) {
+    public Leafref(final RevisionAwareXPath xpath) {
         this.xpath = xpath;
         this.path = BaseTypes.schemaPath(name);
         this.baseType = this;
     }
-    
+
     public Leafref(final List<String> actualPath, final URI namespace,
             final Date revision, final RevisionAwareXPath xpath) {
         super();
@@ -48,7 +48,7 @@ public class Leafref implements LeafrefTypeDefinition {
         this.xpath = xpath;
         baseType = new Leafref(xpath);
     }
-    
+
     public Leafref(final List<String> actualPath, final URI namespace,
             final Date revision, final LeafrefTypeDefinition baseType,
             final RevisionAwareXPath xpath) {
@@ -60,7 +60,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
@@ -71,7 +71,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getUnits()
      */
     @Override
@@ -81,7 +81,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
      * ()
@@ -93,7 +93,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getQName()
      */
     @Override
@@ -103,7 +103,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getPath()
      */
     @Override
@@ -113,7 +113,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
@@ -124,7 +124,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getReference()
      */
     @Override
@@ -134,7 +134,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getStatus()
      */
     @Override
@@ -144,7 +144,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.SchemaNode#getExtensionSchemaNodes
      * ()
@@ -156,7 +156,7 @@ public class Leafref implements LeafrefTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition
      * #getPathStatement()

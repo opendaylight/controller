@@ -15,4 +15,8 @@ public class YangParseException extends RuntimeException {
         super(errorMsg);
     }
 
+    public YangParseException(String errorMsg, Exception exception) {
+        super(errorMsg, exception);
+    }
+
 }

@@ -18,18 +18,17 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.controller.yang.model.parser.builder.api.AbstractTypeAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.api.TypeAwareBuilder;
 
-public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
-        TypeAwareBuilder, DataSchemaNodeBuilder {
+public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder implements SchemaNodeBuilder,
+        DataSchemaNodeBuilder {
 
     private final LeafListSchemaNodeImpl instance;
     private final QName qname;
-    private final ConstraintsBuilder constraintsBuilder = new ConstraintsBuilder();
+    private final ConstraintsBuilder constraints = new ConstraintsBuilder();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
-    private TypeDefinition<?> type;
 
     LeafListSchemaNodeBuilder(QName qname) {
         this.qname = qname;
@@ -38,7 +37,21 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
 
     @Override
     public LeafListSchemaNode build() {
-        instance.setConstraints(constraintsBuilder.build());
+        instance.setConstraints(constraints.build());
+
+        if(type == null) {
+            instance.setType(typedef.build());
+        } else {
+            instance.setType(type);
+        }
+
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
+
         return instance;
     }
 
@@ -70,17 +83,6 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
     }
 
     @Override
-    public TypeDefinition<?> getType() {
-        return type;
-    }
-
-    @Override
-    public void setType(TypeDefinition<?> type) {
-        this.type = type;
-        instance.setType(type);
-    }
-
-    @Override
     public void setAugmenting(boolean augmenting) {
         instance.setAugmenting(augmenting);
     }
@@ -92,7 +94,7 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
 
     @Override
     public ConstraintsBuilder getConstraintsBuilder() {
-        return constraintsBuilder;
+        return constraints;
     }
 
     public void setUserOrdered(boolean userOrdered) {
@@ -112,10 +114,11 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
         private Status status = Status.CURRENT;
         private boolean augmenting;
         private boolean configuration;
-        private ConstraintDefinition constraints;
+        private ConstraintDefinition constraintsDef;
         private TypeDefinition<?> type;
         private boolean userOrdered;
-        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();
+        private List<UnknownSchemaNode> unknownNodes = Collections
+                .emptyList();
 
         private LeafListSchemaNodeImpl(QName qname) {
             this.qname = qname;
@@ -182,11 +185,11 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
 
         @Override
         public ConstraintDefinition getConstraints() {
-            return constraints;
+            return constraintsDef;
         }
 
-        private void setConstraints(ConstraintDefinition constraints) {
-            this.constraints = constraints;
+        private void setConstraints(ConstraintDefinition constraintsDef) {
+            this.constraintsDef = constraintsDef;
         }
 
         @Override
@@ -209,12 +212,13 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return unknownSchemaNodes;
+            return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
-            if(unknownSchemaNodes != null) {
-                this.unknownSchemaNodes = unknownSchemaNodes;
+        private void setUnknownSchemaNodes(
+                List<UnknownSchemaNode> unknownNodes) {
+            if (unknownNodes != null) {
+                this.unknownNodes = unknownNodes;
             }
         }
 
@@ -268,7 +272,7 @@ public class LeafListSchemaNodeBuilder implements SchemaNodeBuilder,
             sb.append(", status=" + status);
             sb.append(", augmenting=" + augmenting);
             sb.append(", configuration=" + configuration);
-            sb.append(", constraints=" + constraints);
+            sb.append(", constraints=" + constraintsDef);
             sb.append(", type=" + type);
             sb.append(", userOrdered=" + userOrdered);
             sb.append("]");
