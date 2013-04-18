@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -13,40 +12,39 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
- * @file   IPluginOutFlowProgrammer.java
- *
- * @brief  Flow programmer interface to be implemented by protocol plugins
- *
- *
- *
+ * @file IPluginOutFlowProgrammer.java
+ * 
+ * @brief Flow programmer interface to be implemented by protocol plugins
  */
 public interface IPluginInFlowProgrammerService {
     /**
      * Add a flow to the network node
-     *
+     * 
      * @param node
      * @param flow
      */
-	Status addFlow(Node node, Flow flow);
+    Status addFlow(Node node, Flow flow);
 
     /**
      * Modify existing flow on the switch
-     *
+     * 
      * @param node
      * @param flow
      */
-	Status modifyFlow(Node node, Flow oldFlow, Flow newFlow);
+    Status modifyFlow(Node node, Flow oldFlow, Flow newFlow);
 
     /**
      * Remove the flow from the network node
+     * 
      * @param node
      * @param flow
      */
-	Status removeFlow(Node node, Flow flow);
+    Status removeFlow(Node node, Flow flow);
 
     /**
      * Remove all flows present on the network node
+     * 
      * @param node
      */
-	Status removeAllFlows(Node node);
+    Status removeAllFlows(Node node);
 }

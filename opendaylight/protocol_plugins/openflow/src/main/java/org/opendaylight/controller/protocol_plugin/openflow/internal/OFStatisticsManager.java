@@ -137,7 +137,7 @@ public class OFStatisticsManager implements IOFStatisticsManager,
                     .getLast());
             long timePeriod = (long) (factoredSamples * portStatsPeriod)
                     / (long) tickPeriod;
-            average = (8 * increment) / timePeriod;
+            average = (8L * increment) / timePeriod;
             return average;
         }
     }
