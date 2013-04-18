@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.usermanager.internal;
 
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
+
 
 /**
  * Configuration Java Object which represents a Local configured Authorization
@@ -28,9 +31,8 @@ public class AuthorizationConfig extends UserConfig {
 	}
 
 	@Override
-	public boolean isValid() {
-		return (user != null && !user.isEmpty() && role != null && !role
-				.isEmpty());
+	public Status validate() {
+		return (!isRoleValid().isSuccess() ? isRoleValid() : isUsernameValid()); 
 	}
 
 	public String getRolesData() {

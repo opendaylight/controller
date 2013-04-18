@@ -62,7 +62,7 @@ one.f.switchmanager = {
 		return $table;
 	},
 	validateName: function(name) {
-		return name.match(/^[a-zA-Z0-9][a-zA-Z0-9_\-\.]{1,31}$/g) == null ? false : true;
+        return (name.length < 256);
 	}
 };
 
@@ -177,7 +177,7 @@ one.f.switchmanager.nodesLearnt = {
 			var result = {};
             result['nodeName'] = $('#' + one.f.switchmanager.nodesLearnt.id.modal.form.nodeName, $modal).val();
             if(!one.f.switchmanager.validateName(result['nodeName'])) {
-            	alert("Node name can contain alphabets numbers and characters _ - . upto 32 characters in length");
+            	alert("Node name can contain upto 255 characters");
             	return;
             }
             result['nodeId'] = $('#' + one.f.switchmanager.nodesLearnt.id.modal.form.nodeId, $modal).val();
@@ -386,7 +386,7 @@ one.f.switchmanager.subnetGatewayConfig = {
 				var result = {};
 	            result['gatewayName'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.name, $modal).val();
 	            if(!one.f.switchmanager.validateName(result['gatewayName'])) {
-	            	alert("Gateway name can contain alphabets numbers and characters _ - . upto 32 characters in length");
+	            	alert("Gateway name can contain upto 255 characters");
 	            	return;
 	            }
 	            result['gatewayIPAddress'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.gatewayIPAddress, $modal).val();

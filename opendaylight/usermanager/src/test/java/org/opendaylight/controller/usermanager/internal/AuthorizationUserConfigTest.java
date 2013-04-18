@@ -28,12 +28,12 @@ public class AuthorizationUserConfigTest {
 		// test isValid
 		authConfig = new AuthorizationConfig(null,
 				UserLevel.SYSTEMADMIN.toString());
-		assertFalse(authConfig.isValid());
+		assertFalse(authConfig.validate().isSuccess());
 		authConfig = new AuthorizationConfig("admin", "");
-		assertFalse(authConfig.isValid());
+		assertFalse(authConfig.validate().isSuccess());
 		authConfig = new AuthorizationConfig("admin",
 				UserLevel.SYSTEMADMIN.toString());
-		assertTrue(authConfig.isValid());		
+		assertTrue(authConfig.validate().isSuccess());		
 	}
 
 	@Test
@@ -42,14 +42,14 @@ public class AuthorizationUserConfigTest {
 
 		userConfig = new UserConfig(null, "cisco",
 				UserLevel.NETWORKOPERATOR.toString());
-		assertFalse(userConfig.isValid());
+		assertFalse(userConfig.validate().isSuccess());
 
 		userConfig = new UserConfig("uname", "", "cisco");
-		assertFalse(userConfig.isValid());
+		assertFalse(userConfig.validate().isSuccess());
 
 		userConfig = new UserConfig("uname", "ciscocisco",
 				UserLevel.NETWORKOPERATOR.toString());
-		assertTrue(userConfig.isValid());
+		assertTrue(userConfig.validate().isSuccess());
 
 		/* currentPassword mismatch */
 		assertFalse(userConfig.update("Cisco", "cisco123",

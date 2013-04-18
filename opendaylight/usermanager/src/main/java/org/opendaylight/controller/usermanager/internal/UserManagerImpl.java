@@ -488,13 +488,12 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
      * Interaction with GUI START
      */
     public Status addRemoveLocalUser(UserConfig AAAconf, boolean delete) {
-        // Validation check
-        if (!AAAconf.isValid()) {
-        	String msg = "Invalid Local User configuration";
-            logger.warn(msg);
-            return new Status(StatusCode.BADREQUEST, msg);
-        }
-
+    	//UserConfig Validation check 
+    	Status validCheck = AAAconf.validate();
+    	if (!validCheck.isSuccess()) {
+    		return validCheck;
+    	}
+    	
         // Update Config database
         if (delete) {
         	if (AAAconf.getUser().equals(UserManagerImpl.defaultAdmin)) {
@@ -537,8 +536,10 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     private Status addRemoveAuthInfo(AuthorizationConfig AAAconf,
             boolean delete) {
-        if (!AAAconf.isValid()) {
-        	String msg = "Invalid Authorization configuration";
+    	Status configCheck = AAAconf.validate();
+        if (!configCheck.isSuccess()) {
+        	String msg = "Invalid Authorization configuration: " +
+        			configCheck.getDescription();
             logger.warn(msg);
             return new Status(StatusCode.BADREQUEST, msg);
         }
