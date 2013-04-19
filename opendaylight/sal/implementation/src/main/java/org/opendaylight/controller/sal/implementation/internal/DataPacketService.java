@@ -533,7 +533,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
         try {
             data = pkt.serialize();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("",e);
             return null;
         }
         if (data.length <= 0) {

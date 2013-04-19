@@ -17,6 +17,8 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class provides helper functions to create a node connector
@@ -24,6 +26,8 @@ import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
  *
  */
 public abstract class NodeConnectorCreator {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(NodeConnectorCreator.class);
     /**
      * Generic NodeConnector creator
      * The nodeConnector type is inferred from the node type
@@ -38,7 +42,7 @@ public abstract class NodeConnectorCreator {
                 return new NodeConnector(NodeConnectorIDType.OPENFLOW,
                         (Short) portId, node);
             } catch (ConstructionException e1) {
-                e1.printStackTrace();
+                logger.error("",e1);
                 return null;
             }
         }
@@ -59,7 +63,7 @@ public abstract class NodeConnectorCreator {
         try {
             return new NodeConnector(nodeConnectorType, portId, node);
         } catch (ConstructionException e1) {
-            e1.printStackTrace();
+            logger.error("",e1);
             return null;
         }
     }
@@ -68,7 +72,7 @@ public abstract class NodeConnectorCreator {
         try {
             return new NodeConnector(NodeConnectorIDType.OPENFLOW, portId, node);
         } catch (ConstructionException e1) {
-            e1.printStackTrace();
+            logger.error("",e1);
             return null;
         }
     }
@@ -85,7 +89,7 @@ public abstract class NodeConnectorCreator {
             }
             return nodeConnectors;
         } catch (ConstructionException e1) {
-            e1.printStackTrace();
+            logger.error("",e1);
             return null;
         }
     }

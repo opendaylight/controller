@@ -243,10 +243,8 @@ public class ClusterManager implements IClusterServices {
             } catch (Exception e) {
                 logger.error("GossipRouter didn't start exception " + e
                         + " met");
-                StringWriter sw = new StringWriter();
                 logger.error("Stack Trace that raised the exception");
-                e.printStackTrace(new PrintWriter(sw));
-                logger.error(sw.toString());
+                logger.error("",e);
             }
         }
         logger.info("Starting the ClusterManager");
@@ -260,11 +258,9 @@ public class ClusterManager implements IClusterServices {
                 logger.debug("Started the ClusterManager");
             }
         } catch (Exception ioe) {
-            StringWriter sw = new StringWriter();
             logger.error("Cannot configure infinispan .. bailing out ");
             logger.error("Stack Trace that raised th exception");
-            ioe.printStackTrace(new PrintWriter(sw));
-            logger.error(sw.toString());
+            logger.error("",ioe);
             this.cm = null;
             this.stop();
         }

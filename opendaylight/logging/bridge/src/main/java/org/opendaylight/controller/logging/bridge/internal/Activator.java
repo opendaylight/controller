@@ -55,6 +55,15 @@ public class Activator implements BundleActivator {
                         this.listener.logged(entry);
                     }
                 }
+                
+                /*
+                 * Install the default exception handler so that the uncaught
+                 * exceptions are handled by our customized handler. This new
+                 * handler will display the exceptions to OSGI console as well
+                 * as log to file.
+                 */
+                Thread.setDefaultUncaughtExceptionHandler(new org.opendaylight.
+                        controller.logging.bridge.internal.UncaughtExceptionHandler());
             } else {
                 this.log.error("Cannot register the LogListener because "
                         + "cannot retrive LogReaderService");

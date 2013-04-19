@@ -269,7 +269,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                                 .getNode(), dst
                                 .getNode(), EdgeType.DIRECTED);
                     } catch (ConstructionException e) {
-                        e.printStackTrace();
+                        log.error("",e);
                         return edgePresentInGraph;
                     }
                 }
@@ -278,7 +278,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                 try {
                     topo.removeEdge(new Edge(src, dst));
                 } catch (ConstructionException e) {
-                    e.printStackTrace();
+                    log.error("",e);
                     return edgePresentInGraph;
                 }
 

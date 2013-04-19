@@ -23,11 +23,15 @@ import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.utils.GUIField;
 
 import org.opendaylight.controller.switchmanager.SpanConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class represents a Span Port configuration for a network node.
  */
 public class SpanConfig implements Serializable {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(SpanConfig.class);
     private static final long serialVersionUID = 1L;
     private static final String guiFields[] = { GUIField.NODE.toString(),
             GUIField.SPANPORTS.toString() };
@@ -107,7 +111,7 @@ public class SpanConfig implements Serializable {
                                 NodeConnectorIDType.OPENFLOW, Short.valueOf(j),
                                 node));
                     } catch (ConstructionException e) {
-                        e.printStackTrace();
+                        logger.error("",e);
                     }
                 }
             } else {
@@ -116,9 +120,9 @@ public class SpanConfig implements Serializable {
                             NodeConnectorIDType.OPENFLOW, Short.valueOf(elem),
                             node));
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    logger.error("",e);
                 } catch (ConstructionException e) {
-                    e.printStackTrace();
+                    logger.error("",e);
                 }
             }
         }

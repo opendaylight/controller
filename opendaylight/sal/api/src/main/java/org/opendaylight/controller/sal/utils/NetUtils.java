@@ -15,6 +15,9 @@ import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Utility class containing the common utility functions needed
  * for operating on networking data structures
@@ -23,6 +26,8 @@ import java.util.regex.Pattern;
  *
  */
 public abstract class NetUtils {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(NetUtils.class);
     /**
      * Constant holding the number of bits in a byte
      */
@@ -65,7 +70,7 @@ public abstract class NetUtils {
         try {
             ip = InetAddress.getByAddress(NetUtils.intToByteArray4(address));
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         return ip;
     }
@@ -105,7 +110,7 @@ public abstract class NetUtils {
         try {
             return InetAddress.getByAddress(address);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         return null;
     }
@@ -276,7 +281,7 @@ public abstract class NetUtils {
         try {
             address = InetAddress.getByName(addressString);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         return address;
     }

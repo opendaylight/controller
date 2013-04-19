@@ -171,7 +171,7 @@ public class V6Match extends OFMatch implements Cloneable {
                 address = InetAddress.getByAddress(ByteBuffer.allocate(4)
                         .putInt(match.getNetworkSource()).array());
             } catch (UnknownHostException e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
             this.setNetworkSource(address, null);
         } else {
@@ -186,7 +186,7 @@ public class V6Match extends OFMatch implements Cloneable {
                 address = InetAddress.getByAddress(ByteBuffer.allocate(4)
                         .putInt(match.getNetworkDestination()).array());
             } catch (UnknownHostException e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
             this.setNetworkDestination(address, null);
         } else {
@@ -542,7 +542,7 @@ public class V6Match extends OFMatch implements Cloneable {
                         match_len += 20;
                     }
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    logger.error("",e);
                 }
             } else if (values[0].equals(STR_NW_SRC)
                     || values[0].equals("ip_src")) {
@@ -560,7 +560,7 @@ public class V6Match extends OFMatch implements Cloneable {
                         match_len += 20;
                     }
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    logger.error("",e);
                 }
             } else if (values[0].equals(STR_NW_PROTO)) {
                 this.networkProtocol = U8.t(Short.valueOf(values[1]));

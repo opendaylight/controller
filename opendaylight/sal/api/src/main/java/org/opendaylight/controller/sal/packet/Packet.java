@@ -17,6 +17,8 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class which represents the generic network packet object
@@ -27,6 +29,8 @@ import org.opendaylight.controller.sal.utils.NetUtils;
  */
 
 public abstract class Packet {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(Packet.class);
     // Access level granted to this packet
     protected boolean writeAccess;
     // When deserialized from wire, packet could result corrupted
@@ -260,7 +264,7 @@ public abstract class Packet {
                             .getHostAddress()
                             + " ");
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    logger.error("",e);
                 }
             } else {
                 ret.append(((Long) BitBufferHelper.getLong(entry.getValue()))

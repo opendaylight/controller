@@ -169,7 +169,7 @@ public class InventoryServiceShim implements IContainerListener,
                 handlePortStatusMessage(sw, (OFPortStatus) msg);
             }
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         return;
     }

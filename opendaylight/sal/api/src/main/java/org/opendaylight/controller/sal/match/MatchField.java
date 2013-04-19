@@ -184,7 +184,7 @@ public class MatchField implements Cloneable, Serializable {
                 }
             }
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         return cloned;
     }

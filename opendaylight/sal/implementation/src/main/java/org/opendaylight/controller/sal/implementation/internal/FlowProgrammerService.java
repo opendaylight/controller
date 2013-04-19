@@ -232,9 +232,9 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         try {
             node = new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("",e);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         ci.println(this.addFlow(node, getSampleFlow(node)));
     }
@@ -249,9 +249,9 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         try {
             node = new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("",e);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Flow flowA = getSampleFlow(node);
         Flow flowB = getSampleFlow(node);
@@ -272,9 +272,9 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         try {
             node = new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("",e);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         ci.println(this.removeFlow(node, getSampleFlow(node)));
     }
@@ -289,9 +289,9 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         try {
             node = new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("",e);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         ci.println(this.addFlow(node, getSampleFlowV6(node)));
     }
@@ -307,9 +307,9 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         try {
             node = new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("",e);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         ci.println(this.removeFlow(node, getSampleFlowV6(node)));
     }

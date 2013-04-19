@@ -283,7 +283,7 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
                             }
                         }catch (UnknownHostException e) {
                             lbsLogger.error("Pool member not found  in the network : {}",e.getMessage());
-                            e.printStackTrace();
+                            lbsLogger.error("",e);
                         }
                     }
                 }

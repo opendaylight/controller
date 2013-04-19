@@ -15,7 +15,12 @@ import org.opendaylight.controller.sal.core.impl.BrokerImpl;
 import org.opendaylight.controller.sal.core.impl.NotificationModule;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SALDemo {
+    protected static final Logger logger = LoggerFactory
+        .getLogger(SALDemo.class);
 
     static BrokerImpl broker;
     static DemoProviderImpl provider;
@@ -81,7 +86,7 @@ public class SALDemo {
             }
         } catch (IOException e) {
 
-            e.printStackTrace();
+            logger.error("",e);
         }
     }
 

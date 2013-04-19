@@ -127,7 +127,7 @@ public class DiscoveryService implements IInventoryShimExternalListener,
                     if (shuttingDown)
                         return;
                 } catch (Exception e2) {
-                    e2.printStackTrace();
+                    logger.error("",e2);
                 }
             }
         }
