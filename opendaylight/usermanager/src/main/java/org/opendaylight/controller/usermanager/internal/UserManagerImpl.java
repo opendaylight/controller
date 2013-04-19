@@ -82,7 +82,13 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     private static final String authFileName = ROOT + "authorization.conf";
     private ConcurrentMap<String, UserConfig> localUserConfigList;
     private ConcurrentMap<String, ServerConfig> remoteServerConfigList;
-    private ConcurrentMap<String, AuthorizationConfig> authorizationConfList; // local authorization info for remotely authenticated users
+    private ConcurrentMap<String, AuthorizationConfig> authorizationConfList; // local
+                                                                              // authorization
+                                                                              // info
+                                                                              // for
+                                                                              // remotely
+                                                                              // authenticated
+                                                                              // users
     private ConcurrentMap<String, AuthenticatedUser> activeUsers;
     private ConcurrentMap<String, IAAAProvider> authProviders;
     private ConcurrentMap<Long, String> localUserListSaveConfigEvent,
@@ -94,8 +100,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     private ISessionManager sessionMgr = new SessionManager();
 
     public boolean addAAAProvider(IAAAProvider provider) {
-        if (provider == null
-        		|| provider.getName() == null
+        if (provider == null || provider.getName() == null
                 || provider.getName().trim().isEmpty()) {
             return false;
         }
@@ -124,8 +129,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         this.applicationAuthorizationClients = Collections
                 .synchronizedSet(new HashSet<IResourceAuthorization>());
         if (clusterGlobalService == null) {
-            logger
-                    .error("un-initialized clusterGlobalService, can't create cache");
+            logger.error("un-initialized clusterGlobalService, can't create cache");
             return;
         }
 
@@ -134,36 +138,35 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
 
             clusterGlobalService.createCache(
-                    "usermanager.remoteServerConfigList", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    "usermanager.remoteServerConfigList",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
 
             clusterGlobalService.createCache(
-                    "usermanager.authorizationConfList", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    "usermanager.authorizationConfList",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
 
-            clusterGlobalService.createCache("usermanager.activeUsers", EnumSet
-                    .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
-
-            clusterGlobalService.createCache(
-                    "usermanager.localUserSaveConfigEvent", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+            clusterGlobalService.createCache("usermanager.activeUsers",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
 
             clusterGlobalService.createCache(
-                    "usermanager.remoteServerSaveConfigEvent", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    "usermanager.localUserSaveConfigEvent",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
 
             clusterGlobalService.createCache(
-                    "usermanager.authorizationSaveConfigEvent", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    "usermanager.remoteServerSaveConfigEvent",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+
+            clusterGlobalService.createCache(
+                    "usermanager.authorizationSaveConfigEvent",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             logger.error("\nCache configuration invalid - check cache mode");
         } catch (CacheExistException ce) {
-            logger
-                    .error("\nCache already exits - destroy and recreate if needed");
+            logger.error("\nCache already exits - destroy and recreate if needed");
         }
     }
 
-    @SuppressWarnings( { "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked", "deprecation" })
     private void retrieveCaches() {
         if (clusterGlobalService == null) {
             logger.error("un-initialized clusterService, can't retrieve cache");
@@ -203,25 +206,23 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         remoteServerSaveConfigEvent = (ConcurrentMap<Long, String>) clusterGlobalService
                 .getCache("usermanager.remoteServerSaveConfigEvent");
         if (remoteServerSaveConfigEvent == null) {
-            logger
-                    .error("\nFailed to get cache for remoteServerSaveConfigEvent");
+            logger.error("\nFailed to get cache for remoteServerSaveConfigEvent");
         }
 
         authorizationSaveConfigEvent = (ConcurrentMap<Long, String>) clusterGlobalService
                 .getCache("usermanager.authorizationSaveConfigEvent");
         if (authorizationSaveConfigEvent == null) {
-            logger
-                    .error("\nFailed to get cache for authorizationSaveConfigEvent");
+            logger.error("\nFailed to get cache for authorizationSaveConfigEvent");
         }
     }
 
     private void loadConfigurations() {
-    	// To encode and decode user and server configuration objects
-    	loadSecurityKeys();
-    	
+        // To encode and decode user and server configuration objects
+        loadSecurityKeys();
+
         /*
-         * Do not load local startup file if we already got the
-         * configurations synced from another cluster node
+         * Do not load local startup file if we already got the configurations
+         * synced from another cluster node
          */
         if (localUserConfigList.isEmpty()) {
             loadUserConfig();
@@ -235,17 +236,15 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     }
 
     private void loadSecurityKeys() {
-		
-	}
 
-	private void checkDefaultNetworkAdmin() {
-        // If startup config is not there, it's old or it was deleted, 
-		// need to add Default Admin
+    }
+
+    private void checkDefaultNetworkAdmin() {
+        // If startup config is not there, it's old or it was deleted,
+        // need to add Default Admin
         if (!localUserConfigList.containsKey(defaultAdmin)) {
-        	localUserConfigList.put(defaultAdmin,
-        					new UserConfig(defaultAdmin,
-        							defaultAdminPassword,
-            						defaultAdminRole));
+            localUserConfigList.put(defaultAdmin, new UserConfig(defaultAdmin,
+                    defaultAdminPassword, defaultAdminRole));
         }
     }
 
@@ -269,10 +268,9 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                 rcResponse = aaaClient.authService(userName, password,
                         aaaServer.getAddress(), aaaServer.getSecret());
                 if (rcResponse.getStatus() == AuthResultEnum.AUTH_ACCEPT) {
-                    logger
-                            .info(
-                                    "Remote Authentication Succeeded for User: \"{}\", by Server: {}",
-                                    userName, aaaServer.getAddress());
+                    logger.info(
+                            "Remote Authentication Succeeded for User: \"{}\", by Server: {}",
+                            userName, aaaServer.getAddress());
                     remotelyAuthenticated = true;
                     break;
                 } else if (rcResponse.getStatus() == AuthResultEnum.AUTH_REJECT) {
@@ -299,9 +297,10 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             }
             rcResponse = localUser.authenticate(password);
             if (rcResponse.getStatus() != AuthResultEnum.AUTH_ACCEPT_LOC) {
-                logger.info("Local Authentication Failed for User: \"{}\", Reason: {}",
-                                userName, rcResponse.getStatus().toString());
-                
+                logger.info(
+                        "Local Authentication Failed for User: \"{}\", Reason: {}",
+                        userName, rcResponse.getStatus().toString());
+
                 return (rcResponse.getStatus());
             }
             logger.info("Local Authentication Succeeded for User: \"{}\"",
@@ -314,8 +313,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         result = new AuthenticatedUser(userName);
 
         /*
-         * Extract attributes from response
-         * All the information we are interested in is in the first Cisco VSA (vendor specific attribute).
+         * Extract attributes from response All the information we are
+         * interested in is in the first Cisco VSA (vendor specific attribute).
          * Just process the first VSA and return
          */
         String attributes = (rcResponse.getData() != null && !rcResponse
@@ -327,15 +326,14 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         authorizationInfoIsPresent = checkAuthorizationInfo(attributes);
 
         /*
-         * The AAA server was only used to perform the authentication
-         * Look for locally stored authorization info for this user
-         * If found, add the data to the rcResponse
+         * The AAA server was only used to perform the authentication Look for
+         * locally stored authorization info for this user If found, add the
+         * data to the rcResponse
          */
         if (remotelyAuthenticated && !authorizationInfoIsPresent) {
-            logger
-                    .info(
-                            "No Remote Authorization Info provided by Server for User: \"{}\"",
-                            userName);
+            logger.info(
+                    "No Remote Authorization Info provided by Server for User: \"{}\"",
+                    userName);
             logger.info(
                     "Looking for Local Authorization Info for User: \"{}\"",
                     userName);
@@ -351,11 +349,11 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         }
 
         /*
-         * Common response parsing for local & remote authenticated user
-         * Looking for authorized resources, detecting attributes' validity
+         * Common response parsing for local & remote authenticated user Looking
+         * for authorized resources, detecting attributes' validity
          */
         if (authorizationInfoIsPresent) {
-        	// Identifying the administrative role
+            // Identifying the administrative role
             adminRoles = attributes.split(" ");
             result.setRoleList(adminRoles);
             authorized = true;
@@ -378,7 +376,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         return rcResponse.getStatus();
     }
 
-    // Check in the attributes string whether or not authorization information is present
+    // Check in the attributes string whether or not authorization information
+    // is present
     private boolean checkAuthorizationInfo(String attributes) {
         return (attributes != null && !attributes.isEmpty());
     }
@@ -389,7 +388,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     private void removeUserFromActiveList(String user) {
         if (!activeUsers.containsKey(user)) {
-            // as cookie persists in cache, we can get logout for unexisting active users
+            // as cookie persists in cache, we can get logout for unexisting
+            // active users
             return;
         }
         activeUsers.remove(user);
@@ -435,7 +435,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     @Override
     public Object readObject(ObjectInputStream ois)
             throws FileNotFoundException, IOException, ClassNotFoundException {
-        // Perform the class deserialization locally, from inside the package where the class is defined
+        // Perform the class deserialization locally, from inside the package
+        // where the class is defined
         return ois.readObject();
     }
 
@@ -488,29 +489,28 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
      * Interaction with GUI START
      */
     public Status addRemoveLocalUser(UserConfig AAAconf, boolean delete) {
-        // Validation check
-        if (!AAAconf.isValid()) {
-        	String msg = "Invalid Local User configuration";
-            logger.warn(msg);
-            return new Status(StatusCode.BADREQUEST, msg);
+        // UserConfig Validation check
+        Status validCheck = AAAconf.validate();
+        if (!validCheck.isSuccess()) {
+            return validCheck;
         }
 
         // Update Config database
         if (delete) {
-        	if (AAAconf.getUser().equals(UserManagerImpl.defaultAdmin)) {
-        		String msg = "Invalid Request: Default Network Admin  User " +
-        				"cannot be deleted";
-        		logger.debug(msg);
-        		return new Status(StatusCode.NOTALLOWED, msg);
-        	}
+            if (AAAconf.getUser().equals(UserManagerImpl.defaultAdmin)) {
+                String msg = "Invalid Request: Default Network Admin  User "
+                        + "cannot be deleted";
+                logger.debug(msg);
+                return new Status(StatusCode.NOTALLOWED, msg);
+            }
             localUserConfigList.remove(AAAconf.getUser());
         } else {
-        	if (AAAconf.getUser().equals(UserManagerImpl.defaultAdmin)) {
-        		String msg = "Invalid Request: Default Network Admin  User " +
-        				"cannot be added";
-        		logger.debug(msg);
-        		return new Status(StatusCode.NOTALLOWED, msg);
-        	}
+            if (AAAconf.getUser().equals(UserManagerImpl.defaultAdmin)) {
+                String msg = "Invalid Request: Default Network Admin  User "
+                        + "cannot be added";
+                logger.debug(msg);
+                return new Status(StatusCode.NOTALLOWED, msg);
+            }
             localUserConfigList.put(AAAconf.getUser(), AAAconf);
         }
 
@@ -520,7 +520,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     private Status addRemoveAAAServer(ServerConfig AAAconf, boolean delete) {
         // Validation check
         if (!AAAconf.isValid()) {
-        	String msg = "Invalid Server configuration";
+            String msg = "Invalid Server configuration";
             logger.warn(msg);
             return new Status(StatusCode.BADREQUEST, msg);
         }
@@ -535,10 +535,11 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         return new Status(StatusCode.SUCCESS, null);
     }
 
-    private Status addRemoveAuthInfo(AuthorizationConfig AAAconf,
-            boolean delete) {
-        if (!AAAconf.isValid()) {
-        	String msg = "Invalid Authorization configuration";
+    private Status addRemoveAuthInfo(AuthorizationConfig AAAconf, boolean delete) {
+        Status configCheck = AAAconf.validate();
+        if (!configCheck.isSuccess()) {
+            String msg = "Invalid Authorization configuration: "
+                    + configCheck.getDescription();
             logger.warn(msg);
             return new Status(StatusCode.BADREQUEST, msg);
         }
@@ -565,14 +566,15 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     @Override
     public Status removeLocalUser(String userName) {
-    	if (userName == null || userName.trim().isEmpty()) {
-    		return new Status(StatusCode.BADREQUEST, "Invalid user name");
-    	}
-    	if (!localUserConfigList.containsKey(userName)) {
-    		return new Status(StatusCode.NOTFOUND, "User does not exist");
-    	}    	
+        if (userName == null || userName.trim().isEmpty()) {
+            return new Status(StatusCode.BADREQUEST, "Invalid user name");
+        }
+        if (!localUserConfigList.containsKey(userName)) {
+            return new Status(StatusCode.NOTFOUND, "User does not exist");
+        }
         return addRemoveLocalUser(localUserConfigList.get(userName), true);
     }
+
     @Override
     public Status addAAAServer(ServerConfig AAAconf) {
         return addRemoveAAAServer(AAAconf, false);
@@ -605,8 +607,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     @Override
     public List<AuthorizationConfig> getAuthorizationList() {
-        return new ArrayList<AuthorizationConfig>(authorizationConfList
-                .values());
+        return new ArrayList<AuthorizationConfig>(
+                authorizationConfList.values());
     }
 
     @Override
@@ -617,12 +619,14 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         // update configuration entry
         targetConfigEntry = localUserConfigList.get(user);
         if (targetConfigEntry == null) {
-        	return new Status(StatusCode.NOTFOUND, "User not found");
+            return new Status(StatusCode.NOTFOUND, "User not found");
         }
         if (false == targetConfigEntry.update(curPassword, newPassword, null)) {
-        	return new Status(StatusCode.BADREQUEST, "Current password is incorrect");
+            return new Status(StatusCode.BADREQUEST,
+                    "Current password is incorrect");
         }
-        localUserConfigList.put(user, targetConfigEntry); // trigger cluster update
+        localUserConfigList.put(user, targetConfigEntry); // trigger cluster
+                                                          // update
 
         logger.info("Password changed for User \"{}\"", user);
 
@@ -631,7 +635,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     @Override
     public void userLogout(String userName) {
-        // TODO: if user was authenticated through AAA server, send Acct-Status-Type=stop message to server with logout as reason
+        // TODO: if user was authenticated through AAA server, send
+        // Acct-Status-Type=stop message to server with logout as reason
         removeUserFromActiveList(userName);
         logger.info("User \"{}\" logged out", userName);
     }
@@ -641,7 +646,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
      */
     @Override
     public void userTimedOut(String userName) {
-        // TODO: if user was authenticated through AAA server, send Acct-Status-Type=stop message to server with timeout as reason
+        // TODO: if user was authenticated through AAA server, send
+        // Acct-Status-Type=stop message to server with timeout as reason
         removeUserFromActiveList(userName);
         logger.info("User \"{}\" timed out", userName);
     }
@@ -726,34 +732,34 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             ci.println(conf.getUser() + " " + conf.getRole());
         }
     }
-    
-    public void _addAAAServer (CommandInterpreter ci) {
+
+    public void _addAAAServer(CommandInterpreter ci) {
         String server = ci.nextArgument();
         String secret = ci.nextArgument();
         String protocol = ci.nextArgument();
-        
+
         if (server == null || secret == null || protocol == null) {
-        	ci.println("Usage : addAAAServer <server> <secret> <protocol>");
-        	return;
+            ci.println("Usage : addAAAServer <server> <secret> <protocol>");
+            return;
         }
         ServerConfig s = new ServerConfig(server, secret, protocol);
         addAAAServer(s);
     }
-    
-    public void _removeAAAServer (CommandInterpreter ci) {
+
+    public void _removeAAAServer(CommandInterpreter ci) {
         String server = ci.nextArgument();
         String secret = ci.nextArgument();
         String protocol = ci.nextArgument();
-        
+
         if (server == null || secret == null || protocol == null) {
-        	ci.println("Usage : addAAAServer <server> <secret> <protocol>");
-        	return;
+            ci.println("Usage : addAAAServer <server> <secret> <protocol>");
+            return;
         }
         ServerConfig s = new ServerConfig(server, secret, protocol);
         removeAAAServer(s);
     }
 
-    public void _printAAAServers (CommandInterpreter ci) {
+    public void _printAAAServers(CommandInterpreter ci) {
         for (ServerConfig aaaServer : remoteServerConfigList.values()) {
             String protocol = aaaServer.getProtocol();
             ci.println(aaaServer.getAddress() + "-" + aaaServer.getProtocol());
@@ -799,25 +805,24 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
-     *
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     * 
      */
     void start() {
         authProviders = new ConcurrentHashMap<String, IAAAProvider>();
@@ -837,10 +842,10 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
-     *
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     * 
      */
     void stop() {
     }
@@ -858,19 +863,19 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     @Override
     public UserLevel getUserLevel(String username) {
         // Returns the controller well-know user level for the passed user
-    	String roleName = null;
+        String roleName = null;
 
-    	// First check in active users then in local configured users
+        // First check in active users then in local configured users
         if (activeUsers.containsKey(username)) {
-        	roleName = activeUsers.get(username).getUserRoles().get(0);
+            roleName = activeUsers.get(username).getUserRoles().get(0);
         } else if (localUserConfigList.containsKey(username)) {
-        	roleName = localUserConfigList.get(username).getRole();
+            roleName = localUserConfigList.get(username).getRole();
         }
-        
+
         if (roleName == null) {
-        	return UserLevel.NOUSER;
+            return UserLevel.NOUSER;
         }
-        
+
         // For now only one role per user is allowed
         if (roleName.equals(UserLevel.SYSTEMADMIN.toString())) {
             return UserLevel.SYSTEMADMIN;
@@ -915,7 +920,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         }
 
         return new Status(StatusCode.INTERNALERROR,
-        		"Failed to save user configurations");
+                "Failed to save user configurations");
     }
 
     @Override
@@ -931,8 +936,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
             return new User(username, localUserConfigList.get(username)
                     .getPassword(), enabled, accountNonExpired,
-                    credentialsNonExpired, accountNonLocked, user
-                            .getGrantedAuthorities(getUserLevel(username)));
+                    credentialsNonExpired, accountNonLocked,
+                    user.getGrantedAuthorities(getUserLevel(username)));
         } else
             throw new UsernameNotFoundException("User not found " + username);
     }
@@ -964,8 +969,9 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                     "Username or credentials did not match");
         }
 
-        AuthResultEnum result = authenticate((String) authentication
-                .getPrincipal(), (String) authentication.getCredentials());
+        AuthResultEnum result = authenticate(
+                (String) authentication.getPrincipal(),
+                (String) authentication.getCredentials());
         if (result.equals(AuthResultEnum.AUTHOR_PASS)
                 || result.equals(AuthResultEnum.AUTH_ACCEPT_LOC)
                 || result.equals(AuthResultEnum.AUTH_ACCEPT)) {
@@ -979,10 +985,10 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             }
 
             authentication = new UsernamePasswordAuthenticationToken(
-                    authentication.getPrincipal(), authentication
-                            .getCredentials(), user
-                            .getGrantedAuthorities(getUserLevel(authentication
-                                    .getName())));
+                    authentication.getPrincipal(),
+                    authentication.getCredentials(),
+                    user.getGrantedAuthorities(getUserLevel(authentication
+                            .getName())));
             return authentication;
 
         } else
@@ -991,34 +997,46 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     }
 
-    //following are setters for use in unit testing
+    // following are setters for use in unit testing
     void setLocalUserConfigList(ConcurrentMap<String, UserConfig> ucl) {
-    	if (ucl != null) { this.localUserConfigList = ucl; }
+        if (ucl != null) {
+            this.localUserConfigList = ucl;
+        }
     }
-    void setRemoteServerConfigList (ConcurrentMap<String, ServerConfig> scl) {
-    	if (scl != null) { this.remoteServerConfigList = scl; }
+
+    void setRemoteServerConfigList(ConcurrentMap<String, ServerConfig> scl) {
+        if (scl != null) {
+            this.remoteServerConfigList = scl;
+        }
     }
-    void setAuthorizationConfList (ConcurrentMap<String, AuthorizationConfig> acl) {
-    	if (acl != null) { this.authorizationConfList = acl; }
+
+    void setAuthorizationConfList(ConcurrentMap<String, AuthorizationConfig> acl) {
+        if (acl != null) {
+            this.authorizationConfList = acl;
+        }
     }
-    void setActiveUsers (ConcurrentMap<String, AuthenticatedUser> au) {
-        if (au != null) { this.activeUsers = au; }
+
+    void setActiveUsers(ConcurrentMap<String, AuthenticatedUser> au) {
+        if (au != null) {
+            this.activeUsers = au;
+        }
     }
-    void setAuthProviders(ConcurrentMap<String, IAAAProvider> ap ) {
-        if (ap != null){ 
+
+    void setAuthProviders(ConcurrentMap<String, IAAAProvider> ap) {
+        if (ap != null) {
             this.authProviders = ap;
         }
     }
-    
+
     @Override
     public ISessionManager getSessionManager() {
         return this.sessionMgr;
     }
-    
+
     public void setSessionMgr(ISessionManager sessionMgr) {
         this.sessionMgr = sessionMgr;
     }
-    
+
     public String getPassword(String username) {
         return localUserConfigList.get(username).getPassword();
     }

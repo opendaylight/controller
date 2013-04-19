@@ -8,36 +8,36 @@
 
 package org.opendaylight.controller.usermanager.internal;
 
+import org.opendaylight.controller.sal.utils.Status;
 
 /**
  * Configuration Java Object which represents a Local configured Authorization
  * for a remote authenticated user for User Manager.
  */
 public class AuthorizationConfig extends UserConfig {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public AuthorizationConfig() {
-		super();
-	}
+    public AuthorizationConfig() {
+        super();
+    }
 
-	// Constructor may be needed for autocontainer logic
-	public AuthorizationConfig(String user, String role) {
-		super();
-		this.user = user;
-		this.role = role;
-	}
+    // Constructor may be needed for autocontainer logic
+    public AuthorizationConfig(String user, String role) {
+        super();
+        this.user = user;
+        this.role = role;
+    }
 
-	@Override
-	public boolean isValid() {
-		return (user != null && !user.isEmpty() && role != null && !role
-				.isEmpty());
-	}
+    @Override
+    public Status validate() {
+        return (!isRoleValid().isSuccess() ? isRoleValid() : isUsernameValid());
+    }
 
-	public String getRolesData() {
-		return (role.replace(",", " "));
-	}
+    public String getRolesData() {
+        return (role.replace(",", " "));
+    }
 
-	public String toString() {
-		return "AuthorizationConfig=[user: " + user + ", role: " + role + "]";
-	}
+    public String toString() {
+        return "AuthorizationConfig=[user: " + user + ", role: " + role + "]";
+    }
 }
