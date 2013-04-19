@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -46,9 +45,9 @@ import org.opendaylight.controller.sal.discovery.IDiscoveryService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 
 /**
- * The class describes a shim layer that relays the topology events from OpenFlow
- * core to various listeners. The notifications are filtered based on container
- * configurations.
+ * The class describes a shim layer that relays the topology events from
+ * OpenFlow core to various listeners. The notifications are filtered based on
+ * container configurations.
  */
 public class TopologyServiceShim implements IDiscoveryService,
         IContainerListener, CommandProvider, IRefreshInternalProvider {
@@ -56,7 +55,7 @@ public class TopologyServiceShim implements IDiscoveryService,
             .getLogger(TopologyServiceShim.class);
     private ConcurrentMap<String, ITopologyServiceShimListener> topologyServiceShimListeners = new ConcurrentHashMap<String, ITopologyServiceShimListener>();
     private ConcurrentMap<NodeConnector, List<String>> containerMap = new ConcurrentHashMap<NodeConnector, List<String>>();
-    private ConcurrentMap<String, Map<NodeConnector, Pair<Edge, Set<Property>>>> edgeMap = new ConcurrentHashMap<String, Map<NodeConnector, Pair<Edge, Set<Property>>>>();
+    private ConcurrentMap<String, ConcurrentMap<NodeConnector, Pair<Edge, Set<Property>>>> edgeMap = new ConcurrentHashMap<String, ConcurrentMap<NodeConnector, Pair<Edge, Set<Property>>>>();
 
     private BlockingQueue<NotifyEntry> notifyQ;
     private Thread notifyThread;
@@ -69,7 +68,8 @@ public class TopologyServiceShim implements IDiscoveryService,
     private Thread bwUtilNotifyThread;
     private BlockingQueue<UtilizationUpdate> bwUtilNotifyQ;
     private List<NodeConnector> connectorsOverUtilized;
-    private float bwThresholdFactor = (float) 0.8; // Threshold = 80% of link bandwidth
+    private float bwThresholdFactor = (float) 0.8; // Threshold = 80% of link
+                                                   // bandwidth
 
     class NotifyEntry {
         String container;
@@ -98,8 +98,9 @@ public class TopologyServiceShim implements IDiscoveryService,
 
                     ITopologyServiceShimListener topologServiceShimListener = topologyServiceShimListeners
                             .get(entry.container);
-                    topologServiceShimListener.edgeUpdate(entry.edgeProps
-                            .getLeft(), entry.type, entry.edgeProps.getRight());
+                    topologServiceShimListener.edgeUpdate(
+                            entry.edgeProps.getLeft(), entry.type,
+                            entry.edgeProps.getRight());
 
                     entry = null;
                 } catch (InterruptedException e1) {
@@ -136,7 +137,7 @@ public class TopologyServiceShim implements IDiscoveryService,
                 try {
                     UtilizationUpdate update = notifyQ.take();
                     NodeConnector connector = update.connector;
-                    Set<String> containerList = edgeMap.keySet();//.get(connector);
+                    Set<String> containerList = edgeMap.keySet();
                     for (String container : containerList) {
                         Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropsMap = edgeMap
                                 .get(container);
@@ -154,10 +155,9 @@ public class TopologyServiceShim implements IDiscoveryService,
                         }
                     }
                 } catch (InterruptedException e1) {
-                    logger
-                            .warn(
-                                    "Edge Bandwidth Utilization Notify Thread interrupted",
-                                    e1.getMessage());
+                    logger.warn(
+                            "Edge Bandwidth Utilization Notify Thread interrupted",
+                            e1.getMessage());
                     if (shuttingDown) {
                         return;
                     }
@@ -171,7 +171,7 @@ public class TopologyServiceShim implements IDiscoveryService,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
         logger.trace("Init called");
@@ -212,10 +212,10 @@ public class TopologyServiceShim implements IDiscoveryService,
     }
 
     /**
-     * Continuously polls the transmit bit rate for all the node connectors
-     * from statistics manager and trigger the warning notification upward
-     * when the transmit rate is above a threshold which is a percentage of
-     * the edge bandwidth
+     * Continuously polls the transmit bit rate for all the node connectors from
+     * statistics manager and trigger the warning notification upward when the
+     * transmit rate is above a threshold which is a percentage of the edge
+     * bandwidth
      */
     protected void pollTxBitRates() {
         Map<NodeConnector, Pair<Edge, Set<Property>>> globalContainerEdges = edgeMap
@@ -226,7 +226,8 @@ public class TopologyServiceShim implements IDiscoveryService,
 
         for (NodeConnector connector : globalContainerEdges.keySet()) {
             // Skip if node connector belongs to production switch
-            if (connector.getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)) {
+            if (connector.getType().equals(
+                    NodeConnector.NodeConnectorIDType.PRODUCTION)) {
                 continue;
             }
 
@@ -277,10 +278,10 @@ public class TopologyServiceShim implements IDiscoveryService,
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
         logger.trace("DESTROY called!");
@@ -289,10 +290,9 @@ public class TopologyServiceShim implements IDiscoveryService,
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
-     *
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     * 
      */
     void start() {
         logger.trace("START called!");
@@ -303,10 +303,10 @@ public class TopologyServiceShim implements IDiscoveryService,
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
-     *
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     * 
      */
     void stop() {
         logger.trace("STOP called!");
@@ -327,7 +327,7 @@ public class TopologyServiceShim implements IDiscoveryService,
         }
         if ((this.topologyServiceShimListeners != null)
                 && !this.topologyServiceShimListeners
-                	.containsKey(containerName)) {
+                        .containsKey(containerName)) {
             this.topologyServiceShimListeners.put(containerName, s);
             logger.trace("Added topologyServiceShimListener for container:"
                     + containerName);
@@ -346,11 +346,9 @@ public class TopologyServiceShim implements IDiscoveryService,
             return;
         }
         if ((this.topologyServiceShimListeners != null)
-                && this.topologyServiceShimListeners
-                .containsKey(containerName)
-                && this.topologyServiceShimListeners
-                .get(containerName).equals(s)
-                ) {
+                && this.topologyServiceShimListeners.containsKey(containerName)
+                && this.topologyServiceShimListeners.get(containerName).equals(
+                        s)) {
             this.topologyServiceShimListeners.remove(containerName);
             logger.trace("Removed topologyServiceShimListener for container: "
                     + containerName);
@@ -393,7 +391,7 @@ public class TopologyServiceShim implements IDiscoveryService,
 
     private void notifyEdge(String container, Edge edge, UpdateType type,
             Set<Property> props) {
-        Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropsMap = edgeMap
+        ConcurrentMap<NodeConnector, Pair<Edge, Set<Property>>> edgePropsMap = edgeMap
                 .get(container);
         NodeConnector src = edge.getTailNodeConnector();
         Pair<Edge, Set<Property>> edgeProps = new ImmutablePair<Edge, Set<Property>>(
@@ -403,7 +401,7 @@ public class TopologyServiceShim implements IDiscoveryService,
         case ADDED:
         case CHANGED:
             if (edgePropsMap == null) {
-                edgePropsMap = new HashMap<NodeConnector, Pair<Edge, Set<Property>>>();
+                edgePropsMap = new ConcurrentHashMap<NodeConnector, Pair<Edge, Set<Property>>>();
             } else {
                 if (edgePropsMap.containsKey(src)
                         && edgePropsMap.get(src).equals(edgeProps)) {
@@ -460,8 +458,7 @@ public class TopologyServiceShim implements IDiscoveryService,
         NodeConnector src = edge.getTailNodeConnector(), dst = edge
                 .getHeadNodeConnector();
 
-        if (!src.getType().equals(
-                NodeConnector.NodeConnectorIDType.PRODUCTION)) {
+        if (!src.getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)) {
             /* Find the common containers for both ends */
             List<String> srcContainers = this.containerMap.get(src), dstContainers = this.containerMap
                     .get(dst), cmnContainers = null;
@@ -545,8 +542,8 @@ public class TopologyServiceShim implements IDiscoveryService,
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---Topology Service Shim---\n");
-        help
-                .append("\t pem [container]               - Print edgeMap entries for a given container\n");
+        help.append("\t pem [container]               - Print edgeMap entries");
+        help.append(" for a given container\n");
         return help.toString();
     }
 
@@ -594,16 +591,15 @@ public class TopologyServiceShim implements IDiscoveryService,
     }
 
     /**
-     * This method will trigger topology updates to be sent
-     * toward SAL.  SAL then pushes the updates to ALL the applications
-     * that have registered as listeners for this service.  SAL has no
-     * way of knowing which application requested for the refresh.
-     *
-     * As an example of this case, is stopping and starting the
-     * Topology Manager.  When the topology Manager is stopped,
-     * and restarted, it will no longer have the latest topology.
-     * Hence, a request is sent here.
-     *
+     * This method will trigger topology updates to be sent toward SAL. SAL then
+     * pushes the updates to ALL the applications that have registered as
+     * listeners for this service. SAL has no way of knowing which application
+     * requested for the refresh.
+     * 
+     * As an example of this case, is stopping and starting the Topology
+     * Manager. When the topology Manager is stopped, and restarted, it will no
+     * longer have the latest topology. Hence, a request is sent here.
+     * 
      * @param containerName
      * @return void
      */
@@ -615,9 +611,10 @@ public class TopologyServiceShim implements IDiscoveryService,
     }
 
     /**
-     * Reading the current topology database, the method will replay
-     * all the edge updates for the ITopologyServiceShimListener instance
-     * in the given container, which will in turn publish them toward SAL.
+     * Reading the current topology database, the method will replay all the
+     * edge updates for the ITopologyServiceShimListener instance in the given
+     * container, which will in turn publish them toward SAL.
+     * 
      * @param containerName
      */
     private void TopologyBulkUpdate(String containerName) {
