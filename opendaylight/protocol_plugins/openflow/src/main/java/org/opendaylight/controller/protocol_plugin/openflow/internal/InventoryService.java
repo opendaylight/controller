@@ -143,7 +143,7 @@ public class InventoryService implements IInventoryShimInternalListener,
         try {
             node = new Node(NodeIDType.OPENFLOW, id);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
 
         return node;

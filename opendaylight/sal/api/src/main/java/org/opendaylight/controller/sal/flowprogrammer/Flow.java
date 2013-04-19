@@ -29,6 +29,8 @@ import org.opendaylight.controller.sal.action.SetNwDst;
 import org.opendaylight.controller.sal.action.SetNwSrc;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.utils.EtherTypes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represent a flow: match + actions + flow specific properties
@@ -37,6 +39,8 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class Flow implements Cloneable, Serializable {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(Flow.class);
 	private static final long serialVersionUID = 1L;
 	@XmlElement
     private Match match;
@@ -61,7 +65,7 @@ public class Flow implements Cloneable, Serializable {
             try {
                 throw new Exception("Conflicting Match and Action list");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         } else {
             this.match = match;
@@ -170,7 +174,7 @@ public class Flow implements Cloneable, Serializable {
             cloned.match = this.getMatch();
             cloned.actions = this.getActions();
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         return cloned;
     }

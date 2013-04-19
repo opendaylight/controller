@@ -109,7 +109,7 @@ public class TopologyServiceShim implements IDiscoveryService,
                         return;
                     }
                 } catch (Exception e2) {
-                    e2.printStackTrace();
+                    logger.error("",e2);
                 }
             }
         }
@@ -162,7 +162,7 @@ public class TopologyServiceShim implements IDiscoveryService,
                         return;
                     }
                 } catch (Exception e2) {
-                    e2.printStackTrace();
+                    logger.error("",e2);
                 }
             }
         }

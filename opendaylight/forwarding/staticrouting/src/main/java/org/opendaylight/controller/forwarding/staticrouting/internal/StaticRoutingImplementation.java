@@ -244,7 +244,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
                     try {
                         ra.staticRouteUpdate(s, update);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("",e);
                     }
                 }
             }
@@ -274,7 +274,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
                         try {
                             host = future.get();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            log.error("",e);
                         }
                     }
                 }

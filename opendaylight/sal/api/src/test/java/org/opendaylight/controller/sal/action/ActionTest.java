@@ -35,8 +35,12 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ActionTest {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(ActionTest.class);
     @Test
     public void tesActionCreationValidation() {
         Action action = new PopVlan();
@@ -140,7 +144,7 @@ public class ActionTest {
         try {
             ip = InetAddress.getByName("171.71.9.52");
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
 
         action = new SetNwSrc(ip);
@@ -152,7 +156,7 @@ public class ActionTest {
         try {
             ip = InetAddress.getByName("2001:420:281:1003:f2de:f1ff:fe71:728d");
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         action = new SetNwSrc(ip);
         Assert.assertTrue(action.isValid());
@@ -222,7 +226,7 @@ public class ActionTest {
         try {
             ip = InetAddress.getByName("1.1.1.1");
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
 
         actions.add(new SetDlSrc(mac));

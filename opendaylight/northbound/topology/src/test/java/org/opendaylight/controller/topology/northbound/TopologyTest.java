@@ -18,8 +18,12 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TopologyTest {
+        protected static final Logger logger = LoggerFactory
+            .getLogger(TopologyTest.class);
 
     @Test
     public void edgePropertiesTopologyTest() {
@@ -43,13 +47,13 @@ public class TopologyTest {
         try {
             e12 = new Edge(nc12, nc21);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
             assertTrue(false);
         }
         try {
             e23 = new Edge(nc23, nc32);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
             assertTrue(false);
         }
 

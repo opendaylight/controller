@@ -67,11 +67,15 @@ import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for converting a SAL Flow into the OF flow and vice-versa
  */
 public class FlowConverter {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(FlowConverter.class);
     private Flow flow; // SAL Flow
     private OFMatch ofMatch; // OF 1.0 match or OF 1.0 + IPv6 extension match
     private List<OFAction> actionsList; // OF 1.0 actions
@@ -680,7 +684,7 @@ public class FlowConverter {
                         try {
                             ip = InetAddress.getByAddress(addr);
                         } catch (UnknownHostException e) {
-                            e.printStackTrace();
+                            logger.error("",e);
                         }
                         salAction = new SetNwSrc(ip);
                     } else if (ofAction instanceof OFActionNetworkLayerDestination) {
@@ -691,7 +695,7 @@ public class FlowConverter {
                         try {
                             ip = InetAddress.getByAddress(addr);
                         } catch (UnknownHostException e) {
-                            e.printStackTrace();
+                            logger.error("",e);
                         }
                         salAction = new SetNwDst(ip);
                     } else if (ofAction instanceof OFActionNetworkTypeOfService) {

@@ -328,9 +328,9 @@ public class ReadService implements IReadService, CommandProvider {
         try {
             node = new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("",e);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         List<FlowOnNode> list = (cached) ? this.readAllFlows(node) : this
                 .nonCachedReadAllFlows(node);
@@ -355,9 +355,9 @@ public class ReadService implements IReadService, CommandProvider {
         try {
             node = new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("",e);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Flow flow = getSampleFlow(node);
         FlowOnNode flowOnNode = (cached) ? this.readFlow(node, flow) : this
@@ -382,9 +382,9 @@ public class ReadService implements IReadService, CommandProvider {
         try {
             node = new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("",e);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         List<NodeConnectorStatistics> list = (cached) ? this
                 .readNodeConnectors(node) : this
@@ -438,9 +438,9 @@ public class ReadService implements IReadService, CommandProvider {
         try {
             node = new Node(NodeIDType.OPENFLOW, Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error("",e);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         NodeDescription desc = (cached) ? this.readDescription(node) : this
                 .nonCachedReadDescription(node);

@@ -18,6 +18,8 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This java class provides the osgi console with the commands for running the unit test scripts for the API3
@@ -26,6 +28,9 @@ import org.osgi.framework.FrameworkUtil;
  *
  */
 public class API3UnitTest implements CommandProvider {
+    private static Logger log = LoggerFactory
+         .getLogger(API3UnitTest.class);
+
     private static final String python = "/usr/bin/python";
 
     /**
@@ -140,7 +145,7 @@ public class API3UnitTest implements CommandProvider {
             printStream(process.getErrorStream());
         } catch (Exception e) {
             System.out.println("Exception!");
-            e.printStackTrace();
+            logger.error("",e);
         }
     }
 
@@ -192,7 +197,7 @@ public class API3UnitTest implements CommandProvider {
             printStream(process.getErrorStream());
         } catch (Exception e) {
             System.out.println("Exception!");
-            e.printStackTrace();
+            logger.error("",e);
         }
     }
 

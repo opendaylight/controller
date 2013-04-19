@@ -12,6 +12,8 @@ package org.opendaylight.controller.sal.utils;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for creating a Node object
@@ -20,11 +22,13 @@ import org.opendaylight.controller.sal.core.Node.NodeIDType;
  *
  */
 public abstract class NodeCreator {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(NodeCreator.class);
     public static Node createOFNode(Long switchId) {
         try {
             return new Node(NodeIDType.OPENFLOW, switchId);
         } catch (ConstructionException e1) {
-            e1.printStackTrace();
+            logger.error("",e1);
             return null;
         }
     }

@@ -22,11 +22,16 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class defines a static route object.
  */
 public class StaticRoute {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(StaticRoute.class);
+
     /**
      * This Enum defines the possible types for the next hop address.
      */
@@ -249,7 +254,7 @@ public class StaticRoute {
             return InetAddress.getByAddress(BitBufferHelper
                     .toByteArray(netmask));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("",e);
             return null;
         }
     }
@@ -282,7 +287,7 @@ public class StaticRoute {
                 try {
                     return InetAddress.getByAddress(bbself.array());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("",e);
                 }
             }
         }

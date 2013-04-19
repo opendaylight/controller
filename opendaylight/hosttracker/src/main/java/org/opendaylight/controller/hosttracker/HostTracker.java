@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.felix.dm.Component;
+import org.apache.taglibs.standard.lang.jstl.DivideOperator;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
@@ -1215,7 +1216,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                                     nc,
                     Short.valueOf(vlan));
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("",e);
             return new Status(StatusCode.BADREQUEST, "Invalid Address");
         }
     }
@@ -1227,7 +1228,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
             address = InetAddress.getByName(networkAddress);
             return removeStaticHostReq(address);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("",e);
             return new Status(StatusCode.BADREQUEST, "Invalid Address");
         }
     }

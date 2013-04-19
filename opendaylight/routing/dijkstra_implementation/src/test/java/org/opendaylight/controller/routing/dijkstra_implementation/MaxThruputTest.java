@@ -27,9 +27,12 @@ import org.junit.Assert;
 import org.opendaylight.controller.routing.dijkstra_implementation.internal.DijkstraImplementation;
 
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MaxThruputTest {
-
+    protected static final Logger logger = LoggerFactory
+    .getLogger(MaxThruputTest.class);
     Map<Edge, Number> LinkCostMap = new HashMap<Edge, Number>();
 
     @Test
@@ -71,14 +74,14 @@ public class MaxThruputTest {
         try {
             edge1 = new Edge(nc11, nc21);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge1, 10);
         Edge edge2 = null;
         try {
             edge2 = new Edge(nc21, nc11);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge2, 10);
 
@@ -86,14 +89,14 @@ public class MaxThruputTest {
         try {
             edge3 = new Edge(nc22, nc31);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge3, 30);
         Edge edge4 = null;
         try {
             edge4 = new Edge(nc31, nc22);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge4, 30);
 
@@ -101,14 +104,14 @@ public class MaxThruputTest {
         try {
             edge5 = new Edge(nc32, nc41);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge5, 10);
         Edge edge6 = null;
         try {
             edge6 = new Edge(nc41, nc32);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge6, 10);
 
@@ -116,14 +119,14 @@ public class MaxThruputTest {
         try {
             edge7 = new Edge(nc12, nc51);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge7, 20);
         Edge edge8 = null;
         try {
             edge8 = new Edge(nc51, nc12);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge8, 20);
 
@@ -131,14 +134,14 @@ public class MaxThruputTest {
         try {
             edge9 = new Edge(nc52, nc61);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge9, 20);
         Edge edge10 = null;
         try {
             edge10 = new Edge(nc61, nc52);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge10, 20);
 
@@ -146,14 +149,14 @@ public class MaxThruputTest {
         try {
             edge11 = new Edge(nc62, nc42);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge11, 20);
         Edge edge12 = null;
         try {
             edge12 = new Edge(nc42, nc62);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         LinkCostMap.put(edge12, 20);
 
@@ -185,7 +188,7 @@ public class MaxThruputTest {
         try {
             expectedRes = new Path(expectedPath);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         if (!res.equals(expectedRes)) {
             System.out.println("Actual Res is " + res);
@@ -203,7 +206,7 @@ public class MaxThruputTest {
         try {
             expectedRes = new Path(expectedPath);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         if (!res.equals(expectedRes)) {
             System.out.println("Actual Res is " + res);

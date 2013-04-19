@@ -29,8 +29,12 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.routing.dijkstra_implementation.internal.DijkstraImplementation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DijkstraTest {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(DijkstraTest.class);
     @Test
     public void testSinglePathRouteNoBw() {
         DijkstraImplementation imp = new DijkstraImplementation();
@@ -46,7 +50,7 @@ public class DijkstraTest {
         try {
             edge1 = new Edge(nc11, nc21);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Set<Property> props = new HashSet<Property>();
         props.add(new Bandwidth(0));
@@ -59,7 +63,7 @@ public class DijkstraTest {
         try {
             edge2 = new Edge(nc22, nc31);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Set<Property> props2 = new HashSet<Property>();
         props.add(new Bandwidth(0));
@@ -73,7 +77,7 @@ public class DijkstraTest {
         try {
             expectedRes = new Path(expectedPath);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         if (!res.equals(expectedRes)) {
             System.out.println("Actual Res is " + res);
@@ -97,7 +101,7 @@ public class DijkstraTest {
         try {
             edge1 = new Edge(nc11, nc21);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Set<Property> props = new HashSet<Property>();
         props.add(new Bandwidth(0));
@@ -111,7 +115,7 @@ public class DijkstraTest {
         try {
             edge2 = new Edge(nc22, nc31);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Set<Property> props2 = new HashSet<Property>();
         props.add(new Bandwidth(0));
@@ -125,7 +129,7 @@ public class DijkstraTest {
         try {
             edge3 = new Edge(nc12, nc32);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Set<Property> props3 = new HashSet<Property>();
         props.add(new Bandwidth(0));
@@ -139,7 +143,7 @@ public class DijkstraTest {
         try {
             expectedRes = new Path(expectedPath);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         if (!res.equals(expectedRes)) {
             System.out.println("Actual Res is " + res);
@@ -163,7 +167,7 @@ public class DijkstraTest {
         try {
             edge1 = new Edge(nc11, nc21);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Set<Property> props = new HashSet<Property>();
         props.add(new Bandwidth(0));
@@ -177,7 +181,7 @@ public class DijkstraTest {
         try {
             edge2 = new Edge(nc22, nc31);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Set<Property> props2 = new HashSet<Property>();
         props.add(new Bandwidth(0));
@@ -191,7 +195,7 @@ public class DijkstraTest {
         try {
             edge3 = new Edge(nc12, nc32);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         Set<Property> props3 = new HashSet<Property>();
         props.add(new Bandwidth(0));
@@ -207,7 +211,7 @@ public class DijkstraTest {
         try {
             expectedRes = new Path(expectedPath);
         } catch (ConstructionException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         if (!res.equals(expectedRes)) {
             System.out.println("Actual Res is " + res);

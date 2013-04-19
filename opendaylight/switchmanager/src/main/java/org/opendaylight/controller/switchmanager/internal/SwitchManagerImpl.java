@@ -1041,7 +1041,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         try {
             nis = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException e1) {
-            e1.printStackTrace();
+            log.error("",e1);
             return null;
         }
         byte[] MAC = null;
@@ -1050,7 +1050,7 @@ public class SwitchManagerImpl implements ISwitchManager,
             try {
                 MAC = ni.getHardwareAddress();
             } catch (SocketException e) {
-                e.printStackTrace();
+                log.error("",e);
             }
             if (MAC != null) {
                 return MAC;

@@ -12,6 +12,9 @@ package org.opendaylight.controller.sal.utils;
 import java.io.*;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Convenience object to write a file
  *
@@ -19,6 +22,8 @@ import java.util.ArrayList;
  *
  */
 public class WriteToFile {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(WriteToFile.class);
     private FileWriter fstream;
     private BufferedWriter bufferOut;
     private String fileName;
@@ -37,7 +42,7 @@ public class WriteToFile {
         try {
             this.bufferOut.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
     }
 

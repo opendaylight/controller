@@ -15,6 +15,8 @@ package org.opendaylight.controller.sal.packet;
 import java.util.Arrays;
 
 import org.opendaylight.controller.sal.utils.NetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * BitBufferHelper class that provides utility methods to
@@ -26,6 +28,8 @@ import org.opendaylight.controller.sal.utils.NetUtils;
  *
  */
 public abstract class BitBufferHelper {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(BitBufferHelper.class);
 
     public static long ByteMask = 0xFF;
 
@@ -46,7 +50,7 @@ public abstract class BitBufferHelper {
                 throw new Exception(
                         "Container is too small for the number of requested bits");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         }
         return (data[0]);
@@ -64,7 +68,7 @@ public abstract class BitBufferHelper {
                 throw new Exception(
                         "Container is too small for the number of requested bits");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         }
         return (short) toNumber(data);
@@ -82,7 +86,7 @@ public abstract class BitBufferHelper {
                 throw new Exception(
                         "Container is too small for the number of requested bits");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         }
         return (int) toNumber(data);
@@ -100,7 +104,7 @@ public abstract class BitBufferHelper {
                 throw new Exception(
                         "Container is too small for the number of requested bits");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         }
         return (long) toNumber(data);
@@ -120,7 +124,7 @@ public abstract class BitBufferHelper {
                 throw new Exception(
                         "Container is too small for the number of requested bits");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         }
         int startOffset = data.length * NetUtils.NumBitsInAByte - numBits;
@@ -142,7 +146,7 @@ public abstract class BitBufferHelper {
                 throw new Exception(
                         "Container is too small for the number of requiested bits");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         }
         int startOffset = data.length * NetUtils.NumBitsInAByte - numBits;
@@ -165,7 +169,7 @@ public abstract class BitBufferHelper {
                 throw new Exception(
                         "Container is too small for the number of requested bits");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         }
         if (numBits > data.length * NetUtils.NumBitsInAByte) {
@@ -173,7 +177,7 @@ public abstract class BitBufferHelper {
                 throw new Exception(
                         "Trying to read more bits than contained in the data buffer");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         }
         int startOffset = data.length * NetUtils.NumBitsInAByte - numBits;

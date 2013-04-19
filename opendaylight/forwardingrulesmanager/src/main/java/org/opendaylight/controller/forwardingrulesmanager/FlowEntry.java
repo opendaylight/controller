@@ -18,6 +18,8 @@ import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a flow applications request Forwarding Rules Manager to install
@@ -26,6 +28,8 @@ import org.opendaylight.controller.sal.match.Match;
  * For instance the flows constituting a policy all share the same group name.
  */
 public class FlowEntry implements Cloneable, Serializable {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(FlowEntry.class);
     private static final long serialVersionUID = 1L;
     private String groupName; // group name
     private String flowName; // flow name (may be null)
@@ -79,7 +83,7 @@ public class FlowEntry implements Cloneable, Serializable {
             cloned = (FlowEntry) super.clone();
             cloned.flow = this.flow.clone();
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         return cloned;
     }

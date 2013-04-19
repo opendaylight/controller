@@ -2244,7 +2244,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         try {
             node = NodeCreator.createOFNode(Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            log.error("",e);
         }
         ci.println(this.programmer.addFlow(node, getSampleFlow(node)));
     }
@@ -2260,7 +2260,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         try {
             node = NodeCreator.createOFNode(Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            log.error("",e);
         }
         ci.println(this.programmer.removeFlow(node, getSampleFlow(node)));
     }

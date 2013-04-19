@@ -88,7 +88,7 @@ public abstract class Action {
         } catch (Exception e) {
             logger.error(e.getMessage());
             if (debug) {
-                e.printStackTrace();
+                logger.error("",e);
             }
         }
     }

@@ -24,6 +24,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class that represents the IPv4  packet objects
@@ -32,6 +34,8 @@ import org.opendaylight.controller.sal.utils.NetUtils;
  */
 
 public class IPv4 extends Packet {
+    protected static final Logger logger = LoggerFactory
+    .getLogger(IPv4.class);
     private static final String VERSION = "Version";
     private static final String HEADERLENGTH = "HeaderLength";
     private static final String DIFFSERV = "DiffServ";
@@ -531,7 +535,7 @@ public class IPv4 extends Packet {
         try {
             payloadLength = payload.serialize().length;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         this.setTotalLength((short) (this.getHeaderLen() + payloadLength));
     }

@@ -13,6 +13,9 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The QName from XML consists of local name of element and XML namespace, but
  * for our use, we added module revision to it.
@@ -34,6 +37,8 @@ import java.util.Date;
  * 
  */
 public class QName {
+    protected static final Logger logger = LoggerFactory
+        .getLogger(QName.class);
 
     private SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -215,7 +220,7 @@ public class QName {
                     namespace.getPort(), namespace.getPath(), query,
                     namespace.getFragment());
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            logger.error("",e);
         }
         return compositeURI;
     }
