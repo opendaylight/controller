@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -9,20 +8,22 @@
 
 package org.opendaylight.controller.forwardingrulesmanager;
 
-
 /**
- * The interface which describes the methods forwarding rules manager
- * will call for notifying the listeners of policy installation updates.
- *
+ * The interface which describes the methods forwarding rules manager will call
+ * for notifying the listeners of policy installation updates.
+ * 
  */
 public interface IForwardingRulesManagerAware {
 
-	/**
-	 * Inform the listeners that a troubleshooting information was 
-	 * added or removed for the specified policy.
-	 * 
-	 * @param policyName the policy affected
-	 * @param add true if the troubleshooting information was added, false otherwise
-	 */
+    /**
+     * Inform the listeners that a troubleshooting information was added or
+     * removed for the specified policy.
+     * 
+     * @param policyName
+     *            the policy affected
+     * @param add
+     *            true if the troubleshooting information was added, false
+     *            otherwise
+     */
     public void policyUpdate(String policyName, boolean add);
 }

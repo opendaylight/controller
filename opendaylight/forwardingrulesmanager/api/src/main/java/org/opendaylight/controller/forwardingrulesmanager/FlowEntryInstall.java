@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -15,15 +14,15 @@ import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Node;
 
 /**
- * The flow database object representing the flow entry to install on
- * the network node. It contains the original flow entry FRM was
- * requested to install, the container flow with which that entry had
- * to be merged and the resultant merged flow entry, which is the
- * one that was eventually installed on the network node
- *
- * Note: If the container flow is null, the install entry will be a clone
- * of the original entry
- *
+ * The flow database object representing the flow entry to install on the
+ * network node. It contains the original flow entry FRM was requested to
+ * install, the container flow with which that entry had to be merged and the
+ * resultant merged flow entry, which is the one that was eventually installed
+ * on the network node
+ * 
+ * Note: If the container flow is null, the install entry will be a clone of the
+ * original entry
+ * 
  */
 public class FlowEntryInstall {
     private FlowEntry original;

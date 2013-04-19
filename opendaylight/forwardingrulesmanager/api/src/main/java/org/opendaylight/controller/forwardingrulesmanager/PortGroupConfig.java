@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -15,14 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * PortGroupConfig class represents the User's Configuration with a Opaque Regular Expression
- * String that is parsed and handled by PortGroupProvider.
- *
- * Typically, the opaque matchString will be a Regular Expression String supported by a particular
- * PortGroupProvider based on Customer requirements.
- *
- *
- *
+ * PortGroupConfig class represents the User's Configuration with a Opaque
+ * Regular Expression String that is parsed and handled by PortGroupProvider.
+ * 
+ * Typically, the opaque matchString will be a Regular Expression String
+ * supported by a particular PortGroupProvider based on Customer requirements.
+ * 
+ * 
+ * 
  */
 public class PortGroupConfig implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -40,11 +39,13 @@ public class PortGroupConfig implements Serializable {
     }
 
     /**
-     * Constructor to create a Port Group Configuration using a Group Name and an Opaque
-     * String that is managed by PortGroupProvider.
-     *
-     * @param name Group Name representing a Port Group configuration
-     * @param matchString An Opaque String managed by PortGroupProvider
+     * Constructor to create a Port Group Configuration using a Group Name and
+     * an Opaque String that is managed by PortGroupProvider.
+     * 
+     * @param name
+     *            Group Name representing a Port Group configuration
+     * @param matchString
+     *            An Opaque String managed by PortGroupProvider
      */
     public PortGroupConfig(String name, String matchString) {
         super();
@@ -54,7 +55,7 @@ public class PortGroupConfig implements Serializable {
 
     /**
      * Returns the user configured PortGroup Configuration name.
-     *
+     * 
      * @return Configuration Name
      */
     public String getName() {
@@ -63,7 +64,9 @@ public class PortGroupConfig implements Serializable {
 
     /**
      * Assigns a name to the configuration
-     * @param name configuration name
+     * 
+     * @param name
+     *            configuration name
      */
     public void setName(String name) {
         this.name = name;
@@ -71,6 +74,7 @@ public class PortGroupConfig implements Serializable {
 
     /**
      * Returns the Opaque string
+     * 
      * @return
      */
     public String getMatchString() {
@@ -79,17 +83,18 @@ public class PortGroupConfig implements Serializable {
 
     /**
      * Assigns an opaque String to the Configuration.
-     *
-     * @param matchString Opaque string handled by PortGroupProvider
+     * 
+     * @param matchString
+     *            Opaque string handled by PortGroupProvider
      */
     public void setMatchString(String matchString) {
         this.matchString = matchString;
     }
 
     /**
-     * Returns the names of all the configurable fields in PortGroupConfig.
-     * This method is typically used by NorthBound apis.
-     *
+     * Returns the names of all the configurable fields in PortGroupConfig. This
+     * method is typically used by NorthBound apis.
+     * 
      * @return List of Field names that can be configured.
      */
     public static List<String> getFieldsNames() {
@@ -97,7 +102,7 @@ public class PortGroupConfig implements Serializable {
         for (Field fld : PortGroupConfig.class.getDeclaredFields()) {
             fieldList.add(fld.getName());
         }
-        //remove static field(s)
+        // remove static field(s)
         fieldList.remove(0);
         fieldList.remove(0);
 
@@ -105,10 +110,12 @@ public class PortGroupConfig implements Serializable {
     }
 
     /**
-     * Returns the names of all the configurable fields in PortGroupConfig in human readable format for UI purposes.
-     * This method is typically used by Web/UI apis.
-     *
-     * @return List of Human readable Strings that corresponds to the configurable field names.
+     * Returns the names of all the configurable fields in PortGroupConfig in
+     * human readable format for UI purposes. This method is typically used by
+     * Web/UI apis.
+     * 
+     * @return List of Human readable Strings that corresponds to the
+     *         configurable field names.
      */
     public static List<String> getPrettyFieldsNames() {
         List<String> fieldList = new ArrayList<String>();

@@ -6,11 +6,11 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
     <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../commons/opendaylight</relativePath>
+    <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
-  <artifactId>forwardingrulesmanager</artifactId>
+  <artifactId>forwardingrulesmanager.implementation</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
@@ -26,7 +26,6 @@
 	    <Include-Resource>
 	    </Include-Resource>
 	    <Export-Package>
-	      org.opendaylight.controller.forwardingrulesmanager
 	    </Export-Package>
 	    <Import-Package>
 		      org.opendaylight.controller.clustering.services,
@@ -40,6 +39,7 @@
               org.opendaylight.controller.sal.match,
 			  org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
+			  org.opendaylight.controller.forwardingrulesmanager,
               javax.xml.bind.annotation,
               javax.xml.bind,
               org.apache.felix.dm,
@@ -86,6 +86,11 @@
 	<dependency>
 		<groupId>org.opendaylight.controller</groupId>
 		<artifactId>sal</artifactId>
+		<version>0.4.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.opendaylight.controller</groupId>
+		<artifactId>forwardingrulesmanager</artifactId>
 		<version>0.4.0-SNAPSHOT</version>
 	</dependency>
     <dependency>
