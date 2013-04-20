@@ -31,6 +31,7 @@ public class FlowEntry implements Cloneable, Serializable {
     protected static final Logger logger = LoggerFactory
     .getLogger(FlowEntry.class);
     private static final long serialVersionUID = 1L;
+    private static final Logger log = LoggerFactory.getLogger(FlowEntry.class);
     private String groupName; // group name
     private String flowName; // flow name (may be null)
     private Node node; // network node where to install the flow
@@ -83,7 +84,7 @@ public class FlowEntry implements Cloneable, Serializable {
             cloned = (FlowEntry) super.clone();
             cloned.flow = this.flow.clone();
         } catch (CloneNotSupportedException e) {
-            logger.error("",e);
+           log.warn("exception in clone", e);
         }
         return cloned;
     }
