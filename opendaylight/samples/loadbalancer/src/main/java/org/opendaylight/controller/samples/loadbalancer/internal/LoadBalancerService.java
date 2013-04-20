@@ -221,7 +221,7 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
                 lbsLogger.debug("Packet recieved from switch : {}",inPkt.getIncomingNodeConnector().getNode().toString());
                 IPv4 ipv4Pkt = (IPv4)ipPkt;
                 if(IPProtocols.getProtocolName(ipv4Pkt.getProtocol()).equals(IPProtocols.TCP.toString())
-                        || IPProtocols.getProtocolName(ipv4Pkt.getProtocol()).equals(IPProtocols.TCP.toString())){
+                        || IPProtocols.getProtocolName(ipv4Pkt.getProtocol()).equals(IPProtocols.UDP.toString())){
                     
                     lbsLogger.debug("Packet protocol : {}",IPProtocols.getProtocolName(ipv4Pkt.getProtocol()));
                     Client client = new LBUtil().getClientFromPacket(ipv4Pkt);
