@@ -63,7 +63,6 @@ import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -74,6 +73,7 @@ import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
@@ -144,7 +144,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         // Sanity Check
         if (flowEntry == null || flowEntry.getNode() == null) {
             String msg = "Invalid FlowEntry";
-            log.warn(msg + ": " + flowEntry);
+            String logMsg = msg + ": {}";
+            log.warn(logMsg, flowEntry);
             return new Status(StatusCode.NOTACCEPTABLE, msg);
         }
 
@@ -158,7 +159,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         // Container Flow conflict Check
         if (toInstallList.isEmpty()) {
             String msg = "Flow Entry conflicts with all Container Flows";
-            log.warn(msg);
+            String logMsg = msg + ": {}";
+            log.warn(logMsg, flowEntry);
             return new Status(StatusCode.CONFLICT, msg);
         }
 
@@ -170,7 +172,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             if (findMatch(entry.getInstall(), false) != null) {
                 log.warn("Operation Rejected: A flow with same match "
                         + "and priority exists on the target node");
-                log.trace("Aborting to install " + entry);
+                log.trace("Aborting to install {}", entry);
                 continue;
             }
             toInstallSafe.add(entry);
@@ -181,7 +183,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         if (toInstallSafe.size() == 0) {
             String msg = "A flow with same match and priority exists "
                     + "on the target node";
-            log.warn(msg);
+            String logMsg = msg + ": {}";
+            log.warn(logMsg, flowEntry);
             return new Status(StatusCode.CONFLICT, msg);
         }
 
@@ -197,7 +200,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 oneSucceded = true;
             } else {
                 error = ret;
-                log.warn("Failed to install the entry: " + ret.getDescription());
+                log.warn("Failed to install the entry: {}. The failure is: {}",
+                        installEntry, ret.getDescription());
             }
         }
 
@@ -257,21 +261,24 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         if (currentFlowEntry == null || currentFlowEntry.getNode() == null
                 || newFlowEntry == null || newFlowEntry.getNode() == null) {
             String msg = "Modify: Invalid FlowEntry";
-            log.warn(msg + ": {} or {} ", currentFlowEntry, newFlowEntry);
+            String logMsg = msg + ": {} or {}";
+            log.warn(logMsg, currentFlowEntry, newFlowEntry);
             return new Status(StatusCode.NOTACCEPTABLE, msg);
         }
         if (!currentFlowEntry.getNode().equals(newFlowEntry.getNode())
                 || !currentFlowEntry.getFlowName().equals(
                         newFlowEntry.getFlowName())) {
             String msg = "Modify: Incompatible Flow Entries";
-            log.warn(msg + ": {} and {}", currentFlowEntry, newFlowEntry);
+            String logMsg = msg + ": {} and {}";
+            log.warn(logMsg, currentFlowEntry, newFlowEntry);
             return new Status(StatusCode.NOTACCEPTABLE, msg);
         }
 
         // Equality Check
         if (currentFlowEntry.equals(newFlowEntry)) {
             String msg = "Modify skipped as flows are the same";
-            log.debug(msg + ": " + currentFlowEntry + " and " + newFlowEntry);
+            String logMsg = msg + ": {} and {}";
+            log.debug(logMsg, currentFlowEntry, newFlowEntry);
             return new Status(StatusCode.SUCCESS, msg);
         }
 
@@ -286,7 +293,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                         currentFlowEntry)) {
             String msg = "Operation Rejected: Another flow with same match "
                     + "and priority exists on the target node";
-            log.warn(msg);
+            String logMsg = msg + ": {}";
+            log.warn(logMsg, currentFlowEntry);
             return new Status(StatusCode.CONFLICT, msg);
         }
 
@@ -299,6 +307,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         if (toInstallList.isEmpty()) {
             String msg = "Modify Operation Rejected: The new entry "
                     + "conflicts with all the container flows";
+            String logMsg = msg + ": {}";
+            log.warn(logMsg, newFlowEntry);
             log.warn(msg);
             return new Status(StatusCode.CONFLICT, msg);
         }
@@ -419,8 +429,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                         .getFlow());
 
         if (!status.isSuccess()) {
-            log.warn("SDN Plugin failed to program the flow: "
-                    + status.getDescription());
+            log.warn(
+                    "SDN Plugin failed to program the flow: {}. The failure is: {}",
+                    newEntries.getInstall(), status.getDescription());
             return status;
         }
 
@@ -447,7 +458,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         // Sanity Check
         if (flowEntry == null || flowEntry.getNode() == null) {
             String msg = "Invalid FlowEntry";
-            log.warn(msg + ": " + flowEntry);
+            String logMsg = msg + ": {}";
+            log.warn(logMsg, flowEntry);
             return new Status(StatusCode.NOTACCEPTABLE, msg);
         }
 
@@ -459,14 +471,14 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         boolean atLeastOneRemoved = false;
         for (FlowEntryInstall entry : installedList) {
             if (flowsOnNode == null) {
-                String msg = "Removal skipped (Node down or Flow not on Node)";
-                log.debug(msg + " for flow entry " + flowEntry);
+                String msg = "Removal skipped (Node down) for flow entry";
+                String logMsg = msg + ": {}";
+                log.debug(logMsg, flowEntry);
                 return new Status(StatusCode.SUCCESS, msg);
             }
             if (!flowsOnNode.contains(entry)) {
-                log.debug("Removal skipped (not present in software view) "
-                        + "for flow entry " + flowEntry);
-
+                String logMsg = "Removal skipped (not present in software view) for flow entry: {}";
+                log.debug(logMsg, flowEntry);
                 if (installedList.size() == 1) {
                     // If we had only one entry to remove, we are done
                     return new Status(StatusCode.SUCCESS, null);
@@ -480,7 +492,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
 
             if (!ret.isSuccess()) {
                 error = ret;
-                log.warn("Failed to remove the entry: " + ret.getDescription());
+                log.warn("Failed to remove the entry: {}. The failure is: {}",
+                        entry.getInstall(), ret.getDescription());
                 if (installedList.size() == 1) {
                     // If we had only one entry to remove, this is fatal failure
                     return error;
@@ -517,11 +530,12 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 .getInstall().getFlow());
 
         if (!status.isSuccess()) {
-            log.warn("SDN Plugin failed to remove the flow: "
-                    + status.getDescription());
+            log.warn(
+                    "SDN Plugin failed to program the flow: {}. The failure is: {}",
+                    entry.getInstall(), status.getDescription());
             return status;
         }
-        log.trace("Removed  {}", entry.getInstall());
+        log.info("Removed  {}", entry.getInstall());
 
         // Update DB
         updateLocalDatabase(entry, false);
@@ -545,12 +559,13 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 .getFlow());
 
         if (!status.isSuccess()) {
-            log.warn("SDN Plugin failed to program the flow: "
-                    + status.getDescription());
+            log.warn(
+                    "SDN Plugin failed to program the flow: {}. The failure is: {}",
+                    entry.getInstall(), status.getDescription());
             return status;
         }
 
-        log.trace("Added    {}", entry.getInstall());
+        log.info("Added    {}", entry.getInstall());
 
         // Update DB
         updateLocalDatabase(entry, true);
@@ -706,6 +721,11 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         // Update DB
         if (status.isSuccess()) {
             updateLocalDatabase(target, false);
+        } else {
+            // log the error
+            log.warn(
+                    "SDN Plugin failed to remove the flow: {}. The failure is: {}",
+                    target.getInstall(), status.getDescription());
         }
 
         return status;
@@ -716,8 +736,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         Status status;
         if (inContainerMode) {
             String msg = "Controller in container mode: Install Refused";
+            String logMsg = msg + ": {}";
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
-            log.warn(msg);
+            log.warn(logMsg, flowEntry);
         } else {
             status = addEntry(flowEntry);
         }
@@ -729,8 +750,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         Status status;
         if (inContainerMode) {
             String msg = "Controller in container mode: Uninstall Refused";
+            String logMsg = msg + ": {}";
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
-            log.warn(msg);
+            log.warn(logMsg, entry);
         } else {
             status = removeEntry(entry);
         }
@@ -743,8 +765,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         Status status = null;
         if (inContainerMode) {
             String msg = "Controller in container mode: Modify Refused";
+            String logMsg = msg + ": {}";
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
-            log.warn(msg);
+            log.warn(logMsg, newFlowEntry);
         } else {
             status = modifyEntry(currentFlowEntry, newFlowEntry);
         }
@@ -881,7 +904,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                     try {
                         frma.policyUpdate(policyname, add);
                     } catch (Exception e) {
-                        log.error("Exception on callback", e);
+                        log.warn("Exception on callback", e);
                     }
                 }
             }
@@ -933,9 +956,10 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                     log.info("Ports {} added to FlowEntry {}", portList,
                             flowName);
                 } else {
-                    log.warn("Failed to add ports {} to Flow entry {}: "
-                            + error.getDescription(), portList,
-                            currentFlowEntry.toString());
+                    log.warn(
+                            "Failed to add ports {} to Flow entry {}. The failure is: {}",
+                            portList, currentFlowEntry.toString(),
+                            error.getDescription());
                 }
                 return;
             }
@@ -963,9 +987,10 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                     log.info("Ports {} removed from FlowEntry {}", portList,
                             flowName);
                 } else {
-                    log.warn("Failed to remove ports {} from Flow entry {}: "
-                            + status.getDescription(), portList,
-                            currentFlowEntry.toString());
+                    log.warn(
+                            "Failed to remove ports {} from Flow entry {}. The failure is: {}",
+                            portList, currentFlowEntry.toString(),
+                            status.getDescription());
                 }
                 return;
             }
@@ -1015,11 +1040,12 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         Status status = modifyEntry(currentFlowEntry, newFlowEntry);
 
         if (status.isSuccess()) {
-            log.info("Output port replaced with " + outPort
-                    + " for flow {} on node {}", flowName, node);
+            log.info("Output port replaced with {} for flow {} on node {}",
+                    outPort, flowName, node);
         } else {
-            log.warn("Failed to replace output port for flow {} on node {}: ",
-                    status.getDescription(), flowName, node);
+            log.warn(
+                    "Failed to replace output port for flow {} on node {}. The failure is: {}",
+                    flowName, node, status.getDescription());
         }
         return;
     }
@@ -1081,9 +1107,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
 
         } catch (CacheConfigException cce) {
-            log.error("FRM CacheConfigException");
+            log.error("FRM CacheConfigException", cce);
         } catch (CacheExistException cce) {
-            log.error("FRM CacheExistException");
+            log.error("FRM CacheExistException", cce);
         }
     }
 
@@ -1213,13 +1239,17 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         // Presence check
         if (flowConfigExists(config)) {
             error = "Entry with this name on specified switch already exists";
+            log.warn(
+                    "Entry with this name on specified switch already exists: {}",
+                    config);
             config.setStatus(error);
             return new Status(StatusCode.CONFLICT, error);
         }
 
         // Skip validation check if we are trying to restore a saved config
         if (!restore && !config.isValid(container, resultStr)) {
-            log.debug(resultStr.toString());
+            log.warn("Invalid Configuration for flow {}. The failure is {}",
+                    config, resultStr.toString());
             error = "Invalid Configuration (" + resultStr.toString() + ")";
             config.setStatus(error);
             return new Status(StatusCode.BADREQUEST, error);
@@ -1233,7 +1263,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 }
             }
             if (!multipleFlowPush) {
-                log.debug(resultStr.toString());
+                log.warn(
+                        "Invalid Configuration(Invalid PortGroup Name) for flow {}",
+                        config);
                 error = "Invalid Configuration (Invalid PortGroup Name)";
                 config.setStatus(error);
                 return new Status(StatusCode.BADREQUEST, error);
@@ -1304,7 +1336,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     }
 
     private void updateStaticFlowConfigsOnNodeDown(Node node) {
-        log.trace("Updating Static Flow configs on node down: " + node);
+        log.trace("Updating Static Flow configs on node down: {}", node);
 
         List<Integer> toRemove = new ArrayList<Integer>();
         for (Entry<Integer, FlowConfig> entry : staticFlows.entrySet()) {
@@ -1331,8 +1363,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     }
 
     private void updateStaticFlowConfigsOnContainerModeChange(UpdateType update) {
-        log.trace("Updating Static Flow configs on container mode change: "
-                + update);
+        log.trace("Updating Static Flow configs on container mode change: {}",
+                update);
 
         for (FlowConfig config : staticFlows.values()) {
             if (config.isPortGroupEnabled()) {
@@ -1387,7 +1419,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 if (entry.isInternalFlow()) {
                     String msg = "Invalid operation: Controller generated "
                             + "flow cannot be deleted";
-                    log.warn(msg);
+                    String logMsg = msg + ": {}";
+                    log.warn(logMsg, name);
                     return new Status(StatusCode.NOTACCEPTABLE, msg);
                 }
                 if (!entry.isPortGroupEnabled()) {
@@ -1412,7 +1445,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         if (newFlowConfig.isInternalFlow()) {
             String msg = "Invalid operation: Controller generated flow "
                     + "cannot be modified";
-            log.warn(msg);
+            String logMsg = msg + ": {}";
+            log.warn(logMsg, newFlowConfig);
             return new Status(StatusCode.NOTACCEPTABLE, msg);
         }
 
@@ -1421,7 +1455,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         if (!newFlowConfig.isValid(container, resultStr)) {
             String msg = "Invalid Configuration (" + resultStr.toString() + ")";
             newFlowConfig.setStatus(msg);
-            log.warn(msg);
+            log.warn("Invalid Configuration for flow {}. The failure is {}",
+                    newFlowConfig, resultStr.toString());
             return new Status(StatusCode.BADREQUEST, msg);
         }
 
@@ -1439,14 +1474,17 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
 
         if (oldFlowConfig == null) {
             String msg = "Attempt to modify a non existing static flow";
-            log.warn(msg);
+            String logMsg = msg + ": {}";
+            log.warn(logMsg, newFlowConfig);
             return new Status(StatusCode.NOTFOUND, msg);
         }
 
         // Do not attempt to reinstall the flow, warn user
         if (newFlowConfig.equals(oldFlowConfig)) {
             String msg = "No modification detected";
-            log.info("Static flow modification skipped: " + msg);
+            log.info(
+                    "Static flow modification skipped. New flow and old flow are the same: {}",
+                    newFlowConfig);
             return new Status(StatusCode.SUCCESS, msg);
         }
 
@@ -1482,7 +1520,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         if (config.isInternalFlow()) {
             String msg = "Invalid operation: Controller generated flow "
                     + "cannot be modified";
-            log.warn(msg);
+            String logMsg = msg + ": {}";
+            log.warn(logMsg, config);
             return new Status(StatusCode.NOTACCEPTABLE, msg);
         }
 
@@ -1532,9 +1571,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         for (FlowEntry flowEntry : inactiveFlows) {
             Status status = this.removeEntry(flowEntry);
             if (!status.isSuccess()) {
-                log.warn(
-                        "Failed to remove entry: {}: "
-                                + status.getDescription(), flowEntry);
+                log.warn("Failed to remove entry: {}. The failure is: {}"
+                        + flowEntry, status.getDescription());
             }
         }
     }
@@ -1550,9 +1588,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         for (FlowEntry flowEntry : this.inactiveFlows) {
             Status status = this.addEntry(flowEntry);
             if (!status.isSuccess()) {
-                log.warn(
-                        "Failed to install entry: {}: "
-                                + status.getDescription(), flowEntry);
+                log.warn("Failed to install entry: {}. The failure is: {}"
+                        + flowEntry, status.getDescription());
             }
         }
 
@@ -1779,7 +1816,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * @param node
      */
     private synchronized void cleanDatabaseForNode(Node node) {
-        log.info("Cleaning Flow database for Node " + node.toString());
+        log.info("Cleaning Flow database for Node {}", node.toString());
 
         // Find out which groups the node's flows are part of
         Set<String> affectedGroups = new HashSet<String>();
@@ -2244,7 +2281,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         try {
             node = NodeCreator.createOFNode(Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            ci.print("Node id not a number");
+            return;
         }
         ci.println(this.programmer.addFlow(node, getSampleFlow(node)));
     }
@@ -2260,7 +2298,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         try {
             node = NodeCreator.createOFNode(Long.valueOf(nodeId));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            ci.print("Node id not a number");
+            return;
         }
         ci.println(this.programmer.removeFlow(node, getSampleFlow(node)));
     }
