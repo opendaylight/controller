@@ -284,27 +284,31 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             ARP arp = new ARP();
             byte[] senderIP = subnet.getNetworkAddress().getAddress();
             byte[] targetIPB = targetIP.getAddress();
-            arp.setHardwareType(ARP.HW_TYPE_ETHERNET).setProtocolType(
-                    EtherTypes.IPv4.shortValue()).setHardwareAddressLength(
-                    (byte) 6).setProtocolAddressLength((byte) 4).setOpCode(
-                    ARP.REQUEST).setSenderHardwareAddress(getControllerMAC())
-                    .setSenderProtocolAddress(senderIP)
-                    .setTargetHardwareAddress(
-                            new byte[] { (byte) 0, (byte) 0, (byte) 0,
-                                    (byte) 0, (byte) 0, (byte) 0 })
-                    .setTargetProtocolAddress(targetIPB);
+            arp.setHardwareType(ARP.HW_TYPE_ETHERNET)
+               .setProtocolType(EtherTypes.IPv4.shortValue())
+               .setHardwareAddressLength((byte) 6)
+               .setProtocolAddressLength((byte) 4)
+               .setOpCode(ARP.REQUEST)
+               .setSenderHardwareAddress(getControllerMAC())
+               .setSenderProtocolAddress(senderIP)
+               .setTargetHardwareAddress(new byte[] { (byte) 0, (byte) 0,
+                                                     (byte) 0, (byte) 0,
+                                                     (byte) 0, (byte) 0 })
+               .setTargetProtocolAddress(targetIPB);
 
             Ethernet ethernet = new Ethernet();
             ethernet.setSourceMACAddress(getControllerMAC())
-                    .setDestinationMACAddress(
-                            new byte[] { (byte) -1, (byte) -1, (byte) -1,
-                                    (byte) -1, (byte) -1, (byte) -1 })
+                    .setDestinationMACAddress(new byte[] { (byte) -1,
+                                                          (byte) -1,
+                                                          (byte) -1,
+                                                          (byte) -1,
+                                                          (byte) -1,
+                                                          (byte) -1 })
                     .setEtherType(EtherTypes.ARP.shortValue()).setPayload(arp);
 
             // TODO For now send port-by-port, see how to optimize to
             // send to a bunch of port on the same node in a shoot
-            RawPacket destPkt = this.dataPacketService
-                    .encodeDataPacket(ethernet);
+            RawPacket destPkt = this.dataPacketService.encodeDataPacket(ethernet);
             destPkt.setOutgoingNodeConnector(p);
 
             this.dataPacketService.transmitDataPacket(destPkt);
