@@ -95,9 +95,9 @@ one.lib.dashlet = {
             if (body.length == 0 && !(typeof thead === 'undefined')) {
                 var $tr = $(document.createElement('tr'));
                 var $td = $(document.createElement('td'));
-                $td.attr("colspan", thead.length);
-                $td.text("No data available");
-                $td.addClass("empty");
+                $td.attr('colspan', thead.length);
+                $td.text('No data available');
+                $td.addClass('empty');
                 $tr.append($td);
                 $tbody.append($tr);
                 return $tbody;
@@ -105,21 +105,25 @@ one.lib.dashlet = {
             // else, populate as usual
             $(body).each(function(index, value) {
                 var $tr = $(document.createElement('tr'));
-                // data-id
-                if (value['id'] != undefined) {
-                    $tr.attr('data-id', value['id']);
-                }
-                // add classes
-                $(value["type"]).each(function(index, value) {
-                    $tr.addClass(value);
+                $.each(value, function(key, value) {
+                    if (key == 'type') {
+                        // add classes
+                        $(value).each(function(index, value) {
+                            $tr.addClass(value);
+                        });
+                    } else if (key == 'entry') {
+                        // add entries
+                        $(value).each(function(index, value) {
+                            var $td = $(document.createElement('td'));
+                            $td.append(value);
+                            $tr.append($td);
+                        });
+                    } else {
+                        // data field
+                        $tr.attr('data-' + key, value);
+                    }
+                    $tbody.append($tr);
                 });
-                // add entries
-                $(value["entry"]).each(function(index, value) {
-                    var $td = $(document.createElement('td'));
-                    $td.append(value);
-                    $tr.append($td);
-                });
-                $tbody.append($tr);
             });
             return $tbody;
         }
