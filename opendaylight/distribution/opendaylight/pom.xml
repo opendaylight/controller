@@ -40,7 +40,8 @@
     <module>../../configuration/implementation</module>
     <module>../../routing/dijkstra_implementation</module>
     <module>../../arphandler</module>
-    <module>../../forwardingrulesmanager</module>
+    <module>../../forwardingrulesmanager/api</module>
+    <module>../../forwardingrulesmanager/implementation</module>
     <module>../../hosttracker</module>
     <module>../../containermanager/api</module>
     <module>../../containermanager/implementation</module>
