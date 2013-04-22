@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -22,10 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Represents a flow applications request Forwarding Rules Manager to install
- * on a network node. A FlowEntry is constituted of a flow (match + actions),
- * the target network node, and the flow name. It also includes a group name. 
- * For instance the flows constituting a policy all share the same group name.
+ * Represents a flow applications request Forwarding Rules Manager to install on
+ * a network node. A FlowEntry is constituted of a flow (match + actions), the
+ * target network node, and the flow name. It also includes a group name. For
+ * instance the flows constituting a policy all share the same group name.
  */
 public class FlowEntry implements Cloneable, Serializable {
     protected static final Logger logger = LoggerFactory
@@ -54,7 +53,7 @@ public class FlowEntry implements Cloneable, Serializable {
 
     /**
      * Return the actual Flow contained in this entry
-     *
+     * 
      * @return the flow
      */
     public Flow getFlow() {
@@ -115,13 +114,12 @@ public class FlowEntry implements Cloneable, Serializable {
 
     /**
      * Merges the current Flow with the passed Container Flow
-     *
-     * Note: Container Flow merging is not an injective function.
-     * Be m1 and m2 two different matches, and be f() the flow merge
-     * function, such that y1 = f(m1) and y2 = f(m2) are the two merged
-     * matches, we may have: y1 = y2
-     *
-     *
+     * 
+     * Note: Container Flow merging is not an injective function. Be m1 and m2
+     * two different matches, and be f() the flow merge function, such that y1 =
+     * f(m1) and y2 = f(m2) are the two merged matches, we may have: y1 = y2
+     * 
+     * 
      * @param containerFlow
      * @return this merged FlowEntry
      */

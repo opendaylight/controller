@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -13,13 +12,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * PortGroup is a simple data-structure to represent any arbitrary group of ports
- * on a Switch (that is represented using its switch-ID).
- *
- * PortGroup is used by PortGroupProvider application to signal a set of ports that
- * represent a configured PortGroupConfig.
- *
- *
+ * PortGroup is a simple data-structure to represent any arbitrary group of
+ * ports on a Switch (that is represented using its switch-ID).
+ * 
+ * PortGroup is used by PortGroupProvider application to signal a set of ports
+ * that represent a configured PortGroupConfig.
+ * 
+ * 
  */
 public class PortGroup {
     private long matrixSwitchId;
@@ -27,9 +26,11 @@ public class PortGroup {
 
     /**
      * PortGroup Constructor using Switch and Ports.
-     *
-     * @param matrixSwitchId Switch Id that represents an openflow Switch
-     * @param ports Set of short values representing openflow port-ids.
+     * 
+     * @param matrixSwitchId
+     *            Switch Id that represents an openflow Switch
+     * @param ports
+     *            Set of short values representing openflow port-ids.
      */
     public PortGroup(long matrixSwitchId, Set<Short> ports) {
         super();
@@ -39,8 +40,9 @@ public class PortGroup {
 
     /**
      * PortGroup Constructor using Switch.
-     *
-     * @param matrixSwitchId Switch-Id that represents an openflow Switch
+     * 
+     * @param matrixSwitchId
+     *            Switch-Id that represents an openflow Switch
      */
     public PortGroup(long matrixSwitchId) {
         this.matrixSwitchId = matrixSwitchId;
@@ -49,7 +51,7 @@ public class PortGroup {
 
     /**
      * Returns the switchId representing the Switch that makes this PortGroup.
-     *
+     * 
      * @return long switchId
      */
     public long getMatrixSwitchId() {
@@ -58,8 +60,9 @@ public class PortGroup {
 
     /**
      * Assigns a Switch to this PortGroup
-     *
-     * @param matrixSwitchId Switch-Id that represents an openflow Switch
+     * 
+     * @param matrixSwitchId
+     *            Switch-Id that represents an openflow Switch
      */
     public void setMatrixSwitchId(long matrixSwitchId) {
         this.matrixSwitchId = matrixSwitchId;
@@ -67,7 +70,7 @@ public class PortGroup {
 
     /**
      * Returns the Set of Ports that makes this PortGroup.
-     *
+     * 
      * @return Set of short values representing openflow port-ids.
      */
     public Set<Short> getPorts() {
@@ -76,8 +79,9 @@ public class PortGroup {
 
     /**
      * Assigns a set of openflow ports to this PortGroup
-     *
-     * @param ports Set of short values representing openflow port-ids.
+     * 
+     * @param ports
+     *            Set of short values representing openflow port-ids.
      */
     public void setPorts(Set<Short> ports) {
         this.ports = ports;
@@ -85,8 +89,9 @@ public class PortGroup {
 
     /**
      * Adds a port to this PortGroup
-     *
-     * @param port Short value of a openflow port.
+     * 
+     * @param port
+     *            Short value of a openflow port.
      */
     public void addPort(short port) {
         ports.add(port);

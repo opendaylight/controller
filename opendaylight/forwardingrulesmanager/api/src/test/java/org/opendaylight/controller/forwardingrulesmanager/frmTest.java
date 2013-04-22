@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -41,33 +40,35 @@ import org.opendaylight.controller.sal.utils.NodeCreator;
 
 public class frmTest {
 
-	@Test
-	public void testFlowEntryInstall() throws UnknownHostException{
-		 Node node = NodeCreator.createOFNode(1L);
-	     FlowEntry pol = new FlowEntry("polTest", null, getSampleFlowV6(node),
-	                node);
-	     FlowEntry pol2 = new FlowEntry("polTest2", null, getSampleFlowV6(node),
-	                node);
-	     FlowEntryInstall fei = new FlowEntryInstall(pol, null);
-	     FlowEntryInstall fei2 = new FlowEntryInstall(pol, null);
-	     FlowEntryInstall fei3 = new FlowEntryInstall(pol2, null);
-	     Assert.assertTrue(fei.getOriginal().equals(pol));
-	     Assert.assertTrue(fei.getInstall().equals(pol));
-	     Assert.assertTrue(fei.getFlowName().equals(pol.getFlowName()));
-	     Assert.assertTrue(fei.getGroupName().equals(pol.getGroupName()));
-	     Assert.assertTrue(fei.getNode().equals(pol.getNode()));
-	     Assert.assertFalse(fei.isDeletePending());
-	     fei.toBeDeleted();
-	     Assert.assertTrue(fei.isDeletePending());
-	     Assert.assertNull(fei.getContainerFlow());
-	     Assert.assertTrue(fei.equalsByNodeAndName(pol.getNode(), pol.getFlowName()));
-	     
-	     Assert.assertTrue(fei.equals(fei2));
-	     fei2.getOriginal().setFlowName("polTest2");
-	     Assert.assertFalse(fei.equals(null));
-	     Assert.assertFalse(fei.equals(fei3));
-	  
-	}
+    @Test
+    public void testFlowEntryInstall() throws UnknownHostException {
+        Node node = NodeCreator.createOFNode(1L);
+        FlowEntry pol = new FlowEntry("polTest", null, getSampleFlowV6(node),
+                node);
+        FlowEntry pol2 = new FlowEntry("polTest2", null, getSampleFlowV6(node),
+                node);
+        FlowEntryInstall fei = new FlowEntryInstall(pol, null);
+        FlowEntryInstall fei2 = new FlowEntryInstall(pol, null);
+        FlowEntryInstall fei3 = new FlowEntryInstall(pol2, null);
+        Assert.assertTrue(fei.getOriginal().equals(pol));
+        Assert.assertTrue(fei.getInstall().equals(pol));
+        Assert.assertTrue(fei.getFlowName().equals(pol.getFlowName()));
+        Assert.assertTrue(fei.getGroupName().equals(pol.getGroupName()));
+        Assert.assertTrue(fei.getNode().equals(pol.getNode()));
+        Assert.assertFalse(fei.isDeletePending());
+        fei.toBeDeleted();
+        Assert.assertTrue(fei.isDeletePending());
+        Assert.assertNull(fei.getContainerFlow());
+        Assert.assertTrue(fei.equalsByNodeAndName(pol.getNode(),
+                pol.getFlowName()));
+
+        Assert.assertTrue(fei.equals(fei2));
+        fei2.getOriginal().setFlowName("polTest2");
+        Assert.assertFalse(fei.equals(null));
+        Assert.assertFalse(fei.equals(fei3));
+
+    }
+
     @Test
     public void testFlowEntryCreation() throws UnknownHostException {
         Node node = NodeCreator.createOFNode(1L);
@@ -102,7 +103,6 @@ public class frmTest {
         Assert.assertTrue(pol.equals(pol2));
     }
 
-
     @Test
     public void testFlowEntryCloning() throws UnknownHostException {
         Node node = NodeCreator.createOFNode(1L);
@@ -126,7 +126,7 @@ public class frmTest {
         match.setField(MatchType.DL_TYPE, EtherTypes.IPv4.shortValue());
 
         List<Action> actionList = new ArrayList<Action>();
-        //actionList.add(new Drop());
+        // actionList.add(new Drop());
 
         Flow flow = new Flow(match, actionList);
         FlowEntry pol1 = new FlowEntry("m1", "same", flow, node1);
@@ -165,21 +165,21 @@ public class frmTest {
         FlowEntry entry = new FlowEntry("polTest", null, getSampleFlowV6(node),
                 node);
 
-        //testing equal function
+        // testing equal function
         Assert.assertFalse(frmC.equals(null));
         Assert.assertTrue(frmC.equals(frmC));
         Assert.assertTrue(frmC.equals(frmC3));
         Assert.assertFalse(frmC.equals(entry));
         FlowConfig flowC = createSampleFlowConfig();
         Assert.assertFalse(frmC.equals(flowC));
-        //testing installInHW
+        // testing installInHW
         Assert.assertTrue(frmC.installInHw());
         frmC.setInstallInHw(false);
         Assert.assertFalse(frmC.installInHw());
         frmC.setInstallInHw(true);
         Assert.assertTrue(frmC.installInHw());
 
-        //testing general set and get methods
+        // testing general set and get methods
         ArrayList<String> actions = createSampleActionList();
         frmC.setActions(actions);
         Assert.assertFalse(frmC.equals(frmC3));
@@ -256,20 +256,16 @@ public class frmTest {
 
         Assert.assertFalse(frmC.equals(flowC));
         frmC.setProtocol(IPProtocols.TCP.toString());
-        Assert.assertTrue(frmC.getProtocol().equals(
-                              IPProtocols.TCP.toString()));
+        Assert.assertTrue(frmC.getProtocol().equals(IPProtocols.TCP.toString()));
         Assert.assertFalse(frmC.equals(frmC3));
         frmC3.setProtocol(IPProtocols.TCP.toString());
 
         Assert.assertFalse(frmC.equals(flowC));
-        frmC.setNode(Node.fromString(Node.NodeIDType.OPENFLOW,
-                                     "1"));
-        Assert.assertTrue(frmC.getNode()
-                          .equals(Node.fromString(Node.NodeIDType.OPENFLOW,
-                                                  "1")));
+        frmC.setNode(Node.fromString(Node.NodeIDType.OPENFLOW, "1"));
+        Assert.assertTrue(frmC.getNode().equals(
+                Node.fromString(Node.NodeIDType.OPENFLOW, "1")));
         Assert.assertFalse(frmC.equals(frmC3));
-        frmC3.setNode(Node.fromString(Node.NodeIDType.OPENFLOW,
-                                      "1"));
+        frmC3.setNode(Node.fromString(Node.NodeIDType.OPENFLOW, "1"));
 
         Assert.assertFalse(frmC.equals(flowC));
         frmC.setTosBits("0");
@@ -313,7 +309,7 @@ public class frmTest {
         Assert.assertFalse(frmC.equals(frmC3));
         frmC3.setHardTimeout("1000");
 
-        //	Assert.assertFalse(frmC.equals(flowC));
+        // Assert.assertFalse(frmC.equals(flowC));
         Assert.assertTrue(actions.equals(frmC.getActions()));
 
         FlowConfig frmC2 = new FlowConfig(frmC);
@@ -323,7 +319,7 @@ public class frmTest {
         Assert.assertFalse(frmC2.equals(frmC));
         frmC2.setDynamic(true);
         Assert.assertTrue(frmC2.equals(frmC));
-        //Assert.assertFalse(frmC2.equals(frmC3));
+        // Assert.assertFalse(frmC2.equals(frmC3));
         flowC.setDynamic(true);
         Assert.assertTrue(flowC.equals(frmC));
         Assert.assertTrue(flowC.isStatusSuccessful());
@@ -342,65 +338,61 @@ public class frmTest {
         Assert.assertTrue(id.toString().equals("1"));
 
     }
-    
+
     @Test
-    public void testFlowConfigNextHopValidity() throws UnknownHostException{
-    	FlowConfig fc = new FlowConfig();
-    	Assert.assertFalse(fc.isOutputNextHopValid(null));
-    	Assert.assertFalse(fc.isOutputNextHopValid("abc"));
-    	Assert.assertFalse(fc.isOutputNextHopValid("1.1.1"));
-    	Assert.assertFalse(fc.isOutputNextHopValid("1.1.1.1/49"));
-    	
-    	Assert.assertTrue(fc.isOutputNextHopValid("1.1.1.1"));
-    	Assert.assertTrue(fc.isOutputNextHopValid("1.1.1.1/32"));
-    	Assert.assertTrue(fc.isOutputNextHopValid("2001:420:281:1004:407a:57f4:4d15:c355"));
-    	
+    public void testFlowConfigNextHopValidity() throws UnknownHostException {
+        FlowConfig fc = new FlowConfig();
+        Assert.assertFalse(fc.isOutputNextHopValid(null));
+        Assert.assertFalse(fc.isOutputNextHopValid("abc"));
+        Assert.assertFalse(fc.isOutputNextHopValid("1.1.1"));
+        Assert.assertFalse(fc.isOutputNextHopValid("1.1.1.1/49"));
+
+        Assert.assertTrue(fc.isOutputNextHopValid("1.1.1.1"));
+        Assert.assertTrue(fc.isOutputNextHopValid("1.1.1.1/32"));
+        Assert.assertTrue(fc
+                .isOutputNextHopValid("2001:420:281:1004:407a:57f4:4d15:c355"));
+
     }
-    
+
     @Test
-    public void testFlowConfigEqualities() throws UnknownHostException{
-    	FlowConfig fc = new FlowConfig();
-    	FlowConfig fc2 = new FlowConfig();
-    	fc.setName("flow1");
-    	fc.setNode(Node.fromString(Node.NodeIDType.OPENFLOW,
-                                   "1"));
-    	Assert.assertFalse(fc.onNode(Node.fromString(Node.NodeIDType.OPENFLOW,
-                                                     "0")));
-    	Assert.assertTrue(fc.onNode(Node.fromString(Node.NodeIDType.OPENFLOW,
-                                                    "1")));
-    	
-    	Assert.assertTrue(fc.isByNameAndNodeIdEqual(
-                              "flow1",
-                              Node.fromString(Node.NodeIDType.OPENFLOW, "1")));
-    	Assert.assertFalse(fc.isByNameAndNodeIdEqual(
-                               "flow1",
-                               Node.fromString(Node.NodeIDType.OPENFLOW, "0")));
-    	Assert.assertFalse(fc.isByNameAndNodeIdEqual(
-                               "flow2",
-                               Node.fromString(Node.NodeIDType.OPENFLOW, "1")));
-    	
-    	Assert.assertFalse(fc.isByNameAndNodeIdEqual(fc2));
-    	fc2.setName("flow1");
-    	Assert.assertFalse(fc.isByNameAndNodeIdEqual(fc2));
-    	fc2.setNode(Node.fromString(Node.NodeIDType.OPENFLOW,
-                                     "0"));
-    	Assert.assertFalse(fc.isByNameAndNodeIdEqual(fc2));
-    	fc2.setNode(Node.fromString(Node.NodeIDType.OPENFLOW,
-                                    "1"));
-    	Assert.assertTrue(fc.isByNameAndNodeIdEqual(fc2));
+    public void testFlowConfigEqualities() throws UnknownHostException {
+        FlowConfig fc = new FlowConfig();
+        FlowConfig fc2 = new FlowConfig();
+        fc.setName("flow1");
+        fc.setNode(Node.fromString(Node.NodeIDType.OPENFLOW, "1"));
+        Assert.assertFalse(fc.onNode(Node.fromString(Node.NodeIDType.OPENFLOW,
+                "0")));
+        Assert.assertTrue(fc.onNode(Node.fromString(Node.NodeIDType.OPENFLOW,
+                "1")));
+
+        Assert.assertTrue(fc.isByNameAndNodeIdEqual("flow1",
+                Node.fromString(Node.NodeIDType.OPENFLOW, "1")));
+        Assert.assertFalse(fc.isByNameAndNodeIdEqual("flow1",
+                Node.fromString(Node.NodeIDType.OPENFLOW, "0")));
+        Assert.assertFalse(fc.isByNameAndNodeIdEqual("flow2",
+                Node.fromString(Node.NodeIDType.OPENFLOW, "1")));
+
+        Assert.assertFalse(fc.isByNameAndNodeIdEqual(fc2));
+        fc2.setName("flow1");
+        Assert.assertFalse(fc.isByNameAndNodeIdEqual(fc2));
+        fc2.setNode(Node.fromString(Node.NodeIDType.OPENFLOW, "0"));
+        Assert.assertFalse(fc.isByNameAndNodeIdEqual(fc2));
+        fc2.setNode(Node.fromString(Node.NodeIDType.OPENFLOW, "1"));
+        Assert.assertTrue(fc.isByNameAndNodeIdEqual(fc2));
     }
-    
+
     @Test
-    public void testStatusToggle() throws UnknownHostException{
-    	FlowConfig fc = new FlowConfig();
-    	fc.toggleStatus();
-    	Assert.assertTrue(fc.installInHw());
-    	fc.toggleStatus();
-    	Assert.assertFalse(fc.installInHw());
-    	fc.toggleStatus();
-    	Assert.assertTrue(fc.installInHw());
-    	
+    public void testStatusToggle() throws UnknownHostException {
+        FlowConfig fc = new FlowConfig();
+        fc.toggleStatus();
+        Assert.assertTrue(fc.installInHw());
+        fc.toggleStatus();
+        Assert.assertFalse(fc.installInHw());
+        fc.toggleStatus();
+        Assert.assertTrue(fc.installInHw());
+
     }
+
     @Test
     public void testGetFlowEntry() throws UnknownHostException {
         FlowConfig fc2 = createSampleFlowConfig();
@@ -442,8 +434,7 @@ public class frmTest {
         Assert.assertFalse(fc.isValid(null, sb));
         Assert.assertTrue(sb.toString().contains("Node is null"));
 
-        fc.setNode(Node.fromString(Node.NodeIDType.OPENFLOW,
-                                   "1"));
+        fc.setNode(Node.fromString(Node.NodeIDType.OPENFLOW, "1"));
         Assert.assertTrue(fc.isValid(null, sb));
 
         fc.setPriority("-1");
@@ -463,9 +454,7 @@ public class frmTest {
         fc.setCookie("100");
         fc.setIngressPort("-1");
         Assert.assertFalse(fc.isValid(null, sb));
-        Assert
-                .assertTrue(sb.toString().contains(
-                        "is not valid for the Switch"));
+        Assert.assertTrue(sb.toString().contains("is not valid for the Switch"));
         fc.setIngressPort("100");
         Assert.assertTrue(fc.isValid(null, sb));
 
@@ -613,15 +602,12 @@ public class frmTest {
     private FlowConfig createSampleFlowConfig() throws UnknownHostException {
         ArrayList<String> actions;
         actions = createSampleActionList();
-        //actions.add(ActionType.CONTROLLER.toString());
-        FlowConfig flowConfig =
-            new FlowConfig("true", "Config1", 
-                           Node.fromString(Node.NodeIDType.OPENFLOW,
-                                           "1"), "100", "0", "60", "2", "100",
-                           "0", "0x0800", "00:A0:C9:14:C8:29",
-                           "00:A0:C9:22:AB:11", IPProtocols.TCP.toString(), "0",
-                           "1.2.3.4", "2.2.2.2", "8080", "100", "300", "1000",
-                           actions);
+        // actions.add(ActionType.CONTROLLER.toString());
+        FlowConfig flowConfig = new FlowConfig("true", "Config1",
+                Node.fromString(Node.NodeIDType.OPENFLOW, "1"), "100", "0",
+                "60", "2", "100", "0", "0x0800", "00:A0:C9:14:C8:29",
+                "00:A0:C9:22:AB:11", IPProtocols.TCP.toString(), "0",
+                "1.2.3.4", "2.2.2.2", "8080", "100", "300", "1000", actions);
         return flowConfig;
 
     }
@@ -633,19 +619,19 @@ public class frmTest {
         actions.add(ActionType.FLOOD.toString());
         actions.add(ActionType.SW_PATH.toString());
         actions.add(ActionType.HW_PATH.toString());
-        actions.add(ActionType.SET_VLAN_PCP.toString()+"=1");
-        actions.add(ActionType.SET_VLAN_ID.toString()+"=1");
+        actions.add(ActionType.SET_VLAN_PCP.toString() + "=1");
+        actions.add(ActionType.SET_VLAN_ID.toString() + "=1");
         actions.add(ActionType.POP_VLAN.toString());
-        actions.add(ActionType.SET_DL_SRC.toString()+"=00:A0:C1:AB:22:11");
-        actions.add(ActionType.SET_DL_DST.toString()+"=00:B1:C1:00:AA:BB");
-        actions.add(ActionType.SET_NW_SRC.toString()+"=1.1.1.1");
-        actions.add(ActionType.SET_NW_DST.toString()+"=2.2.2.2");
+        actions.add(ActionType.SET_DL_SRC.toString() + "=00:A0:C1:AB:22:11");
+        actions.add(ActionType.SET_DL_DST.toString() + "=00:B1:C1:00:AA:BB");
+        actions.add(ActionType.SET_NW_SRC.toString() + "=1.1.1.1");
+        actions.add(ActionType.SET_NW_DST.toString() + "=2.2.2.2");
         actions.add(ActionType.CONTROLLER.toString());
-        actions.add(ActionType.SET_NW_TOS.toString()+"1");
-        actions.add(ActionType.SET_TP_SRC.toString()+"60");
-        actions.add(ActionType.SET_TP_DST.toString()+"8080");
-        actions.add(ActionType.SET_NEXT_HOP.toString()+"=1.1.1.1");
-        
+        actions.add(ActionType.SET_NW_TOS.toString() + "1");
+        actions.add(ActionType.SET_TP_SRC.toString() + "60");
+        actions.add(ActionType.SET_TP_DST.toString() + "8080");
+        actions.add(ActionType.SET_NEXT_HOP.toString() + "=1.1.1.1");
+
         return actions;
     }
 

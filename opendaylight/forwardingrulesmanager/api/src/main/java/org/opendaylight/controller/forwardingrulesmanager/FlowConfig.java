@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -76,8 +75,8 @@ public class FlowConfig implements Serializable {
     private String status;
 
     /*
-     * The order of the object data defined below is used directly in the UI built using JSP.
-     * Hence try to keep the order in a more logical way.
+     * The order of the object data defined below is used directly in the UI
+     * built using JSP. Hence try to keep the order in a more logical way.
      */
     @XmlElement
     private String installInHw;
@@ -216,14 +215,14 @@ public class FlowConfig implements Serializable {
     public void setInstallInHw(boolean inHw) {
         installInHw = inHw ? "true" : "false";
     }
-    
+
     public String getInstallInHw() {
-    	return installInHw;
+        return installInHw;
     }
 
     public boolean isInternalFlow() {
         // Controller generated static flows have name starting with "**"
-    	return (this.name != null && this.name.startsWith("**"));
+        return (this.name != null && this.name.startsWith("**"));
     }
 
     public String getName() {
@@ -608,14 +607,14 @@ public class FlowConfig implements Serializable {
                         }
                     }
 
-                    log.debug("Get Nexthop address = {} Type = {}", address, setNHType.toString());
+                    log.debug("Get Nexthop address = " + address + " Type = "
+                            + setNHType.toString());
                     if (setNHType == SetNextHopType.RESOLVE_L2RW) {
                         try {
                             return InetAddress.getByName(address);
                         } catch (Exception e) {
-                            log
-                                    .debug("Exception during nextHopAddress resolution : ",
-                                            e);
+                            log.debug("Exception during nextHopAddress resolution : "
+                                    + e.getMessage());
                         }
                     }
                 }
@@ -641,10 +640,9 @@ public class FlowConfig implements Serializable {
                 .compile("([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}");
         Matcher mm = macPattern.matcher(mac);
         if (!mm.matches()) {
-            log
-                    .debug(
-                            "Ethernet address {} is not valid. Example: 00:05:b9:7c:81:5f",
-                            mac);
+            log.debug(
+                    "Ethernet address {} is not valid. Example: 00:05:b9:7c:81:5f",
+                    mac);
             return false;
         }
         return true;
@@ -657,8 +655,7 @@ public class FlowConfig implements Serializable {
         }
 
         if (sw == null) {
-            log
-                    .debug("switch info is not available. Skip checking if port is part of a switch or not.");
+            log.debug("switch info is not available. Skip checking if port is part of a switch or not.");
             return true;
         }
 
@@ -713,11 +710,11 @@ public class FlowConfig implements Serializable {
         // Check against each container's flow
         Flow flow = this.getFlow();
 
-        // Configuration is rejected if it conflicts with _all_ the container flows
+        // Configuration is rejected if it conflicts with _all_ the container
+        // flows
         for (ContainerFlow cFlow : cFlowList) {
             if (cFlow.allowsFlow(flow)) {
-                log
-                        .trace("Config is congruent with at least one container flow");
+                log.trace("Config is congruent with at least one container flow");
                 return false;
             }
         }
@@ -756,8 +753,7 @@ public class FlowConfig implements Serializable {
                     }
                 }
                 if (sw == null) {
-                    resultStr
-                            .append(String.format("Node %s not found", node));
+                    resultStr.append(String.format("Node %s not found", node));
                     return false;
                 }
             } else {
@@ -783,8 +779,7 @@ public class FlowConfig implements Serializable {
                 if (isPortValid(sw, port) == false) {
                     resultStr
                             .append(String
-                                    .format(
-                                            "Ingress port %d is not valid for the Switch",
+                                    .format("Ingress port %d is not valid for the Switch",
                                             port));
                     if ((container != null)
                             && !container.getName().equals(
@@ -843,8 +838,7 @@ public class FlowConfig implements Serializable {
             if ((dlSrc != null) && !isL2AddressValid(dlSrc)) {
                 resultStr
                         .append(String
-                                .format(
-                                        "Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
+                                .format("Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
                                         dlSrc));
                 return false;
             }
@@ -852,8 +846,7 @@ public class FlowConfig implements Serializable {
             if ((dlDst != null) && !isL2AddressValid(dlDst)) {
                 resultStr
                         .append(String
-                                .format(
-                                        "Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
+                                .format("Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
                                         dlDst));
                 return false;
             }
@@ -929,8 +922,7 @@ public class FlowConfig implements Serializable {
                                     if (isPortValid(sw, port) == false) {
                                         resultStr
                                                 .append(String
-                                                        .format(
-                                                                "Output port %d is not valid for this switch",
+                                                        .format("Output port %d is not valid for this switch",
                                                                 port));
                                         if ((container != null)
                                                 && !container.getName().equals(
@@ -965,8 +957,8 @@ public class FlowConfig implements Serializable {
                     if (sstr.matches()) {
                         if (!NetUtils.isIPv4AddressValid(sstr.group(1))) {
                             resultStr.append(String.format(
-                                    "IP source address %s is not valid", sstr
-                                            .group(1)));
+                                    "IP source address %s is not valid",
+                                    sstr.group(1)));
                             return false;
                         }
                         continue;
@@ -1007,8 +999,7 @@ public class FlowConfig implements Serializable {
                                 && !isVlanPriorityValid(sstr.group(1))) {
                             resultStr
                                     .append(String
-                                            .format(
-                                                    "Vlan priority %s is not in the range 0 - 7",
+                                            .format("Vlan priority %s is not in the range 0 - 7",
                                                     sstr.group(1)));
                             return false;
                         }
@@ -1023,8 +1014,7 @@ public class FlowConfig implements Serializable {
                                 && !isL2AddressValid(sstr.group(1))) {
                             resultStr
                                     .append(String
-                                            .format(
-                                                    "Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
+                                            .format("Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
                                                     sstr.group(1)));
                             return false;
                         }
@@ -1039,8 +1029,7 @@ public class FlowConfig implements Serializable {
                                 && !isL2AddressValid(sstr.group(1))) {
                             resultStr
                                     .append(String
-                                            .format(
-                                                    "Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
+                                            .format("Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
                                                     sstr.group(1)));
                             return false;
                         }
@@ -1055,8 +1044,7 @@ public class FlowConfig implements Serializable {
                                 && !isTOSBitsValid(sstr.group(1))) {
                             resultStr
                                     .append(String
-                                            .format(
-                                                    "IP ToS bits %s is not in the range 0 - 63",
+                                            .format("IP ToS bits %s is not in the range 0 - 63",
                                                     sstr.group(1)));
                             return false;
                         }
@@ -1085,8 +1073,7 @@ public class FlowConfig implements Serializable {
                                 && !isTpPortValid(sstr.group(1))) {
                             resultStr
                                     .append(String
-                                            .format(
-                                                    "Transport destination port %s is not valid",
+                                            .format("Transport destination port %s is not valid",
                                                     sstr.group(1)));
                             return false;
                         }
@@ -1115,8 +1102,8 @@ public class FlowConfig implements Serializable {
                 return false;
             }
         } catch (NumberFormatException e) {
-            resultStr.append(String.format("Invalid number format %s", e
-                    .getMessage()));
+            resultStr.append(String.format("Invalid number format %s",
+                    e.getMessage()));
             return false;
         }
 
@@ -1124,25 +1111,26 @@ public class FlowConfig implements Serializable {
     }
 
     public FlowEntry getFlowEntry() {
-        return new FlowEntry(FlowConfig.staticFlowsGroup, this.name, this
-                .getFlow(), this.getNode());
+        return new FlowEntry(FlowConfig.staticFlowsGroup, this.name,
+                this.getFlow(), this.getNode());
     }
 
     public Flow getFlow() {
         Match match = new Match();
 
         if (this.ingressPort != null) {
-            match.setField(MatchType.IN_PORT, NodeConnectorCreator
-                    .createOFNodeConnector(Short.parseShort(ingressPort),
-                            getNode()));
+            match.setField(
+                    MatchType.IN_PORT,
+                    NodeConnectorCreator.createOFNodeConnector(
+                            Short.parseShort(ingressPort), getNode()));
         }
         if (this.dlSrc != null) {
-            match.setField(MatchType.DL_SRC, HexEncode
-                    .bytesFromHexString(this.dlSrc));
+            match.setField(MatchType.DL_SRC,
+                    HexEncode.bytesFromHexString(this.dlSrc));
         }
         if (this.dlDst != null) {
-            match.setField(MatchType.DL_DST, HexEncode
-                    .bytesFromHexString(this.dlDst));
+            match.setField(MatchType.DL_DST,
+                    HexEncode.bytesFromHexString(this.dlDst));
         }
         if (this.etherType != null) {
             match.setField(MatchType.DL_TYPE, Integer.decode(etherType)
@@ -1152,8 +1140,8 @@ public class FlowConfig implements Serializable {
             match.setField(MatchType.DL_VLAN, Short.parseShort(this.vlanId));
         }
         if (this.vlanPriority != null) {
-            match.setField(MatchType.DL_VLAN_PR, Byte
-                    .parseByte(this.vlanPriority));
+            match.setField(MatchType.DL_VLAN_PR,
+                    Byte.parseByte(this.vlanPriority));
         }
         if (this.nwSrc != null) {
             String parts[] = this.nwSrc.split("/");
@@ -1178,8 +1166,8 @@ public class FlowConfig implements Serializable {
             match.setField(MatchType.NW_DST, ip, mask);
         }
         if (this.protocol != null) {
-            match.setField(MatchType.NW_PROTO, IPProtocols
-                    .getProtocolNumberByte(this.protocol));
+            match.setField(MatchType.NW_PROTO,
+                    IPProtocols.getProtocolNumberByte(this.protocol));
         }
         if (this.tosBits != null) {
             match.setField(MatchType.NW_TOS, Byte.parseByte(this.tosBits));
@@ -1246,9 +1234,9 @@ public class FlowConfig implements Serializable {
     }
 
     /*
-     * Parses the actions string and return the List of SAL Action
-     * No syntax check run, as this function will be called when the
-     * config validation check has already been performed
+     * Parses the actions string and return the List of SAL Action No syntax
+     * check run, as this function will be called when the config validation
+     * check has already been performed
      */
     private List<Action> getActionList() {
         List<Action> actionList = new ArrayList<Action>();
@@ -1265,8 +1253,8 @@ public class FlowConfig implements Serializable {
                             if (n.group(1) != null) {
                                 short ofPort = Short.parseShort(n.group(1));
                                 actionList.add(new Output(NodeConnectorCreator
-                                        .createOFNodeConnector(ofPort, this
-                                                .getNode())));
+                                        .createOFNodeConnector(ofPort,
+                                                this.getNode())));
                             }
                         }
                     }
@@ -1319,8 +1307,8 @@ public class FlowConfig implements Serializable {
                         ActionType.SET_VLAN_ID.toString() + "=(.*)").matcher(
                         actiongrp);
                 if (sstr.matches()) {
-                    actionList.add(new SetVlanId(Short
-                            .parseShort(sstr.group(1))));
+                    actionList.add(new SetVlanId(
+                            Short.parseShort(sstr.group(1))));
                     continue;
                 }
 
