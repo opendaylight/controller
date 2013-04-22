@@ -31,45 +31,48 @@ import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder
 public class GroupingBuilderImpl implements GroupingBuilder {
 
     private final GroupingDefinitionImpl instance;
+    private SchemaPath schemaPath;
     private final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
     private final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    GroupingBuilderImpl(QName qname) {
+    GroupingBuilderImpl(final QName qname) {
         this.instance = new GroupingDefinitionImpl(qname);
     }
 
     @Override
     public GroupingDefinition build() {
+        instance.setPath(schemaPath);
+
         // CHILD NODES
-        Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+        final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
         for (DataSchemaNodeBuilder node : childNodes) {
             childs.put(node.getQName(), node.build());
         }
         instance.setChildNodes(childs);
 
         // GROUPINGS
-        Set<GroupingDefinition> groupingDefinitions = new HashSet<GroupingDefinition>();
+        final Set<GroupingDefinition> groupingDefs = new HashSet<GroupingDefinition>();
         for (GroupingBuilder builder : groupings) {
-            groupingDefinitions.add(builder.build());
+            groupingDefs.add(builder.build());
         }
-        instance.setGroupings(groupingDefinitions);
+        instance.setGroupings(groupingDefs);
 
         // TYPEDEFS
-        Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
+        final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
         for (TypeDefinitionBuilder entry : addedTypedefs) {
             typedefs.add(entry.build());
         }
         instance.setTypeDefinitions(typedefs);
 
         // USES
-        Set<UsesNode> usesNodeDefinitions = new HashSet<UsesNode>();
+        final Set<UsesNode> usesNodeDefs = new HashSet<UsesNode>();
         for (UsesNodeBuilder builder : usesNodes) {
-            usesNodeDefinitions.add(builder.build());
+            usesNodeDefs.add(builder.build());
         }
-        instance.setUses(usesNodeDefinitions);
+        instance.setUses(usesNodeDefs);
 
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
@@ -90,48 +93,65 @@ public class GroupingBuilderImpl implements GroupingBuilder {
     }
 
     @Override
-    public void addTypedef(TypeDefinitionBuilder type) {
+    public void addTypedef(final TypeDefinitionBuilder type) {
         addedTypedefs.add(type);
     }
 
     @Override
-    public void setPath(SchemaPath schemaPath) {
-        instance.setPath(schemaPath);
+    public SchemaPath getPath() {
+        return schemaPath;
     }
 
     @Override
-    public void setDescription(String description) {
+    public void setPath(SchemaPath schemaPath) {
+        this.schemaPath = schemaPath;
+    }
+
+    @Override
+    public void setDescription(final String description) {
         instance.setDescription(description);
     }
 
     @Override
-    public void setReference(String reference) {
+    public void setReference(final String reference) {
         instance.setReference(reference);
     }
 
     @Override
-    public void setStatus(Status status) {
+    public void setStatus(final Status status) {
         instance.setStatus(status);
     }
 
     @Override
-    public void addChildNode(DataSchemaNodeBuilder childNode) {
+    public DataSchemaNodeBuilder getChildNode(String name) {
+        DataSchemaNodeBuilder result = null;
+        for(DataSchemaNodeBuilder node : childNodes) {
+            if(node.getQName().getLocalName().equals(name)) {
+                result = node;
+                break;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void addChildNode(final DataSchemaNodeBuilder childNode) {
         childNodes.add(childNode);
     }
 
     @Override
-    public void addGrouping(GroupingBuilder grouping) {
+    public void addGrouping(final GroupingBuilder grouping) {
         groupings.add(grouping);
     }
 
     @Override
-    public void addUsesNode(UsesNodeBuilder usesBuilder) {
+    public void addUsesNode(final UsesNodeBuilder usesBuilder) {
         usesNodes.add(usesBuilder);
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
-        addedUnknownNodes.add(unknownSchemaNodeBuilder);
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
     }
 
     private static class GroupingDefinitionImpl implements GroupingDefinition {
@@ -144,9 +164,9 @@ public class GroupingBuilderImpl implements GroupingBuilder {
         private Set<GroupingDefinition> groupings = Collections.emptySet();
         private Set<TypeDefinition<?>> typeDefinitions = Collections.emptySet();
         private Set<UsesNode> uses = Collections.emptySet();
-        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();
+        private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
-        private GroupingDefinitionImpl(QName qname) {
+        private GroupingDefinitionImpl(final QName qname) {
             this.qname = qname;
         }
 
@@ -229,12 +249,12 @@ public class GroupingBuilderImpl implements GroupingBuilder {
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return unknownSchemaNodes;
+            return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
-            if(unknownSchemaNodes != null) {
-                this.unknownSchemaNodes = unknownSchemaNodes;
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownNodes) {
+            if(unknownNodes != null) {
+                this.unknownNodes = unknownNodes;
             }
         }
 
@@ -275,7 +295,7 @@ public class GroupingBuilderImpl implements GroupingBuilder {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            GroupingDefinitionImpl other = (GroupingDefinitionImpl) obj;
+            final GroupingDefinitionImpl other = (GroupingDefinitionImpl) obj;
             if (qname == null) {
                 if (other.qname != null) {
                     return false;

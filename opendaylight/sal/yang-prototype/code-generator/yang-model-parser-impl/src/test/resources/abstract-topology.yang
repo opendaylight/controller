@@ -8,7 +8,7 @@ module abstract-topology {
         revision-date 2010-09-24;
     }
 
-    organization "Cisco";
+    organization "opendaylight";
     contact "WILL-BE-DEFINED-LATER";
 
     description

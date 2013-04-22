@@ -12,52 +12,37 @@ import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
-import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
-import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.model.parser.builder.api.AbstractTypeAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 
-public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
-        implements SchemaNodeBuilder, DataSchemaNodeBuilder {
-    private final LeafListSchemaNodeImpl instance;
+public class AnyXmlBuilder implements DataSchemaNodeBuilder {
     private final QName qname;
+    private SchemaPath path;
+    private final AnyXmlSchemaNodeImpl instance;
     private final ConstraintsBuilder constraints = new ConstraintsBuilder();
-    private SchemaPath schemaPath;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
-    private boolean augmenting;
     private boolean configuration;
-    private boolean userOrdered;
 
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
-
-    public LeafListSchemaNodeBuilder(final QName qname) {
+    public AnyXmlBuilder(final QName qname) {
         this.qname = qname;
-        instance = new LeafListSchemaNodeImpl(qname);
+        instance = new AnyXmlSchemaNodeImpl(qname);
     }
 
     @Override
-    public LeafListSchemaNode build() {
+    public AnyXmlSchemaNode build() {
+        instance.setPath(path);
         instance.setConstraints(constraints.build());
-        instance.setPath(schemaPath);
         instance.setDescription(description);
         instance.setReference(reference);
         instance.setStatus(status);
-        instance.setAugmenting(augmenting);
-        instance.setConfiguration(configuration);
-        instance.setUserOrdered(userOrdered);
-
-        if (type == null) {
-            instance.setType(typedef.build());
-        } else {
-            instance.setType(type);
-        }
 
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
@@ -66,6 +51,7 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
         }
         instance.setUnknownSchemaNodes(unknownNodes);
 
+        instance.setConfiguration(configuration);
         return instance;
     }
 
@@ -75,12 +61,26 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
     }
 
     public SchemaPath getPath() {
-        return schemaPath;
+        return path;
     }
 
     @Override
-    public void setPath(final SchemaPath schemaPath) {
-        this.schemaPath = schemaPath;
+    public void setPath(final SchemaPath path) {
+        this.path = path;
+    }
+
+    @Override
+    public ConstraintsBuilder getConstraints() {
+        return constraints;
+    }
+
+    @Override
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
+    }
+
+    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+        return addedUnknownNodes;
     }
 
     public String getDescription() {
@@ -97,7 +97,7 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
     }
 
     @Override
-    public void setReference(String reference) {
+    public void setReference(final String reference) {
         this.reference = reference;
     }
 
@@ -106,19 +106,16 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
     }
 
     @Override
-    public void setStatus(Status status) {
-        if(status != null) {
+    public void setStatus(final Status status) {
+        if (status != null) {
             this.status = status;
         }
     }
 
-    public boolean isAugmenting() {
-        return augmenting;
-    }
-
     @Override
-    public void setAugmenting(boolean augmenting) {
-        this.augmenting = augmenting;
+    public void setAugmenting(final boolean augmenting) {
+        throw new UnsupportedOperationException(
+                "An anyxml node cannot be augmented.");
     }
 
     public boolean isConfiguration() {
@@ -126,46 +123,21 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
     }
 
     @Override
-    public void setConfiguration(boolean configuration) {
-        this.configuration = configuration;
+    public void setConfiguration(final boolean configuration) {
+        instance.setConfiguration(configuration);
     }
 
-    @Override
-    public ConstraintsBuilder getConstraints() {
-        return constraints;
-    }
-
-    public boolean isUserOrdered() {
-        return userOrdered;
-    }
-
-    public void setUserOrdered(final boolean userOrdered) {
-        this.userOrdered = userOrdered;
-    }
-
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
-    }
-
-    private class LeafListSchemaNodeImpl implements LeafListSchemaNode {
+    private static class AnyXmlSchemaNodeImpl implements AnyXmlSchemaNode {
         private final QName qname;
         private SchemaPath path;
         private String description;
         private String reference;
         private Status status = Status.CURRENT;
-        private boolean augmenting;
         private boolean configuration;
         private ConstraintDefinition constraintsDef;
-        private TypeDefinition<?> type;
-        private boolean userOrdered;
         private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
-        private LeafListSchemaNodeImpl(final QName qname) {
+        private AnyXmlSchemaNodeImpl(final QName qname) {
             this.qname = qname;
         }
 
@@ -207,16 +179,14 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
         }
 
         private void setStatus(Status status) {
-            this.status = status;
+            if (status != null) {
+                this.status = status;
+            }
         }
 
         @Override
         public boolean isAugmenting() {
-            return augmenting;
-        }
-
-        private void setAugmenting(boolean augmenting) {
-            this.augmenting = augmenting;
+            return false;
         }
 
         @Override
@@ -235,24 +205,6 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
 
         private void setConstraints(ConstraintDefinition constraintsDef) {
             this.constraintsDef = constraintsDef;
-        }
-
-        @Override
-        public TypeDefinition<?> getType() {
-            return type;
-        }
-
-        public void setType(TypeDefinition<? extends TypeDefinition<?>> type) {
-            this.type = type;
-        }
-
-        @Override
-        public boolean isUserOrdered() {
-            return userOrdered;
-        }
-
-        private void setUserOrdered(boolean userOrdered) {
-            this.userOrdered = userOrdered;
         }
 
         @Override
@@ -286,7 +238,7 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            LeafListSchemaNodeImpl other = (LeafListSchemaNodeImpl) obj;
+            AnyXmlSchemaNodeImpl other = (AnyXmlSchemaNodeImpl) obj;
             if (qname == null) {
                 if (other.qname != null) {
                     return false;
@@ -307,15 +259,10 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder(
-                    LeafListSchemaNodeImpl.class.getSimpleName());
+                    AnyXmlSchemaNodeImpl.class.getSimpleName());
             sb.append("[");
             sb.append("qname=" + qname);
             sb.append(", path=" + path);
-            sb.append(", augmenting=" + augmenting);
-            sb.append(", configuration=" + configuration);
-            sb.append(", constraints=" + constraintsDef);
-            sb.append(", type=" + type);
-            sb.append(", userOrdered=" + userOrdered);
             sb.append("]");
             return sb.toString();
         }

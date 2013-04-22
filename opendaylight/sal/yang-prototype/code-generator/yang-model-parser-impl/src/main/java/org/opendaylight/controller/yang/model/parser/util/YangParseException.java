@@ -11,11 +11,11 @@ public class YangParseException extends RuntimeException {
 
     private static final long serialVersionUID = 1239548963471793178L;
 
-    public YangParseException(String errorMsg) {
+    public YangParseException(final String errorMsg) {
         super(errorMsg);
     }
 
-    public YangParseException(String errorMsg, Exception exception) {
+    public YangParseException(final String errorMsg, final Exception exception) {
         super(errorMsg, exception);
     }
 

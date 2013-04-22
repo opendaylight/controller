@@ -27,6 +27,7 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.AbstractChildNodeBuilder;
+import org.opendaylight.controller.yang.model.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.AugmentationTargetBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.GroupingBuilder;
@@ -39,21 +40,36 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         DataSchemaNodeBuilder {
 
     private final ContainerSchemaNodeImpl instance;
-    private final ConstraintsBuilder constraintsBuilder;
+    private final ConstraintsBuilder constraints;
+    private SchemaPath schemaPath;
+    private String description;
+    private String reference;
+    private Status status = Status.CURRENT;
+    private boolean presence;
+    private boolean augmenting;
+    private boolean configuration;
 
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
-    private final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
+    private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    ContainerSchemaNodeBuilder(QName qname) {
+    public ContainerSchemaNodeBuilder(QName qname) {
         super(qname);
         instance = new ContainerSchemaNodeImpl(qname);
-        constraintsBuilder = new ConstraintsBuilder();
+        constraints = new ConstraintsBuilder();
     }
 
     @Override
     public ContainerSchemaNode build() {
+        instance.setPath(schemaPath);
+        instance.setDescription(description);
+        instance.setReference(reference);
+        instance.setStatus(status);
+        instance.setPresenceContainer(presence);
+        instance.setAugmenting(augmenting);
+        instance.setConfiguration(configuration);
+
         // CHILD NODES
         final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
         for (DataSchemaNodeBuilder node : childNodes) {
@@ -62,11 +78,11 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         instance.setChildNodes(childs);
 
         // GROUPINGS
-        final Set<GroupingDefinition> groupingDefinitions = new HashSet<GroupingDefinition>();
+        final Set<GroupingDefinition> groupingDefs = new HashSet<GroupingDefinition>();
         for (GroupingBuilder builder : groupings) {
-            groupingDefinitions.add(builder.build());
+            groupingDefs.add(builder.build());
         }
-        instance.setGroupings(groupingDefinitions);
+        instance.setGroupings(groupingDefs);
 
         // TYPEDEFS
         final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
@@ -82,6 +98,13 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         }
         instance.setUses(uses);
 
+        // AUGMENTATIONS
+        final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
+        for(AugmentationSchemaBuilder builder : addedAugmentations) {
+            augmentations.add(builder.build());
+        }
+        instance.setAvailableAugmentations(augmentations);
+
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
         for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
@@ -89,55 +112,93 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         }
         instance.setUnknownSchemaNodes(unknownNodes);
 
-        instance.setConstraints(constraintsBuilder.build());
+        instance.setConstraints(constraints.build());
         instance.setAvailableAugmentations(augmentations);
 
         return instance;
     }
 
+    public Set<TypeDefinitionBuilder> getTypedefs() {
+        return addedTypedefs;
+    }
+
     @Override
-    public void addTypedef(TypeDefinitionBuilder type) {
+    public void addTypedef(final TypeDefinitionBuilder type) {
         addedTypedefs.add(type);
     }
 
-    @Override
-    public void addAugmentation(AugmentationSchema augment) {
-        augmentations.add(augment);
+    public Set<AugmentationSchemaBuilder> getAugmentations() {
+        return addedAugmentations;
     }
 
     @Override
-    public void setPath(SchemaPath schemaPath) {
-        instance.setPath(schemaPath);
+    public void addAugmentation(AugmentationSchemaBuilder augment) {
+        addedAugmentations.add(augment);
+    }
+
+    public SchemaPath getPath() {
+        return schemaPath;
     }
 
     @Override
-    public void setDescription(String description) {
-        instance.setDescription(description);
+    public void setPath(final SchemaPath schemaPath) {
+        this.schemaPath = schemaPath;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    public String getReference() {
+        return reference;
     }
 
     @Override
     public void setReference(String reference) {
-        instance.setReference(reference);
+        this.reference = reference;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     @Override
     public void setStatus(Status status) {
-        instance.setStatus(status);
+        if(status != null) {
+            this.status = status;
+        }
+    }
+
+    public boolean isAugmenting() {
+        return augmenting;
     }
 
     @Override
     public void setAugmenting(boolean augmenting) {
-        instance.setAugmenting(augmenting);
+        this.augmenting = augmenting;
+    }
+
+    public boolean isConfiguration() {
+        return configuration;
     }
 
     @Override
     public void setConfiguration(boolean configuration) {
-        instance.setConfiguration(configuration);
+        this.configuration = configuration;
     }
 
     @Override
-    public ConstraintsBuilder getConstraintsBuilder() {
-        return constraintsBuilder;
+    public ConstraintsBuilder getConstraints() {
+        return constraints;
+    }
+
+    public Set<UsesNodeBuilder> getUsesNodes() {
+        return addedUsesNodes;
     }
 
     @Override
@@ -145,17 +206,24 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         addedUsesNodes.add(usesNodeBuilder);
     }
 
-    public void setPresenceContainer(boolean presence) {
-        instance.setPresenceContainer(presence);
+    public boolean isPresence() {
+        return presence;
+    }
+
+    public void setPresence(boolean presence) {
+        this.presence = presence;
+    }
+
+    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+        return addedUnknownNodes;
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
-        addedUnknownNodes.add(unknownSchemaNodeBuilder);
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
     }
 
     private class ContainerSchemaNodeImpl implements ContainerSchemaNode {
-
         private final QName qname;
         private SchemaPath path;
         private String description;

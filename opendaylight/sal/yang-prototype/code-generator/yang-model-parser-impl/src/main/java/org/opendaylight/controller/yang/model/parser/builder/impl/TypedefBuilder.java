@@ -38,11 +38,11 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
 
     private String description;
     private String reference;
-    private Status status;
+    private Status status = Status.CURRENT;
     private String units;
     private Object defaultValue;
 
-    public TypedefBuilder(QName qname) {
+    public TypedefBuilder(final QName qname) {
         this.qname = qname;
     }
 
@@ -55,12 +55,12 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
                     + qname.getLocalName() + "'.");
         }
         if (type == null || type instanceof UnknownType) {
-            typeBuilder = new ExtendedType.Builder(qname, typedef.build(),
-                    description, reference);
-        } else {
-            typeBuilder = new ExtendedType.Builder(qname, type, description,
-                    reference);
+            type = typedef.build();
         }
+
+        typeBuilder = new ExtendedType.Builder(qname, type, description,
+                reference);
+
         typeBuilder.status(status);
         typeBuilder.units(units);
         typeBuilder.defaultValue(defaultValue);
@@ -68,6 +68,7 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
         typeBuilder.ranges(ranges);
         typeBuilder.lengths(lengths);
         typeBuilder.patterns(patterns);
+        typeBuilder.fractionDigits(fractionDigits);
 
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
@@ -132,7 +133,7 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void setUnits(String units) {
+    public void setUnits(final String units) {
         this.units = units;
     }
 
@@ -142,7 +143,7 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void setDefaultValue(Object defaultValue) {
+    public void setDefaultValue(final Object defaultValue) {
         this.defaultValue = defaultValue;
     }
 
@@ -152,7 +153,7 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
     }
 
@@ -162,7 +163,7 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void setRanges(List<RangeConstraint> ranges) {
+    public void setRanges(final List<RangeConstraint> ranges) {
         if (ranges != null) {
             this.ranges = ranges;
         }
@@ -174,7 +175,7 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void setLengths(List<LengthConstraint> lengths) {
+    public void setLengths(final List<LengthConstraint> lengths) {
         if (lengths != null) {
             this.lengths = lengths;
         }
@@ -186,7 +187,7 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void setPatterns(List<PatternConstraint> patterns) {
+    public void setPatterns(final List<PatternConstraint> patterns) {
         if (patterns != null) {
             this.patterns = patterns;
         }
@@ -198,21 +199,22 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void setFractionDigits(Integer fractionDigits) {
+    public void setFractionDigits(final Integer fractionDigits) {
         this.fractionDigits = fractionDigits;
     }
 
     @Override
     public String toString() {
-        String result = "TypedefBuilder[" + qname.getLocalName();
-        result += ", type=";
+        final StringBuilder result = new StringBuilder("TypedefBuilder["
+                + qname.getLocalName());
+        result.append(", type=");
         if (type == null) {
-            result += typedef;
+            result.append(typedef);
         } else {
-            result += type;
+            result.append(type);
         }
-        result += "]";
-        return result;
+        result.append("]");
+        return result.toString();
     }
 
 }

@@ -2,80 +2,117 @@ module types1 {
     yang-version 1;
     namespace "urn:simple.container.demo";
     prefix "t1";
-    
+
     import types2 {
-         prefix "data";
-         revision-date 2013-02-27;
-     }
-    
+        prefix "data";
+        revision-date 2013-02-27;
+    }
+
+   import types3 {
+        prefix "t3";
+        revision-date 2013-02-27;
+    }
+
     organization "opendaylight";
     contact "WILL-BE-DEFINED-LATER";
-    
+
     revision "2013-02-27" {
         reference " WILL BE DEFINED LATER";
     }
-    
-    container interfaces {
-         list ifEntry {
-             key "ifIndex";
 
-             leaf ifIndex {
-                 type uint32;
-                 units minutes;
-             }
-             
-             leaf ifMtu {
-                 type int32;
-             }
-         }
-    }
-     
     leaf testleaf {
         type data:my-type1 {
             range "min..max";
         }
     }
-    
+
     leaf test-string-leaf {
         type data:my-string-type-ext;
     }
-    
+
     leaf leaf-with-length {
     	type data:my-string-type {
     		length "7..max";
     	}
     }
-    
+
     leaf test-int-leaf {
         type data:my-int-type-ext;
     }
-    
+
     leaf test-decimal-leaf {
         type data:my-decimal-type {
             fraction-digits 4;
         }
     }
-    
+
     leaf test-decimal-leaf2 {
         type data:my-decimal-type-ext;
     }
-    
+
     container ext {
         data:c-define "MY_INTERFACES";
     }
-    
+
     leaf union-leaf {
     	type data:my-union-ext;
     }
-    
+
     deviation /data:system/data:user {
         deviate add {
             default "admin"; // new users are 'admin' by default
+            config "true";
         }
     }
-    
+
     leaf nested-union-leaf {
     	type data:nested-union1;
+    }
+
+    leaf custom-union-leaf {
+        type t3:union1;
+    }
+
+    container transfer {
+        choice how {
+            default interval;
+            case interval {
+                leaf interval {
+                    type uint16;
+                    default 30;
+                    units minutes;
+                }
+            }
+            case daily {
+                leaf daily {
+                    type empty;
+                }
+                leaf time-of-day {
+                    type string;
+                    units 24-hour-clock;
+                    default 1am;
+                }
+            }
+            case manual {
+                leaf manual {
+                    type empty;
+                }
+            }
+        }
+    }
+
+    anyxml data {
+        description
+          "Copy of the source datastore subset that matched
+           the filter criteria (if any).  An empty data container
+           indicates that the request did not produce any results.";
+    }
+
+    augment "/data:interfaces/data:ifEntry/t3:augment-holder" {
+        when "if:ifType='ds0'";
+        leaf ds0ChannelNumber {
+            type string;
+        }
     }
 
 }

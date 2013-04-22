@@ -17,8 +17,8 @@ public class DeviationBuilder implements Builder {
 
     private final DeviationImpl instance;
 
-    DeviationBuilder(String targetPathStr) {
-        SchemaPath targetPath = YangModelBuilderUtil
+    DeviationBuilder(final String targetPathStr) {
+        final SchemaPath targetPath = YangModelBuilderUtil
                 .parseAugmentPath(targetPathStr);
         instance = new DeviationImpl(targetPath);
     }
@@ -28,14 +28,14 @@ public class DeviationBuilder implements Builder {
         return instance;
     }
 
-    public void setDeviate(String deviate) {
-        if (deviate.equals("not-supported")) {
+    public void setDeviate(final String deviate) {
+        if ("not-supported".equals(deviate)) {
             instance.setDeviate(Deviate.NOT_SUPPORTED);
-        } else if (deviate.equals("add")) {
+        } else if ("add".equals(deviate)) {
             instance.setDeviate(Deviate.ADD);
-        } else if (deviate.equals("replace")) {
+        } else if ("replace".equals(deviate)) {
             instance.setDeviate(Deviate.REPLACE);
-        } else if (deviate.equals("delete")) {
+        } else if ("delete".equals(deviate)) {
             instance.setDeviate(Deviate.DELETE);
         } else {
             throw new IllegalArgumentException(
@@ -43,17 +43,16 @@ public class DeviationBuilder implements Builder {
         }
     }
 
-    public void setReference(String reference) {
+    public void setReference(final String reference) {
         instance.setReference(reference);
     }
 
     private static class DeviationImpl implements Deviation {
-
-        private SchemaPath targetPath;
+        private final SchemaPath targetPath;
         private Deviate deviate;
         private String reference;
 
-        private DeviationImpl(SchemaPath targetPath) {
+        private DeviationImpl(final SchemaPath targetPath) {
             this.targetPath = targetPath;
         }
 
@@ -67,7 +66,7 @@ public class DeviationBuilder implements Builder {
             return deviate;
         }
 
-        private void setDeviate(Deviate deviate) {
+        private void setDeviate(final Deviate deviate) {
             this.deviate = deviate;
         }
 
@@ -76,7 +75,7 @@ public class DeviationBuilder implements Builder {
             return reference;
         }
 
-        private void setReference(String reference) {
+        private void setReference(final String reference) {
             this.reference = reference;
         }
 
