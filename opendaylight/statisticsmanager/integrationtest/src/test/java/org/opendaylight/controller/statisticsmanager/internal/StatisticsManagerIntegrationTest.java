@@ -102,7 +102,7 @@ public class StatisticsManagerIntegrationTest {
                 mavenBundle("org.opendaylight.controller",
                         "clustering.services", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller",
-                        "clustering.services-implementation", "0.4.0-SNAPSHOT"),
+                        "clustering.stub", "0.4.0-SNAPSHOT"),
 
                 // needed by forwardingrulesmanager
                 mavenBundle("org.opendaylight.controller", "switchmanager",
