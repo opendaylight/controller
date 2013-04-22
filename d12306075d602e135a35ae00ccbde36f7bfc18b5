@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///s0\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-impl/src/test/resources/leafref-test-models/abstract-topology@2013-02-08.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-22T20:10:58Z",
+      "side": 1,
+      "message": "Please remove Cisco from here.",
+      "revId": "d12306075d602e135a35ae00ccbde36f7bfc18b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
