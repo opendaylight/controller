@@ -1,10 +1,3 @@
-/*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
 import java.util.ArrayList;
@@ -16,10 +9,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.AugmentationSchema;
+import org.opendaylight.controller.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
-import org.opendaylight.controller.yang.model.api.NotificationDefinition;
-import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
@@ -27,29 +21,37 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.AbstractChildNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.api.GroupingBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
 
-public class NotificationBuilder extends AbstractChildNodeBuilder implements
-        TypeDefinitionAwareBuilder, SchemaNodeBuilder {
+public class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements DataSchemaNodeBuilder {
 
-    private final NotificationDefinitionImpl instance;
+    private final ChoiceCaseNodeImpl instance;
+    private final ConstraintsBuilder constraints;
     private SchemaPath schemaPath;
-    private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
+    private String description;
+    private String reference;
+    private Status status = Status.CURRENT;
+    private boolean augmenting;
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
+    private final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    NotificationBuilder(QName qname) {
+    ChoiceCaseBuilder(QName qname) {
         super(qname);
-        instance = new NotificationDefinitionImpl(qname);
+        instance = new ChoiceCaseNodeImpl(qname);
+        constraints = new ConstraintsBuilder();
     }
 
     @Override
-    public SchemaNode build() {
+    public ChoiceCaseNode build() {
+        instance.setConstraints(constraints.build());
         instance.setPath(schemaPath);
+        instance.setDescription(description);
+        instance.setReference(reference);
+        instance.setStatus(status);
+        instance.setAugmenting(augmenting);
+        instance.setAvailableAugmentations(augmentations);
 
         // CHILD NODES
         final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
@@ -57,20 +59,6 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
             childs.put(node.getQName(), node.build());
         }
         instance.setChildNodes(childs);
-
-        // GROUPINGS
-        final Set<GroupingDefinition> groupingDefs = new HashSet<GroupingDefinition>();
-        for (GroupingBuilder builder : groupings) {
-            groupingDefs.add(builder.build());
-        }
-        instance.setGroupings(groupingDefs);
-
-        // TYPEDEFS
-        final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
-        for (TypeDefinitionBuilder entry : addedTypedefs) {
-            typedefs.add(entry.build());
-        }
-        instance.setTypeDefinitions(typedefs);
 
         // USES
         final Set<UsesNode> uses = new HashSet<UsesNode>();
@@ -89,59 +77,105 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
         return instance;
     }
 
-    @Override
-    public void addTypedef(final TypeDefinitionBuilder type) {
-        addedTypedefs.add(type);
-    }
-
-    @Override
-    public void addUsesNode(final UsesNodeBuilder usesNodeBuilder) {
-        addedUsesNodes.add(usesNodeBuilder);
-    }
-
-    @Override
     public SchemaPath getPath() {
         return schemaPath;
     }
 
     @Override
-    public void setPath(SchemaPath schemaPath) {
+    public void setPath(final SchemaPath schemaPath) {
         this.schemaPath = schemaPath;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     @Override
     public void setDescription(final String description) {
-        instance.setDescription(description);
+        this.description = description;
+    }
+
+    public String getReference() {
+        return reference;
     }
 
     @Override
-    public void setReference(final String reference) {
-        instance.setReference(reference);
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     @Override
-    public void setStatus(final Status status) {
-        instance.setStatus(status);
+    public void setStatus(Status status) {
+        if(status != null) {
+            this.status = status;
+        }
+    }
+
+    public boolean isAugmenting() {
+        return augmenting;
     }
 
     @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+    public void setAugmenting(boolean augmenting) {
+        this.augmenting = augmenting;
+    }
+
+    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+        return addedUnknownNodes;
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
     }
 
-    private class NotificationDefinitionImpl implements NotificationDefinition {
+    public Set<UsesNodeBuilder> getUsesNodes() {
+        return addedUsesNodes;
+    }
+
+    @Override
+    public void addUsesNode(UsesNodeBuilder usesNodeBuilder) {
+        addedUsesNodes.add(usesNodeBuilder);
+    }
+
+    @Override
+    public void addTypedef(TypeDefinitionBuilder typedefBuilder) {
+        throw new UnsupportedOperationException("Can not add type definition to choice case.");
+    }
+
+    @Override
+    public void setConfiguration(boolean configuration) {
+        throw new UnsupportedOperationException("Can not add config definition to choice case.");
+    }
+
+    @Override
+    public ConstraintsBuilder getConstraints() {
+        return constraints;
+    }
+
+    public Set<AugmentationSchema> getAugmentations() {
+        return augmentations;
+    }
+
+
+    private static class ChoiceCaseNodeImpl implements ChoiceCaseNode {
         private final QName qname;
         private SchemaPath path;
         private String description;
         private String reference;
         private Status status = Status.CURRENT;
+        private boolean augmenting;
+        private ConstraintDefinition constraints;
         private Map<QName, DataSchemaNode> childNodes = Collections.emptyMap();
-        private Set<GroupingDefinition> groupings = Collections.emptySet();
-        private Set<TypeDefinition<?>> typeDefinitions = Collections.emptySet();
+        private Set<AugmentationSchema> augmentations = Collections.emptySet();
         private Set<UsesNode> uses = Collections.emptySet();
         private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
-        private NotificationDefinitionImpl(final QName qname) {
+        private ChoiceCaseNodeImpl(QName qname) {
             this.qname = qname;
         }
 
@@ -155,7 +189,7 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
             return path;
         }
 
-        private void setPath(final SchemaPath path) {
+        private void setPath(SchemaPath path) {
             this.path = path;
         }
 
@@ -164,7 +198,7 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
             return description;
         }
 
-        private void setDescription(final String description) {
+        private void setDescription(String description) {
             this.description = description;
         }
 
@@ -183,9 +217,48 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
         }
 
         private void setStatus(Status status) {
-            if (status != null) {
+            if(status != null) {
                 this.status = status;
             }
+        }
+
+        @Override
+        public boolean isConfiguration() {
+            return false;
+        }
+
+        @Override
+        public ConstraintDefinition getConstraints() {
+            return constraints;
+        }
+
+        private void setConstraints(ConstraintDefinition constraints) {
+            this.constraints = constraints;
+        }
+
+        @Override
+        public boolean isAugmenting() {
+            return augmenting;
+        }
+
+        private void setAugmenting(boolean augmenting) {
+            this.augmenting = augmenting;
+        }
+
+        @Override
+        public List<UnknownSchemaNode> getUnknownSchemaNodes() {
+            return unknownNodes;
+        }
+
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownNodes) {
+            if(unknownNodes != null) {
+                this.unknownNodes = unknownNodes;
+            }
+        }
+
+        @Override
+        public Set<TypeDefinition<?>> getTypeDefinitions() {
+            return Collections.emptySet();
         }
 
         @Override
@@ -201,48 +274,7 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
 
         @Override
         public Set<GroupingDefinition> getGroupings() {
-            return groupings;
-        }
-
-        private void setGroupings(Set<GroupingDefinition> groupings) {
-            if (groupings != null) {
-                this.groupings = groupings;
-            }
-        }
-
-        @Override
-        public Set<UsesNode> getUses() {
-            return uses;
-        }
-
-        private void setUses(Set<UsesNode> uses) {
-            if (uses != null) {
-                this.uses = uses;
-            }
-        }
-
-        @Override
-        public Set<TypeDefinition<?>> getTypeDefinitions() {
-            return typeDefinitions;
-        }
-
-        private void setTypeDefinitions(
-                final Set<TypeDefinition<?>> typeDefinitions) {
-            if (typeDefinitions != null) {
-                this.typeDefinitions = typeDefinitions;
-            }
-        }
-
-        @Override
-        public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return unknownNodes;
-        }
-
-        private void setUnknownSchemaNodes(
-                final List<UnknownSchemaNode> unknownNodes) {
-            if (unknownNodes != null) {
-                this.unknownNodes = unknownNodes;
-            }
+            return Collections.emptySet();
         }
 
         @Override
@@ -261,6 +293,30 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
             }
             return result;
         }
+
+        @Override
+        public Set<UsesNode> getUses() {
+            return uses;
+        }
+
+        private void setUses(Set<UsesNode> uses) {
+            if (uses != null) {
+                this.uses = uses;
+            }
+        }
+
+        @Override
+        public Set<AugmentationSchema> getAvailableAugmentations() {
+            return augmentations;
+        }
+
+        private void setAvailableAugmentations(
+                Set<AugmentationSchema> augmentations) {
+            if (augmentations != null) {
+                this.augmentations = augmentations;
+            }
+        }
+
 
         @Override
         public int hashCode() {
@@ -282,7 +338,7 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final NotificationDefinitionImpl other = (NotificationDefinitionImpl) obj;
+            ChoiceCaseNodeImpl other = (ChoiceCaseNodeImpl) obj;
             if (qname == null) {
                 if (other.qname != null) {
                     return false;
@@ -303,10 +359,13 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder(
-                    NotificationDefinitionImpl.class.getSimpleName());
-            sb.append("[qname=" + qname + ", path=" + path + "]");
+                    ChoiceCaseNodeImpl.class.getSimpleName());
+            sb.append("[");
+            sb.append("qname=" + qname);
+            sb.append("]");
             return sb.toString();
         }
+
     }
 
 }

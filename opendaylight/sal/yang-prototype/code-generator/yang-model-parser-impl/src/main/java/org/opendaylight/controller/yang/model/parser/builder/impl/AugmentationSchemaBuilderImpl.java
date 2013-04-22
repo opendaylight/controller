@@ -31,16 +31,19 @@ import org.opendaylight.controller.yang.model.parser.util.YangModelBuilderUtil;
 public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder {
 
     private final AugmentationSchemaImpl instance;
+    private final String augmentTargetStr;
     private final SchemaPath augmentTarget;
-    final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
-    final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
+    private final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
+    private final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
 
-    AugmentationSchemaBuilderImpl(String augmentPath) {
-        SchemaPath targetPath = YangModelBuilderUtil.parseAugmentPath(augmentPath);
+    AugmentationSchemaBuilderImpl(final String augmentTargetStr) {
+        this.augmentTargetStr = augmentTargetStr;
+        final SchemaPath targetPath = YangModelBuilderUtil.parseAugmentPath(augmentTargetStr);
         augmentTarget = targetPath;
         instance = new AugmentationSchemaImpl(targetPath);
     }
+
 
     @Override
     public void addChildNode(DataSchemaNodeBuilder childNode) {
@@ -72,23 +75,22 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
 
     @Override
     public AugmentationSchema build() {
-
         // CHILD NODES
-        Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+        final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
         for (DataSchemaNodeBuilder node : childNodes) {
             childs.put(node.getQName(), node.build());
         }
         instance.setChildNodes(childs);
 
         // GROUPINGS
-        Set<GroupingDefinition> groupingDefinitions = new HashSet<GroupingDefinition>();
+        final Set<GroupingDefinition> groupingDefinitions = new HashSet<GroupingDefinition>();
         for (GroupingBuilder builder : groupings) {
             groupingDefinitions.add(builder.build());
         }
         instance.setGroupings(groupingDefinitions);
 
         // USES
-        Set<UsesNode> usesNodeDefinitions = new HashSet<UsesNode>();
+        final Set<UsesNode> usesNodeDefinitions = new HashSet<UsesNode>();
         for (UsesNodeBuilder builder : usesNodes) {
             usesNodeDefinitions.add(builder.build());
         }
@@ -123,12 +125,16 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         return augmentTarget;
     }
 
-    private static class AugmentationSchemaImpl implements AugmentationSchema {
+    @Override
+    public String getTargetPathAsString() {
+        return augmentTargetStr;
+    }
 
+    private static class AugmentationSchemaImpl implements AugmentationSchema {
         private final SchemaPath targetPath;
-        private Map<QName, DataSchemaNode> childNodes;
-        private Set<GroupingDefinition> groupings;
-        private Set<UsesNode> uses;
+        private Map<QName, DataSchemaNode> childNodes = Collections.emptyMap();
+        private Set<GroupingDefinition> groupings = Collections.emptySet();
+        private Set<UsesNode> uses = Collections.emptySet();
 
         private String description;
         private String reference;
@@ -149,7 +155,9 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         }
 
         private void setChildNodes(Map<QName, DataSchemaNode> childNodes) {
-            this.childNodes = childNodes;
+            if(childNodes != null) {
+                this.childNodes = childNodes;
+            }
         }
 
         @Override
@@ -158,7 +166,9 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         }
 
         private void setGroupings(Set<GroupingDefinition> groupings) {
-            this.groupings = groupings;
+            if(groupings != null) {
+                this.groupings = groupings;
+            }
         }
 
         @Override
@@ -167,7 +177,9 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         }
 
         private void setUses(Set<UsesNode> uses) {
-            this.uses = uses;
+            if(uses != null) {
+                this.uses = uses;
+            }
         }
 
         /**
@@ -234,12 +246,6 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
             result = prime * result
                     + ((groupings == null) ? 0 : groupings.hashCode());
             result = prime * result + ((uses == null) ? 0 : uses.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            result = prime * result
-                    + ((status == null) ? 0 : status.hashCode());
             return result;
         }
 
@@ -281,27 +287,6 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
                     return false;
                 }
             } else if (!uses.equals(other.uses)) {
-                return false;
-            }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (status == null) {
-                if (other.status != null) {
-                    return false;
-                }
-            } else if (!status.equals(other.status)) {
                 return false;
             }
             return true;

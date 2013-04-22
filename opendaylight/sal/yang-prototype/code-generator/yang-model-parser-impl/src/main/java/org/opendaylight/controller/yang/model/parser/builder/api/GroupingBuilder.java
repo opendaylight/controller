@@ -12,8 +12,11 @@ import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 /**
  * Interface for builders of 'grouping' statement.
  */
-public interface GroupingBuilder extends ChildNodeBuilder, SchemaNodeBuilder, TypeDefinitionAwareBuilder {
+public interface GroupingBuilder extends ChildNodeBuilder, SchemaNodeBuilder,
+        TypeDefinitionAwareBuilder {
 
-	GroupingDefinition build();
+    DataSchemaNodeBuilder getChildNode(String name);
+
+    GroupingDefinition build();
 
 }
