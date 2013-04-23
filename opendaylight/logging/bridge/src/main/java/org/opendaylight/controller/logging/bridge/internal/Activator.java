@@ -44,7 +44,7 @@ public class Activator implements BundleActivator {
                         .getService(service);
                 if (reader == null) {
                     this.log.error("Cannot register the LogListener because "
-                            + "cannot retrive LogReaderService");
+                            + "cannot retrieve LogReaderService");
                 }
                 reader.addLogListener(this.listener);
                 // Now lets walk all the exiting messages
@@ -66,7 +66,7 @@ public class Activator implements BundleActivator {
                         controller.logging.bridge.internal.UncaughtExceptionHandler());
             } else {
                 this.log.error("Cannot register the LogListener because "
-                        + "cannot retrive LogReaderService");
+                        + "cannot retrieve LogReaderService");
             }
         } else {
             System.err

@@ -38,8 +38,9 @@ public class SessionManager implements ISessionManager {
         ServletContext ctx = se.getSession().getServletContext();
         String path = ctx.getContextPath();
 
-        logger.debug("Servlet Context Path created " + path);
-        logger.debug("Session Id created for ctxt path " + se.getSession().getId());
+        logger.debug("Servlet Context Path created {}", path);
+        logger.debug("Session Id created for ctxt path {}",
+                se.getSession().getId());
 
         synchronized (sessionMap) {
             Set<HttpSession> set = sessionMap.get(ctx);
@@ -55,8 +56,8 @@ public class SessionManager implements ISessionManager {
     public void sessionDestroyed(HttpSessionEvent se) {
         ServletContext ctx = se.getSession().getServletContext();
         String path = ctx.getContextPath();
-        logger.debug("Servlet Context Path of destroyed session - " + path);
-        logger.debug("Session Id destroyed " + se.getSession().getId());
+        logger.debug("Servlet Context Path of destroyed session - {}", path);
+        logger.debug("Session Id destroyed {}", se.getSession().getId());
 
         synchronized (sessionMap) {
             Set<HttpSession> set = sessionMap.get(ctx);

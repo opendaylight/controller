@@ -113,15 +113,15 @@ public class ClusterManager implements IClusterServices {
         }
         while (supernodes.hasMoreTokens()) {
             String curr_supernode = supernodes.nextToken();
-            logger.debug("Examining supernode " + curr_supernode);
+            logger.debug("Examining supernode {}", curr_supernode);
             StringTokenizer host_port = new StringTokenizer(curr_supernode,
                     "[]");
             String host;
             String port;
             Integer port_num = gossipRouterPortDefault;
             if (host_port.countTokens() > 2) {
-                logger.error("Error parsing supernode " + curr_supernode
-                        + " proceed to the next one");
+                logger.error("Error parsing supernode {} proceed to the next one",
+                        curr_supernode);
                 continue;
             }
             host = host_port.nextToken();
@@ -184,13 +184,13 @@ public class ClusterManager implements IClusterServices {
                     for (InetAddress myAddr : myAddresses) {
                         if (myAddr.isLoopbackAddress()
                                 || myAddr.isLinkLocalAddress()) {
-                            logger.debug("Skipping local address "
-                                    + myAddr.getHostAddress());
+                            logger.debug("Skipping local address {}",
+                                         myAddr.getHostAddress());
                             continue;
                         } else {
                             // First non-local address
                             myBind = myAddr.getHostAddress();
-                            logger.debug("First non-local address " + myBind);
+                            logger.debug("First non-local address {}", myBind);
                             break;
                         }
                     }
@@ -199,7 +199,7 @@ public class ClusterManager implements IClusterServices {
                         .getProperty("jgroups.tcp.address");
                 if (jgroupAddress == null) {
                     if (myBind != null) {
-                        logger.debug("Set bind address to be " + myBind);
+                        logger.debug("Set bind address to be {}", myBind);
                         System.setProperty("jgroups.tcp.address", myBind);
                     } else {
                         logger
@@ -207,8 +207,8 @@ public class ClusterManager implements IClusterServices {
                         System.setProperty("jgroups.tcp.address", "127.0.0.1");
                     }
                 } else {
-                    logger.debug("jgroup.tcp.address already set to be "
-                            + jgroupAddress);
+                    logger.debug("jgroup.tcp.address already set to be {}",
+                            jgroupAddress);
                 }
             } catch (UnknownHostException uhe) {
                 logger
@@ -220,14 +220,14 @@ public class ClusterManager implements IClusterServices {
         // host list
         System.setProperty("jgroups.tcpgossip.initial_hosts",
                 sanitized_supernodes_list.toString());
-        logger.debug("jgroups.tcp.address set to "
-                + System.getProperty("jgroups.tcp.address"));
-        logger.debug("jgroups.tcpgossip.initial_hosts set to "
-                + System.getProperty("jgroups.tcpgossip.initial_hosts"));
+        logger.debug("jgroups.tcp.address set to {}",
+                System.getProperty("jgroups.tcp.address"));
+        logger.debug("jgroups.tcpgossip.initial_hosts set to {}",
+                System.getProperty("jgroups.tcpgossip.initial_hosts"));
         GossipRouter res = null;
         if (amIGossipRouter) {
-            logger.info("I'm a GossipRouter will listen on port "
-                    + gossipRouterPort);
+            logger.info("I'm a GossipRouter will listen on port {}",
+                    gossipRouterPort);
             res = new GossipRouter(gossipRouterPort);
         }
         return res;
@@ -241,10 +241,8 @@ public class ClusterManager implements IClusterServices {
                 this.gossiper.start();
                 logger.info("Started GossipRouter");
             } catch (Exception e) {
-                logger.error("GossipRouter didn't start exception " + e
-                        + " met");
-                logger.error("Stack Trace that raised the exception");
-                logger.error("",e);
+                logger.error("GossipRouter didn't start. Exception Stack Trace",
+                             e);
             }
         }
         logger.info("Starting the ClusterManager");
@@ -264,7 +262,7 @@ public class ClusterManager implements IClusterServices {
             this.cm = null;
             this.stop();
         }
-        logger.debug("Cache Manager has value " + this.cm);
+        logger.debug("Cache Manager has value {}", this.cm);
     }
 
     public void stop() {

@@ -639,7 +639,6 @@ public class HostTracker implements IfIptoHost, IfHostListener,
             if (switchNeedsTieringUpdate(dstNode, currentTier + 1)) {
                 Tier t = new Tier(currentTier + 1);
                 switchManager.setNodeProp(dstNode, t);
-                //logger.info("Updating Switch Tier "+ (currentTier+1) +" for "+String.format("%x", dstSw.getId()));
                 needsVisiting.add(dstNode);
             }
         }
@@ -684,7 +683,6 @@ public class HostTracker implements IfIptoHost, IfHostListener,
             return true;
         else if (t.getValue() > tier)
             return true;
-        //logger.info(getContainerName()+" -> "+ "Switch "+String.format("%x", sw.getId())+ " is in better Tier "+sw.getTier()+" ... skipping "+tier);
         return false;
     }
 
@@ -993,8 +991,6 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                     notifyHostLearnedOrRemoved(host, false);
                 } else if (arp_cntdown <= switchManager.getHostRetryCount()) {
                     /* Use the services of arphandler to check if host is still there */
-                    // logger.info("Probe for Host:{}", host);
-                    //logger.info("ARP Probing ("+arp_cntdown+") for "+host.toString());
                     logger.trace("ARP Probing ({}) for {}({})", new Object[] {
                             arp_cntdown,
                             host.getNetworkAddress().getHostAddress(),
