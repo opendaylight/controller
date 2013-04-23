@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -12,21 +11,24 @@ package org.opendaylight.controller.protocol_plugin.openflow.internal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openflow.protocol.statistics.OFPortStatisticsReply;
-import org.openflow.protocol.statistics.OFStatistics;
-
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.openflow.protocol.statistics.OFPortStatisticsReply;
+import org.openflow.protocol.statistics.OFStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Converts an openflow list of port statistics in a SAL list of
  * NodeConnectorStatistics objects
- *
- *
- *
+ * 
+ * 
+ * 
  */
 public class PortStatisticsConverter {
+    private static final Logger log = LoggerFactory
+            .getLogger(PortStatisticsConverter.class);
     private long switchId;
     private List<OFStatistics> ofStatsList;
     private List<NodeConnectorStatistics> ncStatsList;
@@ -63,13 +65,13 @@ public class PortStatisticsConverter {
                         .getReceiveFrameErrors());
                 NCStat.setReceiveOverRunErrorCount(ofPortStat
                         .getReceiveOverrunErrors());
-                NCStat
-                        .setReceiveCRCErrorCount(ofPortStat
-                                .getReceiveCRCErrors());
+                NCStat.setReceiveCRCErrorCount(ofPortStat.getReceiveCRCErrors());
                 NCStat.setCollisionCount(ofPortStat.getCollisions());
                 this.ncStatsList.add(NCStat);
             }
         }
+        log.trace("OFStatistics: {} NodeConnectorStatistics: {}", ofStatsList,
+                ncStatsList);
         return this.ncStatsList;
     }
 

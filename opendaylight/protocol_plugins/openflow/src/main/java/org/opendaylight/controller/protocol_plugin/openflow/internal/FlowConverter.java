@@ -16,29 +16,6 @@ import java.util.List;
 
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6FlowMod;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
-import org.openflow.protocol.OFFlowMod;
-import org.openflow.protocol.OFMatch;
-import org.openflow.protocol.OFMessage;
-import org.openflow.protocol.OFPacketOut;
-import org.openflow.protocol.OFPort;
-import org.openflow.protocol.OFVendor;
-import org.openflow.protocol.action.OFAction;
-import org.openflow.protocol.action.OFActionDataLayerDestination;
-import org.openflow.protocol.action.OFActionDataLayerSource;
-import org.openflow.protocol.action.OFActionNetworkLayerAddress;
-import org.openflow.protocol.action.OFActionNetworkLayerDestination;
-import org.openflow.protocol.action.OFActionNetworkLayerSource;
-import org.openflow.protocol.action.OFActionNetworkTypeOfService;
-import org.openflow.protocol.action.OFActionOutput;
-import org.openflow.protocol.action.OFActionStripVirtualLan;
-import org.openflow.protocol.action.OFActionTransportLayer;
-import org.openflow.protocol.action.OFActionTransportLayerDestination;
-import org.openflow.protocol.action.OFActionTransportLayerSource;
-import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
-import org.openflow.protocol.action.OFActionVirtualLanPriorityCodePoint;
-import org.openflow.util.U16;
-import org.openflow.util.U32;
-
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
@@ -67,6 +44,28 @@ import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
+import org.openflow.protocol.OFFlowMod;
+import org.openflow.protocol.OFMatch;
+import org.openflow.protocol.OFMessage;
+import org.openflow.protocol.OFPacketOut;
+import org.openflow.protocol.OFPort;
+import org.openflow.protocol.OFVendor;
+import org.openflow.protocol.action.OFAction;
+import org.openflow.protocol.action.OFActionDataLayerDestination;
+import org.openflow.protocol.action.OFActionDataLayerSource;
+import org.openflow.protocol.action.OFActionNetworkLayerAddress;
+import org.openflow.protocol.action.OFActionNetworkLayerDestination;
+import org.openflow.protocol.action.OFActionNetworkLayerSource;
+import org.openflow.protocol.action.OFActionNetworkTypeOfService;
+import org.openflow.protocol.action.OFActionOutput;
+import org.openflow.protocol.action.OFActionStripVirtualLan;
+import org.openflow.protocol.action.OFActionTransportLayer;
+import org.openflow.protocol.action.OFActionTransportLayerDestination;
+import org.openflow.protocol.action.OFActionTransportLayerSource;
+import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
+import org.openflow.protocol.action.OFActionVirtualLanPriorityCodePoint;
+import org.openflow.util.U16;
+import org.openflow.util.U32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +74,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FlowConverter {
     protected static final Logger logger = LoggerFactory
-    .getLogger(FlowConverter.class);
+            .getLogger(FlowConverter.class);
     private Flow flow; // SAL Flow
     private OFMatch ofMatch; // OF 1.0 match or OF 1.0 + IPv6 extension match
     private List<OFAction> actionsList; // OF 1.0 actions
@@ -256,7 +255,8 @@ public class FlowConverter {
                 ofMatch.setWildcards(U32.t(Long.valueOf(wildcards)));
             }
         }
-
+        logger.trace("SAL Match: {} Openflow Match: {}", flow.getMatch(),
+                ofMatch);
         return ofMatch;
     }
 
@@ -416,6 +416,8 @@ public class FlowConverter {
                 }
             }
         }
+        logger.trace("SAL Actions: {} Openflow Actions: {}", flow.getActions(),
+                actionsList);
         return actionsList;
     }
 
@@ -483,6 +485,9 @@ public class FlowConverter {
                 }
             }
         }
+        logger.trace("Openflow Match: {} Openflow Actions: {}", ofMatch,
+                actionsList);
+        logger.trace("Openflow Mod Message: {}", fm);
         return fm;
     }
 
@@ -684,7 +689,7 @@ public class FlowConverter {
                         try {
                             ip = InetAddress.getByAddress(addr);
                         } catch (UnknownHostException e) {
-                            logger.error("",e);
+                            logger.error("", e);
                         }
                         salAction = new SetNwSrc(ip);
                     } else if (ofAction instanceof OFActionNetworkLayerDestination) {
@@ -695,7 +700,7 @@ public class FlowConverter {
                         try {
                             ip = InetAddress.getByAddress(addr);
                         } catch (UnknownHostException e) {
-                            logger.error("",e);
+                            logger.error("", e);
                         }
                         salAction = new SetNwDst(ip);
                     } else if (ofAction instanceof OFActionNetworkTypeOfService) {
@@ -719,6 +724,9 @@ public class FlowConverter {
             // Create Flow
             flow = new Flow(salMatch, salActionList);
         }
+        logger.trace("Openflow Match: {} Openflow Actions: {}", ofMatch,
+                actionsList);
+        logger.trace("SAL Flow: {}", flow);
         return flow;
     }
 

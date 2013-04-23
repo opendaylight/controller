@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -13,20 +12,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6StatsReply;
-import org.openflow.protocol.statistics.OFFlowStatisticsReply;
-import org.openflow.protocol.statistics.OFStatistics;
-
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
+import org.openflow.protocol.statistics.OFFlowStatisticsReply;
+import org.openflow.protocol.statistics.OFStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Converts an openflow list of flow statistics in a SAL list of FlowOnNode objects
- *
- *
- *
+ * Converts an openflow list of flow statistics in a SAL list of FlowOnNode
+ * objects
+ * 
+ * 
+ * 
  */
 public class FlowStatisticsConverter {
+    private static final Logger log = LoggerFactory
+            .getLogger(FlowStatisticsConverter.class);
     private List<OFStatistics> ofStatsList;
     private List<FlowOnNode> flowOnNodeList;
 
@@ -34,7 +37,8 @@ public class FlowStatisticsConverter {
         if (statsList == null) {// || statsList.isEmpty()) {
             this.ofStatsList = new ArrayList<OFStatistics>(1); // dummy list
         } else {
-            this.ofStatsList = statsList; //new ArrayList<OFStatistics>(statsList);
+            this.ofStatsList = statsList; // new
+                                          // ArrayList<OFStatistics>(statsList);
         }
         this.flowOnNodeList = null;
     }
@@ -83,6 +87,8 @@ public class FlowStatisticsConverter {
                 flowOnNodeList.add(flowOnNode);
             }
         }
+        log.trace("OFStatistics: {} FlowOnNode: {}", ofStatsList,
+                flowOnNodeList);
         return flowOnNodeList;
     }
 }

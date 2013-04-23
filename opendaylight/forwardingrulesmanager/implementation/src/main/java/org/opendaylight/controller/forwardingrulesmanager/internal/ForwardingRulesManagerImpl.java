@@ -1571,8 +1571,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         for (FlowEntry flowEntry : inactiveFlows) {
             Status status = this.removeEntry(flowEntry);
             if (!status.isSuccess()) {
-                log.warn("Failed to remove entry: {}. The failure is: {}"
-                        + flowEntry, status.getDescription());
+                log.warn("Failed to remove entry: {}. The failure is: {}",
+                        flowEntry, status.getDescription());
             }
         }
     }
@@ -1588,8 +1588,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         for (FlowEntry flowEntry : this.inactiveFlows) {
             Status status = this.addEntry(flowEntry);
             if (!status.isSuccess()) {
-                log.warn("Failed to install entry: {}. The failure is: {}"
-                        + flowEntry, status.getDescription());
+                log.warn("Failed to install entry: {}. The failure is: {}",
+                        flowEntry, status.getDescription());
             }
         }
 
@@ -1923,7 +1923,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     @Override
     public void portGroupChanged(PortGroupConfig config,
             Map<Node, PortGroup> data, boolean add) {
-        log.info("PortGroup Changed for :" + config + " Data: " + portGroupData);
+        log.info("PortGroup Changed for: {} Data: {}", config, portGroupData);
         Map<Node, PortGroup> existingData = portGroupData.get(config);
         if (existingData != null) {
             for (Map.Entry<Node, PortGroup> entry : data.entrySet()) {
