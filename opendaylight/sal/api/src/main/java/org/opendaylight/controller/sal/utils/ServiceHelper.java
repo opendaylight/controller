@@ -82,7 +82,8 @@ public class ServiceHelper {
             }
             return true;
         } catch (Exception e) {
-            logger.error("Exception "+e.getMessage() +" while registering the service "+instance.toString());
+            logger.error("Exception {} while registering the service {}",
+                    e.getMessage(), instance.toString());
         }
         return false;
     }

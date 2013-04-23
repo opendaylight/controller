@@ -130,9 +130,11 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
 
     protected void handleARPPacket(Ethernet eHeader, ARP pkt, NodeConnector p) {
         if (pkt.getOpCode() == 0x1) {
-            logger.debug("Received ARP REQUEST Packet from NodeConnector:" + p);
+            logger.debug("Received ARP REQUEST Packet from NodeConnector: {}",
+                         p);
         } else {
-            logger.debug("Received ARP REPLY Packet from NodeConnector:" + p);
+            logger.debug("Received ARP REPLY Packet from NodeConnector: {}",
+                         p);
         }
         InetAddress targetIP = null;
         try {
@@ -328,13 +330,13 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         Node n = host.getnodeconnectorNode();
         if (n == null) {
             logger.error("cannot send UcastARP because cannot extract node "
-                    + "from HostNodeConnector:" + host);
+                    + "from HostNodeConnector: {}", host);
             return;
         }
         NodeConnector outPort = host.getnodeConnector();
         if (outPort == null) {
             logger.error("cannot send UcastARP because cannot extract "
-                    + "outPort from HostNodeConnector:" + host);
+                    + "outPort from HostNodeConnector: {}", host);
             return;
         }
 
@@ -489,8 +491,8 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             return PacketResult.IGNORED;
         }
         logger
-                .trace("Received a frame of size:"
-                        + inPkt.getPacketData().length);
+                .trace("Received a frame of size: {}",
+                        inPkt.getPacketData().length);
         Packet formattedPak = this.dataPacketService.decodeDataPacket(inPkt);
         if (formattedPak instanceof Ethernet) {
             Object nextPak = formattedPak.getPayload();

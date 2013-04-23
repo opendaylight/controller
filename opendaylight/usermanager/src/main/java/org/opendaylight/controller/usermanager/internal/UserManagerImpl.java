@@ -275,14 +275,14 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                     break;
                 } else if (rcResponse.getStatus() == AuthResultEnum.AUTH_REJECT) {
                     logger.info(
-                            "Remote Authentication Rejected User: \"{}\", from Server: {}, Reason: "
-                                    + rcResponse.getStatus().toString(),
-                            userName, aaaServer.getAddress());
+                            "Remote Authentication Rejected User: \"{}\", from Server: {}, Reason:{}",
+                            new Object[] {userName, aaaServer.getAddress(),
+                            rcResponse.getStatus().toString()});
                 } else {
                     logger.info(
-                            "Remote Authentication Failed for User: \"{}\", from Server: {}, Reason: "
-                                    + rcResponse.getStatus().toString(),
-                            userName, aaaServer.getAddress());
+                            "Remote Authentication Failed for User: \"{}\", from Server: {}, Reason:{}",
+                            new Object[] {userName, aaaServer.getAddress(),
+                            rcResponse.getStatus().toString()});
                 }
             }
         }
@@ -367,8 +367,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
          */
         putUserInActiveList(userName, result);
         if (authorized) {
-            logger.info("User \"{}\" authorized for the following role(s): "
-                    + result.getUserRoles(), userName);
+            logger.info("User \"{}\" authorized for the following role(s): {}",
+                        userName, result.getUserRoles());
         } else {
             logger.info("User \"{}\" Not Authorized for any role ", userName);
         }
