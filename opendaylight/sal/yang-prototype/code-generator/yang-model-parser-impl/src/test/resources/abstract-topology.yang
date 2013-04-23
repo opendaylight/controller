@@ -8,8 +8,8 @@ module abstract-topology {
         revision-date 2010-09-24;
     }
 
-    organization "Cisco";
-    contact "WILL-BE-DEFINED-LATER";
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
 
     description
         "This module contains the definitions of elements that creates network 

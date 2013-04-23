@@ -6,9 +6,8 @@ module demo-topology {
     import controller-network {prefix "cn";}
 	import mount  {prefix "mnt";}
 
-    organization "Cisco";
-
-    contact "WILL-BE-DEFINED-LATER";
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
 
     description "
         This module contains the definitions of elements that creates network 

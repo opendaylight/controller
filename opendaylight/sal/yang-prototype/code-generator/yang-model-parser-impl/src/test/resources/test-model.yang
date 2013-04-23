@@ -7,9 +7,8 @@ module test-model {
 	import iana-if-type {prefix "if-type";}
 	import mount {prefix "mnt";} 
 
-	organization "Cisco";
-
-	contact "WILL-BE-DEFINED-LATER";
+	organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
 
 	description "module description";
 	reference "module reference";

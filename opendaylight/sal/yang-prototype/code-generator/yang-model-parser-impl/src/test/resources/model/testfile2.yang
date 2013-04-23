@@ -8,8 +8,9 @@ module types2 {
          revision-date 2013-02-27;
      }
 
-    organization "opendaylight";
-    contact "WILL-BE-DEFINED-LATER";
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+    
     description "This is types-data test description";
 
     revision "2013-02-27" {

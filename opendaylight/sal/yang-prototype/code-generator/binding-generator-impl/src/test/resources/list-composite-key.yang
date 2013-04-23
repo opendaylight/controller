@@ -3,9 +3,8 @@ module list-composite-key {
     namespace "urn:composite.key";
     prefix "scd";
 
-    organization "Cisco";
-
-    contact "WILL-BE-DEFINED-LATER";
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
 
     description "
         This module contains the definitions of elements that creates network 

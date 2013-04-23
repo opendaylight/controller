@@ -7,9 +7,8 @@ module abstract-topology {
 	import ietf-inet-types { prefix "inet"; }
     import abstract-prefixes { prefix "abs-pref"; }
     
-	organization "Cisco";
-
-    contact "WILL-BE-DEFINED-LATER";
+	organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
 
     description "
 		This module contains the definitions of elements that creates network 

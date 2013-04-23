@@ -8,8 +8,8 @@ module types1 {
          revision-date 2013-02-27;
      }
     
-    organization "opendaylight";
-    contact "WILL-BE-DEFINED-LATER";
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
     
     revision "2013-02-27" {
         reference " WILL BE DEFINED LATER";
