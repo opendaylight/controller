@@ -116,7 +116,7 @@ abstract public class ClusterManagerCommon implements IClusterServicesCommon {
         Dictionary props = c.getServiceProperties();
         if (props != null) {
             this.containerName = (String) props.get("containerName");
-            logger.debug("Running containerName:" + this.containerName);
+            logger.debug("Running containerName: {}", this.containerName);
         } else {
             // In the Global instance case the containerName is empty
             this.containerName = "";

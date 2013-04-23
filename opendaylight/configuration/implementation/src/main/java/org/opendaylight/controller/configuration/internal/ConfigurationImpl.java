@@ -84,8 +84,8 @@ public class ConfigurationImpl implements IConfigurationService {
         	Status status = configurationAware.saveConfiguration();
             if (!status.isSuccess()) {
             	success = false;
-            	logger.info("Failed to save config for "
-            			+ configurationAware.getClass().getName());
+            	logger.info("Failed to save config for {}",
+            			configurationAware.getClass().getName());
             }
         }
         if (success) {
