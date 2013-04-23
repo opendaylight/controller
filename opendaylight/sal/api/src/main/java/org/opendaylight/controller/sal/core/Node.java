@@ -53,8 +53,8 @@ public class Node implements Serializable {
      * surround.
      */
     public static final class NodeIDType {
-        private static final ConcurrentHashMap<String, Class> compatibleType =
-            new ConcurrentHashMap<String, Class>();
+        private static final ConcurrentHashMap<String, Class<? extends Object>> compatibleType =
+            new ConcurrentHashMap<String, Class<? extends Object>>();
         /**
          * Identifier for an OpenFlow node
          */
@@ -113,7 +113,7 @@ public class Node implements Serializable {
          * @return true if registered, false otherwise
          */
         public static boolean registerIDType(String type,
-                                             Class compatibleID) {
+                                             Class<? extends Object> compatibleID) {
             if (compatibleType.get(type) != null) {
                 return false;
             }  else {

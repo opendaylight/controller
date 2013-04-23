@@ -88,7 +88,7 @@ abstract public class ClusterManagerCommon implements IClusterServicesCommon {
             CacheConfigException {
         ConcurrentMap<?, ?> res = this.caches.get(cacheName);
         if (res == null) {
-            res = new ConcurrentHashMap();
+            res = new ConcurrentHashMap<Object, Object>();
             this.caches.put(cacheName, res);
             return res;
         }

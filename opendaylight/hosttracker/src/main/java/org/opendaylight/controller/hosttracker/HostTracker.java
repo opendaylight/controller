@@ -956,6 +956,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
     }
 
     private class ARPRefreshHandler extends TimerTask {
+        @SuppressWarnings("deprecation")
         public void run() {
             if ((clusterContainerService != null)
                     && !clusterContainerService.amICoordinator()) {

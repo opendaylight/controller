@@ -118,7 +118,7 @@ public interface IClusterServices {
      *
      * @return ConcurrentHashMap to be used to modify the data structure
      */
-    ConcurrentMap<?, ?> getCache(String containerName, String cacheName);
+    ConcurrentMap<? extends Object, ? extends Object> getCache(String containerName, String cacheName);
 
     /**
      * Destroy a cachename given containerName/cachename, if doesn't exist

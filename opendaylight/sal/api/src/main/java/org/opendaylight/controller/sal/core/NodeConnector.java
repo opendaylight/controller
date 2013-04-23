@@ -50,8 +50,8 @@ public class NodeConnector implements Serializable {
      */
     public static class NodeConnectorIDType {
         private static final
-        ConcurrentHashMap<String, ImmutablePair<Class, String>> compatibleType =
-            new ConcurrentHashMap<String, ImmutablePair<Class, String>>();
+        ConcurrentHashMap<String, ImmutablePair<Class<? extends Object>, String>> compatibleType =
+            new ConcurrentHashMap<String, ImmutablePair<Class<? extends Object>, String>>();
         /**
          * Represent a special port pointing toward the controller,
          * this is to send data packets toward the controller from
@@ -175,7 +175,7 @@ public class NodeConnector implements Serializable {
          * @return true if registered, false otherwise
          */
         public static boolean registerIDType(String type,
-                                             Class compatibleID,
+                                             Class<? extends Object> compatibleID,
                                              String compatibleNode) {
             if (compatibleType.get(type) != null) {
                 return false;

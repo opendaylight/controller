@@ -46,6 +46,7 @@ public class ContainerServiceDependency implements ServiceDependency,
         this.containerName = containerName;
     }
 
+    @SuppressWarnings("rawtypes") // can't change org.apache.felix.dm.ServiceDependency
     @Override
     public ServiceDependency setService(Class serviceName) {
         this.m_dep.setService(serviceName, "(containerName="
@@ -53,6 +54,7 @@ public class ContainerServiceDependency implements ServiceDependency,
         return this;
     }
 
+    @SuppressWarnings("rawtypes") // can't change org.apache.felix.dm.ServiceDependency
     @Override
     public ServiceDependency setService(Class serviceName, String serviceFilter) {
         this.m_dep.setService(serviceName, "(&(containerName="
@@ -67,6 +69,7 @@ public class ContainerServiceDependency implements ServiceDependency,
         return this;
     }
 
+    @SuppressWarnings("rawtypes") // can't change org.apache.felix.dm.ServiceDependency
     @Override
     public ServiceDependency setService(Class serviceName,
             ServiceReference serviceReference) {
@@ -163,6 +166,7 @@ public class ContainerServiceDependency implements ServiceDependency,
                 .createCopy(), this.containerName);
     }
 
+    @SuppressWarnings("rawtypes") // can't change org.apache.felix.dm.ServiceDependency
     @Override
     public Dictionary getProperties() {
         return this.m_dep.getProperties();
@@ -193,6 +197,7 @@ public class ContainerServiceDependency implements ServiceDependency,
         return this.m_dep.isAutoConfig();
     }
 
+    @SuppressWarnings("rawtypes") // can't change org.apache.felix.dm.ServiceDependency
     @Override
     public Class getAutoConfigType() {
         return this.m_dep.getAutoConfigType();
