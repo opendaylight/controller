@@ -17,6 +17,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.impl.BindingGeneratorImpl;
+import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
@@ -38,6 +39,47 @@ public class GeneratedTypesTest {
     }
 
     @Test
+    public void testLeafEnumResolving() {
+        final String ietfInterfacesPath = getClass().getResource(
+                "/enum-test-models/ietf-interfaces@2012-11-15.yang").getPath();
+        final String ifTypePath = getClass().getResource(
+                "/enum-test-models/iana-if-type@2012-06-05.yang").getPath();
+        final String yangTypesPath = getClass().getResource(
+                "/enum-test-models/ietf-yang-types@2010-09-24.yang").getPath();
+
+        final SchemaContext context = resolveSchemaContextFromFiles(
+                ietfInterfacesPath, ifTypePath, yangTypesPath);
+        assertTrue(context != null);
+        
+        final BindingGenerator bindingGen = new BindingGeneratorImpl();
+        final List<Type> genTypes = bindingGen.generateTypes(context);
+        assertTrue(genTypes != null);
+    }
+
+    @Test
+    public void testTypedefEnumResolving() {
+        final String ianaIfTypePath = getClass().getResource(
+                "/leafref-test-models/iana-if-type@2012-06-05.yang").getPath();
+
+        final SchemaContext context = resolveSchemaContextFromFiles(ianaIfTypePath);
+        assertTrue(context != null);
+
+        final BindingGenerator bindingGen = new BindingGeneratorImpl();
+        final List<Type> genTypes = bindingGen.generateTypes(context);
+        assertTrue(genTypes != null);
+        assertEquals(1, genTypes.size());
+
+        final Type type = genTypes.get(0);
+        assertTrue(type instanceof GeneratedType);
+
+        final GeneratedType genType = (GeneratedType) type;
+        assertEquals(1, genType.getEnumDefintions().size());
+
+        final Enumeration enumer = genType.getEnumDefintions().get(0);
+        assertEquals(272, enumer.getValues().size());
+    }
+
+    @Test
     public void testMultipleModulesResolving() {
         final String topologyPath = getClass().getResource(
                 "/abstract-topology.yang").getPath();
@@ -51,7 +93,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(11, genTypes.size());
+        assertEquals(13, genTypes.size());
     }
 
     @Test
@@ -88,9 +130,9 @@ public class GeneratedTypesTest {
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
-        assertEquals(21, genTypes.size());
+        assertEquals(25, genTypes.size());
         assertTrue(genTypes != null);
-        
+
         int resolvedLeafrefCount = 0;
         for (final Type type : genTypes) {
             if (type.getName().equals("InterfaceKey")
@@ -98,7 +140,7 @@ public class GeneratedTypesTest {
                 final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
                 final List<GeneratedProperty> properties = genTO
                         .getProperties();
-                
+
                 assertTrue(properties != null);
                 for (final GeneratedProperty property : properties) {
                     if (property.getName().equals("InterfaceId")) {
@@ -217,7 +259,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(2, genTypes.size());
+        assertEquals(3, genTypes.size());
 
         final GeneratedType simpleContainer = (GeneratedType) genTypes.get(0);
         final GeneratedType nestedContainer = (GeneratedType) genTypes.get(1);
@@ -295,7 +337,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(2, genTypes.size());
+        assertEquals(3, genTypes.size());
 
         final GeneratedType simpleContainer = (GeneratedType) genTypes.get(0);
         final GeneratedType nestedContainer = (GeneratedType) genTypes.get(1);
@@ -368,7 +410,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(4, genTypes.size());
+        assertEquals(5, genTypes.size());
 
         int genTypesCount = 0;
         int genTOsCount = 0;
@@ -451,7 +493,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(6, genTypes.size());
+        assertEquals(7, genTypes.size());
 
         int genTypesCount = 0;
         int genTOsCount = 0;
@@ -483,7 +525,7 @@ public class GeneratedTypesTest {
             }
         }
 
-        assertEquals(4, genTypesCount);
+        assertEquals(5, genTypesCount);
         assertEquals(2, genTOsCount);
     }
 
@@ -498,7 +540,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(13, genTypes.size());
+        assertEquals(14, genTypes.size());
 
         int genTypesCount = 0;
         int genTOsCount = 0;
@@ -510,7 +552,7 @@ public class GeneratedTypesTest {
             }
         }
 
-        assertEquals(10, genTypesCount);
+        assertEquals(11, genTypesCount);
         assertEquals(3, genTOsCount);
     }
 }

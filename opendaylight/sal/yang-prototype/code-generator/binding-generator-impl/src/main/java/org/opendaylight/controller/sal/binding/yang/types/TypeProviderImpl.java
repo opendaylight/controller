@@ -7,38 +7,28 @@
  */
 package org.opendaylight.controller.sal.binding.yang.types;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-
 import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.sal.binding.generator.spi.TypeProvider;
 import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.controller.yang.model.api.DataNodeContainer;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
-import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.ModuleImport;
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.Leafref;
+import org.opendaylight.controller.yang.model.util.SchemaContextUtil;
 
 public class TypeProviderImpl implements TypeProvider {
 
-    private SchemaContext schemaContext;
+    private SchemaContextUtil schemaContextUtil;
 
     public TypeProviderImpl(SchemaContext schemaContext) {
-        this.schemaContext = schemaContext;
+        schemaContextUtil = new SchemaContextUtil(schemaContext);
     }
 
     /*
@@ -55,7 +45,8 @@ public class TypeProviderImpl implements TypeProvider {
     }
 
     @Override
-    public Type javaTypeForSchemaDefinitionType(final TypeDefinition<?> typeDefinition) {
+    public Type javaTypeForSchemaDefinitionType(
+            final TypeDefinition<?> typeDefinition) {
         Type returnType = null;
         if (typeDefinition != null) {
             if (typeDefinition instanceof Leafref) {
@@ -64,21 +55,20 @@ public class TypeProviderImpl implements TypeProvider {
             } else if (typeDefinition instanceof IdentityrefTypeDefinition) {
 
             } else if (typeDefinition instanceof ExtendedType) {
-                final TypeDefinition<?> baseType = typeDefinition.getBaseType(); 
+                final TypeDefinition<?> baseType = typeDefinition.getBaseType();
                 return javaTypeForSchemaDefinitionType(baseType);
-            }
-            else {
+            } else {
                 returnType = baseTypeForExtendedType(typeDefinition);
             }
         }
         return returnType;
     }
-    
+
     public Type baseTypeForExtendedType(final TypeDefinition<?> typeDefinition) {
         Type returnType = null;
         if (typeDefinition != null) {
             if (typeDefinition instanceof ExtendedType) {
-                final TypeDefinition<?> extType = typeDefinition.getBaseType(); 
+                final TypeDefinition<?> extType = typeDefinition.getBaseType();
                 return baseTypeForExtendedType(extType);
             } else {
                 returnType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
@@ -87,7 +77,7 @@ public class TypeProviderImpl implements TypeProvider {
         }
         return returnType;
     }
-    
+
     public Type provideTypeForLeafref(final LeafrefTypeDefinition leafrefType) {
         Type returnType = null;
         if ((leafrefType != null) && (leafrefType.getPathStatement() != null)
@@ -100,22 +90,19 @@ public class TypeProviderImpl implements TypeProvider {
                 if (strXPath.matches(".*//[.* | .*//].*")) {
                     returnType = Types.typeForClass(Object.class);
                 } else {
-                    final Module module = resolveModuleFromSchemaPath(leafrefType
-                            .getPath());
+                    final Module module = schemaContextUtil
+                            .resolveModuleFromSchemaPath(leafrefType.getPath());
                     if (module != null) {
-                        Queue<String> leafrefPath;
-                        if (!xpath.isAbsolute()) {
-                            leafrefPath = resolveRelativeXPath(xpath,
-                                    leafrefType.getPath());
+                        final DataSchemaNode dataNode;
+                        if (xpath.isAbsolute()) {
+                            dataNode = schemaContextUtil.findDataSchemaNode(
+                                    module, xpath);
                         } else {
-                            leafrefPath = xpathToPrefixedPath(strXPath,
-                                    module.getName());
+                            dataNode = schemaContextUtil
+                                    .findDataSchemaNodeForRelativeXPath(module,
+                                            leafrefType, xpath);
                         }
-                        if (leafrefPath != null) {
-                            final DataSchemaNode dataNode = findSchemaNodeForGivenPath(
-                                    module, leafrefPath);
-                            returnType = resolveTypeFromDataSchemaNode(dataNode);
-                        }
+                        returnType = resolveTypeFromDataSchemaNode(dataNode);
                     }
                 }
             }
@@ -135,151 +122,5 @@ public class TypeProviderImpl implements TypeProvider {
             }
         }
         return returnType;
-    }
-
-    /**
-     * Search which starts from root of Module.
-     * 
-     * @param module
-     * @param prefixedPath
-     * @return
-     */
-    private DataSchemaNode findSchemaNodeForGivenPath(final Module module,
-            final Queue<String> prefixedPath) {
-        if ((module != null) && (prefixedPath != null)) {
-            DataNodeContainer nextContainer = module;
-            final String modulePrefix = module.getPrefix();
-            
-            String childNodeName = null;
-            DataSchemaNode schemaNode = null;
-            while ((nextContainer != null) && (prefixedPath.size() > 0)) {
-                childNodeName = prefixedPath.poll();
-                if (childNodeName.contains(":")) {
-                    final String[] prefixedChildNode = childNodeName.split(":");
-                    if ((modulePrefix != null)
-                            && modulePrefix.equals(prefixedChildNode[0])) {
-
-                        childNodeName = prefixedChildNode[1];
-                    } else {
-                        final Module nextModule = resolveModuleForPrefix(
-                                prefixedChildNode[0], module);
-                        final Queue<String> nextModulePrefixedPath = new LinkedList<String>();
-                        nextModulePrefixedPath.add(childNodeName);
-                        nextModulePrefixedPath.addAll(prefixedPath);
-                        prefixedPath.clear();
-
-                        schemaNode = findSchemaNodeForGivenPath(nextModule,
-                                nextModulePrefixedPath);
-
-                        return schemaNode;
-                    }
-                }
-
-                schemaNode = nextContainer.getDataChildByName(childNodeName);
-                if (schemaNode instanceof ContainerSchemaNode) {
-                    nextContainer = (ContainerSchemaNode) schemaNode;
-                } else if (schemaNode instanceof ListSchemaNode) {
-                    nextContainer = (ListSchemaNode) schemaNode;
-                } else {
-                    return schemaNode;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private Module resolveModuleFromSchemaPath(final SchemaPath schemaPath) {
-        if ((schemaPath != null) && (schemaPath.getPath() != null)) {
-            final QName qname = schemaPath.getPath().get(0);
-
-            if ((qname != null) && (qname.getNamespace() != null)) {
-                return schemaContext
-                        .findModuleByNamespace(qname.getNamespace());
-            }
-        }
-        return null;
-    }
-
-    private Queue<String> xpathToPrefixedPath(final String xpath,
-            final String moduleName) {
-        final Queue<String> retQueue = new LinkedList<String>();
-        if ((xpath != null) && (moduleName != null)) {
-            final String[] prefixedPath = xpath.split("/");
-
-            if (prefixedPath != null) {
-                for (int i = 0; i < prefixedPath.length; ++i) {
-                    if (!prefixedPath[i].isEmpty()) {
-                        retQueue.add(prefixedPath[i]);
-                    }
-                }
-            }
-        }
-        return retQueue;
-    }
-
-    private Module resolveModuleForPrefix(final String prefix,
-            final Module parent) {
-        if ((prefix != null) && (parent != null)) {
-            final Set<ModuleImport> imports = parent.getImports();
-
-            if (imports != null) {
-                for (final ModuleImport impModule : imports) {
-                    final String impModPrefix = impModule.getPrefix();
-                    if ((impModPrefix != null) && prefix.equals(impModPrefix)) {
-                        return resolveModuleFromContext(prefix,
-                                impModule.getModuleName());
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private Module resolveModuleFromContext(final String prefix,
-            final String moduleName) {
-        final Set<Module> modules = schemaContext.getModules();
-
-        if ((prefix != null) && (moduleName != null) && (modules != null)) {
-            for (Module module : modules) {
-                if ((module != null) && prefix.equals(module.getPrefix())
-                        && moduleName.equals(module.getName())) {
-                    return module;
-                }
-            }
-        }
-        return null;
-    }
-
-    private Queue<String> resolveRelativeXPath(
-            final RevisionAwareXPath relativeXPath,
-            final SchemaPath leafrefSchemaPath) {
-        final Queue<String> absolutePath = new LinkedList<String>();
-
-        if ((relativeXPath != null) && !relativeXPath.isAbsolute()
-                && (leafrefSchemaPath != null)) {
-            final String strXPath = relativeXPath.toString();
-            if (strXPath != null) {
-                final String[] xpaths = strXPath.split("/");
-
-                if (xpaths != null) {
-                    int colCount = 0;
-                    while (xpaths[colCount].contains("..")) {
-                        ++colCount;
-                    }
-                    final List<QName> path = leafrefSchemaPath.getPath();
-                    if (path != null) {
-                        int lenght = path.size() - colCount;
-                        for (int i = 0; i < lenght; ++i) {
-                            absolutePath.add(path.get(i).getLocalName());
-                        }
-                        for (int i = colCount; i < xpaths.length; ++i) {
-                            absolutePath.add(xpaths[i]);
-                        }
-                    }
-                }
-            }
-        }
-        return absolutePath;
     }
 }

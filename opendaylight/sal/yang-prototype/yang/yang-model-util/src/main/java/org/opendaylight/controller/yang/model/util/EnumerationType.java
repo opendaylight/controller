@@ -7,7 +7,9 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -24,24 +26,38 @@ import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
 public class EnumerationType implements EnumTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("enumeration");
-    private final SchemaPath path = BaseTypes.schemaPath(name);
+    private final SchemaPath path;
     private final String description = "The enumeration built-in type represents values from a set of assigned names.";
     private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.6";
 
-    private final List<EnumPair> defaultEnum;
+    private final EnumPair defaultEnum;
     private final List<EnumPair> enums;
     private String units = "";
-
-    public EnumerationType(final List<EnumPair> enums) {
-        super();
+    private final EnumTypeDefinition baseType;
+    
+    private EnumerationType(final List<EnumPair> enums) {
+        this.path = BaseTypes.schemaPath(name);
         this.enums = Collections.unmodifiableList(enums);
-        defaultEnum = Collections.emptyList();
+        this.defaultEnum = null;
+        baseType = this;
+    }
+    
+    public EnumerationType(final List<String> actualPath, final URI namespace,
+            final Date revision, final List<EnumPair> enums) {
+        super();
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.enums = Collections.unmodifiableList(enums);
+        this.defaultEnum = null;
+        baseType = new EnumerationType(enums);
     }
 
-    public EnumerationType(final List<EnumPair> defaultEnum,
+    public EnumerationType(final List<String> actualPath, final URI namespace,
+            final Date revision, final EnumTypeDefinition baseType, final EnumPair defaultEnum,
             final List<EnumPair> enums, final String units) {
         super();
-        this.defaultEnum = Collections.unmodifiableList(defaultEnum);
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = baseType;
+        this.defaultEnum = defaultEnum;
         this.enums = Collections.unmodifiableList(enums);
         this.units = units;
     }
@@ -53,7 +69,7 @@ public class EnumerationType implements EnumTypeDefinition {
      */
     @Override
     public EnumTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*

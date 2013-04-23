@@ -963,7 +963,7 @@ public final class YangModelBuilderUtil {
             type = YangTypesConverter.javaTypeForBaseYangUnsignedIntegerType(
                     typeName, rangeStatements);
         } else if ("enumeration".equals(typeName)) {
-            type = new EnumerationType(enumConstants);
+            type = new EnumerationType(actualPath, namespace, revision, enumConstants);
         } else if ("string".equals(typeName)) {
             type = new StringType(lengthStatements, patternStatements);
         } else if ("bits".equals(typeName)) {

@@ -19,7 +19,7 @@ import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
-public class ExtendedType implements TypeDefinition {
+public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
 
     private final QName typeName;
     private final TypeDefinition<?> baseType;

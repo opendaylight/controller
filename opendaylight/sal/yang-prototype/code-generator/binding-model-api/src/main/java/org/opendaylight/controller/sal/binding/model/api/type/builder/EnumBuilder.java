@@ -14,8 +14,8 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 
  *
  */
-public interface EnumBuilder {
-
+public interface EnumBuilder extends Type {
+    
     public void addValue(final String name, final Integer value);
 
     public Enumeration toInstance(final Type definingType);

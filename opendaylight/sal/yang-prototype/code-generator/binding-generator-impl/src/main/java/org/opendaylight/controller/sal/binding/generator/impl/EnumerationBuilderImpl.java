@@ -26,7 +26,17 @@ final class EnumerationBuilderImpl implements EnumBuilder {
         this.name = name;
         values = new ArrayList<Enumeration.Pair>();
     }
+    
+    @Override
+    public String getPackageName() {
+        return packageName;
+    }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+    
     @Override
     public void addValue(final String name, final Integer value) {
         values.add(new EnumPairImpl(name, value));

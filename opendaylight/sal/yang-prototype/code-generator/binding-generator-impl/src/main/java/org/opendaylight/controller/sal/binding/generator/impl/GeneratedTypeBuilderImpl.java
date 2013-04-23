@@ -23,7 +23,7 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedT
 import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 
 public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
-    
+
     private final String packageName;
     private String comment;
     private final String name;
@@ -35,7 +35,7 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
         this.packageName = packageName;
         this.name = name;
     }
-    
+
     @Override
     public Type getParentType() {
         return this;
@@ -67,7 +67,8 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
 
     @Override
     public EnumBuilder addEnumeration(final String name) {
-        final EnumBuilder builder = new EnumerationBuilderImpl(packageName,
+        final String innerPackageName = packageName + "." + this.name;
+        final EnumBuilder builder = new EnumerationBuilderImpl(innerPackageName,
                 name);
         enumDefinitions.add(builder);
         return builder;
@@ -94,16 +95,16 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
         private final List<MethodSignature.Parameter> parameters;
         private String comment = "";
         private final Type parent;
-        
+
         public MethodSignatureBuilderImpl(final Type parent, final String name) {
             super();
             this.name = name;
             this.parent = parent;
             parameters = new ArrayList<MethodSignature.Parameter>();
-            //TODO: move implementation elsewhere!
-            
+            // TODO: move implementation elsewhere!
+
         }
-        
+
         @Override
         public void addReturnType(Type returnType) {
             if (returnType != null) {

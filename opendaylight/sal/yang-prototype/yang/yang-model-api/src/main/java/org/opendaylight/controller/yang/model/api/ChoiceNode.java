@@ -9,7 +9,7 @@ package org.opendaylight.controller.yang.model.api;
 
 import java.util.Set;
 
-public interface ChoiceNode extends DataSchemaNode {
+public interface ChoiceNode extends DataSchemaNode, AugmentationTarget {
 
     Set<ChoiceCaseNode> getCases();
 }
