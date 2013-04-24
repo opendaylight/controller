@@ -607,14 +607,15 @@ public class FlowConfig implements Serializable {
                         }
                     }
 
-                    log.debug("Get Nexthop address = " + address + " Type = "
-                            + setNHType.toString());
+                    log.debug("Get Nexthop address = {} Type = {}", address,
+                            setNHType.toString());
                     if (setNHType == SetNextHopType.RESOLVE_L2RW) {
                         try {
                             return InetAddress.getByName(address);
                         } catch (Exception e) {
-                            log.debug("Exception during nextHopAddress resolution : "
-                                    + e.getMessage());
+                            log.debug(
+                                    "Exception during nextHopAddress resolution : ",
+                                    e);
                         }
                     }
                 }

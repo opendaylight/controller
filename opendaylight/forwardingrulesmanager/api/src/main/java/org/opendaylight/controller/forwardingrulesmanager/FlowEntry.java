@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FlowEntry implements Cloneable, Serializable {
     protected static final Logger logger = LoggerFactory
-    .getLogger(FlowEntry.class);
+            .getLogger(FlowEntry.class);
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(FlowEntry.class);
     private String groupName; // group name
@@ -83,7 +83,7 @@ public class FlowEntry implements Cloneable, Serializable {
             cloned = (FlowEntry) super.clone();
             cloned.flow = this.flow.clone();
         } catch (CloneNotSupportedException e) {
-           log.warn("exception in clone", e);
+            log.warn("exception in clone", e);
         }
         return cloned;
     }

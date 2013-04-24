@@ -100,7 +100,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                         IInventoryListener.class.getName(),
                         ICacheUpdateAware.class.getName(),
                         IConfigurationContainerAware.class.getName(),
-                        IFlowProgrammerListener.class.getName()};
+                        IFlowProgrammerListener.class.getName() };
             } else {
                 interfaces = new String[] {
                         ISwitchManagerAware.class.getName(),
@@ -108,7 +108,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                         IInventoryListener.class.getName(),
                         ICacheUpdateAware.class.getName(),
                         IConfigurationContainerAware.class.getName(),
-                        IFlowProgrammerListener.class.getName()};
+                        IFlowProgrammerListener.class.getName() };
             }
 
             c.setInterface(interfaces, props);
