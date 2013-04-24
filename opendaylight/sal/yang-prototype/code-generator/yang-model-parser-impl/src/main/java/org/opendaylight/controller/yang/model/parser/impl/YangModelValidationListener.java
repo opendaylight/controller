@@ -234,11 +234,11 @@ final class YangModelValidationListener extends YangParserBaseListener {
                 Prefix_stmtContext.class,
                 f("Missing prefix statement in import:%s, in (sub)module:%s",
                         importName, rootParentName), true);
-        checkPresentChildOfType(
-                ctx,
-                Revision_date_stmtContext.class,
-                f("Missing revision-date statement in import:%s, in (sub)module:%s",
-                        importName, rootParentName), true);
+        //checkPresentChildOfType(
+        //        ctx,
+        //        Revision_date_stmtContext.class,
+        //        f("Missing revision-date statement in import:%s, in (sub)module:%s",
+        //                importName, rootParentName), true);
     }
 
     /**
