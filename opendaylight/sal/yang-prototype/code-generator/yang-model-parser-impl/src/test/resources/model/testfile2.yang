@@ -8,7 +8,7 @@ module types2 {
          revision-date 2013-02-27;
      }
 
-    organization "OPEN DAYLIGHT";
+    organization "opendaylight";
     contact "http://www.opendaylight.org/";
     
     description "This is types-data test description";
@@ -145,6 +145,47 @@ module types2 {
         leaf user {
             type string;
         }
+    }
+    
+    grouping target {
+        leaf address {
+            type string;
+            description "Target IP address";
+        }
+        container port {
+            description "Target port container";
+        }
+    }
+
+    container peer {
+        container destination {
+            uses target {
+                refine address {
+                    default "1.2.3.4";
+                }
+                refine port {
+                    must "must-condition" {
+                        error-message "An error message test";
+                        error-app-tag "An error app tag test";
+                    }
+                }
+            }
+        }
+    }
+    
+    container interfaces {
+         list ifEntry {
+             key "ifIndex";
+
+             leaf ifIndex {
+                 type uint32;
+                 units minutes;
+             }
+             
+             leaf ifMtu {
+                 type int32;
+             }
+         }
     }
 
 }

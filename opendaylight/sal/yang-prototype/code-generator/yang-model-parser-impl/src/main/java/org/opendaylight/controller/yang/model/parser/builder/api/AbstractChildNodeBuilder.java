@@ -27,9 +27,17 @@ public abstract class AbstractChildNodeBuilder implements ChildNodeBuilder {
         return qname;
     }
 
+    public Set<DataSchemaNodeBuilder> getChildNodes() {
+        return childNodes;
+    }
+
     @Override
     public void addChildNode(DataSchemaNodeBuilder childNode) {
         childNodes.add(childNode);
+    }
+
+    public Set<GroupingBuilder> getGroupings() {
+        return groupings;
     }
 
     @Override

@@ -22,18 +22,21 @@ public class FeatureBuilder implements SchemaNodeBuilder {
 
     private final FeatureDefinitionImpl instance;
     private final QName qname;
+    private SchemaPath schemaPath;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    FeatureBuilder(QName qname) {
+    FeatureBuilder(final QName qname) {
         this.qname = qname;
         instance = new FeatureDefinitionImpl(qname);
     }
 
     @Override
     public FeatureDefinitionImpl build() {
+        instance.setPath(schemaPath);
+
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
             unknownNodes.add(b.build());
         }
         instance.setUnknownSchemaNodes(unknownNodes);
@@ -47,28 +50,33 @@ public class FeatureBuilder implements SchemaNodeBuilder {
     }
 
     @Override
-    public void setPath(SchemaPath path) {
-        instance.setPath(path);
+    public SchemaPath getPath() {
+        return schemaPath;
     }
 
     @Override
-    public void setDescription(String description) {
+    public void setPath(SchemaPath schemaPath) {
+        this.schemaPath = schemaPath;
+    }
+
+    @Override
+    public void setDescription(final String description) {
         instance.setDescription(description);
     }
 
     @Override
-    public void setReference(String reference) {
+    public void setReference(final String reference) {
         instance.setReference(reference);
     }
 
     @Override
-    public void setStatus(Status status) {
+    public void setStatus(final Status status) {
         instance.setStatus(status);
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
-        addedUnknownNodes.add(unknownSchemaNodeBuilder);
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
     }
 
     private static class FeatureDefinitionImpl implements FeatureDefinition {
@@ -76,11 +84,10 @@ public class FeatureBuilder implements SchemaNodeBuilder {
         private SchemaPath path;
         private String description;
         private String reference;
-        private Status status;
-        private List<UnknownSchemaNode> unknownSchemaNodes = Collections
-                .emptyList();
+        private Status status = Status.CURRENT;
+        private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
-        private FeatureDefinitionImpl(QName qname) {
+        private FeatureDefinitionImpl(final QName qname) {
             this.qname = qname;
         }
 
@@ -94,9 +101,8 @@ public class FeatureBuilder implements SchemaNodeBuilder {
             return path;
         }
 
-        private void setPath(SchemaPath path) {
+        private void setPath(final SchemaPath path) {
             this.path = path;
-            ;
         }
 
         @Override
@@ -104,7 +110,7 @@ public class FeatureBuilder implements SchemaNodeBuilder {
             return description;
         }
 
-        private void setDescription(String description) {
+        private void setDescription(final String description) {
             this.description = description;
         }
 
@@ -113,7 +119,7 @@ public class FeatureBuilder implements SchemaNodeBuilder {
             return reference;
         }
 
-        private void setReference(String reference) {
+        private void setReference(final String reference) {
             this.reference = reference;
         }
 
@@ -123,17 +129,20 @@ public class FeatureBuilder implements SchemaNodeBuilder {
         }
 
         private void setStatus(Status status) {
-            this.status = status;
+            if (status != null) {
+                this.status = status;
+            }
         }
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return unknownSchemaNodes;
+            return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
-            if(unknownSchemaNodes != null) {
-                this.unknownSchemaNodes = unknownSchemaNodes;
+        private void setUnknownSchemaNodes(
+                final List<UnknownSchemaNode> unknownNodes) {
+            if (unknownNodes != null) {
+                this.unknownNodes = unknownNodes;
             }
         }
 
@@ -179,8 +188,7 @@ public class FeatureBuilder implements SchemaNodeBuilder {
         public String toString() {
             StringBuilder sb = new StringBuilder(
                     FeatureDefinitionImpl.class.getSimpleName());
-            sb.append("[name=" + qname);
-            sb.append(", path=" + path + "]");
+            sb.append("[name=" + qname + "]");
             return sb.toString();
         }
     }

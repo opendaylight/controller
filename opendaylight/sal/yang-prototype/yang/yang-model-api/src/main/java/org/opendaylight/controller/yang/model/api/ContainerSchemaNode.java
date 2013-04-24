@@ -7,12 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
-import java.util.Set;
-
 public interface ContainerSchemaNode extends DataNodeContainer,
         AugmentationTarget, DataSchemaNode {
-
-    Set<UsesNode> getUses();
 
     boolean isPresenceContainer();
 

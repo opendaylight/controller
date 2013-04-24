@@ -22,21 +22,37 @@ import org.opendaylight.controller.yang.model.parser.builder.api.AbstractTypeAwa
 import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 
-public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements DataSchemaNodeBuilder,
-        SchemaNodeBuilder {
+public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements
+        DataSchemaNodeBuilder, SchemaNodeBuilder {
     private final QName qname;
+    private SchemaPath path;
     private final LeafSchemaNodeImpl instance;
     private final ConstraintsBuilder constraints = new ConstraintsBuilder();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    LeafSchemaNodeBuilder(QName qname) {
+    private String description;
+    private String reference;
+    private Status status = Status.CURRENT;
+    private boolean augmenting;
+    private boolean configuration;
+    private String defaultStr;
+    private String unitsStr;
+
+    public LeafSchemaNodeBuilder(final QName qname) {
         this.qname = qname;
         instance = new LeafSchemaNodeImpl(qname);
     }
 
     @Override
     public LeafSchemaNode build() {
-        if(type == null) {
+        instance.setPath(path);
+        instance.setConstraints(constraints.build());
+        instance.setDescription(description);
+        instance.setReference(reference);
+        instance.setStatus(status);
+
+        // TYPE
+        if (type == null) {
             instance.setType(typedef.build());
         } else {
             instance.setType(type);
@@ -44,12 +60,15 @@ public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements D
 
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
             unknownNodes.add(b.build());
         }
         instance.setUnknownSchemaNodes(unknownNodes);
 
-        instance.setConstraints(constraints.build());
+        instance.setAugmenting(augmenting);
+        instance.setConfiguration(configuration);
+        instance.setDefault(defaultStr);
+        instance.setUnits(unitsStr);
         return instance;
     }
 
@@ -58,46 +77,90 @@ public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements D
         return qname;
     }
 
-    @Override
-    public void setPath(SchemaPath path) {
-        instance.setPath(path);
+    public SchemaPath getPath() {
+        return path;
     }
 
     @Override
-    public void setDescription(String description) {
-        instance.setDescription(description);
+    public void setPath(final SchemaPath path) {
+        this.path = path;
     }
 
     @Override
-    public void setReference(String reference) {
-        instance.setReference(reference);
-    }
-
-    @Override
-    public void setStatus(Status status) {
-        if(status != null) {
-            instance.setStatus(status);
-        }
-    }
-
-    @Override
-    public void setAugmenting(boolean augmenting) {
-        instance.setAugmenting(augmenting);
-    }
-
-    @Override
-    public void setConfiguration(boolean configuration) {
-        instance.setConfiguration(configuration);
-    }
-
-    @Override
-    public ConstraintsBuilder getConstraintsBuilder() {
+    public ConstraintsBuilder getConstraints() {
         return constraints;
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
+    }
+
+    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+        return addedUnknownNodes;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    @Override
+    public void setReference(final String reference) {
+        this.reference = reference;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    @Override
+    public void setStatus(final Status status) {
+        if (status != null) {
+            this.status = status;
+        }
+    }
+
+    public boolean isAugmenting() {
+        return augmenting;
+    }
+
+    @Override
+    public void setAugmenting(final boolean augmenting) {
+        this.augmenting = augmenting;
+    }
+
+    public boolean isConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public void setConfiguration(final boolean configuration) {
+        instance.setConfiguration(configuration);
+    }
+
+    public String getDefaultStr() {
+        return defaultStr;
+    }
+
+    public void setDefaultStr(String defaultStr) {
+        this.defaultStr = defaultStr;
+    }
+
+    public String getUnits() {
+        return unitsStr;
+    }
+
+    public void setUnits(String unitsStr) {
+        this.unitsStr = unitsStr;
     }
 
     private class LeafSchemaNodeImpl implements LeafSchemaNode {
@@ -111,8 +174,10 @@ public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements D
         private ConstraintDefinition constraintsDef;
         private TypeDefinition<?> type;
         private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
+        private String defaultStr;
+        private String unitsStr;
 
-        private LeafSchemaNodeImpl(QName qname) {
+        private LeafSchemaNodeImpl(final QName qname) {
             this.qname = qname;
         }
 
@@ -126,7 +191,7 @@ public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements D
             return path;
         }
 
-        private void setPath(SchemaPath path) {
+        private void setPath(final SchemaPath path) {
             this.path = path;
         }
 
@@ -201,9 +266,25 @@ public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements D
         }
 
         private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownNodes) {
-            if(unknownNodes != null) {
+            if (unknownNodes != null) {
                 this.unknownNodes = unknownNodes;
             }
+        }
+
+        public String getDefault() {
+            return defaultStr;
+        }
+
+        private void setDefault(String defaultStr) {
+            this.defaultStr = defaultStr;
+        }
+
+        public String getUnits() {
+            return unitsStr;
+        }
+
+        public void setUnits(String unitsStr) {
+            this.unitsStr = unitsStr;
         }
 
         @Override
@@ -251,14 +332,6 @@ public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements D
             sb.append("[");
             sb.append("qname=" + qname);
             sb.append(", path=" + path);
-            sb.append(", description=" + description);
-            sb.append(", reference=" + reference);
-            sb.append(", status=" + status);
-            sb.append(", augmenting=" + augmenting);
-            sb.append(", configuration=" + configuration);
-            sb.append(", constraints=" + constraintsDef);
-            sb.append(", type=" + type);
-            sb.append(", constraints=" + constraintsDef);
             sb.append("]");
             return sb.toString();
         }

@@ -20,19 +20,22 @@ import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuild
 public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
 
     private final QName qname;
+    private SchemaPath schemaPath;
     private final IdentitySchemaNodeImpl instance;
     private IdentitySchemaNodeBuilder baseIdentity;
     private String baseIdentityName;
 
-    IdentitySchemaNodeBuilder(QName qname) {
+    IdentitySchemaNodeBuilder(final QName qname) {
         this.qname = qname;
         instance = new IdentitySchemaNodeImpl(qname);
     }
 
     @Override
     public IdentitySchemaNode build() {
-        if(baseIdentity != null) {
-            IdentitySchemaNode base = baseIdentity.build();
+        instance.setPath(schemaPath);
+
+        if (baseIdentity != null) {
+            final IdentitySchemaNode base = baseIdentity.build();
             instance.setBaseIdentity(base);
         }
         return instance;
@@ -44,30 +47,34 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
     }
 
     @Override
-    public void setPath(SchemaPath path) {
-        instance.setPath(path);
+    public SchemaPath getPath() {
+        return schemaPath;
     }
 
     @Override
-    public void setDescription(String description) {
+    public void setPath(SchemaPath schemaPath) {
+        this.schemaPath = schemaPath;
+    }
+
+    @Override
+    public void setDescription(final String description) {
         instance.setDescription(description);
     }
 
     @Override
-    public void setReference(String reference) {
+    public void setReference(final String reference) {
         instance.setReference(reference);
     }
 
     @Override
-    public void setStatus(Status status) {
+    public void setStatus(final Status status) {
         if (status != null) {
             instance.setStatus(status);
         }
     }
 
     @Override
-    public void addUnknownSchemaNode(
-            UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
         throw new IllegalStateException(
                 "Can not add schema node to identity statement");
     }
@@ -76,11 +83,11 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
         return baseIdentityName;
     }
 
-    public void setBaseIdentityName(String baseIdentityName) {
+    public void setBaseIdentityName(final String baseIdentityName) {
         this.baseIdentityName = baseIdentityName;
     }
 
-    public void setBaseIdentity(IdentitySchemaNodeBuilder baseType) {
+    public void setBaseIdentity(final IdentitySchemaNodeBuilder baseType) {
         this.baseIdentity = baseType;
     }
 
@@ -92,7 +99,7 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
         private Status status = Status.CURRENT;
         private SchemaPath path;
 
-        private IdentitySchemaNodeImpl(QName qname) {
+        private IdentitySchemaNodeImpl(final QName qname) {
             this.qname = qname;
         }
 
@@ -106,7 +113,7 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
             return baseIdentity;
         }
 
-        private void setBaseIdentity(IdentitySchemaNode baseIdentity) {
+        private void setBaseIdentity(final IdentitySchemaNode baseIdentity) {
             this.baseIdentity = baseIdentity;
         }
 
@@ -115,7 +122,7 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
             return description;
         }
 
-        private void setDescription(String description) {
+        private void setDescription(final String description) {
             this.description = description;
         }
 
@@ -124,7 +131,7 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
             return reference;
         }
 
-        private void setReference(String reference) {
+        private void setReference(final String reference) {
             this.reference = reference;
         }
 
@@ -133,7 +140,7 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
             return status;
         }
 
-        private void setStatus(Status status) {
+        private void setStatus(final Status status) {
             if (status != null) {
                 this.status = status;
             }
@@ -144,7 +151,7 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
             return path;
         }
 
-        private void setPath(SchemaPath path) {
+        private void setPath(final SchemaPath path) {
             this.path = path;
         }
 
@@ -190,9 +197,6 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
             sb.append("[");
             sb.append("base=" + baseIdentity);
             sb.append(", qname=" + qname);
-            sb.append(", description=" + description);
-            sb.append(", reference=" + reference);
-            sb.append(", status=" + status);
             sb.append("]");
             return sb.toString();
         }
