@@ -37,6 +37,7 @@ public class GeneratedTypesTest {
         return parser.resolveSchemaContext(modules);
     }
 
+    @Ignore
     @Test
     public void testLeafEnumResolving() {
         final String ietfInterfacesPath = getClass().getResource(
@@ -49,7 +50,7 @@ public class GeneratedTypesTest {
         final SchemaContext context = resolveSchemaContextFromFiles(
                 ietfInterfacesPath, ifTypePath, yangTypesPath);
         assertTrue(context != null);
-        
+
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
         final List<Type> genTypes = bindingGen.generateTypes(context);
         assertTrue(genTypes != null);

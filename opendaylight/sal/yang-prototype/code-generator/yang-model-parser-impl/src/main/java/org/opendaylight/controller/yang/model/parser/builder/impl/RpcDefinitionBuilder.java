@@ -21,16 +21,13 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.model.parser.builder.api.ChildNodeBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
 
-public class RpcDefinitionBuilder implements ChildNodeBuilder,
-        SchemaNodeBuilder, TypeDefinitionAwareBuilder {
+public class RpcDefinitionBuilder implements SchemaNodeBuilder,
+        TypeDefinitionAwareBuilder {
     private final RpcDefinitionImpl instance;
     private final QName qname;
     private SchemaPath schemaPath;
@@ -119,23 +116,6 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
     @Override
     public QName getQName() {
         return null;
-    }
-
-    @Override
-    public void addChildNode(final DataSchemaNodeBuilder childNode) {
-        throw new UnsupportedOperationException(
-                "Can not add child node to rpc definition: rpc can not contains child nodes.");
-    }
-
-    @Override
-    public void addGrouping(final GroupingBuilder grouping) {
-        addedGroupings.add(grouping);
-    }
-
-    @Override
-    public void addUsesNode(final UsesNodeBuilder usesBuilder) {
-        throw new UnsupportedOperationException(
-                "Can not add uses node to rpc definition: rpc can not contains uses nodes.");
     }
 
     @Override

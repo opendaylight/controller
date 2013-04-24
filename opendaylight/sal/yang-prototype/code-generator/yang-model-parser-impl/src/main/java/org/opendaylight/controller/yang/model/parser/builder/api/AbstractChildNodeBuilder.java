@@ -27,6 +27,7 @@ public abstract class AbstractChildNodeBuilder implements ChildNodeBuilder {
         return qname;
     }
 
+    @Override
     public Set<DataSchemaNodeBuilder> getChildNodes() {
         return childNodes;
     }

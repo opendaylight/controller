@@ -110,13 +110,6 @@ module types2 {
     	}
     }
 
-    augment "/if:interfaces/if:ifEntry" {
-        when "if:ifType='ds0'";
-        leaf ds0ChannelNumber {
-            type string;
-        }
-    }
-
     leaf if-name {
         type leafref {
             path "/interface/name";

@@ -140,6 +140,11 @@ public class GroupingBuilderImpl implements GroupingBuilder {
     }
 
     @Override
+    public Set<DataSchemaNodeBuilder> getChildNodes() {
+        return childNodes;
+    }
+
+    @Override
     public void addGrouping(final GroupingBuilder grouping) {
         groupings.add(grouping);
     }

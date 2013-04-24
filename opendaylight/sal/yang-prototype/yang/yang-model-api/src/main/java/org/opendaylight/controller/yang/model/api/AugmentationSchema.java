@@ -11,6 +11,8 @@ import java.util.Set;
 
 public interface AugmentationSchema extends DataNodeContainer {
 
+    RevisionAwareXPath getWhenCondition();
+
     String getDescription();
 
     String getReference();

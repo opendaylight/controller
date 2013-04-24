@@ -32,17 +32,24 @@ module types3 {
             description "Description for augment holder";
         }
     }
+    
+    augment "/data:interfaces/data:ifEntry" {
+        when "if:ifType='ds2'";
+        container augment-holder2 {
+            description "Description for augment holder";
+        }
+    }
 
     container network {
+        mnt:mountpoint point {
+	        mnt:target-ref target;
+        }
+        
 	    description "network-description";
 	    reference "network-reference";
 	    status obsolete;
 	    config true;
 	    presence "some presence text";
-
-		mnt:mountpoint point  {
-	    	mnt:target-ref target;
-        }
     }
 
     feature local-storage {
