@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.implementation.internal;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -58,10 +59,17 @@ public class FlowProgrammerService implements IFlowProgrammerService,
             .getLogger(FlowProgrammerService.class);
     private ConcurrentHashMap<String, IPluginInFlowProgrammerService> pluginFlowProgrammer;
     private Set<IFlowProgrammerListener> listener;
+    private AtomicLong seq;
 
     public FlowProgrammerService() {
         pluginFlowProgrammer = new ConcurrentHashMap<String, IPluginInFlowProgrammerService>();
         listener = new HashSet<IFlowProgrammerListener>();
+        seq = new AtomicLong();
+        /*
+         * This Request ID generator starts with 1. Each aysnc message is
+         * associated with an unique Request ID (!= 0).
+         */
+        seq.lazySet(1);
     }
 
     /**
@@ -214,6 +222,39 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     }
 
     @Override
+    public Status addFlowAsync(Node node, Flow flow) {
+        if (pluginFlowProgrammer != null) {
+            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
+                return this.pluginFlowProgrammer.get(node.getType()).addFlowAsync(
+                        node, flow, getNextRid());
+            }
+        }
+        return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
+    }
+
+    @Override
+    public Status removeFlowAsync(Node node, Flow flow) {
+        if (pluginFlowProgrammer != null) {
+            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
+                return this.pluginFlowProgrammer.get(node.getType())
+                        .removeFlowAsync(node, flow, getNextRid());
+            }
+        }
+        return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
+    }
+
+    @Override
+    public Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow) {
+        if (pluginFlowProgrammer != null) {
+            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
+                return this.pluginFlowProgrammer.get(node.getType())
+                        .modifyFlowAsync(node, oldFlow, newFlow, getNextRid());
+            }
+        }
+        return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
+    }
+
+    @Override
     public void flowRemoved(Node node, Flow flow) {
         for (IFlowProgrammerListener l : listener) {
             l.flowRemoved(node, flow);
@@ -254,7 +295,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         }
         ci.println(this.addFlow(node, getSampleFlow(node)));
     }
-
+    
     public void _modifyflow(CommandInterpreter ci) throws UnknownHostException {
         Node node = null;
         String nodeId = ci.nextArgument();
@@ -440,4 +481,22 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         return flow;
     }
 
+    /*
+     * This Request ID generator starts with 1. Each aysnc message is
+     * associated with an unique Request ID (!= 0).
+     */
+    private long getNextRid() {
+        return seq.getAndIncrement();
+    }
+
+    @Override
+    public Status sendBarrierMessage(Node node) {
+        if (this.pluginFlowProgrammer != null) {
+            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
+                return this.pluginFlowProgrammer.get(node.getType())
+                        .sendBarrierMessage(node);
+            }
+        }
+        return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
+    }
 }

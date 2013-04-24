@@ -18,7 +18,7 @@ import org.opendaylight.controller.sal.utils.Status;
  */
 public interface IPluginInFlowProgrammerService {
     /**
-     * Add a flow to the network node
+     * Synchronously add a flow to the network node
      * 
      * @param node
      * @param flow
@@ -26,7 +26,7 @@ public interface IPluginInFlowProgrammerService {
     Status addFlow(Node node, Flow flow);
 
     /**
-     * Modify existing flow on the switch
+     * Synchronously modify existing flow on the switch
      * 
      * @param node
      * @param flow
@@ -34,7 +34,7 @@ public interface IPluginInFlowProgrammerService {
     Status modifyFlow(Node node, Flow oldFlow, Flow newFlow);
 
     /**
-     * Remove the flow from the network node
+     * Synchronously remove the flow from the network node
      * 
      * @param node
      * @param flow
@@ -42,9 +42,43 @@ public interface IPluginInFlowProgrammerService {
     Status removeFlow(Node node, Flow flow);
 
     /**
+     * Asynchronously add a flow to the network node
+     * 
+     * @param node
+     * @param flow
+     * @param rid
+     */
+    Status addFlowAsync(Node node, Flow flow, long rid);
+
+    /**
+     * Asynchronously modify existing flow on the switch
+     * 
+     * @param node
+     * @param flow
+     * @param rid
+     */
+    Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow, long rid);
+
+    /**
+     * Asynchronously remove the flow from the network node
+     * 
+     * @param node
+     * @param flow
+     * @param rid
+     */
+    Status removeFlowAsync(Node node, Flow flow, long rid);
+
+    /**
      * Remove all flows present on the network node
      * 
      * @param node
      */
     Status removeAllFlows(Node node);
+
+    /**
+     * Send synchronous Barrier message 
+     * 
+     * @param node
+     */
+    Status sendBarrierMessage(Node node);
 }

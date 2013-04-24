@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -49,8 +48,8 @@ import org.slf4j.LoggerFactory;
  * The class describes a shim layer that bridges inventory events from Openflow
  * core to various listeners. The notifications are filtered based on container
  * configurations.
- *
- *
+ * 
+ * 
  */
 public class InventoryServiceShim implements IContainerListener,
         IMessageListener, ISwitchStateListener {
@@ -74,42 +73,42 @@ public class InventoryServiceShim implements IContainerListener,
     void setInventoryShimInternalListener(Map<?, ?> props,
             IInventoryShimInternalListener s) {
         if (props == null) {
-            logger.error("Didn't receive the service properties");
+            logger.error("setInventoryShimInternalListener property is null");
             return;
         }
         String containerName = (String) props.get("containerName");
         if (containerName == null) {
-            logger.error("containerName not supplied");
+            logger.error("setInventoryShimInternalListener containerName not supplied");
             return;
         }
         if ((this.inventoryShimInternalListeners != null)
                 && !this.inventoryShimInternalListeners.containsValue(s)) {
             this.inventoryShimInternalListeners.put(containerName, s);
-            logger.trace("Added inventoryShimInternalListener for container:"
-                    + containerName);
+            logger.trace(
+                    "Added inventoryShimInternalListener for container {}",
+                    containerName);
         }
     }
 
     void unsetInventoryShimInternalListener(Map<?, ?> props,
             IInventoryShimInternalListener s) {
         if (props == null) {
-            logger.error("Didn't receive the service properties");
+            logger.error("unsetInventoryShimInternalListener property is null");
             return;
         }
         String containerName = (String) props.get("containerName");
         if (containerName == null) {
-            logger.error("containerName not supplied");
+            logger.error("unsetInventoryShimInternalListener containerName not supplied");
             return;
         }
         if ((this.inventoryShimInternalListeners != null)
-                && this.inventoryShimInternalListeners
-                	.get(containerName) != null
-                && this.inventoryShimInternalListeners
-                	.get(containerName).equals(s)) {
+                && this.inventoryShimInternalListeners.get(containerName) != null
+                && this.inventoryShimInternalListeners.get(containerName)
+                        .equals(s)) {
             this.inventoryShimInternalListeners.remove(containerName);
-            logger
-                    .trace("Removed inventoryShimInternalListener for container: "
-                            + containerName);
+            logger.trace(
+                    "Removed inventoryShimInternalListener for container {}",
+                    containerName);
         }
     }
 
@@ -131,7 +130,7 @@ public class InventoryServiceShim implements IContainerListener,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
         this.controller.addMessageListener(OFType.PORT_STATUS, this);
@@ -139,8 +138,7 @@ public class InventoryServiceShim implements IContainerListener,
     }
 
     /**
-     * Function called after registering the
-     * service in OSGi service registry.
+     * Function called after registering the service in OSGi service registry.
      */
     void started() {
         /* Start with existing switches */
@@ -148,10 +146,10 @@ public class InventoryServiceShim implements IContainerListener,
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
         this.controller.removeMessageListener(OFType.PACKET_IN, this);
@@ -189,6 +187,8 @@ public class InventoryServiceShim implements IContainerListener,
             type = UpdateType.CHANGED;
         }
 
+        logger.trace("handlePortStatusMessage {} type {}", nodeConnector, type);
+
         if (type != null) {
             // get node connector properties
             Set<Property> props = InventoryServiceHelper.OFPortToProps(m
@@ -206,8 +206,8 @@ public class InventoryServiceShim implements IContainerListener,
         Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper
                 .OFSwitchToProps(sw);
         for (Map.Entry<NodeConnector, Set<Property>> entry : ncProps.entrySet()) {
-            notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED, entry
-                    .getValue());
+            notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED,
+                    entry.getValue());
         }
 
         // Add this node
@@ -300,17 +300,19 @@ public class InventoryServiceShim implements IContainerListener,
         if (inventoryShimInternalListener != null) {
             inventoryShimInternalListener.updateNodeConnector(nodeConnector,
                     type, props);
-            logger.trace(type + " " + nodeConnector + " on container "
-                    + container);
+            logger.trace(
+                    "notifyInventoryShimInternalListener {} type {} for container {}",
+                    nodeConnector, type, container);
         }
     }
 
     /*
-     *  Notify all internal and external listeners
+     * Notify all internal and external listeners
      */
     private void notifyInventoryShimListener(NodeConnector nodeConnector,
             UpdateType type, Set<Property> props) {
-        // Always notify default InventoryService. Store properties in default one.
+        // Always notify default InventoryService. Store properties in default
+        // one.
         notifyInventoryShimInternalListener(GlobalConstants.DEFAULT.toString(),
                 nodeConnector, type, props);
 
@@ -329,7 +331,7 @@ public class InventoryServiceShim implements IContainerListener,
     }
 
     /*
-     *  Notify all internal and external listeners
+     * Notify all internal and external listeners
      */
     private void notifyInventoryShimListener(Node node, UpdateType type,
             Set<Property> props) {
@@ -380,22 +382,22 @@ public class InventoryServiceShim implements IContainerListener,
         byte tables = sw.getTables();
         Tables t = new Tables(tables);
         if (t != null) {
-        	props.add(t);
+            props.add(t);
         }
         int cap = sw.getCapabilities();
         Capabilities c = new Capabilities(cap);
         if (c != null) {
-        	props.add(c);
+            props.add(c);
         }
         int act = sw.getActions();
         Actions a = new Actions(act);
         if (a != null) {
-        	props.add(a);
+            props.add(a);
         }
         int buffers = sw.getBuffers();
         Buffers b = new Buffers(buffers);
         if (b != null) {
-        	props.add(b);
+            props.add(b);
         }
         // Notify all internal and external listeners
         notifyInventoryShimListener(node, type, props);

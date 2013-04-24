@@ -17,7 +17,7 @@ import org.opendaylight.controller.sal.utils.Status;
  */
 public interface IFlowProgrammerService {
     /**
-     * Add a flow to the network node
+     * Synchronously add a flow to the network node
      * 
      * @param node
      * @param flow
@@ -25,15 +25,15 @@ public interface IFlowProgrammerService {
     Status addFlow(Node node, Flow flow);
 
     /**
-     * Modify existing flow on the switch
+     * Synchronously modify existing flow on the switch
      * 
      * @param node
      * @param flow
      */
-    Status modifyFlow(Node node, Flow oldflow, Flow newFlow);
+    Status modifyFlow(Node node, Flow oldFlow, Flow newFlow);
 
     /**
-     * Remove the flow from the network node
+     * Synchronously remove the flow from the network node
      * 
      * @param node
      * @param flow
@@ -41,9 +41,40 @@ public interface IFlowProgrammerService {
     Status removeFlow(Node node, Flow flow);
 
     /**
+     * Asynchronously add a flow to the network node
+     * 
+     * @param node
+     * @param flow
+     */
+    Status addFlowAsync(Node node, Flow flow);
+
+    /**
+     * Asynchronously modify existing flow on the switch
+     * 
+     * @param node
+     * @param flow
+     */
+    Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow);
+
+    /**
+     * Asynchronously remove the flow from the network node
+     * 
+     * @param node
+     * @param flow
+     */
+    Status removeFlowAsync(Node node, Flow flow);
+
+    /**
      * Remove all flows present on the network node
      * 
      * @param node
      */
     Status removeAllFlows(Node node);
+
+    /**
+     * Send synchronous Barrier message 
+     * 
+     * @param node
+     */
+    Status sendBarrierMessage(Node node);
 }

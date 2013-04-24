@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -9,6 +8,8 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -18,31 +19,34 @@ import org.openflow.protocol.OFMessage;
  * This class describes an OpenFlow message with priority
  */
 class PriorityMessage {
-	OFMessage msg;
-	int priority;
-	
-	public PriorityMessage(OFMessage msg, int priority) {
-		this.msg = msg;
-		this.priority = priority;
-	}
+    OFMessage msg;
+    int priority;
+    final static AtomicLong seq = new AtomicLong();
+    final long seqNum;
 
-	public OFMessage getMsg() {
-		return msg;
-	}
+    public PriorityMessage(OFMessage msg, int priority) {
+        this.msg = msg;
+        this.priority = priority;
+        this.seqNum = seq.getAndIncrement();
+    }
 
-	public void setMsg(OFMessage msg) {
-		this.msg = msg;
-	}
+    public OFMessage getMsg() {
+        return msg;
+    }
 
-	public int getPriority() {
-		return priority;
-	}
+    public void setMsg(OFMessage msg) {
+        this.msg = msg;
+    }
 
-	public void setPriority(int priority) {
-		this.priority = priority;
-	}    	
-	
-	@Override
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
@@ -54,6 +58,7 @@ class PriorityMessage {
 
     @Override
     public String toString() {
-        return "PriorityMessage[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "PriorityMessage[" + ReflectionToStringBuilder.toString(this)
+                + "]";
     }
 }

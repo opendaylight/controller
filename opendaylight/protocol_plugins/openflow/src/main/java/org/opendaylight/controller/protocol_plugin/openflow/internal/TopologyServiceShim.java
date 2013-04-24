@@ -9,7 +9,6 @@
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,7 +103,7 @@ public class TopologyServiceShim implements IDiscoveryService,
 
                     entry = null;
                 } catch (InterruptedException e1) {
-                    logger.warn("TopologyNotify interrupted", e1.getMessage());
+                    logger.warn("TopologyNotify interrupted {}", e1.getMessage());
                     if (shuttingDown) {
                         return;
                     }
@@ -156,7 +155,7 @@ public class TopologyServiceShim implements IDiscoveryService,
                     }
                 } catch (InterruptedException e1) {
                     logger.warn(
-                            "Edge Bandwidth Utilization Notify Thread interrupted",
+                            "Edge Bandwidth Utilization Notify Thread interrupted {}",
                             e1.getMessage());
                     if (shuttingDown) {
                         return;
@@ -329,8 +328,8 @@ public class TopologyServiceShim implements IDiscoveryService,
                 && !this.topologyServiceShimListeners
                         .containsKey(containerName)) {
             this.topologyServiceShimListeners.put(containerName, s);
-            logger.trace("Added topologyServiceShimListener for container:"
-                    + containerName);
+            logger.trace("Added topologyServiceShimListener for container: {}",
+                    containerName);
         }
     }
 
@@ -350,8 +349,8 @@ public class TopologyServiceShim implements IDiscoveryService,
                 && this.topologyServiceShimListeners.get(containerName).equals(
                         s)) {
             this.topologyServiceShimListeners.remove(containerName);
-            logger.trace("Removed topologyServiceShimListener for container: "
-                    + containerName);
+            logger.trace("Removed topologyServiceShimListener for container: {}",
+                    containerName);
         }
     }
 
@@ -423,14 +422,15 @@ public class TopologyServiceShim implements IDiscoveryService,
             }
             break;
         default:
-            logger.debug("Invalid " + type + " Edge " + edge
-                    + " in container {}", container);
+            logger.debug("notifyEdge: invalid {} for Edge {} in container {}",
+                    type, edge, container);
             return;
         }
 
         notifyQ.add(new NotifyEntry(container, edgeProps, type));
 
-        logger.trace(type + " Edge " + edge + " in container {}", container);
+        logger.debug("notifyEdge: {} Edge {} in container {}",
+                type, edge, container);
     }
 
     @Override

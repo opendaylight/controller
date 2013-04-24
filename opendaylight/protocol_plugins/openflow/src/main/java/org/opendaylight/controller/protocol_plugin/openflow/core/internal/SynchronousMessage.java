@@ -46,8 +46,10 @@ public class SynchronousMessage implements Callable<Object> {
     @Override
     public Object call() throws Exception {
         sw.asyncSend(syncMsg, xid);
-        OFBarrierRequest barrierMsg = new OFBarrierRequest();
-        sw.asyncSend(barrierMsg, xid);
+        if (!(syncMsg instanceof OFBarrierRequest)) {
+            OFBarrierRequest barrierMsg = new OFBarrierRequest();
+            sw.asyncSend(barrierMsg, xid);
+        }
         latch.await();
         return result;
     }

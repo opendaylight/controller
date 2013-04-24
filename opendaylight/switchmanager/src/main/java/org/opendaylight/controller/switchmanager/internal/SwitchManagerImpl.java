@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -96,10 +95,10 @@ public class SwitchManagerImpl implements ISwitchManager,
     private ConcurrentMap<InetAddress, Subnet> subnets; // set of Subnets keyed by the InetAddress
     private ConcurrentMap<String, SubnetConfig> subnetsConfigList;
     private ConcurrentMap<Integer, SpanConfig> spanConfigList;
-    private ConcurrentMap<String, SwitchConfig> nodeConfigList; // manually configured parameters for the node, like name and tier
+    private ConcurrentMap<String, SwitchConfig> nodeConfigList; // manually configured parameters for the node like name and tier
     private ConcurrentMap<Long, String> configSaveEvent;
-    private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in default container only
-    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in default container only
+    private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in global container only
+    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in global container only
     private ConcurrentMap<Node, Map<String, NodeConnector>> nodeConnectorNames;
     private IInventoryService inventoryService;
     private Set<ISwitchManagerAware> switchManagerAware = Collections
@@ -114,7 +113,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     private IClusterContainerServices clusterContainerService = null;
     private String containerName = null;
     private boolean isDefaultContainer = true;
-    
+
     public enum ReasonCode {
         SUCCESS("Success"), FAILURE("Failure"), INVALID_CONF(
                 "Invalid Configuration"), EXIST("Entry Already Exist"), CONFLICT(
@@ -137,7 +136,8 @@ public class SwitchManagerImpl implements ISwitchManager,
                 try {
                     ((ISwitchManagerAware) subAware).subnetNotify(sub, add);
                 } catch (Exception e) {
-                    log.error("Failed to notify Subnet change", e);
+                    log.error("Failed to notify Subnet change {}",
+                            e.getMessage());
                 }
             }
         }
@@ -150,7 +150,8 @@ public class SwitchManagerImpl implements ISwitchManager,
                 try {
                     ((ISpanAware) sa).spanUpdate(node, ports, add);
                 } catch (Exception e) {
-                    log.error("Failed to notify Span Interface change", e);
+                    log.error("Failed to notify Span Interface change {}",
+                            e.getMessage());
                 }
             }
         }
@@ -162,7 +163,8 @@ public class SwitchManagerImpl implements ISwitchManager,
                 try {
                     service.modeChangeNotify(node, proactive);
                 } catch (Exception e) {
-                    log.error("Failed to notify Subnet change", e);
+                    log.error("Failed to notify Subnet change {}",
+                            e.getMessage());
                 }
             }
         }
@@ -198,16 +200,16 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     @SuppressWarnings("deprecation")
-	private void allocateCaches() {
+    private void allocateCaches() {
         if (this.clusterContainerService == null) {
-            log.info("un-initialized clusterContainerService, can't create cache");
+            log.warn("un-initialized clusterContainerService, can't create cache");
             return;
         }
 
         try {
             clusterContainerService.createCache(
-                    "switchmanager.subnetsConfigList", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    "switchmanager.subnetsConfigList",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
             clusterContainerService.createCache("switchmanager.spanConfigList",
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
             clusterContainerService.createCache("switchmanager.nodeConfigList",
@@ -215,16 +217,16 @@ public class SwitchManagerImpl implements ISwitchManager,
             clusterContainerService.createCache("switchmanager.subnets",
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
             clusterContainerService.createCache(
-                    "switchmanager.configSaveEvent", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    "switchmanager.configSaveEvent",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
             clusterContainerService.createCache("switchmanager.nodeProps",
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
             clusterContainerService.createCache(
-                    "switchmanager.nodeConnectorProps", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    "switchmanager.nodeConnectorProps",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
             clusterContainerService.createCache(
-                    "switchmanager.nodeConnectorNames", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    "switchmanager.nodeConnectorNames",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             log.error("\nCache configuration invalid - check cache mode");
         } catch (CacheExistException ce) {
@@ -235,8 +237,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     @SuppressWarnings({ "unchecked", "deprecation" })
     private void retrieveCaches() {
         if (this.clusterContainerService == null) {
-            log
-                    .info("un-initialized clusterContainerService, can't create cache");
+            log.info("un-initialized clusterContainerService, can't create cache");
             return;
         }
 
@@ -301,10 +302,9 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     @SuppressWarnings("deprecation")
-	private void destroyCaches(String container) {
+    private void destroyCaches(String container) {
         if (this.clusterContainerService == null) {
-            log
-                    .info("un-initialized clusterContainerService, can't create cache");
+            log.info("un-initialized clusterContainerService, can't create cache");
             return;
         }
 
@@ -411,7 +411,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         Subnet newSubnet = new Subnet(conf);
         Set<InetAddress> IPs = subnets.keySet();
         if (IPs == null) {
-        	return new Status(StatusCode.SUCCESS, null);
+            return new Status(StatusCode.SUCCESS, null);
         }
         for (InetAddress i : IPs) {
             Subnet existingSubnet = subnets.get(i);
@@ -426,7 +426,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     private Status addRemoveSubnet(SubnetConfig conf, boolean add) {
         // Valid config check
         if (!conf.isValidConfig()) {
-        	String msg = "Invalid Subnet configuration";
+            String msg = "Invalid Subnet configuration";
             log.warn(msg);
             return new Status(StatusCode.BADREQUEST, msg);
         }
@@ -434,8 +434,8 @@ public class SwitchManagerImpl implements ISwitchManager,
         if (add) {
             // Presence check
             if (subnetsConfigList.containsKey(conf.getName())) {
-            	return new Status(StatusCode.CONFLICT, 
-            			"Same subnet config already exists");
+                return new Status(StatusCode.CONFLICT,
+                        "Same subnet config already exists");
             }
             // Semantyc check
             Status rc = semanticCheck(conf);
@@ -481,7 +481,7 @@ public class SwitchManagerImpl implements ISwitchManager,
             return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
         }
         if (!conf.isValidSwitchPort(switchPorts)) {
-        	return new Status(StatusCode.BADREQUEST, "Invalid switchports");
+            return new Status(StatusCode.BADREQUEST, "Invalid switchports");
         }
 
         conf.addNodeConnectors(switchPorts);
@@ -498,7 +498,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         // Update Configuration
         SubnetConfig conf = subnetsConfigList.get(name);
         if (conf == null) {
-        	return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
+            return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
         }
         conf.removeNodeConnectors(switchPorts);
 
@@ -609,15 +609,15 @@ public class SwitchManagerImpl implements ISwitchManager,
                 propMap.put(tier.getName(), tier);
                 addNodeProps(node, propMap);
 
-                log.info("Set Node {}'s Mode to {}", nodeId, cfgObject
-                        .getMode());
+                log.info("Set Node {}'s Mode to {}", nodeId,
+                        cfgObject.getMode());
 
                 if (modeChange) {
                     notifyModeChange(node, cfgObject.isProactive());
                 }
             }
         } catch (Exception e) {
-            log.debug("updateSwitchConfig: {}", e);
+            log.debug("updateSwitchConfig: {}", e.getMessage());
         }
     }
 
@@ -659,14 +659,14 @@ public class SwitchManagerImpl implements ISwitchManager,
     public Status addSpanConfig(SpanConfig conf) {
         // Valid config check
         if (!conf.isValidConfig()) {
-        	String msg = "Invalid Span configuration";
+            String msg = "Invalid Span configuration";
             log.warn(msg);
             return new Status(StatusCode.BADREQUEST, msg);
         }
 
         // Presence check
         if (spanConfigList.containsKey(conf.hashCode())) {
-        	return new Status(StatusCode.CONFLICT, "Same span config exists");
+            return new Status(StatusCode.CONFLICT, "Same span config exists");
         }
 
         // Update database and notify clients
@@ -740,7 +740,8 @@ public class SwitchManagerImpl implements ISwitchManager,
             String nodeId = node.toString();
             for (SwitchConfig conf : nodeConfigList.values()) {
                 if (conf.getNodeId().equals(nodeId)) {
-                    Property description = new Description(conf.getNodeDescription());
+                    Property description = new Description(
+                            conf.getNodeDescription());
                     propMap.put(description.getName(), description);
                     Property tier = new Tier(Integer.parseInt(conf.getTier()));
                     propMap.put(tier.getName(), tier);
@@ -756,10 +757,10 @@ public class SwitchManagerImpl implements ISwitchManager,
 
         // notify node listeners
         notifyNode(node, UpdateType.ADDED, propMap);
-        
+
         // notify proactive mode forwarding
         if (proactiveForwarding) {
-        	notifyModeChange(node, true);
+            notifyModeChange(node, true);
         }
     }
 
@@ -873,7 +874,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         Set<Node> nodes = getNodes();
         if (nodes != null) {
             for (Node node : nodes) {
-                if (id.equals((Long)node.getID())) {
+                if (id.equals((Long) node.getID())) {
                     return node;
                 }
             }
@@ -883,9 +884,12 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     /*
      * Returns a copy of a list of properties for a given node
-     *
+     * 
      * (non-Javadoc)
-     * @see org.opendaylight.controller.switchmanager.ISwitchManager#getNodeProps(org.opendaylight.controller.sal.core.Node)
+     * 
+     * @see
+     * org.opendaylight.controller.switchmanager.ISwitchManager#getNodeProps
+     * (org.opendaylight.controller.sal.core.Node)
      */
     @Override
     public Map<String, Property> getNodeProps(Node node) {
@@ -902,8 +906,8 @@ public class SwitchManagerImpl implements ISwitchManager,
         } else {
             // get it from default container
             ISwitchManager defaultSwitchManager = (ISwitchManager) ServiceHelper
-                    .getInstance(ISwitchManager.class, GlobalConstants.DEFAULT
-                            .toString(), this);
+                    .getInstance(ISwitchManager.class,
+                            GlobalConstants.DEFAULT.toString(), this);
             return defaultSwitchManager.getNodeProps(node);
         }
     }
@@ -929,8 +933,8 @@ public class SwitchManagerImpl implements ISwitchManager,
     public Status removeNodeProp(Node node, String propName) {
         Map<String, Property> propMap = getNodeProps(node);
         if (propMap != null) {
-        	propMap.remove(propName);
-        	this.nodeProps.put(node, propMap);
+            propMap.remove(propName);
+            this.nodeProps.put(node, propMap);
         }
         return new Status(StatusCode.SUCCESS, null);
     }
@@ -948,8 +952,8 @@ public class SwitchManagerImpl implements ISwitchManager,
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
         for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
-            if (((Long) nodeConnector.getNode().getID())
-                    .longValue() != (Long) node.getID())
+            if (((Long) nodeConnector.getNode().getID()).longValue() != (Long) node
+                    .getID())
                 continue;
             if (isNodeConnectorEnabled(nodeConnector))
                 nodeConnectorSet.add(nodeConnector);
@@ -965,8 +969,8 @@ public class SwitchManagerImpl implements ISwitchManager,
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
         for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
-            if (((Long) nodeConnector.getNode().getID())
-                    .longValue() != (Long) node.getID())
+            if (((Long) nodeConnector.getNode().getID()).longValue() != (Long) node
+                    .getID())
                 continue;
             nodeConnectorSet.add(nodeConnector);
         }
@@ -992,7 +996,8 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     /*
-     * testing utility function which assumes we are dealing with OF Node nodeconnectors only
+     * testing utility function which assumes we are dealing with OF Node
+     * nodeconnectors only
      */
     @SuppressWarnings("unused")
     private Set<Long> getEnabledNodeConnectorIds(Node node) {
@@ -1023,8 +1028,8 @@ public class SwitchManagerImpl implements ISwitchManager,
         } else {
             // get it from default container
             ISwitchManager defaultSwitchManager = (ISwitchManager) ServiceHelper
-                    .getInstance(ISwitchManager.class, GlobalConstants.DEFAULT
-                            .toString(), this);
+                    .getInstance(ISwitchManager.class,
+                            GlobalConstants.DEFAULT.toString(), this);
             return defaultSwitchManager.getNodeConnectorProps(nodeConnector);
         }
     }
@@ -1089,19 +1094,23 @@ public class SwitchManagerImpl implements ISwitchManager,
     /**
      * Adds a node connector and its property if any
      * 
-     * @param nodeConnector {@link org.opendaylight.controller.sal.core.NodeConnector}
-     * @param propName 	 	name of {@link org.opendaylight.controller.sal.core.Property}
+     * @param nodeConnector
+     *            {@link org.opendaylight.controller.sal.core.NodeConnector}
+     * @param propName
+     *            name of {@link org.opendaylight.controller.sal.core.Property}
      * @return success or failed reason
      */
     @Override
-    public Status addNodeConnectorProp(NodeConnector nodeConnector, Property prop) {
+    public Status addNodeConnectorProp(NodeConnector nodeConnector,
+            Property prop) {
         Map<String, Property> propMap = getNodeConnectorProps(nodeConnector);
 
         if (propMap == null) {
             propMap = new HashMap<String, Property>();
         }
 
-        // Just add the nodeConnector if prop is not available (in a non-default container)
+        // Just add the nodeConnector if prop is not available (in a non-default
+        // container)
         if (prop == null) {
             nodeConnectorProps.put(nodeConnector, propMap);
             return new Status(StatusCode.SUCCESS, null);
@@ -1129,16 +1138,19 @@ public class SwitchManagerImpl implements ISwitchManager,
     /**
      * Removes one property of a node connector
      * 
-     * @param nodeConnector {@link org.opendaylight.controller.sal.core.NodeConnector}
-     * @param propName 	 	name of {@link org.opendaylight.controller.sal.core.Property}
+     * @param nodeConnector
+     *            {@link org.opendaylight.controller.sal.core.NodeConnector}
+     * @param propName
+     *            name of {@link org.opendaylight.controller.sal.core.Property}
      * @return success or failed reason
      */
     @Override
-    public Status removeNodeConnectorProp(NodeConnector nodeConnector, String propName) {
+    public Status removeNodeConnectorProp(NodeConnector nodeConnector,
+            String propName) {
         Map<String, Property> propMap = getNodeConnectorProps(nodeConnector);
 
         if (propMap == null) {
-        	/* Nothing to remove */
+            /* Nothing to remove */
             return new Status(StatusCode.SUCCESS, null);
         }
 
@@ -1164,7 +1176,8 @@ public class SwitchManagerImpl implements ISwitchManager,
     /**
      * Removes all the properties of a node connector
      * 
-     * @param nodeConnector {@link org.opendaylight.controller.sal.core.NodeConnector}
+     * @param nodeConnector
+     *            {@link org.opendaylight.controller.sal.core.NodeConnector}
      * @return success or failed reason
      */
     @Override
@@ -1189,13 +1202,13 @@ public class SwitchManagerImpl implements ISwitchManager,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init(Component c) {
         Dictionary<?, ?> props = c.getServiceProperties();
         if (props != null) {
             this.containerName = (String) props.get("containerName");
-            log.trace("Running containerName:" + this.containerName);
+            log.trace("Running containerName: {}", this.containerName);
         } else {
             // In the Global instance case the containerName is empty
             this.containerName = "";
@@ -1207,20 +1220,19 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
         shutDown();
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
-     *
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     * 
      */
     void start() {
         // OSGI console
@@ -1228,8 +1240,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     /**
-     * Function called after registered the
-     * service in OSGi service registry.
+     * Function called after registered the service in OSGi service registry.
      */
     void started() {
         // solicit for existing inventories
@@ -1237,10 +1248,10 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
-     *
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     * 
      */
     void stop() {
     }
@@ -1449,12 +1460,13 @@ public class SwitchManagerImpl implements ISwitchManager,
             return;
         }
         for (Node node : nodeSet) {
-        	Description desc = ((Description) getNodeProp(node, Description.propertyName));
+            Description desc = ((Description) getNodeProp(node,
+                    Description.propertyName));
             Tier tier = ((Tier) getNodeProp(node, Tier.TierPropName));
             String nodeName = (desc == null) ? "" : desc.getValue();
             int tierNum = (tier == null) ? 0 : tier.getValue();
-            ci.println(node + "            " + node.getType()
-                    + "            " + nodeName + "            " + tierNum);
+            ci.println(node + "            " + node.getType() + "            "
+                    + nodeName + "            " + tierNum);
         }
         ci.println("Total number of Nodes: " + nodeSet.size());
     }
@@ -1555,12 +1567,12 @@ public class SwitchManagerImpl implements ISwitchManager,
                 }
 
                 ci.println(nodeConnector
-                		+ "            "
-                		+ ((nodeConnectorName == null) ? ""
-                				: nodeConnectorName) + "("
-                        + nodeConnector.getID() + ")");
+                        + "            "
+                        + ((nodeConnectorName == null) ? "" : nodeConnectorName)
+                        + "(" + nodeConnector.getID() + ")");
             }
-            ci.println("Total number of NodeConnectors: " + nodeConnectorSet.size());
+            ci.println("Total number of NodeConnectors: "
+                    + nodeConnectorSet.size());
         }
     }
 
@@ -1636,10 +1648,10 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     @Override
     public boolean isSpecial(NodeConnector p) {
-        if (p.getType().equals(NodeConnectorIDType.CONTROLLER) ||
-            p.getType().equals(NodeConnectorIDType.ALL) ||
-            p.getType().equals(NodeConnectorIDType.SWSTACK) ||
-            p.getType().equals(NodeConnectorIDType.HWPATH)) {
+        if (p.getType().equals(NodeConnectorIDType.CONTROLLER)
+                || p.getType().equals(NodeConnectorIDType.ALL)
+                || p.getType().equals(NodeConnectorIDType.SWSTACK)
+                || p.getType().equals(NodeConnectorIDType.HWPATH)) {
             return true;
         }
         return false;
@@ -1723,58 +1735,61 @@ public class SwitchManagerImpl implements ISwitchManager,
         return saveSwitchConfig();
     }
 
-	/**
-	 * Creates a Name/Tier/Bandwidth Property object based on given property
-	 * name and value. Other property types are not supported yet.
-	 * 
-	 * @param propName  Name of the Property
-	 * @param propValue Value of the Property
-	 * @return {@link org.opendaylight.controller.sal.core.Property}
-	 */
-	@Override
-	public Property createProperty(String propName, String propValue) {
-		if (propName == null) {
-			log.debug("propName is null");
-			return null;
-		}
-		if (propValue == null) {
-			log.debug("propValue is null");
-			return null;
-		}
-		
-		try {
-			if (propName.equalsIgnoreCase(Description.propertyName)) {
-				return new Description(propValue);
-			} else if (propName.equalsIgnoreCase(Tier.TierPropName)) {
-				int tier = Integer.parseInt(propValue);
-				return new Tier(tier);
-			} else if (propName.equalsIgnoreCase(Bandwidth.BandwidthPropName)) {
-				long bw = Long.parseLong(propValue);
-				return new Bandwidth(bw);
-			} else {
-				log.debug("Not able to create {} property", propName);
-			}
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+    /**
+     * Creates a Name/Tier/Bandwidth Property object based on given property
+     * name and value. Other property types are not supported yet.
+     * 
+     * @param propName
+     *            Name of the Property
+     * @param propValue
+     *            Value of the Property
+     * @return {@link org.opendaylight.controller.sal.core.Property}
+     */
+    @Override
+    public Property createProperty(String propName, String propValue) {
+        if (propName == null) {
+            log.debug("propName is null");
+            return null;
+        }
+        if (propValue == null) {
+            log.debug("propValue is null");
+            return null;
+        }
 
-		return null;
+        try {
+            if (propName.equalsIgnoreCase(Description.propertyName)) {
+                return new Description(propValue);
+            } else if (propName.equalsIgnoreCase(Tier.TierPropName)) {
+                int tier = Integer.parseInt(propValue);
+                return new Tier(tier);
+            } else if (propName.equalsIgnoreCase(Bandwidth.BandwidthPropName)) {
+                long bw = Long.parseLong(propValue);
+                return new Bandwidth(bw);
+            } else {
+                log.debug("Not able to create {} property", propName);
+            }
+        } catch (Exception e) {
+            log.debug("createProperty caught exception {}", e.getMessage());
+        }
+
+        return null;
     }
-	
-	@Override
-	public String getNodeDescription(Node node) {
-    	// Check first if user configured a name
+
+    @Override
+    public String getNodeDescription(Node node) {
+        // Check first if user configured a name
         SwitchConfig config = getSwitchConfig(node.toString());
         if (config != null) {
-        	String configuredDesc = config.getNodeDescription();
-        	if (configuredDesc != null && !configuredDesc.isEmpty()) {
-        		return configuredDesc;
-        	}
+            String configuredDesc = config.getNodeDescription();
+            if (configuredDesc != null && !configuredDesc.isEmpty()) {
+                return configuredDesc;
+            }
         }
-        
+
         // No name configured by user, get the node advertised name
-        Description desc = (Description) getNodeProp(node, Description.propertyName);
-        return (desc == null /*|| desc.getValue().equalsIgnoreCase("none")*/) ?	
-        				"" : desc.getValue();
+        Description desc = (Description) getNodeProp(node,
+                Description.propertyName);
+        return (desc == null /* || desc.getValue().equalsIgnoreCase("none") */) ? ""
+                : desc.getValue();
     }
 }

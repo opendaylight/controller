@@ -85,11 +85,11 @@ public class DiscoveryService implements IInventoryShimExternalListener,
     private long discoveryTimerTick = 1L * 1000; // per tick in msec
     private int discoveryTimerTickCount = 0; // main tick counter
     private int discoveryBatchMaxPorts = 500; // max # of ports handled in one batch
-    private int discoveryBatchRestartTicks = 30; // periodically restart batching process
-    private int discoveryBatchPausePeriod = 2; // pause for few secs
+    private int discoveryBatchRestartTicks = getDiscoveryInterval(); // periodically restart batching process
+    private int discoveryBatchPausePeriod = 5; // pause for few secs
     private int discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod; // pause after this point
-    private int discoveryRetry = 1; // number of retry after initial timeout
-    private int discoveryTimeoutTicks = 2; // timeout 2 sec
+    private int discoveryRetry = 2; // number of retry after initial timeout
+    private int discoveryTimeoutTicks = getDiscoveryTimeout(); // timeout in sec
     private int discoveryAgeoutTicks = 120; // age out 2 min
     private int discoveryConsistencyCheckMultiple = 2; // multiple of discoveryBatchRestartTicks
     private int discoveryConsistencyCheckTickCount = discoveryBatchPauseTicks; // CC tick counter
@@ -1349,7 +1349,7 @@ public class DiscoveryService implements IInventoryShimExternalListener,
         portIdTlv.setType((byte) LLDPTLV.TLVType.PortID.getValue());
 
         // Create LLDP TTL TLV
-        byte[] ttl = new byte[] { (byte) 120 };
+        byte[] ttl = new byte[] {(byte) 0, (byte) 120 };
         ttlTlv = new LLDPTLV();
         ttlTlv.setType((byte) LLDPTLV.TLVType.TTL.getValue()).setLength(
                 (short) ttl.length).setValue(ttl);
@@ -1474,5 +1474,45 @@ public class DiscoveryService implements IInventoryShimExternalListener,
         }
         
         return sourceMac;
+    }
+    
+    /**
+     * This method returns the interval which determines how often the discovery
+     * packets will be sent. Default is 300 seconds.
+     * 
+     * @return The discovery interval in second
+     */
+    private static int getDiscoveryInterval() {
+        String elapsedTime = System.getProperty("of.discoveryInterval");
+        int rv = 300;
+
+        try {
+            if (elapsedTime != null) {
+                rv = Integer.parseInt(elapsedTime);
+            }
+        } catch (Exception e) {
+        }
+
+        return rv;
+    }
+
+    /**
+     * This method returns the timeout value in waiting for response of a
+     * discovery query. Default is 60 seconds.
+     * 
+     * @return The discovery timeout in second
+     */
+    private static int getDiscoveryTimeout() {
+        String elapsedTime = System.getProperty("of.discoveryTimeout");
+        int rv = 60;
+
+        try {
+            if (elapsedTime != null) {
+                rv = Integer.parseInt(elapsedTime);
+            }
+        } catch (Exception e) {
+        }
+
+        return rv;
     }
 }

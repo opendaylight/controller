@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -35,91 +34,94 @@ public class TopologyServices implements ITopologyServiceShimListener,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     @SuppressWarnings("unchecked")
     void init(Component c) {
-        logger.debug("INIT called!");
+        logger.trace("INIT called!");
         Dictionary<Object, Object> props = c.getServiceProperties();
         containerName = (props != null) ? (String) props.get("containerName")
                 : null;
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
-        logger.debug("DESTROY called!");
+        logger.trace("DESTROY called!");
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
-     *
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     * 
      */
     void start() {
-        logger.debug("START called!");
+        logger.trace("START called!");
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
-     *
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     * 
      */
     void stop() {
-        logger.debug("STOP called!");
+        logger.trace("STOP called!");
     }
 
     /**
      * Retrieve SAL service IPluginOutTopologyService
-     *
-     * @param s Called by Dependency Manager as soon as the SAL
-     * service is available
+     * 
+     * @param s
+     *            Called by Dependency Manager as soon as the SAL service is
+     *            available
      */
     public void setPluginOutTopologyService(IPluginOutTopologyService s) {
-        logger.debug("Setting IPluginOutTopologyService to:" + s);
+        logger.trace("Setting IPluginOutTopologyService to: {}", s);
         this.salTopoService = s;
     }
 
     /**
      * called when SAL service IPluginOutTopologyService is no longer available
-     *
-     * @param s Called by Dependency Manager as soon as the SAL
-     * service is unavailable
+     * 
+     * @param s
+     *            Called by Dependency Manager as soon as the SAL service is
+     *            unavailable
      */
     public void unsetPluginOutTopologyService(IPluginOutTopologyService s) {
         if (this.salTopoService == s) {
-            logger.debug("UNSetting IPluginOutTopologyService from:" + s);
+            logger.trace("UNSetting IPluginOutTopologyService from: {}", s);
             this.salTopoService = null;
         }
     }
 
     /**
      * Retrieve OF protocol_plugin service IRefreshInternalProvider
-     *
-     * @param s Called by Dependency Manager as soon as the SAL
-     * service is available
+     * 
+     * @param s
+     *            Called by Dependency Manager as soon as the SAL service is
+     *            available
      */
     public void setRefreshInternalProvider(IRefreshInternalProvider s) {
-        logger.debug("Setting IRefreshInternalProvider to:" + s);
+        logger.trace("Setting IRefreshInternalProvider to: {}", s);
         this.topoRefreshService = s;
     }
 
     /**
-     * called when OF protocol_plugin service IRefreshInternalProvider
-     * is no longer available
-     *
-     * @param s Called by Dependency Manager as soon as the SAL
-     * service is unavailable
+     * called when OF protocol_plugin service IRefreshInternalProvider is no
+     * longer available
+     * 
+     * @param s
+     *            Called by Dependency Manager as soon as the SAL service is
+     *            unavailable
      */
     public void unsetRefreshInternalProvider(IRefreshInternalProvider s) {
         if (this.topoRefreshService == s) {
-            logger.debug("UNSetting IRefreshInternalProvider from:" + s);
+            logger.trace("UNSetting IRefreshInternalProvider from: {}", s);
             this.topoRefreshService = null;
         }
     }

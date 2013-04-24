@@ -238,7 +238,9 @@ public class Activator extends ComponentActivatorAbstractBase {
                     new String[] {
                             IPluginInFlowProgrammerService.class.getName(),
                             IMessageListener.class.getName(),
-                            IContainerListener.class.getName() }, props);
+                            IContainerListener.class.getName(),
+                            IInventoryShimExternalListener.class.getName() },
+                    props);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")

@@ -9,7 +9,6 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -122,7 +121,6 @@ public class Controller implements IController, CommandProvider {
         this.switchStateListener = null;
         this.switchInstanceNumber = new AtomicInteger(0);
         registerWithOSGIConsole();
-
     }
 
     /**
@@ -147,7 +145,7 @@ public class Controller implements IController, CommandProvider {
             logger.error("Caught exception: " + ex + " during start");
         }
     }
-
+    
     /**
      * Function called by the dependency manager before the services
      * exported by the component are unregistered, this will be
@@ -340,24 +338,24 @@ public class Controller implements IController, CommandProvider {
     }
 
     public void _controllerShowConnConfig(CommandInterpreter ci) {
-    	String str = System.getProperty("secureChannelEnabled");
-        if ((str != null) && (str.trim().equalsIgnoreCase("true"))) { 
-            ci.print("The Controller and Switch should communicate through TLS connetion.\n");        	
+        String str = System.getProperty("secureChannelEnabled");
+        if ((str != null) && (str.trim().equalsIgnoreCase("true"))) {
+            ci.print("The Controller and Switch should communicate through TLS connetion.\n");
 
-         	String keyStoreFile = System.getProperty("controllerKeyStore");
-         	String trustStoreFile = System.getProperty("controllerTrustStore");
-        	if ((keyStoreFile == null) || keyStoreFile.trim().isEmpty()) {        	
-                ci.print("controllerKeyStore not specified in ./configuration/config.ini\n");        	        		
-        	} else {
-                ci.print("controllerKeyStore=" + keyStoreFile + "\n");        	
-        	}
-        	if ((trustStoreFile == null) || trustStoreFile.trim().isEmpty()) {    	
-                ci.print("controllerTrustStore not specified in ./configuration/config.ini\n");        	        		        		
-        	} else {
-                ci.print("controllerTrustStore=" + trustStoreFile + "\n");        	
-        	}
+            String keyStoreFile = System.getProperty("controllerKeyStore");
+            String trustStoreFile = System.getProperty("controllerTrustStore");
+            if ((keyStoreFile == null) || keyStoreFile.trim().isEmpty()) {
+                ci.print("controllerKeyStore not specified in ./configuration/config.ini\n");
+            } else {
+                ci.print("controllerKeyStore=" + keyStoreFile + "\n");
+            }
+            if ((trustStoreFile == null) || trustStoreFile.trim().isEmpty()) {
+                ci.print("controllerTrustStore not specified in ./configuration/config.ini\n");
+            } else {
+                ci.print("controllerTrustStore=" + trustStoreFile + "\n");
+            }
         } else {
-            ci.print("The Controller and Switch should communicate through TCP connetion.\n");        	
+            ci.print("The Controller and Switch should communicate through TCP connetion.\n");
         }
     }
 
@@ -371,10 +369,10 @@ public class Controller implements IController, CommandProvider {
     @Override
     public String getHelp() {
         StringBuffer help = new StringBuffer();
-        help.append("--Open Flow Controller --\n");
-        help.append("\tcontrollerShowSwitches\n");
-        help.append("\tcontrollerReset\n");
-        help.append("\tcontrollerShowConnConfig\n");
+        help.append("-- Open Flow Controller --\n");
+        help.append("\t controllerShowSwitches\n");
+        help.append("\t controllerReset\n");
+        help.append("\t controllerShowConnConfig\n");
         return help.toString();
     }
 }

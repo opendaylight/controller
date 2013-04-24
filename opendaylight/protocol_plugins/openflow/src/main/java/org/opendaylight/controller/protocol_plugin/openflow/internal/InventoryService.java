@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -48,8 +47,8 @@ import org.slf4j.LoggerFactory;
  * container of the network. Each instance gets container specific inventory
  * events from InventoryServiceShim. It interacts with SAL to pass inventory
  * data to the upper application.
- *
- *
+ * 
+ * 
  */
 public class InventoryService implements IInventoryShimInternalListener,
         IPluginInInventoryService, IStatisticsListener {
@@ -58,8 +57,8 @@ public class InventoryService implements IInventoryShimInternalListener,
     private Set<IPluginOutInventoryService> pluginOutInventoryServices = Collections
             .synchronizedSet(new HashSet<IPluginOutInventoryService>());
     private IController controller = null;
-    private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in default container only
-    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in default container only
+    private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in global container only
+    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in global container only
     private boolean isDefaultContainer = false;
 
     void setController(IController s) {
@@ -75,7 +74,7 @@ public class InventoryService implements IInventoryShimInternalListener,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     @SuppressWarnings("rawtypes")
     void init(Component c) {
@@ -96,7 +95,7 @@ public class InventoryService implements IInventoryShimInternalListener,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     *
+     * 
      */
     void destroy() {
         logger.trace("DESTROY called!");
@@ -105,7 +104,7 @@ public class InventoryService implements IInventoryShimInternalListener,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     *
+     * 
      */
     void start() {
         logger.trace("START called!");
@@ -115,7 +114,7 @@ public class InventoryService implements IInventoryShimInternalListener,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     *
+     * 
      */
     void stop() {
         logger.trace("STOP called!");
@@ -158,7 +157,7 @@ public class InventoryService implements IInventoryShimInternalListener,
             return null;
         Map<Long, ISwitch> switches = controller.getSwitches();
         for (Map.Entry<Long, ISwitch> entry : switches.entrySet()) {
-        	ISwitch sw = entry.getValue();
+            ISwitch sw = entry.getValue();
             Node node = OFSwitchToNode(sw);
             Map<String, Property> propMap = null;
             if (isDefaultContainer) {
@@ -166,22 +165,22 @@ public class InventoryService implements IInventoryShimInternalListener,
                 byte tables = sw.getTables();
                 Tables t = new Tables(tables);
                 if (t != null) {
-                	propMap.put(Tables.TablesPropName,t);
+                    propMap.put(Tables.TablesPropName, t);
                 }
                 int cap = sw.getCapabilities();
                 Capabilities c = new Capabilities(cap);
                 if (c != null) {
-                	propMap.put(Capabilities.CapabilitiesPropName, c);
+                    propMap.put(Capabilities.CapabilitiesPropName, c);
                 }
                 int act = sw.getActions();
                 Actions a = new Actions(act);
                 if (a != null) {
-                	propMap.put(Actions.ActionsPropName,a);
+                    propMap.put(Actions.ActionsPropName, a);
                 }
                 int buffers = sw.getBuffers();
                 Buffers b = new Buffers(buffers);
                 if (b != null) {
-                	propMap.put(Buffers.BuffersPropName,b);
+                    propMap.put(Buffers.BuffersPropName, b);
                 }
                 Date connectedSince = sw.getConnectedDate();
                 Long connectedSinceTime = (connectedSince == null) ? 0
@@ -208,8 +207,8 @@ public class InventoryService implements IInventoryShimInternalListener,
                         .OFSwitchToProps(sw);
                 for (Map.Entry<NodeConnector, Set<Property>> entry : ncProps
                         .entrySet()) {
-                    updateNodeConnector(entry.getKey(), UpdateType.ADDED, entry
-                            .getValue());
+                    updateNodeConnector(entry.getKey(), UpdateType.ADDED,
+                            entry.getValue());
                 }
             }
         }
@@ -220,18 +219,14 @@ public class InventoryService implements IInventoryShimInternalListener,
     @Override
     public void updateNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Set<Property> props) {
-        logger.trace("NodeConnector id " + nodeConnector.getID()
-                + " type " + nodeConnector.getType() + " "
-                + type.getName() + " for Node id "
-                + nodeConnector.getNode().getID());
-
+        logger.trace("updateNodeConnector {} type {}", nodeConnector,
+                type.getName());
         if (nodeConnectorProps == null) {
+            logger.trace("nodeConnectorProps is null");
             return;
         }
 
-
-        Map<String, Property> propMap = nodeConnectorProps
-                .get(nodeConnector);
+        Map<String, Property> propMap = nodeConnectorProps.get(nodeConnector);
         switch (type) {
         case ADDED:
         case CHANGED:
@@ -306,7 +301,6 @@ public class InventoryService implements IInventoryShimInternalListener,
         }
     }
 
-
     private void updateSwitchProperty(Long switchId, Set<Property> propSet) {
         // update local cache
         Node node = OFSwitchToNode(controller.getSwitch(switchId));
@@ -314,25 +308,25 @@ public class InventoryService implements IInventoryShimInternalListener,
         if (propMap == null) {
             propMap = new HashMap<String, Property>();
         }
-        
+
         boolean change = false;
         for (Property prop : propSet) {
-        	String propertyName = prop.getName();
-        	Property currentProp = propMap.get(propertyName);
-        	if (!prop.equals(currentProp)) {
-        		change = true;
-        		propMap.put(propertyName, prop);
-        	}
+            String propertyName = prop.getName();
+            Property currentProp = propMap.get(propertyName);
+            if (!prop.equals(currentProp)) {
+                change = true;
+                propMap.put(propertyName, prop);
+            }
         }
         nodeProps.put(node, propMap);
 
         // Update sal if any of the properties has changed
         if (change) {
-	        synchronized (pluginOutInventoryServices) {
-	            for (IPluginOutInventoryService service : pluginOutInventoryServices) {
-	                service.updateNode(node, UpdateType.CHANGED, propSet);
-	            }
-	        }
+            synchronized (pluginOutInventoryServices) {
+                for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+                    service.updateNode(node, UpdateType.CHANGED, propSet);
+                }
+            }
         }
     }
 
@@ -350,14 +344,14 @@ public class InventoryService implements IInventoryShimInternalListener,
         }
     }
 
-	@Override
-	public void descriptionRefreshed(Long switchId,
-			OFDescriptionStatistics descriptionStats) {
-		
-		Set<Property> propSet = new HashSet<Property>(1);
-  		Description desc = 
-				new Description(descriptionStats.getDatapathDescription());
-       propSet.add(desc);
-       this.updateSwitchProperty(switchId, propSet);
-	}
+    @Override
+    public void descriptionRefreshed(Long switchId,
+            OFDescriptionStatistics descriptionStats) {
+
+        Set<Property> propSet = new HashSet<Property>(1);
+        Description desc = new Description(
+                descriptionStats.getDatapathDescription());
+        propSet.add(desc);
+        this.updateSwitchProperty(switchId, propSet);
+    }
 }

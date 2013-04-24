@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -31,30 +30,29 @@ public class LLDPTLV extends Packet {
     private static final String LENGTH = "Length";
     private static final String VALUE = "Value";
     private static final int LLDPTLVFields = 3;
-	public static final byte[] OFOUI = new byte[] {(byte)0x00, (byte)0x26, (byte)0xe1};	// OpenFlow OUI
-	public static final byte[] customTlvSubType = new byte[] {0};
-	public static final int customTlvOffset = OFOUI.length + customTlvSubType.length;
-	public static final byte chassisIDSubType[] = new byte[] {4}; 	// MAC address for the system
-	public static final byte portIDSubType[] = new byte[] {7}; 	// locally assigned
+    public static final byte[] OFOUI = new byte[] { (byte) 0x00, (byte) 0x26,
+            (byte) 0xe1 }; // OpenFlow OUI
+    public static final byte[] customTlvSubType = new byte[] { 0 };
+    public static final int customTlvOffset = OFOUI.length
+            + customTlvSubType.length;
+    public static final byte chassisIDSubType[] = new byte[] { 4 }; // MAC address for the system
+    public static final byte portIDSubType[] = new byte[] { 7 }; // locally assigned
 
-	public enum TLVType {
-		Unknown		((byte)0),
-		ChassisID	((byte)1),
-		PortID		((byte)2),
-		TTL			((byte)3),
-		PortDesc	((byte)4),
-		SystemName	((byte)5),
-		SystemDesc	((byte)6),
-		Custom		((byte)127);
-		
-		private byte value;
-		private TLVType(byte value) {
-			this.value = value;
-		}
-		public byte getValue() {
-			return value;
-		}
-	}
+    public enum TLVType {
+        Unknown((byte) 0), ChassisID((byte) 1), PortID((byte) 2), TTL((byte) 3), PortDesc(
+                (byte) 4), SystemName((byte) 5), SystemDesc((byte) 6), Custom(
+                (byte) 127);
+
+        private byte value;
+
+        private TLVType(byte value) {
+            this.value = value;
+        }
+
+        public byte getValue() {
+            return value;
+        }
+    }
 
     private static Map<String, Pair<Integer, Integer>> fieldCoordinates = new LinkedHashMap<String, Pair<Integer, Integer>>() {
         private static final long serialVersionUID = 1L;
@@ -69,8 +67,8 @@ public class LLDPTLV extends Packet {
     protected Map<String, byte[]> fieldValues;
 
     /**
-     * Default constructor that creates and sets the hash map values
-     * and sets the payload to null
+     * Default constructor that creates and sets the hash map values and sets
+     * the payload to null
      */
     public LLDPTLV() {
         payload = null;
@@ -80,8 +78,7 @@ public class LLDPTLV extends Packet {
     }
 
     /**
-     * Constructor that writes the passed LLDPTLV values to the
-     * hdrFieldsMap
+     * Constructor that writes the passed LLDPTLV values to the hdrFieldsMap
      */
     public LLDPTLV(LLDPTLV other) {
         for (Map.Entry<String, byte[]> entry : other.hdrFieldsMap.entrySet()) {
@@ -166,6 +163,7 @@ public class LLDPTLV extends Packet {
 
     /**
      * Returns the size in bits of the whole TLV
+     * 
      * @return int - size in bits of full TLV
      * @throws Exception
      */
@@ -174,27 +172,41 @@ public class LLDPTLV extends Packet {
                 LLDPTLV.fieldCoordinates.get(LENGTH).getRight() + // static
         getfieldnumBits(VALUE)); // variable
     }
-    
+
     /**
-     * Creates the ChassisID TLV value including the subtype and ChassisID string
+     * Creates the ChassisID TLV value including the subtype and ChassisID
+     * string
      * 
-     * @param nodeId node identifier string
+     * @param nodeId
+     *            node identifier string
      * @return the ChassisID TLV value in byte array
      */
     static public byte[] createChassisIDTLVValue(String nodeId) {
-        byte[] cid = HexEncode.bytesFromHexString(nodeId);
+        byte[] nid = HexEncode.bytesFromHexString(nodeId);
+        byte[] cid = new byte[6];
+        int srcPos = 0, dstPos = 0;
+
+        if (nid.length > cid.length) {
+            srcPos = nid.length - cid.length;
+        } else {
+            dstPos = cid.length - nid.length;
+        }
+        System.arraycopy(nid, srcPos, cid, dstPos, cid.length);
+
         byte[] cidValue = new byte[cid.length + chassisIDSubType.length];
 
-        System.arraycopy(chassisIDSubType, 0, cidValue, 0, chassisIDSubType.length);
+        System.arraycopy(chassisIDSubType, 0, cidValue, 0,
+                chassisIDSubType.length);
         System.arraycopy(cid, 0, cidValue, chassisIDSubType.length, cid.length);
 
-    	return cidValue;
+        return cidValue;
     }
 
     /**
      * Creates the PortID TLV value including the subtype and PortID string
      * 
-     * @param portId port identifier string
+     * @param portId
+     *            port identifier string
      * @return the PortID TLV value in byte array
      */
     static public byte[] createPortIDTLVValue(String portId) {
@@ -204,13 +216,14 @@ public class LLDPTLV extends Packet {
         System.arraycopy(portIDSubType, 0, pidValue, 0, portIDSubType.length);
         System.arraycopy(pid, 0, pidValue, portIDSubType.length, pid.length);
 
-    	return pidValue;
+        return pidValue;
     }
 
     /**
      * Creates the custom TLV value including OUI, subtype and custom string
      * 
-     * @param portId port identifier string
+     * @param portId
+     *            port identifier string
      * @return the custom TLV value in byte array
      */
     static public byte[] createCustomTLVValue(String customString) {
@@ -223,40 +236,49 @@ public class LLDPTLV extends Packet {
         System.arraycopy(customArray, 0, customValue, customTlvOffset,
                 customArray.length);
 
-    	return customValue;
+        return customValue;
     }
 
     /**
      * Retrieves the string from TLV value and returns it in HexString format
      * 
-     * @param tlvValue the TLV value
-     * @param tlvLen the TLV length
+     * @param tlvValue
+     *            the TLV value
+     * @param tlvLen
+     *            the TLV length
      * @return the HexString
      */
     static public String getHexStringValue(byte[] tlvValue, int tlvLen) {
-    	byte[] cidBytes = new byte[tlvLen - chassisIDSubType.length];    	     
-        System.arraycopy(tlvValue, chassisIDSubType.length, cidBytes, 0, cidBytes.length);
-    	return HexEncode.bytesToHexStringFormat(cidBytes);
+        byte[] cidBytes = new byte[tlvLen - chassisIDSubType.length];
+        System.arraycopy(tlvValue, chassisIDSubType.length, cidBytes, 0,
+                cidBytes.length);
+        return HexEncode.bytesToHexStringFormat(cidBytes);
     }
 
     /**
      * Retrieves the string from TLV value
      * 
-     * @param tlvValue the TLV value
-     * @param tlvLen the TLV length
+     * @param tlvValue
+     *            the TLV value
+     * @param tlvLen
+     *            the TLV length
      * @return the string
      */
     static public String getStringValue(byte[] tlvValue, int tlvLen) {
-    	byte[] pidBytes = new byte[tlvLen - portIDSubType.length];
-        System.arraycopy(tlvValue, portIDSubType.length, pidBytes, 0, pidBytes.length);
-    	return (new String(pidBytes));
+        byte[] pidBytes = new byte[tlvLen - portIDSubType.length];
+        System.arraycopy(tlvValue, portIDSubType.length, pidBytes, 0,
+                pidBytes.length);
+        return (new String(pidBytes));
     }
 
     /**
-     * Retrieves the custom string from the Custom TLV value which includes OUI, subtype and custom string
+     * Retrieves the custom string from the Custom TLV value which includes OUI,
+     * subtype and custom string
      * 
-     * @param customTlvValue the custom TLV value
-     * @param customTlvLen the custom TLV length
+     * @param customTlvValue
+     *            the custom TLV value
+     * @param customTlvLen
+     *            the custom TLV length
      * @return the custom string
      */
     static public String getCustomString(byte[] customTlvValue, int customTlvLen) {
@@ -266,14 +288,14 @@ public class LLDPTLV extends Packet {
         if (Arrays.equals(vendor, LLDPTLV.OFOUI)) {
             int customArrayLength = customTlvLen - customTlvOffset;
             byte[] customArray = new byte[customArrayLength];
-            System.arraycopy(customTlvValue, customTlvOffset,
-                    customArray, 0, customArrayLength);
+            System.arraycopy(customTlvValue, customTlvOffset, customArray, 0,
+                    customArrayLength);
             try {
-            	customString = new String(customArray, "UTF-8");
+                customString = new String(customArray, "UTF-8");
             } catch (UnsupportedEncodingException e) {
             }
         }
-        
-    	return customString;
-    }    
+
+        return customString;
+    }
 }
