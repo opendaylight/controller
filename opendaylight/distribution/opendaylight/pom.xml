@@ -42,18 +42,18 @@
     <module>../../arphandler</module>
     <module>../../forwardingrulesmanager/api</module>
     <module>../../forwardingrulesmanager/implementation</module>
-    <module>../../hosttracker</module>
+    <module>../../hosttracker/api</module>
+    <module>../../hosttracker/implementation</module>
+    <module>../../hosttracker/integrationtest</module>
     <module>../../containermanager/api</module>
     <module>../../containermanager/implementation</module>
-    <module>../../switchmanager</module>
+    <module>../../switchmanager/api</module>
+    <module>../../switchmanager/implementation</module>
     <module>../../statisticsmanager/api</module>
     <module>../../statisticsmanager/implementation</module>
      <module>../../statisticsmanager/integrationtest</module>
     <module>../../topologymanager</module>
     <module>../../usermanager</module>
-    <module>../../security</module>
-    
-    
     <module>../../../third-party/openflowj</module>
     <module>../../../third-party/net.sf.jung2</module>
     <module>../../../third-party/jersey-servlet</module>
@@ -70,8 +70,6 @@
     <module>../../web/topology</module>
     
     <!-- Northbound bundles -->
-    
-     
     <module>../../northbound/commons</module>
     <module>../../northbound/topology</module>
     <module>../../northbound/staticrouting</module>
@@ -80,7 +78,7 @@
     <module>../../northbound/hosttracker</module>
     <module>../../northbound/subnets</module>
     <module>../../northbound/switchmanager</module>
-    
+
     <!-- Debug and logging -->
     <module>../../logging/bridge</module>
 
@@ -90,8 +88,6 @@
 	
     <!-- Samples -->
     <module>../../samples/simpleforwarding</module>
-    <module>../../samples/loadbalancer</module>
-    <module>../../samples/northbound/loadbalancer</module>
   </modules>
   
   <build>
