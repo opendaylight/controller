@@ -17,6 +17,7 @@ import java.util.Stack;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Argument_stmtContext;
+import org.opendaylight.controller.antlrv4.code.gen.YangParser.Base_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Bit_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Bits_specificationContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Config_argContext;
@@ -29,6 +30,7 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.Enum_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Error_app_tag_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Error_message_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Fraction_digits_stmtContext;
+import org.opendaylight.controller.antlrv4.code.gen.YangParser.Identityref_specificationContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Leafref_specificationContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Length_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Mandatory_argContext;
@@ -134,18 +136,18 @@ public final class YangModelBuilderUtil {
      * @param builder
      *            builder to fill in with parsed statements
      */
-    public static void parseSchemaNodeArgs(ParseTree ctx,
-            SchemaNodeBuilder builder) {
+    public static void parseSchemaNodeArgs(final ParseTree ctx,
+            final SchemaNodeBuilder builder) {
         for (int i = 0; i < ctx.getChildCount(); i++) {
-            ParseTree child = ctx.getChild(i);
+            final ParseTree child = ctx.getChild(i);
             if (child instanceof Description_stmtContext) {
-                String desc = stringFromNode(child);
+                final String desc = stringFromNode(child);
                 builder.setDescription(desc);
             } else if (child instanceof Reference_stmtContext) {
-                String ref = stringFromNode(child);
+                final String ref = stringFromNode(child);
                 builder.setReference(ref);
             } else if (child instanceof Status_stmtContext) {
-                Status status = parseStatus((Status_stmtContext) child);
+                final Status status = parseStatus((Status_stmtContext) child);
                 builder.setStatus(status);
             }
         }
@@ -158,7 +160,7 @@ public final class YangModelBuilderUtil {
      *            status context
      * @return value parsed from context
      */
-    public static Status parseStatus(Status_stmtContext ctx) {
+    public static Status parseStatus(final Status_stmtContext ctx) {
         Status result = null;
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree statusArg = ctx.getChild(i);
@@ -186,7 +188,7 @@ public final class YangModelBuilderUtil {
      * @return value of units statement as string or null if there is no units
      *         statement
      */
-    public static String parseUnits(ParseTree ctx) {
+    public static String parseUnits(final ParseTree ctx) {
         String units = null;
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree child = ctx.getChild(i);
@@ -209,8 +211,9 @@ public final class YangModelBuilderUtil {
      * @param prefix
      * @return SchemaPath object.
      */
-    public static SchemaPath createActualSchemaPath(List<String> actualPath,
-            URI namespace, Date revision, String prefix) {
+    public static SchemaPath createActualSchemaPath(
+            final List<String> actualPath, final URI namespace,
+            final Date revision, final String prefix) {
         final List<QName> path = new ArrayList<QName>();
         QName qname;
         // start from index 1 - module name omited
@@ -228,9 +231,9 @@ public final class YangModelBuilderUtil {
      *            string representation of path
      * @return SchemaPath object
      */
-    public static SchemaPath parseAugmentPath(String augmentPath) {
-        boolean absolute = augmentPath.startsWith("/");
-        String[] splittedPath = augmentPath.split("/");
+    public static SchemaPath parseAugmentPath(final String augmentPath) {
+        final boolean absolute = augmentPath.startsWith("/");
+        final String[] splittedPath = augmentPath.split("/");
         List<QName> path = new ArrayList<QName>();
         QName name;
         for (String pathElement : splittedPath) {
@@ -262,8 +265,8 @@ public final class YangModelBuilderUtil {
      *            current prefix
      * @return YANG list key as java.util.List of QName objects
      */
-    public static List<QName> createListKey(String keyDefinition,
-            URI namespace, Date revision, String prefix) {
+    public static List<QName> createListKey(final String keyDefinition,
+            final URI namespace, final Date revision, final String prefix) {
         List<QName> key = new ArrayList<QName>();
         String[] splittedKey = keyDefinition.split(" ");
 
@@ -290,8 +293,8 @@ public final class YangModelBuilderUtil {
      * @return List of EnumPair object parsed from given context
      */
     private static List<EnumTypeDefinition.EnumPair> getEnumConstants(
-            Type_body_stmtsContext ctx, List<String> path, URI namespace,
-            Date revision, String prefix) {
+            final Type_body_stmtsContext ctx, final List<String> path,
+            final URI namespace, final Date revision, final String prefix) {
         List<EnumTypeDefinition.EnumPair> enumConstants = new ArrayList<EnumTypeDefinition.EnumPair>();
 
         for (int j = 0; j < ctx.getChildCount(); j++) {
@@ -330,8 +333,9 @@ public final class YangModelBuilderUtil {
      * @return EnumPair object parsed from given context
      */
     private static EnumTypeDefinition.EnumPair createEnumPair(
-            Enum_stmtContext ctx, final int highestValue, List<String> path,
-            final URI namespace, final Date revision, final String prefix) {
+            final Enum_stmtContext ctx, final int highestValue,
+            final List<String> path, final URI namespace, final Date revision,
+            final String prefix) {
         final String name = stringFromNode(ctx);
         final QName qname = new QName(namespace, revision, prefix, name);
         Integer value = null;
@@ -514,7 +518,7 @@ public final class YangModelBuilderUtil {
      * @return List of RangeConstraint created from this context
      */
     private static List<RangeConstraint> getRangeConstraints(
-            Type_body_stmtsContext ctx) {
+            final Type_body_stmtsContext ctx) {
         List<RangeConstraint> rangeConstraints = Collections.emptyList();
         outer: for (int j = 0; j < ctx.getChildCount(); j++) {
             ParseTree numRestrChild = ctx.getChild(j);
@@ -539,7 +543,7 @@ public final class YangModelBuilderUtil {
      * @return List of RangeConstraints parsed from this context
      */
     private static List<RangeConstraint> parseRangeConstraints(
-            Range_stmtContext ctx) {
+            final Range_stmtContext ctx) {
         List<RangeConstraint> rangeConstraints = new ArrayList<RangeConstraint>();
         String description = null;
         String reference = null;
@@ -582,7 +586,7 @@ public final class YangModelBuilderUtil {
      * @return List of LengthConstraint created from this context
      */
     private static List<LengthConstraint> getLengthConstraints(
-            Type_body_stmtsContext ctx) {
+            final Type_body_stmtsContext ctx) {
         List<LengthConstraint> lengthConstraints = Collections.emptyList();
         outer: for (int j = 0; j < ctx.getChildCount(); j++) {
             ParseTree stringRestrChild = ctx.getChild(j);
@@ -607,7 +611,7 @@ public final class YangModelBuilderUtil {
      * @return List of LengthConstraints parsed from this context
      */
     private static List<LengthConstraint> parseLengthConstraints(
-            Length_stmtContext ctx) {
+            final Length_stmtContext ctx) {
         List<LengthConstraint> lengthConstraints = new ArrayList<LengthConstraint>();
         String description = null;
         String reference = null;
@@ -648,7 +652,7 @@ public final class YangModelBuilderUtil {
      * @return wrapper object of primitive java type or UnknownBoundaryNumber if
      *         type is one of special YANG values 'min' or 'max'
      */
-    private static Number parseNumberConstraintValue(String value) {
+    private static Number parseNumberConstraintValue(final String value) {
         Number result = null;
         if ("min".equals(value) || "max".equals(value)) {
             result = new UnknownBoundaryNumber(value);
@@ -664,7 +668,7 @@ public final class YangModelBuilderUtil {
     }
 
     private static List<PatternConstraint> getPatternConstraint(
-            Type_body_stmtsContext ctx) {
+            final Type_body_stmtsContext ctx) {
         List<PatternConstraint> patterns = new ArrayList<PatternConstraint>();
 
         outer: for (int j = 0; j < ctx.getChildCount(); j++) {
@@ -692,7 +696,7 @@ public final class YangModelBuilderUtil {
      * @return PatternConstraint object
      */
     private static PatternConstraint parsePatternConstraint(
-            Pattern_stmtContext ctx) {
+            final Pattern_stmtContext ctx) {
         String description = null;
         String reference = null;
         for (int i = 0; i < ctx.getChildCount(); i++) {
@@ -771,7 +775,8 @@ public final class YangModelBuilderUtil {
     }
 
     /**
-     * Internal helper method for parsing bit statements from given type body context.
+     * Internal helper method for parsing bit statements from given type body
+     * context.
      *
      * @param ctx
      *            type body context to parse
@@ -864,7 +869,8 @@ public final class YangModelBuilderUtil {
         }
 
         final List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
-        return new BitImpl(position, qname, schemaPath, description, reference, status, unknownNodes);
+        return new BitImpl(position, qname, schemaPath, description, reference,
+                status, unknownNodes);
     }
 
     /**
@@ -962,9 +968,10 @@ public final class YangModelBuilderUtil {
      *            current prefix
      * @return TypeDefinition object based on parsed values.
      */
-    public static TypeDefinition<?> parseTypeBody(String typeName,
-            Type_body_stmtsContext typeBody, List<String> actualPath,
-            URI namespace, Date revision, String prefix) {
+    public static TypeDefinition<?> parseTypeBody(final String typeName,
+            final Type_body_stmtsContext typeBody,
+            final List<String> actualPath, final URI namespace,
+            final Date revision, final String prefix) {
         TypeDefinition<?> type = null;
 
         List<RangeConstraint> rangeStatements = getRangeConstraints(typeBody);
@@ -984,7 +991,8 @@ public final class YangModelBuilderUtil {
             type = YangTypesConverter.javaTypeForBaseYangUnsignedIntegerType(
                     typeName, rangeStatements);
         } else if ("enumeration".equals(typeName)) {
-            type = new EnumerationType(actualPath, namespace, revision, enumConstants);
+            type = new EnumerationType(actualPath, namespace, revision,
+                    enumConstants);
         } else if ("string".equals(typeName)) {
             type = new StringType(lengthStatements, patternStatements);
         } else if ("bits".equals(typeName)) {
@@ -1004,6 +1012,24 @@ public final class YangModelBuilderUtil {
             type = new InstanceIdentifier(null, requireInstance);
         }
         return type;
+    }
+
+    public static String getIdentityrefBase(Type_body_stmtsContext ctx) {
+        String result = null;
+        outer:
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree child = ctx.getChild(i);
+            if (child instanceof Identityref_specificationContext) {
+                for (int j = 0; j < child.getChildCount(); j++) {
+                    ParseTree baseArg = child.getChild(j);
+                    if (baseArg instanceof Base_stmtContext) {
+                        result = stringFromNode(baseArg);
+                        break outer;
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     private static boolean isRequireInstance(Type_body_stmtsContext ctx) {
@@ -1043,7 +1069,7 @@ public final class YangModelBuilderUtil {
      *            Must_stmtContext
      * @return MustDefinition object based on parsed context
      */
-    public static MustDefinition parseMust(YangParser.Must_stmtContext ctx) {
+    public static MustDefinition parseMust(final YangParser.Must_stmtContext ctx) {
         StringBuilder mustText = new StringBuilder();
         String description = null;
         String reference = null;
@@ -1091,33 +1117,33 @@ public final class YangModelBuilderUtil {
      *
      * @param ctx
      *            context to search
-     * @param constraintsBuilder
+     * @param constraints
      *            ConstraintsBuilder to fill
      */
-    public static void parseConstraints(ParseTree ctx,
-            ConstraintsBuilder constraintsBuilder) {
+    public static void parseConstraints(final ParseTree ctx,
+            final ConstraintsBuilder constraints) {
         for (int i = 0; i < ctx.getChildCount(); ++i) {
             final ParseTree childNode = ctx.getChild(i);
             if (childNode instanceof Max_elements_stmtContext) {
                 Integer max = Integer.valueOf(stringFromNode(childNode));
-                constraintsBuilder.setMinElements(max);
+                constraints.setMinElements(max);
             } else if (childNode instanceof Min_elements_stmtContext) {
                 Integer min = Integer.valueOf(stringFromNode(childNode));
-                constraintsBuilder.setMinElements(min);
+                constraints.setMinElements(min);
             } else if (childNode instanceof Must_stmtContext) {
                 MustDefinition must = parseMust((Must_stmtContext) childNode);
-                constraintsBuilder.addMustDefinition(must);
+                constraints.addMustDefinition(must);
             } else if (childNode instanceof Mandatory_stmtContext) {
                 for (int j = 0; j < childNode.getChildCount(); j++) {
                     ParseTree mandatoryTree = ctx.getChild(j);
                     if (mandatoryTree instanceof Mandatory_argContext) {
                         Boolean mandatory = Boolean
                                 .valueOf(stringFromNode(mandatoryTree));
-                        constraintsBuilder.setMandatory(mandatory);
+                        constraints.setMandatory(mandatory);
                     }
                 }
             } else if (childNode instanceof When_stmtContext) {
-                constraintsBuilder.addWhenCondition(stringFromNode(childNode));
+                constraints.addWhenCondition(stringFromNode(childNode));
             }
         }
     }
@@ -1155,8 +1181,8 @@ public final class YangModelBuilderUtil {
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree child = ctx.getChild(i);
             if (child instanceof Refine_stmtContext) {
-                String refineTarget = stringFromNode(child);
-                RefineHolder refine = new RefineHolder(refineTarget);
+                final String refineTarget = stringFromNode(child);
+                final RefineHolder refine = new RefineHolder(refineTarget);
                 for (int j = 0; j < child.getChildCount(); j++) {
                     ParseTree refinePom = child.getChild(j);
                     if (refinePom instanceof Refine_pomContext) {

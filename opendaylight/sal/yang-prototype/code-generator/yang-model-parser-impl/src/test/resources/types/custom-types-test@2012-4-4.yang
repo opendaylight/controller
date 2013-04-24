@@ -5,9 +5,9 @@ module custom-types-test {
     prefix "iit";
     
     organization "opendaylight";
-    revision 2012-04-16 {
-    }
     contact "WILL-BE-DEFINED-LATER";
+        revision 2012-04-16 {
+    }
     
     
     typedef access-operations-type {
@@ -89,5 +89,27 @@ module custom-types-test {
        }
      }
    }
-	
+   
+  identity service-type {
+    description
+            "Service identity base type. All service identities must be
+             derived from this type. A service type uniquely defines a single
+             atomic API contract, such as a Java interface, a set of C
+             function declarations, or similar.
+
+             If the service type has a corresponding Java interface, the name
+             of that interface should be attached to the derived identity MUST
+             include a java-class keyword, whose name argument points to that
+             interface.";
+  }
+
+  typedef service-type-ref {
+    description
+            "Internal type of references to service type identity.";
+
+    type identityref {
+      base service-type;
+    }
+  }
+
 }

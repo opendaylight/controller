@@ -18,15 +18,22 @@ import org.opendaylight.controller.yang.model.api.Status;
  */
 public interface AugmentationSchemaBuilder extends ChildNodeBuilder {
 
-	void setDescription(String description);
-	void setReference(String reference);
-	void setStatus(Status status);
+    String getWhenCondition();
 
-	String getTargetPathAsString();
-	SchemaPath getTargetPath();
+    void addWhenCondition(String whenCondition);
 
-	Set<DataSchemaNodeBuilder> getChildNodes();
+    void setDescription(String description);
 
-        AugmentationSchema build();
+    void setReference(String reference);
+
+    void setStatus(Status status);
+
+    String getTargetPathAsString();
+
+    SchemaPath getTargetPath();
+
+    Set<DataSchemaNodeBuilder> getChildNodes();
+
+    AugmentationSchema build();
 
 }

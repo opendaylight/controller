@@ -231,6 +231,11 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
         this.defaultCase = defaultCase;
     }
 
+    @Override
+    public Set<DataSchemaNodeBuilder> getChildNodes() {
+        return new HashSet<DataSchemaNodeBuilder>(cases);
+    }
+
     private static class ChoiceNodeImpl implements ChoiceNode {
         private final QName qname;
         private SchemaPath path;

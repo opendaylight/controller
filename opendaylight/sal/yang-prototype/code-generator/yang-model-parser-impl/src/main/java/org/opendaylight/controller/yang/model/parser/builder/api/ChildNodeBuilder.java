@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.api;
 
+import java.util.Set;
+
 import org.opendaylight.controller.yang.common.QName;
 
 /**
@@ -24,5 +26,7 @@ public interface ChildNodeBuilder extends Builder {
     void addUsesNode(UsesNodeBuilder usesBuilder);
 
     void addTypedef(TypeDefinitionBuilder typedefBuilder);
+
+    Set<DataSchemaNodeBuilder> getChildNodes();
 
 }

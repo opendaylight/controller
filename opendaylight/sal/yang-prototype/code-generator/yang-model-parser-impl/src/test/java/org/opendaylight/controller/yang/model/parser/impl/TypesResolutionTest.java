@@ -28,6 +28,7 @@ import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.util.BitsType;
 import org.opendaylight.controller.yang.model.util.EnumerationType;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
+import org.opendaylight.controller.yang.model.util.IdentityrefType;
 import org.opendaylight.controller.yang.model.util.InstanceIdentifier;
 import org.opendaylight.controller.yang.model.util.StringType;
 import org.opendaylight.controller.yang.model.util.UnionType;
@@ -325,6 +326,21 @@ public class TypesResolutionTest {
                 testedTypeBaseQName.getRevision());
         assertEquals("yang", testedTypeBaseQName.getPrefix());
         assertEquals("object-identifier", testedTypeBaseQName.getLocalName());
+    }
+
+    @Test
+    public void testIdentityref() {
+        Module tested = TestUtils
+                .findModule(testedModules, "custom-types-test");
+        Set<TypeDefinition<?>> typedefs = tested.getTypeDefinitions();
+        TypeDefinition<?> testedType = TestUtils.findTypedef(typedefs,
+                "service-type-ref");
+        IdentityrefType baseType = (IdentityrefType)testedType.getBaseType();
+        QName identity = baseType.getIdentity();
+        assertEquals(URI.create("urn:simple.container.demo"), identity.getNamespace());
+        assertEquals(TestUtils.createDate("2012-04-16"), identity.getRevision());
+        assertEquals("iit", identity.getPrefix());
+        assertEquals("service-type", identity.getLocalName());
     }
 
 }

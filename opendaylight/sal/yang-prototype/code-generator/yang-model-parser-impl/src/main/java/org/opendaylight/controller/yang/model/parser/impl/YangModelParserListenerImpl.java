@@ -48,6 +48,7 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.Revision_stmtsCon
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Status_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Type_body_stmtsContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Units_stmtContext;
+import org.opendaylight.controller.antlrv4.code.gen.YangParser.When_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yang_version_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParserBaseListener;
 import org.opendaylight.controller.yang.common.QName;
@@ -251,6 +252,9 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
             } else if (child instanceof Status_stmtContext) {
                 Status status = parseStatus((Status_stmtContext) child);
                 builder.setStatus(status);
+            } else if (child instanceof When_stmtContext) {
+                String when = stringFromNode(child);
+                builder.addWhenCondition(when);
             }
         }
     }
@@ -326,6 +330,8 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
             } else {
                 if ("union".equals(typeName)) {
                     moduleBuilder.addUnionType(actualPath);
+                } else if("identityref".equals(typeName)) {
+                    moduleBuilder.addIdentityrefType(getIdentityrefBase(typeBody), actualPath);
                 } else {
                     List<String> typePath = new ArrayList<String>(actualPath);
                     typePath.remove(0);
@@ -646,7 +652,6 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
         UnknownSchemaNodeBuilder builder = moduleBuilder.addUnknownSchemaNode(
                 qname, actualPath);
         updatePath(name);
-
         builder.setPath(createActualSchemaPath(actualPath, namespace, revision,
                 yangModelPrefix));
         parseSchemaNodeArgs(ctx, builder);
@@ -725,7 +730,8 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
         final String targetPath = stringFromNode(ctx);
         String reference = null;
         String deviate = null;
-        DeviationBuilder builder = moduleBuilder.addDeviation(targetPath, actualPath);
+        DeviationBuilder builder = moduleBuilder.addDeviation(targetPath,
+                actualPath);
         updatePath(targetPath);
 
         for (int i = 0; i < ctx.getChildCount(); i++) {

@@ -170,7 +170,7 @@ public class YangModelParserTest {
         // test AugmentationTarget args
         Set<AugmentationSchema> availableAugmentations = ifEntry
                 .getAvailableAugmentations();
-        assertEquals(1, availableAugmentations.size());
+        assertEquals(2, availableAugmentations.size());
         AugmentationSchema augment = availableAugmentations.iterator().next();
         ContainerSchemaNode augmentHolder = (ContainerSchemaNode) augment
                 .getDataChildByName("augment-holder");
@@ -183,7 +183,7 @@ public class YangModelParserTest {
         assertFalse(ifEntry.isUserOrdered());
         // test DataNodeContainer args
         assertEquals(0, ifEntry.getTypeDefinitions().size());
-        assertEquals(3, ifEntry.getChildNodes().size());
+        assertEquals(4, ifEntry.getChildNodes().size());
         assertEquals(0, ifEntry.getGroupings().size());
         assertEquals(0, ifEntry.getUses().size());
 
@@ -225,14 +225,14 @@ public class YangModelParserTest {
 
         Set<AugmentationSchema> ifEntryAugments = ifEntry
                 .getAvailableAugmentations();
-        assertEquals(1, ifEntryAugments.size());
+        assertEquals(2, ifEntryAugments.size());
 
         // testfile3
         Module module3 = TestUtils.findModule(modules, "types3");
 
         Set<AugmentationSchema> module3Augmentations = module3
                 .getAugmentations();
-        assertEquals(1, module3Augmentations.size());
+        assertEquals(2, module3Augmentations.size());
         AugmentationSchema augment3 = module3Augmentations.iterator().next();
         ContainerSchemaNode augmentedContainerDefinition = (ContainerSchemaNode) augment3
                 .getDataChildByName("augment-holder");
@@ -256,7 +256,7 @@ public class YangModelParserTest {
                 .getDataChildByName("ifEntry");
         Set<AugmentationSchema> augmentations = ifEntry
                 .getAvailableAugmentations();
-        assertEquals(1, augmentations.size());
+        assertEquals(2, augmentations.size());
 
         AugmentationSchema augment = augmentations.iterator().next();
 
@@ -675,6 +675,13 @@ public class YangModelParserTest {
         assertNotNull(input.getDataChildByName("filter"));
         ContainerSchemaNode output = rpc.getOutput();
         assertNotNull(output.getDataChildByName("data"));
+    }
+
+    @Test
+    public void test() {
+        Module testModule = TestUtils.findModule(modules, "types4");
+
+        boolean flag = false;
     }
 
 }

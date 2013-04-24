@@ -17,6 +17,7 @@ import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.AugmentationSchema;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
+import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
@@ -27,23 +28,25 @@ import org.opendaylight.controller.yang.model.parser.builder.api.GroupingBuilder
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.util.YangModelBuilderUtil;
+import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
 
 public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder {
 
     private final AugmentationSchemaImpl instance;
     private final String augmentTargetStr;
     private final SchemaPath augmentTarget;
+    private String whenCondition;
     private final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
     private final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
 
     AugmentationSchemaBuilderImpl(final String augmentTargetStr) {
         this.augmentTargetStr = augmentTargetStr;
-        final SchemaPath targetPath = YangModelBuilderUtil.parseAugmentPath(augmentTargetStr);
+        final SchemaPath targetPath = YangModelBuilderUtil
+                .parseAugmentPath(augmentTargetStr);
         augmentTarget = targetPath;
         instance = new AugmentationSchemaImpl(targetPath);
     }
-
 
     @Override
     public void addChildNode(DataSchemaNodeBuilder childNode) {
@@ -75,6 +78,14 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
 
     @Override
     public AugmentationSchema build() {
+        RevisionAwareXPath whenStmt;
+        if (whenCondition == null) {
+            whenStmt = null;
+        } else {
+            whenStmt = new RevisionAwareXPathImpl(whenCondition, false);
+        }
+        instance.setWhenCondition(whenStmt);
+
         // CHILD NODES
         final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
         for (DataSchemaNodeBuilder node : childNodes) {
@@ -97,6 +108,14 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         instance.setUses(usesNodeDefinitions);
 
         return instance;
+    }
+
+    public String getWhenCondition() {
+        return whenCondition;
+    }
+
+    public void addWhenCondition(String whenCondition) {
+        this.whenCondition = whenCondition;
     }
 
     @Override
@@ -130,8 +149,76 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         return augmentTargetStr;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 17;
+        int result = 1;
+        result = prime * result
+                + ((augmentTargetStr == null) ? 0 : augmentTargetStr.hashCode());
+        result = prime * result
+                + ((childNodes == null) ? 0 : childNodes.hashCode());
+        result = prime * result
+                + ((groupings == null) ? 0 : groupings.hashCode());
+        result = prime * result + ((usesNodes == null) ? 0 : usesNodes.hashCode());
+        result = prime * result
+                + ((whenCondition == null) ? 0 : whenCondition.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AugmentationSchemaBuilderImpl other = (AugmentationSchemaBuilderImpl) obj;
+        if (augmentTargetStr == null) {
+            if (other.augmentTargetStr != null) {
+                return false;
+            }
+        } else if (!augmentTargetStr.equals(other.augmentTargetStr)) {
+            return false;
+        }
+        if (childNodes == null) {
+            if (other.childNodes != null) {
+                return false;
+            }
+        } else if (!childNodes.equals(other.childNodes)) {
+            return false;
+        }
+        if (groupings == null) {
+            if (other.groupings != null) {
+                return false;
+            }
+        } else if (!groupings.equals(other.groupings)) {
+            return false;
+        }
+        if (usesNodes == null) {
+            if (other.usesNodes != null) {
+                return false;
+            }
+        } else if (!usesNodes.equals(other.usesNodes)) {
+            return false;
+        }
+        if (whenCondition == null) {
+            if (other.whenCondition != null) {
+                return false;
+            }
+        } else if (!whenCondition.equals(other.whenCondition)) {
+            return false;
+        }
+        return true;
+    }
+
+
     private static class AugmentationSchemaImpl implements AugmentationSchema {
         private final SchemaPath targetPath;
+        private RevisionAwareXPath whenCondition;
         private Map<QName, DataSchemaNode> childNodes = Collections.emptyMap();
         private Set<GroupingDefinition> groupings = Collections.emptySet();
         private Set<UsesNode> uses = Collections.emptySet();
@@ -150,12 +237,21 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         }
 
         @Override
+        public RevisionAwareXPath getWhenCondition() {
+            return whenCondition;
+        }
+
+        private void setWhenCondition(RevisionAwareXPath whenCondition) {
+            this.whenCondition = whenCondition;
+        }
+
+        @Override
         public Set<DataSchemaNode> getChildNodes() {
             return new HashSet<DataSchemaNode>(childNodes.values());
         }
 
         private void setChildNodes(Map<QName, DataSchemaNode> childNodes) {
-            if(childNodes != null) {
+            if (childNodes != null) {
                 this.childNodes = childNodes;
             }
         }
@@ -166,7 +262,7 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         }
 
         private void setGroupings(Set<GroupingDefinition> groupings) {
-            if(groupings != null) {
+            if (groupings != null) {
                 this.groupings = groupings;
             }
         }
@@ -177,7 +273,7 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         }
 
         private void setUses(Set<UsesNode> uses) {
-            if(uses != null) {
+            if (uses != null) {
                 this.uses = uses;
             }
         }
@@ -246,6 +342,8 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
             result = prime * result
                     + ((groupings == null) ? 0 : groupings.hashCode());
             result = prime * result + ((uses == null) ? 0 : uses.hashCode());
+            result = prime * result
+                    + ((whenCondition == null) ? 0 : whenCondition.hashCode());
             return result;
         }
 
@@ -287,6 +385,13 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
                     return false;
                 }
             } else if (!uses.equals(other.uses)) {
+                return false;
+            }
+            if (whenCondition == null) {
+                if (other.whenCondition != null) {
+                    return false;
+                }
+            } else if (!whenCondition.equals(other.whenCondition)) {
                 return false;
             }
             return true;

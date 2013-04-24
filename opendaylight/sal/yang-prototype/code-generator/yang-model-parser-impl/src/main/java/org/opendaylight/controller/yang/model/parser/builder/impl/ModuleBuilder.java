@@ -51,8 +51,11 @@ import org.opendaylight.controller.yang.model.parser.util.YangParseException;
 public class ModuleBuilder implements Builder {
     private final ModuleImpl instance;
     private final String name;
+    private URI namespace;
     private String prefix;
     private Date revision;
+
+    private int augmentsResolved;
 
     private final Set<ModuleImport> imports = new HashSet<ModuleImport>();
 
@@ -91,6 +94,7 @@ public class ModuleBuilder implements Builder {
     @Override
     public Module build() {
         instance.setImports(imports);
+        instance.setNamespace(namespace);
 
         // TYPEDEFS
         final Set<TypeDefinition<?>> typedefs = buildModuleTypedefs(addedTypedefs);
@@ -160,6 +164,19 @@ public class ModuleBuilder implements Builder {
         return moduleNodes.get(path);
     }
 
+    public Set<DataSchemaNodeBuilder> getChildNodes() {
+        final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
+        for (Map.Entry<List<String>, DataSchemaNodeBuilder> entry : addedChilds
+                .entrySet()) {
+            List<String> path = entry.getKey();
+            DataSchemaNodeBuilder child = entry.getValue();
+            if (path.size() == 2) {
+                childNodes.add(child);
+            }
+        }
+        return childNodes;
+    }
+
     public Map<List<String>, TypeAwareBuilder> getDirtyNodes() {
         return dirtyNodes;
     }
@@ -191,6 +208,14 @@ public class ModuleBuilder implements Builder {
         return name;
     }
 
+    public URI getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(final URI namespace) {
+        this.namespace = namespace;
+    }
+
     public String getPrefix() {
         return prefix;
     }
@@ -199,15 +224,19 @@ public class ModuleBuilder implements Builder {
         return revision;
     }
 
+    public int getAugmentsResolved() {
+        return augmentsResolved;
+    }
+
+    public void augmentResolved() {
+        augmentsResolved++;
+    }
+
     public void addDirtyNode(final List<String> path) {
         final List<String> dirtyNodePath = new ArrayList<String>(path);
         final TypeAwareBuilder nodeBuilder = (TypeAwareBuilder) moduleNodes
                 .get(dirtyNodePath);
         dirtyNodes.put(dirtyNodePath, nodeBuilder);
-    }
-
-    public void setNamespace(final URI namespace) {
-        instance.setNamespace(namespace);
     }
 
     public void setRevision(final Date revision) {
@@ -559,6 +588,14 @@ public class ModuleBuilder implements Builder {
         path.add("union");
 
         moduleNodes.put(path, union);
+    }
+
+    public void addIdentityrefType(String baseString, List<String> parentPath) {
+        TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
+                .get(parentPath);
+        IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(baseString);
+        parent.setType(identityref);
+        dirtyNodes.put(parentPath, parent);
     }
 
     public DeviationBuilder addDeviation(String targetPath,
