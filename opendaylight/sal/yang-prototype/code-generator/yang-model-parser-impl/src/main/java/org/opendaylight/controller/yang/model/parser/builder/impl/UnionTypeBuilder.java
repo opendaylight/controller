@@ -26,8 +26,8 @@ import org.opendaylight.controller.yang.model.util.UnionType;
 /**
  * Builder for YANG union type. User can add type to this union as
  * TypeDefinition object (resolved type) or in form of TypeDefinitionBuilder.
- * When build is called, types in builder form will be transformed to
- * TypeDefinition objects and add to resolved types.
+ * When build is called, types in builder form will be built and add to resolved
+ * types.
  */
 public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
         TypeDefinitionBuilder, Builder {
@@ -60,12 +60,12 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void setType(TypeDefinition<?> type) {
+    public void setType(final TypeDefinition<?> type) {
         types.add(type);
     }
 
     @Override
-    public void setType(TypeDefinitionBuilder tdb) {
+    public void setType(final TypeDefinitionBuilder tdb) {
         typedefs.add(tdb);
     }
 
@@ -78,140 +78,139 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void setPath(SchemaPath schemaPath) {
-        // TODO Auto-generated method stub
+    public void setPath(final SchemaPath schemaPath) {
+        throw new IllegalStateException("Can not set path to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
-    public void setDescription(String description) {
-        // TODO Auto-generated method stub
+    public void setDescription(final String description) {
+        throw new IllegalStateException("Can not set description to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
-    public void setReference(String reference) {
-        // TODO Auto-generated method stub
+    public void setReference(final String reference) {
+        throw new IllegalStateException("Can not set reference to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
-    public void setStatus(Status status) {
-        // TODO Auto-generated method stub
+    public void setStatus(final Status status) {
+        throw new IllegalStateException("Can not set status to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
-    public void addUnknownSchemaNode(
-            UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
-        // TODO Auto-generated method stub
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+        throw new IllegalStateException("Can not add unknown node to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
     public QName getQName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public SchemaPath getPath() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getDescription() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getReference() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Status getStatus() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public List<RangeConstraint> getRanges() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public void setRanges(List<RangeConstraint> ranges) {
-        // TODO Auto-generated method stub
+        throw new IllegalStateException("Can not set ranges to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
     public List<LengthConstraint> getLengths() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public void setLengths(List<LengthConstraint> lengths) {
-        // TODO Auto-generated method stub
+        throw new IllegalStateException("Can not set lengths to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
     public List<PatternConstraint> getPatterns() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public void setPatterns(List<PatternConstraint> patterns) {
-        // TODO Auto-generated method stub
+        throw new IllegalStateException("Can not set patterns to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
     public Integer getFractionDigits() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void setFractionDigits(Integer fractionDigits) {
-        // TODO Auto-generated method stub
+        throw new IllegalStateException("Can not set fraction digits to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
     public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public Object getDefaultValue() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void setDefaultValue(Object defaultValue) {
-        // TODO Auto-generated method stub
+        throw new IllegalStateException("Can not set default value to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
     public String getUnits() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void setUnits(String units) {
-        // TODO Auto-generated method stub
+        throw new IllegalStateException("Can not set units to "
+                + UnionTypeBuilder.class.getSimpleName());
     }
 
     @Override
     public String toString() {
-        String result = "UnionTypeBuilder[";
-        result += ", types=" + types;
-        result += ", typedefs=" + typedefs;
-        result += "]";
-        return result;
+        final StringBuilder result = new StringBuilder(
+                UnionTypeBuilder.class.getSimpleName() + "[");
+        result.append(", types=" + types);
+        result.append(", typedefs=" + typedefs);
+        result.append("]");
+        return result.toString();
     }
 
 }

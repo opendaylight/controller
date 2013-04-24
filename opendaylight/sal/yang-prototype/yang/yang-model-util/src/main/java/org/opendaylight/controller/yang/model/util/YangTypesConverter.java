@@ -19,6 +19,7 @@ import org.opendaylight.controller.yang.model.api.type.BinaryTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BooleanTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.DecimalTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.EmptyTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
@@ -33,6 +34,7 @@ public class YangTypesConverter {
     private static final TypeDefinition<BinaryTypeDefinition> BINARY = new BinaryType();
     private static final TypeDefinition<BitsTypeDefinition> BITS = new BitsType();
     private static final TypeDefinition<BooleanTypeDefinition> BOOLEAN_TYPE = new BooleanType();
+    private static final TypeDefinition<EmptyTypeDefinition> EMPTY_TYPE = new EmptyType();
     private static final TypeDefinition<InstanceIdentifierTypeDefinition> INST_ID_TYPE = new InstanceIdentifier(null, true);
     private static final TypeDefinition<IntegerTypeDefinition> INT8_TYPE = new Int8();
     private static final TypeDefinition<IntegerTypeDefinition> INT16_TYPE = new Int16();
@@ -48,6 +50,7 @@ public class YangTypesConverter {
         baseYangTypeMap.put("binary", BINARY);
         baseYangTypeMap.put("bits", BITS);
         baseYangTypeMap.put("boolean", BOOLEAN_TYPE);
+        baseYangTypeMap.put("empty", EMPTY_TYPE);
         baseYangTypeMap.put("instance-identifier", INST_ID_TYPE);
         baseYangTypeMap.put("int8", INT8_TYPE);
         baseYangTypeMap.put("int16", INT16_TYPE);

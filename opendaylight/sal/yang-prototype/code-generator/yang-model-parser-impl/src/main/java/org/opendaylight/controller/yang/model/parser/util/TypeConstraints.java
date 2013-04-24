@@ -31,11 +31,10 @@ public final class TypeConstraints {
 
     public List<RangeConstraint> getRange() {
         if(ranges.isEmpty()) {
-            List<RangeConstraint> result = Collections.emptyList();
-            return result;
+            return Collections.emptyList();
         }
 
-        List<RangeConstraint> resolved = ranges.get(0);
+        final List<RangeConstraint> resolved = ranges.get(0);
         RangeConstraint firstRange = resolved.get(0);
         RangeConstraint lastRange = resolved.get(resolved.size() - 1);
         Number min = firstRange.getMin();
@@ -46,7 +45,7 @@ public final class TypeConstraints {
             return resolved;
         }
 
-        if (firstRange == lastRange) {
+        if (firstRange.equals(lastRange)) {
             if (min instanceof UnknownBoundaryNumber) {
                 min = resolveMinRange(min);
             }
@@ -81,7 +80,7 @@ public final class TypeConstraints {
     private Number resolveMinRange(Number min) {
         int i = 1;
         while (min instanceof UnknownBoundaryNumber) {
-            List<RangeConstraint> act = ranges.get(i);
+            final List<RangeConstraint> act = ranges.get(i);
             min = act.get(0).getMin();
             i++;
         }
@@ -91,15 +90,15 @@ public final class TypeConstraints {
     private Number resolveMaxRange(Number max) {
         int i = 1;
         while (max instanceof UnknownBoundaryNumber) {
-            List<RangeConstraint> act = ranges.get(i);
+            final List<RangeConstraint> act = ranges.get(i);
             max = act.get(act.size() - 1).getMax();
             i++;
         }
         return max;
     }
 
-    public void addRanges(List<RangeConstraint> ranges) {
-        if (ranges != null && ranges.size() > 0) {
+    public void addRanges(final List<RangeConstraint> ranges) {
+        if (ranges != null && !(ranges.isEmpty())) {
             this.ranges.add(ranges);
         }
     }
@@ -110,11 +109,10 @@ public final class TypeConstraints {
 
     public List<LengthConstraint> getLength() {
         if(lengths.isEmpty()) {
-            List<LengthConstraint> result = Collections.emptyList();
-            return result;
+            return Collections.emptyList();
         }
 
-        List<LengthConstraint> resolved = lengths.get(0);
+        final List<LengthConstraint> resolved = lengths.get(0);
         LengthConstraint firstLength = resolved.get(0);
         LengthConstraint lastLength = resolved.get(resolved.size() - 1);
         Number min = firstLength.getMin();
@@ -125,7 +123,7 @@ public final class TypeConstraints {
             return resolved;
         }
 
-        if (firstLength == lastLength) {
+        if (firstLength.equals(lastLength)) {
             if (min instanceof UnknownBoundaryNumber) {
                 min = resolveMinLength(min);
             }
@@ -160,7 +158,7 @@ public final class TypeConstraints {
     private Number resolveMinLength(Number min) {
         int i = 1;
         while (min instanceof UnknownBoundaryNumber) {
-            List<LengthConstraint> act = lengths.get(i);
+            final List<LengthConstraint> act = lengths.get(i);
             min = act.get(0).getMin();
             i++;
         }
@@ -170,15 +168,15 @@ public final class TypeConstraints {
     private Number resolveMaxLength(Number max) {
         int i = 1;
         while (max instanceof UnknownBoundaryNumber) {
-            List<LengthConstraint> act = lengths.get(i);
+            final List<LengthConstraint> act = lengths.get(i);
             max = act.get(act.size() - 1).getMax();
             i++;
         }
         return max;
     }
 
-    public void addLengths(List<LengthConstraint> lengths) {
-        if (lengths != null && lengths.size() > 0) {
+    public void addLengths(final List<LengthConstraint> lengths) {
+        if (lengths != null && !(lengths.isEmpty())) {
             this.lengths.add(lengths);
         }
     }
@@ -187,7 +185,7 @@ public final class TypeConstraints {
         return patterns;
     }
 
-    public void addPatterns(List<PatternConstraint> patterns) {
+    public void addPatterns(final List<PatternConstraint> patterns) {
         this.patterns.addAll(patterns);
     }
 
@@ -195,7 +193,7 @@ public final class TypeConstraints {
         return fractionDigits;
     }
 
-    public void setFractionDigits(Integer fractionDigits) {
+    public void setFractionDigits(final Integer fractionDigits) {
         if (this.fractionDigits == null) {
             this.fractionDigits = fractionDigits;
         }

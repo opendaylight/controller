@@ -9,6 +9,7 @@ package org.opendaylight.controller.yang.model.parser.builder.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +22,20 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.Builder;
+import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.model.parser.util.RefineHolder;
 
 public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
 
     private final UsesNodeImpl instance;
+    private final SchemaPath groupingPath;
     private final Set<AugmentationSchemaBuilder> addedAugments = new HashSet<AugmentationSchemaBuilder>();
+    private List<SchemaNodeBuilder> refineBuilders = new ArrayList<SchemaNodeBuilder>();
+    private List<RefineHolder> refines = Collections.emptyList();
 
-    UsesNodeBuilderImpl(String groupingPathStr) {
-        SchemaPath groupingPath = parseUsesPath(groupingPathStr);
+    UsesNodeBuilderImpl(final String groupingPathStr) {
+        this.groupingPath = parseUsesPath(groupingPathStr);
         instance = new UsesNodeImpl(groupingPath);
     }
 
@@ -42,25 +48,54 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
         }
         instance.setAugmentations(augments);
 
+        // REFINES
+        final Map<SchemaPath, SchemaNode> refineNodes = new HashMap<SchemaPath, SchemaNode>();
+        for(SchemaNodeBuilder refineBuilder : refineBuilders) {
+            SchemaNode refineNode = refineBuilder.build();
+            refineNodes.put(refineNode.getPath(), refineNode);
+        }
+        instance.setRefines(refineNodes);
+
         return instance;
     }
 
     @Override
-    public void addAugment(AugmentationSchemaBuilder augmentBuilder) {
+    public SchemaPath getGroupingPath() {
+        return groupingPath;
+    }
+
+    @Override
+    public void addAugment(final AugmentationSchemaBuilder augmentBuilder) {
         addedAugments.add(augmentBuilder);
     }
 
     @Override
-    public void setAugmenting(boolean augmenting) {
+    public void setAugmenting(final boolean augmenting) {
         instance.setAugmenting(augmenting);
     }
 
-    private SchemaPath parseUsesPath(String augmentPath) {
-        String[] splittedPath = augmentPath.split("/");
-        List<QName> path = new ArrayList<QName>();
+    @Override
+    public void addRefineNode(SchemaNodeBuilder refineNode) {
+        refineBuilders.add(refineNode);
+    }
+
+    public List<RefineHolder> getRefines() {
+        return refines;
+    }
+
+    @Override
+    public void setRefines(List<RefineHolder> refines) {
+        if(refines != null) {
+            this.refines = refines;
+        }
+    }
+
+    private SchemaPath parseUsesPath(final String augmentPath) {
+        final String[] splittedPath = augmentPath.split("/");
+        final List<QName> path = new ArrayList<QName>();
         QName name;
         for (String pathElement : splittedPath) {
-            String[] splittedElement = pathElement.split(":");
+            final String[] splittedElement = pathElement.split(":");
             if (splittedElement.length == 1) {
                 name = new QName(null, null, null, splittedElement[0]);
             } else {
@@ -74,12 +109,12 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
     }
 
     private static class UsesNodeImpl implements UsesNode {
-
         private final SchemaPath groupingPath;
         private Set<AugmentationSchema> augmentations = Collections.emptySet();
         private boolean augmenting;
+        private Map<SchemaPath, SchemaNode> refines = Collections.emptyMap();
 
-        private UsesNodeImpl(SchemaPath groupingPath) {
+        private UsesNodeImpl(final SchemaPath groupingPath) {
             this.groupingPath = groupingPath;
         }
 
@@ -93,7 +128,7 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
             return augmentations;
         }
 
-        private void setAugmentations(Set<AugmentationSchema> augmentations) {
+        private void setAugmentations(final Set<AugmentationSchema> augmentations) {
             if (augmentations != null) {
                 this.augmentations = augmentations;
             }
@@ -103,24 +138,30 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
         public boolean isAugmenting() {
             return augmenting;
         }
-        
-        private void setAugmenting(boolean augmenting) {
+
+        private void setAugmenting(final boolean augmenting) {
             this.augmenting = augmenting;
         }
-        
 
         @Override
         public Map<SchemaPath, SchemaNode> getRefines() {
-            // TODO Auto-generated method stub
-            return null;
+            return refines;
         }
-        
+
+        private void setRefines(Map<SchemaPath, SchemaNode> refines) {
+            if(refines != null) {
+                this.refines = refines;
+            }
+        }
+
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((groupingPath == null) ? 0 : groupingPath.hashCode());
-            result = prime * result + ((augmentations == null) ? 0 : augmentations.hashCode());
+            result = prime * result
+                    + ((groupingPath == null) ? 0 : groupingPath.hashCode());
+            result = prime * result
+                    + ((augmentations == null) ? 0 : augmentations.hashCode());
             result = prime * result + (augmenting ? 1231 : 1237);
             return result;
         }
@@ -136,7 +177,7 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            UsesNodeImpl other = (UsesNodeImpl) obj;
+            final UsesNodeImpl other = (UsesNodeImpl) obj;
             if (groupingPath == null) {
                 if (other.groupingPath != null) {
                     return false;
@@ -161,7 +202,7 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
         public String toString() {
             StringBuilder sb = new StringBuilder(
                     UsesNodeImpl.class.getSimpleName());
-            sb.append("[groupingPath=" + groupingPath +"]");
+            sb.append("[groupingPath=" + groupingPath + "]");
             return sb.toString();
         }
     }

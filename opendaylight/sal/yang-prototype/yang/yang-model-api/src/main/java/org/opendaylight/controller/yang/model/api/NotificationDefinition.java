@@ -7,8 +7,5 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
-import java.util.Set;
-
 public interface NotificationDefinition extends SchemaNode, DataNodeContainer {
-    Set<UsesNode> getUses();
 }

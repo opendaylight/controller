@@ -22,21 +22,26 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
 
     private final ExtensionDefinitionImpl instance;
     private final QName qname;
+    private SchemaPath schemaPath;
     private final List<UnknownSchemaNodeBuilder> addedExtensions = new ArrayList<UnknownSchemaNodeBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    ExtensionBuilder(QName qname) {
+    ExtensionBuilder(final QName qname) {
         this.qname = qname;
         instance = new ExtensionDefinitionImpl(qname);
     }
 
     @Override
     public ExtensionDefinition build() {
-        List<UnknownSchemaNode> extensions = new ArrayList<UnknownSchemaNode>();
+        instance.setPath(schemaPath);
+
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> extensions = new ArrayList<UnknownSchemaNode>();
         for (UnknownSchemaNodeBuilder e : addedExtensions) {
             extensions.add(e.build());
         }
         instance.setUnknownSchemaNodes(extensions);
+
         return instance;
     }
 
@@ -58,8 +63,13 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
     }
 
     @Override
+    public SchemaPath getPath() {
+        return schemaPath;
+    }
+
+    @Override
     public void setPath(SchemaPath schemaPath) {
-        instance.setPath(schemaPath);
+        this.schemaPath = schemaPath;
     }
 
     @Override
@@ -78,8 +88,8 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
-        addedUnknownNodes.add(unknownSchemaNodeBuilder);
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
     }
 
     private static class ExtensionDefinitionImpl implements ExtensionDefinition {
@@ -89,7 +99,7 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
         private String description;
         private String reference;
         private Status status = Status.CURRENT;
-        private List<UnknownSchemaNode> unknownSchemaNodes = Collections
+        private List<UnknownSchemaNode> unknownNodes = Collections
                 .emptyList();
         private boolean yin;
 
@@ -142,13 +152,13 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return unknownSchemaNodes;
+            return unknownNodes;
         }
 
         private void setUnknownSchemaNodes(
-                List<UnknownSchemaNode> unknownSchemaNodes) {
-            if(unknownSchemaNodes != null) {
-                this.unknownSchemaNodes = unknownSchemaNodes;
+                List<UnknownSchemaNode> unknownNodes) {
+            if(unknownNodes != null) {
+                this.unknownNodes = unknownNodes;
             }
         }
 
@@ -177,16 +187,10 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
             result = prime * result
                     + ((schemaPath == null) ? 0 : schemaPath.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            result = prime * result
-                    + ((status == null) ? 0 : status.hashCode());
             result = prime
                     * result
-                    + ((unknownSchemaNodes == null) ? 0
-                            : unknownSchemaNodes.hashCode());
+                    + ((unknownNodes == null) ? 0
+                            : unknownNodes.hashCode());
             result = prime * result + (yin ? 1231 : 1237);
             return result;
         }
@@ -217,32 +221,11 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
             } else if (!schemaPath.equals(other.schemaPath)) {
                 return false;
             }
-            if (description == null) {
-                if (other.description != null) {
+            if (unknownNodes == null) {
+                if (other.unknownNodes != null) {
                     return false;
                 }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            if (status == null) {
-                if (other.status != null) {
-                    return false;
-                }
-            } else if (!status.equals(other.status)) {
-                return false;
-            }
-            if (unknownSchemaNodes == null) {
-                if (other.unknownSchemaNodes != null) {
-                    return false;
-                }
-            } else if (!unknownSchemaNodes.equals(other.unknownSchemaNodes)) {
+            } else if (!unknownNodes.equals(other.unknownNodes)) {
                 return false;
             }
             if (yin != other.yin) {
@@ -259,10 +242,7 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
             sb.append("argument="+ argument);
             sb.append(", qname=" + qname);
             sb.append(", schemaPath=" + schemaPath);
-            sb.append(", description=" + description);
-            sb.append(", reference=" + reference);
-            sb.append(", status=" + status);
-            sb.append(", extensionSchemaNodes=" + unknownSchemaNodes);
+            sb.append(", extensionSchemaNodes=" + unknownNodes);
             sb.append(", yin=" + yin);
             sb.append("]");
             return sb.toString();

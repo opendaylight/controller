@@ -15,7 +15,7 @@ public final class UnknownBoundaryNumber extends Number {
 
     private final String value;
 
-    UnknownBoundaryNumber(String value) {
+    UnknownBoundaryNumber(final String value) {
         this.value = value;
     }
 

@@ -66,5 +66,28 @@ module custom-types-test {
         }
         default "auto-sense-speed";
     }
+    
+   typedef ip-version {
+     type enumeration {
+       enum unknown {
+         description
+          "An unknown or unspecified version of the Internet protocol.";
+       }
+       enum ipv4 {
+         value "19";
+         description
+          "The IPv4 protocol as defined in RFC 791.";
+       }
+       enum ipv6 {
+         value "7";
+         description
+          "The IPv6 protocol as defined in RFC 2460.";
+       }
+       enum default {
+         description 
+          "default ip";
+       }
+     }
+   }
 	
 }

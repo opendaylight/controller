@@ -7,15 +7,23 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.api;
 
+import java.util.List;
+
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.UsesNode;
+import org.opendaylight.controller.yang.model.parser.util.RefineHolder;
 
 /**
  * Interface for builders of 'uses' statement.
  */
 public interface UsesNodeBuilder extends Builder {
 
+    SchemaPath getGroupingPath();
     void addAugment(AugmentationSchemaBuilder builder);
     void setAugmenting(boolean augmenting);
+    List<RefineHolder> getRefines();
+    void setRefines(List<RefineHolder> refines);
+    void addRefineNode(SchemaNodeBuilder refineNode);
     UsesNode build();
 
 }

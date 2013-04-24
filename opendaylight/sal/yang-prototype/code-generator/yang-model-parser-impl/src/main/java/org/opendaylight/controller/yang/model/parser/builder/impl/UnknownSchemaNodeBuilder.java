@@ -20,6 +20,7 @@ import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuild
 public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
 
     private final QName qname;
+    private SchemaPath schemaPath;
     private final UnknownSchemaNodeImpl instance;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
@@ -28,12 +29,13 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
         instance = new UnknownSchemaNodeImpl(qname);
     }
 
-
     @Override
     public UnknownSchemaNode build() {
+        instance.setPath(schemaPath);
+
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
             unknownNodes.add(b.build());
         }
         instance.setUnknownSchemaNodes(unknownNodes);
@@ -46,28 +48,33 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
     }
 
     @Override
-    public void setPath(SchemaPath schemaPath) {
-        instance.setPath(schemaPath);
+    public SchemaPath getPath() {
+        return schemaPath;
     }
 
     @Override
-    public void setDescription(String description) {
+    public void setPath(SchemaPath schemaPath) {
+        this.schemaPath = schemaPath;
+    }
+
+    @Override
+    public void setDescription(final String description) {
         instance.setDescription(description);
     }
 
     @Override
-    public void setReference(String reference) {
+    public void setReference(final String reference) {
         instance.setReference(reference);
     }
 
     @Override
-    public void setStatus(Status status) {
+    public void setStatus(final Status status) {
         instance.setStatus(status);
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
-        addedUnknownNodes.add(unknownSchemaNodeBuilder);
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
     }
 
     private static class UnknownSchemaNodeImpl implements UnknownSchemaNode {
@@ -76,9 +83,9 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
         private String description;
         private String reference;
         private Status status = Status.CURRENT;
-        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();
+        private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
-        private UnknownSchemaNodeImpl(QName qname) {
+        private UnknownSchemaNodeImpl(final QName qname) {
             this.qname = qname;
         }
 
@@ -91,7 +98,8 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
         public SchemaPath getPath() {
             return path;
         }
-        private void setPath(SchemaPath path) {
+
+        private void setPath(final SchemaPath path) {
             this.path = path;
         }
 
@@ -100,7 +108,7 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
             return description;
         }
 
-        private void setDescription(String description) {
+        private void setDescription(final String description) {
             this.description = description;
         }
 
@@ -109,7 +117,7 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
             return reference;
         }
 
-        private void setReference(String reference) {
+        private void setReference(final String reference) {
             this.reference = reference;
         }
 
@@ -118,20 +126,21 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
             return status;
         }
 
-        private void setStatus(Status status) {
-            if(status != null) {
+        private void setStatus(final Status status) {
+            if (status != null) {
                 this.status = status;
             }
         }
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return unknownSchemaNodes;
+            return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
-            if(unknownSchemaNodes != null) {
-                this.unknownSchemaNodes = unknownSchemaNodes;
+        private void setUnknownSchemaNodes(
+                final List<UnknownSchemaNode> unknownNodes) {
+            if (unknownNodes != null) {
+                this.unknownNodes = unknownNodes;
             }
         }
     }

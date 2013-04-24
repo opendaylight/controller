@@ -16,12 +16,13 @@ import org.opendaylight.controller.yang.model.api.Status;
 /**
  * Interface for builders of 'augment' statement.
  */
-public interface AugmentationSchemaBuilder extends ChildNodeBuilder, TypeDefinitionAwareBuilder {
+public interface AugmentationSchemaBuilder extends ChildNodeBuilder {
 
 	void setDescription(String description);
 	void setReference(String reference);
 	void setStatus(Status status);
 
+	String getTargetPathAsString();
 	SchemaPath getTargetPath();
 
 	Set<DataSchemaNodeBuilder> getChildNodes();

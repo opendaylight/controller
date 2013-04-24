@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.api;
 
-import org.opendaylight.controller.yang.model.api.AugmentationSchema;
-
 /**
  * Interface for builders of those nodes, which can be augmentation targets.
  */
 public interface AugmentationTargetBuilder {
 
-	/**
-	 * Add augment, which points to this node.
-	 * @param augment augment which points to this node
-	 */
-	void addAugmentation(AugmentationSchema augment);
+    /**
+     * Add augment, which points to this node.
+     *
+     * @param augment
+     *            augment which points to this node
+     */
+    void addAugmentation(AugmentationSchemaBuilder augment);
 
 }

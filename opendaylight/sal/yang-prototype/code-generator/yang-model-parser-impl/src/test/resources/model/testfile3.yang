@@ -1,0 +1,134 @@
+module types3 {
+    yang-version 1;
+    namespace "urn:simple.container.demo.test";
+    prefix "t3";
+
+    import types2 {
+        prefix "data";
+        revision-date 2013-02-27;
+    }
+
+    organization "opendaylight";
+    contact "http://www.opendaylight.org/";
+
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+
+    typedef union1 {
+        type union2;
+    }
+
+    typedef union2 {
+        type union {
+            type int32;
+            type data:nested-union2;
+        }
+    }
+
+    augment "/data:interfaces/data:ifEntry" {
+        when "if:ifType='ds0'";
+        container augment-holder {
+            description "Description for augment holder";
+        }
+    }
+
+    container network {
+	    description "network-description";
+	    reference "network-reference";
+	    status obsolete;
+	    config true;
+	    presence "some presence text";
+
+		mnt:mountpoint point  {
+	    	mnt:target-ref target;
+        }
+    }
+
+    feature local-storage {
+        description
+            "This feature means the device supports local
+             storage (memory, flash or disk) that can be used to
+             store syslog messages.";
+    }
+    
+    extension c-define {
+        description
+            "Takes as argument a name string.
+             Makes the code generator use the given name in the
+             #define.";
+        argument "name";
+    }
+    
+    notification event {
+        leaf event-class {
+            type string;
+        }
+        anyxml reporting-entity;
+        leaf severity {
+            type string;
+        }
+    }
+    
+    rpc get-config {
+        description
+          "Retrieve all or part of a specified configuration.";
+
+        reference "RFC 6241, Section 7.1";
+
+        input {
+            container source {
+                description
+                  "Particular configuration to retrieve.";
+
+                choice config-source {
+                    mandatory true;
+                    description
+                      "The configuration to retrieve.";
+                    case a {
+                        leaf candidate {
+                            if-feature candidate;
+                            type empty;
+                            description
+                              "The candidate configuration is the config source.";
+                        }
+                    }
+                    case b {
+                        leaf running {
+                            type empty;
+                            description
+                              "The running configuration is the config source.";
+                        }
+                    }
+                    case c {
+                        leaf startup {
+                            if-feature startup;
+                            type empty;
+                            description
+                              "The startup configuration is the config source.
+                               This is optional-to-implement on the server because
+                               not all servers will support filtering for this
+                               datastore.";
+                        }
+                    }
+                }
+            }
+
+            anyxml filter {
+                description
+                  "Subtree or XPath filter to use.";
+                   nc:get-filter-element-attributes;
+            }
+        }
+
+        output {
+            anyxml data {
+                description
+                  "Copy of the source datastore subset that matched
+                   the filter criteria (if any).  An empty data container
+                   indicates that the request did not produce any results.";
+            }
+        }
+    }
+
+}

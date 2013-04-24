@@ -31,16 +31,16 @@ import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder
 
 public class RpcDefinitionBuilder implements ChildNodeBuilder,
         SchemaNodeBuilder, TypeDefinitionAwareBuilder {
-
     private final RpcDefinitionImpl instance;
     private final QName qname;
+    private SchemaPath schemaPath;
     private ContainerSchemaNodeBuilder inputBuilder;
     private ContainerSchemaNodeBuilder outputBuilder;
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    RpcDefinitionBuilder(QName qname) {
+    RpcDefinitionBuilder(final QName qname) {
         this.qname = qname;
         this.instance = new RpcDefinitionImpl(qname);
     }
@@ -52,8 +52,10 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
         instance.setInput(input);
         instance.setOutput(output);
 
+        instance.setPath(schemaPath);
+
         // TYPEDEFS
-        Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
+        final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
         for (TypeDefinitionBuilder entry : addedTypedefs) {
             typedefs.add(entry.build());
         }
@@ -68,7 +70,7 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
 
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for(UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
             unknownNodes.add(b.build());
         }
         instance.setUnknownSchemaNodes(unknownNodes);
@@ -76,36 +78,41 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
         return instance;
     }
 
-    void setInput(ContainerSchemaNodeBuilder inputBuilder) {
+    void setInput(final ContainerSchemaNodeBuilder inputBuilder) {
         this.inputBuilder = inputBuilder;
     }
 
-    void setOutput(ContainerSchemaNodeBuilder outputBuilder) {
+    void setOutput(final ContainerSchemaNodeBuilder outputBuilder) {
         this.outputBuilder = outputBuilder;
     }
 
     @Override
-    public void addTypedef(TypeDefinitionBuilder type) {
+    public void addTypedef(final TypeDefinitionBuilder type) {
         addedTypedefs.add(type);
     }
 
     @Override
-    public void setPath(SchemaPath schemaPath) {
-        instance.setPath(schemaPath);
+    public SchemaPath getPath() {
+        return schemaPath;
     }
 
     @Override
-    public void setDescription(String description) {
+    public void setPath(SchemaPath schemaPath) {
+        this.schemaPath = schemaPath;
+    }
+
+    @Override
+    public void setDescription(final String description) {
         instance.setDescription(description);
     }
 
     @Override
-    public void setReference(String reference) {
+    public void setReference(final String reference) {
         instance.setReference(reference);
     }
 
     @Override
-    public void setStatus(Status status) {
+    public void setStatus(final Status status) {
         instance.setStatus(status);
     }
 
@@ -115,25 +122,25 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
     }
 
     @Override
-    public void addChildNode(DataSchemaNodeBuilder childNode) {
+    public void addChildNode(final DataSchemaNodeBuilder childNode) {
         throw new UnsupportedOperationException(
                 "Can not add child node to rpc definition: rpc can not contains child nodes.");
     }
 
     @Override
-    public void addGrouping(GroupingBuilder grouping) {
+    public void addGrouping(final GroupingBuilder grouping) {
         addedGroupings.add(grouping);
     }
 
     @Override
-    public void addUsesNode(UsesNodeBuilder usesBuilder) {
+    public void addUsesNode(final UsesNodeBuilder usesBuilder) {
         throw new UnsupportedOperationException(
                 "Can not add uses node to rpc definition: rpc can not contains uses nodes.");
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownSchemaNodeBuilder) {
-        addedUnknownNodes.add(unknownSchemaNodeBuilder);
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
     }
 
     @Override
@@ -149,7 +156,7 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
         if (!(obj instanceof RpcDefinitionBuilder)) {
             return false;
         }
-        RpcDefinitionBuilder other = (RpcDefinitionBuilder) obj;
+        final RpcDefinitionBuilder other = (RpcDefinitionBuilder) obj;
         if (other.qname == null) {
             if (this.qname != null) {
                 return false;
@@ -171,9 +178,9 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
         private ContainerSchemaNode output;
         private Set<TypeDefinition<?>> typeDefinitions;
         private Set<GroupingDefinition> groupings;
-        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();
+        private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
-        private RpcDefinitionImpl(QName qname) {
+        private RpcDefinitionImpl(final QName qname) {
             this.qname = qname;
         }
 
@@ -256,12 +263,12 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return unknownSchemaNodes;
+            return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
-            if(unknownSchemaNodes != null) {
-                this.unknownSchemaNodes = unknownSchemaNodes;
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownNodes) {
+            if (unknownNodes != null) {
+                this.unknownNodes = unknownNodes;
             }
         }
 
@@ -284,7 +291,7 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            RpcDefinitionImpl other = (RpcDefinitionImpl) obj;
+            final RpcDefinitionImpl other = (RpcDefinitionImpl) obj;
             if (qname == null) {
                 if (other.qname != null) {
                     return false;
@@ -301,9 +308,6 @@ public class RpcDefinitionBuilder implements ChildNodeBuilder,
                     RpcDefinitionImpl.class.getSimpleName() + "[");
             sb.append("qname=" + qname);
             sb.append(", path=" + path);
-            sb.append(", description=" + description);
-            sb.append(", reference=" + reference);
-            sb.append(", status=" + status);
             sb.append(", input=" + input);
             sb.append(", output=" + output + "]");
             return sb.toString();

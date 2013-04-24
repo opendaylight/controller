@@ -23,6 +23,9 @@ public class ConstraintsBuilder implements Builder {
     private final ConstraintDefinitionImpl instance;
     private final Set<MustDefinition> mustDefinitions;
     private String whenCondition;
+    private boolean mandatory;
+    private Integer min;
+    private Integer max;
 
     ConstraintsBuilder() {
         instance = new ConstraintDefinitionImpl();
@@ -31,39 +34,62 @@ public class ConstraintsBuilder implements Builder {
 
     @Override
     public ConstraintDefinition build() {
-        RevisionAwareXPath whenStmt = new RevisionAwareXPathImpl(whenCondition,
-                false);
+        RevisionAwareXPath whenStmt;
+        if (whenCondition == null) {
+            whenStmt = null;
+        } else {
+            whenStmt = new RevisionAwareXPathImpl(whenCondition, false);
+        }
         instance.setWhenCondition(whenStmt);
         instance.setMustConstraints(mustDefinitions);
+        instance.setMandatory(mandatory);
+        instance.setMinElements(min);
+        instance.setMaxElements(max);
         return instance;
     }
 
+    public Integer getMinElements() {
+        return min;
+    }
+
     public void setMinElements(Integer minElements) {
-        instance.setMinElements(minElements);
+        this.min = minElements;
+    }
+
+    public Integer getMaxElements() {
+        return max;
     }
 
     public void setMaxElements(Integer maxElements) {
-        instance.setMaxElements(maxElements);
+        this.max = maxElements;
     }
 
-    public void addMustDefinition(String mustStr, String description,
-            String reference) {
-        MustDefinition must = new MustDefinitionImpl(mustStr, description,
-                reference);
+    public Set<MustDefinition> getMustDefinitions() {
+        return mustDefinitions;
+    }
+
+    public void addMustDefinition(MustDefinition must) {
         mustDefinitions.add(must);
+    }
+
+    public String getWhenCondition() {
+        return whenCondition;
     }
 
     public void addWhenCondition(String whenCondition) {
         this.whenCondition = whenCondition;
     }
 
+    public boolean isMandatory() {
+        return mandatory;
+    }
+
     public void setMandatory(boolean mandatory) {
-        instance.setMandatory(mandatory);
+        this.mandatory = mandatory;
     }
 
     private static class ConstraintDefinitionImpl implements
             ConstraintDefinition {
-
         private DataSchemaNode parent;
         private RevisionAwareXPath whenCondition;
         private Set<MustDefinition> mustConstraints;
@@ -215,103 +241,6 @@ public class ConstraintsBuilder implements Builder {
             return sb.toString();
         }
 
-    }
-
-    private static class MustDefinitionImpl implements MustDefinition {
-
-        private final String mustStr;
-        private final String description;
-        private final String reference;
-
-        private MustDefinitionImpl(String mustStr, String description,
-                String reference) {
-            this.mustStr = mustStr;
-            this.description = description;
-            this.reference = reference;
-        }
-
-        @Override
-        public String getDescription() {
-            return description;
-        }
-
-        @Override
-        public String getErrorAppTag() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public String getErrorMessage() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public String getReference() {
-            return reference;
-        }
-
-        @Override
-        public RevisionAwareXPath getXpath() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result
-                    + ((mustStr == null) ? 0 : mustStr.hashCode());
-            result = prime * result
-                    + ((description == null) ? 0 : description.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            MustDefinitionImpl other = (MustDefinitionImpl) obj;
-            if (mustStr == null) {
-                if (other.mustStr != null) {
-                    return false;
-                }
-            } else if (!mustStr.equals(other.mustStr)) {
-                return false;
-            }
-            if (description == null) {
-                if (other.description != null) {
-                    return false;
-                }
-            } else if (!description.equals(other.description)) {
-                return false;
-            }
-            if (reference == null) {
-                if (other.reference != null) {
-                    return false;
-                }
-            } else if (!reference.equals(other.reference)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return MustDefinitionImpl.class.getSimpleName() + "[mustStr="
-                    + mustStr + "]";
-        }
     }
 
 }
