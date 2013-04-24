@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -39,9 +38,8 @@ public class StatisticsCollector implements Callable<Object> {
     }
 
     /*
-     * accumulate the stats records in result
-     * Returns: true: if this is the last record
-     *                 false: more to come
+     * accumulate the stats records in result Returns: true: if this is the last
+     * record false: more to come
      */
     public boolean collect(OFStatisticsReply reply) {
         synchronized (result) {

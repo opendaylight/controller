@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -9,7 +8,6 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -54,7 +52,8 @@ public class Controller implements IController, CommandProvider {
     private AtomicInteger switchInstanceNumber;
 
     /*
-     * this thread monitors the switchEvents queue for new incoming events from switch
+     * this thread monitors the switchEvents queue for new incoming events from
+     * switch
      */
     private class EventHandler implements Runnable {
         @Override
@@ -65,17 +64,13 @@ public class Controller implements IController, CommandProvider {
                     SwitchEvent ev = switchEvents.take();
                     SwitchEvent.SwitchEventType eType = ev.getEventType();
                     ISwitch sw = ev.getSwitch();
-                    if (eType != SwitchEvent.SwitchEventType.SWITCH_MESSAGE) {
-                        //logger.debug("Received " + ev.toString() + " from " + sw.toString());
-                    }
                     switch (eType) {
                     case SWITCH_ADD:
                         Long sid = sw.getId();
                         ISwitch existingSwitch = switches.get(sid);
                         if (existingSwitch != null) {
-                            logger.info(" Replacing existing "
-                                    + existingSwitch.toString() + " with New "
-                                    + sw.toString());
+                            logger.info("Replacing existing {} with New {}",
+                                    existingSwitch.toString(), sw.toString());
                             disconnectSwitch(existingSwitch);
                         }
                         switches.put(sid, sw);
@@ -98,7 +93,7 @@ public class Controller implements IController, CommandProvider {
                         }
                         break;
                     default:
-                        logger.error("unknow switch event " + eType.ordinal());
+                        logger.error("Unknown switch event {}", eType.ordinal());
                     }
                 } catch (InterruptedException e) {
                     switchEvents.clear();
@@ -112,10 +107,10 @@ public class Controller implements IController, CommandProvider {
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     public void init() {
-        logger.debug("OpenFlowCore init");
+        logger.debug("Initializing!");
         this.switches = new ConcurrentHashMap<Long, ISwitch>();
         this.switchEvents = new LinkedBlockingQueue<SwitchEvent>();
         this.messageListeners = new ConcurrentHashMap<OFType, IMessageListener>();
@@ -126,13 +121,12 @@ public class Controller implements IController, CommandProvider {
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
-     *
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     * 
      */
     public void start() {
-        logger.debug("OpenFlowCore start() is called");
+        logger.debug("Starting!");
         /*
          * start a thread to handle event coming from the switch
          */
@@ -144,15 +138,15 @@ public class Controller implements IController, CommandProvider {
         try {
             controllerIO.start();
         } catch (IOException ex) {
-            logger.error("Caught exception: " + ex + " during start");
+            logger.error("Caught exception while starting:", ex);
         }
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
-     *
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     * 
      */
     public void stop() {
         for (Iterator<Entry<Long, ISwitch>> it = switches.entrySet().iterator(); it
@@ -163,17 +157,17 @@ public class Controller implements IController, CommandProvider {
         }
         switchEventThread.interrupt();
         try {
-        	controllerIO.shutDown();
+            controllerIO.shutDown();
         } catch (IOException ex) {
-        	logger.error("Caught exception: " + ex + " during stop");
+            logger.error("Caught exception while stopping:", ex);
         }
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     public void destroy() {
     }
@@ -182,18 +176,20 @@ public class Controller implements IController, CommandProvider {
     public void addMessageListener(OFType type, IMessageListener listener) {
         IMessageListener currentListener = this.messageListeners.get(type);
         if (currentListener != null) {
-            logger.warn(type.toString() + " already listened by "
-                    + currentListener.toString());
+            logger.warn("{} is already listened by {}", type.toString(),
+                    currentListener.toString());
         }
         this.messageListeners.put(type, listener);
-        logger.debug(type.toString() + " is now listened by "
-                + listener.toString());
+        logger.debug("{} is now listened by {}", type.toString(),
+                listener.toString());
     }
 
     @Override
     public void removeMessageListener(OFType type, IMessageListener listener) {
         IMessageListener currentListener = this.messageListeners.get(type);
         if ((currentListener != null) && (currentListener == listener)) {
+            logger.debug("{} listener {} is Removed", type.toString(),
+                    listener.toString());
             this.messageListeners.remove(type);
         }
     }
@@ -201,17 +197,20 @@ public class Controller implements IController, CommandProvider {
     @Override
     public void addSwitchStateListener(ISwitchStateListener listener) {
         if (this.switchStateListener != null) {
-            logger.warn(this.switchStateListener.toString()
-                    + "already listened to switch events");
+            logger.warn("Switch events are already listened by {}",
+                    this.switchStateListener.toString());
         }
         this.switchStateListener = listener;
-        logger.debug(listener.toString() + " now listens to switch events");
+        logger.debug("Switch events are now listened by {}",
+                listener.toString());
     }
 
     @Override
     public void removeSwitchStateListener(ISwitchStateListener listener) {
         if ((this.switchStateListener != null)
                 && (this.switchStateListener == listener)) {
+            logger.debug("SwitchStateListener {} is Removed",
+                    listener.toString());
             this.switchStateListener = null;
         }
     }
@@ -229,7 +228,11 @@ public class Controller implements IController, CommandProvider {
             SwitchHandler switchHandler = new SwitchHandler(this, sc,
                     instanceName);
             switchHandler.start();
-            logger.info(instanceName + " connected: " + sc.toString());
+            if (sc.isConnected()) {
+                logger.info("Switch:{} is connected to the Controller", sc
+                        .getRemoteAddress().toString().split("/")[1]);
+            }
+
         } catch (IOException e) {
             return;
         }
@@ -239,11 +242,8 @@ public class Controller implements IController, CommandProvider {
         if (((SwitchHandler) sw).isOperational()) {
             Long sid = sw.getId();
             if (this.switches.remove(sid, sw)) {
-                logger.warn(sw.toString() + " is disconnected");
+                logger.warn("{} is Disconnected", sw.toString());
                 notifySwitchDeleted(sw);
-            } else {
-                //logger.warn(sw.toString() + " has been replaced by " +
-                //	this.switches.get(sid));
             }
         }
         ((SwitchHandler) sw).stop();
@@ -270,7 +270,7 @@ public class Controller implements IController, CommandProvider {
         }
     }
 
-    public void takeSwtichEventAdd(ISwitch sw) {
+    public void takeSwitchEventAdd(ISwitch sw) {
         SwitchEvent ev = new SwitchEvent(
                 SwitchEvent.SwitchEventType.SWITCH_ADD, sw, null);
         addSwitchEvent(ev);
@@ -319,7 +319,8 @@ public class Controller implements IController, CommandProvider {
         while (iter.hasNext()) {
             Long sid = iter.next();
             Date date = switches.get(sid).getConnectedDate();
-            String switchInstanceName = ((SwitchHandler) switches.get(sid)).getInstanceName();
+            String switchInstanceName = ((SwitchHandler) switches.get(sid))
+                    .getInstanceName();
             s.append(switchInstanceName + "/" + HexString.toHexString(sid)
                     + " connected since " + date.toString() + "\n");
         }
@@ -340,24 +341,24 @@ public class Controller implements IController, CommandProvider {
     }
 
     public void _controllerShowConnConfig(CommandInterpreter ci) {
-    	String str = System.getProperty("secureChannelEnabled");
-        if ((str != null) && (str.trim().equalsIgnoreCase("true"))) { 
-            ci.print("The Controller and Switch should communicate through TLS connetion.\n");        	
+        String str = System.getProperty("secureChannelEnabled");
+        if ((str != null) && (str.trim().equalsIgnoreCase("true"))) {
+            ci.print("The Controller and Switch should communicate through TLS connetion.\n");
 
-         	String keyStoreFile = System.getProperty("controllerKeyStore");
-         	String trustStoreFile = System.getProperty("controllerTrustStore");
-        	if ((keyStoreFile == null) || keyStoreFile.trim().isEmpty()) {        	
-                ci.print("controllerKeyStore not specified in ./configuration/config.ini\n");        	        		
-        	} else {
-                ci.print("controllerKeyStore=" + keyStoreFile + "\n");        	
-        	}
-        	if ((trustStoreFile == null) || trustStoreFile.trim().isEmpty()) {    	
-                ci.print("controllerTrustStore not specified in ./configuration/config.ini\n");        	        		        		
-        	} else {
-                ci.print("controllerTrustStore=" + trustStoreFile + "\n");        	
-        	}
+            String keyStoreFile = System.getProperty("controllerKeyStore");
+            String trustStoreFile = System.getProperty("controllerTrustStore");
+            if ((keyStoreFile == null) || keyStoreFile.trim().isEmpty()) {
+                ci.print("controllerKeyStore not specified in ./configuration/config.ini\n");
+            } else {
+                ci.print("controllerKeyStore=" + keyStoreFile + "\n");
+            }
+            if ((trustStoreFile == null) || trustStoreFile.trim().isEmpty()) {
+                ci.print("controllerTrustStore not specified in ./configuration/config.ini\n");
+            } else {
+                ci.print("controllerTrustStore=" + trustStoreFile + "\n");
+            }
         } else {
-            ci.print("The Controller and Switch should communicate through TCP connetion.\n");        	
+            ci.print("The Controller and Switch should communicate through TCP connetion.\n");
         }
     }
 
@@ -371,10 +372,10 @@ public class Controller implements IController, CommandProvider {
     @Override
     public String getHelp() {
         StringBuffer help = new StringBuffer();
-        help.append("--Open Flow Controller --\n");
-        help.append("\tcontrollerShowSwitches\n");
-        help.append("\tcontrollerReset\n");
-        help.append("\tcontrollerShowConnConfig\n");
+        help.append("---Open Flow Controller---\n");
+        help.append("\t controllerShowSwitches\n");
+        help.append("\t controllerReset\n");
+        help.append("\t controllerShowConnConfig\n");
         return help.toString();
     }
 }
