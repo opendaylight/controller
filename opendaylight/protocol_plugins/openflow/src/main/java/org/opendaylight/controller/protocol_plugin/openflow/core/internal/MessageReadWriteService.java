@@ -145,7 +145,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
 
     @Override
     public void stop() {
-        inBuffer = null;
-        outBuffer = null;
+    	inBuffer = null;
+    	outBuffer = null;
     }
 }
