@@ -356,11 +356,6 @@ public class SwitchHandler implements ISwitch {
         }
         for (OFMessage msg : msgs) {
             logger.trace("Message received: {}", msg.toString());
-            /*
-             * if ((msg.getType() != OFType.ECHO_REQUEST) && (msg.getType() !=
-             * OFType.ECHO_REPLY)) { logger.debug(msg.getType().toString() +
-             * " received from sw " + toString()); }
-             */
             this.lastMsgReceivedTimeStamp = System.currentTimeMillis();
             OFType type = msg.getType();
             switch (type) {
@@ -422,21 +417,14 @@ public class SwitchHandler implements ISwitch {
     }
 
     private void processPortStatusMsg(OFPortStatus msg) {
-        // short portNumber = msg.getDesc().getPortNumber();
         OFPhysicalPort port = msg.getDesc();
         if (msg.getReason() == (byte) OFPortReason.OFPPR_MODIFY.ordinal()) {
             updatePhysicalPort(port);
-            // logger.debug("Port " + portNumber + " on " + toString() +
-            // " modified");
         } else if (msg.getReason() == (byte) OFPortReason.OFPPR_ADD.ordinal()) {
             updatePhysicalPort(port);
-            // logger.debug("Port " + portNumber + " on " + toString() +
-            // " added");
         } else if (msg.getReason() == (byte) OFPortReason.OFPPR_DELETE
                 .ordinal()) {
             deletePhysicalPort(port);
-            // logger.debug("Port " + portNumber + " on " + toString() +
-            // " deleted");
         }
 
     }
@@ -457,8 +445,9 @@ public class SwitchHandler implements ISwitch {
                             reportSwitchStateChange(false);
                         } else {
                             // send a probe to see if the switch is still alive
-                            // logger.debug("Send idle probe (Echo Request) to "
-                            // + switchName());
+                            logger.debug(
+                                    "Send idle probe (Echo Request) to {}",
+                                    toString());
                             probeSent = true;
                             OFMessage echo = factory
                                     .getMessage(OFType.ECHO_REQUEST);
@@ -500,8 +489,7 @@ public class SwitchHandler implements ISwitch {
     private void reportError(Exception e) {
         if (e instanceof AsynchronousCloseException
                 || e instanceof InterruptedException
-                || e instanceof SocketException
-                || e instanceof IOException) {
+                || e instanceof SocketException || e instanceof IOException) {
             logger.debug("Caught exception {}", e.getMessage());
         } else {
             logger.warn("Caught exception ", e);
@@ -512,7 +500,7 @@ public class SwitchHandler implements ISwitch {
 
     private void reportSwitchStateChange(boolean added) {
         if (added) {
-            ((Controller) core).takeSwtichEventAdd(this);
+            ((Controller) core).takeSwitchEventAdd(this);
         } else {
             ((Controller) core).takeSwitchEventDelete(this);
         }
@@ -567,7 +555,7 @@ public class SwitchHandler implements ISwitch {
                                                 .getValue()
                                         | OFPortFeatures.OFPPF_1GB_HD
                                                 .getValue() | OFPortFeatures.OFPPF_10GB_FD
-                                        .getValue()));
+                                            .getValue()));
     }
 
     private void deletePhysicalPort(OFPhysicalPort port) {
@@ -583,11 +571,16 @@ public class SwitchHandler implements ISwitch {
 
     @Override
     public String toString() {
-        return ("["
-                + this.socket.toString()
-                + " SWID "
-                + (isOperational() ? HexString.toHexString(this.sid)
-                        : "unkbown") + "]");
+        try {
+            return ("Switch:"
+                    + socket.getRemoteAddress().toString().split("/")[1]
+                    + " SWID:" + (isOperational() ? HexString
+                    .toHexString(this.sid) : "unknown"));
+        } catch (Exception e) {
+            return (isOperational() ? HexString.toHexString(this.sid)
+                    : "unknown");
+        }
+
     }
 
     @Override
@@ -823,14 +816,14 @@ public class SwitchHandler implements ISwitch {
     }
 
     /**
-     * Sends synchronous Barrier message 
+     * Sends synchronous Barrier message
      */
     @Override
     public Object sendBarrierMessage() {
         OFBarrierRequest barrierMsg = new OFBarrierRequest();
-        return syncSend(barrierMsg);        
+        return syncSend(barrierMsg);
     }
-    
+
     /**
      * This method returns the switch liveness timeout value. If controller did
      * not receive any message from the switch for such a long period,
