@@ -12,6 +12,7 @@ package org.opendaylight.controller.logging.bridge.internal;
 import org.osgi.service.log.LogEntry;
 import java.util.Enumeration;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.ServiceReference;
@@ -64,6 +65,14 @@ public class Activator implements BundleActivator {
                  */
                 Thread.setDefaultUncaughtExceptionHandler(new org.opendaylight.
                         controller.logging.bridge.internal.UncaughtExceptionHandler());
+                
+                /*
+                 * Install the Shutdown handler. This will intercept SIGTERM signal and
+                 * close the system bundle. This allows for a graceful  closing of OSGI
+                 * framework.
+                 */
+                
+                Runtime.getRuntime().addShutdownHook(new shutdownHandler(context));
             } else {
                 this.log.error("Cannot register the LogListener because "
                         + "cannot retrieve LogReaderService");
@@ -86,4 +95,21 @@ public class Activator implements BundleActivator {
         this.listener = null;
         this.log = null;
     }
+    
+    private class shutdownHandler extends Thread {
+        BundleContext bundlecontext;
+        public shutdownHandler(BundleContext ctxt) {
+                this.bundlecontext = ctxt;
+        }
+        
+        public void run () {
+            try {
+                this.bundlecontext.getBundle(0).stop();
+                log.debug("shutdown handler thread called");
+            } catch (BundleException e) {
+                log.debug("Bundle couldn't be stopped");
+            }
+        }   
+    }
+
 }
