@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -40,8 +39,8 @@ public class ControllerIO {
             try {
                 openFlowPort = Short.decode(portString).shortValue();
             } catch (NumberFormatException e) {
-                logger.warn("Invalid port:" + portString + ", use default("
-                        + openFlowPort + ")");
+                logger.warn("Invalid port:{}, use default({})", portString,
+                        openFlowPort);
             }
         }
     }
@@ -72,8 +71,8 @@ public class ControllerIO {
                             SelectionKey skey = selectedKeys.next();
                             selectedKeys.remove();
                             if (skey.isValid() && skey.isAcceptable()) {
-                                 ((Controller) listener).handleNewConnection(selector,
-                                        serverSelectionKey);
+                                ((Controller) listener).handleNewConnection(
+                                        selector, serverSelectionKey);
                             }
                         }
                     } catch (Exception e) {
@@ -83,7 +82,7 @@ public class ControllerIO {
             }
         }, "ControllerI/O Thread");
         controllerIOThread.start();
-        logger.info("Controller is now listening on port " + openFlowPort);
+        logger.info("Controller is now listening on port {}", openFlowPort);
     }
 
     public void shutDown() throws IOException {
