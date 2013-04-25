@@ -2,7 +2,7 @@
   <global>
     <transport>
       <properties>
-        <property name="configurationFile" value="/config/jgroups.xml"/>
+        <property name="configurationFile" value="config/jgroups.xml"/>
       </properties>
     </transport>
     <!-- Enable JMX statistics -->
