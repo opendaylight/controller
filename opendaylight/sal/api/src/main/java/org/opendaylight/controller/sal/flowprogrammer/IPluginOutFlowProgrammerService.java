@@ -28,4 +28,18 @@ public interface IPluginOutFlowProgrammerService {
      *            and flow parameters fields. Actions may not be present.
      */
     public void flowRemoved(Node node, Flow flow);
+
+    /**
+     * Inform SAL that an error message has been received from a switch
+     * regarding a flow message previously sent to the switch. A Request ID
+     * associated with the offending message is also returned.
+     * 
+     * @param node
+     *            the network node on which the error reported
+     * @param rid
+     *            the offending message request id
+     * @param err
+     *            the error message
+     */
+    public void flowErrorReported(Node node, long rid, Object err);
 }

@@ -261,6 +261,16 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         }
     }
 
+    @Override
+    public void flowErrorReported(Node node, long rid, Object err) {
+        logger.error("Got error {} for message rid {} from node {}",
+                new Object[] { err, rid, node });
+
+        for (IFlowProgrammerListener l : listener) {
+            l.flowErrorReported(node, rid, err);
+        }
+    }
+
     // ---------------- OSGI TEST CODE ------------------------------//
 
     private void registerWithOSGIConsole() {
@@ -481,9 +491,11 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         return flow;
     }
 
-    /*
+    /**
      * This Request ID generator starts with 1. Each aysnc message is
      * associated with an unique Request ID (!= 0).
+     * 
+     * @return Request ID
      */
     private long getNextRid() {
         return seq.getAndIncrement();

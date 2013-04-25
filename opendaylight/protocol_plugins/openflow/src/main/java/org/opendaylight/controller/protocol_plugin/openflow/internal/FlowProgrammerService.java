@@ -117,6 +117,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
      */
     void init() {
         this.controller.addMessageListener(OFType.FLOW_REMOVED, this);
+        this.controller.addMessageListener(OFType.ERROR, this);
         registerWithOSGIConsole();
     }
 
@@ -398,6 +399,8 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     public void receive(ISwitch sw, OFMessage msg) {
         if (msg instanceof OFFlowRemoved) {
             handleFlowRemovedMessage(sw, (OFFlowRemoved) msg);
+        } else if (msg instanceof OFError) {
+            handleErrorMessage(sw, (OFError) msg);
         }
     }
 
@@ -429,6 +432,24 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                     || this.containerToNc.get(container).contains(inPort)) {
                 notifier.flowRemoved(node, flow);
             }
+        }
+    }
+
+    private void handleErrorMessage(ISwitch sw, OFError errorMsg) {
+        Node node = NodeCreator.createOFNode(sw.getId());
+        OFMessage offendingMsg = errorMsg.getOffendingMsg();
+        Integer xid;
+        if (offendingMsg != null) {
+            xid = offendingMsg.getXid();
+        } else {
+            xid = errorMsg.getXid();
+        }
+
+        long rid = getMessageRid(sw.getId(), xid);
+        for (Map.Entry<String, IFlowProgrammerNotifier> containerNotifier : flowProgrammerNotifiers
+                .entrySet()) {
+            IFlowProgrammerNotifier notifier = containerNotifier.getValue();
+            notifier.flowErrorReported(node, rid, errorMsg);
         }
     }
 

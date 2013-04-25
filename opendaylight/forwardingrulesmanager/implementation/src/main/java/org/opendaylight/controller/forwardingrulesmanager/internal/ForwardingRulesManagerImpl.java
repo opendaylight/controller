@@ -2422,4 +2422,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         this.updateLocalDatabase(installedEntry, false);
     }
 
+    @Override
+    public void flowErrorReported(Node node, long rid, Object err) {
+        log.error("Got error {} for message rid {} from node {}", new Object[] {
+                err, rid, node });
+    }
 }

@@ -83,4 +83,13 @@ public class FlowProgrammerNotifier implements IFlowProgrammerNotifier {
         }
     }
 
+    @Override
+    public void flowErrorReported(Node node, long rid, Object err) {
+        if (salNotifier != null) {
+            salNotifier.flowErrorReported(node, rid, err);
+        } else {
+            logger.warn("Unable to relay switch error message to upper layer");
+        }
+    }
+
 }
