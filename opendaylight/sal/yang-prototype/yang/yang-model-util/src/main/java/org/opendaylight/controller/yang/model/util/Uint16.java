@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -17,7 +19,7 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  * Implementation of Yang uint32 built-in type. <br>
  * uint16 represents integer values between 0 and 65535, inclusively. The Java
  * counterpart of Yang uint32 built-in type is {@link Integer}.
- * 
+ *
  */
 public class Uint16 extends AbstractUnsignedInteger {
 
@@ -25,24 +27,27 @@ public class Uint16 extends AbstractUnsignedInteger {
     private Integer defaultValue = null;
     private static final String description = "uint16 represents integer values between 0 and 65535, inclusively.";
 
-    public Uint16() {
-        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint16(final List<String> actualPath,
+            final URI namespace, final Date revision) {
+        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
     }
 
-    public Uint16(final Integer defaultValue) {
-        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint16(final List<String> actualPath,
+            final URI namespace, final Date revision, final Integer defaultValue) {
+        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
         this.defaultValue = defaultValue;
     }
 
-    public Uint16(final List<RangeConstraint> rangeStatements,
+    public Uint16(final List<String> actualPath,
+            final URI namespace, final Date revision, final List<RangeConstraint> rangeStatements,
             final String units, final Integer defaultValue) {
-        super(name, description, rangeStatements, units);
+        super(actualPath, namespace, revision, name, description, rangeStatements, units);
         this.defaultValue = defaultValue;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
@@ -53,7 +58,7 @@ public class Uint16 extends AbstractUnsignedInteger {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
      * ()

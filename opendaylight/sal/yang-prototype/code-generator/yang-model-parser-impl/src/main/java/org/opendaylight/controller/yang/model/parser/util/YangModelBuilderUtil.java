@@ -88,13 +88,21 @@ import org.opendaylight.controller.yang.model.parser.util.RefineHolder.Refine;
 import org.opendaylight.controller.yang.model.util.BaseConstraints;
 import org.opendaylight.controller.yang.model.util.BinaryType;
 import org.opendaylight.controller.yang.model.util.BitsType;
+import org.opendaylight.controller.yang.model.util.Decimal64;
 import org.opendaylight.controller.yang.model.util.EnumerationType;
 import org.opendaylight.controller.yang.model.util.InstanceIdentifier;
+import org.opendaylight.controller.yang.model.util.Int16;
+import org.opendaylight.controller.yang.model.util.Int32;
+import org.opendaylight.controller.yang.model.util.Int64;
+import org.opendaylight.controller.yang.model.util.Int8;
 import org.opendaylight.controller.yang.model.util.Leafref;
 import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
 import org.opendaylight.controller.yang.model.util.StringType;
+import org.opendaylight.controller.yang.model.util.Uint16;
+import org.opendaylight.controller.yang.model.util.Uint32;
+import org.opendaylight.controller.yang.model.util.Uint64;
+import org.opendaylight.controller.yang.model.util.Uint8;
 import org.opendaylight.controller.yang.model.util.UnknownType;
-import org.opendaylight.controller.yang.model.util.YangTypesConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -982,19 +990,32 @@ public final class YangModelBuilderUtil {
                 typeBody, actualPath, namespace, revision, prefix);
 
         if ("decimal64".equals(typeName)) {
-            type = YangTypesConverter.javaTypeForBaseYangDecimal64Type(
-                    rangeStatements, fractionDigits);
+            type = new Decimal64(actualPath, namespace, revision, fractionDigits);
         } else if (typeName.startsWith("int")) {
-            type = YangTypesConverter.javaTypeForBaseYangSignedIntegerType(
-                    typeName, rangeStatements);
+            if (typeName.equals("int8")) {
+                type = new Int8(actualPath, namespace, revision, rangeStatements, null, null);
+            } else if (typeName.equals("int16")) {
+                type = new Int16(actualPath, namespace, revision, rangeStatements, null, null);
+            } else if (typeName.equals("int32")) {
+                type = new Int32(actualPath, namespace, revision, rangeStatements, null, null);
+            } else if (typeName.equals("int64")) {
+                type = new Int64(actualPath, namespace, revision, rangeStatements, null, null);
+            }
         } else if (typeName.startsWith("uint")) {
-            type = YangTypesConverter.javaTypeForBaseYangUnsignedIntegerType(
-                    typeName, rangeStatements);
+            if (typeName.equals("uint8")) {
+                type = new Uint8(actualPath, namespace, revision, rangeStatements, null, null);
+            } else if (typeName.equals("uint16")) {
+                type = new Uint16(actualPath, namespace, revision, rangeStatements, null, null);
+            } else if (typeName.equals("uint32")) {
+                type = new Uint32(actualPath, namespace, revision, rangeStatements, null, null);
+            } else if (typeName.equals("uint64")) {
+                type = new Uint64(actualPath, namespace, revision, rangeStatements, null, null);
+            }
         } else if ("enumeration".equals(typeName)) {
             type = new EnumerationType(actualPath, namespace, revision,
                     enumConstants);
         } else if ("string".equals(typeName)) {
-            type = new StringType(lengthStatements, patternStatements);
+            type = new StringType(actualPath, namespace, revision, lengthStatements, patternStatements);
         } else if ("bits".equals(typeName)) {
             type = new BitsType(getBits(typeBody, actualPath, namespace,
                     revision, prefix));

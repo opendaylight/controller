@@ -8,8 +8,10 @@
 package org.opendaylight.controller.yang.model.util;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -21,8 +23,8 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
 /**
  * The <code>default</code> implementation of Decimal Type Definition interface.
- * 
- * 
+ *
+ *
  * @see DecimalTypeDefinition
  */
 public class Decimal64 implements DecimalTypeDefinition {
@@ -52,14 +54,15 @@ public class Decimal64 implements DecimalTypeDefinition {
      * inclusively as defined interface {@link DecimalTypeDefinition} <br>
      * If the fraction digits are not defined inner the definition boundaries
      * the constructor will throw {@link IllegalArgumentException}
-     * 
+     *
      * @param fractionDigits
      *            integer between 1 and 18 inclusively
-     * 
+     *
      * @see DecimalTypeDefinition
      * @exception IllegalArgumentException
      */
-    public Decimal64(final Integer fractionDigits) {
+    public Decimal64(final List<String> actualPath, final URI namespace,
+            final Date revision, final Integer fractionDigits) {
         super();
         if (!((fractionDigits.intValue() > 1) && (fractionDigits.intValue() <= 18))) {
             throw new IllegalArgumentException(
@@ -67,12 +70,12 @@ public class Decimal64 implements DecimalTypeDefinition {
         }
         this.fractionDigits = fractionDigits;
         rangeStatements = defaultRangeStatements();
-        this.path = BaseTypes.schemaPath(name);
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
     }
 
     /**
      * Decimal64 Type Constructor. <br>
-     * 
+     *
      * If parameter <code>Range Statements</code> is <code>null</code> or
      * defined as <code>empty List</code> the constructor automatically assigns
      * the boundaries as min and max value defined for Decimal64 in <a
@@ -83,14 +86,15 @@ public class Decimal64 implements DecimalTypeDefinition {
      * inclusively as defined interface {@link DecimalTypeDefinition} <br>
      * If the fraction digits are not defined inner the definition boundaries
      * the constructor will throw {@link IllegalArgumentException}
-     * 
+     *
      * @param rangeStatements
      *            Range Constraint Statements
      * @param fractionDigits
      *            integer between 1 and 18 inclusively
      * @exception IllegalArgumentException
      */
-    public Decimal64(final List<RangeConstraint> rangeStatements,
+    public Decimal64(final List<String> actualPath, final URI namespace,
+            final Date revision, final List<RangeConstraint> rangeStatements,
             Integer fractionDigits) {
         super();
         if (!((fractionDigits.intValue() > 1) && (fractionDigits.intValue() <= 18))) {
@@ -103,7 +107,7 @@ public class Decimal64 implements DecimalTypeDefinition {
             this.rangeStatements = Collections.unmodifiableList(rangeStatements);
         }
         this.fractionDigits = fractionDigits;
-        this.path = BaseTypes.schemaPath(name);
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
     }
 
     /**
@@ -118,7 +122,7 @@ public class Decimal64 implements DecimalTypeDefinition {
      * inclusively as defined interface {@link DecimalTypeDefinition} <br>
      * If the fraction digits are not defined inner the definition boundaries
      * the constructor will throw {@link IllegalArgumentException}
-     * 
+     *
      * @param units
      *            units associated with the type
      * @param defaultValue
@@ -127,10 +131,11 @@ public class Decimal64 implements DecimalTypeDefinition {
      *            Range Constraint Statements
      * @param fractionDigits
      *            integer between 1 and 18 inclusively
-     * 
+     *
      * @exception IllegalArgumentException
      */
-    public Decimal64(final String units, final BigDecimal defaultValue,
+    public Decimal64(final List<String> actualPath, final URI namespace,
+            final Date revision, final String units, final BigDecimal defaultValue,
             final List<RangeConstraint> rangeStatements,
             final Integer fractionDigits) {
         super();
@@ -141,7 +146,7 @@ public class Decimal64 implements DecimalTypeDefinition {
 
         if (rangeStatements == null || rangeStatements.isEmpty()) {
             this.rangeStatements = defaultRangeStatements();
-            
+
         } else {
             this.rangeStatements = Collections.unmodifiableList(rangeStatements);
         }
@@ -153,7 +158,7 @@ public class Decimal64 implements DecimalTypeDefinition {
 
     /**
      * Returns unmodifiable List with default definition of Range Statements.
-     * 
+     *
      * @return unmodifiable List with default definition of Range Statements.
      */
     private List<RangeConstraint> defaultRangeStatements() {

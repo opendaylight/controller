@@ -7,6 +7,8 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -16,36 +18,39 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 /**
  * Implementation of Yang int8 built-in type.
  * <br>
- * int8 represents integer values between -128 and 127, inclusively. The Java counterpart of 
+ * int8 represents integer values between -128 and 127, inclusively. The Java counterpart of
  * Yang int8 built-in type is {@link Byte}.
- * 
+ *
  * @see AbstractSignedInteger
  */
 public class Int8 extends AbstractSignedInteger {
 
     private static final QName name = BaseTypes.constructQName("int8");
     private Byte defaultValue = null;
-    private static final String description = 
+    private static final String description =
             "represents integer values between -128 and 127, inclusively.";
-    
-    public Int8() {
-        super(name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
+
+    public Int8(final List<String> actualPath, final URI namespace,
+            final Date revision) {
+        super(actualPath, namespace, revision, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
     }
 
-    public Int8(final Byte defaultValue) {
-        super(name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
+    public Int8(final List<String> actualPath, final URI namespace,
+            final Date revision, final Byte defaultValue) {
+        super(actualPath, namespace, revision, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
         this.defaultValue = defaultValue;
     }
 
-    public Int8(final List<RangeConstraint> rangeStatements,
+    public Int8(final List<String> actualPath, final URI namespace,
+            final Date revision, final List<RangeConstraint> rangeStatements,
             final String units, final Byte defaultValue) {
-        super(name, description, rangeStatements, units);
+        super(actualPath, namespace, revision, name, description, rangeStatements, units);
         this.defaultValue = defaultValue;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
@@ -55,7 +60,7 @@ public class Int8 extends AbstractSignedInteger {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
      */
     @Override

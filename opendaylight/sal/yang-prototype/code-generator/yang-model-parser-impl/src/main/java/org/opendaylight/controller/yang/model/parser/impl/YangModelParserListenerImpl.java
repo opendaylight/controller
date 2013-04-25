@@ -325,7 +325,7 @@ public final class YangModelParserListenerImpl extends YangParserBaseListener {
         if (YangTypesConverter.isBaseYangType(typeName)) {
             if (typeBody == null) {
                 // if there are no constraints, just grab default base yang type
-                type = YangTypesConverter.javaTypeForBaseYangType(typeName);
+                type = YangTypesConverter.javaTypeForBaseYangType(actualPath, namespace, revision, typeName);
                 moduleBuilder.setType(type, actualPath);
             } else {
                 if ("union".equals(typeName)) {
@@ -770,7 +770,7 @@ public final class YangModelParserListenerImpl extends YangParserBaseListener {
         final QName identityQName = new QName(namespace, revision,
                 yangModelPrefix, identityName);
         IdentitySchemaNodeBuilder builder = moduleBuilder
-                .addIdentity(identityQName);
+                .addIdentity(identityQName, actualPath);
         updatePath(identityName);
 
         builder.setPath(createActualSchemaPath(actualPath, namespace, revision,
