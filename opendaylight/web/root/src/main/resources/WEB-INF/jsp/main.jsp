@@ -56,12 +56,12 @@
  <!-- #menu -->
  <div id="menu" class="navbar navbar-fixed-top">
   <div class="navbar-inner row-fluid">
-   <div class="span10">
+   <div class="span9">
     <a class="brand" href="/" title="${version}">${name}</a>
     <ul class="nav nav-tabs">
     </ul>
    </div>
-   <div class="span2">
+   <div class="span3">
     <div id="toolbar" class="btn-group">
      <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
       <div class="icon-user"></div> ${username} <span class="caret"></span>
