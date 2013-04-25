@@ -90,7 +90,7 @@ public class IPv4Test {
         byte protocol = ip.getProtocol();
         Assert.assertTrue(protocol == 1);
 
-        Class<? extends Packet> clazz = ip.protocolClassMap.get(protocol);
+        Class<? extends Packet> clazz = IPv4.protocolClassMap.get(protocol);
         System.out.printf("clazz = %s\n", clazz.getName());
         Assert.assertTrue(clazz == ICMP.class);
     }

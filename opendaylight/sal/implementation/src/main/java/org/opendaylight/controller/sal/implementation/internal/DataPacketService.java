@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.packet.Ethernet;
@@ -516,7 +515,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
             try {
                 res.deserialize(data, 0, data.length * NetUtils.NumBitsInAByte);
             } catch (Exception e) {
-                logger.warn("", e);
+                logger.warn("Failed to decode packet: {}", e.getMessage());
             }
             return res;
         }

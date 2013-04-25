@@ -51,7 +51,7 @@ public class IPv4 extends Packet {
     private static final String DIP = "DestinationIPAddress";
     private static final String OPTIONS = "Options";
 
-    public static Map<Byte, Class<? extends Packet>> protocolClassMap;
+    public static final Map<Byte, Class<? extends Packet>> protocolClassMap;
     static {
         protocolClassMap = new HashMap<Byte, Class<? extends Packet>>();
         protocolClassMap.put(IPProtocols.ICMP.byteValue(), ICMP.class);
@@ -505,17 +505,20 @@ public class IPv4 extends Packet {
      * Method to perform post serialization - like computation of checksum of serialized header
      * @param serializedBytes
      * @return void
-     * @Exception throws exception
+     * @Exception throws PacketException
      */
     protected void postSerializeCustomOperation(byte[] serializedBytes)
-            throws Exception {
+            throws PacketException {
         int startOffset = this.getfieldOffset(CHECKSUM);
         int numBits = this.getfieldnumBits(CHECKSUM);
         byte[] checkSum = BitBufferHelper.toByteArray(computeChecksum(
                 serializedBytes, serializedBytes.length));
-        BitBufferHelper.setBytes(serializedBytes, checkSum, startOffset,
-                numBits);
-        return;
+        try {
+            BitBufferHelper.setBytes(serializedBytes, checkSum, startOffset,
+                    numBits);
+        } catch (BufferException e) {
+            throw new PacketException(e.getMessage());
+        }
     }
 
     @Override
@@ -534,8 +537,8 @@ public class IPv4 extends Packet {
         int payloadLength = 0;
         try {
             payloadLength = payload.serialize().length;
-        } catch (Exception e) {
-            logger.error("",e);
+        } catch (PacketException e) {
+            logger.error("", e);
         }
         this.setTotalLength((short) (this.getHeaderLen() + payloadLength));
     }
@@ -549,7 +552,8 @@ public class IPv4 extends Packet {
         int endByteOffset = endBitOffset / NetUtils.NumBitsInAByte;
         int computedChecksum = computeChecksum(data, endByteOffset);
         int actualChecksum = BitBufferHelper.getInt(fieldValues.get(CHECKSUM));
-        if (computedChecksum != actualChecksum)
+        if (computedChecksum != actualChecksum) {
             corrupted = true;
+        }
     }
 }

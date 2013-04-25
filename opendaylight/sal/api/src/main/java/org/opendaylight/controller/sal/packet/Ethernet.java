@@ -31,7 +31,7 @@ public class Ethernet extends Packet {
 
     // TODO: This has to be outside and it should be possible for osgi
     // to add new coming packet classes
-    public static Map<Short, Class<? extends Packet>> etherTypeClassMap;
+    public static final Map<Short, Class<? extends Packet>> etherTypeClassMap;
     static {
         etherTypeClassMap = new HashMap<Short, Class<? extends Packet>>();
         etherTypeClassMap.put(EtherTypes.ARP.shortValue(), ARP.class);

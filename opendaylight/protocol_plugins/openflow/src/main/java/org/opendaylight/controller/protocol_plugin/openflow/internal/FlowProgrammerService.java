@@ -72,6 +72,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     public FlowProgrammerService() {
         controller = null;
         flowProgrammerNotifiers = new ConcurrentHashMap<String, IFlowProgrammerNotifier>();
+        containerToNc = new HashMap<String, Set<NodeConnector>>();
         xid2rid = new ConcurrentHashMap<Long, Map<Integer, Long>>();
     }
 

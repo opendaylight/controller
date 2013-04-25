@@ -152,7 +152,7 @@ public class LLDPTLV extends Packet {
     }
 
     @Override
-    public int getfieldnumBits(String fieldName) throws Exception {
+    public int getfieldnumBits(String fieldName) {
         if (fieldName.equals(VALUE)) {
             return (NetUtils.NumBitsInAByte * (int) BitBufferHelper.getShort(
                     fieldValues.get(LENGTH), fieldCoordinates.get(LENGTH)
@@ -165,9 +165,8 @@ public class LLDPTLV extends Packet {
      * Returns the size in bits of the whole TLV
      * 
      * @return int - size in bits of full TLV
-     * @throws Exception
      */
-    public int getTLVSize() throws Exception {
+    public int getTLVSize() {
         return (LLDPTLV.fieldCoordinates.get(TYPE).getRight() + // static
                 LLDPTLV.fieldCoordinates.get(LENGTH).getRight() + // static
         getfieldnumBits(VALUE)); // variable

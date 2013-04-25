@@ -256,8 +256,8 @@ public class DiscoveryService implements IInventoryShimExternalListener,
         try {
             ethPkt.deserialize(data, 0, data.length * NetUtils.NumBitsInAByte);
         } catch (Exception e) {
-            logger.warn("Failed to decode LLDP packet from "
-                    + inPkt.getIncomingNodeConnector() + ": " + e);
+            logger.warn("Failed to decode LLDP packet from {}: {}",
+                    inPkt.getIncomingNodeConnector(), e);
             return PacketResult.IGNORED;
         }
         if (ethPkt.getPayload() instanceof LLDP) {
