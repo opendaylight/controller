@@ -26,4 +26,18 @@ public interface IForwardingRulesManagerAware {
      *            otherwise
      */
     public void policyUpdate(String policyName, boolean add);
+
+    /**
+     * Inform listeners that the network node has notified us about a failure in
+     * executing the controller generated asynchronous request identified by the
+     * passed unique id.
+     * 
+     * @param requestId
+     *            the unique id associated with the request which failed to be
+     *            executed on the network node
+     * @param error
+     *            the string describing the error reported by the network node
+     */
+    public void requestFailed(long requestId, String error);
+
 }

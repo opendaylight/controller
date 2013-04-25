@@ -9,6 +9,9 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
+import java.nio.ByteBuffer;
+
+import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Error;
 import org.openflow.protocol.OFError;
 import org.openflow.protocol.OFError.OFBadActionCode;
 import org.openflow.protocol.OFError.OFBadRequestCode;
@@ -20,6 +23,18 @@ import org.openflow.protocol.OFError.OFQueueOpFailedCode;
 
 public abstract class Utils {
     public static String getOFErrorString(OFError error) {
+        // Handle VENDOR extension errors here
+        if (error.getErrorType() == V6Error.NICIRA_VENDOR_ERRORTYPE) {
+            V6Error er = new V6Error(error);
+            byte[] b = error.getError();
+            ByteBuffer bb = ByteBuffer.allocate(b.length);
+            bb.put(b);
+            bb.rewind();
+            er.readFrom(bb);
+            return er.toString();
+        }
+        
+        // Handle OF1.0 errors here
         OFErrorType et = OFErrorType.values()[0xffff & error.getErrorType()];
         String errorStr = "Error : " + et.toString();
         switch (et) {

@@ -138,9 +138,13 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * 
      * @param flowEntry
      *            the original flow entry application requested to add
-     * @return
+     * @param async
+     *            the flag indicating if this is a asynchronous request
+     * @return the status of this request. In case of asynchronous call, it
+     *          will contain the unique id assigned to this request
      */
-    private Status addEntry(FlowEntry flowEntry) {
+    private Status addEntry(FlowEntry flowEntry, boolean async) {
+        
         // Sanity Check
         if (flowEntry == null || flowEntry.getNode() == null) {
             String msg = "Invalid FlowEntry";
@@ -190,14 +194,22 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
 
         // Try to install an entry at the time
         Status error = new Status(null, null);
+        Status succeded = null;
         boolean oneSucceded = false;
-        for (FlowEntryInstall installEntry : toInstallList) {
+        for (FlowEntryInstall installEntry : toInstallSafe) {
 
             // Install and update database
-            Status ret = addEntriesInternal(installEntry);
+            Status ret = addEntriesInternal(installEntry, async);
 
             if (ret.isSuccess()) {
                 oneSucceded = true;
+                /*
+                 * The first successful status response will be returned
+                 * For the asynchronous call, we can discard the container flow
+                 * complication for now and assume we will always deal with
+                 * one flow only per request
+                 */
+                succeded = ret;   
             } else {
                 error = ret;
                 log.warn("Failed to install the entry: {}. The failure is: {}",
@@ -205,7 +217,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             }
         }
 
-        return (oneSucceded) ? new Status(StatusCode.SUCCESS, null) : error;
+        return (oneSucceded) ? succeded : error;
     }
 
     /**
@@ -251,10 +263,14 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * 
      * @param currentFlowEntry
      * @param newFlowEntry
-     * @return Success or error string
+     * @param async
+     *            the flag indicating if this is a asynchronous request
+     * @return the status of this request. In case of asynchronous call, it
+     *          will contain the unique id assigned to this request
      */
     private Status modifyEntry(FlowEntry currentFlowEntry,
-            FlowEntry newFlowEntry) {
+            FlowEntry newFlowEntry, boolean async) {
+
         Status retExt;
 
         // Sanity checks
@@ -329,6 +345,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
          * So, for the above two cases, to simplify, let's decouple the modify
          * in: 1) remove current entries 2) install new entries
          */
+        Status succeeded = null;
         boolean decouple = false;
         if (installedList.size() != toInstallList.size()) {
             log.info("Modify: New flow entry does not satisfy the same "
@@ -354,11 +371,11 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         if (decouple) {
             // Remove current entries
             for (FlowEntryInstall currEntry : installedList) {
-                this.removeEntryInternal(currEntry);
+                this.removeEntryInternal(currEntry, async);
             }
             // Install new entries
             for (FlowEntryInstall newEntry : toInstallSafe) {
-                this.addEntriesInternal(newEntry);
+                succeeded = this.addEntriesInternal(newEntry, async);
             }
         } else {
             /*
@@ -372,13 +389,13 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
              * fails, we need to stop, restore the already modified entries, and
              * declare failure.
              */
-            Status retModify;
+            Status retModify = null;
             int i = 0;
             int size = toInstallList.size();
             while (i < size) {
                 // Modify and update database
                 retModify = modifyEntryInternal(installedList.get(i),
-                        toInstallList.get(i));
+                        toInstallList.get(i), async);
                 if (retModify.isSuccess()) {
                     i++;
                 } else {
@@ -394,7 +411,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 while (j < i) {
                     log.info("Attempting to restore initial entries");
                     retExt = modifyEntryInternal(toInstallList.get(i),
-                            installedList.get(i));
+                            installedList.get(i), async);
                     if (retExt.isSuccess()) {
                         j++;
                     } else {
@@ -408,8 +425,15 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                     return new Status(StatusCode.INTERNALERROR, msg);
                 }
             }
+            succeeded = retModify;
         }
-        return new Status(StatusCode.SUCCESS, null);
+        /*
+         * The first successful status response will be returned.
+         * For the asynchronous call, we can discard the container flow
+         * complication for now and assume we will always deal with
+         * one flow only per request
+         */
+        return succeeded;
     }
 
     /**
@@ -419,14 +443,22 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * 
      * @param currentEntries
      * @param newEntries
-     * @return
+     * @param async
+     *            the flag indicating if this is a asynchronous request
+     * @return the status of this request. In case of asynchronous call, it
+     *          will contain the unique id assigned to this request
      */
     private Status modifyEntryInternal(FlowEntryInstall currentEntries,
-            FlowEntryInstall newEntries) {
+            FlowEntryInstall newEntries, boolean async) {
         // Modify the flow on the network node
-        Status status = programmer.modifyFlow(currentEntries.getNode(),
-                currentEntries.getInstall().getFlow(), newEntries.getInstall()
-                        .getFlow());
+        Status status = (async)? 
+                programmer.modifyFlowAsync(currentEntries.getNode(),
+                        currentEntries.getInstall().getFlow(), newEntries.getInstall()
+                                .getFlow()) :
+                programmer.modifyFlow(currentEntries.getNode(),
+                        currentEntries.getInstall().getFlow(), newEntries.getInstall()
+                                .getFlow());
+
 
         if (!status.isSuccess()) {
             log.warn(
@@ -439,6 +471,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 newEntries.getInstall());
 
         // Update DB
+        newEntries.setRequestId(status.getRequestId());
         updateLocalDatabase(currentEntries, false);
         updateLocalDatabase(newEntries, true);
 
@@ -450,9 +483,13 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * (entry or node not present), it return successfully
      * 
      * @param flowEntry
-     * @return
+     *          the flow entry to remove
+     * @param async
+     *            the flag indicating if this is a asynchronous request
+     * @return the status of this request. In case of asynchronous call, it
+     *          will contain the unique id assigned to this request
      */
-    private Status removeEntry(FlowEntry flowEntry) {
+    private Status removeEntry(FlowEntry flowEntry, boolean async) {
         Status error = new Status(null, null);
 
         // Sanity Check
@@ -468,6 +505,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 flowEntry.clone(), container.getContainerFlows());
 
         Set<FlowEntryInstall> flowsOnNode = nodeFlows.get(flowEntry.getNode());
+        Status succeeded = null;
         boolean atLeastOneRemoved = false;
         for (FlowEntryInstall entry : installedList) {
             if (flowsOnNode == null) {
@@ -481,14 +519,14 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 log.debug(logMsg, flowEntry);
                 if (installedList.size() == 1) {
                     // If we had only one entry to remove, we are done
-                    return new Status(StatusCode.SUCCESS, null);
+                    return new Status(StatusCode.SUCCESS);
                 } else {
                     continue;
                 }
             }
 
             // Remove and update DB
-            Status ret = removeEntryInternal(entry);
+            Status ret = removeEntryInternal(entry, async);
 
             if (!ret.isSuccess()) {
                 error = ret;
@@ -499,6 +537,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                     return error;
                 }
             } else {
+                succeeded = ret;
                 atLeastOneRemoved = true;
             }
         }
@@ -508,8 +547,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
          * of removing the stale entries later, or adjusting the software
          * database if not in sync with hardware
          */
-        return (atLeastOneRemoved) ? new Status(StatusCode.SUCCESS, null)
-                : error;
+        return (atLeastOneRemoved) ? succeeded : error;
     }
 
     /**
@@ -518,16 +556,23 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * validity checks are passed
      * 
      * @param entry
-     *            the FlowEntryInstall
-     * @return "Success" or error string
+     *            the flow entry to remove
+     * @param async
+     *            the flag indicating if this is a asynchronous request
+     * @return the status of this request. In case of asynchronous call, it
+     *          will contain the unique id assigned to this request
      */
-    private Status removeEntryInternal(FlowEntryInstall entry) {
+    private Status removeEntryInternal(FlowEntryInstall entry, boolean async) {
         // Mark the entry to be deleted (for CC just in case we fail)
         entry.toBeDeleted();
 
         // Remove from node
-        Status status = programmer.removeFlow(entry.getNode(), entry
-                .getInstall().getFlow());
+        Status status = (async)?
+                programmer.removeFlowAsync(entry.getNode(), entry
+                        .getInstall().getFlow()) :
+                programmer.removeFlow(entry.getNode(), entry
+                        .getInstall().getFlow());
+ 
 
         if (!status.isSuccess()) {
             log.warn(
@@ -535,7 +580,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                     entry.getInstall(), status.getDescription());
             return status;
         }
-        log.info("Removed  {}", entry.getInstall());
+        log.trace("Removed  {}", entry.getInstall());
 
         // Update DB
         updateLocalDatabase(entry, false);
@@ -550,13 +595,20 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * whether this flow would conflict or overwrite an existing one.
      * 
      * @param entry
-     *            the FlowEntryInstall
-     * @return "Success" or error string
+     *            the flow entry to install
+     * @param async
+     *            the flag indicating if this is a asynchronous request
+     * @return the status of this request. In case of asynchronous call, it
+     *          will contain the unique id assigned to this request
      */
-    private Status addEntriesInternal(FlowEntryInstall entry) {
+    private Status addEntriesInternal(FlowEntryInstall entry, boolean async) {
         // Install the flow on the network node
-        Status status = programmer.addFlow(entry.getNode(), entry.getInstall()
-                .getFlow());
+        Status status = (async)?
+                programmer.addFlow(entry.getNode(), entry.getInstall()
+                        .getFlow()) :
+                programmer.addFlowAsync(entry.getNode(), entry.getInstall()
+                            .getFlow());
+
 
         if (!status.isSuccess()) {
             log.warn(
@@ -565,9 +617,10 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             return status;
         }
 
-        log.info("Added    {}", entry.getInstall());
+        log.trace("Added    {}", entry.getInstall());
 
         // Update DB
+        entry.setRequestId(status.getRequestId());
         updateLocalDatabase(entry, true);
 
         return status;
@@ -740,7 +793,20 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
             log.warn(logMsg, flowEntry);
         } else {
-            status = addEntry(flowEntry);
+            status = addEntry(flowEntry, false);
+        }
+        return status;
+    }
+
+    @Override
+    public Status installFlowEntryAsync(FlowEntry flowEntry) {
+        Status status;
+        if (inContainerMode) {
+            String msg = "Controller in container mode: Install Refused";
+            status = new Status(StatusCode.NOTACCEPTABLE, msg);
+            log.warn(msg);
+        } else {
+            status = addEntry(flowEntry, true);
         }
         return status;
     }
@@ -754,11 +820,24 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
             log.warn(logMsg, entry);
         } else {
-            status = removeEntry(entry);
+            status = removeEntry(entry, false);
         }
         return status;
     }
 
+    @Override
+    public Status uninstallFlowEntryAsync(FlowEntry flowEntry) {
+        Status status;
+        if (inContainerMode) {
+            String msg = "Controller in container mode: Uninstall Refused";
+            status = new Status(StatusCode.NOTACCEPTABLE, msg);
+            log.warn(msg);
+        } else {
+            status = removeEntry(flowEntry, true);
+        }
+        return status;
+    }
+    
     @Override
     public Status modifyFlowEntry(FlowEntry currentFlowEntry,
             FlowEntry newFlowEntry) {
@@ -769,7 +848,20 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
             log.warn(logMsg, newFlowEntry);
         } else {
-            status = modifyEntry(currentFlowEntry, newFlowEntry);
+            status = modifyEntry(currentFlowEntry, newFlowEntry, false);
+        }
+        return status;
+    }
+
+    @Override
+    public Status modifyFlowEntryAsync(FlowEntry current, FlowEntry newone) {
+        Status status = null;
+        if (inContainerMode) {
+            String msg = "Controller in container mode: Modify Refused";
+            status = new Status(StatusCode.NOTACCEPTABLE, msg);
+            log.warn(msg);
+        } else {
+            status = modifyEntry(current, newone, true);
         }
         return status;
     }
@@ -795,6 +887,28 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         }
     }
 
+    @Override
+    public Status modifyOrAddFlowEntryAsync(FlowEntry newone) {
+        /*
+         * Run a loose check on the installed entries to decide whether to go
+         * with a add or modify method. A loose check means only check against
+         * the original flow entry requests and not against the installed flow
+         * entries which are the result of the original entry merged with the
+         * container flow(s) (if any). The modifyFlowEntry method in presence of
+         * conflicts with the Container flows (if any) would revert back to a
+         * delete + add pattern
+         */
+        FlowEntryInstall currentFlowEntries = findMatch(newone, true);
+
+        if (currentFlowEntries != null) {
+            return modifyFlowEntryAsync(currentFlowEntries.getOriginal(),
+                   newone);
+        } else {
+            return installFlowEntry(newone);
+        }
+    }
+
+    
     /**
      * Try to find in the database if a Flow with the same Match and priority of
      * the passed one already exists for the specified network node. Flow,
@@ -858,7 +972,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             // Remove the old couples. No validity checks to be run, use the
             // internal remove
             for (FlowEntryInstall oldCouple : oldCouples) {
-                this.removeEntryInternal(oldCouple);
+                this.removeEntryInternal(oldCouple, false);
             }
             // Reinstall the original flow entries, via the regular path: new
             // cFlow merge + validations
@@ -951,7 +1065,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 for (NodeConnector dstPort : portList) {
                     newFlowEntry.getFlow().addAction(new Output(dstPort));
                 }
-                Status error = modifyEntry(currentFlowEntry, newFlowEntry);
+                Status error = modifyEntry(currentFlowEntry, newFlowEntry, false);
                 if (error.isSuccess()) {
                     log.info("Ports {} added to FlowEntry {}", portList,
                             flowName);
@@ -982,7 +1096,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                     Action action = new Output(dstPort);
                     newFlowEntry.getFlow().removeAction(action);
                 }
-                Status status = modifyEntry(currentFlowEntry, newFlowEntry);
+                Status status = modifyEntry(currentFlowEntry, newFlowEntry, false);
                 if (status.isSuccess()) {
                     log.info("Ports {} removed from FlowEntry {}", portList,
                             flowName);
@@ -1037,7 +1151,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         newFlowEntry.getFlow().addAction(new Output(outPort));
 
         // Modify on network node
-        Status status = modifyEntry(currentFlowEntry, newFlowEntry);
+        Status status = modifyEntry(currentFlowEntry, newFlowEntry, false);
 
         if (status.isSuccess()) {
             log.info("Output port replaced with {} for flow {} on node {}",
@@ -1280,7 +1394,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             // Program hw
             if (config.installInHw()) {
                 FlowEntry entry = config.getFlowEntry();
-                status = this.addEntry(entry);
+                status = this.addEntry(entry, false);
                 if (!status.isSuccess()) {
                     config.setStatus(status.getDescription());
                     if (!restore) {
@@ -1316,7 +1430,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 portGroupChanged(pgconfig, existingData, true);
             }
         }
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     private void addStaticFlowsToSwitch(Node node) {
@@ -1328,7 +1442,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 if (config.installInHw()
                         && !config.getStatus().equals(
                                 StatusCode.SUCCESS.toString())) {
-                    Status status = this.addEntry(config.getFlowEntry());
+                    Status status = this.addEntry(config.getFlowEntry(), false);
                     config.setStatus(status.getDescription());
                 }
             }
@@ -1395,7 +1509,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         for (Map.Entry<Integer, FlowConfig> entry : staticFlows.entrySet()) {
             if (entry.getValue().isByNameAndNodeIdEqual(config)) {
                 // Program the network node
-                Status status = this.removeEntry(config.getFlowEntry());
+                Status status = this.removeEntry(config.getFlowEntry(), false);
                 // Update configuration database if programming was successful
                 if (status.isSuccess()) {
                     staticFlows.remove(entry.getKey());
@@ -1425,7 +1539,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 }
                 if (!entry.isPortGroupEnabled()) {
                     // Program the network node
-                    status = this.removeEntry(entry.getFlowEntry());
+                    status = this.removeEntry(entry.getFlowEntry(), false);
                 }
                 // Update configuration database if programming was successful
                 if (status.isSuccess()) {
@@ -1492,7 +1606,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         Status status = new Status(StatusCode.SUCCESS, "Saved in config");
         if (oldFlowConfig.installInHw()) {
             status = this.modifyEntry(oldFlowConfig.getFlowEntry(),
-                    newFlowConfig.getFlowEntry());
+                    newFlowConfig.getFlowEntry(), false);
         }
 
         // Update configuration database if programming was successful
@@ -1529,11 +1643,11 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             FlowConfig conf = entry.getValue();
             if (conf.isByNameAndNodeIdEqual(config)) {
                 // Program the network node
-                Status status = new Status(StatusCode.SUCCESS, null);
+                Status status = new Status(StatusCode.SUCCESS);
                 if (conf.installInHw()) {
-                    status = this.removeEntry(conf.getFlowEntry());
+                    status = this.removeEntry(conf.getFlowEntry(), false);
                 } else {
-                    status = this.addEntry(conf.getFlowEntry());
+                    status = this.addEntry(conf.getFlowEntry(), false);
                 }
                 if (!status.isSuccess()) {
                     conf.setStatus(status.getDescription());
@@ -1569,7 +1683,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
 
         // Now remove the entries
         for (FlowEntry flowEntry : inactiveFlows) {
-            Status status = this.removeEntry(flowEntry);
+            Status status = this.removeEntry(flowEntry, false);
             if (!status.isSuccess()) {
                 log.warn("Failed to remove entry: {}. The failure is: {}",
                         flowEntry, status.getDescription());
@@ -1586,7 +1700,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         log.info("Reinstalling all inactive flows");
 
         for (FlowEntry flowEntry : this.inactiveFlows) {
-            Status status = this.addEntry(flowEntry);
+            Status status = this.addEntry(flowEntry, false);
             if (!status.isSuccess()) {
                 log.warn("Failed to install entry: {}. The failure is: {}",
                         flowEntry, status.getDescription());
@@ -2424,7 +2538,49 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
 
     @Override
     public void flowErrorReported(Node node, long rid, Object err) {
-        log.error("Got error {} for message rid {} from node {}", new Object[] {
-                err, rid, node });
+        log.trace("Got error {} for message rid {} from node {}",
+                new Object[] {err, rid, node });
+        /*
+         *  If this was for a flow install, remove the corresponding entry
+         *  from the software view. If it was a Looking for the rid going through the
+         *  software database. 
+         *  TODO: A more efficient rid <->  FlowEntryInstall mapping will 
+         *  have to be added in future
+         */
+        Set<FlowEntryInstall> entries = nodeFlows.get(node);
+        if (entries != null) {
+            FlowEntryInstall target = null;
+            for (FlowEntryInstall entry : entries) {
+                if (entry.getRequestId() == rid) {
+                    target = entry;
+                    break;
+                }
+            }
+            if (target != null) {
+                // This was a flow install, update database
+                this.updateLocalDatabase(target, false);
+            }
+        }
+        
+        // Notify listeners
+        if (frmAware != null) {
+            synchronized (frmAware) {
+                for (IForwardingRulesManagerAware frma : frmAware) {
+                    try {
+                        frma.requestFailed(rid, err.toString());
+                    } catch (Exception e) {
+                        log.warn("Failed to notify {}", frma);
+                    }
+                }
+            }
+        }
     }
+    
+    @Override
+    public void solicitStatusResponse(Node node) {
+        if (this.programmer != null) {
+            programmer.sendBarrierMessage(node);
+        }        
+    }
+
 }
