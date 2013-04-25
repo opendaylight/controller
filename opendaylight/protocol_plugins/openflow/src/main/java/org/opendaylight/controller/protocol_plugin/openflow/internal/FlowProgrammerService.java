@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,15 +23,6 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExtern
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
-import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Error;
-import org.openflow.protocol.OFError;
-import org.openflow.protocol.OFFlowMod;
-import org.openflow.protocol.OFFlowRemoved;
-import org.openflow.protocol.OFMessage;
-import org.openflow.protocol.OFPort;
-import org.openflow.protocol.OFType;
-import org.openflow.protocol.action.OFAction;
-
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
@@ -47,8 +37,15 @@ import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
+import org.openflow.protocol.OFError;
+import org.openflow.protocol.OFFlowMod;
+import org.openflow.protocol.OFFlowRemoved;
+import org.openflow.protocol.OFMessage;
+import org.openflow.protocol.OFPort;
+import org.openflow.protocol.OFType;
+import org.openflow.protocol.action.OFAction;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -208,22 +205,11 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 }
                 if (result instanceof Boolean) {
                     return ((Boolean) result == Boolean.TRUE) ? new Status(
-                            StatusCode.SUCCESS, null) : new Status(
+                            StatusCode.SUCCESS, rid) : new Status(
                             StatusCode.TIMEOUT, errorString(null, action,
                                     "Request Timed Out"));
                 } else if (result instanceof OFError) {
                     OFError res = (OFError) result;
-                    if (res.getErrorType() == V6Error.NICIRA_VENDOR_ERRORTYPE) {
-                        V6Error er = new V6Error(res);
-                        byte[] b = res.getError();
-                        ByteBuffer bb = ByteBuffer.allocate(b.length);
-                        bb.put(b);
-                        bb.rewind();
-                        er.readFrom(bb);
-                        return new Status(StatusCode.INTERNALERROR,
-                                errorString("program", action,
-                                        "Vendor Extension Internal Error"));
-                    }
                     return new Status(StatusCode.INTERNALERROR, errorString(
                             "program", action, Utils.getOFErrorString(res)));
                 } else {
@@ -286,7 +272,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                         return new Status(StatusCode.TIMEOUT, errorString(null,
                                 action, "Request Timed Out"));
                     } else if (msg2 == null) {
-                        return new Status(StatusCode.SUCCESS, null);
+                        return new Status(StatusCode.SUCCESS, rid);
                     }
                 } else if (result instanceof OFError) {
                     return new Status(StatusCode.INTERNALERROR, errorString(
@@ -315,7 +301,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                     }
                     if (result instanceof Boolean) {
                         return ((Boolean) result == Boolean.TRUE) ? new Status(
-                                StatusCode.SUCCESS, null) : new Status(
+                                StatusCode.SUCCESS, rid) : new Status(
                                 StatusCode.TIMEOUT, errorString(null, action,
                                         "Request Timed Out"));
                     } else if (result instanceof OFError) {
@@ -364,7 +350,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 }
                 if (result instanceof Boolean) {
                     return ((Boolean) result == Boolean.TRUE) ? new Status(
-                            StatusCode.SUCCESS, null) : new Status(
+                            StatusCode.SUCCESS, rid) : new Status(
                             StatusCode.TIMEOUT, errorString(null, action,
                                     "Request Timed Out"));
                 } else if (result instanceof OFError) {

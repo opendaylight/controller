@@ -20,7 +20,10 @@ public interface IFlowProgrammerService {
      * Synchronously add a flow to the network node
      * 
      * @param node
+     *            The target network node
      * @param flow
+     *            The flow to install
+     * @return The status of this request
      */
     Status addFlow(Node node, Flow flow);
 
@@ -28,7 +31,12 @@ public interface IFlowProgrammerService {
      * Synchronously modify existing flow on the switch
      * 
      * @param node
-     * @param flow
+     *            The target network node
+     * @param oldFlow
+     *            The existing flow to modify
+     * @param newFlow
+     *            The new flow to install
+     * @return The status of this request
      */
     Status modifyFlow(Node node, Flow oldFlow, Flow newFlow);
 
@@ -36,7 +44,10 @@ public interface IFlowProgrammerService {
      * Synchronously remove the flow from the network node
      * 
      * @param node
+     *            The target network node
      * @param flow
+     *            The flow to remove
+     * @return The status of this request
      */
     Status removeFlow(Node node, Flow flow);
 
@@ -44,7 +55,10 @@ public interface IFlowProgrammerService {
      * Asynchronously add a flow to the network node
      * 
      * @param node
+     *            The target network node
      * @param flow
+     *            The flow to install
+     * @return The status of this request containing the unique request id
      */
     Status addFlowAsync(Node node, Flow flow);
 
@@ -52,7 +66,12 @@ public interface IFlowProgrammerService {
      * Asynchronously modify existing flow on the switch
      * 
      * @param node
-     * @param flow
+     *            The target network node
+     * @param oldFlow
+     *            The existing flow to modify
+     * @param newFlow
+     *            The new flow to install
+     * @return The status of this request containing the unique request id
      */
     Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow);
 
@@ -60,7 +79,10 @@ public interface IFlowProgrammerService {
      * Asynchronously remove the flow from the network node
      * 
      * @param node
+     *            The target network node
      * @param flow
+     *            The flow to remove
+     * @return The status of this request containing the unique request id
      */
     Status removeFlowAsync(Node node, Flow flow);
 
@@ -68,13 +90,23 @@ public interface IFlowProgrammerService {
      * Remove all flows present on the network node
      * 
      * @param node
+     *            The target network node
+     * @return The status of this request containing the unique request id
      */
     Status removeAllFlows(Node node);
 
     /**
-     * Send synchronous Barrier message 
+     * Send synchronous Barrier message
+     * 
+     * Solicit the network node to report whether all the requests sent so far
+     * are completed. When this call is done, caller knows that all past flow
+     * operations requested to the node in asynchronous fashion were satisfied
+     * by the network node and that in case of any failure, a message was sent
+     * to the controller.
      * 
      * @param node
+     *            The network node to solicit
+     * @return The status of this request containing the unique request id
      */
     Status sendBarrierMessage(Node node);
 }

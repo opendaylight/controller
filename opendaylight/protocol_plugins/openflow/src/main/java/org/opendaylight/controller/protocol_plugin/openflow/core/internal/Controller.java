@@ -228,8 +228,9 @@ public class Controller implements IController, CommandProvider {
                     instanceName);
             switchHandler.start();
             if (sc.isConnected()) {
-                logger.info("Switch:{} is connected to the Controller", sc
-                        .getRemoteAddress().toString().split("/")[1]);
+                logger.info("Switch:{} is connected to the Controller", 
+                        sc.socket().getRemoteSocketAddress()
+                        .toString().split("/")[1]);
             }
 
         } catch (IOException e) {

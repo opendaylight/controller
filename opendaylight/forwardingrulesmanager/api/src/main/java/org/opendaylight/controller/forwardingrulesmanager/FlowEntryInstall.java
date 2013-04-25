@@ -28,6 +28,7 @@ public class FlowEntryInstall {
     private FlowEntry original;
     private ContainerFlow cFlow;
     private FlowEntry install;
+    transient private long requestId; // async request id
     transient private boolean deletePending;
 
     public FlowEntryInstall(FlowEntry original, ContainerFlow cFlow) {
@@ -36,6 +37,7 @@ public class FlowEntryInstall {
         this.install = (cFlow == null) ? original.clone() : original
                 .mergeWith(cFlow);
         deletePending = false;
+        requestId = 0;
     }
 
     @Override
@@ -84,9 +86,17 @@ public class FlowEntryInstall {
         this.deletePending = true;
     }
 
+    public void setRequestId(long rid) {
+        this.requestId = rid;
+    }
+    
+    public long getRequestId() {
+        return requestId;
+    }
+
     @Override
     public String toString() {
-        return "[Install = " + install + " Original: " + original + " cFlow: "
-                + cFlow + "]";
+        return "[Install = " + install + " Original = " + original + " cFlow = "
+                + cFlow + " rid = " + requestId + "]";
     }
 }

@@ -573,7 +573,7 @@ public class SwitchHandler implements ISwitch {
     public String toString() {
         try {
             return ("Switch:"
-                    + socket.getRemoteAddress().toString().split("/")[1]
+                    + socket.socket().getRemoteSocketAddress().toString().split("/")[1]
                     + " SWID:" + (isOperational() ? HexString
                     .toHexString(this.sid) : "unknown"));
         } catch (Exception e) {

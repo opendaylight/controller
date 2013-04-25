@@ -14,8 +14,9 @@ package org.opendaylight.controller.sal.utils;
  * a string which describes a failure reason (if any) in human readable form.
  */
 public class Status {
-    StatusCode code;
-    String description;
+    private StatusCode code;
+    private String description;
+    private long requestId;
 
     /**
      * Generates an instance of the Status class. This is used as return code
@@ -34,6 +35,7 @@ public class Status {
         this.code = (errorCode != null) ? errorCode : StatusCode.UNDEFINED;
         this.description = (description != null) ? description : this.code
                 .toString();
+        this.requestId = 0;
     }
 
     /**
@@ -49,6 +51,27 @@ public class Status {
         this.code = (errorCode != null) ? errorCode : StatusCode.UNDEFINED;
         this.description = (description != null) ? description : this.code
                 .toString();
+        this.requestId = 0;
+    }
+
+    /**
+     * Generates an instance of the Status class to be used in case of
+     * asynchronous call. It is supposed to be created by the underlying
+     * infrastructure only when it was successful in allocating the asynchronous
+     * request id, hence caller should expect StatusCode to be successful.
+     * 
+     * @param errorCode
+     *            The status code. If passed as null, code will be stored as
+     *            {@code StatusCode.UNDEFINED}
+     * @param requestId
+     *            The request id set by underlying infrastructure for this
+     *            request
+     */
+    public Status(StatusCode errorCode, long requestId) {
+        this.code = (errorCode != null) ? errorCode : StatusCode.UNDEFINED;
+        this.description = (description != null) ? description : this.code
+                .toString();
+        this.requestId = requestId;
     }
 
     /**
@@ -78,9 +101,20 @@ public class Status {
         return code == StatusCode.SUCCESS;
     }
 
+    /**
+     * Return the request id assigned by underlying infrastructure in case of
+     * asynchronous request. In case of synchronous requests, the returned id
+     * is expected to be 0
+     * 
+     * @return The request id assigned for this asynchronous request
+     */
+    public long getRequestId() {
+        return requestId;
+    }
+
     @Override
     public String toString() {
-        return code + ": " + description;
+        return code + ": " + description + " (" + requestId + ")";
     }
 
     @Override
