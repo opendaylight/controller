@@ -445,7 +445,20 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             xid = errorMsg.getXid();
         }
 
-        long rid = getMessageRid(sw.getId(), xid);
+        Long rid = getMessageRid(sw.getId(), xid);
+        /*
+         * Null or zero requestId indicates that the error message is meant for
+         * a sync message. It will be handled by the sync message worker thread.
+         * Hence we are done here.
+         */
+        if ((rid == null) || (rid == 0)) {
+            return;
+        }
+        
+        /*
+         * Notifies the caller that error has been reported for a previous flow
+         * programming request
+         */
         for (Map.Entry<String, IFlowProgrammerNotifier> containerNotifier : flowProgrammerNotifiers
                 .entrySet()) {
             IFlowProgrammerNotifier notifier = containerNotifier.getValue();
@@ -585,10 +598,14 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
      *            The OF message xid
      * @return The Request ID
      */
-    public long getMessageRid(long swid, int xid) {
+    private Long getMessageRid(long swid, Integer xid) {
+        Long rid = null;
+
+        if (xid == null) {
+            return rid;
+        }
+
         Map<Integer, Long> swxid2rid = this.xid2rid.get(swid);
-        long rid = 0;
-        
         if (swxid2rid != null) {
             rid = swxid2rid.get(xid);
         }
