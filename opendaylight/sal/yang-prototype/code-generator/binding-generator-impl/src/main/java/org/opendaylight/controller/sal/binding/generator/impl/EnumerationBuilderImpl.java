@@ -11,15 +11,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.Type;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.AnnotationTypeBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.EnumBuilder;
 
 final class EnumerationBuilderImpl implements EnumBuilder {
     private final String packageName;
     private final String name;
     private final List<Enumeration.Pair> values;
-
+    private final List<AnnotationTypeBuilder> annotationBuilders = new ArrayList<AnnotationTypeBuilder>();
+    
     public EnumerationBuilderImpl(final String packageName, final String name) {
         super();
         this.packageName = packageName;
@@ -38,15 +41,26 @@ final class EnumerationBuilderImpl implements EnumBuilder {
     }
     
     @Override
+    public AnnotationTypeBuilder addAnnotation(final String packageName, final String name) {
+        if (packageName != null && name != null) {
+            final AnnotationTypeBuilder builder = new AnnotationTypeBuilderImpl(packageName, name);
+            if (annotationBuilders.add(builder)) {
+                return builder;
+            }
+        }
+        return null;
+    }
+    
+    @Override
     public void addValue(final String name, final Integer value) {
         values.add(new EnumPairImpl(name, value));
     }
 
     @Override
     public Enumeration toInstance(final Type definingType) {
-        return new EnumerationImpl(definingType, packageName, name, values);
+        return new EnumerationImpl(definingType, annotationBuilders, packageName, name, values);
     }
-
+    
     /*
      * (non-Javadoc)
      * 
@@ -191,7 +205,7 @@ final class EnumerationBuilderImpl implements EnumBuilder {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("EnumPairImpl [name=");
+            builder.append("EnumPair [name=");
             builder.append(name);
             builder.append(", value=");
             builder.append(value);
@@ -206,12 +220,18 @@ final class EnumerationBuilderImpl implements EnumBuilder {
         private final String packageName;
         private final String name;
         private final List<Pair> values;
-
+        private List<AnnotationType> annotations = new ArrayList<AnnotationType>();
+        
         public EnumerationImpl(final Type definingType,
+                final List<AnnotationTypeBuilder> annotationBuilders,
                 final String packageName, final String name,
                 final List<Pair> values) {
             super();
             this.definingType = definingType;
+            for (final AnnotationTypeBuilder builder : annotationBuilders) {
+                annotations.add(builder.toInstance());
+            }
+            this.annotations = Collections.unmodifiableList(annotations); 
             this.packageName = packageName;
             this.name = name;
             this.values = Collections.unmodifiableList(values);
@@ -235,6 +255,11 @@ final class EnumerationBuilderImpl implements EnumBuilder {
         @Override
         public List<Pair> getValues() {
             return values;
+        }
+        
+        @Override
+        public List<AnnotationType> getAnnotations() {
+            return annotations;
         }
 
         @Override
@@ -279,17 +304,6 @@ final class EnumerationBuilderImpl implements EnumBuilder {
             result = prime * result
                     + ((values == null) ? 0 : values.hashCode());
 
-            if (definingType != null) {
-                result = prime
-                        * result
-                        + ((definingType.getPackageName() == null) ? 0
-                                : definingType.getPackageName().hashCode());
-                result = prime
-                        * result
-                        + ((definingType.getName() == null) ? 0 : definingType
-                                .getName().hashCode());
-            }
-
             return result;
         }
 
@@ -331,18 +345,6 @@ final class EnumerationBuilderImpl implements EnumBuilder {
             } else if (!values.equals(other.values)) {
                 return false;
             }
-            if (definingType == null) {
-                if (other.definingType != null) {
-                    return false;
-                }
-            } else if ((definingType != null) && (other.definingType != null)) {
-                if (!definingType.getPackageName().equals(
-                        other.definingType.getPackageName())
-                        && !definingType.getName().equals(
-                                other.definingType.getName())) {
-                    return false;
-                }
-            }
             return true;
         }
 
@@ -354,7 +356,7 @@ final class EnumerationBuilderImpl implements EnumBuilder {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("EnumerationImpl [packageName=");
+            builder.append("Enumeration [packageName=");
             builder.append(packageName);
             if (definingType != null) {
                 builder.append(", definingType=");

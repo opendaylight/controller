@@ -25,16 +25,15 @@ import static org.opendaylight.controller.sal.java.api.generator.Constants.SC;
 import static org.opendaylight.controller.sal.java.api.generator.Constants.STATIC;
 import static org.opendaylight.controller.sal.java.api.generator.Constants.TAB;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration.Pair;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature.Parameter;
 import org.opendaylight.controller.sal.binding.model.api.ParameterizedType;
@@ -42,51 +41,89 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 
 public class GeneratorUtil {
 
-    private static final String[] SET_VALUES = new String[] { "abstract",
-            "assert", "boolean", "break", "byte", "case", "catch", "char",
-            "class", "const", "continue", "default", "double", "do", "else",
-            "enum", "extends", "false", "final", "finally", "float", "for",
-            "goto", "if", "implements", "import", "instanceof", "int",
-            "interface", "long", "native", "new", "null", "package", "private",
-            "protected", "public", "return", "short", "static", "strictfp",
-            "super", "switch", "synchronized", "this", "throw", "throws",
-            "transient", "true", "try", "void", "volatile", "while" };
-
-    public static final Set<String> JAVA_RESERVED_WORDS = new HashSet<String>(
-            Arrays.asList(SET_VALUES));
-
     private GeneratorUtil() {
     }
 
-    private static String validateParamName(final String paramName) {
-        if (paramName != null) {
-            if (JAVA_RESERVED_WORDS.contains(paramName)) {
-                return "_" + paramName;
-            }
-        }
-        return paramName;
-    }
-
     public static String createIfcDeclarationWithPkgName(
-            final String packageName, final String name, final String indent) {
-        return createFileDeclarationWithPkgName(IFC,
-                packageName, validateParamName(name), indent);
+            final GeneratedType genType, final String indent) {
+        return createFileDeclarationWithPkgName(IFC, genType, indent);
     }
 
     public static String createClassDeclarationWithPkgName(
-            final String packageName, final String name, final String indent) {
-        return createFileDeclarationWithPkgName(CLASS,
-                packageName, validateParamName(name), indent);
+            final GeneratedTransferObject genTransferObject, final String indent) {
+        return createFileDeclarationWithPkgName(CLASS, genTransferObject,
+                indent);
     }
 
     private static String createFileDeclarationWithPkgName(final String type,
-            final String packageName, final String name, final String indent) {
+            final GeneratedType genType, final String indent) {
         final StringBuilder builder = new StringBuilder();
-        builder.append(PKG + GAP + packageName + SC);
+        builder.append(PKG + GAP + genType.getPackageName() + SC);
         builder.append(NL);
         builder.append(NL);
-        builder.append(PUBLIC + GAP + type + GAP + validateParamName(name) + GAP + LCB);
+
+        if (!genType.getAnnotations().isEmpty()) {
+            final List<AnnotationType> annotations = genType.getAnnotations();
+            appendAnnotations(builder, annotations);
+            builder.append(NL);
+        }
+        builder.append(PUBLIC + GAP + type + GAP + genType.getName() + GAP
+                + LCB);
         return builder.toString();
+    }
+
+    private static StringBuilder appendAnnotations(final StringBuilder builder, final List<AnnotationType> annotations) {
+        if ((builder != null) && (annotations != null)) {
+            for (final AnnotationType annotation : annotations) {
+                builder.append("@");
+                builder.append(annotation.getPackageName());
+                builder.append(".");
+                builder.append(annotation.getName());
+
+                if (annotation.containsParameters()) {
+                    builder.append("(");
+                    final List<AnnotationType.Parameter> parameters = annotation
+                            .getParameters();
+                    appendAnnotationParams(builder, parameters);
+                    builder.append(")");
+                }
+            }
+        }
+        return builder;
+    }
+
+    private static StringBuilder appendAnnotationParams(
+            final StringBuilder builder,
+            final List<AnnotationType.Parameter> parameters) {
+        if (parameters != null) {
+            int i = 0;
+            for (final AnnotationType.Parameter param : parameters) {
+                if (param == null) {
+                    continue;
+                }
+                if (i > 0) {
+                    builder.append(", ");
+                }
+                final String paramName = param.getName();
+                if (param.getValue() != null) {
+                    builder.append(paramName);
+                    builder.append(" = ");
+                    builder.append(param.getValue());
+                } else {
+                    builder.append(paramName);
+                    builder.append(" = {");
+                    final List<String> values = param.getValues();
+                    builder.append(values.get(0));
+                    for (int j = 1; j < values.size(); ++j) {
+                        builder.append(", ");
+                        builder.append(values.get(j));
+                    }
+                    builder.append("}");
+                }
+                i++;
+            }
+        }
+        return builder;
     }
 
     public static String createConstant(final Constant constant,
@@ -103,6 +140,12 @@ public class GeneratorUtil {
     public static String createField(final GeneratedProperty property,
             final String indent) {
         final StringBuilder builder = new StringBuilder();
+        builder.append(indent);
+        if (!property.getAnnotations().isEmpty()) {
+            final List<AnnotationType> annotations = property.getAnnotations();
+            appendAnnotations(builder, annotations);
+            builder.append(NL);
+        }
         builder.append(indent + PRIVATE + GAP);
         builder.append(getExplicitType(property.getReturnType()) + GAP
                 + property.getName());
@@ -126,7 +169,15 @@ public class GeneratorUtil {
 
         final StringBuilder builder = new StringBuilder();
         createComment(builder, comment, indent);
-
+        builder.append(NL);
+        builder.append(indent);
+        
+        if (!method.getAnnotations().isEmpty()) {
+            final List<AnnotationType> annotations = method.getAnnotations();
+            appendAnnotations(builder, annotations);
+            builder.append(NL);
+        }
+        
         builder.append(indent + getExplicitType(type) + GAP + name);
         builder.append(LB);
         for (int i = 0; i < parameters.size(); i++) {
@@ -135,7 +186,7 @@ public class GeneratorUtil {
             if (i + 1 == parameters.size()) {
                 separator = "";
             }
-            builder.append(getExplicitType(p.getType()) + GAP + validateParamName(p.getName())
+            builder.append(getExplicitType(p.getType()) + GAP + p.getName()
                     + separator);
         }
         builder.append(RB);

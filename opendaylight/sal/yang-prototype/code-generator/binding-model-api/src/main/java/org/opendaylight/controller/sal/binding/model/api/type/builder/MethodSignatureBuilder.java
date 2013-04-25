@@ -12,7 +12,9 @@ import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 
 public interface MethodSignatureBuilder {
-
+    
+    public AnnotationTypeBuilder addAnnotation(final String packageName, final String name);
+    
     public void addReturnType(final Type returnType);
 
     public void addParameter(final Type type, final String name);

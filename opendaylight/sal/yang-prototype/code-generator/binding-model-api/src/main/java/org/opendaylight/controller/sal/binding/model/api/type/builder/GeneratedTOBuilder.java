@@ -8,15 +8,11 @@
 package org.opendaylight.controller.sal.binding.model.api.type.builder;
 
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
-import org.opendaylight.controller.sal.binding.model.api.Type;
 
 /**
 
- *
  */
-public interface GeneratedTOBuilder extends Type {
-
-    public EnumBuilder addEnumeration(final String name);
+public interface GeneratedTOBuilder extends GeneratedTypeBuilder {
 
     public GeneratedPropertyBuilder addProperty(final String name);
 
@@ -26,5 +22,6 @@ public interface GeneratedTOBuilder extends Type {
 
     public boolean addToStringProperty(final GeneratedPropertyBuilder property);
 
+    @Override
     public GeneratedTransferObject toInstance();
 }

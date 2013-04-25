@@ -19,7 +19,9 @@ public interface GeneratedTypeBuilder extends Type {
     public Type getParentType();
 
     public void addComment(final String comment);
-
+    
+    public AnnotationTypeBuilder addAnnotation(final String packageName, final String name);
+    
     public ConstantBuilder addConstant(final Type type, final String name,
             final Object value);
 
