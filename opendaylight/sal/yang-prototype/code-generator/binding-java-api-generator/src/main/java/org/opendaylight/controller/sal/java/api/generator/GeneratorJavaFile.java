@@ -24,7 +24,7 @@ import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 public class GeneratorJavaFile {
 
     private final CodeGenerator interfaceGenerator;
-    private final CompositeKeyGenerator classGenerator;
+    private final ClassCodeGenerator classGenerator;
     private final Set<GeneratedType> types;
     private final Set<GeneratedTransferObject> genTransferObjects;
 
@@ -33,13 +33,13 @@ public class GeneratorJavaFile {
         this.interfaceGenerator = codeGenerator;
         this.types = types;
         this.genTransferObjects = new HashSet<GeneratedTransferObject>();
-        classGenerator = new CompositeKeyGenerator();
+        classGenerator = new ClassCodeGenerator();
     }
 
     public GeneratorJavaFile(final Set<GeneratedType> types,
             final Set<GeneratedTransferObject> genTransferObjects) {
         this.interfaceGenerator = new InterfaceGenerator();
-        this.classGenerator = new CompositeKeyGenerator();
+        this.classGenerator = new ClassCodeGenerator();
         this.types = types;
         this.genTransferObjects = genTransferObjects;
     }

@@ -75,7 +75,7 @@ final class ConstantBuilderImpl implements ConstantBuilder {
         public Object getValue() {
             return value;
         }
-
+        
         @Override
         public String toFormattedString() {
             StringBuilder builder = new StringBuilder();
@@ -98,17 +98,6 @@ final class ConstantBuilderImpl implements ConstantBuilder {
             int result = 1;
             result = prime * result + ((name == null) ? 0 : name.hashCode());
             result = prime * result + ((type == null) ? 0 : type.hashCode());
-            result = prime * result + ((value == null) ? 0 : value.hashCode());
-            if (definingType != null) {
-                result = prime
-                        * result
-                        + ((definingType.getPackageName() == null) ? 0
-                                : definingType.getPackageName().hashCode());
-                result = prime
-                        * result
-                        + ((definingType.getName() == null) ? 0 : definingType
-                                .getName().hashCode());
-            }
             return result;
         }
 
@@ -150,25 +139,13 @@ final class ConstantBuilderImpl implements ConstantBuilder {
             } else if (!value.equals(other.value)) {
                 return false;
             }
-            if (definingType == null) {
-                if (other.definingType != null) {
-                    return false;
-                }
-            } else if ((definingType != null) && (other.definingType != null)) {
-                if (!definingType.getPackageName().equals(
-                        other.definingType.getPackageName())
-                        && !definingType.getName().equals(
-                                other.definingType.getName())) {
-                    return false;
-                }
-            }
             return true;
         }
 
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("ConstantImpl [type=");
+            builder.append("Constant [type=");
             builder.append(type);
             builder.append(", name=");
             builder.append(name);

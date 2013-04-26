@@ -17,6 +17,8 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
  */
 public interface GeneratedPropertyBuilder {
     
+    public AnnotationTypeBuilder addAnnotation(final String packageName, final String name);
+    
     public String getName();
     
     public boolean addReturnType(final Type returnType);

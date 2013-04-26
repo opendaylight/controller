@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.binding.yang.types.test;
+package org.opendaylight.controller.sal.binding.generator.impl;
 
 import static org.junit.Assert.*;
 
@@ -418,7 +418,7 @@ public class GeneratedTypesTest {
         int genTypesCount = 0;
         int genTOsCount = 0;
         for (final Type type : genTypes) {
-            if (type instanceof GeneratedType) {
+            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
                 final GeneratedType genType = (GeneratedType) type;
                 if (genType.getName().equals("ListParentContainer")) {
                     assertEquals(2, genType.getMethodDefinitions().size());
@@ -501,7 +501,7 @@ public class GeneratedTypesTest {
         int genTypesCount = 0;
         int genTOsCount = 0;
         for (final Type type : genTypes) {
-            if (type instanceof GeneratedType) {
+            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
                 genTypesCount++;
             } else if (type instanceof GeneratedTransferObject) {
                 final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
@@ -548,7 +548,7 @@ public class GeneratedTypesTest {
         int genTypesCount = 0;
         int genTOsCount = 0;
         for (final Type type : genTypes) {
-            if (type instanceof GeneratedType) {
+            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
                 genTypesCount++;
             } else if (type instanceof GeneratedTransferObject) {
                 genTOsCount++;

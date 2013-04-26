@@ -9,20 +9,25 @@ package org.opendaylight.controller.sal.binding.model.api;
 
 import java.util.List;
 
-public interface Enumeration extends Type {
+
+public interface AnnotationType extends Type {
     
     public List<AnnotationType> getAnnotations();
     
-    public Type getDefiningType();
-
-    public List<Pair> getValues();
-
-    public String toFormattedString();
-
-    interface Pair {
-
+    public Parameter getParameter(final String paramName);
+    
+    public List<Parameter> getParameters();
+    
+    public List<String> getParameterNames();
+    
+    public boolean containsParameters();
+    
+    interface Parameter {
+        
         public String getName();
-
-        public Integer getValue();
+        
+        public String getValue();
+        
+        public List<String> getValues();
     }
 }

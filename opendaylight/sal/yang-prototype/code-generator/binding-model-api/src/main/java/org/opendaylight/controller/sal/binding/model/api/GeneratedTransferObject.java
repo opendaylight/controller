@@ -8,16 +8,8 @@
 package org.opendaylight.controller.sal.binding.model.api;
 
 import java.util.List;
-import java.util.Set;
 
-public interface GeneratedTransferObject extends Type {
-    
-    /**
-     * Returns Set of all Enumerator definitions associated with interface.
-     * 
-     * @return Set of all Enumerator definitions associated with interface.
-     */
-    public List<Enumeration> getEnumDefintions();
+public interface GeneratedTransferObject extends GeneratedType {
     
     public List<GeneratedProperty> getProperties();
     

@@ -12,20 +12,24 @@ import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.controller.sal.binding.model.api.AccessModifier;
+import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.Type;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.AnnotationTypeBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.ConstantBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.EnumBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedPropertyBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 
 final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     private String packageName;
     private final String name;
+    private String comment = "";
 
     private final List<EnumBuilder> enumerations = new ArrayList<EnumBuilder>();
     private final List<GeneratedPropertyBuilder> properties = new ArrayList<GeneratedPropertyBuilder>();
@@ -33,12 +37,16 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     private final List<GeneratedPropertyBuilder> hashProperties = new ArrayList<GeneratedPropertyBuilder>();
     private final List<GeneratedPropertyBuilder> toStringProperties = new ArrayList<GeneratedPropertyBuilder>();
 
+    private final List<ConstantBuilder> constantDefintions = new ArrayList<ConstantBuilder>();
+    private final List<MethodSignatureBuilder> methodDefinitions = new ArrayList<MethodSignatureBuilder>();
+    private final List<AnnotationTypeBuilder> annotationBuilders = new ArrayList<AnnotationTypeBuilder>();
+
     public GeneratedTOBuilderImpl(String packageName, String name) {
         super();
         this.packageName = packageName;
         this.name = name;
     }
-    
+
     @Override
     public String getPackageName() {
         return packageName;
@@ -48,12 +56,51 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     public String getName() {
         return name;
     }
-    
+
+    @Override
+    public Type getParentType() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void addComment(final String comment) {
+        this.comment = comment;
+    }
+
+    @Override
+    public AnnotationTypeBuilder addAnnotation(String packageName, String name) {
+        if (packageName != null && name != null) {
+            final AnnotationTypeBuilder builder = new AnnotationTypeBuilderImpl(
+                    packageName, name);
+            if (annotationBuilders.add(builder)) {
+                return builder;
+            }
+        }
+        return null;
+    }
+
     @Override
     public EnumBuilder addEnumeration(String name) {
         final EnumBuilder builder = new EnumerationBuilderImpl(packageName,
                 name);
         enumerations.add(builder);
+        return builder;
+    }
+
+    @Override
+    public ConstantBuilder addConstant(Type type, String name, Object value) {
+        final ConstantBuilder builder = new ConstantBuilderImpl(type, name,
+                value);
+        constantDefintions.add(builder);
+        return builder;
+    }
+
+    @Override
+    public MethodSignatureBuilder addMethod(String name) {
+        final MethodSignatureBuilder builder = new MethodSignatureBuilderImpl(
+                this, name);
+        methodDefinitions.add(builder);
         return builder;
     }
 
@@ -82,15 +129,17 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
 
     @Override
     public GeneratedTransferObject toInstance() {
-        return new GeneratedTransferObjectImpl(packageName, name, enumerations,
-                properties, equalsProperties, hashProperties,
-                toStringProperties);
+        return new GeneratedTransferObjectImpl(packageName, name, comment, 
+                annotationBuilders, constantDefintions, enumerations,
+                methodDefinitions, properties, equalsProperties,
+                hashProperties, toStringProperties);
     }
 
     private static final class GeneratedPropertyBuilderImpl implements
             GeneratedPropertyBuilder {
 
         private final String name;
+        private final List<AnnotationTypeBuilder> annotationBuilders = new ArrayList<AnnotationTypeBuilder>();
         private Type returnType;
         private final List<MethodSignature.Parameter> parameters;
         private String comment = "";
@@ -109,6 +158,19 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
 
         public String getName() {
             return name;
+        }
+
+        @Override
+        public AnnotationTypeBuilder addAnnotation(String packageName,
+                String name) {
+            if (packageName != null && name != null) {
+                final AnnotationTypeBuilder builder = new AnnotationTypeBuilderImpl(
+                        packageName, name);
+                if (annotationBuilders.add(builder)) {
+                    return builder;
+                }
+            }
+            return null;
         }
 
         @Override
@@ -145,7 +207,7 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
 
         @Override
         public GeneratedProperty toInstance(final Type definingType) {
-            return new GeneratedPropertyImpl(name, comment, definingType,
+            return new GeneratedPropertyImpl(name, comment, annotationBuilders, definingType,
                     returnType, isFinal, isReadOnly, parameters, accessModifier);
         }
     }
@@ -154,6 +216,7 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             GeneratedProperty {
 
         private final String name;
+        private List<AnnotationType> annotations;
         private final String comment;
         private final Type parent;
         private final Type returnType;
@@ -161,13 +224,18 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         private final boolean isReadOnly;
         private final List<MethodSignature.Parameter> parameters;
         private final AccessModifier modifier;
-
+        
         public GeneratedPropertyImpl(final String name, final String comment,
-                final Type parent, final Type returnType,
+                final List<AnnotationTypeBuilder> annotationBuilders, final Type parent, final Type returnType,
                 final boolean isFinal, final boolean isReadOnly,
                 final List<Parameter> parameters, final AccessModifier modifier) {
             super();
             this.name = name;
+            this.annotations = new ArrayList<AnnotationType>();
+            for (final AnnotationTypeBuilder builder : annotationBuilders) {
+                this.annotations.add(builder.toInstance());
+            }
+            this.annotations = Collections.unmodifiableList(this.annotations);
             this.comment = comment;
             this.parent = parent;
             this.returnType = returnType;
@@ -193,6 +261,11 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         }
 
         @Override
+        public List<AnnotationType> getAnnotations() {
+            return annotations;
+        }
+        
+        @Override
         public Type getReturnType() {
             return returnType;
         }
@@ -217,31 +290,15 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             return isFinal;
         }
 
+        
+
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result
-                    + ((comment == null) ? 0 : comment.hashCode());
-            result = prime * result + (isFinal ? 1231 : 1237);
-            result = prime * result + (isReadOnly ? 1231 : 1237);
-            result = prime * result
-                    + ((modifier == null) ? 0 : modifier.hashCode());
             result = prime * result + ((name == null) ? 0 : name.hashCode());
             result = prime * result
                     + ((parameters == null) ? 0 : parameters.hashCode());
-
-            if (parent != null) {
-                result = prime
-                        * result
-                        + ((parent.getPackageName() == null) ? 0 : parent
-                                .getPackageName().hashCode());
-                result = prime
-                        * result
-                        + ((parent.getName() == null) ? 0 : parent.getName()
-                                .hashCode());
-            }
-
             result = prime * result
                     + ((returnType == null) ? 0 : returnType.hashCode());
             return result;
@@ -259,22 +316,6 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
                 return false;
             }
             GeneratedPropertyImpl other = (GeneratedPropertyImpl) obj;
-            if (comment == null) {
-                if (other.comment != null) {
-                    return false;
-                }
-            } else if (!comment.equals(other.comment)) {
-                return false;
-            }
-            if (isFinal != other.isFinal) {
-                return false;
-            }
-            if (isReadOnly != other.isReadOnly) {
-                return false;
-            }
-            if (modifier != other.modifier) {
-                return false;
-            }
             if (name == null) {
                 if (other.name != null) {
                     return false;
@@ -289,22 +330,13 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             } else if (!parameters.equals(other.parameters)) {
                 return false;
             }
-            if (parent == null) {
-                if (other.parent != null) {
-                    return false;
-                }
-            } else if ((parent != null) && (other.parent != null)) {
-                if (!parent.getPackageName().equals(
-                        other.parent.getPackageName())
-                        && !parent.getName().equals(other.parent.getName())) {
-                    return false;
-                }
-            }
             if (returnType == null) {
                 if (other.returnType != null) {
                     return false;
                 }
-            } else if (!returnType.equals(other.returnType)) {
+            } else if (!returnType.getPackageName().equals(other.returnType.getPackageName())) {
+                return false;
+            } else if (!returnType.getName().equals(other.returnType.getName())) {
                 return false;
             }
             return true;
@@ -315,6 +347,8 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             StringBuilder builder = new StringBuilder();
             builder.append("GeneratedPropertyImpl [name=");
             builder.append(name);
+            builder.append(", annotations=");
+            builder.append(annotations);
             builder.append(", comment=");
             builder.append(comment);
             if (parent != null) {
@@ -323,7 +357,7 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
                 builder.append(".");
                 builder.append(parent.getName());
             } else {
-                builder.append(", parent= null");
+                builder.append(", parent=null");
             }
             builder.append(", returnType=");
             builder.append(returnType);
@@ -345,12 +379,49 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
 
         private final String packageName;
         private final String name;
-        // private final List<Constant> constants;
+        private final String comment;
+        private final List<Constant> constants;
         private final List<Enumeration> enumerations;
         private final List<GeneratedProperty> properties;
         private final List<GeneratedProperty> equalsProperties;
         private final List<GeneratedProperty> hashCodeProperties;
         private final List<GeneratedProperty> stringProperties;
+        private final List<AnnotationType> annotations;
+        private final List<MethodSignature> methods;
+
+        public GeneratedTransferObjectImpl(final String packageName,
+                final String name,
+                final String comment,
+                final List<AnnotationTypeBuilder> annotationBuilders,
+                final List<ConstantBuilder> constantBuilders,
+                final List<EnumBuilder> enumBuilders,
+                final List<MethodSignatureBuilder> methodBuilders,
+                final List<GeneratedPropertyBuilder> propBuilers,
+                final List<GeneratedPropertyBuilder> equalsBuilers,
+                final List<GeneratedPropertyBuilder> hashCodeBuilers,
+                final List<GeneratedPropertyBuilder> stringBuilers) {
+            super();
+            this.packageName = packageName;
+            this.name = name;
+            this.comment = comment;
+            this.annotations = toUnmodifiableAnnotations(annotationBuilders);
+            this.constants = toUnmodifiableConstant(constantBuilders);
+            this.enumerations = toUnmodifiableEnumerations(enumBuilders);
+            this.properties = toUnmodifiableProperties(propBuilers);
+            this.methods = toUnmodifiableMethods(methodBuilders);
+            this.equalsProperties = toUnmodifiableProperties(equalsBuilers);
+            this.hashCodeProperties = toUnmodifiableProperties(hashCodeBuilers);
+            this.stringProperties = toUnmodifiableProperties(stringBuilers);
+        }
+
+        private List<AnnotationType> toUnmodifiableAnnotations(
+                final List<AnnotationTypeBuilder> annotationBuilders) {
+            final List<AnnotationType> annotations = new ArrayList<AnnotationType>();
+            for (final AnnotationTypeBuilder builder : annotationBuilders) {
+                annotations.add(builder.toInstance());
+            }
+            return Collections.unmodifiableList(annotations);
+        }
 
         private List<Enumeration> toUnmodifiableEnumerations(
                 final List<EnumBuilder> enumBuilders) {
@@ -370,6 +441,15 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             return Collections.unmodifiableList(constants);
         }
 
+        private List<MethodSignature> toUnmodifiableMethods(
+                final List<MethodSignatureBuilder> methodBuilders) {
+            final List<MethodSignature> methods = new ArrayList<MethodSignature>();
+            for (final MethodSignatureBuilder builder : methodBuilders) {
+                methods.add(builder.toInstance(this));
+            }
+            return Collections.unmodifiableList(methods);
+        }
+
         private List<GeneratedProperty> toUnmodifiableProperties(
                 final List<GeneratedPropertyBuilder> propBuilders) {
             final List<GeneratedProperty> constants = new ArrayList<GeneratedProperty>();
@@ -377,22 +457,6 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
                 constants.add(builder.toInstance(this));
             }
             return Collections.unmodifiableList(constants);
-        }
-
-        public GeneratedTransferObjectImpl(String packageName, String name,
-                List<EnumBuilder> enumBuilders,
-                List<GeneratedPropertyBuilder> propBuilers,
-                List<GeneratedPropertyBuilder> equalsBuilers,
-                List<GeneratedPropertyBuilder> hashCodeBuilers,
-                List<GeneratedPropertyBuilder> stringBuilers) {
-            super();
-            this.packageName = packageName;
-            this.name = name;
-            this.enumerations = toUnmodifiableEnumerations(enumBuilders);
-            this.properties = toUnmodifiableProperties(propBuilers);
-            this.equalsProperties = toUnmodifiableProperties(equalsBuilers);
-            this.hashCodeProperties = toUnmodifiableProperties(hashCodeBuilers);
-            this.stringProperties = toUnmodifiableProperties(stringBuilers);
         }
 
         @Override
@@ -406,8 +470,33 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         }
 
         @Override
+        public Type getParentType() {
+            return null;
+        }
+        
+        @Override
+        public String getComment() {
+            return comment;
+        }
+        
+        @Override
+        public List<AnnotationType> getAnnotations() {
+            return annotations;
+        }
+
+        @Override
         public List<Enumeration> getEnumDefintions() {
             return enumerations;
+        }
+
+        @Override
+        public List<Constant> getConstantDefinitions() {
+            return constants;
+        }
+
+        @Override
+        public List<MethodSignature> getMethodDefinitions() {
+            return methods;
         }
 
         @Override
@@ -430,42 +519,16 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             return stringProperties;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#hashCode()
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result
-                    + ((enumerations == null) ? 0 : enumerations.hashCode());
-            result = prime
-                    * result
-                    + ((equalsProperties == null) ? 0 : equalsProperties
-                            .hashCode());
-            result = prime
-                    * result
-                    + ((hashCodeProperties == null) ? 0 : hashCodeProperties
-                            .hashCode());
             result = prime * result + ((name == null) ? 0 : name.hashCode());
             result = prime * result
                     + ((packageName == null) ? 0 : packageName.hashCode());
-            result = prime * result
-                    + ((properties == null) ? 0 : properties.hashCode());
-            result = prime
-                    * result
-                    + ((stringProperties == null) ? 0 : stringProperties
-                            .hashCode());
             return result;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
         @Override
         public boolean equals(Object obj) {
             if (this == obj) {
@@ -478,27 +541,6 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
                 return false;
             }
             GeneratedTransferObjectImpl other = (GeneratedTransferObjectImpl) obj;
-            if (enumerations == null) {
-                if (other.enumerations != null) {
-                    return false;
-                }
-            } else if (!enumerations.equals(other.enumerations)) {
-                return false;
-            }
-            if (equalsProperties == null) {
-                if (other.equalsProperties != null) {
-                    return false;
-                }
-            } else if (!equalsProperties.equals(other.equalsProperties)) {
-                return false;
-            }
-            if (hashCodeProperties == null) {
-                if (other.hashCodeProperties != null) {
-                    return false;
-                }
-            } else if (!hashCodeProperties.equals(other.hashCodeProperties)) {
-                return false;
-            }
             if (name == null) {
                 if (other.name != null) {
                     return false;
@@ -513,35 +555,20 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             } else if (!packageName.equals(other.packageName)) {
                 return false;
             }
-            if (properties == null) {
-                if (other.properties != null) {
-                    return false;
-                }
-            } else if (!properties.equals(other.properties)) {
-                return false;
-            }
-            if (stringProperties == null) {
-                if (other.stringProperties != null) {
-                    return false;
-                }
-            } else if (!stringProperties.equals(other.stringProperties)) {
-                return false;
-            }
             return true;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("GeneratedTransferObjectImpl [packageName=");
+            builder.append("GeneratedTransferObject [packageName=");
             builder.append(packageName);
             builder.append(", name=");
             builder.append(name);
+            builder.append(", comment=");
+            builder.append(comment);
+            builder.append(", constants=");
+            builder.append(constants);
             builder.append(", enumerations=");
             builder.append(enumerations);
             builder.append(", properties=");
@@ -552,6 +579,10 @@ final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             builder.append(hashCodeProperties);
             builder.append(", stringProperties=");
             builder.append(stringProperties);
+            builder.append(", annotations=");
+            builder.append(annotations);
+            builder.append(", methods=");
+            builder.append(methods);
             builder.append("]");
             return builder.toString();
         }

@@ -31,7 +31,11 @@ import java.util.List;
 public interface GeneratedType extends Type {
 
     public Type getParentType();
-
+    
+    public String getComment();
+    
+    public List<AnnotationType> getAnnotations();
+    
     /**
      * Returns Set of all Enumerator definitions associated with interface.
      * 

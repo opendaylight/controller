@@ -7,18 +7,18 @@
  */
 package org.opendaylight.controller.sal.binding.model.api.type.builder;
 
-import org.opendaylight.controller.sal.binding.model.api.Enumeration;
+import java.util.List;
+
+import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 
-/**
-
- *
- */
-public interface EnumBuilder extends Type {
+public interface AnnotationTypeBuilder extends Type {
     
     public AnnotationTypeBuilder addAnnotation(final String packageName, final String name);
     
-    public void addValue(final String name, final Integer value);
-
-    public Enumeration toInstance(final Type definingType);
+    public boolean addParameter(final String paramName, String value);
+    
+    public boolean addParameters(final String paramName, List<String> values);
+    
+    public AnnotationType toInstance();
 }

@@ -29,13 +29,14 @@ public class InterfaceGenerator implements CodeGenerator {
         Writer writer = new StringWriter();
         if (type instanceof GeneratedType) {
             GeneratedType genType = (GeneratedType) type;
-            
+
             final List<Constant> constants = genType.getConstantDefinitions();
-            final List<MethodSignature> methods = genType.getMethodDefinitions();
+            final List<MethodSignature> methods = genType
+                    .getMethodDefinitions();
             final List<Enumeration> enums = genType.getEnumDefintions();
 
-            writer.write(GeneratorUtil.createIfcDeclarationWithPkgName(
-                    type.getPackageName(), type.getName(), ""));
+            writer.write(GeneratorUtil.createIfcDeclarationWithPkgName(genType,
+                    ""));
             writer.write(NL);
 
             if (constants != null) {
@@ -47,7 +48,8 @@ public class InterfaceGenerator implements CodeGenerator {
 
             if (methods != null) {
                 for (MethodSignature m : methods) {
-                    writer.write(GeneratorUtil.createMethodDeclaration(m, TAB) + NL);
+                    writer.write(GeneratorUtil.createMethodDeclaration(m, TAB)
+                            + NL);
                 }
                 writer.write(NL);
             }

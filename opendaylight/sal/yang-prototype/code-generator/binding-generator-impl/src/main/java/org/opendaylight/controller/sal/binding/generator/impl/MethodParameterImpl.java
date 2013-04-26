@@ -87,7 +87,7 @@ final class MethodParameterImpl implements Parameter {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("MethodParameterImpl [name=");
+        builder.append("MethodParameter [name=");
         builder.append(name);
         builder.append(", type=");
         builder.append(type.getPackageName());

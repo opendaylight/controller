@@ -10,7 +10,9 @@ package org.opendaylight.controller.sal.binding.model.api;
 import java.util.List;
 
 public interface MethodSignature {
-
+    
+    public List<AnnotationType> getAnnotations();
+    
     public String getName();
 
     public String getComment();
