@@ -203,19 +203,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                      */
                     result = asyncMsgSend(node, sw, msg, rid);  
                 }
-                if (result instanceof Boolean) {
-                    return ((Boolean) result == Boolean.TRUE) ? new Status(
-                            StatusCode.SUCCESS, rid) : new Status(
-                            StatusCode.TIMEOUT, errorString(null, action,
-                                    "Request Timed Out"));
-                } else if (result instanceof OFError) {
-                    OFError res = (OFError) result;
-                    return new Status(StatusCode.INTERNALERROR, errorString(
-                            "program", action, Utils.getOFErrorString(res)));
-                } else {
-                    return new Status(StatusCode.INTERNALERROR, errorString(
-                            "send", action, "Internal Error"));
-                }
+                return getStatusInternal(result, action, rid);
             } else {
                 return new Status(StatusCode.GONE, errorString("send", action,
                         "Switch is not available"));
@@ -267,52 +255,28 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                      */
                     result = asyncMsgSend(node, sw, msg1, rid);
                 }
-                if (result instanceof Boolean) {
-                    if ((Boolean) result == Boolean.FALSE) {
-                        return new Status(StatusCode.TIMEOUT, errorString(null,
-                                action, "Request Timed Out"));
-                    } else if (msg2 == null) {
-                        return new Status(StatusCode.SUCCESS, rid);
-                    }
-                } else if (result instanceof OFError) {
-                    return new Status(StatusCode.INTERNALERROR, errorString(
-                            "program", action,
-                            Utils.getOFErrorString((OFError) result)));
-                } else {
-                    return new Status(StatusCode.INTERNALERROR, errorString(
-                            "send", action, "Internal Error"));
+
+                Status rv = getStatusInternal(result, action, rid);
+                if ((msg2 == null) || !rv.isSuccess()) {
+                    return rv;
                 }
 
-                if (msg2 != null) {
-                    action = "add";
-                    if (rid == 0) {
-                        /*
-                         * Synchronous message send. Each message is followed by a
-                         * Barrier message.
-                         */
-                        result = sw.syncSend(msg2);
-                    } else {
-                        /*
-                         * Message will be sent asynchronously. A Barrier message
-                         * will be inserted automatically to synchronize the
-                         * progression.
-                         */
-                        result = asyncMsgSend(node, sw, msg2, rid);
-                    }
-                    if (result instanceof Boolean) {
-                        return ((Boolean) result == Boolean.TRUE) ? new Status(
-                                StatusCode.SUCCESS, rid) : new Status(
-                                StatusCode.TIMEOUT, errorString(null, action,
-                                        "Request Timed Out"));
-                    } else if (result instanceof OFError) {
-                        return new Status(StatusCode.INTERNALERROR,
-                                errorString("program", action, Utils
-                                        .getOFErrorString((OFError) result)));
-                    } else {
-                        return new Status(StatusCode.INTERNALERROR,
-                                errorString("send", action, "Internal Error"));
-                    }
+                action = "add";
+                if (rid == 0) {
+                    /*
+                     * Synchronous message send. Each message is followed by a
+                     * Barrier message.
+                     */
+                    result = sw.syncSend(msg2);
+                } else {
+                    /*
+                     * Message will be sent asynchronously. A Barrier message
+                     * will be inserted automatically to synchronize the
+                     * progression.
+                     */
+                    result = asyncMsgSend(node, sw, msg2, rid);
                 }
+                return getStatusInternal(result, action, rid);
             } else {
                 return new Status(StatusCode.GONE, errorString("send", action,
                         "Switch is not available"));
@@ -348,19 +312,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                      */
                     result = asyncMsgSend(node, sw, msg, rid);
                 }
-                if (result instanceof Boolean) {
-                    return ((Boolean) result == Boolean.TRUE) ? new Status(
-                            StatusCode.SUCCESS, rid) : new Status(
-                            StatusCode.TIMEOUT, errorString(null, action,
-                                    "Request Timed Out"));
-                } else if (result instanceof OFError) {
-                    return new Status(StatusCode.INTERNALERROR, errorString(
-                            "program", action,
-                            Utils.getOFErrorString((OFError) result)));
-                } else {
-                    return new Status(StatusCode.INTERNALERROR, errorString(
-                            "send", action, "Internal Error"));
-                }
+                return getStatusInternal(result, action, rid);
             } else {
                 return new Status(StatusCode.GONE, errorString("send", action,
                         "Switch is not available"));
@@ -649,6 +601,35 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         }
     }
 
+    /**
+     * Convert various result into Status
+     * 
+     * @param result
+     *            The returned result from previous action
+     * @param action
+     *            add/modify/delete flow action
+     * @param rid
+     *            The Request ID associated with the flow message
+     * @return Status
+     */
+    private Status getStatusInternal(Object result, String action, long rid) {
+        if (result instanceof Boolean) {
+            return ((Boolean) result == Boolean.TRUE) ? new Status(
+                    StatusCode.SUCCESS, rid) : new Status(
+                    StatusCode.TIMEOUT, errorString(null, action,
+                            "Request Timed Out"));
+        } else if (result instanceof Status) {
+            return (Status) result;
+        } else if (result instanceof OFError) {
+            OFError res = (OFError) result;
+            return new Status(StatusCode.INTERNALERROR, errorString(
+                    "program", action, Utils.getOFErrorString(res)));
+        } else {
+            return new Status(StatusCode.INTERNALERROR, errorString(
+                    "send", action, "Internal Error"));
+        }
+    }
+    
     /**
      * When a Barrier reply is received, this method will be invoked to clear
      * the local DB
