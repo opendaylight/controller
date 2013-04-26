@@ -248,7 +248,7 @@ public class ClusterManager implements IClusterServices {
         logger.info("Starting the ClusterManager");
         try {
             //FIXME keeps throwing FileNotFoundException
-            this.cm = new DefaultCacheManager("/config/infinispan-config.xml");
+            this.cm = new DefaultCacheManager("config/infinispan-config.xml");
             logger.debug("Allocated ClusterManager");
             if (this.cm != null) {
                 this.cm.start();
