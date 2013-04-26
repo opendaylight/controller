@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.binding.generator.impl;
+package org.opendaylight.controller.binding.generator.util.generated.type.builder;
 
 import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature.Parameter;

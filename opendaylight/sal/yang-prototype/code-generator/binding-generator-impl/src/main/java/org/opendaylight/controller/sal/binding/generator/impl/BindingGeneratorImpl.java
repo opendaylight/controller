@@ -20,6 +20,8 @@ import java.util.Set;
 
 import org.opendaylight.controller.binding.generator.util.CodeGeneratorHelper;
 import org.opendaylight.controller.binding.generator.util.Types;
+import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
+import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTypeBuilderImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.spi.TypeProvider;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;

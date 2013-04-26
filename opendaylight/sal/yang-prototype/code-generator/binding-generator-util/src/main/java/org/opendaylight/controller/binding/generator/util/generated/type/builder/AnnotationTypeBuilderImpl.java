@@ -1,4 +1,4 @@
-package org.opendaylight.controller.sal.binding.generator.impl;
+package org.opendaylight.controller.binding.generator.util.generated.type.builder;
 
 import java.util.ArrayList;
 import java.util.Collections;
