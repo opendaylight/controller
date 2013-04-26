@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.binding.generator.impl;
+package org.opendaylight.controller.binding.generator.util.generated.type.builder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +26,7 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedP
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 
-final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
+public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     private String packageName;
     private final String name;
     private String comment = "";
