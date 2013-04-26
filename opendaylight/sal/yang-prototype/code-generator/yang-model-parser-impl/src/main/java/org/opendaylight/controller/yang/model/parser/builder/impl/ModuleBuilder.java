@@ -514,7 +514,7 @@ public class ModuleBuilder implements Builder {
         List<String> pathToCase = new ArrayList<String>(parentPath);
         ChoiceCaseBuilder builder = new ChoiceCaseBuilder(caseName);
 
-        final ChoiceBuilder parent = (ChoiceBuilder) moduleNodes
+        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToCase);
         if (parent != null) {
             if (parent instanceof AugmentationSchemaBuilder) {
@@ -524,7 +524,6 @@ public class ModuleBuilder implements Builder {
         }
 
         pathToCase.add(caseName.getLocalName());
-        addedChilds.put(pathToCase, builder);
         moduleNodes.put(pathToCase, builder);
 
         return builder;
@@ -591,11 +590,12 @@ public class ModuleBuilder implements Builder {
     }
 
     public void addIdentityrefType(String baseString, List<String> parentPath) {
+        List<String> pathToIdentityref = new ArrayList<String>(parentPath);
         TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
-                .get(parentPath);
+                .get(pathToIdentityref);
         IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(baseString);
         parent.setType(identityref);
-        dirtyNodes.put(parentPath, parent);
+        dirtyNodes.put(pathToIdentityref, parent);
     }
 
     public DeviationBuilder addDeviation(String targetPath,
@@ -608,8 +608,11 @@ public class ModuleBuilder implements Builder {
         return builder;
     }
 
-    public IdentitySchemaNodeBuilder addIdentity(QName qname) {
+    public IdentitySchemaNodeBuilder addIdentity(QName qname, List<String> parentPath) {
+        List<String> pathToIdentity = new ArrayList<String>(parentPath);
         IdentitySchemaNodeBuilder builder = new IdentitySchemaNodeBuilder(qname);
+        pathToIdentity.add(qname.getLocalName());
+        moduleNodes.put(pathToIdentity, builder);
         addedIdentities.add(builder);
         return builder;
     }

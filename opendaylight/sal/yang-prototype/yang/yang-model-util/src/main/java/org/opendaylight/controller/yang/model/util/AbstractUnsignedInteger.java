@@ -1,10 +1,12 @@
 /**
- * 
+ *
  */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -17,16 +19,16 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
 /**
  * The Abstract Integer class defines implementation of IntegerTypeDefinition
  * interface which represents UNSIGNED Integer values defined in Yang language. <br>
- * The integer built-in types in Yang are uint8,  uint16, uint32, and uint64. They
- * represent unsigned integers of different sizes:
- * 
+ * The integer built-in types in Yang are uint8, uint16, uint32, and uint64.
+ * They represent unsigned integers of different sizes:
+ *
  * <ul>
  * <li>uint8 - represents integer values between 0 and 255, inclusively.</li>
  * <li>uint16 - represents integer values between 0 and 65535, inclusively.</li>
- * <li>uint32 - represents integer values between 0 and 4294967295,
-      inclusively.</li>
+ * <li>uint32 - represents integer values between 0 and 4294967295, inclusively.
+ * </li>
  * <li>uint64 - represents integer values between 0 and 18446744073709551615,
-      inclusively.</li>
+ * inclusively.</li>
  * </ul>
  *
  */
@@ -39,7 +41,7 @@ public abstract class AbstractUnsignedInteger implements
 
     private final String units;
     private final List<RangeConstraint> rangeStatements;
-    
+
     /**
      * @param name
      * @param description
@@ -47,17 +49,20 @@ public abstract class AbstractUnsignedInteger implements
      * @param maxRange
      * @param units
      */
-    public AbstractUnsignedInteger(final QName name, final String description,
-            final Number minRange, final Number maxRange, final String units) {
+    public AbstractUnsignedInteger(final List<String> actualPath,
+            final URI namespace, final Date revision, final QName name,
+            final String description, final Number minRange,
+            final Number maxRange, final String units) {
         this.name = name;
         this.description = description;
-        this.path = BaseTypes.schemaPath(name);
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
         this.units = units;
         this.rangeStatements = new ArrayList<RangeConstraint>();
         final String rangeDescription = "Integer values between " + minRange
                 + " and " + maxRange + ", inclusively.";
         this.rangeStatements.add(BaseConstraints.rangeConstraint(minRange,
-                maxRange, rangeDescription, "https://tools.ietf.org/html/rfc6020#section-9.2.4"));
+                maxRange, rangeDescription,
+                "https://tools.ietf.org/html/rfc6020#section-9.2.4"));
     }
 
     /**
@@ -66,15 +71,17 @@ public abstract class AbstractUnsignedInteger implements
      * @param rangeStatements
      * @param units
      */
-    public AbstractUnsignedInteger(final QName name, final String description,
+    public AbstractUnsignedInteger(final List<String> actualPath,
+            final URI namespace, final Date revision, final QName name,
+            final String description,
             final List<RangeConstraint> rangeStatements, final String units) {
         this.name = name;
         this.description = description;
-        this.path = BaseTypes.schemaPath(name);
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
         this.units = units;
         this.rangeStatements = rangeStatements;
     }
-    
+
     @Override
     public String getUnits() {
         return units;
