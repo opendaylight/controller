@@ -29,15 +29,23 @@ public class Int8 extends AbstractSignedInteger {
     private Byte defaultValue = null;
     private static final String description =
             "represents integer values between -128 and 127, inclusively.";
+    private final IntegerTypeDefinition baseType;
+
+    private Int8() {
+        super(name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
+        this.baseType = this;
+    }
 
     public Int8(final List<String> actualPath, final URI namespace,
             final Date revision) {
         super(actualPath, namespace, revision, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
+        this.baseType = new Int8();
     }
 
     public Int8(final List<String> actualPath, final URI namespace,
             final Date revision, final Byte defaultValue) {
         super(actualPath, namespace, revision, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
+        this.baseType = new Int8();
         this.defaultValue = defaultValue;
     }
 
@@ -45,6 +53,7 @@ public class Int8 extends AbstractSignedInteger {
             final Date revision, final List<RangeConstraint> rangeStatements,
             final String units, final Byte defaultValue) {
         super(actualPath, namespace, revision, name, description, rangeStatements, units);
+        this.baseType = new Int8();
         this.defaultValue = defaultValue;
     }
 
@@ -55,7 +64,7 @@ public class Int8 extends AbstractSignedInteger {
      */
     @Override
     public IntegerTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*

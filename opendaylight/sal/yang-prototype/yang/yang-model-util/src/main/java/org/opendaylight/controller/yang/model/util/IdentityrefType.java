@@ -7,7 +7,9 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -24,16 +26,32 @@ import org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition
 public class IdentityrefType implements IdentityrefTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("identityref");
-    private final SchemaPath path = BaseTypes.schemaPath(name);
+    private final SchemaPath path;
     private final String description = "The identityref type is used to reference an existing identity.";
     private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.10";
+    private final IdentityrefTypeDefinition baseType;
 
     private final QName identity;
 
     private String units = "";
 
-    public IdentityrefType(QName identity) {
+    private IdentityrefType(QName identity) {
         this.identity = identity;
+        this.path = BaseTypes.schemaPath(name);
+        this.baseType = this;
+    }
+
+    public IdentityrefType(QName identity, SchemaPath schemaPath) {
+        this.identity = identity;
+        this.path = schemaPath;
+        this.baseType = new IdentityrefType(identity);
+    }
+
+    public IdentityrefType(final List<String> actualPath,
+            final URI namespace, final Date revision, final QName identity) {
+        this.identity = identity;
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new IdentityrefType(identity);
     }
 
     @Override
@@ -83,7 +101,7 @@ public class IdentityrefType implements IdentityrefTypeDefinition {
 
     @Override
     public IdentityrefTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
 }

@@ -43,6 +43,7 @@ public class Decimal64 implements DecimalTypeDefinition {
 
     private final List<RangeConstraint> rangeStatements;
     private final Integer fractionDigits;
+    private final DecimalTypeDefinition baseType;
 
     /**
      * Default Decimal64 Type Constructor. <br>
@@ -61,6 +62,17 @@ public class Decimal64 implements DecimalTypeDefinition {
      * @see DecimalTypeDefinition
      * @exception IllegalArgumentException
      */
+    private Decimal64(final Integer fractionDigits) {
+        if (!((fractionDigits.intValue() > 1) && (fractionDigits.intValue() <= 18))) {
+            throw new IllegalArgumentException(
+                    "The fraction digits outside of boundaries. Fraction digits MUST be integer between 1 and 18 inclusively");
+        }
+        this.fractionDigits = fractionDigits;
+        this.rangeStatements = defaultRangeStatements();
+        this.path = BaseTypes.schemaPath(name);
+        this.baseType = this;
+    }
+
     public Decimal64(final List<String> actualPath, final URI namespace,
             final Date revision, final Integer fractionDigits) {
         super();
@@ -71,6 +83,7 @@ public class Decimal64 implements DecimalTypeDefinition {
         this.fractionDigits = fractionDigits;
         rangeStatements = defaultRangeStatements();
         this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new Decimal64(fractionDigits);
     }
 
     /**
@@ -87,6 +100,9 @@ public class Decimal64 implements DecimalTypeDefinition {
      * If the fraction digits are not defined inner the definition boundaries
      * the constructor will throw {@link IllegalArgumentException}
      *
+     * @param actualPath
+     * @param namespace
+     * @param revision
      * @param rangeStatements
      *            Range Constraint Statements
      * @param fractionDigits
@@ -104,10 +120,12 @@ public class Decimal64 implements DecimalTypeDefinition {
         if (rangeStatements == null || rangeStatements.isEmpty()) {
             this.rangeStatements = defaultRangeStatements();
         } else {
-            this.rangeStatements = Collections.unmodifiableList(rangeStatements);
+            this.rangeStatements = Collections
+                    .unmodifiableList(rangeStatements);
         }
         this.fractionDigits = fractionDigits;
         this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new Decimal64(fractionDigits);
     }
 
     /**
@@ -123,6 +141,9 @@ public class Decimal64 implements DecimalTypeDefinition {
      * If the fraction digits are not defined inner the definition boundaries
      * the constructor will throw {@link IllegalArgumentException}
      *
+     * @param actualPath
+     * @param namespace
+     * @param revision
      * @param units
      *            units associated with the type
      * @param defaultValue
@@ -131,11 +152,10 @@ public class Decimal64 implements DecimalTypeDefinition {
      *            Range Constraint Statements
      * @param fractionDigits
      *            integer between 1 and 18 inclusively
-     *
-     * @exception IllegalArgumentException
      */
     public Decimal64(final List<String> actualPath, final URI namespace,
-            final Date revision, final String units, final BigDecimal defaultValue,
+            final Date revision, final String units,
+            final BigDecimal defaultValue,
             final List<RangeConstraint> rangeStatements,
             final Integer fractionDigits) {
         super();
@@ -148,12 +168,14 @@ public class Decimal64 implements DecimalTypeDefinition {
             this.rangeStatements = defaultRangeStatements();
 
         } else {
-            this.rangeStatements = Collections.unmodifiableList(rangeStatements);
+            this.rangeStatements = Collections
+                    .unmodifiableList(rangeStatements);
         }
         this.units = units;
         this.defaultValue = defaultValue;
         this.fractionDigits = fractionDigits;
         this.path = BaseTypes.schemaPath(name);
+        this.baseType = new Decimal64(fractionDigits);
     }
 
     /**
@@ -175,7 +197,7 @@ public class Decimal64 implements DecimalTypeDefinition {
 
     @Override
     public DecimalTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     @Override

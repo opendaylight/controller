@@ -28,10 +28,18 @@ public class Int16 extends AbstractSignedInteger {
     private Short defaultValue = null;
     private static final String description =
             "int16  represents integer values between -32768 and 32767, inclusively.";
+    private final IntegerTypeDefinition baseType;
+
+    private Int16() {
+        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        this.baseType = this;
+    }
 
     public Int16(final List<String> actualPath, final URI namespace,
             final Date revision) {
         super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        this.baseType = new Int16();
+
     }
 
     public Int16(final List<String> actualPath, final URI namespace,
@@ -39,11 +47,12 @@ public class Int16 extends AbstractSignedInteger {
             final String units, final Short defaultValue) {
         super(actualPath, namespace, revision, name, description, rangeStatements, units);
         this.defaultValue = defaultValue;
+        this.baseType = new Int16();
     }
 
     @Override
     public IntegerTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     @Override

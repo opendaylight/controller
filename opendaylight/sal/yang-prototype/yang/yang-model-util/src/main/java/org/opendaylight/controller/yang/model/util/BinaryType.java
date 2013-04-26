@@ -7,8 +7,10 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -20,43 +22,55 @@ import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 
 /**
  * The <code>default</code> implementation of Binary Type Definition interface.
- * 
+ *
  * @see BinaryTypeDefinition
  */
 public class BinaryType implements BinaryTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("binary");
-    private final SchemaPath path = BaseTypes.schemaPath(name);
+    private final SchemaPath path;
     private final String description = "The binary built-in type represents any binary data, i.e., a sequence of octets.";
     private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.8";
-
+    private final BinaryTypeDefinition baseType;
     private List<Byte> bytes;
     private final List<LengthConstraint> lengthConstraints;
     private String units = "";
 
-    /**
-     * 
-     */
-    public BinaryType() {
+    private BinaryType() {
         super();
-        
+
         final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
         constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
-        lengthConstraints = Collections.unmodifiableList(constraints);
-        bytes = Collections.emptyList();
+        this.lengthConstraints = Collections.unmodifiableList(constraints);
+        this.bytes = Collections.emptyList();
+        this.path = BaseTypes.schemaPath(name);
+        this.baseType = this;
+    }
+
+    public BinaryType(final List<String> actualPath, final URI namespace,
+            final Date revision) {
+        super();
+
+        final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
+        constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+        this.lengthConstraints = Collections.unmodifiableList(constraints);
+        this.bytes = Collections.emptyList();
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new BinaryType();
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param bytes
      * @param lengthConstraints
      * @param units
      */
-    public BinaryType(final List<Byte> bytes,
+    public BinaryType(final List<String> actualPath, final URI namespace,
+            final Date revision, final List<Byte> bytes,
             final List<LengthConstraint> lengthConstraints, final String units) {
         super();
-        
+
         if ((lengthConstraints == null) || (lengthConstraints.isEmpty())) {
             final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
             constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
@@ -64,9 +78,11 @@ public class BinaryType implements BinaryTypeDefinition {
         } else {
             this.lengthConstraints = Collections.unmodifiableList(lengthConstraints);
         }
-        
+
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
         this.bytes = Collections.unmodifiableList(bytes);
         this.units = units;
+        this.baseType = new BinaryType();
     }
 
     /*
@@ -76,7 +92,7 @@ public class BinaryType implements BinaryTypeDefinition {
      */
     @Override
     public BinaryTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*

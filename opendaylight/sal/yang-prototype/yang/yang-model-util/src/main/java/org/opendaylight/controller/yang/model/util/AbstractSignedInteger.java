@@ -46,6 +46,20 @@ public abstract class AbstractSignedInteger implements IntegerTypeDefinition {
     private final String units;
     private final List<RangeConstraint> rangeStatements;
 
+    protected AbstractSignedInteger(final QName name, final String description,
+            final Number minRange, final Number maxRange, final String units) {
+        this.name = name;
+        this.description = description;
+        this.path = BaseTypes.schemaPath(name);
+        this.units = units;
+        this.rangeStatements = new ArrayList<RangeConstraint>();
+        final String rangeDescription = "Integer values between " + minRange
+                + " and " + maxRange + ", inclusively.";
+        this.rangeStatements.add(BaseConstraints.rangeConstraint(minRange,
+                maxRange, rangeDescription,
+                "https://tools.ietf.org/html/rfc6020#section-9.2.4"));
+    }
+
     /**
      * @param name
      * @param description

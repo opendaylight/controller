@@ -7,7 +7,9 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -30,31 +32,42 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
     		"uniquely identify a particular instance node in the data tree.";
     private static final String reference = "https://tools.ietf.org/html/rfc6020#section-9.13";
 
-    private final transient SchemaPath path = BaseTypes.schemaPath(name);
+    private final transient SchemaPath path;
     private final RevisionAwareXPath xpath;
     private final String units = "";
-
+    private final InstanceIdentifierTypeDefinition baseType;
     private final boolean requireInstance;
 
-    public InstanceIdentifier(RevisionAwareXPath xpath, boolean requireInstance) {
+    private InstanceIdentifier(RevisionAwareXPath xpath, boolean requireInstance) {
         super();
+        path = BaseTypes.schemaPath(name);
         this.xpath = xpath;
         this.requireInstance = requireInstance;
+        this.baseType = this;
+    }
+
+    public InstanceIdentifier(final List<String> actualPath, final URI namespace,
+            final Date revision, RevisionAwareXPath xpath, boolean requireInstance) {
+        super();
+        path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.xpath = xpath;
+        this.requireInstance = requireInstance;
+        this.baseType = new InstanceIdentifier(xpath, requireInstance);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
     public InstanceIdentifierTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getUnits()
      */
     @Override
@@ -64,7 +77,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
      */
     @Override
@@ -74,7 +87,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getQName()
      */
     @Override
@@ -84,7 +97,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getPath()
      */
     @Override
@@ -94,7 +107,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
     @Override
@@ -104,7 +117,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getReference()
      */
     @Override
@@ -114,7 +127,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getStatus()
      */
     @Override
@@ -124,7 +137,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getExtensionSchemaNodes()
      */
     @Override
@@ -134,7 +147,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition#
      * getPathStatement()
      */
@@ -145,7 +158,7 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition#
      * requireInstance()
      */

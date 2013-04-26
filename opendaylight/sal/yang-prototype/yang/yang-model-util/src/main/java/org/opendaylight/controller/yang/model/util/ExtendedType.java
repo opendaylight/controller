@@ -1,13 +1,15 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -33,7 +35,6 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
     private List<PatternConstraint> patterns = Collections.emptyList();
     private Integer fractionDigits = null;
 
-
     private Status status;
     private String units;
     private Object defaultValue;
@@ -46,7 +47,8 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
         private final String description;
         private final String reference;
 
-        private List<UnknownSchemaNode> unknownSchemaNodes = Collections.emptyList();;
+        private List<UnknownSchemaNode> unknownSchemaNodes = Collections
+                .emptyList();
         private Status status = Status.CURRENT;
         private String units = "";
         private Object defaultValue = null;
@@ -56,11 +58,23 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
         private List<PatternConstraint> patterns = Collections.emptyList();
         private Integer fractionDigits = null;
 
-        public Builder(final QName typeName, TypeDefinition<?> baseType,
-                final String description, final String reference) {
+        public Builder(final List<String> actualPath, final URI namespace,
+                final Date revision, final QName typeName,
+                TypeDefinition<?> baseType, final String description,
+                final String reference) {
             this.typeName = typeName;
             this.baseType = baseType;
-            this.path = BaseTypes.schemaPath(typeName);
+            this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+            this.description = description;
+            this.reference = reference;
+        }
+
+        public Builder(final QName typeName, TypeDefinition<?> baseType,
+                final String description, final String reference,
+                SchemaPath path) {
+            this.typeName = typeName;
+            this.baseType = baseType;
+            this.path = path;
             this.description = description;
             this.reference = reference;
         }
@@ -80,27 +94,28 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
             return this;
         }
 
-        public Builder unknownSchemaNodes(final List<UnknownSchemaNode> unknownSchemaNodes) {
+        public Builder unknownSchemaNodes(
+                final List<UnknownSchemaNode> unknownSchemaNodes) {
             this.unknownSchemaNodes = unknownSchemaNodes;
             return this;
         }
 
         public Builder ranges(final List<RangeConstraint> ranges) {
-            if(ranges != null) {
+            if (ranges != null) {
                 this.ranges = ranges;
             }
             return this;
         }
 
         public Builder lengths(final List<LengthConstraint> lengths) {
-            if(lengths != null) {
+            if (lengths != null) {
                 this.lengths = lengths;
             }
             return this;
         }
 
         public Builder patterns(final List<PatternConstraint> patterns) {
-            if(patterns != null) {
+            if (patterns != null) {
                 this.patterns = patterns;
             }
             return this;
@@ -188,8 +203,10 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
                 + ((defaultValue == null) ? 0 : defaultValue.hashCode());
         result = prime * result
                 + ((description == null) ? 0 : description.hashCode());
-        result = prime * result
-                + ((unknownSchemaNodes == null) ? 0 : unknownSchemaNodes.hashCode());
+        result = prime
+                * result
+                + ((unknownSchemaNodes == null) ? 0 : unknownSchemaNodes
+                        .hashCode());
         result = prime * result + ((path == null) ? 0 : path.hashCode());
         result = prime * result
                 + ((reference == null) ? 0 : reference.hashCode());

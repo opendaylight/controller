@@ -29,15 +29,23 @@ public class Uint8 extends AbstractUnsignedInteger {
     private Short defaultValue = null;
     private static final String description =
             "uint8  represents integer values between 0 and 255, inclusively.";
+    private final UnsignedIntegerTypeDefinition baseType;
+
+    private Uint8() {
+        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        this.baseType = this;
+    }
 
     public Uint8(final List<String> actualPath,
             final URI namespace, final Date revision) {
         super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        this.baseType = new Uint8();
     }
 
     public Uint8(final List<String> actualPath,
             final URI namespace, final Date revision, final Short defaultValue) {
         super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        this.baseType = new Uint8();
         this.defaultValue = defaultValue;
     }
 
@@ -45,6 +53,7 @@ public class Uint8 extends AbstractUnsignedInteger {
             final URI namespace, final Date revision, final List<RangeConstraint> rangeStatements,
             final String units, final Short defaultValue) {
         super(actualPath, namespace, revision, name, description, rangeStatements, units);
+        this.baseType = new Uint8();
         this.defaultValue = defaultValue;
     }
 
@@ -55,7 +64,7 @@ public class Uint8 extends AbstractUnsignedInteger {
      */
     @Override
     public UnsignedIntegerTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*

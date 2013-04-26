@@ -7,7 +7,9 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -20,23 +22,34 @@ import org.opendaylight.controller.yang.model.api.type.UnionTypeDefinition;
 public class UnionType implements UnionTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("union");
-    private final SchemaPath path = BaseTypes.schemaPath(name);
+    private final SchemaPath path;
     private final String description = "The union built-in type represents a value that corresponds to one of its member types.";
     private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.12";
-
+    private final UnionTypeDefinition baseType;
     private final List<TypeDefinition<?>> types;
 
-
-    public UnionType(List<TypeDefinition<?>> types) {
+    private UnionType(List<TypeDefinition<?>> types) {
         if(types == null) {
             throw new NullPointerException("When the type is 'union', the 'type' statement MUST be present.");
         }
+        path = BaseTypes.schemaPath(name);
         this.types = types;
+        this.baseType = this;
+    }
+
+    public UnionType(final List<String> actualPath, final URI namespace,
+            final Date revision, List<TypeDefinition<?>> types) {
+        if(types == null) {
+            throw new NullPointerException("When the type is 'union', the 'type' statement MUST be present.");
+        }
+        path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.types = types;
+        this.baseType = new UnionType(types);
     }
 
     @Override
     public UnionTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     @Override
@@ -86,8 +99,12 @@ public class UnionType implements UnionTypeDefinition {
 
     @Override
     public int hashCode() {
-        // TODO: implement hashcode
-        return 4;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + ((types == null) ? 0 : types.hashCode());
+        return result;
     }
 
     @Override

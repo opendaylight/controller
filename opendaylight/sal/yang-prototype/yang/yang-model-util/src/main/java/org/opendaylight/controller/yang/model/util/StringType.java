@@ -36,6 +36,17 @@ public class StringType implements StringTypeDefinition {
     private final List<LengthConstraint> lengthStatements;
     private final List<PatternConstraint> patterns;
     private String units = "";
+    private final StringTypeDefinition baseType;
+
+    private StringType() {
+        super();
+        path = BaseTypes.schemaPath(name);
+        final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
+        constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+        lengthStatements = Collections.unmodifiableList(constraints);
+        patterns = Collections.emptyList();
+        baseType = this;
+    }
 
     /**
      * Default Constructor.
@@ -47,13 +58,15 @@ public class StringType implements StringTypeDefinition {
         final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
         constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
         lengthStatements = Collections.unmodifiableList(constraints);
-
-        this.patterns = Collections.emptyList();
+        patterns = Collections.emptyList();
+        baseType = new StringType();
     }
 
     /**
      *
-     *
+     * @param actualPath
+     * @param namespace
+     * @param revision
      * @param lengthStatements
      * @param patterns
      */
@@ -70,6 +83,7 @@ public class StringType implements StringTypeDefinition {
             this.lengthStatements = Collections.unmodifiableList(lengthStatements);
         }
         this.patterns = Collections.unmodifiableList(patterns);
+        baseType = new StringType();
     }
 
     /**
@@ -85,7 +99,7 @@ public class StringType implements StringTypeDefinition {
             final List<LengthConstraint> lengthStatements,
             final List<PatternConstraint> patterns, final String units) {
         super();
-        path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
         this.defaultValue = defaultValue;
         if(lengthStatements == null || lengthStatements.size() == 0) {
             final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
@@ -94,8 +108,9 @@ public class StringType implements StringTypeDefinition {
         } else {
             this.lengthStatements = Collections.unmodifiableList(lengthStatements);
         }
-        this.patterns = patterns;
+        this.patterns = Collections.unmodifiableList(patterns);
         this.units = units;
+        this.baseType = new StringType();
     }
 
     /*
@@ -105,7 +120,7 @@ public class StringType implements StringTypeDefinition {
      */
     @Override
     public StringTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*

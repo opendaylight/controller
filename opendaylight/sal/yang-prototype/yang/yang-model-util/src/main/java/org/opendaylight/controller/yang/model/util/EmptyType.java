@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -19,13 +21,25 @@ import org.opendaylight.controller.yang.model.api.type.EmptyTypeDefinition;
 public class EmptyType implements EmptyTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("empty");
-    private final SchemaPath path = BaseTypes.schemaPath(name);
+    private final SchemaPath path;
     private final String description = "The empty built-in type represents a leaf that does not have any value, it conveys information by its presence or absence.";
     private final String reference = "https://tools.ietf.org/html/rfc6020#page-131";
+    private final EmptyTypeDefinition baseType;
+
+    private EmptyType() {
+        path = BaseTypes.schemaPath(name);
+        this.baseType = this;
+    }
+
+    public EmptyType(final List<String> actualPath,
+            final URI namespace, final Date revision) {
+        path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new EmptyType();
+    }
 
     @Override
     public EmptyTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     @Override

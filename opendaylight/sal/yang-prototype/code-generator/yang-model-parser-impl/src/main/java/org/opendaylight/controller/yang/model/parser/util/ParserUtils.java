@@ -16,6 +16,7 @@ import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.parser.builder.api.AugmentationSchemaBuilder;
+import org.opendaylight.controller.yang.model.parser.builder.api.ChildNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
@@ -59,7 +60,9 @@ public final class ParserUtils {
 
     /**
      * Parse uses path.
-     * @param usesPath as String
+     *
+     * @param usesPath
+     *            as String
      * @return SchemaPath from given String
      */
     public static SchemaPath parseUsesPath(final String usesPath) {
@@ -80,6 +83,21 @@ public final class ParserUtils {
             }
         }
         return new SchemaPath(path, absolute);
+    }
+
+    /**
+     * Add all augment's child nodes to given target.
+     *
+     * @param augment
+     * @param target
+     */
+    public static void fillAugmentTarget(
+            final AugmentationSchemaBuilder augment,
+            final ChildNodeBuilder target) {
+        for (DataSchemaNodeBuilder builder : augment.getChildNodes()) {
+            builder.setAugmenting(true);
+            target.addChildNode(builder);
+        }
     }
 
     public static LeafSchemaNodeBuilder copyLeafBuilder(

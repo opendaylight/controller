@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -35,10 +37,19 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
     private final List<TypeDefinitionBuilder> typedefs;
     private final UnionType instance;
 
-    public UnionTypeBuilder() {
+    private final List<String> actualPath;
+    private final URI namespace;
+    private final Date revision;
+
+    public UnionTypeBuilder(final List<String> actualPath, final URI namespace,
+            final Date revision) {
         types = new ArrayList<TypeDefinition<?>>();
         typedefs = new ArrayList<TypeDefinitionBuilder>();
-        instance = new UnionType(types);
+        instance = new UnionType(actualPath, namespace, revision, types);
+
+        this.actualPath = actualPath;
+        this.namespace = namespace;
+        this.revision = revision;
     }
 
     public List<TypeDefinition<?>> getTypes() {
@@ -201,6 +212,18 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
     public void setUnits(String units) {
         throw new IllegalStateException("Can not set units to "
                 + UnionTypeBuilder.class.getSimpleName());
+    }
+
+    public List<String> getActualPath() {
+        return actualPath;
+    }
+
+    public URI getNamespace() {
+        return namespace;
+    }
+
+    public Date getRevision() {
+        return revision;
     }
 
     @Override

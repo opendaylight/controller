@@ -28,15 +28,23 @@ public class Int64 extends AbstractSignedInteger {
     private Long defaultValue = null;
     private static final String description =
             "int64  represents integer values between -9223372036854775808 and 9223372036854775807, inclusively.";
+    private final IntegerTypeDefinition baseType;
+
+    private Int64() {
+        super(name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
+        this.baseType = this;
+    }
 
     public Int64(final List<String> actualPath, final URI namespace,
             final Date revision) {
         super(actualPath, namespace, revision, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
+        this.baseType = new Int64();
     }
 
     public Int64(final List<String> actualPath, final URI namespace,
             final Date revision, final Long defaultValue) {
         super(actualPath, namespace, revision, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
+        this.baseType = new Int64();
         this.defaultValue = defaultValue;
     }
 
@@ -44,6 +52,7 @@ public class Int64 extends AbstractSignedInteger {
             final Date revision, final List<RangeConstraint> rangeStatements,
             final String units, final Long defaultValue) {
         super(actualPath, namespace, revision, name, description, rangeStatements, units);
+        this.baseType = new Int64();
         this.defaultValue = defaultValue;
     }
 
@@ -54,7 +63,7 @@ public class Int64 extends AbstractSignedInteger {
      */
     @Override
     public IntegerTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*

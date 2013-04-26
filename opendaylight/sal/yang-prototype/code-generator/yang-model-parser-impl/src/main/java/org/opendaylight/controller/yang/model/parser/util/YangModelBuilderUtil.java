@@ -63,7 +63,6 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.StringContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.String_restrictionsContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Type_body_stmtsContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Units_stmtContext;
-import org.opendaylight.controller.antlrv4.code.gen.YangParser.Uses_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Value_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.When_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yin_element_argContext;
@@ -84,7 +83,6 @@ import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ConstraintsBuilder;
-import org.opendaylight.controller.yang.model.parser.util.RefineHolder.Refine;
 import org.opendaylight.controller.yang.model.util.BaseConstraints;
 import org.opendaylight.controller.yang.model.util.BinaryType;
 import org.opendaylight.controller.yang.model.util.BitsType;
@@ -1017,7 +1015,7 @@ public final class YangModelBuilderUtil {
         } else if ("string".equals(typeName)) {
             type = new StringType(actualPath, namespace, revision, lengthStatements, patternStatements);
         } else if ("bits".equals(typeName)) {
-            type = new BitsType(getBits(typeBody, actualPath, namespace,
+            type = new BitsType(actualPath, namespace, revision, getBits(typeBody, actualPath, namespace,
                     revision, prefix));
         } else if ("leafref".equals(typeName)) {
             final String path = parseLeafrefPath(typeBody);
@@ -1027,10 +1025,10 @@ public final class YangModelBuilderUtil {
             type = new Leafref(actualPath, namespace, revision, xpath);
         } else if ("binary".equals(typeName)) {
             List<Byte> bytes = Collections.emptyList();
-            type = new BinaryType(bytes, lengthStatements, null);
+            type = new BinaryType(actualPath, namespace, revision, bytes, lengthStatements, null);
         } else if ("instance-identifier".equals(typeName)) {
             boolean requireInstance = isRequireInstance(typeBody);
-            type = new InstanceIdentifier(null, requireInstance);
+            type = new InstanceIdentifier(actualPath, namespace, revision, null, requireInstance);
         }
         return type;
     }
@@ -1196,52 +1194,86 @@ public final class YangModelBuilderUtil {
         return yinValue;
     }
 
-    public static List<RefineHolder> parseRefines(Uses_stmtContext ctx) {
-        List<RefineHolder> refines = new ArrayList<RefineHolder>();
+//    public static List<RefineHolder> parseRefines(Uses_stmtContext ctx) {
+//        List<RefineHolder> refines = new ArrayList<RefineHolder>();
+//
+//        for (int i = 0; i < ctx.getChildCount(); i++) {
+//            ParseTree child = ctx.getChild(i);
+//            if (child instanceof Refine_stmtContext) {
+//                final String refineTarget = stringFromNode(child);
+//                final RefineHolder refine = new RefineHolder(refineTarget);
+//                for (int j = 0; j < child.getChildCount(); j++) {
+//                    ParseTree refinePom = child.getChild(j);
+//                    if (refinePom instanceof Refine_pomContext) {
+//                        for (int k = 0; k < refinePom.getChildCount(); k++) {
+//                            ParseTree refineStmt = refinePom.getChild(k);
+//                            if (refineStmt instanceof Refine_leaf_stmtsContext) {
+//                                parseRefine(refine,
+//                                        (Refine_leaf_stmtsContext) refineStmt);
+//                            } else if (refineStmt instanceof Refine_container_stmtsContext) {
+//                                parseRefine(
+//                                        refine,
+//                                        (Refine_container_stmtsContext) refineStmt);
+//                            } else if (refineStmt instanceof Refine_list_stmtsContext) {
+//                                parseRefine(refine,
+//                                        (Refine_list_stmtsContext) refineStmt);
+//                            } else if (refineStmt instanceof Refine_leaf_list_stmtsContext) {
+//                                parseRefine(
+//                                        refine,
+//                                        (Refine_leaf_list_stmtsContext) refineStmt);
+//                            } else if (refineStmt instanceof Refine_choice_stmtsContext) {
+//                                parseRefine(refine,
+//                                        (Refine_choice_stmtsContext) refineStmt);
+//                            } else if (refineStmt instanceof Refine_anyxml_stmtsContext) {
+//                                parseRefine(refine,
+//                                        (Refine_anyxml_stmtsContext) refineStmt);
+//                            }
+//                        }
+//                    }
+//                }
+//                refines.add(refine);
+//            }
+//        }
+//        return refines;
+//    }
 
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            ParseTree child = ctx.getChild(i);
-            if (child instanceof Refine_stmtContext) {
-                final String refineTarget = stringFromNode(child);
-                final RefineHolder refine = new RefineHolder(refineTarget);
-                for (int j = 0; j < child.getChildCount(); j++) {
-                    ParseTree refinePom = child.getChild(j);
-                    if (refinePom instanceof Refine_pomContext) {
-                        for (int k = 0; k < refinePom.getChildCount(); k++) {
-                            ParseTree refineStmt = refinePom.getChild(k);
-                            if (refineStmt instanceof Refine_leaf_stmtsContext) {
-                                parseRefine(refine,
-                                        (Refine_leaf_stmtsContext) refineStmt);
-                            } else if (refineStmt instanceof Refine_container_stmtsContext) {
-                                parseRefine(
-                                        refine,
-                                        (Refine_container_stmtsContext) refineStmt);
-                            } else if (refineStmt instanceof Refine_list_stmtsContext) {
-                                parseRefine(refine,
-                                        (Refine_list_stmtsContext) refineStmt);
-                            } else if (refineStmt instanceof Refine_leaf_list_stmtsContext) {
-                                parseRefine(
-                                        refine,
-                                        (Refine_leaf_list_stmtsContext) refineStmt);
-                            } else if (refineStmt instanceof Refine_choice_stmtsContext) {
-                                parseRefine(refine,
-                                        (Refine_choice_stmtsContext) refineStmt);
-                            } else if (refineStmt instanceof Refine_anyxml_stmtsContext) {
-                                parseRefine(refine,
-                                        (Refine_anyxml_stmtsContext) refineStmt);
-                            }
-                        }
+    public static RefineHolder parseRefine(Refine_stmtContext child) {
+        final String refineTarget = stringFromNode(child);
+        final RefineHolder refine = new RefineHolder(refineTarget);
+        for (int j = 0; j < child.getChildCount(); j++) {
+            ParseTree refinePom = child.getChild(j);
+            if (refinePom instanceof Refine_pomContext) {
+                for (int k = 0; k < refinePom.getChildCount(); k++) {
+                    ParseTree refineStmt = refinePom.getChild(k);
+                    if (refineStmt instanceof Refine_leaf_stmtsContext) {
+                        parseRefine(refine,
+                                (Refine_leaf_stmtsContext) refineStmt);
+                    } else if (refineStmt instanceof Refine_container_stmtsContext) {
+                        parseRefine(
+                                refine,
+                                (Refine_container_stmtsContext) refineStmt);
+                    } else if (refineStmt instanceof Refine_list_stmtsContext) {
+                        parseRefine(refine,
+                                (Refine_list_stmtsContext) refineStmt);
+                    } else if (refineStmt instanceof Refine_leaf_list_stmtsContext) {
+                        parseRefine(
+                                refine,
+                                (Refine_leaf_list_stmtsContext) refineStmt);
+                    } else if (refineStmt instanceof Refine_choice_stmtsContext) {
+                        parseRefine(refine,
+                                (Refine_choice_stmtsContext) refineStmt);
+                    } else if (refineStmt instanceof Refine_anyxml_stmtsContext) {
+                        parseRefine(refine,
+                                (Refine_anyxml_stmtsContext) refineStmt);
                     }
                 }
-                refines.add(refine);
             }
         }
-        return refines;
+        return refine;
     }
 
     private static RefineHolder parseRefine(RefineHolder refine,
             Refine_leaf_stmtsContext refineStmt) {
-        refine.setType(Refine.LEAF);
         for (int i = 0; i < refineStmt.getChildCount(); i++) {
             ParseTree refineArg = refineStmt.getChild(i);
             if (refineArg instanceof Default_stmtContext) {
@@ -1267,7 +1299,6 @@ public final class YangModelBuilderUtil {
 
     private static RefineHolder parseRefine(RefineHolder refine,
             Refine_container_stmtsContext refineStmt) {
-        refine.setType(Refine.CONTAINER);
         for (int m = 0; m < refineStmt.getChildCount(); m++) {
             ParseTree refineArg = refineStmt.getChild(m);
             if (refineArg instanceof Must_stmtContext) {
@@ -1282,7 +1313,6 @@ public final class YangModelBuilderUtil {
 
     private static RefineHolder parseRefine(RefineHolder refine,
             Refine_list_stmtsContext refineStmt) {
-        refine.setType(Refine.LIST);
         for (int m = 0; m < refineStmt.getChildCount(); m++) {
             ParseTree refineArg = refineStmt.getChild(m);
             if (refineArg instanceof Must_stmtContext) {
@@ -1301,7 +1331,6 @@ public final class YangModelBuilderUtil {
 
     private static RefineHolder parseRefine(RefineHolder refine,
             Refine_leaf_list_stmtsContext refineStmt) {
-        refine.setType(Refine.LEAF_LIST);
         for (int m = 0; m < refineStmt.getChildCount(); m++) {
             ParseTree refineArg = refineStmt.getChild(m);
             if (refineArg instanceof Must_stmtContext) {
@@ -1320,7 +1349,6 @@ public final class YangModelBuilderUtil {
 
     private static RefineHolder parseRefine(RefineHolder refine,
             Refine_choice_stmtsContext refineStmt) {
-        refine.setType(Refine.CHOICE);
         for (int i = 0; i < refineStmt.getChildCount(); i++) {
             ParseTree refineArg = refineStmt.getChild(i);
             if (refineArg instanceof Default_stmtContext) {
@@ -1342,7 +1370,6 @@ public final class YangModelBuilderUtil {
 
     private static RefineHolder parseRefine(RefineHolder refine,
             Refine_anyxml_stmtsContext refineStmt) {
-        refine.setType(Refine.ANYXML);
         for (int i = 0; i < refineStmt.getChildCount(); i++) {
             ParseTree refineArg = refineStmt.getChild(i);
             if (refineArg instanceof Must_stmtContext) {

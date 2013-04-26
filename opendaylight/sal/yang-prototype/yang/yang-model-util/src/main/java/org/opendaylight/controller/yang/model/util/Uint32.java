@@ -26,15 +26,23 @@ public class Uint32 extends AbstractUnsignedInteger {
     private static final QName name = BaseTypes.constructQName("uint32");
     private Long defaultValue = null;
     private static final String description = "uint32 represents integer values between 0 and 4294967295, inclusively.";
+    private final UnsignedIntegerTypeDefinition baseType;
+
+    private Uint32() {
+        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        this.baseType = this;
+    }
 
     public Uint32(final List<String> actualPath,
             final URI namespace, final Date revision) {
         super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        this.baseType = new Uint32();
     }
 
     public Uint32(final List<String> actualPath,
             final URI namespace, final Date revision, final Long defaultValue) {
         super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        this.baseType = new Uint32();
         this.defaultValue = defaultValue;
     }
 
@@ -42,6 +50,7 @@ public class Uint32 extends AbstractUnsignedInteger {
             final URI namespace, final Date revision, final List<RangeConstraint> rangeStatements,
             final String units, final Long defaultValue) {
         super(actualPath, namespace, revision, name, description, rangeStatements, units);
+        this.baseType = new Uint32();
         this.defaultValue = defaultValue;
     }
 
@@ -53,7 +62,7 @@ public class Uint32 extends AbstractUnsignedInteger {
      */
     @Override
     public UnsignedIntegerTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*

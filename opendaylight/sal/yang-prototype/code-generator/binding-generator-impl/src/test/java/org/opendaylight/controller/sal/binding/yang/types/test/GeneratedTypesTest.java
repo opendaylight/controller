@@ -37,7 +37,6 @@ public class GeneratedTypesTest {
         return parser.resolveSchemaContext(modules);
     }
 
-    @Ignore
     @Test
     public void testLeafEnumResolving() {
         final String ietfInterfacesPath = getClass().getResource(
