@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///hE\u003d",
+        "filename": "opendaylight/distribution/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-26T15:03:46Z",
+      "side": 1,
+      "message": "This pom has all the \\r added, can you please avoid this changes?",
+      "revId": "f9b760694e328aad6fbdf24c39958a500bef30f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///hA\u003d",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-26T15:03:46Z",
+      "side": 1,
+      "message": "Remove tabs here",
+      "revId": "f9b760694e328aad6fbdf24c39958a500bef30f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
