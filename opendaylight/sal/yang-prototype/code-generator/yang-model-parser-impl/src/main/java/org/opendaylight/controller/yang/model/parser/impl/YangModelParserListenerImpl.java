@@ -52,11 +52,11 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.When_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yang_version_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParserBaseListener;
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.GroupingBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.AnyXmlBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ChoiceBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ChoiceCaseBuilder;
@@ -329,9 +329,10 @@ public final class YangModelParserListenerImpl extends YangParserBaseListener {
                 moduleBuilder.setType(type, actualPath);
             } else {
                 if ("union".equals(typeName)) {
-                    moduleBuilder.addUnionType(actualPath);
+                    moduleBuilder.addUnionType(actualPath, namespace, revision);
                 } else if("identityref".equals(typeName)) {
-                    moduleBuilder.addIdentityrefType(getIdentityrefBase(typeBody), actualPath);
+                    SchemaPath path = createActualSchemaPath(actualPath, namespace, revision, yangModelPrefix);
+                    moduleBuilder.addIdentityrefType(getIdentityrefBase(typeBody), actualPath, path);
                 } else {
                     List<String> typePath = new ArrayList<String>(actualPath);
                     typePath.remove(0);
@@ -459,16 +460,27 @@ public final class YangModelParserListenerImpl extends YangParserBaseListener {
     @Override
     public void enterUses_stmt(YangParser.Uses_stmtContext ctx) {
         final String groupingPathStr = stringFromNode(ctx);
-        UsesNodeBuilder builder = moduleBuilder.addUsesNode(groupingPathStr,
+        moduleBuilder.addUsesNode(groupingPathStr,
                 actualPath);
         updatePath(groupingPathStr);
-
-        final List<RefineHolder> refines = parseRefines(ctx);
-        builder.setRefines(refines);
     }
 
     @Override
     public void exitUses_stmt(YangParser.Uses_stmtContext ctx) {
+        final String actContainer = actualPath.pop();
+        logger.debug("exiting " + actContainer);
+    }
+
+    @Override
+    public void enterRefine_stmt(YangParser.Refine_stmtContext ctx) {
+        String refineString = stringFromNode(ctx);
+        RefineHolder refine = parseRefine(ctx);
+        moduleBuilder.addRefine(refine, actualPath);
+        updatePath(refineString);
+    }
+
+    @Override
+    public void exitRefine_stmt(YangParser.Refine_stmtContext ctx) {
         final String actContainer = actualPath.pop();
         logger.debug("exiting " + actContainer);
     }

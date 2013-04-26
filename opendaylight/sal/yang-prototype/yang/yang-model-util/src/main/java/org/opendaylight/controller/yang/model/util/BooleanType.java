@@ -1,13 +1,15 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -18,62 +20,82 @@ import org.opendaylight.controller.yang.model.api.type.BooleanTypeDefinition;
 
 /**
  * The <code>default</code> implementation of Boolean Type Definition interface.
- * 
+ *
  * @see BooleanTypeDefinition
  */
 public class BooleanType implements BooleanTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("boolean");
-    private final SchemaPath path = BaseTypes.schemaPath(name);
+    private final SchemaPath path;
     private final String description = "The boolean built-in type represents a boolean value.";
     private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.5";
-
+    private final BooleanTypeDefinition baseType;
     private final Boolean defaultValue;
     private String units = "";
 
     /**
      * Default constructor with default value set to "false".
      */
-    public BooleanType() {
+    private BooleanType() {
         super();
-        defaultValue = false;
+        this.defaultValue = false;
+        this.path = BaseTypes.schemaPath(name);
+        this.baseType = this;
+    }
+
+    public BooleanType(final List<String> actualPath, final URI namespace,
+            final Date revision) {
+        super();
+        this.defaultValue = false;
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new BooleanType();
     }
 
     /**
      * Boolean Type constructor.
-     * 
-     * @param defaultValue Default Value
+     *
+     * @param defaultValue
+     *            Default Value
      */
-    public BooleanType(final Boolean defaultValue) {
+    public BooleanType(final List<String> actualPath, final URI namespace,
+            final Date revision, final Boolean defaultValue) {
         super();
         this.defaultValue = defaultValue;
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new BooleanType();
     }
 
     /**
      * Boolean Type constructor.
-     * 
-     * @param defaultValue Default Value
-     * @param units Units
+     *
+     * @param defaultValue
+     *            Default Value
+     * @param units
+     *            Units
      */
-    public BooleanType(final Boolean defaultValue, final String units) {
+    public BooleanType(final List<String> actualPath, final URI namespace,
+            final Date revision, final Boolean defaultValue, final String units) {
         super();
         this.defaultValue = defaultValue;
         this.units = units;
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new BooleanType();
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
+     *
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
     public BooleanTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getUnits()
      */
     @Override
@@ -83,8 +105,10 @@ public class BooleanType implements BooleanTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
+     *
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
+     * ()
      */
     @Override
     public Object getDefaultValue() {
@@ -93,7 +117,7 @@ public class BooleanType implements BooleanTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getQName()
      */
     @Override
@@ -103,7 +127,7 @@ public class BooleanType implements BooleanTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getPath()
      */
     @Override
@@ -113,8 +137,9 @@ public class BooleanType implements BooleanTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
+     *
+     * @see
+     * org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
     @Override
     public String getDescription() {
@@ -123,7 +148,7 @@ public class BooleanType implements BooleanTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getReference()
      */
     @Override
@@ -133,7 +158,7 @@ public class BooleanType implements BooleanTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getStatus()
      */
     @Override

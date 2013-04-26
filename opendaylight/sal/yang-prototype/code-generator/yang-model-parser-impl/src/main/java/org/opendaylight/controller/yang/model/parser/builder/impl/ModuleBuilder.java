@@ -29,6 +29,7 @@ import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.ModuleImport;
 import org.opendaylight.controller.yang.model.api.NotificationDefinition;
 import org.opendaylight.controller.yang.model.api.RpcDefinition;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.AugmentationSchemaBuilder;
@@ -41,6 +42,7 @@ import org.opendaylight.controller.yang.model.parser.builder.api.TypeAwareBuilde
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.model.parser.util.RefineHolder;
 import org.opendaylight.controller.yang.model.parser.util.YangParseException;
 
 /**
@@ -419,10 +421,9 @@ public class ModuleBuilder implements Builder {
     public UsesNodeBuilder addUsesNode(final String groupingPathStr,
             final List<String> parentPath) {
         final List<String> pathToUses = new ArrayList<String>(parentPath);
-
-        UsesNodeBuilder usesBuilder = new UsesNodeBuilderImpl(groupingPathStr);
-
-        ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
+        final UsesNodeBuilder usesBuilder = new UsesNodeBuilderImpl(
+                groupingPathStr);
+        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToUses);
         if (parent != null) {
             parent.addUsesNode(usesBuilder);
@@ -430,33 +431,46 @@ public class ModuleBuilder implements Builder {
 
         pathToUses.add(groupingPathStr);
         addedUsesNodes.put(pathToUses, usesBuilder);
-
+        moduleNodes.put(pathToUses, usesBuilder);
         return usesBuilder;
+    }
+
+    public void addRefine(final RefineHolder refine,
+            final List<String> parentPath) {
+        final List<String> path = new ArrayList<String>(parentPath);
+        final Builder parent = moduleNodes.get(path);
+        if (!(parent instanceof UsesNodeBuilder)) {
+            throw new YangParseException("Failed to parse refine "
+                    + refine.getName());
+        }
+        UsesNodeBuilder usesBuilder = (UsesNodeBuilder) parent;
+        usesBuilder.addRefine(refine);
+        path.add(refine.getName());
+        moduleNodes.put(path, refine);
     }
 
     public RpcDefinitionBuilder addRpc(final QName qname,
             final List<String> parentPath) {
-        List<String> pathToRpc = new ArrayList<String>(parentPath);
-
-        RpcDefinitionBuilder rpcBuilder = new RpcDefinitionBuilder(qname);
+        final List<String> pathToRpc = new ArrayList<String>(parentPath);
+        final RpcDefinitionBuilder rpcBuilder = new RpcDefinitionBuilder(qname);
 
         pathToRpc.add(qname.getLocalName());
         addedRpcs.put(pathToRpc, rpcBuilder);
 
-        QName inputQName = new QName(qname.getNamespace(), qname.getRevision(),
-                qname.getPrefix(), "input");
-        ContainerSchemaNodeBuilder inputBuilder = new ContainerSchemaNodeBuilder(
+        final QName inputQName = new QName(qname.getNamespace(),
+                qname.getRevision(), qname.getPrefix(), "input");
+        final ContainerSchemaNodeBuilder inputBuilder = new ContainerSchemaNodeBuilder(
                 inputQName);
-        List<String> pathToInput = new ArrayList<String>(pathToRpc);
+        final List<String> pathToInput = new ArrayList<String>(pathToRpc);
         pathToInput.add("input");
         moduleNodes.put(pathToInput, inputBuilder);
         rpcBuilder.setInput(inputBuilder);
 
-        QName outputQName = new QName(qname.getNamespace(),
+        final QName outputQName = new QName(qname.getNamespace(),
                 qname.getRevision(), qname.getPrefix(), "output");
-        ContainerSchemaNodeBuilder outputBuilder = new ContainerSchemaNodeBuilder(
+        final ContainerSchemaNodeBuilder outputBuilder = new ContainerSchemaNodeBuilder(
                 outputQName);
-        List<String> pathToOutput = new ArrayList<String>(pathToRpc);
+        final List<String> pathToOutput = new ArrayList<String>(pathToRpc);
         pathToOutput.add("output");
         moduleNodes.put(pathToOutput, outputBuilder);
         rpcBuilder.setOutput(outputBuilder);
@@ -577,23 +591,28 @@ public class ModuleBuilder implements Builder {
         parent.setType(type);
     }
 
-    public void addUnionType(List<String> parentPath) {
+    public void addUnionType(final List<String> actualPath,
+            final URI namespace, final Date revision) {
+        List<String> pathToUnion = new ArrayList<String>(actualPath);
         TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
-                .get(parentPath);
-        UnionTypeBuilder union = new UnionTypeBuilder();
+                .get(pathToUnion);
+        UnionTypeBuilder union = new UnionTypeBuilder(pathToUnion, namespace,
+                revision);
         parent.setType(union);
 
-        List<String> path = new ArrayList<String>(parentPath);
+        List<String> path = new ArrayList<String>(pathToUnion);
         path.add("union");
 
         moduleNodes.put(path, union);
     }
 
-    public void addIdentityrefType(String baseString, List<String> parentPath) {
+    public void addIdentityrefType(String baseString, List<String> parentPath,
+            SchemaPath schemaPath) {
         List<String> pathToIdentityref = new ArrayList<String>(parentPath);
         TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
                 .get(pathToIdentityref);
-        IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(baseString);
+        IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(
+                baseString, schemaPath);
         parent.setType(identityref);
         dirtyNodes.put(pathToIdentityref, parent);
     }
@@ -608,7 +627,8 @@ public class ModuleBuilder implements Builder {
         return builder;
     }
 
-    public IdentitySchemaNodeBuilder addIdentity(QName qname, List<String> parentPath) {
+    public IdentitySchemaNodeBuilder addIdentity(QName qname,
+            List<String> parentPath) {
         List<String> pathToIdentity = new ArrayList<String>(parentPath);
         IdentitySchemaNodeBuilder builder = new IdentitySchemaNodeBuilder(qname);
         pathToIdentity.add(qname.getLocalName());
@@ -632,14 +652,13 @@ public class ModuleBuilder implements Builder {
         final List<String> pathToUnknown = new ArrayList<String>(parentPath);
         final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(
                 qname);
-
-        final SchemaNodeBuilder parent = (SchemaNodeBuilder) moduleNodes
-                .get(pathToUnknown);
-        if (parent != null) {
-            parent.addUnknownSchemaNode(builder);
+        final Builder parent = moduleNodes.get(pathToUnknown);
+        if (parent instanceof RefineHolder) {
+            ((RefineHolder) parent).addUnknownSchemaNode(builder);
+        } else if (parent instanceof SchemaNodeBuilder) {
+            ((SchemaNodeBuilder) parent).addUnknownSchemaNode(builder);
         }
-
-        return new UnknownSchemaNodeBuilder(qname);
+        return builder;
     }
 
     private class ModuleImpl implements Module {

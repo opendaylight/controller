@@ -70,9 +70,9 @@ import org.opendaylight.controller.yang.model.parser.builder.impl.ListSchemaNode
 import org.opendaylight.controller.yang.model.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.TypedefBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.UnionTypeBuilder;
+import org.opendaylight.controller.yang.model.parser.builder.impl.UnknownSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.util.ParserUtils;
 import org.opendaylight.controller.yang.model.parser.util.RefineHolder;
-import org.opendaylight.controller.yang.model.parser.util.RefineHolder.Refine;
 import org.opendaylight.controller.yang.model.parser.util.TypeConstraints;
 import org.opendaylight.controller.yang.model.parser.util.YangParseException;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
@@ -282,9 +282,11 @@ public class YangModelParserImpl implements YangModelParser {
                         }
                     }
                     unionTypes.removeAll(toRemove);
-                } else if(nodeToResolve.getTypedef() instanceof IdentityrefTypeBuilder) {
-                    IdentityrefTypeBuilder idref = (IdentityrefTypeBuilder)nodeToResolve.getTypedef();
-                    nodeToResolve.setType(new IdentityrefType(findFullQName(modules, module, idref)));
+                } else if (nodeToResolve.getTypedef() instanceof IdentityrefTypeBuilder) {
+                    IdentityrefTypeBuilder idref = (IdentityrefTypeBuilder) nodeToResolve
+                            .getTypedef();
+                    nodeToResolve.setType(new IdentityrefType(findFullQName(
+                            modules, module, idref), idref.getPath()));
                 } else {
                     final TypeDefinitionBuilder resolvedType = resolveType(
                             nodeToResolve, modules, module);
@@ -388,7 +390,9 @@ public class YangModelParserImpl implements YangModelParser {
             final TypeDefinitionBuilder old, final boolean seekByTypedefBuilder) {
         if (old instanceof UnionTypeBuilder) {
             final UnionTypeBuilder oldUnion = (UnionTypeBuilder) old;
-            final UnionTypeBuilder newUnion = new UnionTypeBuilder();
+            final UnionTypeBuilder newUnion = new UnionTypeBuilder(
+                    oldUnion.getActualPath(), oldUnion.getNamespace(),
+                    oldUnion.getRevision());
             for (TypeDefinition<?> td : oldUnion.getTypes()) {
                 newUnion.setType(td);
             }
@@ -472,8 +476,8 @@ public class YangModelParserImpl implements YangModelParser {
             copy.setType(baseTdbCopyResolved);
             return copy;
         } else {
-            throw new IllegalStateException(
-                    "TypeDefinitionBuilder in unexpected state");
+            throw new IllegalStateException("Failed to resolve type "
+                    + copy.getQName().getLocalName());
         }
     }
 
@@ -481,14 +485,11 @@ public class YangModelParserImpl implements YangModelParser {
             final QName unknownTypeQName,
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder builder) {
-
         // search for module which contains referenced typedef
         final ModuleBuilder dependentModule = findDependentModule(modules,
                 builder, unknownTypeQName.getPrefix());
-
         final TypeDefinitionBuilder lookedUpBuilder = findTypedefBuilderByName(
                 dependentModule, unknownTypeQName.getLocalName());
-
         return copyTypedefBuilder(lookedUpBuilder, true);
     }
 
@@ -497,7 +498,6 @@ public class YangModelParserImpl implements YangModelParser {
             final TypeConstraints constraints,
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder builder) {
-
         // union type cannot be restricted
         if (nodeToResolve instanceof UnionTypeBuilder) {
             return constraints;
@@ -560,7 +560,6 @@ public class YangModelParserImpl implements YangModelParser {
             mergeConstraints(referencedType, constraints);
             return constraints;
         }
-
     }
 
     /**
@@ -666,6 +665,13 @@ public class YangModelParserImpl implements YangModelParser {
         }
     }
 
+    /**
+     *
+     * @param modules
+     *            all available modules
+     * @param module
+     *            current module
+     */
     private void resolveAugment(
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module) {
@@ -679,7 +685,7 @@ public class YangModelParserImpl implements YangModelParser {
                 int i = 0;
                 final QName qname = path.get(i);
                 String prefix = qname.getPrefix();
-                if(prefix == null) {
+                if (prefix == null) {
                     prefix = module.getPrefix();
                 }
 
@@ -719,27 +725,13 @@ public class YangModelParserImpl implements YangModelParser {
                 final QName lastAugmentPathElement = path.get(path.size() - 1);
                 if (currentQName.getLocalName().equals(
                         lastAugmentPathElement.getLocalName())) {
-                    fillAugmentTarget(augmentBuilder,
+                    ParserUtils.fillAugmentTarget(augmentBuilder,
                             (ChildNodeBuilder) currentParent);
                     ((AugmentationTargetBuilder) currentParent)
                             .addAugmentation(augmentBuilder);
                     module.augmentResolved();
                 }
             }
-        }
-    }
-
-    /**
-     * Add all augment's child nodes to given target.
-     *
-     * @param augment
-     * @param target
-     */
-    private void fillAugmentTarget(final AugmentationSchemaBuilder augment,
-            final ChildNodeBuilder target) {
-        for (DataSchemaNodeBuilder builder : augment.getChildNodes()) {
-            builder.setAugmenting(true);
-            target.addChildNode(builder);
         }
     }
 
@@ -806,9 +798,7 @@ public class YangModelParserImpl implements YangModelParser {
 
             final String groupingName = key.get(key.size() - 1);
 
-            final List<RefineHolder> refines = usesNode.getRefines();
-            for (RefineHolder refine : refines) {
-                final Refine refineType = refine.getType();
+            for (RefineHolder refine : usesNode.getRefines()) {
                 // refine statements
                 final String defaultStr = refine.getDefaultStr();
                 final Boolean mandatory = refine.isMandatory();
@@ -816,11 +806,13 @@ public class YangModelParserImpl implements YangModelParser {
                 final Boolean presence = refine.isPresence();
                 final Integer min = refine.getMinElements();
                 final Integer max = refine.getMaxElements();
+                final List<UnknownSchemaNodeBuilder> unknownNodes = refine
+                        .getUnknownNodes();
 
-                switch (refineType) {
-                case LEAF:
-                    final LeafSchemaNodeBuilder leaf = (LeafSchemaNodeBuilder) getRefineTargetBuilder(
-                            groupingName, refine, modules, module);
+                Builder refineTarget = getRefineTargetBuilder(groupingName,
+                        refine, modules, module);
+                if (refineTarget instanceof LeafSchemaNodeBuilder) {
+                    final LeafSchemaNodeBuilder leaf = (LeafSchemaNodeBuilder) refineTarget;
                     if (defaultStr != null && !("".equals(defaultStr))) {
                         leaf.setDefaultStr(defaultStr);
                     }
@@ -830,22 +822,28 @@ public class YangModelParserImpl implements YangModelParser {
                     if (must != null) {
                         leaf.getConstraints().addMustDefinition(must);
                     }
+                    if (unknownNodes != null) {
+                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                            leaf.addUnknownSchemaNode(unknown);
+                        }
+                    }
                     usesNode.addRefineNode(leaf);
-                    break;
-                case CONTAINER:
-                    final ContainerSchemaNodeBuilder container = (ContainerSchemaNodeBuilder) getRefineTargetBuilder(
-                            groupingName, refine, modules, module);
+                } else if (refineTarget instanceof ContainerSchemaNodeBuilder) {
+                    final ContainerSchemaNodeBuilder container = (ContainerSchemaNodeBuilder) refineTarget;
                     if (presence != null) {
                         container.setPresence(presence);
                     }
                     if (must != null) {
                         container.getConstraints().addMustDefinition(must);
                     }
+                    if (unknownNodes != null) {
+                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                            container.addUnknownSchemaNode(unknown);
+                        }
+                    }
                     usesNode.addRefineNode(container);
-                    break;
-                case LIST:
-                    final ListSchemaNodeBuilder list = (ListSchemaNodeBuilder) getRefineTargetBuilder(
-                            groupingName, refine, modules, module);
+                } else if (refineTarget instanceof ListSchemaNodeBuilder) {
+                    final ListSchemaNodeBuilder list = (ListSchemaNodeBuilder) refineTarget;
                     if (must != null) {
                         list.getConstraints().addMustDefinition(must);
                     }
@@ -855,8 +853,12 @@ public class YangModelParserImpl implements YangModelParser {
                     if (max != null) {
                         list.getConstraints().setMaxElements(max);
                     }
-                    break;
-                case LEAF_LIST:
+                    if (unknownNodes != null) {
+                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                            list.addUnknownSchemaNode(unknown);
+                        }
+                    }
+                } else if (refineTarget instanceof LeafListSchemaNodeBuilder) {
                     final LeafListSchemaNodeBuilder leafList = (LeafListSchemaNodeBuilder) getRefineTargetBuilder(
                             groupingName, refine, modules, module);
                     if (must != null) {
@@ -868,25 +870,36 @@ public class YangModelParserImpl implements YangModelParser {
                     if (max != null) {
                         leafList.getConstraints().setMaxElements(max);
                     }
-                    break;
-                case CHOICE:
-                    final ChoiceBuilder choice = (ChoiceBuilder) getRefineTargetBuilder(
-                            groupingName, refine, modules, module);
+                    if (unknownNodes != null) {
+                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                            leafList.addUnknownSchemaNode(unknown);
+                        }
+                    }
+                } else if (refineTarget instanceof ChoiceBuilder) {
+                    final ChoiceBuilder choice = (ChoiceBuilder) refineTarget;
                     if (defaultStr != null) {
                         choice.setDefaultCase(defaultStr);
                     }
                     if (mandatory != null) {
                         choice.getConstraints().setMandatory(mandatory);
                     }
-                    break;
-                case ANYXML:
-                    final AnyXmlBuilder anyXml = (AnyXmlBuilder) getRefineTargetBuilder(
-                            groupingName, refine, modules, module);
+                    if (unknownNodes != null) {
+                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                            choice.addUnknownSchemaNode(unknown);
+                        }
+                    }
+                } else if (refineTarget instanceof AnyXmlBuilder) {
+                    final AnyXmlBuilder anyXml = (AnyXmlBuilder) refineTarget;
                     if (mandatory != null) {
                         anyXml.getConstraints().setMandatory(mandatory);
                     }
                     if (must != null) {
                         anyXml.getConstraints().addMustDefinition(must);
+                    }
+                    if (unknownNodes != null) {
+                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                            anyXml.addUnknownSchemaNode(unknown);
+                        }
                     }
                 }
             }
@@ -978,21 +991,26 @@ public class YangModelParserImpl implements YangModelParser {
         return builder.getChildNode(refineNodeName);
     }
 
-    private QName findFullQName(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
+    private QName findFullQName(
+            final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module, final IdentityrefTypeBuilder idref) {
         QName result = null;
         String baseString = idref.getBaseString();
-        if(baseString.contains(":")) {
+        if (baseString.contains(":")) {
             String[] splittedBase = baseString.split(":");
-            if(splittedBase.length > 2) {
-                throw new YangParseException("Failed to parse identityref base: "+ baseString);
+            if (splittedBase.length > 2) {
+                throw new YangParseException(
+                        "Failed to parse identityref base: " + baseString);
             }
             String prefix = splittedBase[0];
             String name = splittedBase[1];
-            ModuleBuilder dependentModule = findDependentModule(modules, module, prefix);
-            result = new QName(dependentModule.getNamespace(), dependentModule.getRevision(), prefix, name);
+            ModuleBuilder dependentModule = findDependentModule(modules,
+                    module, prefix);
+            result = new QName(dependentModule.getNamespace(),
+                    dependentModule.getRevision(), prefix, name);
         } else {
-            result = new QName(module.getNamespace(), module.getRevision(), module.getPrefix(), baseString);
+            result = new QName(module.getNamespace(), module.getRevision(),
+                    module.getPrefix(), baseString);
         }
         return result;
     }
@@ -1017,8 +1035,8 @@ public class YangModelParserImpl implements YangModelParser {
         if (prefix.equals(module.getPrefix())) {
             dependentModule = module;
         } else {
-            final ModuleImport dependentModuleImport = ParserUtils.getModuleImport(module,
-                    prefix);
+            final ModuleImport dependentModuleImport = ParserUtils
+                    .getModuleImport(module, prefix);
             if (dependentModuleImport == null) {
                 throw new YangParseException("No import found with prefix '"
                         + prefix + "' in module " + module.getName() + "'.");
@@ -1052,7 +1070,6 @@ public class YangModelParserImpl implements YangModelParser {
         }
         return dependentModule;
     }
-
 
     private static class SchemaContextImpl implements SchemaContext {
         private final Set<Module> modules;

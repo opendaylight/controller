@@ -22,7 +22,7 @@ public interface UsesNodeBuilder extends Builder {
     void addAugment(AugmentationSchemaBuilder builder);
     void setAugmenting(boolean augmenting);
     List<RefineHolder> getRefines();
-    void setRefines(List<RefineHolder> refines);
+    void addRefine(RefineHolder refine);
     void addRefineNode(SchemaNodeBuilder refineNode);
     UsesNode build();
 

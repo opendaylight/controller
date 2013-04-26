@@ -34,7 +34,6 @@ import org.opendaylight.controller.yang.model.util.StringType;
 import org.opendaylight.controller.yang.model.util.UnionType;
 
 public class TypesResolutionTest {
-
     private Set<Module> testedModules;
 
     @Before

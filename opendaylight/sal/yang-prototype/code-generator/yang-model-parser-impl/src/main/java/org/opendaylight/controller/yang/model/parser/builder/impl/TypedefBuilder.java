@@ -59,7 +59,7 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
         }
 
         typeBuilder = new ExtendedType.Builder(qname, type, description,
-                reference);
+                reference, schemaPath);
 
         typeBuilder.status(status);
         typeBuilder.units(units);

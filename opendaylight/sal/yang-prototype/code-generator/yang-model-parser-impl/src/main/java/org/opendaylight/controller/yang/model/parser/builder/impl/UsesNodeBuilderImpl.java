@@ -32,7 +32,7 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
     private final SchemaPath groupingPath;
     private final Set<AugmentationSchemaBuilder> addedAugments = new HashSet<AugmentationSchemaBuilder>();
     private List<SchemaNodeBuilder> refineBuilders = new ArrayList<SchemaNodeBuilder>();
-    private List<RefineHolder> refines = Collections.emptyList();
+    private List<RefineHolder> refines = new ArrayList<RefineHolder>();
 
     UsesNodeBuilderImpl(final String groupingPathStr) {
         this.groupingPath = parseUsesPath(groupingPathStr);
@@ -79,15 +79,14 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
         refineBuilders.add(refineNode);
     }
 
+    @Override
     public List<RefineHolder> getRefines() {
         return refines;
     }
 
     @Override
-    public void setRefines(List<RefineHolder> refines) {
-        if(refines != null) {
-            this.refines = refines;
-        }
+    public void addRefine(RefineHolder refine) {
+        refines.add(refine);
     }
 
     private SchemaPath parseUsesPath(final String augmentPath) {

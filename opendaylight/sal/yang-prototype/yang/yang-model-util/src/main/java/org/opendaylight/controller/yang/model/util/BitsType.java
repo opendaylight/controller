@@ -1,13 +1,15 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.yang.model.util;
 
+import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -16,22 +18,21 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
 
-
 /**
  * The <code>default</code> implementation of Bits Type Definition interface.
- * 
+ *
  * @see BitsTypeDefinition
  */
 public class BitsType implements BitsTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("bits");
-    private final SchemaPath path = BaseTypes.schemaPath(name);
-    private final String description = "The bits built-in type represents a bit set.  " +
-    		"That is, a bits value is a set of flags identified by small integer position " +
-    		"numbers starting at 0.  Each bit number has an assigned name.";
-    
-    private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.7";
+    private final SchemaPath path;
+    private final String description = "The bits built-in type represents a bit set.  "
+            + "That is, a bits value is a set of flags identified by small integer position "
+            + "numbers starting at 0.  Each bit number has an assigned name.";
 
+    private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.7";
+    private final BitsTypeDefinition baseType;
     private final List<Bit> bits;
     private String units = "";
 
@@ -39,52 +40,72 @@ public class BitsType implements BitsTypeDefinition {
      * Default constructor. <br>
      * Instantiates Bits type as empty bits list.
      */
-    public BitsType() {
+    private BitsType() {
         super();
-        bits = Collections.emptyList();
+        this.bits = Collections.emptyList();
+        this.path = BaseTypes.schemaPath(name);
+        this.baseType = this;
+    }
+
+    public BitsType(final List<String> actualPath, final URI namespace,
+            final Date revision) {
+        super();
+        this.bits = Collections.emptyList();
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new BitsType();
     }
 
     /**
-     * Constructor with explicit definition of bits assigned to
-     * BitsType.
-     * 
+     * Constructor with explicit definition of bits assigned to BitsType.
+     *
+     * @param actualPath
+     * @param namespace
+     * @param revision
      * @param bits
      *            The bits assigned for Bits Type
      */
-    public BitsType(final List<Bit> bits) {
+    public BitsType(final List<String> actualPath, final URI namespace,
+            final Date revision, final List<Bit> bits) {
         super();
         this.bits = Collections.unmodifiableList(bits);
         this.units = "";
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new BitsType();
     }
 
     /**
-     * Constructor with explicit definition of bits assigned to
-     * BitsType and Units.
-     * <br>
+     * Constructor with explicit definition of bits assigned to BitsType and
+     * Units. <br>
      * The default value of Bits Type is List of bits.
-     * 
-     * @param bits The bits assigned for Bits Type
-     * @param units units for bits type
+     *
+     * @param bits
+     *            The bits assigned for Bits Type
+     * @param units
+     *            units for bits type
      */
-    public BitsType(List<Bit> bits, String units) {
+    public BitsType(final List<String> actualPath, final URI namespace,
+            final Date revision, List<Bit> bits, String units) {
         super();
         this.bits = Collections.unmodifiableList(bits);
         this.units = units;
+        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.baseType = new BitsType();
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
+     *
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
     public BitsTypeDefinition getBaseType() {
-        return this;
+        return baseType;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getUnits()
      */
     @Override
@@ -94,8 +115,10 @@ public class BitsType implements BitsTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
+     *
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
+     * ()
      */
     @Override
     public Object getDefaultValue() {
@@ -104,7 +127,7 @@ public class BitsType implements BitsTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getQName()
      */
     @Override
@@ -114,7 +137,7 @@ public class BitsType implements BitsTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getPath()
      */
     @Override
@@ -124,8 +147,9 @@ public class BitsType implements BitsTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
+     *
+     * @see
+     * org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
     @Override
     public String getDescription() {
@@ -134,7 +158,7 @@ public class BitsType implements BitsTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getReference()
      */
     @Override
@@ -144,7 +168,7 @@ public class BitsType implements BitsTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getStatus()
      */
     @Override

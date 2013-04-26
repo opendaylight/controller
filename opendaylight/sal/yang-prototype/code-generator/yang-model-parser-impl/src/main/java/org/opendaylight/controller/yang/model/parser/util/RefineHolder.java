@@ -7,11 +7,15 @@
  */
 package org.opendaylight.controller.yang.model.parser.util;
 
-import org.opendaylight.controller.yang.model.api.MustDefinition;
+import java.util.ArrayList;
+import java.util.List;
 
-public final class RefineHolder {
+import org.opendaylight.controller.yang.model.api.MustDefinition;
+import org.opendaylight.controller.yang.model.parser.builder.api.Builder;
+import org.opendaylight.controller.yang.model.parser.builder.impl.UnknownSchemaNodeBuilder;
+
+public final class RefineHolder implements Builder {
     private final String name;
-    private Refine type;
     private String defaultStr;
     private String description;
     private String reference;
@@ -21,17 +25,10 @@ public final class RefineHolder {
     private MustDefinition must;
     private Integer minElements;
     private Integer maxElements;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     public RefineHolder(final String name) {
         this.name = name;
-    }
-
-    public Refine getType() {
-        return type;
-    }
-
-    public void setType(final Refine type) {
-        this.type = type;
     }
 
     public String getDefaultStr() {
@@ -110,8 +107,17 @@ public final class RefineHolder {
         return name;
     }
 
-    public enum Refine {
-        CONTAINER, LEAF, LIST, LEAF_LIST, CHOICE, ANYXML
+    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+        return addedUnknownNodes;
+    }
+
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
+    }
+
+    @Override
+    public Object build() {
+        return null;
     }
 
 }
