@@ -78,7 +78,7 @@ import org.opendaylight.controller.yang.model.util.YangTypesConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class YangModelParserListenerImpl extends YangParserBaseListener {
+public final class YangModelParserListenerImpl extends YangParserBaseListener {
 
     private static final Logger logger = LoggerFactory
             .getLogger(YangModelParserListenerImpl.class);
@@ -90,7 +90,7 @@ final class YangModelParserListenerImpl extends YangParserBaseListener {
     private String yangModelPrefix;
     private Date revision = new Date(0L);
 
-    final static DateFormat simpleDateFormat = new SimpleDateFormat(
+    public final static DateFormat simpleDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd");
     private final Stack<String> actualPath = new Stack<String>();
 
