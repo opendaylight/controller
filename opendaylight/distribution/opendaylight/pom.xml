@@ -42,13 +42,16 @@
     <module>../../arphandler</module>
     <module>../../forwardingrulesmanager/api</module>
     <module>../../forwardingrulesmanager/implementation</module>
-    <module>../../hosttracker</module>
+    <module>../../hosttracker/api</module>
+    <module>../../hosttracker/implementation</module>
+    <module>../../hosttracker/integrationtest</module>
     <module>../../containermanager/api</module>
     <module>../../containermanager/implementation</module>
-    <module>../../switchmanager</module>
+    <module>../../switchmanager/api</module>
+    <module>../../switchmanager/implementation</module>
     <module>../../statisticsmanager/api</module>
     <module>../../statisticsmanager/implementation</module>
-     <module>../../statisticsmanager/integrationtest</module>
+    <module>../../statisticsmanager/integrationtest</module>
     <module>../../topologymanager</module>
     <module>../../usermanager</module>
     <module>../../security</module>
