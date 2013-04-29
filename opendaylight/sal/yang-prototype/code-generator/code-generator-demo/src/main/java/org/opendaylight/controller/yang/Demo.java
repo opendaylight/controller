@@ -78,6 +78,8 @@ public class Demo {
 
             if (type instanceof GeneratedTransferObject) {
                 tosToGenerate.add((GeneratedTransferObject) type);
+            } else if (type instanceof GeneratedType) {
+                typesToGenerate.add((GeneratedType) type);
             }
         }
 
