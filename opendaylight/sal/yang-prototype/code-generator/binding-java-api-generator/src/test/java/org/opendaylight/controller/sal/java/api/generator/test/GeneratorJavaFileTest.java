@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.sal.java.api.generator.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import javax.tools.ToolProvider;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTypeBuilderImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
@@ -86,7 +88,7 @@ public class GeneratorJavaFileTest {
         assertTrue(filesList.contains("Type2.java"));
         assertTrue(filesList.contains("Type3.java"));
     }
-
+    
     @Test
     public void compilationTest() throws Exception {
         final YangModelParserImpl parser = new YangModelParserImpl();
@@ -107,7 +109,7 @@ public class GeneratorJavaFileTest {
         final Set<GeneratedType> typesToGenerate = new HashSet<GeneratedType>();
         final Set<GeneratedTransferObject> tosToGenerate = new HashSet<GeneratedTransferObject>();
         for (Type type : types) {
-            if (type instanceof GeneratedType) {
+            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
                 typesToGenerate.add((GeneratedType) type);
             }
 

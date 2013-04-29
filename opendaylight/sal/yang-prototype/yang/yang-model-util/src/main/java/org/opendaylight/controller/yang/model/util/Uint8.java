@@ -7,8 +7,6 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -18,39 +16,36 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
 /**
  * Implementation of Yang uint8 built-in type.
  * <br>
- * uint8 represents integer values between 0 and 255, inclusively. The Java counterpart of
+ * uint8 represents integer values between 0 and 255, inclusively. The Java counterpart of 
  * Yang uint8 built-in type is {@link Short}.
- *
+ * 
  * @see AbstractUnsignedInteger
  */
 public class Uint8 extends AbstractUnsignedInteger {
 
     private static final QName name = BaseTypes.constructQName("uint8");
     private Short defaultValue = null;
-    private static final String description =
+    private static final String description = 
             "uint8  represents integer values between 0 and 255, inclusively.";
 
-    public Uint8(final List<String> actualPath,
-            final URI namespace, final Date revision) {
-        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint8() {
+        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
     }
 
-    public Uint8(final List<String> actualPath,
-            final URI namespace, final Date revision, final Short defaultValue) {
-        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint8(final Short defaultValue) {
+        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
         this.defaultValue = defaultValue;
     }
 
-    public Uint8(final List<String> actualPath,
-            final URI namespace, final Date revision, final List<RangeConstraint> rangeStatements,
+    public Uint8(final List<RangeConstraint> rangeStatements,
             final String units, final Short defaultValue) {
-        super(actualPath, namespace, revision, name, description, rangeStatements, units);
+        super(name, description, rangeStatements, units);
         this.defaultValue = defaultValue;
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
@@ -60,7 +55,7 @@ public class Uint8 extends AbstractUnsignedInteger {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
      */
     @Override

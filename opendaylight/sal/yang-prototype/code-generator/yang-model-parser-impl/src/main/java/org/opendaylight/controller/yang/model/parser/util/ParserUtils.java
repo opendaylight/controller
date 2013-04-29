@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ModuleImport;
 import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
@@ -28,7 +27,6 @@ import org.opendaylight.controller.yang.model.parser.builder.impl.ContainerSchem
 import org.opendaylight.controller.yang.model.parser.builder.impl.LeafListSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ListSchemaNodeBuilder;
-import org.opendaylight.controller.yang.model.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 public final class ParserUtils {
@@ -36,32 +34,6 @@ public final class ParserUtils {
     private ParserUtils() {
     }
 
-    /**
-     * Get module import referenced by given prefix.
-     *
-     * @param builder
-     *            module to search
-     * @param prefix
-     *            prefix associated with import
-     * @return ModuleImport based on given prefix
-     */
-    public static ModuleImport getModuleImport(final ModuleBuilder builder,
-            final String prefix) {
-        ModuleImport moduleImport = null;
-        for (ModuleImport mi : builder.getModuleImports()) {
-            if (mi.getPrefix().equals(prefix)) {
-                moduleImport = mi;
-                break;
-            }
-        }
-        return moduleImport;
-    }
-
-    /**
-     * Parse uses path.
-     * @param usesPath as String
-     * @return SchemaPath from given String
-     */
     public static SchemaPath parseUsesPath(final String usesPath) {
         final boolean absolute = usesPath.startsWith("/");
         final String[] splittedPath = usesPath.split("/");

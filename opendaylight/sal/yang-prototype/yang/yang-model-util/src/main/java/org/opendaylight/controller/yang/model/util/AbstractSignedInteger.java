@@ -7,10 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -25,7 +23,7 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  * interface which represents SIGNED Integer values defined in Yang language. <br>
  * The integer built-in types in Yang are int8, int16, int32, int64. They
  * represent signed integers of different sizes:
- *
+ * 
  * <ul>
  * <li>int8 - represents integer values between -128 and 127, inclusively.</li>
  * <li>int16 - represents integer values between -32768 and 32767, inclusively.</li>
@@ -34,7 +32,7 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  * <li>int64 - represents integer values between -9223372036854775808 and
  * 9223372036854775807, inclusively.</li>
  * </ul>
- *
+ * 
  */
 public abstract class AbstractSignedInteger implements IntegerTypeDefinition {
 
@@ -53,20 +51,17 @@ public abstract class AbstractSignedInteger implements IntegerTypeDefinition {
      * @param maxRange
      * @param units
      */
-    public AbstractSignedInteger(final List<String> actualPath,
-            final URI namespace, final Date revision, final QName name,
-            final String description, final Number minRange,
-            final Number maxRange, final String units) {
+    public AbstractSignedInteger(final QName name, final String description,
+            final Number minRange, final Number maxRange, final String units) {
         this.name = name;
         this.description = description;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = BaseTypes.schemaPath(name);
         this.units = units;
         this.rangeStatements = new ArrayList<RangeConstraint>();
         final String rangeDescription = "Integer values between " + minRange
                 + " and " + maxRange + ", inclusively.";
         this.rangeStatements.add(BaseConstraints.rangeConstraint(minRange,
-                maxRange, rangeDescription,
-                "https://tools.ietf.org/html/rfc6020#section-9.2.4"));
+                maxRange, rangeDescription, "https://tools.ietf.org/html/rfc6020#section-9.2.4"));
     }
 
     /**
@@ -75,13 +70,11 @@ public abstract class AbstractSignedInteger implements IntegerTypeDefinition {
      * @param rangeStatements
      * @param units
      */
-    public AbstractSignedInteger(final List<String> actualPath,
-            final URI namespace, final Date revision, final QName name,
-            final String description,
+    public AbstractSignedInteger(final QName name, final String description,
             final List<RangeConstraint> rangeStatements, final String units) {
         this.name = name;
         this.description = description;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = BaseTypes.schemaPath(name);
         this.units = units;
         this.rangeStatements = rangeStatements;
     }

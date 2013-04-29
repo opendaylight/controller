@@ -8,8 +8,6 @@
 package org.opendaylight.controller.yang.model.util;
 
 import java.math.BigInteger;
-import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -31,21 +29,18 @@ public class Uint64 extends AbstractUnsignedInteger {
     private static final String description =
             "uint64 represents integer values between 0 and 18446744073709551615, inclusively.";
 
-    public Uint64(final List<String> actualPath,
-            final URI namespace, final Date revision) {
-        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint64() {
+        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
     }
 
-    public Uint64(final List<String> actualPath,
-            final URI namespace, final Date revision, final BigInteger defaultValue) {
-        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint64(final BigInteger defaultValue) {
+        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
         this.defaultValue = defaultValue;
     }
 
-    public Uint64(final List<String> actualPath,
-            final URI namespace, final Date revision, final List<RangeConstraint> rangeStatements,
+    public Uint64(final List<RangeConstraint> rangeStatements,
             final String units, final BigInteger defaultValue) {
-        super(actualPath, namespace, revision, name, description, rangeStatements, units);
+        super(name, description, rangeStatements, units);
         this.defaultValue = defaultValue;
     }
 

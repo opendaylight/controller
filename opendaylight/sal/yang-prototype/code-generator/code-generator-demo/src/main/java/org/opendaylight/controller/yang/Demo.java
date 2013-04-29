@@ -72,7 +72,7 @@ public class Demo {
         final Set<GeneratedType> typesToGenerate = new HashSet<GeneratedType>();
         final Set<GeneratedTransferObject> tosToGenerate = new HashSet<GeneratedTransferObject>();
         for (Type type : types) {
-            if (type instanceof GeneratedType) {
+            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
                 typesToGenerate.add((GeneratedType) type);
             }
 
