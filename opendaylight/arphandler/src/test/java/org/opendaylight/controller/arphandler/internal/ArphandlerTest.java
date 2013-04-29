@@ -15,11 +15,8 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 import org.opendaylight.controller.hosttracker.IfIptoHost;
-import org.opendaylight.controller.hosttracker.HostTracker;
 
 import org.opendaylight.controller.switchmanager.ISwitchManager;
-import org.opendaylight.controller.switchmanager.internal.SwitchManagerImpl;
-
 
 public class ArphandlerTest extends TestCase {
 	 
@@ -30,23 +27,6 @@ public class ArphandlerTest extends TestCase {
 		ah = new ArpHandler();
 		Assert.assertTrue(ah != null);
 			
-		HostTracker hostTracker = null;
-		hostTracker = new HostTracker();
-		ah.setHostTracker(hostTracker);
-		IfIptoHost ht= ah.getHostTracker();
-		Assert.assertTrue(ht.equals(hostTracker));
-		ah.unsetHostTracker(hostTracker);
-		ht= ah.getHostTracker();
-		Assert.assertTrue(ht == null);
-		
-		ah.setHostListener(hostTracker);
-		ah.unsetHostListener(hostTracker);
-		
-		ISwitchManager swManager = new SwitchManagerImpl();
-		ah.setSwitchManager(swManager);
-		ah.unsetSwitchManager(swManager);
-		
 	}
-
 
 }
