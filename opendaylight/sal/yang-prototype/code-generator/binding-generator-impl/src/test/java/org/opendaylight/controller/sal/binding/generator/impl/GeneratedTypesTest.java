@@ -7,15 +7,17 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
-import org.opendaylight.controller.sal.binding.generator.impl.BindingGeneratorImpl;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
@@ -32,8 +34,13 @@ public class GeneratedTypesTest {
     private SchemaContext resolveSchemaContextFromFiles(
             final String... yangFiles) {
         final YangModelParser parser = new YangModelParserImpl();
-        final Set<Module> modules = parser.parseYangModels(yangFiles);
-
+        
+        final List<File> inputFiles = new ArrayList<File>();
+        for (int i = 0; i < yangFiles.length; ++i) {
+            inputFiles.add(new File(yangFiles[i]));
+        }
+        
+        final Set<Module> modules = parser.parseYangModels(inputFiles);
         return parser.resolveSchemaContext(modules);
     }
 
@@ -54,7 +61,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
         assertTrue(genTypes != null);
     }
-
+    
     @Test
     public void testTypedefEnumResolving() {
         final String ianaIfTypePath = getClass().getResource(
@@ -66,7 +73,7 @@ public class GeneratedTypesTest {
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
         final List<Type> genTypes = bindingGen.generateTypes(context);
         assertTrue(genTypes != null);
-        assertEquals(1, genTypes.size());
+        assertEquals(2, genTypes.size());
 
         final Type type = genTypes.get(0);
         assertTrue(type instanceof GeneratedType);
@@ -92,7 +99,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(13, genTypes.size());
+        assertEquals(24, genTypes.size());
     }
 
     @Test
@@ -129,7 +136,7 @@ public class GeneratedTypesTest {
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
-        assertEquals(25, genTypes.size());
+        assertEquals(46, genTypes.size());
         assertTrue(genTypes != null);
 
         int resolvedLeafrefCount = 0;
@@ -205,7 +212,7 @@ public class GeneratedTypesTest {
                         assertFalse(method.getReturnType().equals(
                                 "java.lang.Void"));
                         assertTrue(method.getReturnType().getName()
-                                .equals("String"));
+                                .equals("Uri"));
                         resolvedLeafrefCount++;
                     }
                 }
@@ -238,7 +245,7 @@ public class GeneratedTypesTest {
                         assertFalse(property.getReturnType().equals(
                                 "java.lang.Void"));
                         assertTrue(property.getReturnType().getName()
-                                .equals("String"));
+                                .equals("Uri"));
                         resolvedLeafrefCount++;
                     }
                 }
@@ -247,7 +254,6 @@ public class GeneratedTypesTest {
         assertEquals(10, resolvedLeafrefCount);
     }
 
-    @Ignore
     @Test
     public void testContainerResolving() {
         final String filePath = getClass().getResource(
@@ -266,7 +272,7 @@ public class GeneratedTypesTest {
 
         assertEquals("SimpleContainer", simpleContainer.getName());
         assertEquals("NestedContainer", nestedContainer.getName());
-        assertEquals(4, simpleContainer.getMethodDefinitions().size());
+        assertEquals(5, simpleContainer.getMethodDefinitions().size());
         assertEquals(4, nestedContainer.getMethodDefinitions().size());
 
         int methodsCount = 0;
@@ -326,7 +332,6 @@ public class GeneratedTypesTest {
         assertEquals(4, methodsCount);
     }
 
-    @Ignore
     @Test
     public void testLeafListResolving() {
         final String filePath = getClass().getResource(
@@ -345,7 +350,7 @@ public class GeneratedTypesTest {
 
         assertEquals("SimpleContainer", simpleContainer.getName());
         assertEquals("NestedContainer", nestedContainer.getName());
-        assertEquals(4, simpleContainer.getMethodDefinitions().size());
+        assertEquals(5, simpleContainer.getMethodDefinitions().size());
         assertEquals(3, nestedContainer.getMethodDefinitions().size());
 
         int methodsCount = 0;
@@ -400,7 +405,6 @@ public class GeneratedTypesTest {
         assertEquals(3, methodsCount);
     }
 
-    @Ignore
     @Test
     public void testListResolving() {
         final String filePath = getClass()
@@ -423,7 +427,7 @@ public class GeneratedTypesTest {
                     assertEquals(2, genType.getMethodDefinitions().size());
                     genTypesCount++;
                 } else if (genType.getName().equals("SimpleList")) {
-                    assertEquals(7, genType.getMethodDefinitions().size());
+                    assertEquals(8, genType.getMethodDefinitions().size());
                     final List<MethodSignature> methods = genType
                             .getMethodDefinitions();
                     int methodsCount = 0;

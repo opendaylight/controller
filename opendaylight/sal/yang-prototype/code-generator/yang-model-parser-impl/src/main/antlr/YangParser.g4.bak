@@ -78,7 +78,7 @@ require_instance_stmt : REQUIRE_INSTANCE_KEYWORD require_instance_arg stmtend;
 path_stmt : PATH_KEYWORD string stmtend;
 leafref_specification : path_stmt;
 enum_stmt : ENUM_KEYWORD string (SEMICOLON | (LEFT_BRACE  (identifier_stmt |value_stmt | status_stmt | description_stmt | reference_stmt )* RIGHT_BRACE));
-enum_specification : enum_stmt (identifier_stmt | enum_stmt )+;
+enum_specification : enum_stmt (identifier_stmt | enum_stmt )*;
 default_stmt : DEFAULT_KEYWORD string stmtend;
 pattern_stmt : PATTERN_KEYWORD string (SEMICOLON | (LEFT_BRACE  (identifier_stmt |error_message_stmt | error_app_tag_stmt | description_stmt | reference_stmt )* RIGHT_BRACE));
 length_stmt : LENGTH_KEYWORD string (SEMICOLON | (LEFT_BRACE  (identifier_stmt |error_message_stmt | error_app_tag_stmt | description_stmt | reference_stmt )* RIGHT_BRACE));

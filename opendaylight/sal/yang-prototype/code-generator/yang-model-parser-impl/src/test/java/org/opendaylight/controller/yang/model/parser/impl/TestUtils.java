@@ -31,13 +31,12 @@ final class TestUtils {
 
     public static Set<Module> loadModules(String resourceDirectory) {
         YangModelParser parser = new YangModelParserImpl();
-        File testDir = new File(resourceDirectory);
-        String[] fileList = testDir.list();
-        String[] testFiles = new String[fileList.length];
+        final File testDir = new File(resourceDirectory);
+        final String[] fileList = testDir.list();
+        final List<File> testFiles = new ArrayList<File>();
         for (int i = 0; i < fileList.length; i++) {
             String fileName = fileList[i];
-            File file = new File(testDir, fileName);
-            testFiles[i] = file.getAbsolutePath();
+            testFiles.add(new File(testDir, fileName));
         }
         return parser.parseYangModels(testFiles);
     }

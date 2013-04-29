@@ -8,6 +8,7 @@
 package org.opendaylight.controller.yang;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,18 +54,14 @@ public class Demo {
         }
 
         String[] dirList = resourceDir.list();
-        String[] absFiles = new String[dirList.length];
-
-        int i = 0;
+        List<File> inputFiles = new ArrayList<File>();
         for (String fileName : dirList) {
-            File abs = new File(resourceDir, fileName);
-            absFiles[i] = abs.getAbsolutePath();
-            i++;
+            inputFiles.add(new File(resourceDir, fileName));
         }
 
         final YangModelParserImpl parser = new YangModelParserImpl();
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
-        final Set<Module> modulesToBuild = parser.parseYangModels(absFiles);
+        final Set<Module> modulesToBuild = parser.parseYangModels(inputFiles);
 
         final SchemaContext context = parser
                 .resolveSchemaContext(modulesToBuild);
@@ -72,7 +69,7 @@ public class Demo {
         final Set<GeneratedType> typesToGenerate = new HashSet<GeneratedType>();
         final Set<GeneratedTransferObject> tosToGenerate = new HashSet<GeneratedTransferObject>();
         for (Type type : types) {
-            if (type instanceof GeneratedType) {
+            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
                 typesToGenerate.add((GeneratedType) type);
             }
 
