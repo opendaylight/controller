@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///f0\u003d",
+        "filename": "opendaylight/arphandler/src/test/java/org/opendaylight/controller/arphandler/internal/ArphandlerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "Do we need this test anymore? It seems useless",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fw\u003d",
+        "filename": "opendaylight/hosttracker/api/src/main/java/org/opendaylight/controller/hosttracker/hostAware/HostNodeConnector.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "Why have you removed the @SuppressWarnings? This was added by a previous commit to silence a warning in eclipse. This should be restored.",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fs\u003d",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 725,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "The usage of the {} it has a reason, it makes the code more performant when logging is disabled. Please see:\n\nhttp://www.slf4j.org/faq.html#logging_performance",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fo\u003d",
+        "filename": "opendaylight/hosttracker/integrationtest/.gitignore",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "gitignore should not be needed given is set at top level with a set of ignore that is a superset of this. do you need it?",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fk\u003d",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/SpanConfig.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "Tao, please don\u0027t use the printStackTrace, this has been removed because of an effort to make sure all the errors are logged via logger. using directly printstacktrace defeat that purpose",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fg\u003d",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Switch.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "Please remove completely this code commented it\u0027s not needed.",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fc\u003d",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "new tab added please remove it.",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fY\u003d",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "there are few new tabs added please remove it",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fU\u003d",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 739,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "Why this change? The toString should be the correct one.",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fQ\u003d",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 950,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "Please totally remove the comparison of the getID the nodeConnector should be compared with .equals. I know this has not been done by you, but if you could fix it would be great.",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///fM\u003d",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1043,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T13:47:21Z",
+      "side": 1,
+      "message": "As in other places, please don\u0027t revert to use printStackTrace",
+      "revId": "31fb9fbdc28ea356c794f66a421beca153a930c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
