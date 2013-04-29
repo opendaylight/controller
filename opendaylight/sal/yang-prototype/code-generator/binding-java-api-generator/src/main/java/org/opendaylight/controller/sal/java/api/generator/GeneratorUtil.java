@@ -27,7 +27,6 @@ import static org.opendaylight.controller.sal.java.api.generator.Constants.TAB;
 
 import java.util.List;
 
-import org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
@@ -74,8 +73,7 @@ public class GeneratorUtil {
         return builder.toString();
     }
 
-    private static StringBuilder appendAnnotations(final StringBuilder builder,
-            final List<AnnotationType> annotations) {
+    private static StringBuilder appendAnnotations(final StringBuilder builder, final List<AnnotationType> annotations) {
         if ((builder != null) && (annotations != null)) {
             for (final AnnotationType annotation : annotations) {
                 builder.append("@");
@@ -174,13 +172,13 @@ public class GeneratorUtil {
         createComment(builder, comment, indent);
         builder.append(NL);
         builder.append(indent);
-
+        
         if (!method.getAnnotations().isEmpty()) {
             final List<AnnotationType> annotations = method.getAnnotations();
             appendAnnotations(builder, annotations);
             builder.append(NL);
         }
-
+        
         builder.append(indent + getExplicitType(type) + GAP + name);
         builder.append(LB);
         for (int i = 0; i < parameters.size(); i++) {
@@ -189,8 +187,7 @@ public class GeneratorUtil {
             if (i + 1 == parameters.size()) {
                 separator = "";
             }
-            builder.append(getExplicitType(p.getType()) + GAP
-                    + BindingGeneratorUtil.validateParameterName(p.getName())
+            builder.append(getExplicitType(p.getType()) + GAP + p.getName()
                     + separator);
         }
         builder.append(RB);

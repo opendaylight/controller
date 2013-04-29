@@ -26,6 +26,7 @@
         <module>maven-yang</module>
         <module>maven-yang-plugin</module>
         <module>maven-yang-plugin-it</module>
+        <module>maven-sal-api-gen-plugin</module>
     </modules>
     <dependencies>
 
