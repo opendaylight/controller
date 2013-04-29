@@ -17,7 +17,7 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.AnnotationTypeBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.EnumBuilder;
 
-final class EnumerationBuilderImpl implements EnumBuilder {
+public final class EnumerationBuilderImpl implements EnumBuilder {
     private final String packageName;
     private final String name;
     private final List<Enumeration.Pair> values;

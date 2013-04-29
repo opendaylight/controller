@@ -189,10 +189,10 @@ public class YangModelParserTest {
 
         LeafSchemaNode ifIndex = (LeafSchemaNode) ifEntry
                 .getDataChildByName("ifIndex");
-        assertTrue(ifIndex.getType() instanceof Uint32);
+        assertEquals(new Uint32(), ifIndex.getType());
         LeafSchemaNode ifMtu = (LeafSchemaNode) ifEntry
                 .getDataChildByName("ifMtu");
-        assertTrue(ifMtu.getType() instanceof Int32);
+        assertEquals(new Int32(), ifMtu.getType());
     }
 
     @Test
@@ -675,6 +675,13 @@ public class YangModelParserTest {
         assertNotNull(input.getDataChildByName("filter"));
         ContainerSchemaNode output = rpc.getOutput();
         assertNotNull(output.getDataChildByName("data"));
+    }
+
+    @Test
+    public void test() {
+        Module testModule = TestUtils.findModule(modules, "types4");
+
+        boolean flag = false;
     }
 
 }

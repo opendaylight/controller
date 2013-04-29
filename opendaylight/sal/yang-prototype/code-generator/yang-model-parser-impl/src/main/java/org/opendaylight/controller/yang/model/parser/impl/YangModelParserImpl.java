@@ -162,7 +162,9 @@ public class YangModelParserImpl implements YangModelParser {
         final List<ParseTree> trees = parseStreams(yangFiles);
         final ModuleBuilder[] builders = new ModuleBuilder[trees.size()];
 
-        // validate yang
+        // validation
+        // if validation fails with any file, do not continue and throw
+        // exception
         new YangModelBasicValidator(walker).validate(trees);
 
         YangModelParserListenerImpl yangModelParser = null;
@@ -717,6 +719,7 @@ public class YangModelParserImpl implements YangModelParser {
 
                 final QName currentQName = currentParent.getQName();
                 final QName lastAugmentPathElement = path.get(path.size() - 1);
+
                 if (currentQName.getLocalName().equals(
                         lastAugmentPathElement.getLocalName())) {
                     fillAugmentTarget(augmentBuilder,
@@ -891,6 +894,7 @@ public class YangModelParserImpl implements YangModelParser {
                 }
             }
         }
+
     }
 
     /**
@@ -985,7 +989,7 @@ public class YangModelParserImpl implements YangModelParser {
         if(baseString.contains(":")) {
             String[] splittedBase = baseString.split(":");
             if(splittedBase.length > 2) {
-                throw new YangParseException("Failed to parse identityref base: "+ baseString);
+                throw new YangParseException("Failed to parse identity base: "+ baseString);
             }
             String prefix = splittedBase[0];
             String name = splittedBase[1];
@@ -1017,7 +1021,7 @@ public class YangModelParserImpl implements YangModelParser {
         if (prefix.equals(module.getPrefix())) {
             dependentModule = module;
         } else {
-            final ModuleImport dependentModuleImport = ParserUtils.getModuleImport(module,
+            final ModuleImport dependentModuleImport = getModuleImport(module,
                     prefix);
             if (dependentModuleImport == null) {
                 throw new YangParseException("No import found with prefix '"
@@ -1053,6 +1057,26 @@ public class YangModelParserImpl implements YangModelParser {
         return dependentModule;
     }
 
+    /**
+     * Get module import referenced by given prefix.
+     *
+     * @param builder
+     *            module to search
+     * @param prefix
+     *            prefix associated with import
+     * @return ModuleImport based on given prefix
+     */
+    private ModuleImport getModuleImport(final ModuleBuilder builder,
+            final String prefix) {
+        ModuleImport moduleImport = null;
+        for (ModuleImport mi : builder.getModuleImports()) {
+            if (mi.getPrefix().equals(prefix)) {
+                moduleImport = mi;
+                break;
+            }
+        }
+        return moduleImport;
+    }
 
     private static class SchemaContextImpl implements SchemaContext {
         private final Set<Module> modules;
