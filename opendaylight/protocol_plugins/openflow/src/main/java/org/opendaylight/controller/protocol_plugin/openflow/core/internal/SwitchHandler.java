@@ -11,6 +11,7 @@ package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 import java.io.IOException;
 import java.net.SocketException;
 import java.nio.channels.AsynchronousCloseException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -239,38 +240,7 @@ public class SwitchHandler implements ISwitch {
     }
 
     private Object syncSend(OFMessage msg, int xid) {
-        SynchronousMessage worker = new SynchronousMessage(this, xid, msg);
-        messageWaitingDone.put(xid, worker);
-        Object result = null;
-        Boolean status = false;
-        Future<Object> submit = executor.submit(worker);
-        try {
-            result = submit.get(responseTimerValue, TimeUnit.MILLISECONDS);
-            messageWaitingDone.remove(xid);
-            if (result == null) {
-                // if result is null, then it means the switch can handle this
-                // message successfully
-                // convert the result into a Boolean with value true
-                status = true;
-                // logger.debug("Successfully send " +
-                // msg.getType().toString());
-                result = status;
-            } else {
-                // if result is not null, this means the switch can't handle
-                // this message
-                // the result if OFError already
-                logger.debug("Send {} failed --> {}", msg.getType().toString(),
-                        ((OFError) result).toString());
-            }
-            return result;
-        } catch (Exception e) {
-            logger.warn("Timeout while waiting for {} reply", msg.getType()
-                    .toString());
-            // convert the result into a Boolean with value false
-            status = false;
-            result = status;
-            return result;
-        }
+        return syncMessageInternal(msg, xid, true);
     }
 
     /**
@@ -489,7 +459,8 @@ public class SwitchHandler implements ISwitch {
     private void reportError(Exception e) {
         if (e instanceof AsynchronousCloseException
                 || e instanceof InterruptedException
-                || e instanceof SocketException || e instanceof IOException) {
+                || e instanceof SocketException || e instanceof IOException
+                || e instanceof ClosedSelectorException) {
             logger.debug("Caught exception {}", e.getMessage());
         } else {
             logger.warn("Caught exception ", e);
@@ -758,6 +729,13 @@ public class SwitchHandler implements ISwitch {
                         PriorityMessage pmsg = transmitQ.poll();
                         msgReadWriteService.asyncSend(pmsg.msg);
                         logger.trace("Message sent: {}", pmsg.toString());
+                        /*
+                         * If syncReply is set to true, wait for the response
+                         * back.
+                         */
+                        if (pmsg.syncReply) {
+                            syncMessageInternal(pmsg.msg, pmsg.msg.getXid(), false);
+                        }
                     }
                     Thread.sleep(10);
                 } catch (InterruptedException ie) {
@@ -816,12 +794,33 @@ public class SwitchHandler implements ISwitch {
     }
 
     /**
-     * Sends synchronous Barrier message
+     * Send Barrier message synchronously. The caller will be blocked until the
+     * Barrier reply is received.
      */
     @Override
-    public Object sendBarrierMessage() {
+    public Object syncSendBarrierMessage() {
         OFBarrierRequest barrierMsg = new OFBarrierRequest();
         return syncSend(barrierMsg);
+    }
+
+    /**
+     * Send Barrier message asynchronously. The caller is not blocked. The
+     * Barrier message will be sent in a transmit thread which will be blocked
+     * until the Barrier reply is received.
+     */
+    @Override
+    public Object asyncSendBarrierMessage() {
+        if (transmitQ == null) {
+            return Boolean.FALSE;
+        }
+
+        OFBarrierRequest barrierMsg = new OFBarrierRequest();
+        int xid = getNextXid();
+
+        barrierMsg.setXid(xid);
+        transmitQ.add(new PriorityMessage(barrierMsg, 0, true));
+        
+        return Boolean.TRUE;
     }
 
     /**
@@ -843,5 +842,57 @@ public class SwitchHandler implements ISwitch {
         }
 
         return rv;
+    }
+
+    /**
+     * This method performs synchronous operations for a given message. If
+     * syncRequest is set to true, the message will be sent out followed by a
+     * Barrier request message. Then it's blocked until the Barrier rely arrives
+     * or timeout. If syncRequest is false, it simply skips the message send and
+     * just waits for the response back.
+     * 
+     * @param msg
+     *            Message to be sent
+     * @param xid
+     *            Message XID
+     * @param request
+     *            If set to true, the message the message will be sent out
+     *            followed by a Barrier request message. If set to false, it
+     *            simply skips the sending and just waits for the Barrier reply.
+     * @return the result
+     */
+    private Object syncMessageInternal(OFMessage msg, int xid, boolean syncRequest) {
+        SynchronousMessage worker = new SynchronousMessage(this, xid, msg, syncRequest);
+        messageWaitingDone.put(xid, worker);
+        Object result = null;
+        Boolean status = false;
+        Future<Object> submit = executor.submit(worker);
+        try {
+            result = submit.get(responseTimerValue, TimeUnit.MILLISECONDS);
+            messageWaitingDone.remove(xid);
+            if (result == null) {
+                // if result is null, then it means the switch can handle this
+                // message successfully
+                // convert the result into a Boolean with value true
+                status = true;
+                // logger.debug("Successfully send " +
+                // msg.getType().toString());
+                result = status;
+            } else {
+                // if result is not null, this means the switch can't handle
+                // this message
+                // the result if OFError already
+                logger.debug("Send {} failed --> {}", msg.getType().toString(),
+                        ((OFError) result).toString());
+            }
+            return result;
+        } catch (Exception e) {
+            logger.warn("Timeout while waiting for {} reply", msg.getType()
+                    .toString());
+            // convert the result into a Boolean with value false
+            status = false;
+            result = status;
+            return result;
+        }
     }
 }

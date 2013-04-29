@@ -96,7 +96,8 @@ public interface IFlowProgrammerService {
     Status removeAllFlows(Node node);
 
     /**
-     * Send synchronous Barrier message
+     * Send Barrier message synchronously. The caller will be blocked until the
+     * solicitation response arrives.
      * 
      * Solicit the network node to report whether all the requests sent so far
      * are completed. When this call is done, caller knows that all past flow
@@ -108,5 +109,20 @@ public interface IFlowProgrammerService {
      *            The network node to solicit
      * @return The status of this request containing the unique request id
      */
-    Status sendBarrierMessage(Node node);
+    Status syncSendBarrierMessage(Node node);
+
+    /**
+     * Send Barrier message asynchronously. The caller is not blocked.
+     * 
+     * Solicit the network node to report whether all the requests sent so far
+     * are completed. When this call is done, caller knows that all past flow
+     * operations requested to the node in asynchronous fashion were satisfied
+     * by the network node and that in case of any failure, a message was sent
+     * to the controller.
+     * 
+     * @param node
+     *            The network node to solicit
+     * @return The status of this request containing the unique request id
+     */
+    Status asyncSendBarrierMessage(Node node);
 }

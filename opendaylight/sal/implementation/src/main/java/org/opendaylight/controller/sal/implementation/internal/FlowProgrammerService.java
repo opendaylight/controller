@@ -502,11 +502,22 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     }
 
     @Override
-    public Status sendBarrierMessage(Node node) {
+    public Status syncSendBarrierMessage(Node node) {
         if (this.pluginFlowProgrammer != null) {
             if (this.pluginFlowProgrammer.get(node.getType()) != null) {
                 return this.pluginFlowProgrammer.get(node.getType())
-                        .sendBarrierMessage(node);
+                        .syncSendBarrierMessage(node);
+            }
+        }
+        return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");
+    }
+
+    @Override
+    public Status asyncSendBarrierMessage(Node node) {
+        if (this.pluginFlowProgrammer != null) {
+            if (this.pluginFlowProgrammer.get(node.getType()) != null) {
+                return this.pluginFlowProgrammer.get(node.getType())
+                        .asyncSendBarrierMessage(node);
             }
         }
         return new Status(StatusCode.NOSERVICE, "Plugin unuvailable");

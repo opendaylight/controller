@@ -23,11 +23,18 @@ class PriorityMessage {
     int priority;
     final static AtomicLong seq = new AtomicLong();
     final long seqNum;
-
+    boolean syncReply; // set to true if we want to be blocked until the response arrives
+    
     public PriorityMessage(OFMessage msg, int priority) {
         this.msg = msg;
         this.priority = priority;
         this.seqNum = seq.getAndIncrement();
+        this.syncReply = false;
+    }
+
+    public PriorityMessage(OFMessage msg, int priority, boolean syncReply) {
+        this(msg, priority);
+        this.syncReply = syncReply;
     }
 
     public OFMessage getMsg() {

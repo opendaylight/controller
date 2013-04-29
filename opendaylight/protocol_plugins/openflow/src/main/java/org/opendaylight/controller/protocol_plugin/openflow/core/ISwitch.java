@@ -217,7 +217,15 @@ public interface ISwitch {
     public boolean isOperational();
 
     /**
-     * Sends synchronous Barrier message 
+     * Send Barrier message synchronously. The caller will be blocked until the
+     * Barrier reply arrives.
      */
-    public Object sendBarrierMessage();
+    Object syncSendBarrierMessage();
+
+    /**
+     * Send Barrier message asynchronously. The caller is not blocked. The
+     * Barrier message will be sent in a transmit thread which will be blocked
+     * until the Barrier reply arrives.
+     */
+    Object asyncSendBarrierMessage();
 }

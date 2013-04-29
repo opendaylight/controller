@@ -76,9 +76,17 @@ public interface IPluginInFlowProgrammerService {
     Status removeAllFlows(Node node);
 
     /**
-     * Send synchronous Barrier message 
+     * Send Barrier message synchronously. The caller will be blocked until the
+     * Barrier reply arrives.
      * 
      * @param node
      */
-    Status sendBarrierMessage(Node node);
+    Status syncSendBarrierMessage(Node node);
+
+    /**
+     * Send Barrier message asynchronously. The caller is not blocked.
+     * 
+     * @param node
+     */
+    Status asyncSendBarrierMessage(Node node);
 }

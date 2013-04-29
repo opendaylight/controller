@@ -2577,10 +2577,17 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     }
     
     @Override
-    public void solicitStatusResponse(Node node) {
+    public Status solicitStatusResponse(Node node, boolean blocking) {
+        Status rv = new Status(StatusCode.INTERNALERROR);
+        
         if (this.programmer != null) {
-            programmer.sendBarrierMessage(node);
-        }        
+            if (blocking) {
+                rv = programmer.syncSendBarrierMessage(node);
+            } else {
+                rv = programmer.asyncSendBarrierMessage(node);                
+            }
+        }
+        
+        return rv;
     }
-
 }

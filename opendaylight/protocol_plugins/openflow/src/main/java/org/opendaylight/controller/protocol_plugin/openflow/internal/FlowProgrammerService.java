@@ -324,7 +324,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public Status removeAllFlows(Node node) {
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     private String errorString(String phase, String action, String cause) {
@@ -445,7 +445,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     }
 
     @Override
-    public Status sendBarrierMessage(Node node) {
+    public Status syncSendBarrierMessage(Node node) {
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             return new Status(StatusCode.NOTACCEPTABLE,
                     "The node does not support Barrier message.");
@@ -455,9 +455,32 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             long swid = (Long) node.getID();
             ISwitch sw = controller.getSwitch(swid);
             if (sw != null) {
-                sw.sendBarrierMessage();
+                sw.syncSendBarrierMessage();
                 clearXid2Rid(swid);
-                return (new Status(StatusCode.SUCCESS, null));
+                return (new Status(StatusCode.SUCCESS));
+            } else {
+                return new Status(StatusCode.GONE,
+                        "The node does not have a valid Switch reference.");
+            }
+        }
+        return new Status(StatusCode.INTERNALERROR,
+                "Failed to send Barrier message.");
+    }
+    
+    @Override
+    public Status asyncSendBarrierMessage(Node node) {
+        if (!node.getType().equals(NodeIDType.OPENFLOW)) {
+            return new Status(StatusCode.NOTACCEPTABLE,
+                    "The node does not support Barrier message.");
+        }
+
+        if (controller != null) {
+            long swid = (Long) node.getID();
+            ISwitch sw = controller.getSwitch(swid);
+            if (sw != null) {
+                sw.asyncSendBarrierMessage();
+                clearXid2Rid(swid);
+                return (new Status(StatusCode.SUCCESS));
             } else {
                 return new Status(StatusCode.GONE,
                         "The node does not have a valid Switch reference.");
@@ -499,7 +522,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         
         int size = swxid2rid.size();
         if (size % barrierMessagePriorCount == 0) {
-            result = sendBarrierMessage(node);
+            result = asyncSendBarrierMessage(node);
         }
         
         return result;
