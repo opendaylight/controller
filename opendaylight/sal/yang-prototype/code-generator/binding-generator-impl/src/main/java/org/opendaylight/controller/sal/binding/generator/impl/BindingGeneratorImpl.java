@@ -18,9 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.opendaylight.controller.binding.generator.util.CodeGeneratorHelper;
+import org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.controller.binding.generator.util.Types;
-import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTypeBuilderImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.spi.TypeProvider;
@@ -98,20 +97,25 @@ public class BindingGeneratorImpl implements BindingGenerator {
     public List<Type> generateTypes(final SchemaContext context) {
         final List<Type> genTypes = new ArrayList<Type>();
 
-        typeProvider = new TypeProviderImpl(context);
         if (context != null) {
+            typeProvider = new TypeProviderImpl(context);
             final Set<Module> modules = context.getModules();
-
+            
             if (modules != null) {
                 for (final Module module : modules) {
-                    DataNodeIterator moduleIterator = new DataNodeIterator(module);
-                    
-                    genTypeBuilders = new HashMap<String, Map<String, GeneratedTypeBuilder>>();
-                    final List<ContainerSchemaNode> schemaContainers = moduleIterator.allContainers();
-                    final List<ListSchemaNode> schemaLists = moduleIterator.allLists();
+                    final DataNodeIterator moduleIterator = new DataNodeIterator(
+                            module);
 
-                    basePackageName = resolveBasePackageName(
-                            module.getNamespace(), module.getYangVersion());
+                    genTypeBuilders = new HashMap<String, Map<String, GeneratedTypeBuilder>>();
+                    final List<ContainerSchemaNode> schemaContainers = moduleIterator
+                            .allContainers();
+                    final List<ListSchemaNode> schemaLists = moduleIterator
+                            .allLists();
+
+                    basePackageName = BindingGeneratorUtil
+                            .moduleNamespaceToPackageName(
+                                    module.getNamespace(),
+                                    module.getYangVersion());
 
                     if (schemaContainers.size() > 0) {
                         for (final ContainerSchemaNode container : schemaContainers) {
@@ -138,6 +142,9 @@ public class BindingGeneratorImpl implements BindingGenerator {
                         genTypes.add(genNotifyType);
                     }
                 }
+                
+                //FIXME this is quick add of typedefs to generated types from type provider
+                genTypes.addAll(((TypeProviderImpl)typeProvider).getGeneratedTypeDefs());
             }
         }
         return genTypes;
@@ -202,7 +209,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
                 && (enumTypeDef.getQName() != null)
                 && (enumTypeDef.getQName().getLocalName() != null)) {
 
-            final String enumerationName = CodeGeneratorHelper
+            final String enumerationName = BindingGeneratorUtil
                     .parseToClassName(enumName);
             final EnumBuilder enumBuilder = typeBuilder
                     .addEnumeration(enumerationName);
@@ -213,7 +220,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
                     int listIndex = 0;
                     for (final EnumPair enumPair : enums) {
                         if (enumPair != null) {
-                            final String enumPairName = CodeGeneratorHelper
+                            final String enumPairName = BindingGeneratorUtil
                                     .parseToClassName(enumPair.getName());
                             Integer enumPairValue = enumPair.getValue();
 
@@ -236,7 +243,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
         if (module != null) {
             String packageName = resolveBasePackageName(module.getNamespace(),
                     module.getYangVersion());
-            final String moduleName = CodeGeneratorHelper
+            final String moduleName = BindingGeneratorUtil
                     .parseToClassName(module.getName()) + postfix;
 
             if (packageName != null) {
@@ -250,7 +257,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
     private GeneratedType rpcMethodsToGenType(final Module module) {
         if (module != null) {
             final Set<RpcDefinition> rpcDefinitions = module.getRpcs();
-
+            //TODO: add implementation
             if ((rpcDefinitions != null) && !rpcDefinitions.isEmpty()) {
                 final GeneratedTypeBuilder rpcTypeBuilder = moduleTypeBuilder(
                         module, "Rpc");
@@ -269,7 +276,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
         if (module != null) {
             final Set<NotificationDefinition> notifications = module
                     .getNotifications();
-
+            //TODO: add implementation
             if ((notifications != null) && !notifications.isEmpty()) {
                 final GeneratedTypeBuilder notifyTypeBuilder = moduleTypeBuilder(
                         module, "Notification");
@@ -284,25 +291,26 @@ public class BindingGeneratorImpl implements BindingGenerator {
         return null;
     }
 
-    private String resolveGeneratedTypePackageName(final SchemaPath schemaPath) {
-        final StringBuilder builder = new StringBuilder();
-        builder.append(basePackageName);
-        if ((schemaPath != null) && (schemaPath.getPath() != null)) {
-            final List<QName> pathToNode = schemaPath.getPath();
-            final int traversalSteps = (pathToNode.size() - 1);
-            for (int i = 0; i < traversalSteps; ++i) {
-                builder.append(".");
-                String nodeLocalName = pathToNode.get(i).getLocalName();
-
-                // TODO: create method
-                nodeLocalName = nodeLocalName.replace(":", ".");
-                nodeLocalName = nodeLocalName.replace("-", ".");
-                builder.append(nodeLocalName);
-            }
-            return validatePackage(builder.toString());
-        }
-        return null;
-    }
+    // private String resolveGeneratedTypePackageName(final SchemaPath
+    // schemaPath) {
+    // final StringBuilder builder = new StringBuilder();
+    // builder.append(basePackageName);
+    // if ((schemaPath != null) && (schemaPath.getPath() != null)) {
+    // final List<QName> pathToNode = schemaPath.getPath();
+    // final int traversalSteps = (pathToNode.size() - 1);
+    // for (int i = 0; i < traversalSteps; ++i) {
+    // builder.append(".");
+    // String nodeLocalName = pathToNode.get(i).getLocalName();
+    //
+    // // TODO: refactor with use of BindingGeneratorUtil class
+    // nodeLocalName = nodeLocalName.replace(":", ".");
+    // nodeLocalName = nodeLocalName.replace("-", ".");
+    // builder.append(nodeLocalName);
+    // }
+    // return validatePackage(builder.toString());
+    // }
+    // return null;
+    // }
 
     private GeneratedType containerToGenType(ContainerSchemaNode container) {
         if (container == null) {
@@ -358,14 +366,17 @@ public class BindingGeneratorImpl implements BindingGenerator {
                             .javaTypeForSchemaDefinitionType(typeDef);
                 } else {
                     if (isImported(leaf.getPath(), typeDef.getPath())) {
-                        //TODO: resolving of imported enums as references to GeneratedTypeData interface
+                        // TODO: resolving of imported enums as references to
+                        // GeneratedTypeData interface
                     } else {
                         final EnumTypeDefinition enumTypeDef = enumTypeDefFromExtendedType(typeDef);
-                        final EnumBuilder enumBuilder = resolveEnumFromTypeDefinition(enumTypeDef, leafName,
-                                typeBuilder);
-                        
+                        final EnumBuilder enumBuilder = resolveEnumFromTypeDefinition(
+                                enumTypeDef, leafName, typeBuilder);
+
                         if (enumBuilder != null) {
-                            type = new ReferencedTypeImpl(enumBuilder.getPackageName(), enumBuilder.getName());
+                            type = new ReferencedTypeImpl(
+                                    enumBuilder.getPackageName(),
+                                    enumBuilder.getName());
                         }
                     }
                 }
@@ -392,7 +403,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
                     && (leafPathQName.getNamespace() != null)
                     && (typePathQName != null)
                     && (typePathQName.getNamespace() != null)) {
-                
+
                 return !leafPathQName.getNamespace().equals(
                         typePathQName.getNamespace());
             }
@@ -418,7 +429,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
                         .javaTypeForSchemaDefinitionType(typeDef);
 
                 final GeneratedPropertyBuilder propBuilder = toBuilder
-                        .addProperty(CodeGeneratorHelper
+                        .addProperty(BindingGeneratorUtil
                                 .parseToClassName(leafName));
 
                 propBuilder.setReadOnly(isReadOnly);
@@ -501,13 +512,14 @@ public class BindingGeneratorImpl implements BindingGenerator {
             return null;
         }
 
-        final String packageName = resolveGeneratedTypePackageName(schemaNode
-                .getPath());
+        final String packageName = BindingGeneratorUtil
+                .packageNameForGeneratedType(basePackageName,
+                        schemaNode.getPath());
         final String schemaNodeName = schemaNode.getQName().getLocalName();
 
         if ((packageName != null) && (schemaNode != null)
                 && (schemaNodeName != null)) {
-            final String genTypeName = CodeGeneratorHelper
+            final String genTypeName = BindingGeneratorUtil
                     .parseToClassName(schemaNodeName);
             final GeneratedTypeBuilder newType = new GeneratedTypeBuilderImpl(
                     packageName, genTypeName);
@@ -531,14 +543,14 @@ public class BindingGeneratorImpl implements BindingGenerator {
     private String getterMethodName(final String methodName) {
         final StringBuilder method = new StringBuilder();
         method.append("get");
-        method.append(CodeGeneratorHelper.parseToClassName(methodName));
+        method.append(BindingGeneratorUtil.parseToClassName(methodName));
         return method.toString();
     }
 
     private String setterMethodName(final String methodName) {
         final StringBuilder method = new StringBuilder();
         method.append("set");
-        method.append(CodeGeneratorHelper.parseToClassName(methodName));
+        method.append(BindingGeneratorUtil.parseToClassName(methodName));
         return method.toString();
     }
 
@@ -564,7 +576,7 @@ public class BindingGeneratorImpl implements BindingGenerator {
 
         setMethod.addComment(comment);
         setMethod.addParameter(parameterType,
-                CodeGeneratorHelper.parseToParamName(schemaNodeName));
+                BindingGeneratorUtil.parseToValidParamName(schemaNodeName));
         setMethod.addReturnType(Types.voidType());
 
         return setMethod;
@@ -639,19 +651,12 @@ public class BindingGeneratorImpl implements BindingGenerator {
      * @return
      */
     private GeneratedTOBuilder resolveListKey(final ListSchemaNode list) {
-        final String packageName = resolveGeneratedTypePackageName(list
-                .getPath());
+        final String packageName = BindingGeneratorUtil
+                .packageNameForGeneratedType(basePackageName, list.getPath());
         final String listName = list.getQName().getLocalName() + "Key";
 
-        if ((packageName != null) && (list != null) && (listName != null)) {
-            final String genTOName = CodeGeneratorHelper
-                    .parseToClassName(listName);
-            final GeneratedTOBuilder newType = new GeneratedTOBuilderImpl(
-                    packageName, genTOName);
-
-            return newType;
-        }
-        return null;
+        return BindingGeneratorUtil.schemaNodeToTransferObjectBuilder(
+                packageName, list, listName);
     }
 
     private boolean isPartOfListKey(final LeafSchemaNode leaf,
@@ -680,10 +685,11 @@ public class BindingGeneratorImpl implements BindingGenerator {
 
     private GeneratedTypeBuilder resolveListTypeBuilder(
             final ListSchemaNode list) {
-        final String packageName = resolveGeneratedTypePackageName(list
-                .getPath());
+        final String packageName = BindingGeneratorUtil
+                .packageNameForGeneratedType(basePackageName,
+                        list.getPath());
         final String schemaNodeName = list.getQName().getLocalName();
-        final String genTypeName = CodeGeneratorHelper
+        final String genTypeName = BindingGeneratorUtil
                 .parseToClassName(schemaNodeName);
 
         GeneratedTypeBuilder typeBuilder = null;

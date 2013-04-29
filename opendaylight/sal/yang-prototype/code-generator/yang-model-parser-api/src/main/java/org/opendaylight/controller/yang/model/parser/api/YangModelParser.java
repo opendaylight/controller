@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.yang.model.parser.api;
 
+import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.model.api.Module;
@@ -22,16 +24,6 @@ import org.opendaylight.controller.yang.model.api.type.UnknownTypeDefinition;
 public interface YangModelParser {
 
     /**
-     * Parse single Yang model file and return the schema definition of Yang
-     * module defined in *.Yang file.
-     *
-     * @param yangFile
-     *            yang file to parse
-     * @return the schema definition of Yang module defined in .Yang file.
-     */
-    public Module parseYangModel(final String yangFile);
-
-    /**
      * Parse one or more Yang model files and return the definitions of Yang
      * modules defined in *.Yang files; <br>
      * This method SHOULD be used if user need to parse multiple yang models
@@ -41,10 +33,10 @@ public interface YangModelParser {
      *            yang files to parse
      * @return Set of Yang Modules
      */
-    public Set<Module> parseYangModels(final String... yangFiles);
-
+    public Set<Module> parseYangModels(final List<File> yangFiles);
+    
     public Set<Module> parseYangModelsFromStreams(
-            final InputStream... yangModelStreams);
+            final List<InputStream> yangModelStreams);
 
     /**
      * Creates {@link SchemaContext} from specified Modules. The modules SHOULD

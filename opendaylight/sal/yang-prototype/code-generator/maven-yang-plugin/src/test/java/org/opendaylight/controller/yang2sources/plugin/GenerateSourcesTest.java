@@ -49,7 +49,7 @@ public class GenerateSourcesTest {
     @Test
     public void test() throws Exception {
         mojo.execute();
-        verify(parser, times(1)).parseYangModels((String[]) anyVararg());
+        verify(parser, times(1)).parseYangModels(anyListOf(File.class));
         assertThat(GeneratorMock.called, is(1));
         assertThat(GeneratorMock.outputDir, is(outDir));
     }
@@ -66,7 +66,5 @@ public class GenerateSourcesTest {
             outputDir = baseDir;
             return Lists.newArrayList();
         }
-
     }
-
 }

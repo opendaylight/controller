@@ -88,21 +88,27 @@ public class YangModelParserImpl implements YangModelParser {
             .getLogger(YangModelParserImpl.class);
 
     @Override
-    public Module parseYangModel(final String yangFile) {
-        final Map<String, TreeMap<Date, ModuleBuilder>> modules = resolveModuleBuilders(yangFile);
-        final Set<Module> result = build(modules);
-        return result.iterator().next();
-    }
-
-    @Override
-    public Set<Module> parseYangModels(final String... yangFiles) {
-        final Map<String, TreeMap<Date, ModuleBuilder>> modules = resolveModuleBuilders(yangFiles);
-        return build(modules);
+    public Set<Module> parseYangModels(final List<File> yangFiles) {
+        if (yangFiles != null) {
+            final List<InputStream> inputStreams = new ArrayList<InputStream>();
+            
+            for (final File yangFile : yangFiles) {
+                try {
+                    inputStreams.add(new FileInputStream(yangFile));
+                } catch (FileNotFoundException e) {
+                    logger.warn("Exception while reading yang file: "
+                            + yangFile.getName(), e);
+                }
+            }
+            final Map<String, TreeMap<Date, ModuleBuilder>> modules = resolveModuleBuilders(inputStreams);
+            return build(modules);
+        }
+        return Collections.emptySet();
     }
 
     @Override
     public Set<Module> parseYangModelsFromStreams(
-            final InputStream... yangModelStreams) {
+            final List<InputStream> yangModelStreams) {
         final Map<String, TreeMap<Date, ModuleBuilder>> modules = resolveModuleBuilders(yangModelStreams);
         return build(modules);
     }
@@ -113,53 +119,10 @@ public class YangModelParserImpl implements YangModelParser {
     }
 
     private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
-            final String... yangFiles) {
-        final InputStream[] streams = loadStreams(yangFiles);
-        Map<String, TreeMap<Date, ModuleBuilder>> result = Collections
-                .emptyMap();
-
-        if (streams != null) {
-            result = resolveModuleBuilders(streams);
-            closeStreams(streams);
-        }
-        return result;
-    }
-
-    private InputStream[] loadStreams(final String... yangFiles) {
-        final InputStream[] streams = new InputStream[yangFiles.length];
-        for (int i = 0; i < yangFiles.length; i++) {
-            final String yangFileName = yangFiles[i];
-            final File yangFile = new File(yangFileName);
-            try {
-                streams[i] = new FileInputStream(yangFile);
-            } catch (FileNotFoundException e) {
-                logger.warn("Exception while reading yang stream: "
-                        + streams[i], e);
-            }
-        }
-        return streams;
-    }
-
-    private void closeStreams(final InputStream[] streams) {
-        if (streams != null) {
-            for (int i = 0; i < streams.length; i++) {
-                try {
-                    if (streams[i] != null) {
-                        streams[i].close();
-                    }
-                } catch (IOException e) {
-                    logger.warn("Exception while closing yang stream: "
-                            + streams[i], e);
-                }
-            }
-        }
-    }
-
-    private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
-            final InputStream... yangFiles) {
+            final List<InputStream>  yangFileStreams) {
         final Map<String, TreeMap<Date, ModuleBuilder>> modules = new HashMap<String, TreeMap<Date, ModuleBuilder>>();
         final ParseTreeWalker walker = new ParseTreeWalker();
-        final List<ParseTree> trees = parseStreams(yangFiles);
+        final List<ParseTree> trees = parseStreams(yangFileStreams);
         final ModuleBuilder[] builders = new ModuleBuilder[trees.size()];
 
         // validate yang
@@ -189,7 +152,7 @@ public class YangModelParserImpl implements YangModelParser {
         return modules;
     }
 
-    private List<ParseTree> parseStreams(final InputStream... yangStreams) {
+    private List<ParseTree> parseStreams(final List<InputStream> yangStreams) {
         final List<ParseTree> trees = new ArrayList<ParseTree>();
         for (InputStream yangStream : yangStreams) {
             trees.add(parseStream(yangStream));
@@ -412,7 +375,8 @@ public class YangModelParserImpl implements YangModelParser {
         tdb.setLengths(old.getLengths());
         tdb.setPatterns(old.getPatterns());
         tdb.setFractionDigits(old.getFractionDigits());
-
+        tdb.setPath(old.getPath());
+        
         final TypeDefinition<?> oldType = old.getType();
         if (oldType == null) {
             tdb.setType(old.getTypedef());

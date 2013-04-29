@@ -8,7 +8,7 @@
 package org.opendaylight.controller.yang2sources.plugin;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -90,20 +90,21 @@ public final class YangToSourcesMojo extends AbstractMojo {
      */
     private SchemaContext processYang() throws MojoExecutionException {
         try {
-            String[] yangFiles = Util.listFilesAsArrayOfPaths(yangFilesRootDir);
-
-            if (yangFiles.length == 0)
+            Collection<File> yangFiles = Util.listFiles(yangFilesRootDir);
+            
+            if (yangFiles.isEmpty()) {
                 getLog().warn(
                         Util.message("No %s file found in %s", LOG_PREFIX,
                                 Util.YANG_SUFFIX, yangFilesRootDir));
-            // TODO only warning or throw exception ?
-
-            Set<Module> parsedYang = parser.parseYangModels(yangFiles);
+                return null;
+            } 
+            
+            Set<Module> parsedYang = parser.parseYangModels(new ArrayList<File>(yangFiles));
             SchemaContext resolveSchemaContext = parser
                     .resolveSchemaContext(parsedYang);
             getLog().info(
                     Util.message("%s files parsed from %s", LOG_PREFIX,
-                            Util.YANG_SUFFIX, Arrays.toString(yangFiles)));
+                            Util.YANG_SUFFIX, yangFiles));
             return resolveSchemaContext;
 
             // MojoExecutionException is thrown since execution cannot continue

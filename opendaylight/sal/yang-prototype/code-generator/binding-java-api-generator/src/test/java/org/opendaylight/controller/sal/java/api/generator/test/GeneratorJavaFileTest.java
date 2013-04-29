@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.sal.java.api.generator.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -86,20 +88,26 @@ public class GeneratorJavaFileTest {
         assertTrue(filesList.contains("Type2.java"));
         assertTrue(filesList.contains("Type3.java"));
     }
-
+    
     @Test
     public void compilationTest() throws Exception {
         final YangModelParserImpl parser = new YangModelParserImpl();
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
 
-        File sourcesDir = new File("src/test/resources/yang");
-        File[] sourceFiles = sourcesDir.listFiles();
-        String[] sourcesDirPaths = new String[sourceFiles.length];
-        for (int i = 0; i < sourceFiles.length; i++) {
-            sourcesDirPaths[i] = sourceFiles[i].getAbsolutePath();
+        final File sourcesDir = new File("src/test/resources/yang");
+        final List<File> sourceFiles = new ArrayList<File>();
+        final File[] fileArray = sourcesDir.listFiles();
+        
+        for (int i = 0; i < fileArray.length; ++i) {
+            sourceFiles.add(fileArray[i]);
         }
+        
+//        String[] sourcesDirPaths = new String[sourceFiles.length];
+//        for (int i = 0; i < sourceFiles.length; i++) {
+//            sourcesDirPaths[i] = sourceFiles[i].getAbsolutePath();
+//        }
         final Set<Module> modulesToBuild = parser
-                .parseYangModels(sourcesDirPaths);
+                .parseYangModels(sourceFiles);
 
         final SchemaContext context = parser
                 .resolveSchemaContext(modulesToBuild);
@@ -107,7 +115,7 @@ public class GeneratorJavaFileTest {
         final Set<GeneratedType> typesToGenerate = new HashSet<GeneratedType>();
         final Set<GeneratedTransferObject> tosToGenerate = new HashSet<GeneratedTransferObject>();
         for (Type type : types) {
-            if (type instanceof GeneratedType) {
+            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
                 typesToGenerate.add((GeneratedType) type);
             }
 

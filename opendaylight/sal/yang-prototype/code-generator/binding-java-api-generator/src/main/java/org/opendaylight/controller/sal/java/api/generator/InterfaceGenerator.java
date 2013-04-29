@@ -19,6 +19,7 @@ import java.util.List;
 import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
 import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.Type;
@@ -27,7 +28,7 @@ public class InterfaceGenerator implements CodeGenerator {
 
     public Writer generate(Type type) throws IOException {
         Writer writer = new StringWriter();
-        if (type instanceof GeneratedType) {
+        if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
             GeneratedType genType = (GeneratedType) type;
 
             final List<Constant> constants = genType.getConstantDefinitions();
