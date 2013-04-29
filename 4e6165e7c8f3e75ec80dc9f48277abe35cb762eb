@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///d0\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/yang-model-parser-impl/src/main/antlr/YangParser.g4.bak",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-04-29T21:40:20Z",
+      "side": 1,
+      "message": "Please remove this backup file",
+      "revId": "4e6165e7c8f3e75ec80dc9f48277abe35cb762eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
