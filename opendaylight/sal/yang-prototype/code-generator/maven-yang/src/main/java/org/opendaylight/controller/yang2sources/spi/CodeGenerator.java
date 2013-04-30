@@ -8,6 +8,7 @@
 package org.opendaylight.controller.yang2sources.spi;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 
 import org.opendaylight.controller.yang.model.api.SchemaContext;
@@ -20,7 +21,7 @@ public interface CodeGenerator {
 
     /**
      * Generate sources from provided {@link SchemaContext}
-     * 
+     *
      * @param context
      *            parsed from yang files
      * @param outputBaseDir
@@ -28,5 +29,5 @@ public interface CodeGenerator {
      *            user
      * @return collection of files that were generated from schema context
      */
-    Collection<File> generateSources(SchemaContext context, File outputBaseDir);
+    Collection<File> generateSources(SchemaContext context, File outputBaseDir) throws IOException;
 }

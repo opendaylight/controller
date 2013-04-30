@@ -18,11 +18,12 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 
 public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
-
+    private final UnknownSchemaNodeImpl instance;
     private final QName qname;
     private SchemaPath schemaPath;
-    private final UnknownSchemaNodeImpl instance;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    private QName nodeType;
+    private String nodeParameter;
 
     UnknownSchemaNodeBuilder(final QName qname) {
         this.qname = qname;
@@ -32,6 +33,8 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
     @Override
     public UnknownSchemaNode build() {
         instance.setPath(schemaPath);
+        instance.setNodeType(nodeType);
+        instance.setNodeParameter(nodeParameter);
 
         // UNKNOWN NODES
         final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
@@ -77,6 +80,22 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
         addedUnknownNodes.add(unknownNode);
     }
 
+    public QName getNodeType() {
+        return nodeType;
+    }
+
+    public void setNodeType(final QName nodeType) {
+        this.nodeType = nodeType;
+    }
+
+    public String getNodeParameter() {
+        return nodeParameter;
+    }
+
+    public void setNodeParameter(final String nodeParameter) {
+        this.nodeParameter = nodeParameter;
+    }
+
     private static class UnknownSchemaNodeImpl implements UnknownSchemaNode {
         private final QName qname;
         private SchemaPath path;
@@ -84,6 +103,8 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
         private String reference;
         private Status status = Status.CURRENT;
         private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
+        private QName nodeType;
+        private String nodeParameter;
 
         private UnknownSchemaNodeImpl(final QName qname) {
             this.qname = qname;
@@ -142,6 +163,24 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
             if (unknownNodes != null) {
                 this.unknownNodes = unknownNodes;
             }
+        }
+
+        @Override
+        public QName getNodeType() {
+            return nodeType;
+        }
+
+        private void setNodeType(final QName nodeType) {
+            this.nodeType = nodeType;
+        }
+
+        @Override
+        public String getNodeParameter() {
+            return nodeParameter;
+        }
+
+        private void setNodeParameter(final String nodeParameter) {
+            this.nodeParameter = nodeParameter;
         }
     }
 

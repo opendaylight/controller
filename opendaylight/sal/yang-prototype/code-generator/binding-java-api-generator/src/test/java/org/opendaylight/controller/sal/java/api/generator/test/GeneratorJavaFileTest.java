@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,7 +65,7 @@ public class GeneratorJavaFileTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws IOException {
         final Set<GeneratedType> types = new HashSet<GeneratedType>();
         GeneratedType t1 = createGeneratedType(
                 "org.opendaylight.controller.gen", "Type1");
@@ -79,7 +80,6 @@ public class GeneratorJavaFileTest {
                 new InterfaceGenerator(), types);
         generator.generateToFile(PATH);
 
-        // path: test-dir/com/cisco/yang
         String[] files = new File(PATH + FS + "org" + FS + "opendaylight" + FS + "controller" + FS + "gen").list();
         List<String> filesList = Arrays.asList(files);
 

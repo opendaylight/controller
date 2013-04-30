@@ -209,6 +209,7 @@ public class YangModelParserImpl implements YangModelParser {
         resolveDirtyNodes(modules, builder);
         resolveIdentities(modules, builder);
         resolveUses(modules, builder);
+        resolveUnknownNodes(modules, builder);
     }
 
     /**
@@ -977,6 +978,29 @@ public class YangModelParserImpl implements YangModelParser {
                     module.getPrefix(), baseString);
         }
         return result;
+    }
+
+    private void resolveUnknownNodes(
+            final Map<String, TreeMap<Date, ModuleBuilder>> modules,
+            final ModuleBuilder module) {
+        for (UnknownSchemaNodeBuilder usnb : module.getAddedUnknownNodes()) {
+            QName nodeType = usnb.getNodeType();
+            if (nodeType.getNamespace() == null
+                    || nodeType.getRevision() == null) {
+                try {
+                    ModuleBuilder dependentModule = findDependentModule(
+                            modules, module, nodeType.getPrefix());
+                    QName newNodeType = new QName(
+                            dependentModule.getNamespace(),
+                            dependentModule.getRevision(),
+                            nodeType.getPrefix(), nodeType.getLocalName());
+                    usnb.setNodeType(newNodeType);
+                } catch (YangParseException e) {
+                    logger.debug("Failed to find unknown node type: "
+                            + nodeType);
+                }
+            }
+        }
     }
 
     /**

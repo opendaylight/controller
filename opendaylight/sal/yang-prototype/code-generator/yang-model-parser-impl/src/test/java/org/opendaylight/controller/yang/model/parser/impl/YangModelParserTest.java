@@ -601,6 +601,9 @@ public class YangModelParserTest {
         ContainerSchemaNode network = (ContainerSchemaNode)testModule.getDataChildByName("network");
         List<UnknownSchemaNode> unknownNodes = network.getUnknownSchemaNodes();
         assertEquals(1, unknownNodes.size());
+        UnknownSchemaNode unknownNode = unknownNodes.get(0);
+        assertNotNull(unknownNode.getNodeType());
+        assertEquals("point", unknownNode.getNodeParameter());
     }
 
     @Test

@@ -44,75 +44,68 @@ public class GeneratorJavaFile {
         this.genTransferObjects = genTransferObjects;
     }
 
-    public boolean generateToFile() {
+    public List<File> generateToFile() throws IOException {
         return generateToFile(null);
     }
 
-    public boolean generateToFile(String path) {
-        try {
-            for (GeneratedType type : types) {
-                String parentPath = generateParentPath(path,
-                        type.getPackageName());
+    public List<File> generateToFile(String path) throws IOException {
+        final List<File> result = new ArrayList<File>();
 
-                File file = new File(parentPath, type.getName() + ".java");
-                File parent = file.getParentFile();
-                if (!parent.exists()) {
-                    parent.mkdirs();
-                }
+        for (GeneratedType type : types) {
+            String parentPath = generateParentPath(path,
+                    type.getPackageName());
 
-                if (!file.exists()) {
-                    FileWriter fw = null;
-                    BufferedWriter bw = null;
-
-                    file.createNewFile();
-                    fw = new FileWriter(file);
-                    bw = new BufferedWriter(fw);
-                    Writer writer = interfaceGenerator.generate(type);
-                    bw.write(writer.toString());
-
-                    if (bw != null) {
-                        try {
-                            bw.close();
-                        } catch (IOException e) {
-                            // TODO: log?
-                        }
-                    }
-                }
+            File file = new File(parentPath, type.getName() + ".java");
+            File parent = file.getParentFile();
+            if (!parent.exists()) {
+                parent.mkdirs();
             }
-            for (GeneratedTransferObject transferObject : genTransferObjects) {
-                String parentPath = generateParentPath(path,
-                        transferObject.getPackageName());
 
-                File file = new File(parentPath, transferObject.getName() + ".java");
-                File parent = file.getParentFile();
-                if (!parent.exists()) {
-                    parent.mkdirs();
+            if (!file.exists()) {
+                FileWriter fw = null;
+                BufferedWriter bw = null;
+
+                file.createNewFile();
+                fw = new FileWriter(file);
+                bw = new BufferedWriter(fw);
+                Writer writer = interfaceGenerator.generate(type);
+                bw.write(writer.toString());
+
+                if (bw != null) {
+                    bw.close();
                 }
-
-                if (!file.exists()) {
-                    FileWriter fw = null;
-                    BufferedWriter bw = null;
-
-                    file.createNewFile();
-                    fw = new FileWriter(file);
-                    bw = new BufferedWriter(fw);
-                    Writer writer = classGenerator.generate(transferObject);
-                    bw.write(writer.toString());
-
-                    if (bw != null) {
-                        try {
-                            bw.close();
-                        } catch (IOException e) {
-                            // TODO: log?
-                        }
-                    }
-                }
+                result.add(file);
             }
-            return true;
-        } catch (IOException e) {
-            // TODO: log?
-            return false;
         }
+
+        for (GeneratedTransferObject transferObject : genTransferObjects) {
+            String parentPath = generateParentPath(path,
+                    transferObject.getPackageName());
+
+            File file = new File(parentPath, transferObject.getName() + ".java");
+            File parent = file.getParentFile();
+            if (!parent.exists()) {
+                parent.mkdirs();
+            }
+
+            if (!file.exists()) {
+                FileWriter fw = null;
+                BufferedWriter bw = null;
+
+                file.createNewFile();
+                fw = new FileWriter(file);
+                bw = new BufferedWriter(fw);
+                Writer writer = classGenerator.generate(transferObject);
+                bw.write(writer.toString());
+
+                if (bw != null) {
+                    bw.close();
+                }
+                result.add(file);
+            }
+        }
+
+        return result;
     }
 
     private String generateParentPath(String path, String pkg) {

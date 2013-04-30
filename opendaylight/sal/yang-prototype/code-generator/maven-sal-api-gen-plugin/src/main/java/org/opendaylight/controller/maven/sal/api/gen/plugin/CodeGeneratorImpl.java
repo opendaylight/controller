@@ -8,7 +8,7 @@
 package org.opendaylight.controller.maven.sal.api.gen.plugin;
 
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +27,7 @@ public class CodeGeneratorImpl implements CodeGenerator {
 
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir) {
+            File outputBaseDir) throws IOException {
 
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
         final List<Type> types = bindingGenerator.generateTypes(context);
@@ -40,13 +40,11 @@ public class CodeGeneratorImpl implements CodeGenerator {
                 typesToGenerate.add((GeneratedType) type);
             }
 
-           
+
         }
 
         final GeneratorJavaFile generator = new GeneratorJavaFile(typesToGenerate, tosToGenerate);
-        generator.generateToFile(outputBaseDir.getAbsolutePath());
-
-        return Arrays.asList(outputBaseDir.listFiles());
+        return generator.generateToFile(outputBaseDir.getAbsolutePath());
     }
 
 }

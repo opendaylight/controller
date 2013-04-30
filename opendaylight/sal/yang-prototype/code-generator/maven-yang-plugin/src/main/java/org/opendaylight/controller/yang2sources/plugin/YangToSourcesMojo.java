@@ -8,6 +8,7 @@
 package org.opendaylight.controller.yang2sources.plugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -167,7 +168,7 @@ public final class YangToSourcesMojo extends AbstractMojo {
      */
     private void generateSourcesWithOneGenerator(SchemaContext context,
             CodeGeneratorArg codeGeneratorCfg) throws ClassNotFoundException,
-            InstantiationException, IllegalAccessException {
+            InstantiationException, IllegalAccessException, IOException {
 
         codeGeneratorCfg.check();
 

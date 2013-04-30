@@ -646,11 +646,21 @@ public final class YangModelParserListenerImpl extends YangParserBaseListener {
     // Unknown types
     @Override
     public void enterIdentifier_stmt(YangParser.Identifier_stmtContext ctx) {
-        final String name = stringFromNode(ctx);
+        final String nodeParameter = stringFromNode(ctx);
+        QName nodeType = null;
+
+        final String nodeTypeStr = ctx.getChild(0).getText();
+        final String[] splittedElement = nodeTypeStr.split(":");
+        if (splittedElement.length == 1) {
+            nodeType = new QName(null, null, null, splittedElement[0]);
+        } else {
+            nodeType = new QName(null, null, splittedElement[0],
+                    splittedElement[1]);
+        }
 
         QName qname;
-        if (name != null) {
-            String[] splittedName = name.split(":");
+        if (nodeParameter != null) {
+            String[] splittedName = nodeParameter.split(":");
             if (splittedName.length == 2) {
                 qname = new QName(null, null, splittedName[0], splittedName[1]);
             } else {
@@ -658,12 +668,14 @@ public final class YangModelParserListenerImpl extends YangParserBaseListener {
                         splittedName[0]);
             }
         } else {
-            qname = new QName(namespace, revision, yangModelPrefix, name);
+            qname = new QName(namespace, revision, yangModelPrefix, nodeParameter);
         }
 
         UnknownSchemaNodeBuilder builder = moduleBuilder.addUnknownSchemaNode(
                 qname, actualPath);
-        updatePath(name);
+        builder.setNodeType(nodeType);
+        builder.setNodeParameter(nodeParameter);
+        updatePath(nodeParameter);
         builder.setPath(createActualSchemaPath(actualPath, namespace, revision,
                 yangModelPrefix));
         parseSchemaNodeArgs(ctx, builder);

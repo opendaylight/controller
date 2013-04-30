@@ -82,6 +82,7 @@ public class ModuleBuilder implements Builder {
     private final Map<String, DeviationBuilder> addedDeviations = new HashMap<String, DeviationBuilder>();
     private final Map<List<String>, TypeDefinitionBuilder> addedTypedefs = new HashMap<List<String>, TypeDefinitionBuilder>();
     private final List<ExtensionBuilder> addedExtensions = new ArrayList<ExtensionBuilder>();
+    private final Set<UnknownSchemaNodeBuilder> addedUnknownNodes = new HashSet<UnknownSchemaNodeBuilder>();
 
     private final Map<List<String>, TypeAwareBuilder> dirtyNodes = new HashMap<List<String>, TypeAwareBuilder>();
 
@@ -126,7 +127,6 @@ public class ModuleBuilder implements Builder {
         instance.setNotifications(notifications);
 
         // AUGMENTATIONS
-        // instance.setAugmentations(augmentations);
         final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
         for (AugmentationSchemaBuilder builder : addedAugments) {
             augmentations.add(builder.build());
@@ -193,6 +193,10 @@ public class ModuleBuilder implements Builder {
 
     public Map<List<String>, UsesNodeBuilder> getAddedUsesNodes() {
         return addedUsesNodes;
+    }
+
+    public Set<UnknownSchemaNodeBuilder> getAddedUnknownNodes() {
+        return addedUnknownNodes;
     }
 
     public Set<TypeDefinitionBuilder> getModuleTypedefs() {
@@ -528,7 +532,7 @@ public class ModuleBuilder implements Builder {
         List<String> pathToCase = new ArrayList<String>(parentPath);
         ChoiceCaseBuilder builder = new ChoiceCaseBuilder(caseName);
 
-        final ChoiceBuilder parent = (ChoiceBuilder) moduleNodes
+        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToCase);
         if (parent != null) {
             if (parent instanceof AugmentationSchemaBuilder) {
@@ -538,7 +542,6 @@ public class ModuleBuilder implements Builder {
         }
 
         pathToCase.add(caseName.getLocalName());
-        addedChilds.put(pathToCase, builder);
         moduleNodes.put(pathToCase, builder);
 
         return builder;
@@ -609,12 +612,13 @@ public class ModuleBuilder implements Builder {
 
     public void addIdentityrefType(String baseString, List<String> parentPath,
             SchemaPath schemaPath) {
+        List<String> pathToIdentityref = new ArrayList<String>(parentPath);
         TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
-                .get(parentPath);
+                .get(pathToIdentityref);
         IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(
                 baseString, schemaPath);
         parent.setType(identityref);
-        dirtyNodes.put(parentPath, parent);
+        dirtyNodes.put(pathToIdentityref, parent);
     }
 
     public DeviationBuilder addDeviation(String targetPath,
@@ -658,6 +662,7 @@ public class ModuleBuilder implements Builder {
         } else if (parent instanceof SchemaNodeBuilder) {
             ((SchemaNodeBuilder) parent).addUnknownSchemaNode(builder);
         }
+        addedUnknownNodes.add(builder);
         return builder;
     }
 
