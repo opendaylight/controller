@@ -3,11 +3,6 @@ module types2 {
     namespace "urn:simple.types.data.demo";
     prefix "t2";
     
-    import types1 {
-         prefix "if";
-         revision-date 2013-02-27;
-     }
-
     organization "opendaylight";
     contact "http://www.opendaylight.org/";
     

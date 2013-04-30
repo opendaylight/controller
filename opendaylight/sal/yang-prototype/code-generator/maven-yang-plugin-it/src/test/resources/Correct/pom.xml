@@ -20,7 +20,7 @@
                             <goal>generate-sources</goal>
                         </goals>
                         <configuration>
-                            <yangFilesRootDir>${basedir}</yangFilesRootDir>
+                            <yangFilesRootDir>${basedir}/../../../../../yang-model-parser-impl/src/test/resources/model</yangFilesRootDir>
                             <codeGenerators>
                                 <generator>
                                     <codeGeneratorClass>
