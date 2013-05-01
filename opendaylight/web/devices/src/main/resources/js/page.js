@@ -77,6 +77,7 @@ one.f.switchmanager.nodesLearnt = {
 			form: {
 				nodeId: "one_f_switchmanager_nodesLearnt_id_modal_form_nodeid",
 				nodeName : "one_f_switchmanager_nodesLearnt_id_modal_form_nodename",
+				portStatus : "one_f_switchmanager_nodesLearnt_id_modal_form_portstatus",
 				tier: "one_f_switchmanager_nodesLearnt_id_modal_form_tier",
 				operationMode: "one_f_switchmanager_nodesLearnt_id_modal_form_opmode"
 			}
@@ -89,7 +90,7 @@ one.f.switchmanager.nodesLearnt = {
 
 		one.f.switchmanager.nodesLearnt.ajax.main(url, function(content) {
 			var body = one.f.switchmanager.nodesLearnt.data.abridged(content);
-			var $table = one.f.switchmanager.createTable(["Node Name", "Node ID", "Ports"], body);
+			var $table = one.f.switchmanager.createTable(["Node Name", "Node ID", "Ports", "Port Status"], body);
 			$dashlet.append($table);
 		});
 	},
@@ -129,7 +130,7 @@ one.f.switchmanager.nodesLearnt = {
 			}
 		},
 		body: {
-			updateNode: function(nodeId, switchDetails, tiers) {
+			updateNode: function(nodeId, portStatus, switchDetails, tiers) {
 				var $form = $(document.createElement('form'));
 				var $fieldset = $(document.createElement('fieldset'));
 				// node ID. not editable.
@@ -146,6 +147,13 @@ one.f.switchmanager.nodesLearnt = {
 				if(switchDetails["nodeName"] != null) {
 					$input.attr('value', switchDetails["nodeName"]);
 				}
+				$fieldset.append($label).append($input);
+				// Port Status. not editable.
+				var $label = one.lib.form.label("Port Status");
+				var $input = one.lib.form.input("Port Status");
+				$input.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.portStatus);
+				$input.attr("disabled", true);
+				$input.attr("value", portStatus);
 				$fieldset.append($label).append($input);
 				// node tier
 				var $label = one.lib.form.label("Tier");
@@ -238,6 +246,7 @@ one.f.switchmanager.nodesLearnt = {
 				entry.push(aTag);
 				entry.push(value["nodeId"]);
 				entry.push(value["ports"]);
+				entry.push(value["portStatus"]);
 				tr.entry = entry;
 				result.push(tr);
 			});
@@ -255,6 +264,7 @@ one.f.switchmanager.nodesLearnt = {
 				entry.push(value["tierName"]);
 				entry.push(value["mac"]);
 				entry.push(value["ports"]);
+				entry.push(value["portStatus"]);
 				tr.entry = entry;
 				result.push(tr);
 			});
