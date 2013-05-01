@@ -18,6 +18,11 @@ import java.util.concurrent.ConcurrentMap;
  */
 import org.opendaylight.controller.sal.utils.Status;
 
+/**
+ * 
+ * This Interface provides APIs to manage and query the static routes
+ *
+ */
 public interface IForwardingStaticRouting {
 
     /**
@@ -48,11 +53,4 @@ public interface IForwardingStaticRouting {
      * If the operation is successful, the return string will be "SUCCESS"
      */
     public Status removeStaticRoute(String name);
-
-    /**
-     * Saves the config
-     * @return a text string indicating the result of the operation.
-     * If the operation is successful, the return string will be "Success"
-     */
-    Status saveConfig();
 }
