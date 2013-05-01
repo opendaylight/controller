@@ -42,6 +42,7 @@
     <module>../../arphandler</module>
     <module>../../forwardingrulesmanager/api</module>
     <module>../../forwardingrulesmanager/implementation</module>
+    <module>../../forwardingrulesmanager/integrationtest</module>
     <module>../../hosttracker/api</module>
     <module>../../hosttracker/implementation</module>
     <module>../../hosttracker/integrationtest</module>
