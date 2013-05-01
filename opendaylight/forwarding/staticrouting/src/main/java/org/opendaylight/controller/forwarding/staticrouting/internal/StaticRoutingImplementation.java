@@ -131,8 +131,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         }
     }
 
-    @Override
-    public Status saveConfig() {
+    
+    private Status saveConfig() {
         // Publish the save config event to the cluster nodes
         configSaveEvent.put(new Date().getTime(), SAVE);
         return saveConfigInternal();

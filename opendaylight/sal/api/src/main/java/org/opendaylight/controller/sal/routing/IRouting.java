@@ -15,6 +15,10 @@ import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Path;
 
+/**
+ * This interface provides APIs to manage and query the routing information
+  *
+ */
 public interface IRouting {
 
     /**
