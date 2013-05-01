@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
@@ -12,24 +13,41 @@
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>forwardingrulesmanager.implementation</artifactId>
   <version>0.4.0-SNAPSHOT</version>
-  <packaging>bundle</packaging>
 
+
+  <properties>
+    <!-- Sonar properties using jacoco to retrieve integration test results -->
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+    <sonar.jacoco.Reportpath>target/jacoco.exec</sonar.jacoco.Reportpath>
+    <sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <sonar.language>java</sonar.language>
+  </properties>
   <build>
+   <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.5.3.201107060350</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>maven-bundle-plugin</artifactId>
-	<version>2.3.6</version>
-	<extensions>true</extensions>
-	<configuration>
-	  <instructions>
-	    <Include-Resource>
-	    </Include-Resource>
-	    <Export-Package>
-	    </Export-Package>
-	    <Import-Package>
-		      org.opendaylight.controller.clustering.services,
-		      org.opendaylight.controller.configuration,
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.6</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Include-Resource>
+            </Include-Resource>
+            <Export-Package>
+            </Export-Package>
+            <Import-Package>
+              org.opendaylight.controller.clustering.services,
+              org.opendaylight.controller.configuration,
               org.opendaylight.controller.hosttracker,
               org.opendaylight.controller.hosttracker.hostAware,
               org.opendaylight.controller.switchmanager,
@@ -37,9 +55,9 @@
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.flowprogrammer,
               org.opendaylight.controller.sal.match,
-			  org.opendaylight.controller.sal.utils,
+              org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
-			  org.opendaylight.controller.forwardingrulesmanager,
+              org.opendaylight.controller.forwardingrulesmanager,
               javax.xml.bind.annotation,
               javax.xml.bind,
               org.apache.felix.dm,
@@ -47,11 +65,11 @@
               org.osgi.service.component,
               org.slf4j,
               org.eclipse.osgi.framework.console,
-			  org.osgi.framework
-	    </Import-Package>
-        <Bundle-Activator>
-    	      org.opendaylight.controller.forwardingrulesmanager.internal.Activator
-       	</Bundle-Activator>
+              org.osgi.framework
+            </Import-Package>
+            <Bundle-Activator>
+              org.opendaylight.controller.forwardingrulesmanager.internal.Activator
+            </Bundle-Activator>
             <Require-Bundle>
               org.opendaylight.controller.hosttracker
             </Require-Bundle>
@@ -59,6 +77,28 @@
             </Service-Component>
           </instructions>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <includes>org.opendaylight.controller.*</includes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>pre-test</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>post-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -72,7 +112,7 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
       <version>0.4.0-SNAPSHOT</version>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
@@ -83,16 +123,16 @@
       <artifactId>switchmanager</artifactId>
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
-	<dependency>
-		<groupId>org.opendaylight.controller</groupId>
-		<artifactId>sal</artifactId>
-		<version>0.4.0-SNAPSHOT</version>
-	</dependency>
-	<dependency>
-		<groupId>org.opendaylight.controller</groupId>
-		<artifactId>forwardingrulesmanager</artifactId>
-		<version>0.4.0-SNAPSHOT</version>
-	</dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>forwardingrulesmanager</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
