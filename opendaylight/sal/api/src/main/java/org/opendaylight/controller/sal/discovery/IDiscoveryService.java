@@ -16,8 +16,8 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 
 /**
- * The interface class provides the methods to notify the listener when an edge
- * is added/deleted/changed
+ * The interface provides the methods to notify the listener when an edge is
+ * added/deleted/changed.
  */
 public interface IDiscoveryService {
     /**

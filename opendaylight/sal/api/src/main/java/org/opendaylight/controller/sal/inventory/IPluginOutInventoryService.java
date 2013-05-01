@@ -17,8 +17,8 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 
 /**
- * The interface class describes Inventory update methods to be implemented by
- * protocol plugin
+ * The Interface describes Inventory update methods to be implemented by
+ * protocol plugin.
  */
 public interface IPluginOutInventoryService {
     /**

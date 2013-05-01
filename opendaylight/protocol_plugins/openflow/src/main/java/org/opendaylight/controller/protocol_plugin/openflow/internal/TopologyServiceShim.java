@@ -24,6 +24,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
 import org.opendaylight.controller.protocol_plugin.openflow.IRefreshInternalProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShimListener;
@@ -33,12 +34,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.opendaylight.controller.sal.core.Bandwidth;
+import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.discovery.IDiscoveryService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
@@ -49,7 +52,8 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
  * container configurations.
  */
 public class TopologyServiceShim implements IDiscoveryService,
-        IContainerListener, CommandProvider, IRefreshInternalProvider {
+		IContainerListener, CommandProvider, IRefreshInternalProvider,
+		IInventoryShimExternalListener {
     protected static final Logger logger = LoggerFactory
             .getLogger(TopologyServiceShim.class);
     private ConcurrentMap<String, ITopologyServiceShimListener> topologyServiceShimListeners = new ConcurrentHashMap<String, ITopologyServiceShimListener>();
@@ -645,4 +649,56 @@ public class TopologyServiceShim implements IDiscoveryService,
         logger.debug("Sent {} updates", i);
     }
 
+    @Override
+    public void updateNode(Node node, UpdateType type, Set<Property> props) {
+    }
+
+    @Override
+    public void updateNodeConnector(NodeConnector nodeConnector,
+            UpdateType type, Set<Property> props) {
+        List<String> containers = new ArrayList<String>();
+        List<String> conList = this.containerMap.get(nodeConnector);
+
+        containers.add(GlobalConstants.DEFAULT.toString());
+        if (conList != null) {
+            containers.addAll(conList);
+        }
+        
+        switch (type) {
+        case ADDED:
+            break;
+        case CHANGED:
+            if (props == null) {
+                break;
+            }
+
+            boolean rmEdge = false;
+            for (Property prop : props) {
+                if (((prop instanceof Config) && (((Config) prop).getValue() != Config.ADMIN_UP))
+                        || ((prop instanceof State) && (((State) prop)
+                                .getValue() != State.EDGE_UP))) {
+                    /*
+                     * If port admin down or link down, remove the edges
+                     * associated with the port
+                     */
+                    rmEdge = true;
+                    break;
+                }
+            }
+
+            if (rmEdge) {
+                for (String cName : containers) {
+                    removeNodeConnector(cName, nodeConnector);
+                }
+            }
+            break;
+        case REMOVED:
+            for (String cName : containers) {
+                removeNodeConnector(cName, nodeConnector);
+            }
+            break;
+        default:
+            break;
+        }
+    }
 }

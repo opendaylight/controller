@@ -17,10 +17,8 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 
 /**
- * Interface class that provides inventory updates to inventory listeners
- * within the protocol plugin
- *
- *
+ * The Interface provides inventory updates to inventory listeners within the
+ * protocol plugin
  */
 public interface IInventoryShimInternalListener {
     /**

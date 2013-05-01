@@ -17,8 +17,8 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 
 /**
- * The interface class that describes methods invoked from SAL toward the protocol
- * plugin to solicit existing inventory data.
+ * The Interface describes methods invoked from SAL toward the protocol plugin
+ * to solicit existing inventory data.
  */
 public interface IPluginInInventoryService {
     /**

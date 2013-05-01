@@ -175,6 +175,8 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         txRates = new HashMap<Long, Map<Short, TxRates>>(initialSize);
         descriptionListeners = new HashSet<IStatisticsListener>();
 
+        configStatsPollIntervals();
+        
         // Initialize managed timers
         statisticsTimer = new Timer();
         statisticsTimerTask = new TimerTask() {
@@ -876,6 +878,8 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         help.append("---OF Statistics Manager utilities---\n");
         help.append("\t ofdumpstatsmgr         - "
                 + "Print Internal Stats Mgr db\n");
+        help.append("\t ofstatsmgrintervals <fP> <pP> <dP>(in seconds) - "
+                + "Set/Show flow/port/dedscription stats poll intervals\n");
         return help.toString();
     }
 
@@ -1001,33 +1005,76 @@ public class OFStatisticsManager implements IOFStatisticsManager,
     public void _ofstatsmgrintervals(CommandInterpreter ci) {
         String flowStatsInterv = ci.nextArgument();
         String portStatsInterv = ci.nextArgument();
+        String descStatsInterv = ci.nextArgument();
 
-        if (flowStatsInterv == null || portStatsInterv == null) {
-
-            ci.println("Usage: ostatsmgrintervals <fP> <pP> (in seconds)");
+        if (flowStatsInterv == null || portStatsInterv == null
+                || descStatsInterv == null) {
+            ci.println("Usage: ostatsmgrintervals <fP> <pP> <dP>(in seconds)");
             ci.println("Current Values: fP=" + statisticsTickNumber + "s pP="
-                    + portTickNumber + "s");
+                    + portTickNumber + "s dP=" + descriptionTickNumber + "s");
             return;
         }
-        Short fP, pP;
+        Short fP, pP, dP;
         try {
             fP = Short.parseShort(flowStatsInterv);
             pP = Short.parseShort(portStatsInterv);
+            dP = Short.parseShort(descStatsInterv);
         } catch (Exception e) {
             ci.println("Invalid format values: " + e.getMessage());
             return;
         }
 
-        if (pP <= 1 || fP <= 1) {
-            ci.println("Invalid values. fP and pP have to be greater than 1.");
+        if (pP <= 1 || fP <= 1 || dP <= 1) {
+            ci.println("Invalid values. fP, pP, dP have to be greater than 1.");
             return;
         }
 
         statisticsTickNumber = fP;
         portTickNumber = pP;
+        descriptionTickNumber = dP;
 
         ci.println("New Values: fP=" + statisticsTickNumber + "s pP="
-                + portTickNumber + "s");
+                + portTickNumber + "s dP=" + descriptionTickNumber + "s");
     }
 
+    /**
+     * This method retrieves user configurations from config.ini and updates
+     * statisticsTickNumber/portTickNumber/descriptionTickNumber accordingly.
+     */
+    private void configStatsPollIntervals() {
+        String fsStr = System.getProperty("of.flowStatsPollInterval");
+        String psStr = System.getProperty("of.portStatsPollInterval");
+        String dsStr = System.getProperty("of.descStatsPollInterval");
+        Short fs, ps, ds;
+
+        if (fsStr != null) {
+            try {
+                fs = Short.parseShort(fsStr);
+                if (fs > 0) {
+                    statisticsTickNumber = fs;
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (psStr != null) {
+            try {
+                ps = Short.parseShort(psStr);
+                if (ps > 0) {
+                    portTickNumber = ps;
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (dsStr != null) {
+            try {
+                ds = Short.parseShort(dsStr);
+                if (ds > 0) {
+                    descriptionTickNumber = ds;
+                }
+            } catch (Exception e) {
+            }
+        }
+    }
 }

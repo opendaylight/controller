@@ -358,8 +358,9 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(TopologyServiceShim.class)) {
             c.setInterface(new String[] { IDiscoveryService.class.getName(),
                     IContainerListener.class.getName(),
-                    IRefreshInternalProvider.class.getName() }, null);
-            c.add(createServiceDependency()
+                    IRefreshInternalProvider.class.getName(),
+                    IInventoryShimExternalListener.class.getName() }, null);
+          c.add(createServiceDependency()
                     .setService(ITopologyServiceShimListener.class)
                     .setCallbacks("setTopologyServiceShimListener",
                             "unsetTopologyServiceShimListener")

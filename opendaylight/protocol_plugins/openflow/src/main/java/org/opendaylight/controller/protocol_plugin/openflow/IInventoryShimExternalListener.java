@@ -10,10 +10,8 @@
 package org.opendaylight.controller.protocol_plugin.openflow;
 
 /**
- * Wrapper of Interface class that provides inventory updates locally in the
- * protocol plugin
- *
- *
+ * Wrapper of Interface that provides inventory updates locally in the protocol
+ * plugin.
  */
 public interface IInventoryShimExternalListener extends
         IInventoryShimInternalListener {

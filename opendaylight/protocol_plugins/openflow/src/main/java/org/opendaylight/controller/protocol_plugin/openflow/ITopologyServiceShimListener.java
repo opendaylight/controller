@@ -16,9 +16,7 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 
 /**
- * Interface class that provides Edge updates to the topology listeners
- *
- *
+ * The Interface provides Edge updates to the topology listeners
  */
 public interface ITopologyServiceShimListener {
     /**

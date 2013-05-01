@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Interface class that provides methods to manipulate user configured link
+ * The Interface provides methods to manipulate user configured link.
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)

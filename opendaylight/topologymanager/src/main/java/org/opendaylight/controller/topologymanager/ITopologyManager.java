@@ -22,8 +22,7 @@ import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
- * Interface class that provides methods to interact with
- * network topology database
+ * The Interface provides methods to interact with network topology database.
  */
 public interface ITopologyManager {
     /**

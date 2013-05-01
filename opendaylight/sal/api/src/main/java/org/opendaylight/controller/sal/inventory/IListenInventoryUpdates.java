@@ -17,8 +17,8 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 
 /**
- * The interface class provides the methods to notify the upper applications
- * in regards to any inventory changes.
+ * The interface provides the methods to notify the upper applications in
+ * regards to any inventory changes.
  */
 public interface IListenInventoryUpdates {
     /**

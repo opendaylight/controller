@@ -17,8 +17,8 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 
 /**
- * Interface class that describes methods invoked from application toward SAL to
- * solicit existing inventory data
+ * The Interface describes methods invoked from application toward SAL to
+ * solicit existing inventory data.
  */
 public interface IInventoryService {
     /**
