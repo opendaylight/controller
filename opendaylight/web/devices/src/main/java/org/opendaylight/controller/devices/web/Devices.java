@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.opendaylight.controller.forwarding.staticrouting.IForwardingStaticRouting;
 import org.opendaylight.controller.forwarding.staticrouting.StaticRouteConfig;
 import org.opendaylight.controller.sal.authorization.UserLevel;
+import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -87,6 +88,7 @@ public class Devices implements IDaylightWeb {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         List<Map<String, String>> nodeData = new ArrayList<Map<String, String>>();
+        Map<String, String> portListStatus = new HashMap<String, String>();
         for (Switch device : switchManager.getNetworkDevices()) {
             HashMap<String, String> nodeDatum = new HashMap<String, String>();
             Node node = device.getNode();
@@ -110,6 +112,7 @@ public class Devices implements IDaylightWeb {
             nodeDatum.put("mac",
                     HexEncode.bytesToHexString(device.getDataLayerAddress()));
             StringBuffer sb1 = new StringBuffer();
+            StringBuffer sb2 = new StringBuffer();
             Set<NodeConnector> nodeConnectorSet = device.getNodeConnectors();
             String nodeConnectorName;
             String nodeConnectorNumberToStr;
@@ -119,19 +122,28 @@ public class Devices implements IDaylightWeb {
                     nodeConnectorNumberToStr = nodeConnector.getID().toString();
                     Name ncName = ((Name) switchManager.getNodeConnectorProp(
                             nodeConnector, Name.NamePropName));
+                    Config portStatus = ((Config) switchManager
+                            .getNodeConnectorProp(nodeConnector,
+                                    Config.ConfigPropName));
                     nodeConnectorName = (ncName != null) ? ncName.getValue()
                             : "";
                     portList.put(Short.parseShort(nodeConnectorNumberToStr),
                             nodeConnectorName);
+                    portListStatus
+                            .put(nodeConnectorName, portStatus.toString());
                 }
+
                 Map<Short, String> sortedPortList = new TreeMap<Short, String>(
                         portList);
+
                 for (Entry<Short, String> e : sortedPortList.entrySet()) {
                     sb1.append(e.getValue() + "(" + e.getKey() + ")");
                     sb1.append("<br>");
+                    sb2.append(portListStatus.get(e.getValue()) + "<br>");
                 }
             }
             nodeDatum.put("ports", sb1.toString());
+            nodeDatum.put("portStatus", sb2.toString());
             nodeData.add(nodeDatum);
         }
         DevicesJsonBean result = new DevicesJsonBean();
@@ -142,6 +154,7 @@ public class Devices implements IDaylightWeb {
         columnNames.add("Tier");
         columnNames.add("Mac Address");
         columnNames.add("Ports");
+        columnNames.add("Port Status");
 
         result.setColumnNames(columnNames);
         return result;

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -18,8 +17,8 @@ import javax.xml.bind.annotation.XmlElement;
 
 /**
  * The class represents Admin Config status
- *
- *
+ * 
+ * 
  */
 @XmlRootElement
 @SuppressWarnings("serial")
@@ -65,6 +64,14 @@ public class Config extends Property {
 
     @Override
     public String toString() {
-        return "Config[" + ReflectionToStringBuilder.toString(this) + "]";
+        StringBuffer ret = new StringBuffer();
+        if (this.configValue == 0) {
+            ret.append("Down");
+        } else if (this.configValue == 1) {
+            ret.append("Up");
+        } else {
+            ret.append("Undefined");
+        }
+        return ret.toString();
     }
 }
