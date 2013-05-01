@@ -229,7 +229,8 @@ public class Troubleshoot implements IDaylightWeb {
         row.put("nodeName", desc);
         if (match.isPresent(MatchType.IN_PORT)) {
             row.put(MatchType.IN_PORT.id(), ((NodeConnector) flow.getMatch()
-                    .getField(MatchType.IN_PORT).getValue()).getID().toString());
+                    .getField(MatchType.IN_PORT).getValue())
+                    .getNodeConnectorIdAsString());
         } else {
             row.put(MatchType.IN_PORT.id(), "*");
         }

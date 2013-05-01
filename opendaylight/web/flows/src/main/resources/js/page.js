@@ -528,10 +528,6 @@ one.f.flows = {
 				alert('Select node');
 				return;
 			}
-			if (result['ingressPort'] == undefined) {
-				alert('Select port');
-				return;
-			}
 			if (action.length == 0) {
 				alert('Please specify an action');
 				return;
@@ -601,7 +597,7 @@ one.f.flows = {
 			$fieldset.append($legend);
 			// name
 			var $label = one.lib.form.label("Name");
-			var $input = one.lib.form.input("Match Name");
+			var $input = one.lib.form.input("Flow Name");
 			$input.attr('id', one.f.flows.id.modal.form.name);
 			$fieldset.append($label).append($input);
 			// node
@@ -787,7 +783,7 @@ one.f.flows = {
                         var placeholder = "VLAN Identification Number";
                         var id = one.f.flows.id.modal.action.setVlanId;
                         var help = "Range: 0 - 4095";
-                        var action = 'setVlan';
+                        var action = 'SET_VLAN_ID';
                         var name = "VLAN ID";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
@@ -803,7 +799,7 @@ one.f.flows = {
                         var placeholder = "VLAN Priority";
                         var id = one.f.flows.id.modal.action.setVlanPriority;
                         var help = "Range: 0 - 7";
-                        var action = 'setVlanPcp';
+                        var action = 'SET_VLAN_PCP';
                         var name = "VLAN Priority";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
@@ -816,7 +812,7 @@ one.f.flows = {
                         break;
                     case "stripVlanHeader" :
                         var name = "Strip VLAN Header";
-                        var action = 'stripVlan';
+                        var action = 'POP_VLAN';
                         one.f.flows.modal.action.add.add(name, action);
                         break;
                     case "modifyDatalayerSourceAddress" :
@@ -824,7 +820,7 @@ one.f.flows = {
                         var placeholder = "Source MAC Address";
                         var id = one.f.flows.id.modal.action.modifyDatalayerSourceAddress;
                         var help = "Example: 00:11:22:aa:bb:cc";
-                        var action = 'setDlSrc';
+                        var action = 'SET_DL_SRC';
                         var name = "Source MAC";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
@@ -840,7 +836,7 @@ one.f.flows = {
                         var placeholder = "Destination MAC Address";
                         var id = one.f.flows.id.modal.action.modifyDatalayerDestinationAddress;
                         var help = "Example: 00:11:22:aa:bb:cc";
-                        var action = 'setDlDst';
+                        var action = 'SET_DL_DST';
                         var name = "Destination MAC";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
@@ -856,7 +852,7 @@ one.f.flows = {
                         var placeholder = "Source IP Address";
                         var id = one.f.flows.id.modal.action.modifyNetworkSourceAddress;
                         var help = "Example: 127.0.0.1";
-                        var action = 'setNwSrc';
+                        var action = 'SET_NW_SRC';
                         var name = "Source IP";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
@@ -872,7 +868,7 @@ one.f.flows = {
                         var placeholder = "Destination IP Address";
                         var id = one.f.flows.id.modal.action.modifyNetworkDestinationAddress;
                         var help = "Example: 127.0.0.1";
-                        var action = 'setNwDst';
+                        var action = 'SET_NW_DST';
                         var name = "Destination IP";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
@@ -888,7 +884,7 @@ one.f.flows = {
                         var placeholder = "IPv4 ToS";
                         var id = one.f.flows.id.modal.action.modifyTosBits;
                         var help = "Range: 0 - 63";
-                        var action = 'setNwTos';
+                        var action = 'SET_NW_TOS';
                         var name = "TOS Bits";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
@@ -904,7 +900,7 @@ one.f.flows = {
                         var placeholder = "Transport Source Port";
                         var id = one.f.flows.id.modal.action.modifyTransportSourcePort;
                         var help = "Range: 1 - 65535";
-                        var action = 'setTpSrc';
+                        var action = 'SET_TP_SRC';
                         var name = "Source Port";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
@@ -920,7 +916,7 @@ one.f.flows = {
                         var placeholder = "Transport Destination Port";
                         var id = one.f.flows.id.modal.action.modifyTransportDestinationPort;
                         var help = "Range: 1 - 65535";
-                        var action = 'setTpDst';
+                        var action = 'SET_TP_DST';
                         var name = "Destination Port";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
@@ -933,32 +929,32 @@ one.f.flows = {
                         break;
                     case "drop" :
                         var name = "Drop";
-                        var action = 'drop';
+                        var action = 'DROP';
                         one.f.flows.modal.action.add.add(name, action);
                         break;
                     case "loopback" :
                         var name = "Loopback";
-                        var action = 'loopback';
+                        var action = 'LOOPBACK';
                         one.f.flows.modal.action.add.add(name, action);
                         break;
                     case "flood" :
                         var name = "Flood";
-                        var action = 'flood';
+                        var action = 'FLOOD';
                         one.f.flows.modal.action.add.add(name, action);
                         break;
                     case "softwarePath" :
                         var name = "Software Path";
-                        var action = 'software path';
+                        var action = 'SW_PATH';
                         one.f.flows.modal.action.add.add(name, action);
                         break;
                     case "hardwarePath" :
                         var name = "Hardware Path";
-                        var action = 'hardware path';
+                        var action = 'HW_PATH';
                         one.f.flows.modal.action.add.add(name, action);
                         break;
                     case "controller" :
                         var name = "Controller";
-                        var action = 'controller';
+                        var action = 'CONTROLLER';
                         one.f.flows.modal.action.add.add(name, action);
                         break;
                 }
