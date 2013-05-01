@@ -28,6 +28,7 @@ import org.opendaylight.controller.sal.core.Host;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
@@ -131,12 +132,21 @@ public class Topology {
         
         for (Map.Entry<Node, Set<Edge>> e : nodeEdges.entrySet()) {
             Node n = e.getKey();
+            
+            // skip production node
+            if (nodeIgnore(n)) {
+                continue;
+            }
+            
             String description = switchManager.getNodeDescription(n);
             NodeBean node = createNodeBean(description, n);
             
             List<Map<String, Object>> adjacencies = new LinkedList<Map<String, Object>>();
             Set<Edge> links = e.getValue();
             for (Edge link : links) {
+                if (edgeIgnore(link)) {
+                    continue;
+                }
                 for (Property p : properties.get(link)) {
                     if (p instanceof Bandwidth) {
                     	bandwidth = (Bandwidth) p;
@@ -166,6 +176,45 @@ public class Topology {
         }
     }
     
+    /**
+     * Check if this node shouldn't appear in the visual topology
+     * 
+     * @param node
+     * @return
+     */
+    private boolean nodeIgnore(Node node) {
+        String nodeType = node.getType();
+        
+        // add other node types to ignore later
+        if (nodeType.equals(NodeIDType.PRODUCTION)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if this edge shouldn't appear in the visual topology
+     * 
+     * @param edge
+     * @return
+     */
+    private boolean edgeIgnore(Edge edge) {
+        NodeConnector headNodeConnector = edge.getHeadNodeConnector();
+        Node headNode = headNodeConnector.getNode();
+        if (nodeIgnore(headNode)) {
+            return true;
+        }
+        
+        NodeConnector tailNodeConnector = edge.getTailNodeConnector();
+        Node tailNode = tailNodeConnector.getNode();
+        if (nodeIgnore(tailNode)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
     protected NodeBean createNodeBean(String description, Node node) {
     	String name = (description == null || 
     			description.trim().isEmpty() ||
@@ -179,6 +228,11 @@ public class Topology {
     	if (nodes == null) return;
     	for (Switch sw : nodes) {
     		Node n = sw.getNode();
+    		
+    		// skip production node
+                if (nodeIgnore(n)) {
+                    continue;
+                }
 
     		String description = switchManager.getNodeDescription(n);
     		
