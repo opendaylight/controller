@@ -34,6 +34,7 @@
     <module>../../forwarding/staticrouting</module>
     <module>../../clustering/services</module>
     <module>../../clustering/services_implementation</module>
+    <module>../../clustering/integrationtest</module>
     <module>../../clustering/stub</module>
     <module>../../clustering/test</module>
     <module>../../configuration/api</module>
