@@ -50,6 +50,8 @@
     <module>../../containermanager/implementation</module>
     <module>../../switchmanager/api</module>
     <module>../../switchmanager/implementation</module>
+    <module>../../switchmanager/integrationtest</module>
+    <module>../../switchmanager/integrationteststub</module>
     <module>../../statisticsmanager/api</module>
     <module>../../statisticsmanager/implementation</module>
     <module>../../statisticsmanager/integrationtest</module>
