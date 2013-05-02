@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///U8\u003d",
+        "filename": "opendaylight/switchmanager/integrationtest/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 14
+      },
+      "writtenOn": "2013-05-02T22:39:42Z",
+      "side": 1,
+      "message": "Format the pom so that tabs are two white spaces.",
+      "revId": "e414ebfb311e195eb121890a8cf9ce932c491d72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
