@@ -71,6 +71,8 @@ import org.opendaylight.controller.yang.model.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.TypedefBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.UnionTypeBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.impl.UnknownSchemaNodeBuilder;
+import org.opendaylight.controller.yang.model.parser.util.ModuleDependencySort;
+import org.opendaylight.controller.yang.model.parser.util.ModuleDependencySort.ModuleSimple;
 import org.opendaylight.controller.yang.model.parser.util.ParserUtils;
 import org.opendaylight.controller.yang.model.parser.util.RefineHolder;
 import org.opendaylight.controller.yang.model.parser.util.TypeConstraints;
@@ -91,7 +93,7 @@ public class YangModelParserImpl implements YangModelParser {
     public Set<Module> parseYangModels(final List<File> yangFiles) {
         if (yangFiles != null) {
             final List<InputStream> inputStreams = new ArrayList<InputStream>();
-            
+
             for (final File yangFile : yangFiles) {
                 try {
                     inputStreams.add(new FileInputStream(yangFile));
@@ -119,7 +121,7 @@ public class YangModelParserImpl implements YangModelParser {
     }
 
     private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
-            final List<InputStream>  yangFileStreams) {
+            final List<InputStream> yangFileStreams) {
         final Map<String, TreeMap<Date, ModuleBuilder>> modules = new HashMap<String, TreeMap<Date, ModuleBuilder>>();
         final ParseTreeWalker walker = new ParseTreeWalker();
         final List<ParseTree> trees = parseStreams(yangFileStreams);
@@ -134,6 +136,9 @@ public class YangModelParserImpl implements YangModelParser {
             walker.walk(yangModelParser, trees.get(i));
             builders[i] = yangModelParser.getModuleBuilder();
         }
+
+        // module dependency graph sorted
+        List<ModuleSimple> sorted = new ModuleDependencySort(builders).sort();
 
         for (ModuleBuilder builder : builders) {
             final String builderName = builder.getName();
@@ -377,7 +382,7 @@ public class YangModelParserImpl implements YangModelParser {
         tdb.setPatterns(old.getPatterns());
         tdb.setFractionDigits(old.getFractionDigits());
         tdb.setPath(old.getPath());
-        
+
         final TypeDefinition<?> oldType = old.getType();
         if (oldType == null) {
             tdb.setType(old.getTypedef());
