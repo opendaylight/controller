@@ -290,28 +290,15 @@ public class BindingGeneratorImpl implements BindingGenerator {
         }
         return null;
     }
-
-    // private String resolveGeneratedTypePackageName(final SchemaPath
-    // schemaPath) {
-    // final StringBuilder builder = new StringBuilder();
-    // builder.append(basePackageName);
-    // if ((schemaPath != null) && (schemaPath.getPath() != null)) {
-    // final List<QName> pathToNode = schemaPath.getPath();
-    // final int traversalSteps = (pathToNode.size() - 1);
-    // for (int i = 0; i < traversalSteps; ++i) {
-    // builder.append(".");
-    // String nodeLocalName = pathToNode.get(i).getLocalName();
-    //
-    // // TODO: refactor with use of BindingGeneratorUtil class
-    // nodeLocalName = nodeLocalName.replace(":", ".");
-    // nodeLocalName = nodeLocalName.replace("-", ".");
-    // builder.append(nodeLocalName);
-    // }
-    // return validatePackage(builder.toString());
-    // }
-    // return null;
-    // }
-
+    
+    private List<GeneratedType> augmentationToGenTypes(final Module module) {
+        final List<GeneratedType> augmentGenTypes = new ArrayList<GeneratedType>();
+        
+        //TODO: add implementation
+        
+        return augmentGenTypes;
+    }
+    
     private GeneratedType containerToGenType(ContainerSchemaNode container) {
         if (container == null) {
             return null;

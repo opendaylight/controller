@@ -20,18 +20,23 @@ import java.util.Set;
 import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
+import org.opendaylight.controller.sal.binding.model.api.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GeneratorJavaFile {
 
+    private static final Logger log = LoggerFactory
+            .getLogger(GeneratorJavaFile.class);
     private final CodeGenerator interfaceGenerator;
     private final ClassCodeGenerator classGenerator;
-    private final Set<GeneratedType> types;
+    private final Set<GeneratedType> genTypes;
     private final Set<GeneratedTransferObject> genTransferObjects;
 
     public GeneratorJavaFile(final CodeGenerator codeGenerator,
             final Set<GeneratedType> types) {
         this.interfaceGenerator = codeGenerator;
-        this.types = types;
+        this.genTypes = types;
         this.genTransferObjects = new HashSet<GeneratedTransferObject>();
         classGenerator = new ClassCodeGenerator();
     }
@@ -40,72 +45,87 @@ public class GeneratorJavaFile {
             final Set<GeneratedTransferObject> genTransferObjects) {
         this.interfaceGenerator = new InterfaceGenerator();
         this.classGenerator = new ClassCodeGenerator();
-        this.types = types;
+        this.genTypes = types;
         this.genTransferObjects = genTransferObjects;
     }
 
-    public List<File> generateToFile() throws IOException {
-        return generateToFile(null);
-    }
-
+    @Deprecated
     public List<File> generateToFile(String path) throws IOException {
         final List<File> result = new ArrayList<File>();
 
-        for (GeneratedType type : types) {
-            String parentPath = generateParentPath(path,
-                    type.getPackageName());
+        for (GeneratedType genType : genTypes) {
+            final String parentPath = generateParentPath(path,
+                    genType.getPackageName());
 
-            File file = new File(parentPath, type.getName() + ".java");
-            File parent = file.getParentFile();
-            if (!parent.exists()) {
-                parent.mkdirs();
-            }
-
-            if (!file.exists()) {
-                FileWriter fw = null;
-                BufferedWriter bw = null;
-
-                file.createNewFile();
-                fw = new FileWriter(file);
-                bw = new BufferedWriter(fw);
-                Writer writer = interfaceGenerator.generate(type);
-                bw.write(writer.toString());
-
-                if (bw != null) {
-                    bw.close();
-                }
-                result.add(file);
+            final File directory = new File(parentPath);
+            final File genFile = generateTypeToJavaFile(directory, genType,
+                    interfaceGenerator);
+            
+            if (genFile != null) {
+                result.add(genFile);
             }
         }
 
         for (GeneratedTransferObject transferObject : genTransferObjects) {
-            String parentPath = generateParentPath(path,
+            final String parentPath = generateParentPath(path,
                     transferObject.getPackageName());
 
-            File file = new File(parentPath, transferObject.getName() + ".java");
-            File parent = file.getParentFile();
-            if (!parent.exists()) {
-                parent.mkdirs();
-            }
+            final File directory = new File(parentPath);
+            final File genFile = generateTypeToJavaFile(directory,
+                    transferObject, classGenerator);
 
-            if (!file.exists()) {
-                FileWriter fw = null;
-                BufferedWriter bw = null;
-
-                file.createNewFile();
-                fw = new FileWriter(file);
-                bw = new BufferedWriter(fw);
-                Writer writer = classGenerator.generate(transferObject);
-                bw.write(writer.toString());
-
-                if (bw != null) {
-                    bw.close();
-                }
-                result.add(file);
+            if (genFile != null) {
+                result.add(genFile);
             }
         }
-
         return result;
+    }
+
+    public List<File> generateToFile(final File directory) throws IOException {
+        final List<File> result = new ArrayList<File>();
+        for (GeneratedType type : genTypes) {
+            final File genFile = generateTypeToJavaFile(directory, type,
+                    interfaceGenerator);
+
+            if (genFile != null) {
+                result.add(genFile);
+            }
+        }
+        for (GeneratedTransferObject transferObject : genTransferObjects) {
+            final File genFile = generateTypeToJavaFile(directory,
+                    transferObject, classGenerator);
+
+            if (genFile != null) {
+                result.add(genFile);
+            }
+        }
+        return result;
+    }
+
+    private File generateTypeToJavaFile(final File directory, final Type type,
+            final CodeGenerator generator) throws IOException {
+        if ((directory != null) && (type != null) && (generator != null)) {
+
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            final File file = new File(directory, type.getName() + ".java");
+            try (final FileWriter fw = new FileWriter(file)) {
+                file.createNewFile();
+
+                try (final BufferedWriter bw = new BufferedWriter(fw)) {
+                    Writer writer = generator.generate(type);
+                    bw.write(writer.toString());
+                }
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                throw new IOException(e.getMessage());
+            }
+
+            return file;
+        }
+        return null;
     }
 
     private String generateParentPath(String path, String pkg) {
@@ -142,5 +162,4 @@ public class GeneratorJavaFile {
         }
         return fullPath;
     }
-
 }

@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -80,7 +79,8 @@ public class GeneratorJavaFileTest {
                 new InterfaceGenerator(), types);
         generator.generateToFile(PATH);
 
-        String[] files = new File(PATH + FS + "org" + FS + "opendaylight" + FS + "controller" + FS + "gen").list();
+        String[] files = new File(PATH + FS + "org" + FS + "opendaylight" + FS
+                + "controller" + FS + "gen").list();
         List<String> filesList = Arrays.asList(files);
 
         assertEquals(3, files.length);
@@ -88,7 +88,7 @@ public class GeneratorJavaFileTest {
         assertTrue(filesList.contains("Type2.java"));
         assertTrue(filesList.contains("Type3.java"));
     }
-    
+
     @Test
     public void compilationTest() throws Exception {
         final YangModelParserImpl parser = new YangModelParserImpl();
@@ -97,17 +97,12 @@ public class GeneratorJavaFileTest {
         final File sourcesDir = new File("src/test/resources/yang");
         final List<File> sourceFiles = new ArrayList<File>();
         final File[] fileArray = sourcesDir.listFiles();
-        
+
         for (int i = 0; i < fileArray.length; ++i) {
             sourceFiles.add(fileArray[i]);
         }
         
-//        String[] sourcesDirPaths = new String[sourceFiles.length];
-//        for (int i = 0; i < sourceFiles.length; i++) {
-//            sourcesDirPaths[i] = sourceFiles[i].getAbsolutePath();
-//        }
-        final Set<Module> modulesToBuild = parser
-                .parseYangModels(sourceFiles);
+        final Set<Module> modulesToBuild = parser.parseYangModels(sourceFiles);
 
         final SchemaContext context = parser
                 .resolveSchemaContext(modulesToBuild);
@@ -115,7 +110,8 @@ public class GeneratorJavaFileTest {
         final Set<GeneratedType> typesToGenerate = new HashSet<GeneratedType>();
         final Set<GeneratedTransferObject> tosToGenerate = new HashSet<GeneratedTransferObject>();
         for (Type type : types) {
-            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
+            if (type instanceof GeneratedType
+                    && !(type instanceof GeneratedTransferObject)) {
                 typesToGenerate.add((GeneratedType) type);
             }
 
@@ -162,7 +158,7 @@ public class GeneratorJavaFileTest {
 
     /**
      * Search recursively given directory for *.java files.
-     *
+     * 
      * @param directory
      *            directory to search
      * @return List of java files found
