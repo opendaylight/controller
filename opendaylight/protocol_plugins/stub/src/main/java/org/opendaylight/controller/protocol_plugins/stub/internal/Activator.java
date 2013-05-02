@@ -58,7 +58,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *         Object
      */
     public Object[] getImplementations() {
-        Object[] res = { ReadService.class };
+        Object[] res = { ReadService.class, InventoryService.class };
         return res;
     }
 
@@ -86,6 +86,14 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("protocolPluginType", Node.NodeIDType.OPENFLOW);
             c.setInterface(IPluginInReadService.class.getName(), props);
         }
-    }
 
+        if (imp.equals(InventoryService.class)) {
+            // export the service to be used by SAL
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            // Set the protocolPluginType property which will be used
+            // by SAL
+            props.put("protocolPluginType", Node.NodeIDType.OPENFLOW);
+            c.setInterface(IPluginInInventoryService.class.getName(), props);
+        }
+    }
 }
