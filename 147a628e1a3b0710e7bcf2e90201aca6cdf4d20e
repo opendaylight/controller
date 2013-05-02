@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///WI\u003d",
+        "filename": "opendaylight/clustering/integrationtest/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 14
+      },
+      "writtenOn": "2013-05-02T21:12:59Z",
+      "side": 1,
+      "message": "Please fix the tab and spacing",
+      "revId": "147a628e1a3b0710e7bcf2e90201aca6cdf4d20e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///WE\u003d",
+        "filename": "opendaylight/clustering/integrationtest/src/test/java/org/opendaylight/controller/clustering/services_implementation/internal/ClusteringServicesIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 14
+      },
+      "writtenOn": "2013-05-02T21:12:59Z",
+      "side": 1,
+      "message": "Please fix all of the extra spaces",
+      "revId": "147a628e1a3b0710e7bcf2e90201aca6cdf4d20e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
