@@ -53,26 +53,30 @@ public class NodeConnector implements Serializable {
         ConcurrentHashMap<String, ImmutablePair<Class<? extends Object>, String>> compatibleType =
             new ConcurrentHashMap<String, ImmutablePair<Class<? extends Object>, String>>();
         /**
-         * Represent a special port pointing toward the controller,
-         * this is to send data packets toward the controller from
-         * data plane.
+         * Represents the OFPP_CONTROLLER reserved port to forward a 
+         * packet to the controller, this is to send data packets 
+         * to the controller from the data plane triggering 
+         * a packet_in event.
          */
         public static String CONTROLLER = "CTRL";
         /**
-         * Special port describing ALL the ports in the system,
-         * should be used for flooding like mechanism but better
-         * to be careful with it
+         * Represents the OFPP_ALL reserved OF port 
+         * to forward to ALL the ports in the system ,
+         * should be used for flooding like mechanism to
+         * be used cautiously to avoid excessive flooding.
          */
         public static String ALL = "ALL";
         /**
-         * Describe the local networking stack of the node
-         * on which the packet is destined. Yet another special port
+         * Represents the OFPP_LOCAL reserved OF port
+         * to access the local networking stack of the node
+         * of which the packet is destined. Typically used for
+         * inband OF communications channel.
          */
         public static String SWSTACK = "SW";
         /**
-         * Describe a special destination that invoke the
-         * traditional HW forwarding on platforms that has this
-         * provision.
+         * Describes OFPP_Normal reserved port destination that invokes 
+         * the traditional native L2/L3 HW normal forwarding functionality 
+         * if supported on the forwarding element.
          */
         public static String HWPATH = "HW";
         public static String OPENFLOW = "OF";
@@ -441,7 +445,7 @@ public class NodeConnector implements Serializable {
      *
      * @param str String to be parsed in a NodeConnector
      *
-     * @return the NodeConnector if parse is succesfull, null otherwise
+     * @return the NodeConnector if parse is successful, null otherwise
      */
     public static NodeConnector fromString(String str) {
         if (str == null) {
@@ -534,14 +538,14 @@ public class NodeConnector implements Serializable {
 
     /**
      * return a NodeConnector from a pair (type, ID) in string format
-     * not containing explicitely the Node portion which has to be
+     * not containing explicitly the Node portion which has to be
      * supplied as parameter
      *
      * @param typeStr type String to be parsed in a NodeConnector
      * @param IDStr ID String portion to be parsed in a NodeConnector
      * @param n Node to which the NodeConnector is attached
      *
-     * @return the NodeConnector if parse is succesfull, null otherwise
+     * @return the NodeConnector if parse is successful, null otherwise
      */
     public static NodeConnector fromStringNoNode(String typeStr, String IDStr,
                                                  Node n) {
