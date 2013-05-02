@@ -9,7 +9,9 @@
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import java.util.Dictionary;
+import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.protocol_plugin.openflow.IRefreshInternalProvider;
@@ -22,6 +24,7 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
+import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 
 public class TopologyServices implements ITopologyServiceShimListener,
         IPluginInTopologyService {
@@ -129,7 +132,10 @@ public class TopologyServices implements ITopologyServiceShimListener,
     @Override
     public void edgeUpdate(Edge edge, UpdateType type, Set<Property> props) {
         if (this.salTopoService != null) {
-            this.salTopoService.edgeUpdate(edge, type, props);
+            List<TopoEdgeUpdate> topoedgeupdateList = new ArrayList<TopoEdgeUpdate>();
+            TopoEdgeUpdate teu = new TopoEdgeUpdate(edge, props, type);
+            topoedgeupdateList.add(teu);
+            this.salTopoService.edgeUpdate(topoedgeupdateList);
         }
     }
 

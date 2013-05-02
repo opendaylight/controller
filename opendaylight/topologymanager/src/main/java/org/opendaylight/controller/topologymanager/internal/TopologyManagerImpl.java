@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -12,6 +11,7 @@ package org.opendaylight.controller.topologymanager.internal;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -44,6 +45,7 @@ import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.ITopologyService;
+import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
@@ -84,37 +86,36 @@ public class TopologyManagerImpl implements ITopologyManager,
     private static String ROOT = GlobalConstants.STARTUPHOME.toString();
     private String userLinksFileName = null;
     private ConcurrentMap<String, TopologyUserLinkConfig> userLinks;
-    
+
     void nonClusterObjectCreate() {
-    	edgesDB = new ConcurrentHashMap<Edge, Set<Property>>();
-    	hostsDB = new ConcurrentHashMap<NodeConnector, ImmutablePair<Host, Set<Property>>>();
-    	userLinks = new ConcurrentHashMap<String, TopologyUserLinkConfig>();
-    	nodeConnectorsDB = new ConcurrentHashMap<NodeConnector, Set<Property>>();
+        edgesDB = new ConcurrentHashMap<Edge, Set<Property>>();
+        hostsDB = new ConcurrentHashMap<NodeConnector, ImmutablePair<Host, Set<Property>>>();
+        userLinks = new ConcurrentHashMap<String, TopologyUserLinkConfig>();
+        nodeConnectorsDB = new ConcurrentHashMap<NodeConnector, Set<Property>>();
     }
-    
 
     void setTopologyManagerAware(ITopologyManagerAware s) {
         if (this.topologyManagerAware != null) {
-        	log.debug("Adding ITopologyManagerAware: {}", s);
+            log.debug("Adding ITopologyManagerAware: {}", s);
             this.topologyManagerAware.add(s);
         }
     }
 
     void unsetTopologyManagerAware(ITopologyManagerAware s) {
         if (this.topologyManagerAware != null) {
-        	log.debug("Removing ITopologyManagerAware: {}", s);
+            log.debug("Removing ITopologyManagerAware: {}", s);
             this.topologyManagerAware.remove(s);
         }
     }
 
     void setTopoService(ITopologyService s) {
-    	log.debug("Adding ITopologyService: {}", s);
+        log.debug("Adding ITopologyService: {}", s);
         this.topoService = s;
     }
 
     void unsetTopoService(ITopologyService s) {
         if (this.topoService == s) {
-        	log.debug("Removing ITopologyService: {}", s);
+            log.debug("Removing ITopologyService: {}", s);
             this.topoService = null;
         }
     }
@@ -134,7 +135,7 @@ public class TopologyManagerImpl implements ITopologyManager,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init(Component c) {
         String containerName = null;
@@ -200,9 +201,9 @@ public class TopologyManagerImpl implements ITopologyManager,
     }
 
     /**
-     * Function called after the topology manager has registered the
-     * service in OSGi service registry.
-     *
+     * Function called after the topology manager has registered the service in
+     * OSGi service registry.
+     * 
      */
     void started() {
         // SollicitRefresh MUST be called here else if called at init
@@ -212,10 +213,10 @@ public class TopologyManagerImpl implements ITopologyManager,
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
         if (this.clusterContainerService == null) {
@@ -255,18 +256,18 @@ public class TopologyManagerImpl implements ITopologyManager,
         // Publish the save config event to the cluster nodes
         /**
          * Get the CLUSTERING SERVICES WORKING BEFORE TRYING THIS
-
-        configSaveEvent.put(new Date().getTime(), SAVE);
+         * 
+         * configSaveEvent.put(new Date().getTime(), SAVE);
          */
         return saveConfigInternal();
     }
 
     public Status saveConfigInternal() {
-    	Status retS;
+        Status retS;
         ObjectWriter objWriter = new ObjectWriter();
 
-        retS = objWriter.write(
-                new ConcurrentHashMap<String, TopologyUserLinkConfig>(
+        retS = objWriter
+                .write(new ConcurrentHashMap<String, TopologyUserLinkConfig>(
                         userLinks), userLinksFileName);
 
         if (retS.isSuccess()) {
@@ -324,11 +325,11 @@ public class TopologyManagerImpl implements ITopologyManager,
     }
 
     /**
-     * The Map returned is a copy of the current topology hence if the
-     * topology changes the copy doesn't
-     *
-     * @return A Map representing the current topology expressed as
-     * edges of the network
+     * The Map returned is a copy of the current topology hence if the topology
+     * changes the copy doesn't
+     * 
+     * @return A Map representing the current topology expressed as edges of the
+     *         network
      */
     @Override
     public Map<Edge, Set<Property>> getEdges() {
@@ -340,8 +341,8 @@ public class TopologyManagerImpl implements ITopologyManager,
         for (Edge key : this.edgesDB.keySet()) {
             // Sets of props are copied because the composition of
             // those properties could change with time
-            HashSet<Property> prop = new HashSet<Property>(this.edgesDB
-                    .get(key));
+            HashSet<Property> prop = new HashSet<Property>(
+                    this.edgesDB.get(key));
             // We can simply reuse the key because the object is
             // immutable so doesn't really matter that we are
             // referencing the only owned by a different table, the
@@ -354,7 +355,8 @@ public class TopologyManagerImpl implements ITopologyManager,
 
     // TODO remove with spring-dm removal
     /**
-     * @param set the topologyAware to set
+     * @param set
+     *            the topologyAware to set
      */
     public void setTopologyAware(Set<Object> set) {
         for (Object s : set) {
@@ -411,7 +413,7 @@ public class TopologyManagerImpl implements ITopologyManager,
         if (this.hostsDB == null) {
             return;
         }
-        
+
         switch (t) {
         case ADDED:
         case CHANGED:
@@ -432,8 +434,8 @@ public class TopologyManagerImpl implements ITopologyManager,
         }
     }
 
-    @Override
-    public void edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
+    private TopoEdgeUpdate edgeUpdate(Edge e, UpdateType type,
+            Set<Property> props) {
         switch (type) {
         case ADDED:
             // Make sure the props are non-null
@@ -444,7 +446,7 @@ public class TopologyManagerImpl implements ITopologyManager,
                 props = (Set<Property>) new HashSet(props);
             }
 
-            // Now make sure thre is the creation timestamp for the
+            // Now make sure there is the creation timestamp for the
             // edge, if not there timestamp with the first update
             boolean found_create = false;
             for (Property prop : props) {
@@ -507,7 +509,7 @@ public class TopologyManagerImpl implements ITopologyManager,
                 }
             }
 
-            // Now lest make sure new properties are non-null
+            // Now lets make sure new properties are non-null
             // Make sure the props are non-null
             if (props == null) {
                 props = (Set<Property>) new HashSet();
@@ -538,37 +540,52 @@ public class TopologyManagerImpl implements ITopologyManager,
             log.trace("Edge {}  {}", e.toString(), type.name());
             break;
         }
+        return new TopoEdgeUpdate(e, props, type);
+    }
+
+    @Override
+    public void edgeUpdate(List<TopoEdgeUpdate> topoedgeupdateList) {
+        List<TopoEdgeUpdate> teuList = new ArrayList<TopoEdgeUpdate>();
+        for (int i = 0; i < topoedgeupdateList.size(); i++) {
+            Edge e = topoedgeupdateList.get(i).getEdge();
+            Set<Property> p = topoedgeupdateList.get(i).getProperty();
+            UpdateType type = topoedgeupdateList.get(i).getUpdateType();
+            TopoEdgeUpdate teu = edgeUpdate(e, type, p);
+            teuList.add(teu);
+        }
 
         // Now update the listeners
         for (ITopologyManagerAware s : this.topologyManagerAware) {
             try {
-                s.edgeUpdate(e, type, props);
+                s.edgeUpdate(teuList);
             } catch (Exception exc) {
                 log.error("Exception on callback", exc);
             }
         }
+
     }
 
     private Edge getReverseLinkTuple(TopologyUserLinkConfig link) {
-		TopologyUserLinkConfig rLink = new TopologyUserLinkConfig(
-				link.getName(), link.getDstNodeIDType(), link.getDstSwitchId(),
-				link.getDstNodeConnectorIDType(), link.getDstPort(),
-				link.getSrcNodeIDType(), link.getSrcSwitchId(),
-				link.getSrcNodeConnectorIDType(), link.getSrcPort());
+        TopologyUserLinkConfig rLink = new TopologyUserLinkConfig(
+                link.getName(), link.getDstNodeIDType(), link.getDstSwitchId(),
+                link.getDstNodeConnectorIDType(), link.getDstPort(),
+                link.getSrcNodeIDType(), link.getSrcSwitchId(),
+                link.getSrcNodeConnectorIDType(), link.getSrcPort());
         return getLinkTuple(rLink);
     }
 
     private Edge getLinkTuple(TopologyUserLinkConfig link) {
         Edge linkTuple = null;
 
-        // if atleast 1 link exists for the srcPort and atleast 1 link exists for the dstPort
+        // if atleast 1 link exists for the srcPort and atleast 1 link exists
+        // for the dstPort
         // that makes it ineligible for the Manual link addition
         // This is just an extra protection to avoid mis-programming.
         boolean srcLinkExists = false;
         boolean dstLinkExists = false;
-        //TODO check a way to validate the port with inventory services
-        //if (srcSw.getPorts().contains(srcPort) &&
-        //dstSw.getPorts().contains(srcPort) &&
+        // TODO check a way to validate the port with inventory services
+        // if (srcSw.getPorts().contains(srcPort) &&
+        // dstSw.getPorts().contains(srcPort) &&
         if (!srcLinkExists && !dstLinkExists) {
             Node sNode = null;
             Node dNode = null;
@@ -580,44 +597,44 @@ public class TopologyManagerImpl implements ITopologyManager,
             String dstNodeIDType = link.getDstNodeIDType();
             String dstNodeConnectorIDType = link.getDstNodeConnectorIDType();
             try {
-            	if (srcNodeIDType.equals(NodeIDType.OPENFLOW)) {
+                if (srcNodeIDType.equals(NodeIDType.OPENFLOW)) {
                     sNode = new Node(srcNodeIDType, link.getSrcSwitchIDLong());
-            	} else {
-                    sNode = new Node(srcNodeIDType, link.getSrcSwitchId());            		
-            	}
+                } else {
+                    sNode = new Node(srcNodeIDType, link.getSrcSwitchId());
+                }
 
-            	if (dstNodeIDType.equals(NodeIDType.OPENFLOW)) {
+                if (dstNodeIDType.equals(NodeIDType.OPENFLOW)) {
                     dNode = new Node(dstNodeIDType, link.getDstSwitchIDLong());
-            	} else {
-                    dNode = new Node(dstNodeIDType, link.getDstSwitchId());            		
-            	}
-    	
-            	if (srcNodeConnectorIDType.equals(NodeConnectorIDType.OPENFLOW)) {
-                    Short srcPort = Short.valueOf((short) 0);
-	        		if (!link.isSrcPortByName()) {
-	        			srcPort = Short.parseShort(link.getSrcPort());
-	        		}
-					sPort = new NodeConnector(srcNodeConnectorIDType, 
-							srcPort, sNode);
-            	} else {
-    				sPort = new NodeConnector(srcNodeConnectorIDType,
-    						link.getSrcPort(), sNode);            		
-            	}
+                } else {
+                    dNode = new Node(dstNodeIDType, link.getDstSwitchId());
+                }
 
-            	if (dstNodeConnectorIDType.equals(NodeConnectorIDType.OPENFLOW)) {
+                if (srcNodeConnectorIDType.equals(NodeConnectorIDType.OPENFLOW)) {
+                    Short srcPort = Short.valueOf((short) 0);
+                    if (!link.isSrcPortByName()) {
+                        srcPort = Short.parseShort(link.getSrcPort());
+                    }
+                    sPort = new NodeConnector(srcNodeConnectorIDType, srcPort,
+                            sNode);
+                } else {
+                    sPort = new NodeConnector(srcNodeConnectorIDType,
+                            link.getSrcPort(), sNode);
+                }
+
+                if (dstNodeConnectorIDType.equals(NodeConnectorIDType.OPENFLOW)) {
                     Short dstPort = Short.valueOf((short) 0);
-	        		if (!link.isDstPortByName()) {
-	                    dstPort = Short.parseShort(link.getDstPort());
-	                }
-					dPort = new NodeConnector(dstNodeConnectorIDType,
-							dstPort, dNode);
-            	} else {
-					dPort = new NodeConnector(dstNodeConnectorIDType,
-							link.getDstPort(), dNode);
-            	}
+                    if (!link.isDstPortByName()) {
+                        dstPort = Short.parseShort(link.getDstPort());
+                    }
+                    dPort = new NodeConnector(dstNodeConnectorIDType, dstPort,
+                            dNode);
+                } else {
+                    dPort = new NodeConnector(dstNodeConnectorIDType,
+                            link.getDstPort(), dNode);
+                }
                 linkTuple = new Edge(sPort, dPort);
             } catch (ConstructionException cex) {
-            	log.warn("Caught exception ", cex);
+                log.warn("Caught exception ", cex);
             }
             return linkTuple;
         }
@@ -636,12 +653,12 @@ public class TopologyManagerImpl implements ITopologyManager,
     @Override
     public Status addUserLink(TopologyUserLinkConfig link) {
         if (!link.isValid()) {
-            return new Status(StatusCode.BADREQUEST, 
-            		"Configuration Invalid. Please check the parameters");
+            return new Status(StatusCode.BADREQUEST,
+                    "Configuration Invalid. Please check the parameters");
         }
         if (userLinks.get(link.getName()) != null) {
-            return new Status(StatusCode.CONFLICT, 
-            		"Link with name : " + link.getName()
+            return new Status(StatusCode.CONFLICT, "Link with name : "
+                    + link.getName()
                     + " already exists. Please use another name");
         }
         if (userLinks.containsValue(link)) {
@@ -658,8 +675,8 @@ public class TopologyManagerImpl implements ITopologyManager,
                 link.setStatus(TopologyUserLinkConfig.STATUS.SUCCESS);
             } catch (Exception e) {
                 return new Status(StatusCode.INTERNALERROR,
-                		"Exception while adding custom link : " + 
-                				e.getMessage());
+                        "Exception while adding custom link : "
+                                + e.getMessage());
             }
         }
         return new Status(StatusCode.SUCCESS, null);
@@ -668,8 +685,8 @@ public class TopologyManagerImpl implements ITopologyManager,
     @Override
     public Status deleteUserLink(String linkName) {
         if (linkName == null) {
-            return new Status(StatusCode.BADREQUEST, 
-            		"A valid linkName is required to Delete a link");
+            return new Status(StatusCode.BADREQUEST,
+                    "A valid linkName is required to Delete a link");
         }
 
         TopologyUserLinkConfig link = userLinks.get(linkName);
@@ -678,19 +695,19 @@ public class TopologyManagerImpl implements ITopologyManager,
         userLinks.remove(linkName);
         if (linkTuple != null) {
             try {
-                //oneTopology.deleteUserConfiguredLink(linkTuple);
+                // oneTopology.deleteUserConfiguredLink(linkTuple);
             } catch (Exception e) {
-                log
-                        .warn("Harmless : Exception while Deleting User Configured link {} {}",
-                                link, e.toString());
+                log.warn(
+                        "Harmless : Exception while Deleting User Configured link {} {}",
+                        link, e.toString());
             }
             linkTuple = getReverseLinkTuple(link);
             try {
-                //oneTopology.deleteUserConfiguredLink(linkTuple);
+                // oneTopology.deleteUserConfiguredLink(linkTuple);
             } catch (Exception e) {
-                log
-                        .warn("Harmless : Exception while Deleting User Configured Reverse link {} {}",
-                                link, e.toString());
+                log.warn(
+                        "Harmless : Exception while Deleting User Configured Reverse link {} {}",
+                        link, e.toString());
             }
         }
         return new Status(StatusCode.SUCCESS, null);
@@ -707,7 +724,7 @@ public class TopologyManagerImpl implements ITopologyManager,
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---Topology Manager---\n");
-		help.append("\t addTopo name <NodeIDType> <src-sw-id> <NodeConnectorIDType> <port-number> <NodeIDType> <dst-sw-id> <NodeConnectorIDType> <port-number>\n");
+        help.append("\t addTopo name <NodeIDType> <src-sw-id> <NodeConnectorIDType> <port-number> <NodeIDType> <dst-sw-id> <NodeConnectorIDType> <port-number>\n");
         help.append("\t delTopo name\n");
         help.append("\t printTopo\n");
         help.append("\t printNodeEdges\n");
@@ -716,11 +733,11 @@ public class TopologyManagerImpl implements ITopologyManager,
 
     public void _printTopo(CommandInterpreter ci) {
         for (String name : this.userLinks.keySet()) {
-        	TopologyUserLinkConfig linkConfig = userLinks.get(name);
+            TopologyUserLinkConfig linkConfig = userLinks.get(name);
             ci.println("Name : " + name);
             ci.println(linkConfig);
-            ci.println("Edge " +  getLinkTuple(linkConfig));
-            ci.println("Reverse Edge " +  getReverseLinkTuple(linkConfig));
+            ci.println("Edge " + getLinkTuple(linkConfig));
+            ci.println("Reverse Edge " + getReverseLinkTuple(linkConfig));
         }
     }
 
@@ -778,9 +795,9 @@ public class TopologyManagerImpl implements ITopologyManager,
             ci.println("Null destination port number");
             return;
         }
-		TopologyUserLinkConfig config = new TopologyUserLinkConfig(name,
-				srcNodeIDType, dpid, srcNodeConnectorIDType, port,
-				dstNodeIDType, ddpid, dstNodeConnectorIDType, dport);
+        TopologyUserLinkConfig config = new TopologyUserLinkConfig(name,
+                srcNodeIDType, dpid, srcNodeConnectorIDType, port,
+                dstNodeIDType, ddpid, dstNodeConnectorIDType, dport);
         ci.println(this.addUserLink(config));
     }
 
@@ -794,23 +811,23 @@ public class TopologyManagerImpl implements ITopologyManager,
     }
 
     public void _printNodeEdges(CommandInterpreter ci) {
-    	Map<Node, Set<Edge>> nodeEdges = getNodeEdges();    	
-    	if (nodeEdges == null) {
-    		return;
-    	}
-    	Set<Node> nodeSet = nodeEdges.keySet();
-    	if (nodeSet == null) {
-    		return;
-    	}
+        Map<Node, Set<Edge>> nodeEdges = getNodeEdges();
+        if (nodeEdges == null) {
+            return;
+        }
+        Set<Node> nodeSet = nodeEdges.keySet();
+        if (nodeSet == null) {
+            return;
+        }
         ci.println("        Node                                         Edge");
-    	for (Node node : nodeSet) {
-    		Set<Edge> edgeSet = nodeEdges.get(node);
-    		if (edgeSet == null) {
-    			continue;
-    		}
-    		for (Edge edge : edgeSet) {
-    			ci.println(node + "             " + edge);
-    		}
+        for (Node node : nodeSet) {
+            Set<Edge> edgeSet = nodeEdges.get(node);
+            if (edgeSet == null) {
+                continue;
+            }
+            for (Edge edge : edgeSet) {
+                ci.println(node + "             " + edge);
+            }
         }
     }
 

@@ -83,7 +83,7 @@ public class FRMIntegrationTest {
                 mavenBundle("ch.qos.logback", "logback-classic", "1.0.9"),
                 // List all the bundles on which the test case depends
                 mavenBundle("org.opendaylight.controller", "sal",
-                        "0.4.0-SNAPSHOT"),
+                        "0.5.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller",
                         "sal.implementation", "0.4.0-SNAPSHOT"),
 

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -9,7 +8,9 @@
 
 package org.opendaylight.controller.sal.implementation.internal;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Collections;
 
@@ -20,6 +21,7 @@ import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.topology.ITopologyService;
+import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,16 +60,16 @@ public class Topology implements IPluginOutTopologyService, ITopologyService {
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
         // Make sure to clear all the data structure we use to track
@@ -90,10 +92,10 @@ public class Topology implements IPluginOutTopologyService, ITopologyService {
     }
 
     @Override
-    public void edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
+    public void edgeUpdate(List<TopoEdgeUpdate> topoedgeupdateList) {
         synchronized (this.updateService) {
             for (IListenTopoUpdates s : this.updateService) {
-                s.edgeUpdate(e, type, props);
+                s.edgeUpdate(topoedgeupdateList);
             }
         }
     }

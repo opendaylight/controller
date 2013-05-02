@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -6,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 
 package org.opendaylight.controller.routing.dijkstra_implementation;
 
@@ -18,9 +16,11 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Path;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +34,8 @@ import org.slf4j.LoggerFactory;
 
 public class DijkstraTest {
     protected static final Logger logger = LoggerFactory
-    .getLogger(DijkstraTest.class);
+            .getLogger(DijkstraTest.class);
+
     @Test
     public void testSinglePathRouteNoBw() {
         DijkstraImplementation imp = new DijkstraImplementation();
@@ -42,6 +43,7 @@ public class DijkstraTest {
         Node node1 = NodeCreator.createOFNode((long) 1);
         Node node2 = NodeCreator.createOFNode((long) 2);
         Node node3 = NodeCreator.createOFNode((long) 3);
+        List<TopoEdgeUpdate> topoedgeupdateList = new ArrayList<TopoEdgeUpdate>();
         NodeConnector nc11 = NodeConnectorCreator.createOFNodeConnector(
                 (short) 1, node1);
         NodeConnector nc21 = NodeConnectorCreator.createOFNodeConnector(
@@ -50,11 +52,13 @@ public class DijkstraTest {
         try {
             edge1 = new Edge(nc11, nc21);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         Set<Property> props = new HashSet<Property>();
         props.add(new Bandwidth(0));
-        imp.edgeUpdate(edge1, UpdateType.ADDED, props);
+        TopoEdgeUpdate teu1 = new TopoEdgeUpdate(edge1, props, UpdateType.ADDED);
+        topoedgeupdateList.add(teu1);
+
         NodeConnector nc22 = NodeConnectorCreator.createOFNodeConnector(
                 (short) 2, node2);
         NodeConnector nc31 = NodeConnectorCreator.createOFNodeConnector(
@@ -63,11 +67,14 @@ public class DijkstraTest {
         try {
             edge2 = new Edge(nc22, nc31);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         Set<Property> props2 = new HashSet<Property>();
-        props.add(new Bandwidth(0));
-        imp.edgeUpdate(edge2, UpdateType.ADDED, props2);
+        props2.add(new Bandwidth(0));
+        TopoEdgeUpdate teu2 = new TopoEdgeUpdate(edge2, props2,
+                UpdateType.ADDED);
+        topoedgeupdateList.add(teu2);
+        imp.edgeUpdate(topoedgeupdateList);
         Path res = imp.getRoute(node1, node3);
 
         List<Edge> expectedPath = (List<Edge>) new LinkedList<Edge>();
@@ -77,7 +84,7 @@ public class DijkstraTest {
         try {
             expectedRes = new Path(expectedPath);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         if (!res.equals(expectedRes)) {
             System.out.println("Actual Res is " + res);
@@ -89,6 +96,7 @@ public class DijkstraTest {
     @Test
     public void testShortestPathRouteNoBw() {
         DijkstraImplementation imp = new DijkstraImplementation();
+        List<TopoEdgeUpdate> topoedgeupdateList = new ArrayList<TopoEdgeUpdate>();
         imp.init();
         Node node1 = NodeCreator.createOFNode((long) 1);
         Node node2 = NodeCreator.createOFNode((long) 2);
@@ -101,11 +109,12 @@ public class DijkstraTest {
         try {
             edge1 = new Edge(nc11, nc21);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         Set<Property> props = new HashSet<Property>();
         props.add(new Bandwidth(0));
-        imp.edgeUpdate(edge1, UpdateType.ADDED, props);
+        TopoEdgeUpdate teu1 = new TopoEdgeUpdate(edge1, props, UpdateType.ADDED);
+        topoedgeupdateList.add(teu1);
 
         NodeConnector nc22 = NodeConnectorCreator.createOFNodeConnector(
                 (short) 2, node2);
@@ -115,11 +124,13 @@ public class DijkstraTest {
         try {
             edge2 = new Edge(nc22, nc31);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         Set<Property> props2 = new HashSet<Property>();
-        props.add(new Bandwidth(0));
-        imp.edgeUpdate(edge2, UpdateType.ADDED, props2);
+        props2.add(new Bandwidth(0));
+        TopoEdgeUpdate teu2 = new TopoEdgeUpdate(edge2, props2,
+                UpdateType.ADDED);
+        topoedgeupdateList.add(teu2);
 
         NodeConnector nc12 = NodeConnectorCreator.createOFNodeConnector(
                 (short) 2, node1);
@@ -129,11 +140,14 @@ public class DijkstraTest {
         try {
             edge3 = new Edge(nc12, nc32);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         Set<Property> props3 = new HashSet<Property>();
-        props.add(new Bandwidth(0));
-        imp.edgeUpdate(edge3, UpdateType.ADDED, props3);
+        props3.add(new Bandwidth(0));
+        TopoEdgeUpdate teu3 = new TopoEdgeUpdate(edge3, props3,
+                UpdateType.ADDED);
+        topoedgeupdateList.add(teu3);
+        imp.edgeUpdate(topoedgeupdateList);
 
         Path res = imp.getRoute(node1, node3);
 
@@ -143,7 +157,7 @@ public class DijkstraTest {
         try {
             expectedRes = new Path(expectedPath);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         if (!res.equals(expectedRes)) {
             System.out.println("Actual Res is " + res);
@@ -156,6 +170,7 @@ public class DijkstraTest {
     public void testShortestPathRouteNoBwAfterLinkDelete() {
         DijkstraImplementation imp = new DijkstraImplementation();
         imp.init();
+        List<TopoEdgeUpdate> topoedgeupdateList = new ArrayList<TopoEdgeUpdate>();
         Node node1 = NodeCreator.createOFNode((long) 1);
         Node node2 = NodeCreator.createOFNode((long) 2);
         Node node3 = NodeCreator.createOFNode((long) 3);
@@ -167,11 +182,12 @@ public class DijkstraTest {
         try {
             edge1 = new Edge(nc11, nc21);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         Set<Property> props = new HashSet<Property>();
         props.add(new Bandwidth(0));
-        imp.edgeUpdate(edge1, UpdateType.ADDED, props);
+        TopoEdgeUpdate teu1 = new TopoEdgeUpdate(edge1, props, UpdateType.ADDED);
+        topoedgeupdateList.add(teu1);
 
         NodeConnector nc22 = NodeConnectorCreator.createOFNodeConnector(
                 (short) 2, node2);
@@ -181,11 +197,13 @@ public class DijkstraTest {
         try {
             edge2 = new Edge(nc22, nc31);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         Set<Property> props2 = new HashSet<Property>();
-        props.add(new Bandwidth(0));
-        imp.edgeUpdate(edge2, UpdateType.ADDED, props2);
+        props2.add(new Bandwidth(0));
+        TopoEdgeUpdate teu2 = new TopoEdgeUpdate(edge2, props2,
+                UpdateType.ADDED);
+        topoedgeupdateList.add(teu2);
 
         NodeConnector nc12 = NodeConnectorCreator.createOFNodeConnector(
                 (short) 2, node1);
@@ -195,13 +213,18 @@ public class DijkstraTest {
         try {
             edge3 = new Edge(nc12, nc32);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         Set<Property> props3 = new HashSet<Property>();
-        props.add(new Bandwidth(0));
-        imp.edgeUpdate(edge3, UpdateType.ADDED, props3);
+        props3.add(new Bandwidth(0));
+        TopoEdgeUpdate teu3 = new TopoEdgeUpdate(edge3, props3,
+                UpdateType.ADDED);
+        topoedgeupdateList.add(teu3);
+        TopoEdgeUpdate teu4 = new TopoEdgeUpdate(edge3, props3,
+                UpdateType.REMOVED);
+        topoedgeupdateList.add(teu4);
 
-        imp.edgeUpdate(edge3, UpdateType.REMOVED, props3);
+        imp.edgeUpdate(topoedgeupdateList);
 
         Path res = imp.getRoute(node1, node3);
         List<Edge> expectedPath = (List<Edge>) new LinkedList<Edge>();
@@ -211,7 +234,7 @@ public class DijkstraTest {
         try {
             expectedRes = new Path(expectedPath);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         if (!res.equals(expectedRes)) {
             System.out.println("Actual Res is " + res);

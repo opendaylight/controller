@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -9,11 +8,9 @@
 
 package org.opendaylight.controller.sal.topology;
 
-import java.util.Set;
+import java.util.List;
 
 import org.opendaylight.controller.sal.core.Edge;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.UpdateType;
 
 /**
  * @file   IListenTopoUpdates.java
@@ -28,30 +25,31 @@ import org.opendaylight.controller.sal.core.UpdateType;
 
 /**
  * Topology notifications provided by SAL toward the application
- *
+ * 
  */
 public interface IListenTopoUpdates {
     /**
      * Called to update on Edge in the topology graph
-     *
-     * @param e Edge being updated
-     * @param type Type of update
-     * @param props Properties of the edge, like BandWidth and/or Latency etc.
+     * 
+     * @param topoedgeupdateList
+     *            List of topoedgeupdates Each topoedgeupdate includes edge, its
+     *            Properties ( BandWidth and/or Latency etc) and update type.
      */
-    public void edgeUpdate(Edge e, UpdateType type, Set<Property> props);
+    public void edgeUpdate(List<TopoEdgeUpdate> topoedgeupdateList);
 
     /**
-     * Called when an Edge utilization is above the safety threshold
-     * configured on the controller
-     *
-     * @param edge The edge which bandwidth usage is above the safety level
+     * Called when an Edge utilization is above the safety threshold configured
+     * on the controller
+     * 
+     * @param edge
+     *            The edge which bandwidth usage is above the safety level
      */
     public void edgeOverUtilized(Edge edge);
 
     /**
      * Called when the Edge utilization is back to normal, below the safety
      * threshold level configured on the controller
-     *
+     * 
      * @param edge
      */
     public void edgeUtilBackToNormal(Edge edge);
