@@ -96,6 +96,8 @@ public class ModuleBuilder implements Builder {
      */
     @Override
     public Module build() {
+        instance.setPrefix(prefix);
+        instance.setRevision(revision);
         instance.setImports(imports);
         instance.setNamespace(namespace);
 
@@ -247,12 +249,10 @@ public class ModuleBuilder implements Builder {
 
     public void setRevision(final Date revision) {
         this.revision = revision;
-        instance.setRevision(revision);
     }
 
     public void setPrefix(final String prefix) {
         this.prefix = prefix;
-        instance.setPrefix(prefix);
     }
 
     public void setYangVersion(final String yangVersion) {
@@ -295,10 +295,8 @@ public class ModuleBuilder implements Builder {
     public ContainerSchemaNodeBuilder addContainerNode(
             final QName containerName, final List<String> parentPath) {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
-
         final ContainerSchemaNodeBuilder containerBuilder = new ContainerSchemaNodeBuilder(
                 containerName);
-
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToNode);
         if (parent != null) {
@@ -318,10 +316,8 @@ public class ModuleBuilder implements Builder {
     public ListSchemaNodeBuilder addListNode(final QName listName,
             final List<String> parentPath) {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
-
         final ListSchemaNodeBuilder listBuilder = new ListSchemaNodeBuilder(
                 listName);
-
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToNode);
         if (parent != null) {
@@ -341,10 +337,8 @@ public class ModuleBuilder implements Builder {
     public LeafSchemaNodeBuilder addLeafNode(final QName leafName,
             final List<String> parentPath) {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
-
         final LeafSchemaNodeBuilder leafBuilder = new LeafSchemaNodeBuilder(
                 leafName);
-
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToNode);
         if (parent != null) {
@@ -364,7 +358,6 @@ public class ModuleBuilder implements Builder {
     public LeafListSchemaNodeBuilder addLeafListNode(final QName leafListName,
             final List<String> parentPath) {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
-
         final LeafListSchemaNodeBuilder leafListBuilder = new LeafListSchemaNodeBuilder(
                 leafListName);
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
@@ -386,7 +379,6 @@ public class ModuleBuilder implements Builder {
     public GroupingBuilder addGrouping(final QName qname,
             final List<String> parentPath) {
         final List<String> pathToGroup = new ArrayList<String>(parentPath);
-
         final GroupingBuilder builder = new GroupingBuilderImpl(qname);
         final ChildNodeBuilder parentNodeBuilder = (ChildNodeBuilder) moduleNodes
                 .get(pathToGroup);
@@ -405,7 +397,6 @@ public class ModuleBuilder implements Builder {
     public AugmentationSchemaBuilder addAugment(final String name,
             final List<String> parentPath) {
         final List<String> pathToAugment = new ArrayList<String>(parentPath);
-
         final AugmentationSchemaBuilder builder = new AugmentationSchemaBuilderImpl(
                 name);
 

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.parser.builder.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,13 +18,13 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 
-public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
-
+public final class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
+    private final IdentitySchemaNodeImpl instance;
     private final QName qname;
     private SchemaPath schemaPath;
-    private final IdentitySchemaNodeImpl instance;
     private IdentitySchemaNodeBuilder baseIdentity;
     private String baseIdentityName;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     IdentitySchemaNodeBuilder(final QName qname) {
         this.qname = qname;
@@ -33,11 +34,17 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
     @Override
     public IdentitySchemaNode build() {
         instance.setPath(schemaPath);
-
         if (baseIdentity != null) {
-            final IdentitySchemaNode base = baseIdentity.build();
-            instance.setBaseIdentity(base);
+            instance.setBaseIdentity(baseIdentity.build());
         }
+
+        // UNKNOWN NODES
+        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
+
         return instance;
     }
 
@@ -75,8 +82,7 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
 
     @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        throw new IllegalStateException(
-                "Can not add schema node to identity statement");
+        addedUnknownNodes.add(unknownNode);
     }
 
     public String getBaseIdentityName() {
@@ -91,13 +97,14 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
         this.baseIdentity = baseType;
     }
 
-    private class IdentitySchemaNodeImpl implements IdentitySchemaNode {
+    private final class IdentitySchemaNodeImpl implements IdentitySchemaNode {
         private final QName qname;
         private IdentitySchemaNode baseIdentity;
         private String description;
         private String reference;
         private Status status = Status.CURRENT;
         private SchemaPath path;
+        private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
         private IdentitySchemaNodeImpl(final QName qname) {
             this.qname = qname;
@@ -157,7 +164,14 @@ public class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return Collections.emptyList();
+            return unknownNodes;
+        }
+
+        private void setUnknownSchemaNodes(
+                List<UnknownSchemaNode> unknownSchemaNodes) {
+            if (unknownSchemaNodes != null) {
+                this.unknownNodes = unknownSchemaNodes;
+            }
         }
 
         @Override

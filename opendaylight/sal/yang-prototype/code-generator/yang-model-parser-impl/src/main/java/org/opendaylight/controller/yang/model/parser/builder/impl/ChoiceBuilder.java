@@ -31,22 +31,26 @@ import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder
 
 public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
         AugmentationTargetBuilder {
+    private final ChoiceNodeImpl instance;
+    // SchemaNode args
     private final QName qname;
     private SchemaPath schemaPath;
-    private final ConstraintsBuilder constraints;
-    private final ChoiceNodeImpl instance;
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    // DataSchemaNode args
     private boolean augmenting;
     private boolean configuration;
-    private String defaultCase;
-
-    private final Set<ChoiceCaseBuilder> cases = new HashSet<ChoiceCaseBuilder>();
+    private final ConstraintsBuilder constraints;
+    // DataNodeContainer args
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
+    // AugmentationTarget args
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    // ChoiceNode args
+    private final Set<ChoiceCaseBuilder> cases = new HashSet<ChoiceCaseBuilder>();
+    private String defaultCase;
 
     public ChoiceBuilder(QName qname) {
         this.qname = qname;
@@ -62,6 +66,7 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
         instance.setStatus(status);
         instance.setAugmenting(augmenting);
         instance.setConfiguration(configuration);
+        instance.setConstraints(constraints.build());
         instance.setDefaultCase(defaultCase);
 
         // CASES
@@ -85,8 +90,6 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
         }
         instance.setUnknownSchemaNodes(unknownNodes);
 
-        instance.setConstraints(constraints.build());
-
         return instance;
     }
 
@@ -97,7 +100,8 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
     @Override
     public void addChildNode(DataSchemaNodeBuilder childNode) {
         if (!(childNode instanceof ChoiceCaseBuilder)) {
-            ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(childNode.getQName());
+            ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(
+                    childNode.getQName());
             caseBuilder.addChildNode(childNode);
             cases.add(caseBuilder);
         } else {

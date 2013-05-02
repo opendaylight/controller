@@ -652,7 +652,7 @@ public final class YangModelParserListenerImpl extends YangParserBaseListener {
         final String nodeTypeStr = ctx.getChild(0).getText();
         final String[] splittedElement = nodeTypeStr.split(":");
         if (splittedElement.length == 1) {
-            nodeType = new QName(null, null, null, splittedElement[0]);
+            nodeType = new QName(null, null, yangModelPrefix, splittedElement[0]);
         } else {
             nodeType = new QName(null, null, splittedElement[0],
                     splittedElement[1]);

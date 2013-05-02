@@ -26,8 +26,7 @@ import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuild
 import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.model.parser.util.RefineHolder;
 
-public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
-
+final class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
     private final UsesNodeImpl instance;
     private final SchemaPath groupingPath;
     private final Set<AugmentationSchemaBuilder> addedAugments = new HashSet<AugmentationSchemaBuilder>();
@@ -89,8 +88,8 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
         refines.add(refine);
     }
 
-    private SchemaPath parseUsesPath(final String augmentPath) {
-        final String[] splittedPath = augmentPath.split("/");
+    private SchemaPath parseUsesPath(final String groupingPathStr) {
+        final String[] splittedPath = groupingPathStr.split("/");
         final List<QName> path = new ArrayList<QName>();
         QName name;
         for (String pathElement : splittedPath) {
@@ -103,11 +102,11 @@ public class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
             }
             path.add(name);
         }
-        final boolean absolute = augmentPath.startsWith("/");
+        final boolean absolute = groupingPathStr.startsWith("/");
         return new SchemaPath(path, absolute);
     }
 
-    private static class UsesNodeImpl implements UsesNode {
+    private final class UsesNodeImpl implements UsesNode {
         private final SchemaPath groupingPath;
         private Set<AugmentationSchema> augmentations = Collections.emptySet();
         private boolean augmenting;

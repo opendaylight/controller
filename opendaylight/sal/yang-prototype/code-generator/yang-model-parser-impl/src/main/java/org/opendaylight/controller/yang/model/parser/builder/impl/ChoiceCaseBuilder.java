@@ -24,18 +24,18 @@ import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeB
 import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
 
-public class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements DataSchemaNodeBuilder {
-
+public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
+        DataSchemaNodeBuilder {
     private final ChoiceCaseNodeImpl instance;
-    private final ConstraintsBuilder constraints;
     private SchemaPath schemaPath;
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private boolean augmenting;
+    private final ConstraintsBuilder constraints;
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
     private final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     ChoiceCaseBuilder(QName qname) {
         super(qname);
@@ -110,7 +110,7 @@ public class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements DataS
 
     @Override
     public void setStatus(Status status) {
-        if(status != null) {
+        if (status != null) {
             this.status = status;
         }
     }
@@ -144,12 +144,14 @@ public class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements DataS
 
     @Override
     public void addTypedef(TypeDefinitionBuilder typedefBuilder) {
-        throw new UnsupportedOperationException("Can not add type definition to choice case.");
+        throw new UnsupportedOperationException(
+                "Can not add type definition to choice case.");
     }
 
     @Override
     public void setConfiguration(boolean configuration) {
-        throw new UnsupportedOperationException("Can not add config definition to choice case.");
+        throw new UnsupportedOperationException(
+                "Can not add config definition to choice case.");
     }
 
     @Override
@@ -161,8 +163,7 @@ public class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements DataS
         return augmentations;
     }
 
-
-    private static class ChoiceCaseNodeImpl implements ChoiceCaseNode {
+    private class ChoiceCaseNodeImpl implements ChoiceCaseNode {
         private final QName qname;
         private SchemaPath path;
         private String description;
@@ -217,7 +218,7 @@ public class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements DataS
         }
 
         private void setStatus(Status status) {
-            if(status != null) {
+            if (status != null) {
                 this.status = status;
             }
         }
@@ -251,7 +252,7 @@ public class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements DataS
         }
 
         private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownNodes) {
-            if(unknownNodes != null) {
+            if (unknownNodes != null) {
                 this.unknownNodes = unknownNodes;
             }
         }
@@ -316,7 +317,6 @@ public class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements DataS
                 this.augmentations = augmentations;
             }
         }
-
 
         @Override
         public int hashCode() {
