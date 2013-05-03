@@ -2,11 +2,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>binding-generator</artifactId>
+        <artifactId>yang</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>1.0</version>
+        <version>0.5-SNAPSHOT</version>
+        <relativePath>../../yang/pom.xml</relativePath>
     </parent>
-    <artifactId>maven-yang-plugin-it</artifactId>
+    <artifactId>yang-maven-plugin-it</artifactId>
 
 
     <dependencies>
