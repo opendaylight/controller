@@ -207,7 +207,6 @@ public class SwitchHandler implements ISwitch {
         }
         executor.shutdown();
 
-        selector = null;
         msgReadWriteService = null;
 
         if (switchHandlerThread != null) {
@@ -313,7 +312,9 @@ public class SwitchHandler implements ISwitch {
         List<OFMessage> msgs = null;
 
         try {
-            msgs = msgReadWriteService.readMessages();
+            if (msgReadWriteService != null) {
+                msgs = msgReadWriteService.readMessages();
+            }
         } catch (Exception e) {
             reportError(e);
         }
