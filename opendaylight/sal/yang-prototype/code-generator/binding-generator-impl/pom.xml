@@ -3,30 +3,30 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>binding-generator</artifactId>
-    <version>1.0</version>
+    <version>0.5-SNAPSHOT</version>
   </parent>
   <artifactId>binding-generator-impl</artifactId>
   <dependencies>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>binding-generator-util</artifactId>
-          <version>1.0</version>
+          <version>0.5-SNAPSHOT</version>
       </dependency>
 
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-model-parser-impl</artifactId>
-          <version>1.0</version>
+          <version>0.5-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>binding-generator-api</artifactId>
-          <version>1.0</version>
+          <version>0.5-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>binding-generator-spi</artifactId>
-          <version>1.0</version>
+          <version>0.5-SNAPSHOT</version>
       </dependency>
       <dependency>
       	<groupId>jaxen</groupId>

@@ -4,35 +4,35 @@
     <parent>
         <artifactId>binding-generator</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>1.0</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <artifactId>maven-sal-api-gen-plugin</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>maven-yang</artifactId>
-            <version>1.0</version>
+            <artifactId>maven-yang-plugin-spi</artifactId>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>binding-model-api</artifactId>
-            <version>1.0</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>binding-generator-api</artifactId>
-            <version>1.0</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
 		<dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>binding-generator-impl</artifactId>
-            <version>1.0</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
 		<dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>binding-java-api-generator</artifactId>
-            <version>1.0</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
     
