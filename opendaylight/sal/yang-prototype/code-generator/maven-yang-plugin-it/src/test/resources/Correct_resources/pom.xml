@@ -4,7 +4,7 @@
     <parent>
         <artifactId>binding-generator</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>1.0</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <artifactId>test</artifactId>
 
@@ -12,8 +12,8 @@
         <plugins>
             <plugin>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>maven-yang-plugin</artifactId>
-                <version>1.0</version>
+                <artifactId>yang-maven-plugin</artifactId>
+                <version>0.5-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <goals>
@@ -38,8 +38,8 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
-                        <artifactId>maven-yang</artifactId>
-                        <version>1.0</version>
+                        <artifactId>yang-maven-plugin-spi</artifactId>
+                        <version>0.5-SNAPSHOT</version>
                         <type>test-jar</type>
                     </dependency>
                 </dependencies>
