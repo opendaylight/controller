@@ -18,7 +18,7 @@ one.f.dashlet = {
 	},
     staticRouteConfig : {
         id : 'staticRouteConfig',
-        name : 'Static route Configuration'
+        name : 'Static Route Configuration'
     },
     subnetGatewayConfig : {
         id : 'subnetGatewayConfig',
@@ -90,11 +90,10 @@ one.f.switchmanager.nodesLearnt = {
 
 		one.f.switchmanager.nodesLearnt.ajax.main(url, function(content) {
 			var body = one.f.switchmanager.nodesLearnt.data.abridged(content);
-			var $table = one.f.switchmanager.createTable(["Node Name", "Node ID", "Ports", "Port Status"], body);
+			var $table = one.f.switchmanager.createTable(["Node Name", "Node ID", "Ports"], body);
 			$dashlet.append($table);
 		});
 	},
-
 	ajax : {
 		main : function(url, callback) {
 			$.getJSON(url, function(data) {
@@ -106,7 +105,7 @@ one.f.switchmanager.nodesLearnt = {
 		initialize: {
 			updateNode: function(evt) {
 				var nodeId = decodeURIComponent(evt.target.id);
-				var h3 = "Update node information";
+				var h3 = "Update Node Information";
 	            var footer = one.f.switchmanager.nodesLearnt.modal.footer.updateNode();
 	            var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.modal, h3, "", footer);
 	            
@@ -130,7 +129,7 @@ one.f.switchmanager.nodesLearnt = {
 			}
 		},
 		body: {
-			updateNode: function(nodeId, portStatus, switchDetails, tiers) {
+			updateNode: function(nodeId, switchDetails, tiers) {
 				var $form = $(document.createElement('form'));
 				var $fieldset = $(document.createElement('fieldset'));
 				// node ID. not editable.
@@ -147,13 +146,6 @@ one.f.switchmanager.nodesLearnt = {
 				if(switchDetails["nodeName"] != null) {
 					$input.attr('value', switchDetails["nodeName"]);
 				}
-				$fieldset.append($label).append($input);
-				// Port Status. not editable.
-				var $label = one.lib.form.label("Port Status");
-				var $input = one.lib.form.input("Port Status");
-				$input.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.portStatus);
-				$input.attr("disabled", true);
-				$input.attr("value", portStatus);
 				$fieldset.append($label).append($input);
 				// node tier
 				var $label = one.lib.form.label("Tier");
@@ -246,7 +238,6 @@ one.f.switchmanager.nodesLearnt = {
 				entry.push(aTag);
 				entry.push(value["nodeId"]);
 				entry.push(value["ports"]);
-				entry.push(value["portStatus"]);
 				tr.entry = entry;
 				result.push(tr);
 			});
@@ -644,7 +635,8 @@ one.f.switchmanager.staticRouteConfig = {
 			var body = one.f.switchmanager.staticRouteConfig.data.staticRouteConfig(content);
 			// first column contains checkbox. no need for header
 			content.columnNames.splice(0,0," ");
-			var $table = one.f.switchmanager.createTable(content.columnNames, body);
+			var tableHeaders = ['', 'Name', 'Static Route', 'Next Hop Address'];
+			var $table = one.f.switchmanager.createTable(tableHeaders, body);
 			$dashlet.append($table);
 		});
 	},

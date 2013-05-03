@@ -88,7 +88,6 @@ public class Devices implements IDaylightWeb {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         List<Map<String, String>> nodeData = new ArrayList<Map<String, String>>();
-        Map<String, String> portListStatus = new HashMap<String, String>();
         for (Switch device : switchManager.getNetworkDevices()) {
             HashMap<String, String> nodeDatum = new HashMap<String, String>();
             Node node = device.getNode();
@@ -112,38 +111,38 @@ public class Devices implements IDaylightWeb {
             nodeDatum.put("mac",
                     HexEncode.bytesToHexString(device.getDataLayerAddress()));
             StringBuffer sb1 = new StringBuffer();
-            StringBuffer sb2 = new StringBuffer();
             Set<NodeConnector> nodeConnectorSet = device.getNodeConnectors();
-            String nodeConnectorName;
-            String nodeConnectorNumberToStr;
             if (nodeConnectorSet != null && nodeConnectorSet.size() > 0) {
                 Map<Short, String> portList = new HashMap<Short, String>();
                 for (NodeConnector nodeConnector : nodeConnectorSet) {
-                    nodeConnectorNumberToStr = nodeConnector.getID().toString();
+                    String nodeConnectorNumberToStr = nodeConnector.getID().toString();
                     Name ncName = ((Name) switchManager.getNodeConnectorProp(
                             nodeConnector, Name.NamePropName));
                     Config portStatus = ((Config) switchManager
                             .getNodeConnectorProp(nodeConnector,
                                     Config.ConfigPropName));
-                    nodeConnectorName = (ncName != null) ? ncName.getValue()
+                    
+                    String nodeConnectorName = (ncName != null) ? ncName.getValue()
                             : "";
+                    nodeConnectorName += " ("+nodeConnector.getID()+")";
+                    if (portStatus.getValue() == Config.ADMIN_UP) {
+                        nodeConnectorName = "<span style='color:green;'>"+nodeConnectorName+"</span>";
+                    } else if (portStatus.getValue() == Config.ADMIN_DOWN) {
+                        nodeConnectorName = "<span style='color:red;'>"+nodeConnectorName+"</span>";
+                    }
+                    
                     portList.put(Short.parseShort(nodeConnectorNumberToStr),
                             nodeConnectorName);
-                    portListStatus
-                            .put(nodeConnectorName, portStatus.toString());
                 }
 
-                Map<Short, String> sortedPortList = new TreeMap<Short, String>(
-                        portList);
+                Map<Short, String> sortedPortList = new TreeMap<Short, String>(portList);
 
                 for (Entry<Short, String> e : sortedPortList.entrySet()) {
-                    sb1.append(e.getValue() + "(" + e.getKey() + ")");
+                    sb1.append(e.getValue());
                     sb1.append("<br>");
-                    sb2.append(portListStatus.get(e.getValue()) + "<br>");
                 }
             }
             nodeDatum.put("ports", sb1.toString());
-            nodeDatum.put("portStatus", sb2.toString());
             nodeData.add(nodeDatum);
         }
         DevicesJsonBean result = new DevicesJsonBean();

@@ -64,14 +64,6 @@ public class Config extends Property {
 
     @Override
     public String toString() {
-        StringBuffer ret = new StringBuffer();
-        if (this.configValue == 0) {
-            ret.append("Down");
-        } else if (this.configValue == 1) {
-            ret.append("Up");
-        } else {
-            ret.append("Undefined");
-        }
-        return ret.toString();
+        return "Config["+ReflectionToStringBuilder.toString(this)+"]";
     }
 }
