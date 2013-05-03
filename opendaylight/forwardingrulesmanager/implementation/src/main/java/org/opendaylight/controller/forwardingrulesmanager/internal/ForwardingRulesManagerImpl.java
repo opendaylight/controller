@@ -604,9 +604,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     private Status addEntriesInternal(FlowEntryInstall entry, boolean async) {
         // Install the flow on the network node
         Status status = (async)?
-                programmer.addFlow(entry.getNode(), entry.getInstall()
-                        .getFlow()) :
                 programmer.addFlowAsync(entry.getNode(), entry.getInstall()
+                        .getFlow()) :
+                programmer.addFlow(entry.getNode(), entry.getInstall()
                             .getFlow());
 
 
