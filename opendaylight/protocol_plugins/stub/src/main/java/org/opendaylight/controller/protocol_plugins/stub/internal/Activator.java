@@ -101,4 +101,20 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(IPluginInInventoryService.class.getName(), props);
         }
     }
+    
+    public Object[] getGlobalImplementations() {
+        Object[] res = { FlowProgrammerService.class };
+        return res;
+    }
+    
+    public void configureGlobalInstance(Component c, Object imp){
+        if (imp.equals(FlowProgrammerService.class)) {
+            // export the service to be used by SAL
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            // Set the protocolPluginType property which will be used
+            // by SAL
+            props.put("protocolPluginType", "STUB");
+            c.setInterface(IPluginInFlowProgrammerService.class.getName(), props);
+        }
+    }
 }
