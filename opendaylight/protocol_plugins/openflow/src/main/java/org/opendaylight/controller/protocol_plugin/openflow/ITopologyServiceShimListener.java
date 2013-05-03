@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -9,11 +8,13 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow;
 
+import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 
 /**
  * The Interface provides Edge updates to the topology listeners
@@ -21,18 +22,17 @@ import org.opendaylight.controller.sal.core.UpdateType;
 public interface ITopologyServiceShimListener {
     /**
      * Called to update on Edge in the topology graph
-     *
-     * @param edge	 		{@link org.opendaylight.controller.sal.core.Edge} being updated
-     * @param type   		{@link org.opendaylight.controller.sal.core.UpdateType}
-     * @param props   		set of {@link org.opendaylight.controller.sal.core.Property} like
-     * 						{@link org.opendaylight.controller.sal.core.Bandwidth} and/or
-     * 						{@link org.opendaylight.controller.sal.core.Latency} etc.
+     * 
+     * @param topoedgeupdateList
+     *            List of topoedgeupdates Each topoedgeupdate includes edge, its
+     *            Properties ( BandWidth and/or Latency etc) and update type.
      */
-    public void edgeUpdate(Edge edge, UpdateType type, Set<Property> props);
+    public void edgeUpdate(List<TopoEdgeUpdate> topoedgeupdateList);
 
     /**
-     * Called when an Edge utilization is above the safe threshold configured
-     * on the controller
+     * Called when an Edge utilization is above the safe threshold configured on
+     * the controller
+     * 
      * @param {@link org.opendaylight.controller.sal.core.Edge}
      */
     public void edgeOverUtilized(Edge edge);
@@ -40,7 +40,7 @@ public interface ITopologyServiceShimListener {
     /**
      * Called when the Edge utilization is back to normal, below the safety
      * threshold level configured on the controller
-     *
+     * 
      * @param {@link org.opendaylight.controller.sal.core.Edge}
      */
     public void edgeUtilBackToNormal(Edge edge);

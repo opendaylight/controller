@@ -207,7 +207,6 @@ public class SwitchHandler implements ISwitch {
         }
         executor.shutdown();
 
-        selector = null;
         msgReadWriteService = null;
 
         if (switchHandlerThread != null) {
