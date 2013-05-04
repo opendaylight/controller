@@ -125,10 +125,13 @@ public class Devices implements IDaylightWeb {
                     String nodeConnectorName = (ncName != null) ? ncName.getValue()
                             : "";
                     nodeConnectorName += " ("+nodeConnector.getID()+")";
-                    if (portStatus.getValue() == Config.ADMIN_UP) {
-                        nodeConnectorName = "<span style='color:green;'>"+nodeConnectorName+"</span>";
-                    } else if (portStatus.getValue() == Config.ADMIN_DOWN) {
-                        nodeConnectorName = "<span style='color:red;'>"+nodeConnectorName+"</span>";
+                    
+                    if (portStatus != null) {
+                        if (portStatus.getValue() == Config.ADMIN_UP) {
+                            nodeConnectorName = "<span style='color:green;'>"+nodeConnectorName+"</span>";
+                        } else if (portStatus.getValue() == Config.ADMIN_DOWN) {
+                            nodeConnectorName = "<span style='color:red;'>"+nodeConnectorName+"</span>";
+                        }
                     }
                     
                     portList.put(Short.parseShort(nodeConnectorNumberToStr),

@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.usermanager.internal.UserConfig;
 import org.springframework.stereotype.Controller;
@@ -93,6 +94,31 @@ public class DaylightWebAdmin {
         }
 
         return userManager.removeLocalUser(userName).getDescription();
+    }
+    
+    @RequestMapping(value = "/users/password/{username}", method = RequestMethod.POST)
+    @ResponseBody
+    public Status changePassword(@PathVariable("username") String username, HttpServletRequest request,
+            @RequestParam("currentPassword") String currentPassword, @RequestParam("newPassword") String newPassword) {
+        String user = request.getUserPrincipal().getName();
+        
+        IUserManager userManager = (IUserManager) ServiceHelper
+                .getGlobalInstance(IUserManager.class, this);
+        if (userManager == null) {
+            return new Status(StatusCode.GONE, "User Manager not found");
+        }
+        
+        if (!authorize(userManager, UserLevel.NETWORKADMIN, request)) {
+            return new Status(StatusCode.FORBIDDEN, "Operation not permitted");
+        }
+        
+        if (newPassword.isEmpty()) {
+            return new Status(StatusCode.BADREQUEST, "Empty passwords not allowed");
+        }
+        
+        Status status = userManager.changeLocalUserPassword(user, currentPassword, newPassword);
+        
+        return status;
     }
 
     /**
