@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -44,6 +43,7 @@ import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.HexEncode;
 
 public class DataPacketMuxDemux implements IContainerListener,
         IMessageListener, IDataPacketMux, IInventoryShimExternalListener {
@@ -53,7 +53,8 @@ public class DataPacketMuxDemux implements IContainerListener,
     private ConcurrentMap<Long, ISwitch> swID2ISwitch = new ConcurrentHashMap<Long, ISwitch>();
     // Gives a map between a Container and all the DataPacket listeners on SAL
     private ConcurrentMap<String, IPluginOutDataPacketService> pluginOutDataPacketServices = new ConcurrentHashMap<String, IPluginOutDataPacketService>();
-    // Gives a map between a NodeConnector and the containers to which it belongs
+    // Gives a map between a NodeConnector and the containers to which it
+    // belongs
     private ConcurrentMap<NodeConnector, List<String>> nc2Container = new ConcurrentHashMap<NodeConnector, List<String>>();
     // Gives a map between a Container and the FlowSpecs on it
     private ConcurrentMap<String, List<ContainerFlow>> container2FlowSpecs = new ConcurrentHashMap<String, List<ContainerFlow>>();
@@ -130,17 +131,17 @@ public class DataPacketMuxDemux implements IContainerListener,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
         this.controller.addMessageListener(OFType.PACKET_IN, this);
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
         this.controller.removeMessageListener(OFType.PACKET_IN, this);
@@ -158,8 +159,9 @@ public class DataPacketMuxDemux implements IContainerListener,
         if (sw == null || msg == null
                 || this.pluginOutDataPacketServices == null) {
             // Something fishy, we cannot do anything
-        	logger.debug("sw: {} and/or msg: {} and/or pluginOutDataPacketServices: {} is null!",
-        				new Object[]{sw, msg, this.pluginOutDataPacketServices});
+            logger.debug(
+                    "sw: {} and/or msg: {} and/or pluginOutDataPacketServices: {} is null!",
+                    new Object[] { sw, msg, this.pluginOutDataPacketServices });
             return;
         }
         if (msg instanceof OFPacketIn) {
@@ -193,11 +195,16 @@ public class DataPacketMuxDemux implements IContainerListener,
                         .get(GlobalConstants.DEFAULT.toString());
                 if (defaultOutService != null) {
                     defaultOutService.receiveDataPacket(dataPacket);
-                    logger.trace("Dispatched to apps a frame of size: {} on container: {}",
-                            ofPacket.getPacketData().length, GlobalConstants.DEFAULT.toString());
+                    logger.trace(
+                            "Dispatched to apps a frame of size: {} on container: {}: {}",
+                            new Object[] {
+                                    ofPacket.getPacketData().length,
+                                    GlobalConstants.DEFAULT.toString(),
+                                    HexEncode.bytesToHexString(dataPacket
+                                            .getPacketData()) });
                 }
                 // Now check the mapping between nodeConnector and
-                // Container and later on optinally filter based on
+                // Container and later on optimally filter based on
                 // flowSpec
                 List<String> containersRX = this.nc2Container.get(p);
                 if (containersRX != null) {
@@ -208,8 +215,14 @@ public class DataPacketMuxDemux implements IContainerListener,
                         if (s != null) {
                             // TODO add filtering on a per-flowSpec base
                             s.receiveDataPacket(dataPacket);
-                            logger.trace("Dispatched to apps a frame of size: {} on container: {}",
-                                    ofPacket.getPacketData().length, GlobalConstants.DEFAULT.toString());
+                            logger.trace(
+                                    "Dispatched to apps a frame of size: {} on container: {}: {}",
+                                    new Object[] {
+                                            ofPacket.getPacketData().length,
+                                            GlobalConstants.DEFAULT.toString(),
+                                            HexEncode
+                                                    .bytesToHexString(dataPacket
+                                                            .getPacketData()) });
 
                         }
                     }
@@ -233,20 +246,20 @@ public class DataPacketMuxDemux implements IContainerListener,
     public void transmitDataPacket(RawPacket outPkt) {
         // Sanity check area
         if (outPkt == null) {
-        	logger.debug("outPkt is null!");
+            logger.debug("outPkt is null!");
             return;
         }
 
         NodeConnector outPort = outPkt.getOutgoingNodeConnector();
         if (outPort == null) {
-        	logger.debug("outPort is null! outPkt: {}", outPkt);
+            logger.debug("outPort is null! outPkt: {}", outPkt);
             return;
         }
 
         if (!outPort.getType().equals(
                 NodeConnector.NodeConnectorIDType.OPENFLOW)) {
             // The output Port is not of type OpenFlow
-        	logger.debug("outPort is not OF Type! outPort: {}", outPort);
+            logger.debug("outPort is not OF Type! outPort: {}", outPort);
             return;
         }
 
@@ -257,7 +270,7 @@ public class DataPacketMuxDemux implements IContainerListener,
         if (sw == null) {
             // If we cannot get the controller descriptor we cannot even
             // send out the frame
-        	logger.debug("swID: {} - sw is null!", swID);
+            logger.debug("swID: {} - sw is null!", swID);
             return;
         }
 
@@ -265,8 +278,9 @@ public class DataPacketMuxDemux implements IContainerListener,
         // build action
         OFActionOutput action = new OFActionOutput().setPort(port);
         // build packet out
-        OFPacketOut po = new OFPacketOut().setBufferId(
-                OFPacketOut.BUFFER_ID_NONE).setInPort(OFPort.OFPP_NONE)
+        OFPacketOut po = new OFPacketOut()
+                .setBufferId(OFPacketOut.BUFFER_ID_NONE)
+                .setInPort(OFPort.OFPP_NONE)
                 .setActions(Collections.singletonList((OFAction) action))
                 .setActionsLength((short) OFActionOutput.MINIMUM_LENGTH);
 
@@ -280,30 +294,30 @@ public class DataPacketMuxDemux implements IContainerListener,
 
     public void addNode(Node node, Set<Property> props) {
         if (node == null) {
-        	logger.debug("node is null!");
+            logger.debug("node is null!");
             return;
-        } 
+        }
 
         long sid = (Long) node.getID();
         ISwitch sw = controller.getSwitches().get(sid);
         if (sw == null) {
-        	logger.debug("sid: {} - sw is null!", sid);
-        	return;
+            logger.debug("sid: {} - sw is null!", sid);
+            return;
         }
         this.swID2ISwitch.put(sw.getId(), sw);
     }
 
     public void removeNode(Node node) {
         if (node == null) {
-        	logger.debug("node is null!");
+            logger.debug("node is null!");
             return;
         }
 
         long sid = (Long) node.getID();
         ISwitch sw = controller.getSwitches().get(sid);
         if (sw == null) {
-        	logger.debug("sid: {} - sw is null!", sid);
-        	return;
+            logger.debug("sid: {} - sw is null!", sid);
+            return;
         }
         this.swID2ISwitch.remove(sw.getId());
     }

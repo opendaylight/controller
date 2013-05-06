@@ -109,6 +109,11 @@ public abstract class Packet {
              * Store the raw read value, checks the payload type and set the
              * payloadClass accordingly
              */
+            logger.trace("{}: {}: {} (offset {} bitsize {})",
+                    new Object[] { this.getClass().getSimpleName(), hdrField,
+                            HexEncode.bytesToHexString(hdrFieldBytes),
+                            startOffset, numBits });
+
             this.setHeaderField(hdrField, hdrFieldBytes);
         }
 
@@ -138,7 +143,7 @@ public abstract class Packet {
      * packet class, into a single stream of bytes to be sent on the wire
      * 
      * @return byte[] - serialized bytes
-     * @throws PacketException 
+     * @throws PacketException
      */
 
     public byte[] serialize() throws PacketException {
@@ -184,6 +189,8 @@ public abstract class Packet {
         }
         postSerializeCustomOperation(headerBytes);
 
+        logger.trace("{}: {}", this.getClass().getSimpleName(),
+                HexEncode.bytesToHexString(headerBytes));
         return headerBytes;
     }
 

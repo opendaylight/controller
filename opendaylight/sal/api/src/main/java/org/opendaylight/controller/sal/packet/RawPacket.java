@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -25,11 +24,10 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.TimeStamp;
 
 /**
- *
- * Describe a raw Data Packet, this is how a packet is
- * received from the network and how it will be transmitted. It
- * essentially wraps the raw bytestream
- *
+ * 
+ * Describe a raw Data Packet, this is how a packet is received from the network
+ * and how it will be transmitted. It essentially wraps the raw bytestream
+ * 
  */
 public class RawPacket {
     private byte[] packetData;
@@ -41,10 +39,10 @@ public class RawPacket {
     private NodeConnector outgoingNodeConnector;
 
     /**
-     * If the packet is being sent this parameter tells where the
-     * packet is sent toward
-     *
-     *
+     * If the packet is being sent this parameter tells where the packet is sent
+     * toward
+     * 
+     * 
      * @return the NodeConnector toward where the packet is being sent
      */
     public NodeConnector getOutgoingNodeConnector() {
@@ -53,9 +51,9 @@ public class RawPacket {
 
     /**
      * Setter method for OutGoing NodeConnector
-     *
-     * @param outgoingNodeConnector NodeConnector toward where the
-     * packet is travelling
+     * 
+     * @param outgoingNodeConnector
+     *            NodeConnector toward where the packet is travelling
      */
     public void setOutgoingNodeConnector(NodeConnector outgoingNodeConnector) {
         this.outgoingNodeConnector = outgoingNodeConnector;
@@ -63,7 +61,7 @@ public class RawPacket {
 
     /**
      * Return the incoming NodeConnector if the packet was received
-     *
+     * 
      * @return NodeConnector where the packet was received from
      */
     public NodeConnector getIncomingNodeConnector() {
@@ -72,8 +70,9 @@ public class RawPacket {
 
     /**
      * Setter for Incoming NodeConnector
-     *
-     * @param incomingNodeConnector NodeConnector to be used and incoming one
+     * 
+     * @param incomingNodeConnector
+     *            NodeConnector to be used and incoming one
      */
     public void setIncomingNodeConnector(NodeConnector incomingNodeConnector) {
         this.incomingNodeConnector = incomingNodeConnector;
@@ -81,9 +80,10 @@ public class RawPacket {
 
     /**
      * Retrieve a given property attached to the packet, if exits of course
-     *
-     * @param key Key to retrieve the wanted property attached to the packet
-     *
+     * 
+     * @param key
+     *            Key to retrieve the wanted property attached to the packet
+     * 
      * @return The property attached to the packet
      */
     public Object getProps(Object key) {
@@ -95,9 +95,11 @@ public class RawPacket {
 
     /**
      * Generic data associated to the data packet
-     *
-     * @param key key for the association
-     * @param value value associated to the key
+     * 
+     * @param key
+     *            key for the association
+     * @param value
+     *            value associated to the key
      */
     public void setProps(Object key, Object value) {
         if (this.props == null) {
@@ -109,10 +111,12 @@ public class RawPacket {
 
     /**
      * Constructor for RawPacket
-     *
-     * @param data content of the packet as bytestream
-     * @param e datalink encapsulation for the packet
-     *
+     * 
+     * @param data
+     *            content of the packet as bytestream
+     * @param e
+     *            datalink encapsulation for the packet
+     * 
      */
     public RawPacket(byte[] data, LinkEncap e) throws ConstructionException {
         if (data == null) {
@@ -130,12 +134,13 @@ public class RawPacket {
     }
 
     /**
-     * Copy Constructor for RawPacket, it perform a copy of the packet
-     * so each packet can be modified indipendently without worrying
-     * that source packet content is touched
-     *
-     * @param src packet to copy data from
-     *
+     * Copy Constructor for RawPacket, it performs a copy of the packet so each
+     * packet can be modified independently without worrying that source packet
+     * content is touched
+     * 
+     * @param src
+     *            packet to copy data from
+     * 
      */
     public RawPacket(RawPacket src) throws ConstructionException {
         if (src == null) {
@@ -143,8 +148,8 @@ public class RawPacket {
         }
         if (src.getPacketData() != null) {
             this.packetData = new byte[src.getPacketData().length];
-            System.arraycopy(src.getPacketData(), 0, this.packetData, 0, src
-                    .getPacketData().length);
+            System.arraycopy(src.getPacketData(), 0, this.packetData, 0,
+                    src.getPacketData().length);
         } else {
             throw new ConstructionException("Empty packetData");
         }
@@ -158,9 +163,10 @@ public class RawPacket {
 
     /**
      * Constructor for RawPacket with Ethernet encapsulation
-     *
-     * @param data content of the packet as bytestream
-     *
+     * 
+     * @param data
+     *            content of the packet as bytestream
+     * 
      */
     public RawPacket(byte[] data) throws ConstructionException {
         this(data, LinkEncap.ETHERNET);
@@ -168,7 +174,7 @@ public class RawPacket {
 
     /**
      * Read the timestamp when the packet has entered the system
-     *
+     * 
      * @return The timestamp when the packet has entered the system
      */
     public TimeStamp getIncomingTime() {
@@ -177,9 +183,9 @@ public class RawPacket {
 
     /**
      * Read the packet encapsulation
-     *
-     * @return The encapsulation for the raw packet, necessary to
-     * start parsing the packet
+     * 
+     * @return The encapsulation for the raw packet, necessary to start parsing
+     *         the packet
      */
     public LinkEncap getEncap() {
         return this.encap;
@@ -187,7 +193,7 @@ public class RawPacket {
 
     /**
      * Get bytestream of the packet body
-     *
+     * 
      * @return The raw bytestream composing the packet
      */
     public byte[] getPacketData() {
