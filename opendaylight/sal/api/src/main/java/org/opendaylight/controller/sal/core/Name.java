@@ -9,12 +9,11 @@
 
 package org.opendaylight.controller.sal.core;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * The class represents the Name property of an element.
@@ -59,6 +58,6 @@ public class Name extends Property {
 
     @Override
     public String toString() {
-        return "Name[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "Name[" + nameValue + "]";
     }
 }

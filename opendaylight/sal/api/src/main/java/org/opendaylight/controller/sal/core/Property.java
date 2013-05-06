@@ -10,12 +10,13 @@
 package org.opendaylight.controller.sal.core;
 
 import java.io.Serializable;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
  * @file   Property.java
@@ -45,6 +46,7 @@ abstract public class Property implements Serializable {
     /**
      * Private constructor used for JAXB mapping
      */
+    @SuppressWarnings("unused")
     private Property() {
         this.name = null;
     }

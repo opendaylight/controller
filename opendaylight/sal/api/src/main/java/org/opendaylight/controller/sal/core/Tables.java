@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
  * @file   Tables.java
@@ -69,6 +68,6 @@ public class Tables extends Property {
 
     @Override
     public String toString() {
-        return "Tables[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "Tables[" + tablesValue + "]";
     }
 }

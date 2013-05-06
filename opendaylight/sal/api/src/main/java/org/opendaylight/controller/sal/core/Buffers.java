@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
  * @file   Buffers.java
@@ -70,6 +69,6 @@ public class Buffers extends Property {
 
     @Override
     public String toString() {
-        return "Buffers[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "Buffers[" + buffersValue + "]";
     }
 }

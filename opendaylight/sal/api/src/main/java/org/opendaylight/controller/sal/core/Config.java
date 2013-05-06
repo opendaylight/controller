@@ -8,12 +8,11 @@
 
 package org.opendaylight.controller.sal.core;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * The class represents Admin Config status
@@ -64,6 +63,6 @@ public class Config extends Property {
 
     @Override
     public String toString() {
-        return "Config["+ReflectionToStringBuilder.toString(this)+"]";
+        return "Config["+ configValue +"]";
     }
 }

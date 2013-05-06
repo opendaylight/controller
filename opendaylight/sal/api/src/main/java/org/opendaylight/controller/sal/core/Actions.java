@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
  * @file   Actions.java
@@ -94,6 +93,6 @@ public class Actions extends Property {
 
     @Override
     public String toString() {
-        return "Actions[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "Actions[" + actionsValue + "]";
     }
 }
