@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -29,183 +28,240 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Returns the list of roles associated to the passed user name
-     *
+     * 
      * @param userName
      * @return the role associated to the user name
      */
     public List<String> getUserRoles(String userName);
 
     /**
-     * Authenticate user with AAA server and return authentication and authorization info
-     *
-     * @param username	the username
-     * @param password	the password
-     * @return			{@link org.opendaylight.controller.sal.authorization.AuthResultEnum authenticate result}
+     * Authenticate user with AAA server and return authentication and
+     * authorization info
+     * 
+     * @param username
+     *            the username
+     * @param password
+     *            the password
+     * @return {@link org.opendaylight.controller.sal.authorization.AuthResultEnum}
+     *         authentication result
      */
     public AuthResultEnum authenticate(String username, String password);
 
     /**
      * Add/remove AAA server
-     *
-     * @param configObject	refer to {@link org.opendaylight.controller.usermanager.internal.ServerConfig ServerConfig}
-     * @return				status code
+     * 
+     * @param configObject
+     *            {@link org.opendaylight.controller.usermanager.internal.ServerConfig}
+     *            Server Configuration
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status of this action
      */
     public Status addAAAServer(ServerConfig configObject);
 
     /**
      * Remove AAA server
-     *
-     * @param configObject	refer to {@link org.opendaylight.controller.usermanager.internal.ServerConfig ServerConfig}
-     * @return				status code
+     * 
+     * @param configObject
+     *            refer to
+     *            {@link org.opendaylight.controller.usermanager.internal.ServerConfig}
+     *            Server Configuration
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status of this action
      */
     public Status removeAAAServer(ServerConfig configObject);
 
     /**
      * Add a local user
-     *
-     * @param configObject refer to {@link org.opendaylight.controller.usermanager.internal.UserConfig UserConfig}
-     * @return				status code
+     * 
+     * @param configObject
+     *            {@link org.opendaylight.controller.usermanager.internal.UserConfig}
+     *            User Configuration
+     * @return refer to {@link org.opendaylight.controller.sal.utils.Status}
+     *         status code
      */
     public Status addLocalUser(UserConfig configObject);
 
     /**
      * Remove a local user
-     *
-     * @param configObject refer to {@link org.opendaylight.controller.usermanager.internal.UserConfig UserConfig}
-     * @return				status code
+     * 
+     * @param configObject
+     *            {@link org.opendaylight.controller.usermanager.internal.UserConfig}
+     *            UserConfig
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status of this action
      */
     public Status removeLocalUser(UserConfig configObject);
-    
+
     /**
      * Remove a local user
      * 
-     * @param userName the user name
-     * @return the status of this action
+     * @param userName
+     *            the user name
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status of this action
      */
     public Status removeLocalUser(String userName);
 
     /**
-     * Add the authorization information for a user that gets authenticated remotely
-     *
+     * Add the authorization information for a user that gets authenticated
+     * remotely
+     * 
      * @param AAAconf
-     * @return
+     *            {@link org.opendaylight.controller.usermanager.internal.AuthorizationConfig}
+     *            Authorization Resources
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status of this action
      */
     public Status addAuthInfo(AuthorizationConfig AAAconf);
 
     /**
-     * Remove the authorization information for a user that gets authenticated remotely
-     *
+     * Remove the authorization information for a user that gets authenticated
+     * remotely
+     * 
      * @param AAAconf
-     * @return
+     *            {@link org.opendaylight.controller.usermanager.internal.AuthorizationConfig}
+     *            Authorization Resource
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status of this action
      */
     public Status removeAuthInfo(AuthorizationConfig AAAconf);
 
     /**
      * Return the list of authorization resources
-     * @return
+     * 
+     * @return {@link org.opendaylight.controller.usermanager.internal.AuthorizationConfig}
+     *         List of Authorization Resource
      */
     public List<AuthorizationConfig> getAuthorizationList();
 
     /**
      * Returns a list of AAA Providers.
+     * 
      * @return Set of provider names.
      */
     public Set<String> getAAAProviderNames();
 
     /**
-     * Change the current password for a configured user
-     *
+     * Change the current password for a locally configured user
+     * 
      * @param user
+     *            the username
      * @param curPasssword
+     *            the current password
      * @param newPassword
-     * @return
+     *            the new password
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status of this action
      */
     public Status changeLocalUserPassword(String user, String curPassword,
             String newPassword);
 
     /**
      * Return a list of AAA servers currently configured
-     *
-     * @return list of {@link org.opendaylight.controller.usermanager.internal.ServerConfig ServerConfig}
+     * 
+     * @return {@link org.opendaylight.controller.usermanager.internal.ServerConfig}
+     *         List of ServerConfig
      */
     public List<ServerConfig> getAAAServerList();
 
     /**
      * Return a list of local users
-     *
-     * @return list of {@link org.opendaylight.controller.usermanager.internal.UserConfig UserConfig}
+     * 
+     * @return {@link org.opendaylight.controller.usermanager.internal.UserConfig}
+     *         List of UserConfig
      */
     public List<UserConfig> getLocalUserList();
 
     /**
-     * Save the local users to local disk
-     *
-     * @return status code
+     * Save the local users to disk
+     * 
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status of this action
      */
     public Status saveLocalUserList();
 
     /**
-     * Save the AAA server configurations to local disk
-     *
-     * @return status code
+     * Save the AAA server configurations to disk
+     * 
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status of this action
      */
     public Status saveAAAServerList();
 
     /**
-     * Save the Authorization configurations to local disk
-     *
-     * @return status code
+     * Save the Authorization configurations to disk
+     * 
+     * @return {@link org.opendaylight.controller.sal.utils.Status}
+     *         status code
      */
     public Status saveAuthorizationList();
 
     /**
      * Remove user profile when user logs out
-     *
-     * @param username	the user name
+     * 
+     * @param username
+     *            the user name
      */
     public void userLogout(String username);
 
     /**
      * Remove user profile when user times out
-     *
-     * @param username	the user name
+     * 
+     * @param username
+     *            the user name
      */
     public void userTimedOut(String username);
 
     /**
      * Get the list of users currently logged in
-     *
+     * 
      * @return the list of users along with their administrative roles
      */
     public Map<String, List<String>> getUserLoggedIn();
 
     /**
      * Get date and time user was successfully authenticated
-     *
+     * 
      * @param user
      * @return Date in String format
      */
     public String getAccessDate(String user);
 
     /**
-     * Returns the user level for the passed user name
-     * It check the roles assigned to this user and checks
-     * against the well known Controller user roles to
-     * determines the highest user level associated with
-     * the user
-     *
-     * @param userName the user name
-     * @return	the highest user level for this user
+     * Returns the user level for the passed user name. It checks the roles
+     * assigned to this user and checks against the well known Controller user
+     * roles to determines the highest user level associated with the user
+     * 
+     * @param userName
+     *            the user name
+     * @return {@link org.opendaylight.controller.sal.authorization.UserLevel}
+     *         the highest user level for this user
      */
     public UserLevel getUserLevel(String userName);
 
-    // For internal use. Place holder to move securityContext storage.
+    /**
+     * Returns the Security Context
+     * 
+     * @returns {@link org.springframework.security.web.context.SecurityContextRepository}
+     *          Security Context
+     */
     public SecurityContextRepository getSecurityContextRepo();
 
-    // Session manager to implement session mgmt across web-apps
+    /**
+     * Returns the Session Manager Interface Handler
+     * 
+     * @return {@link org.opendaylight.controller.usermanager.ISessionManager}
+     *         session manager interface handler
+     */
     public ISessionManager getSessionManager();
-    
-    
+
+    /* non-Javadoc
+     * Returns the password for a given user
+     * 
+     * @param username
+     *            the user name
+     * @return password for the username
+     */
     public String getPassword(String username);
 
 }

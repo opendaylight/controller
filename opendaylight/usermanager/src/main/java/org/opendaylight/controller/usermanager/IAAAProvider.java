@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -10,27 +9,33 @@
 package org.opendaylight.controller.usermanager;
 
 /**
- * IAAAProvider exposes a pluggable interface for 3rd party Authentication and Authorization
- * providers to support the UserManager with AAA management.
+ * IAAAProvider exposes a pluggable interface for 3rd party Authentication and
+ * Authorization providers to support the UserManager with AAA management.
  */
 
 public interface IAAAProvider {
 
     /**
-     * Authenticate user with AAA server and return authentication and authorization info
-     * using the Provider's mechanism
+     * Authenticate user with AAA server and return authentication and
+     * authorization info using the Provider's mechanism
+     * 
      * @param userName
+     *            the username
      * @param password
+     *            the password
      * @param server
+     *            AAA server ip address in string form
      * @param secretKey
-     * @return Authentication and Authorization Response
+     *            shared secret between the AAA client and AAA server
+     * @return {@link org.opendaylight.controller.usermanager.AuthResponse}
+     *         Authentication and Authorization Response
      */
     public AuthResponse authService(String userName, String password,
             String server, String secretKey);
 
     /**
      * Returns the Name of the Provider
-     *
+     * 
      * @return Name of the AAA provider
      */
     public String getName();
