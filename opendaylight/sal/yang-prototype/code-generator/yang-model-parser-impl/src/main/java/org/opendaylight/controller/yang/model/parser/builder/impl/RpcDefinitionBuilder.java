@@ -29,6 +29,7 @@ import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionB
 public class RpcDefinitionBuilder implements SchemaNodeBuilder,
         TypeDefinitionAwareBuilder {
     private final RpcDefinitionImpl instance;
+    private final int line;
     private final QName qname;
     private SchemaPath schemaPath;
     private ContainerSchemaNodeBuilder inputBuilder;
@@ -37,8 +38,9 @@ public class RpcDefinitionBuilder implements SchemaNodeBuilder,
     private final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    RpcDefinitionBuilder(final QName qname) {
+    RpcDefinitionBuilder(final QName qname, final int line) {
         this.qname = qname;
+        this.line = line;
         this.instance = new RpcDefinitionImpl(qname);
     }
 
@@ -73,6 +75,11 @@ public class RpcDefinitionBuilder implements SchemaNodeBuilder,
         instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     void setInput(final ContainerSchemaNodeBuilder inputBuilder) {

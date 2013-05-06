@@ -25,21 +25,26 @@ import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuild
 public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
         implements SchemaNodeBuilder, DataSchemaNodeBuilder {
     private final LeafListSchemaNodeImpl instance;
+    private final int line;
+    // SchemaNode args
     private final QName qname;
-    private final ConstraintsBuilder constraints = new ConstraintsBuilder();
     private SchemaPath schemaPath;
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    // DataSchemaNode args
     private boolean augmenting;
     private boolean configuration;
+    private final ConstraintsBuilder constraints;
+    // LeafListSchemaNode args
     private boolean userOrdered;
 
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
-
-    public LeafListSchemaNodeBuilder(final QName qname) {
+    public LeafListSchemaNodeBuilder(final QName qname, final int line) {
         this.qname = qname;
+        this.line = line;
         instance = new LeafListSchemaNodeImpl(qname);
+        constraints = new ConstraintsBuilder(line);
     }
 
     @Override
@@ -67,6 +72,11 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
         instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override
@@ -107,7 +117,7 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
 
     @Override
     public void setStatus(Status status) {
-        if(status != null) {
+        if (status != null) {
             this.status = status;
         }
     }

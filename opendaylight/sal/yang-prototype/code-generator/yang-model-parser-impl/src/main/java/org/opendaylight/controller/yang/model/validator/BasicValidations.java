@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yang_version_stmtContext;
 import org.opendaylight.controller.yang.model.parser.impl.YangModelParserListenerImpl;
@@ -131,6 +132,10 @@ final class BasicValidations {
             String parent = ValidationUtil.getRootParentName(statement);
             message = parent.equals(name) ? message : ValidationUtil.f(
                     "(In (sub)module:%s) %s", parent, message);
+
+            if(statement instanceof ParserRuleContext) {
+                message = "Error on line "+ ((ParserRuleContext)statement).getStart().getLine() + ": "+ message;
+            }
 
             ValidationUtil.ex(message);
         }

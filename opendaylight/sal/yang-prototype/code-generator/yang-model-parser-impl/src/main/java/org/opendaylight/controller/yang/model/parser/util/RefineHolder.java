@@ -16,6 +16,7 @@ import org.opendaylight.controller.yang.model.parser.builder.impl.UnknownSchemaN
 
 public final class RefineHolder implements Builder {
     private final String name;
+    private final int line;
     private String defaultStr;
     private String description;
     private String reference;
@@ -27,8 +28,14 @@ public final class RefineHolder implements Builder {
     private Integer maxElements;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    public RefineHolder(final String name) {
+    public RefineHolder(final String name, final int line) {
         this.name = name;
+        this.line = line;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     public String getDefaultStr() {

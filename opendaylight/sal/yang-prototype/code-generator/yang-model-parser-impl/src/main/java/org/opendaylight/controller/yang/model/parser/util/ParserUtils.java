@@ -103,7 +103,7 @@ public final class ParserUtils {
     public static LeafSchemaNodeBuilder copyLeafBuilder(
             final LeafSchemaNodeBuilder old) {
         final LeafSchemaNodeBuilder copy = new LeafSchemaNodeBuilder(
-                old.getQName());
+                old.getQName(), old.getLine());
         final TypeDefinition<?> type = old.getType();
 
         if (type == null) {
@@ -129,7 +129,7 @@ public final class ParserUtils {
     public static ContainerSchemaNodeBuilder copyContainerBuilder(
             final ContainerSchemaNodeBuilder old) {
         final ContainerSchemaNodeBuilder copy = new ContainerSchemaNodeBuilder(
-                old.getQName());
+                old.getQName(), old.getLine());
         copy.setPath(old.getPath());
         copyConstraints(old, copy);
         for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
@@ -165,7 +165,7 @@ public final class ParserUtils {
     public static ListSchemaNodeBuilder copyListBuilder(
             final ListSchemaNodeBuilder old) {
         final ListSchemaNodeBuilder copy = new ListSchemaNodeBuilder(
-                old.getQName());
+                old.getQName(), old.getLine());
         copy.setPath(old.getPath());
         copyConstraints(old, copy);
         for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
@@ -201,7 +201,7 @@ public final class ParserUtils {
     public static LeafListSchemaNodeBuilder copyLeafListBuilder(
             final LeafListSchemaNodeBuilder old) {
         final LeafListSchemaNodeBuilder copy = new LeafListSchemaNodeBuilder(
-                old.getQName());
+                old.getQName(), old.getLine());
         copy.setPath(old.getPath());
         copyConstraints(old, copy);
         final TypeDefinition<?> type = old.getType();
@@ -226,7 +226,7 @@ public final class ParserUtils {
     }
 
     public static ChoiceBuilder copyChoiceBuilder(final ChoiceBuilder old) {
-        final ChoiceBuilder copy = new ChoiceBuilder(old.getQName());
+        final ChoiceBuilder copy = new ChoiceBuilder(old.getQName(), old.getLine());
         copy.setPath(old.getPath());
         copyConstraints(old, copy);
         for (ChoiceCaseBuilder caseBuilder : old.getCases()) {
@@ -254,7 +254,7 @@ public final class ParserUtils {
     }
 
     public static AnyXmlBuilder copyAnyXmlBuilder(final AnyXmlBuilder old) {
-        final AnyXmlBuilder copy = new AnyXmlBuilder(old.getQName());
+        final AnyXmlBuilder copy = new AnyXmlBuilder(old.getQName(), old.getLine());
         copy.setPath(old.getPath());
         copyConstraints(old, copy);
         for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {

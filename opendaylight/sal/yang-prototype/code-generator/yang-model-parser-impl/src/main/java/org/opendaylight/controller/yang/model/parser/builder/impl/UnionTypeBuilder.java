@@ -33,6 +33,7 @@ import org.opendaylight.controller.yang.model.util.UnionType;
  */
 public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
         TypeDefinitionBuilder, Builder {
+    private final int line;
     private final List<TypeDefinition<?>> types;
     private final List<TypeDefinitionBuilder> typedefs;
     private final UnionType instance;
@@ -42,7 +43,8 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
     private final Date revision;
 
     public UnionTypeBuilder(final List<String> actualPath, final URI namespace,
-            final Date revision) {
+            final Date revision, final int line) {
+        this.line = line;
         types = new ArrayList<TypeDefinition<?>>();
         typedefs = new ArrayList<TypeDefinitionBuilder>();
         instance = new UnionType(actualPath, namespace, revision, types);
@@ -50,6 +52,11 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
         this.actualPath = actualPath;
         this.namespace = namespace;
         this.revision = revision;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     public List<TypeDefinition<?>> getTypes() {

@@ -27,6 +27,7 @@ import org.opendaylight.controller.yang.model.util.UnknownType;
 
 public class TypedefBuilder extends AbstractTypeAwareBuilder implements
         TypeDefinitionBuilder {
+    private final int line;
     private final QName qname;
     private SchemaPath schemaPath;
 
@@ -42,8 +43,9 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
     private String units;
     private Object defaultValue;
 
-    public TypedefBuilder(final QName qname) {
+    public TypedefBuilder(final QName qname, final int line) {
         this.qname = qname;
+        this.line = line;
     }
 
     @Override
@@ -78,6 +80,11 @@ public class TypedefBuilder extends AbstractTypeAwareBuilder implements
         typeBuilder.unknownSchemaNodes(unknownNodes);
         result = typeBuilder.build();
         return result;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

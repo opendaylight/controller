@@ -20,10 +20,11 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.DataSchemaNodeBuilder;
 
 public class AnyXmlBuilder implements DataSchemaNodeBuilder {
+    private final int line;
     private final QName qname;
     private SchemaPath path;
     private final AnyXmlSchemaNodeImpl instance;
-    private final ConstraintsBuilder constraints = new ConstraintsBuilder();
+    private final ConstraintsBuilder constraints;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     private String description;
@@ -31,9 +32,11 @@ public class AnyXmlBuilder implements DataSchemaNodeBuilder {
     private Status status = Status.CURRENT;
     private boolean configuration;
 
-    public AnyXmlBuilder(final QName qname) {
+    public AnyXmlBuilder(final QName qname, final int line) {
         this.qname = qname;
+        this.line = line;
         instance = new AnyXmlSchemaNodeImpl(qname);
+        constraints = new ConstraintsBuilder(line);
     }
 
     @Override
@@ -53,6 +56,11 @@ public class AnyXmlBuilder implements DataSchemaNodeBuilder {
 
         instance.setConfiguration(configuration);
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

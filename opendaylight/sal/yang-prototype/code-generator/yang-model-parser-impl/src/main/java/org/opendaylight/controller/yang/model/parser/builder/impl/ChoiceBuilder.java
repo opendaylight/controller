@@ -32,6 +32,7 @@ import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder
 public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
         AugmentationTargetBuilder {
     private final ChoiceNodeImpl instance;
+    private final int line;
     // SchemaNode args
     private final QName qname;
     private SchemaPath schemaPath;
@@ -52,10 +53,11 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
     private final Set<ChoiceCaseBuilder> cases = new HashSet<ChoiceCaseBuilder>();
     private String defaultCase;
 
-    public ChoiceBuilder(QName qname) {
+    public ChoiceBuilder(final QName qname, final int line) {
         this.qname = qname;
+        this.line = line;
         instance = new ChoiceNodeImpl(qname);
-        constraints = new ConstraintsBuilder();
+        constraints = new ConstraintsBuilder(line);
     }
 
     @Override
@@ -93,6 +95,11 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
         return instance;
     }
 
+    @Override
+    public int getLine() {
+        return line;
+    }
+
     public Set<ChoiceCaseBuilder> getCases() {
         return cases;
     }
@@ -101,7 +108,7 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
     public void addChildNode(DataSchemaNodeBuilder childNode) {
         if (!(childNode instanceof ChoiceCaseBuilder)) {
             ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(
-                    childNode.getQName());
+                    childNode.getQName(), childNode.getLine());
             caseBuilder.addChildNode(childNode);
             cases.add(caseBuilder);
         } else {

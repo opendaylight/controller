@@ -19,15 +19,16 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 
 public class ExtensionBuilder implements SchemaNodeBuilder {
-
     private final ExtensionDefinitionImpl instance;
+    private final int line;
     private final QName qname;
     private SchemaPath schemaPath;
     private final List<UnknownSchemaNodeBuilder> addedExtensions = new ArrayList<UnknownSchemaNodeBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    ExtensionBuilder(final QName qname) {
+    ExtensionBuilder(final QName qname, final int line) {
         this.qname = qname;
+        this.line = line;
         instance = new ExtensionDefinitionImpl(qname);
     }
 
@@ -43,6 +44,11 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
         instance.setUnknownSchemaNodes(extensions);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     public void addExtension(UnknownSchemaNodeBuilder extension) {

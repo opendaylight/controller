@@ -164,6 +164,11 @@ public class ModuleBuilder implements Builder {
         return instance;
     }
 
+    @Override
+    public int getLine() {
+        return 0;
+    }
+
     public Builder getNode(final List<String> path) {
         return moduleNodes.get(path);
     }
@@ -286,17 +291,18 @@ public class ModuleBuilder implements Builder {
         return imports;
     }
 
-    public ExtensionBuilder addExtension(final QName qname) {
-        final ExtensionBuilder builder = new ExtensionBuilder(qname);
+    public ExtensionBuilder addExtension(final QName qname, final int line) {
+        final ExtensionBuilder builder = new ExtensionBuilder(qname, line);
         addedExtensions.add(builder);
         return builder;
     }
 
     public ContainerSchemaNodeBuilder addContainerNode(
-            final QName containerName, final List<String> parentPath) {
+            final QName containerName, final List<String> parentPath,
+            final int line) {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
         final ContainerSchemaNodeBuilder containerBuilder = new ContainerSchemaNodeBuilder(
-                containerName);
+                containerName, line);
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToNode);
         if (parent != null) {
@@ -314,10 +320,10 @@ public class ModuleBuilder implements Builder {
     }
 
     public ListSchemaNodeBuilder addListNode(final QName listName,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
         final ListSchemaNodeBuilder listBuilder = new ListSchemaNodeBuilder(
-                listName);
+                listName, line);
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToNode);
         if (parent != null) {
@@ -335,10 +341,10 @@ public class ModuleBuilder implements Builder {
     }
 
     public LeafSchemaNodeBuilder addLeafNode(final QName leafName,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
         final LeafSchemaNodeBuilder leafBuilder = new LeafSchemaNodeBuilder(
-                leafName);
+                leafName, line);
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToNode);
         if (parent != null) {
@@ -356,10 +362,10 @@ public class ModuleBuilder implements Builder {
     }
 
     public LeafListSchemaNodeBuilder addLeafListNode(final QName leafListName,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
         final LeafListSchemaNodeBuilder leafListBuilder = new LeafListSchemaNodeBuilder(
-                leafListName);
+                leafListName, line);
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToNode);
         if (parent != null) {
@@ -377,9 +383,9 @@ public class ModuleBuilder implements Builder {
     }
 
     public GroupingBuilder addGrouping(final QName qname,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         final List<String> pathToGroup = new ArrayList<String>(parentPath);
-        final GroupingBuilder builder = new GroupingBuilderImpl(qname);
+        final GroupingBuilder builder = new GroupingBuilderImpl(qname, line);
         final ChildNodeBuilder parentNodeBuilder = (ChildNodeBuilder) moduleNodes
                 .get(pathToGroup);
         if (parentNodeBuilder != null) {
@@ -395,10 +401,10 @@ public class ModuleBuilder implements Builder {
     }
 
     public AugmentationSchemaBuilder addAugment(final String name,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         final List<String> pathToAugment = new ArrayList<String>(parentPath);
         final AugmentationSchemaBuilder builder = new AugmentationSchemaBuilderImpl(
-                name);
+                name, line);
 
         // augment can only be in 'module' or 'uses' statement
         final UsesNodeBuilder parent = addedUsesNodes.get(pathToAugment);
@@ -414,10 +420,10 @@ public class ModuleBuilder implements Builder {
     }
 
     public UsesNodeBuilder addUsesNode(final String groupingPathStr,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         final List<String> pathToUses = new ArrayList<String>(parentPath);
         final UsesNodeBuilder usesBuilder = new UsesNodeBuilderImpl(
-                groupingPathStr);
+                groupingPathStr, line);
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToUses);
         if (parent != null) {
@@ -445,9 +451,10 @@ public class ModuleBuilder implements Builder {
     }
 
     public RpcDefinitionBuilder addRpc(final QName qname,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         final List<String> pathToRpc = new ArrayList<String>(parentPath);
-        final RpcDefinitionBuilder rpcBuilder = new RpcDefinitionBuilder(qname);
+        final RpcDefinitionBuilder rpcBuilder = new RpcDefinitionBuilder(qname,
+                line);
 
         pathToRpc.add(qname.getLocalName());
         addedRpcs.put(pathToRpc, rpcBuilder);
@@ -455,7 +462,7 @@ public class ModuleBuilder implements Builder {
         final QName inputQName = new QName(qname.getNamespace(),
                 qname.getRevision(), qname.getPrefix(), "input");
         final ContainerSchemaNodeBuilder inputBuilder = new ContainerSchemaNodeBuilder(
-                inputQName);
+                inputQName, line);
         final List<String> pathToInput = new ArrayList<String>(pathToRpc);
         pathToInput.add("input");
         moduleNodes.put(pathToInput, inputBuilder);
@@ -464,7 +471,7 @@ public class ModuleBuilder implements Builder {
         final QName outputQName = new QName(qname.getNamespace(),
                 qname.getRevision(), qname.getPrefix(), "output");
         final ContainerSchemaNodeBuilder outputBuilder = new ContainerSchemaNodeBuilder(
-                outputQName);
+                outputQName, line);
         final List<String> pathToOutput = new ArrayList<String>(pathToRpc);
         pathToOutput.add("output");
         moduleNodes.put(pathToOutput, outputBuilder);
@@ -474,11 +481,12 @@ public class ModuleBuilder implements Builder {
     }
 
     public NotificationBuilder addNotification(final QName notificationName,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         final List<String> pathToNotification = new ArrayList<String>(
                 parentPath);
 
-        NotificationBuilder builder = new NotificationBuilder(notificationName);
+        NotificationBuilder builder = new NotificationBuilder(notificationName,
+                line);
 
         pathToNotification.add(notificationName.getLocalName());
         moduleNodes.put(pathToNotification, builder);
@@ -488,19 +496,19 @@ public class ModuleBuilder implements Builder {
     }
 
     public FeatureBuilder addFeature(final QName featureName,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         List<String> pathToFeature = new ArrayList<String>(parentPath);
         pathToFeature.add(featureName.getLocalName());
 
-        FeatureBuilder builder = new FeatureBuilder(featureName);
+        FeatureBuilder builder = new FeatureBuilder(featureName, line);
         addedFeatures.put(pathToFeature, builder);
         return builder;
     }
 
     public ChoiceBuilder addChoice(final QName choiceName,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         List<String> pathToChoice = new ArrayList<String>(parentPath);
-        ChoiceBuilder builder = new ChoiceBuilder(choiceName);
+        ChoiceBuilder builder = new ChoiceBuilder(choiceName, line);
 
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToChoice);
@@ -519,9 +527,9 @@ public class ModuleBuilder implements Builder {
     }
 
     public ChoiceCaseBuilder addCase(final QName caseName,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         List<String> pathToCase = new ArrayList<String>(parentPath);
-        ChoiceCaseBuilder builder = new ChoiceCaseBuilder(caseName);
+        ChoiceCaseBuilder builder = new ChoiceCaseBuilder(caseName, line);
 
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToCase);
@@ -539,9 +547,9 @@ public class ModuleBuilder implements Builder {
     }
 
     public AnyXmlBuilder addAnyXml(final QName anyXmlName,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         List<String> pathToAnyXml = new ArrayList<String>(parentPath);
-        AnyXmlBuilder builder = new AnyXmlBuilder(anyXmlName);
+        AnyXmlBuilder builder = new AnyXmlBuilder(anyXmlName, line);
 
         final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
                 .get(pathToAnyXml);
@@ -561,9 +569,9 @@ public class ModuleBuilder implements Builder {
     }
 
     public TypedefBuilder addTypedef(final QName typeDefName,
-            final List<String> parentPath) {
+            final List<String> parentPath, final int line) {
         List<String> pathToType = new ArrayList<String>(parentPath);
-        TypedefBuilder builder = new TypedefBuilder(typeDefName);
+        TypedefBuilder builder = new TypedefBuilder(typeDefName, line);
         TypeDefinitionAwareBuilder parent = (TypeDefinitionAwareBuilder) moduleNodes
                 .get(pathToType);
         if (parent != null) {
@@ -587,12 +595,12 @@ public class ModuleBuilder implements Builder {
     }
 
     public void addUnionType(final List<String> actualPath,
-            final URI namespace, final Date revision) {
+            final URI namespace, final Date revision, final int line) {
         List<String> pathToUnion = new ArrayList<String>(actualPath);
         TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
                 .get(pathToUnion);
         UnionTypeBuilder union = new UnionTypeBuilder(pathToUnion, namespace,
-                revision);
+                revision, line);
         parent.setType(union);
 
         List<String> path = new ArrayList<String>(pathToUnion);
@@ -601,31 +609,33 @@ public class ModuleBuilder implements Builder {
         moduleNodes.put(path, union);
     }
 
-    public void addIdentityrefType(String baseString, List<String> parentPath,
-            SchemaPath schemaPath) {
+    public void addIdentityrefType(final String baseString,
+            final List<String> parentPath, final SchemaPath schemaPath,
+            final int line) {
         List<String> pathToIdentityref = new ArrayList<String>(parentPath);
         TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
                 .get(pathToIdentityref);
         IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(
-                baseString, schemaPath);
+                baseString, schemaPath, line);
         parent.setType(identityref);
         dirtyNodes.put(pathToIdentityref, parent);
     }
 
-    public DeviationBuilder addDeviation(String targetPath,
-            List<String> parentPath) {
+    public DeviationBuilder addDeviation(final String targetPath,
+            final List<String> parentPath, final int line) {
         final List<String> pathToDeviation = new ArrayList<String>(parentPath);
         pathToDeviation.add(targetPath);
-        DeviationBuilder builder = new DeviationBuilder(targetPath);
+        DeviationBuilder builder = new DeviationBuilder(targetPath, line);
         addedDeviations.put(targetPath, builder);
         moduleNodes.put(pathToDeviation, builder);
         return builder;
     }
 
-    public IdentitySchemaNodeBuilder addIdentity(QName qname,
-            List<String> parentPath) {
-        List<String> pathToIdentity = new ArrayList<String>(parentPath);
-        IdentitySchemaNodeBuilder builder = new IdentitySchemaNodeBuilder(qname);
+    public IdentitySchemaNodeBuilder addIdentity(final QName qname,
+            final List<String> parentPath, final int line) {
+        final List<String> pathToIdentity = new ArrayList<String>(parentPath);
+        final IdentitySchemaNodeBuilder builder = new IdentitySchemaNodeBuilder(
+                qname, line);
         pathToIdentity.add(qname.getLocalName());
         moduleNodes.put(pathToIdentity, builder);
         addedIdentities.add(builder);
@@ -642,11 +652,11 @@ public class ModuleBuilder implements Builder {
         }
     }
 
-    public UnknownSchemaNodeBuilder addUnknownSchemaNode(QName qname,
-            List<String> parentPath) {
+    public UnknownSchemaNodeBuilder addUnknownSchemaNode(final QName qname,
+            final List<String> parentPath, final int line) {
         final List<String> pathToUnknown = new ArrayList<String>(parentPath);
         final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(
-                qname);
+                qname, line);
         final Builder parent = moduleNodes.get(pathToUnknown);
         if (parent instanceof RefineHolder) {
             ((RefineHolder) parent).addUnknownSchemaNode(builder);

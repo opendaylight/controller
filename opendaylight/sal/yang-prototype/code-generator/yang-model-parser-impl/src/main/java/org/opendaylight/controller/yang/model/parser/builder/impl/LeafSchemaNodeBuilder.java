@@ -24,23 +24,28 @@ import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuild
 
 public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements
         DataSchemaNodeBuilder, SchemaNodeBuilder {
+    private final LeafSchemaNodeImpl instance;
+    private final int line;
+    // SchemaNode args
     private final QName qname;
     private SchemaPath path;
-    private final LeafSchemaNodeImpl instance;
-    private final ConstraintsBuilder constraints = new ConstraintsBuilder();
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
-
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    // DataSchemaNode args
     private boolean augmenting;
     private boolean configuration;
+    private final ConstraintsBuilder constraints;
+    // leaf args
     private String defaultStr;
     private String unitsStr;
 
-    public LeafSchemaNodeBuilder(final QName qname) {
+    public LeafSchemaNodeBuilder(final QName qname, final int line) {
         this.qname = qname;
+        this.line = line;
         instance = new LeafSchemaNodeImpl(qname);
+        constraints = new ConstraintsBuilder(line);
     }
 
     @Override
@@ -70,6 +75,11 @@ public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements
         instance.setDefault(defaultStr);
         instance.setUnits(unitsStr);
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

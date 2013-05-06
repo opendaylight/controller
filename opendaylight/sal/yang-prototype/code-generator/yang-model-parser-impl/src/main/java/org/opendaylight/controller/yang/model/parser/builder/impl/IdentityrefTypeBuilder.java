@@ -30,12 +30,14 @@ import org.opendaylight.controller.yang.model.util.IdentityrefType;
  */
 public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
         TypeDefinitionBuilder, Builder {
+    private final int line;
     private final String baseString;
     private final SchemaPath schemaPath;
     private QName baseQName;
 
 
-    public IdentityrefTypeBuilder(final String baseString, SchemaPath schemaPath) {
+    public IdentityrefTypeBuilder(final String baseString, final SchemaPath schemaPath, final int line) {
+        this.line = line;
         this.baseString = baseString;
         this.schemaPath = schemaPath;
     }
@@ -46,6 +48,11 @@ public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
 
     public void setBaseQName(QName baseQName) {
         this.baseQName = baseQName;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

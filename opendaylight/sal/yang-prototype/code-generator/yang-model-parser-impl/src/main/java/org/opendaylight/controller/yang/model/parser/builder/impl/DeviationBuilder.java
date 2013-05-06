@@ -14,10 +14,11 @@ import org.opendaylight.controller.yang.model.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.model.parser.util.YangModelBuilderUtil;
 
 public class DeviationBuilder implements Builder {
-
     private final DeviationImpl instance;
+    private final int line;
 
-    DeviationBuilder(final String targetPathStr) {
+    DeviationBuilder(final String targetPathStr, final int line) {
+        this.line = line;
         final SchemaPath targetPath = YangModelBuilderUtil
                 .parseAugmentPath(targetPathStr);
         instance = new DeviationImpl(targetPath);
@@ -26,6 +27,11 @@ public class DeviationBuilder implements Builder {
     @Override
     public Deviation build() {
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     public void setDeviate(final String deviate) {
@@ -130,11 +136,12 @@ public class DeviationBuilder implements Builder {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(DeviationImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(
+                    DeviationImpl.class.getSimpleName());
             sb.append("[");
-            sb.append("targetPath="+ targetPath);
-            sb.append(", deviate="+ deviate);
-            sb.append(", reference="+ reference);
+            sb.append("targetPath=" + targetPath);
+            sb.append(", deviate=" + deviate);
+            sb.append(", reference=" + reference);
             sb.append("]");
             return sb.toString();
         }

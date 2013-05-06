@@ -35,15 +35,16 @@ import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder
 
 public class NotificationBuilder extends AbstractChildNodeBuilder implements
         TypeDefinitionAwareBuilder, SchemaNodeBuilder {
-
     private final NotificationDefinitionImpl instance;
+    private final int line;
     private SchemaPath schemaPath;
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    NotificationBuilder(QName qname) {
+    NotificationBuilder(final QName qname, final int line) {
         super(qname);
+        this.line = line;
         instance = new NotificationDefinitionImpl(qname);
     }
 
@@ -87,6 +88,11 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
         instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

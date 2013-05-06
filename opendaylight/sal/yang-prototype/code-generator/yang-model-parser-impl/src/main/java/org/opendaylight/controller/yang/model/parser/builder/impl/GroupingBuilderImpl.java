@@ -29,8 +29,8 @@ import org.opendaylight.controller.yang.model.parser.builder.api.TypeDefinitionB
 import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder;
 
 public class GroupingBuilderImpl implements GroupingBuilder {
-
     private final GroupingDefinitionImpl instance;
+    private final int line;
     private SchemaPath schemaPath;
     private final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
     private final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
@@ -38,8 +38,9 @@ public class GroupingBuilderImpl implements GroupingBuilder {
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    GroupingBuilderImpl(final QName qname) {
+    GroupingBuilderImpl(final QName qname, final int line) {
         this.instance = new GroupingDefinitionImpl(qname);
+        this.line = line;
     }
 
     @Override
@@ -82,6 +83,11 @@ public class GroupingBuilderImpl implements GroupingBuilder {
         instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     /**
