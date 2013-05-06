@@ -489,7 +489,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * @return the status of this request. In case of asynchronous call, it
      *          will contain the unique id assigned to this request
      */
-    private Status removeEntry(FlowEntry flowEntry, boolean async) {
+    private synchronized Status removeEntry(FlowEntry flowEntry, boolean async) {
         Status error = new Status(null, null);
 
         // Sanity Check
@@ -667,7 +667,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     /*
      * Update the node mapped flows database
      */
-    private void updateNodeFlowsDB(FlowEntryInstall flowEntries, boolean add) {
+    private synchronized void updateNodeFlowsDB(FlowEntryInstall flowEntries, boolean add) {
         Node node = flowEntries.getNode();
 
         Set<FlowEntryInstall> flowEntrylist = this.nodeFlows.get(node);
@@ -751,7 +751,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * entry is effectively present in the local database
      */
     @SuppressWarnings("unused")
-    private Status removeEntry(Node node, String flowName) {
+    private synchronized Status removeEntry(Node node, String flowName) {
         FlowEntryInstall target = null;
 
         // Find in database
@@ -904,7 +904,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             return modifyFlowEntryAsync(currentFlowEntries.getOriginal(),
                    newone);
         } else {
-            return installFlowEntry(newone);
+            return installFlowEntryAsync(newone);
         }
     }
 
@@ -923,7 +923,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * @return null if not found, otherwise the FlowEntryInstall which contains
      *         the existing flow entry
      */
-    private FlowEntryInstall findMatch(FlowEntry flowEntry, boolean looseCheck) {
+    private synchronized FlowEntryInstall findMatch(FlowEntry flowEntry, boolean looseCheck) {
         Flow flow = flowEntry.getFlow();
         Match match = flow.getMatch();
         short priority = flow.getPriority();
@@ -1053,7 +1053,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     }
 
     @Override
-    public void addOutputPort(Node node, String flowName,
+    public synchronized void addOutputPort(Node node, String flowName,
             List<NodeConnector> portList) {
 
         Set<FlowEntryInstall> flowEntryList = this.nodeFlows.get(node);
@@ -1083,7 +1083,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     }
 
     @Override
-    public void removeOutputPort(Node node, String flowName,
+    public synchronized void removeOutputPort(Node node, String flowName,
             List<NodeConnector> portList) {
 
         Set<FlowEntryInstall> flowEntryList = this.nodeFlows.get(node);
@@ -1118,7 +1118,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * This function assumes the target flow has only one output port
      */
     @Override
-    public void replaceOutputPort(Node node, String flowName,
+    public synchronized void replaceOutputPort(Node node, String flowName,
             NodeConnector outPort) {
         FlowEntry currentFlowEntry = null;
         FlowEntry newFlowEntry = null;
@@ -1165,7 +1165,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     }
 
     @Override
-    public NodeConnector getOutputPort(Node node, String flowName) {
+    public synchronized NodeConnector getOutputPort(Node node, String flowName) {
         Set<FlowEntryInstall> flowEntryList = this.nodeFlows.get(node);
 
         for (FlowEntryInstall flow : flowEntryList) {
@@ -2537,7 +2537,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     }
 
     @Override
-    public void flowErrorReported(Node node, long rid, Object err) {
+    public synchronized void flowErrorReported(Node node, long rid, Object err) {
         log.trace("Got error {} for message rid {} from node {}",
                 new Object[] {err, rid, node });
         /*
