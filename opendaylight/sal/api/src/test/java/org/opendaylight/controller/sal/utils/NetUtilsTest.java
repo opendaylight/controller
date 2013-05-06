@@ -15,7 +15,6 @@ import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.sal.utils.NetUtils;
 
 public class NetUtilsTest {
 
@@ -272,6 +271,51 @@ public class NetUtilsTest {
                 .isIPv6AddressValid("fe80:::0:0:0:204:61ff:fe9d/64")); //not valid ip, valid netmask
         Assert.assertFalse(NetUtils
                 .isIPv6AddressValid("fe80:::0:0:0:204:61ff:fe9d/-1")); //not valid both
+
+    }
+    
+    @Test
+    public void testInetAddressConflict() throws UnknownHostException {
+
+        // test a ipv4 testAddress in the same subnet as the filter
+        // the method should return false as there is no conflict
+        Assert.assertFalse(NetUtils.inetAddressConflict(
+                InetAddress.getByName("9.9.1.1"),
+                InetAddress.getByName("9.9.1.0"), null,
+                InetAddress.getByName("255.255.255.0")));
+
+        // test a ipv4 testAddress not in the same subnet as the filter
+        // the method should return true as there is a conflict
+        Assert.assertTrue(NetUtils.inetAddressConflict(
+                InetAddress.getByName("9.9.2.1"),
+                InetAddress.getByName("9.9.1.0"), null,
+                InetAddress.getByName("255.255.255.0")));
+
+        // test a ipv4 testAddress more generic than the filter
+        // the method should return true as there is a conflict
+        Assert.assertTrue(NetUtils.inetAddressConflict(
+                InetAddress.getByName("9.9.1.1"),
+                InetAddress.getByName("9.9.1.0"),
+                InetAddress.getByName("255.255.0.0"),
+                InetAddress.getByName("255.255.255.0")));
+
+        // test a ipv4 testAddress less generic than the filter and in the same
+        // subnet as the filter
+        // the method should return false as there is no conflict
+        Assert.assertFalse(NetUtils.inetAddressConflict(
+                InetAddress.getByName("9.9.1.0"),
+                InetAddress.getByName("9.9.0.0"),
+                InetAddress.getByName("255.255.255.0"),
+                InetAddress.getByName("255.255.0.0")));
+
+        // test a ipv4 testAddress less generic than the filter and not in the
+        // same subnet as the filter
+        // the method should return true as there is a conflict
+        Assert.assertTrue(NetUtils.inetAddressConflict(
+                InetAddress.getByName("9.8.1.0"),
+                InetAddress.getByName("9.9.0.0"),
+                InetAddress.getByName("255.255.255.0"),
+                InetAddress.getByName("255.255.0.0")));
 
     }
 }

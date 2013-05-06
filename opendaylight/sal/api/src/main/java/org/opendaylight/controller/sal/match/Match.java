@@ -293,10 +293,8 @@ public class Match implements Cloneable, Serializable {
                         && filterAddress instanceof Inet4Address) {
                     return true;
                 }
-                InetAddress thisMask = (InetAddress) filter.getField(type)
-                        .getMask();
-                InetAddress filterMask = (InetAddress) filter.getField(type)
-                        .getMask();
+                InetAddress thisMask = (InetAddress) thisField.getMask();
+                InetAddress filterMask = (InetAddress) filterField.getMask();
                 // thisAddress has to be in same subnet of filterAddress
                 if (NetUtils.inetAddressConflict(thisAddress, filterAddress,
                         thisMask, filterMask)) {
