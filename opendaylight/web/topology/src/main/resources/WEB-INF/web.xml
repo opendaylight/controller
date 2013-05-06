@@ -46,6 +46,11 @@
 		</form-login-config>
 	</login-config>
 
+    <error-page>
+            <error-code>403</error-code>
+            <location>/WEB-INF/jsp/autherror.jsp</location>
+    </error-page>
+
 	<servlet>
 		<servlet-name>Topology</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
