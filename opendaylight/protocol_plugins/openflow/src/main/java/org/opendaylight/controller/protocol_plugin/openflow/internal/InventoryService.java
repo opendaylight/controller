@@ -20,14 +20,12 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
 import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -38,7 +36,6 @@ import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
-import org.openflow.protocol.statistics.OFDescriptionStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class InventoryService implements IInventoryShimInternalListener,
-        IPluginInInventoryService, IStatisticsListener {
+        IPluginInInventoryService {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryService.class);
     private Set<IPluginOutInventoryService> pluginOutInventoryServices = Collections
@@ -142,7 +139,7 @@ public class InventoryService implements IInventoryShimInternalListener,
         try {
             node = new Node(NodeIDType.OPENFLOW, id);
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
 
         return node;
@@ -197,8 +194,9 @@ public class InventoryService implements IInventoryShimInternalListener,
     @Override
     public ConcurrentMap<NodeConnector, Map<String, Property>> getNodeConnectorProps(
             Boolean refresh) {
-        if (nodeConnectorProps == null)
+        if (nodeConnectorProps == null) {
             return null;
+        }
 
         if (isDefaultContainer && refresh) {
             Map<Long, ISwitch> switches = controller.getSwitches();
@@ -230,9 +228,9 @@ public class InventoryService implements IInventoryShimInternalListener,
         switch (type) {
         case ADDED:
         case CHANGED:
-            if (propMap == null)
+            if (propMap == null) {
                 propMap = new HashMap<String, Property>();
-
+            }
             if (props != null) {
                 for (Property prop : props) {
                     propMap.put(prop.getName(), prop);
@@ -256,9 +254,10 @@ public class InventoryService implements IInventoryShimInternalListener,
     }
 
     private void addNode(Node node, Set<Property> props) {
-        logger.trace("{} added", node);
-        if (nodeProps == null)
+        logger.trace("{} added, props: {}", node, props);
+        if (nodeProps == null) {
             return;
+        }
 
         // update local cache
         Map<String, Property> propMap = new HashMap<String, Property>();
@@ -300,31 +299,31 @@ public class InventoryService implements IInventoryShimInternalListener,
             }
         }
     }
-
-    private void updateSwitchProperty(Long switchId, Set<Property> propSet) {
-        // update local cache
-        Node node = OFSwitchToNode(controller.getSwitch(switchId));
-        Map<String, Property> propMap = nodeProps.get(node);
-        if (propMap == null) {
-            propMap = new HashMap<String, Property>();
+    
+    private void updateNode(Node node, Set<Property> properties) {
+        logger.trace("{} updated, props: {}", node, properties);
+        if (nodeProps == null || !nodeProps.containsKey(node) ||
+                properties == null || properties.isEmpty()) {
+            return;
         }
 
-        boolean change = false;
-        for (Property prop : propSet) {
-            String propertyName = prop.getName();
-            Property currentProp = propMap.get(propertyName);
-            if (!prop.equals(currentProp)) {
-                change = true;
-                propMap.put(propertyName, prop);
+        // Update local cache with new properties
+        Set<Property> newProperties = new HashSet<Property>(properties.size());
+        Map<String, Property> propertyMap = nodeProps.get(node);
+        for (Property property : properties) {
+            String name = property.getName();
+            Property currentProperty = propertyMap.get(name);
+            if (!property.equals(currentProperty)) {
+                propertyMap.put(name, property);
+                newProperties.add(property);                
             }
         }
-        nodeProps.put(node, propMap);
 
-        // Update sal if any of the properties has changed
-        if (change) {
+        // Update SAL if we got new properties
+        if (!newProperties.isEmpty()) {
             synchronized (pluginOutInventoryServices) {
                 for (IPluginOutInventoryService service : pluginOutInventoryServices) {
-                    service.updateNode(node, UpdateType.CHANGED, propSet);
+                    service.updateNode(node, UpdateType.CHANGED, newProperties);
                 }
             }
         }
@@ -339,19 +338,12 @@ public class InventoryService implements IInventoryShimInternalListener,
         case REMOVED:
             removeNode(node);
             break;
+        case CHANGED:
+            updateNode(node, props);
+            break;
         default:
             break;
         }
     }
 
-    @Override
-    public void descriptionRefreshed(Long switchId,
-            OFDescriptionStatistics descriptionStats) {
-
-        Set<Property> propSet = new HashSet<Property>(1);
-        Description desc = new Description(
-                descriptionStats.getDatapathDescription());
-        propSet.add(desc);
-        this.updateSwitchProperty(switchId, propSet);
-    }
 }

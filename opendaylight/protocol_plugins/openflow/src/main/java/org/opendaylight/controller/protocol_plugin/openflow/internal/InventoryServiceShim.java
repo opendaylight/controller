@@ -19,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
+import org.opendaylight.controller.protocol_plugin.openflow.IStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
@@ -28,6 +29,7 @@ import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
@@ -41,6 +43,7 @@ import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFPortStatus;
 import org.openflow.protocol.OFPortStatus.OFPortReason;
 import org.openflow.protocol.OFType;
+import org.openflow.protocol.statistics.OFDescriptionStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class InventoryServiceShim implements IContainerListener,
-        IMessageListener, ISwitchStateListener {
+        IMessageListener, ISwitchStateListener, IStatisticsListener {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryServiceShim.class);
     private IController controller = null;
@@ -351,6 +354,14 @@ public class InventoryServiceShim implements IContainerListener,
                 inventoryShimInternalListener.updateNode(node, type, null);
             }
             break;
+        case CHANGED:
+            // Notify only the default Inventory Service
+            inventoryShimDefaultListener = inventoryShimInternalListeners
+                    .get(GlobalConstants.DEFAULT.toString());
+            if (inventoryShimDefaultListener != null) {
+                inventoryShimDefaultListener.updateNode(node, type, props);
+            }
+            break;
         default:
             break;
         }
@@ -425,4 +436,26 @@ public class InventoryServiceShim implements IContainerListener,
             switchAdded(sw);
         }
     }
+
+    @Override
+    public void descriptionRefreshed(Long switchId,
+            OFDescriptionStatistics descriptionStats) {
+        Node node;
+        try {
+            node = new Node(NodeIDType.OPENFLOW, switchId);
+        } catch (ConstructionException e) {
+            logger.error("{}", e.getMessage());
+            return;
+        }
+        
+        Set<Property> properties = new HashSet<Property>(1);
+        Description desc = new Description(
+                descriptionStats.getDatapathDescription());
+        properties.add(desc);
+        
+        // Notify all internal and external listeners
+        notifyInventoryShimListener(node, UpdateType.CHANGED, properties);
+    }  
+
+   
 }

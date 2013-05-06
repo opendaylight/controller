@@ -12,9 +12,8 @@ package org.opendaylight.controller.sal.core;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * The class represents the Tier property of a node
@@ -61,6 +60,6 @@ public class Tier extends Property {
 
     @Override
     public String toString() {
-        return "Tier[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "Tier[" + tierValue + "]";
     }
 }

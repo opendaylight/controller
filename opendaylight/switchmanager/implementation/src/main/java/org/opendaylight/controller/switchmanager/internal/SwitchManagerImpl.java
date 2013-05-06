@@ -715,7 +715,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     private void addNode(Node node, Set<Property> props) {
-        log.trace("{} added", node);
+        log.trace("{} added, props: {}", node, props);
         if (nodeProps == null) {
             return;
         }
@@ -766,8 +766,9 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     private void removeNode(Node node) {
         log.trace("{} removed", node);
-        if (nodeProps == null)
+        if (nodeProps == null) {
             return;
+        }
         nodeProps.remove(node);
 
         // check if span ports need to be cleaned up
@@ -778,8 +779,9 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     private void updateNode(Node node, Set<Property> props) {
-        log.trace("{} updated", node);
-        if (nodeProps == null) {
+        log.trace("{} updated, props: {}", node, props);
+        if (nodeProps == null || !nodeProps.containsKey(node) ||
+                props == null || props.isEmpty()) {
             return;
         }
 

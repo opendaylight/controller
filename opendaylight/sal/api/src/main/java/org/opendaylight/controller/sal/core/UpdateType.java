@@ -9,7 +9,6 @@
 
 package org.opendaylight.controller.sal.core;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
  * @file   UpdateType.java
@@ -28,10 +27,5 @@ public enum UpdateType {
 
     public String getName() {
         return this.name;
-    }
-
-    @Override
-    public String toString() {
-        return "UpdateType[" + ReflectionToStringBuilder.toString(this) + "]";
     }
 }

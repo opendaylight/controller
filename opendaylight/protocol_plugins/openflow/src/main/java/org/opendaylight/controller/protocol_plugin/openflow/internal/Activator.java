@@ -121,7 +121,6 @@ public class Activator extends ComponentActivatorAbstractBase {
             // export the service
             c.setInterface(
                     new String[] { IPluginInInventoryService.class.getName(),
-                            IStatisticsListener.class.getName(),
                             IInventoryShimInternalListener.class.getName() },
                     null);
 
@@ -336,8 +335,8 @@ public class Activator extends ComponentActivatorAbstractBase {
         }
 
         if (imp.equals(InventoryServiceShim.class)) {
-            c.setInterface(new String[] { IContainerListener.class.getName() },
-                    null);
+            c.setInterface(new String[] { IContainerListener.class.getName(),
+                    IStatisticsListener.class.getName()}, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")

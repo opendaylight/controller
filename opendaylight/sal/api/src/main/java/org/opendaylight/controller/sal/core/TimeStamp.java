@@ -9,12 +9,11 @@
 
 package org.opendaylight.controller.sal.core;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * @file   TimeStamp.java
@@ -85,6 +84,6 @@ public class TimeStamp extends Property {
 
     @Override
     public String toString() {
-        return "TimeStamp[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "TimeStamp[" + timestampName + ": " + timestamp +"]";
     }
 }
