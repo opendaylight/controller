@@ -13,5 +13,6 @@ package org.opendaylight.controller.yang.model.parser.builder.api;
 public interface Builder {
 
 	Object build();
+	int getLine();
 
 }

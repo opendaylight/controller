@@ -38,8 +38,8 @@ import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder
 public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         implements TypeDefinitionAwareBuilder, AugmentationTargetBuilder,
         DataSchemaNodeBuilder {
-
     private final ContainerSchemaNodeImpl instance;
+    private final int line;
     private final ConstraintsBuilder constraints;
     private SchemaPath schemaPath;
     private String description;
@@ -54,10 +54,11 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    public ContainerSchemaNodeBuilder(QName qname) {
+    public ContainerSchemaNodeBuilder(final QName qname, final int line) {
         super(qname);
+        this.line = line;
         instance = new ContainerSchemaNodeImpl(qname);
-        constraints = new ConstraintsBuilder();
+        constraints = new ConstraintsBuilder(line);
     }
 
     @Override
@@ -116,6 +117,11 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         instance.setAvailableAugmentations(augmentations);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     public Set<TypeDefinitionBuilder> getTypedefs() {

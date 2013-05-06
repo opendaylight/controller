@@ -28,13 +28,15 @@ import org.opendaylight.controller.yang.model.parser.util.RefineHolder;
 
 final class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
     private final UsesNodeImpl instance;
+    private final int line;
     private final SchemaPath groupingPath;
     private final Set<AugmentationSchemaBuilder> addedAugments = new HashSet<AugmentationSchemaBuilder>();
     private List<SchemaNodeBuilder> refineBuilders = new ArrayList<SchemaNodeBuilder>();
     private List<RefineHolder> refines = new ArrayList<RefineHolder>();
 
-    UsesNodeBuilderImpl(final String groupingPathStr) {
+    UsesNodeBuilderImpl(final String groupingPathStr, final int line) {
         this.groupingPath = parseUsesPath(groupingPathStr);
+        this.line = line;
         instance = new UsesNodeImpl(groupingPath);
     }
 
@@ -49,13 +51,18 @@ final class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
 
         // REFINES
         final Map<SchemaPath, SchemaNode> refineNodes = new HashMap<SchemaPath, SchemaNode>();
-        for(SchemaNodeBuilder refineBuilder : refineBuilders) {
+        for (SchemaNodeBuilder refineBuilder : refineBuilders) {
             SchemaNode refineNode = refineBuilder.build();
             refineNodes.put(refineNode.getPath(), refineNode);
         }
         instance.setRefines(refineNodes);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override
@@ -126,7 +133,8 @@ final class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
             return augmentations;
         }
 
-        private void setAugmentations(final Set<AugmentationSchema> augmentations) {
+        private void setAugmentations(
+                final Set<AugmentationSchema> augmentations) {
             if (augmentations != null) {
                 this.augmentations = augmentations;
             }
@@ -147,7 +155,7 @@ final class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
         }
 
         private void setRefines(Map<SchemaPath, SchemaNode> refines) {
-            if(refines != null) {
+            if (refines != null) {
                 this.refines = refines;
             }
         }

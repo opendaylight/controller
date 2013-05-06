@@ -27,6 +27,7 @@ import org.opendaylight.controller.yang.model.parser.builder.api.UsesNodeBuilder
 public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
         DataSchemaNodeBuilder {
     private final ChoiceCaseNodeImpl instance;
+    private final int line;
     private SchemaPath schemaPath;
     private String description;
     private String reference;
@@ -37,10 +38,11 @@ public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
     private final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
 
-    ChoiceCaseBuilder(QName qname) {
+    ChoiceCaseBuilder(final QName qname, final int line) {
         super(qname);
+        this.line = line;
         instance = new ChoiceCaseNodeImpl(qname);
-        constraints = new ConstraintsBuilder();
+        constraints = new ConstraintsBuilder(line);
     }
 
     @Override
@@ -75,6 +77,11 @@ public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
         instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     public SchemaPath getPath() {

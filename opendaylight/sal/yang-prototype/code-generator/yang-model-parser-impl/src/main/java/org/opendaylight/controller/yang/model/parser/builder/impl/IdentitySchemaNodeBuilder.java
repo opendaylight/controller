@@ -20,14 +20,16 @@ import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuild
 
 public final class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
     private final IdentitySchemaNodeImpl instance;
+    private final int line;
     private final QName qname;
     private SchemaPath schemaPath;
     private IdentitySchemaNodeBuilder baseIdentity;
     private String baseIdentityName;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    IdentitySchemaNodeBuilder(final QName qname) {
+    IdentitySchemaNodeBuilder(final QName qname, final int line) {
         this.qname = qname;
+        this.line = line;
         instance = new IdentitySchemaNodeImpl(qname);
     }
 
@@ -46,6 +48,11 @@ public final class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
         instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

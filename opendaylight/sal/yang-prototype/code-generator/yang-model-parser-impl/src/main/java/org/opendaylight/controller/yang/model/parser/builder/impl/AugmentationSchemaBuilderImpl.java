@@ -31,8 +31,8 @@ import org.opendaylight.controller.yang.model.parser.util.YangModelBuilderUtil;
 import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
 
 public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder {
-
     private final AugmentationSchemaImpl instance;
+    private final int line;
     private final String augmentTargetStr;
     private final SchemaPath augmentTarget;
     private String whenCondition;
@@ -40,12 +40,18 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
     private final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
 
-    AugmentationSchemaBuilderImpl(final String augmentTargetStr) {
+    AugmentationSchemaBuilderImpl(final String augmentTargetStr, final int line) {
         this.augmentTargetStr = augmentTargetStr;
+        this.line = line;
         final SchemaPath targetPath = YangModelBuilderUtil
                 .parseAugmentPath(augmentTargetStr);
         augmentTarget = targetPath;
         instance = new AugmentationSchemaImpl(targetPath);
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

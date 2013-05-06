@@ -19,4 +19,25 @@ public class YangParseException extends RuntimeException {
         super(errorMsg, exception);
     }
 
+    public YangParseException(final int line, final String errorMsg) {
+        super("Error on line " + line + ": " + errorMsg);
+    }
+
+    public YangParseException(final int line, final String errorMsg,
+            final Exception exception) {
+        super("Error on line " + line + ": " + errorMsg, exception);
+    }
+
+    public YangParseException(final String moduleName, final int line,
+            final String errorMsg) {
+        super("Error in module '" + moduleName + "' on line " + line + ": "
+                + errorMsg);
+    }
+
+    public YangParseException(final String moduleName, final int line,
+            final String errorMsg, final Exception exception) {
+        super("Error in module '" + moduleName + "' on line " + line + ": "
+                + errorMsg, exception);
+    }
+
 }

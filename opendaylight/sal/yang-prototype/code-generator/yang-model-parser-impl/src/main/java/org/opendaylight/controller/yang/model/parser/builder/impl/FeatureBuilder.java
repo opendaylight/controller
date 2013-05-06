@@ -19,14 +19,15 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.parser.builder.api.SchemaNodeBuilder;
 
 public class FeatureBuilder implements SchemaNodeBuilder {
-
     private final FeatureDefinitionImpl instance;
+    private final int line;
     private final QName qname;
     private SchemaPath schemaPath;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    FeatureBuilder(final QName qname) {
+    FeatureBuilder(final QName qname, final int line) {
         this.qname = qname;
+        this.line = line;
         instance = new FeatureDefinitionImpl(qname);
     }
 
@@ -42,6 +43,11 @@ public class FeatureBuilder implements SchemaNodeBuilder {
         instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     @Override

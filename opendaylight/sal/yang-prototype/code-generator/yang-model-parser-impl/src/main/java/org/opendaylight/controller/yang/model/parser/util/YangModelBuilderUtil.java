@@ -550,6 +550,7 @@ public final class YangModelBuilderUtil {
      */
     private static List<RangeConstraint> parseRangeConstraints(
             final Range_stmtContext ctx) {
+        final int line = ctx.getStart().getLine();
         List<RangeConstraint> rangeConstraints = new ArrayList<RangeConstraint>();
         String description = null;
         String reference = null;
@@ -571,10 +572,11 @@ public final class YangModelBuilderUtil {
             Number min;
             Number max;
             if (splittedRangeDef.length == 1) {
-                min = max = parseNumberConstraintValue(splittedRangeDef[0]);
+                min = max = parseNumberConstraintValue(splittedRangeDef[0],
+                        line);
             } else {
-                min = parseNumberConstraintValue(splittedRangeDef[0]);
-                max = parseNumberConstraintValue(splittedRangeDef[1]);
+                min = parseNumberConstraintValue(splittedRangeDef[0], line);
+                max = parseNumberConstraintValue(splittedRangeDef[1], line);
             }
             RangeConstraint range = BaseConstraints.rangeConstraint(min, max,
                     description, reference);
@@ -618,6 +620,7 @@ public final class YangModelBuilderUtil {
      */
     private static List<LengthConstraint> parseLengthConstraints(
             final Length_stmtContext ctx) {
+        final int line = ctx.getStart().getLine();
         List<LengthConstraint> lengthConstraints = new ArrayList<LengthConstraint>();
         String description = null;
         String reference = null;
@@ -639,10 +642,11 @@ public final class YangModelBuilderUtil {
             Number min;
             Number max;
             if (splittedRangeDef.length == 1) {
-                min = max = parseNumberConstraintValue(splittedRangeDef[0]);
+                min = max = parseNumberConstraintValue(splittedRangeDef[0],
+                        line);
             } else {
-                min = parseNumberConstraintValue(splittedRangeDef[0]);
-                max = parseNumberConstraintValue(splittedRangeDef[1]);
+                min = parseNumberConstraintValue(splittedRangeDef[0], line);
+                max = parseNumberConstraintValue(splittedRangeDef[1], line);
             }
             LengthConstraint range = BaseConstraints.lengthConstraint(min, max,
                     description, reference);
@@ -658,7 +662,8 @@ public final class YangModelBuilderUtil {
      * @return wrapper object of primitive java type or UnknownBoundaryNumber if
      *         type is one of special YANG values 'min' or 'max'
      */
-    private static Number parseNumberConstraintValue(final String value) {
+    private static Number parseNumberConstraintValue(final String value,
+            final int line) {
         Number result = null;
         if ("min".equals(value) || "max".equals(value)) {
             result = new UnknownBoundaryNumber(value);
@@ -666,8 +671,8 @@ public final class YangModelBuilderUtil {
             try {
                 result = Long.valueOf(value);
             } catch (NumberFormatException e) {
-                throw new YangParseException("Unable to parse range value '"
-                        + value + "'.", e);
+                throw new YangParseException("Error on line " + line
+                        + ": Unable to parse range value '" + value + "'.", e);
             }
         }
         return result;
@@ -988,35 +993,45 @@ public final class YangModelBuilderUtil {
                 typeBody, actualPath, namespace, revision, prefix);
 
         if ("decimal64".equals(typeName)) {
-            type = new Decimal64(actualPath, namespace, revision, fractionDigits);
+            type = new Decimal64(actualPath, namespace, revision,
+                    fractionDigits);
         } else if (typeName.startsWith("int")) {
             if (typeName.equals("int8")) {
-                type = new Int8(actualPath, namespace, revision, rangeStatements, null, null);
+                type = new Int8(actualPath, namespace, revision,
+                        rangeStatements, null, null);
             } else if (typeName.equals("int16")) {
-                type = new Int16(actualPath, namespace, revision, rangeStatements, null, null);
+                type = new Int16(actualPath, namespace, revision,
+                        rangeStatements, null, null);
             } else if (typeName.equals("int32")) {
-                type = new Int32(actualPath, namespace, revision, rangeStatements, null, null);
+                type = new Int32(actualPath, namespace, revision,
+                        rangeStatements, null, null);
             } else if (typeName.equals("int64")) {
-                type = new Int64(actualPath, namespace, revision, rangeStatements, null, null);
+                type = new Int64(actualPath, namespace, revision,
+                        rangeStatements, null, null);
             }
         } else if (typeName.startsWith("uint")) {
             if (typeName.equals("uint8")) {
-                type = new Uint8(actualPath, namespace, revision, rangeStatements, null, null);
+                type = new Uint8(actualPath, namespace, revision,
+                        rangeStatements, null, null);
             } else if (typeName.equals("uint16")) {
-                type = new Uint16(actualPath, namespace, revision, rangeStatements, null, null);
+                type = new Uint16(actualPath, namespace, revision,
+                        rangeStatements, null, null);
             } else if (typeName.equals("uint32")) {
-                type = new Uint32(actualPath, namespace, revision, rangeStatements, null, null);
+                type = new Uint32(actualPath, namespace, revision,
+                        rangeStatements, null, null);
             } else if (typeName.equals("uint64")) {
-                type = new Uint64(actualPath, namespace, revision, rangeStatements, null, null);
+                type = new Uint64(actualPath, namespace, revision,
+                        rangeStatements, null, null);
             }
         } else if ("enumeration".equals(typeName)) {
             type = new EnumerationType(actualPath, namespace, revision,
                     enumConstants);
         } else if ("string".equals(typeName)) {
-            type = new StringType(actualPath, namespace, revision, lengthStatements, patternStatements);
+            type = new StringType(actualPath, namespace, revision,
+                    lengthStatements, patternStatements);
         } else if ("bits".equals(typeName)) {
-            type = new BitsType(actualPath, namespace, revision, getBits(typeBody, actualPath, namespace,
-                    revision, prefix));
+            type = new BitsType(actualPath, namespace, revision, getBits(
+                    typeBody, actualPath, namespace, revision, prefix));
         } else if ("leafref".equals(typeName)) {
             final String path = parseLeafrefPath(typeBody);
             final boolean absolute = path.startsWith("/");
@@ -1025,18 +1040,19 @@ public final class YangModelBuilderUtil {
             type = new Leafref(actualPath, namespace, revision, xpath);
         } else if ("binary".equals(typeName)) {
             List<Byte> bytes = Collections.emptyList();
-            type = new BinaryType(actualPath, namespace, revision, bytes, lengthStatements, null);
+            type = new BinaryType(actualPath, namespace, revision, bytes,
+                    lengthStatements, null);
         } else if ("instance-identifier".equals(typeName)) {
             boolean requireInstance = isRequireInstance(typeBody);
-            type = new InstanceIdentifier(actualPath, namespace, revision, null, requireInstance);
+            type = new InstanceIdentifier(actualPath, namespace, revision,
+                    null, requireInstance);
         }
         return type;
     }
 
     public static String getIdentityrefBase(Type_body_stmtsContext ctx) {
         String result = null;
-        outer:
-        for (int i = 0; i < ctx.getChildCount(); i++) {
+        outer: for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree child = ctx.getChild(i);
             if (child instanceof Identityref_specificationContext) {
                 for (int j = 0; j < child.getChildCount(); j++) {
@@ -1194,52 +1210,43 @@ public final class YangModelBuilderUtil {
         return yinValue;
     }
 
-//    public static List<RefineHolder> parseRefines(Uses_stmtContext ctx) {
-//        List<RefineHolder> refines = new ArrayList<RefineHolder>();
-//
-//        for (int i = 0; i < ctx.getChildCount(); i++) {
-//            ParseTree child = ctx.getChild(i);
-//            if (child instanceof Refine_stmtContext) {
-//                final String refineTarget = stringFromNode(child);
-//                final RefineHolder refine = new RefineHolder(refineTarget);
-//                for (int j = 0; j < child.getChildCount(); j++) {
-//                    ParseTree refinePom = child.getChild(j);
-//                    if (refinePom instanceof Refine_pomContext) {
-//                        for (int k = 0; k < refinePom.getChildCount(); k++) {
-//                            ParseTree refineStmt = refinePom.getChild(k);
-//                            if (refineStmt instanceof Refine_leaf_stmtsContext) {
-//                                parseRefine(refine,
-//                                        (Refine_leaf_stmtsContext) refineStmt);
-//                            } else if (refineStmt instanceof Refine_container_stmtsContext) {
-//                                parseRefine(
-//                                        refine,
-//                                        (Refine_container_stmtsContext) refineStmt);
-//                            } else if (refineStmt instanceof Refine_list_stmtsContext) {
-//                                parseRefine(refine,
-//                                        (Refine_list_stmtsContext) refineStmt);
-//                            } else if (refineStmt instanceof Refine_leaf_list_stmtsContext) {
-//                                parseRefine(
-//                                        refine,
-//                                        (Refine_leaf_list_stmtsContext) refineStmt);
-//                            } else if (refineStmt instanceof Refine_choice_stmtsContext) {
-//                                parseRefine(refine,
-//                                        (Refine_choice_stmtsContext) refineStmt);
-//                            } else if (refineStmt instanceof Refine_anyxml_stmtsContext) {
-//                                parseRefine(refine,
-//                                        (Refine_anyxml_stmtsContext) refineStmt);
-//                            }
-//                        }
-//                    }
-//                }
-//                refines.add(refine);
-//            }
-//        }
-//        return refines;
-//    }
+    /**
+     * Check this base type.
+     *
+     * @param typeName
+     *            base YANG type name
+     * @param moduleName
+     *            name of current module
+     * @param line
+     *            line in module
+     * @throws YangParseException
+     *             if this is one of YANG type which MUST contain additional
+     *             informations in its body
+     */
+    public static void checkMissingBody(final String typeName,
+            final String moduleName, final int line) throws YangParseException {
+        if ("decimal64".equals(typeName)) {
+            throw new YangParseException(moduleName, line,
+                    "The 'fraction-digits' statement MUST be present if the type is 'decimal64'.");
+        } else if ("identityref".equals(typeName)) {
+            throw new YangParseException(moduleName, line,
+                    "The 'base' statement MUST be present if the type is 'identityref'.");
+        } else if ("leafref".equals(typeName)) {
+            throw new YangParseException(moduleName, line,
+                    "The 'path' statement MUST be present if the type is 'leafref'.");
+        } else if("bits".equals(typeName)) {
+            throw new YangParseException(moduleName, line,
+                    "The 'bit' statement MUST be present if the type is 'bits'.");
+        } else if("enumeration".equals(typeName)) {
+            throw new YangParseException(moduleName, line,
+                    "The 'enum' statement MUST be present if the type is 'enumeration'.");
+        }
+    }
 
     public static RefineHolder parseRefine(Refine_stmtContext child) {
         final String refineTarget = stringFromNode(child);
-        final RefineHolder refine = new RefineHolder(refineTarget);
+        final RefineHolder refine = new RefineHolder(refineTarget, child
+                .getStart().getLine());
         for (int j = 0; j < child.getChildCount(); j++) {
             ParseTree refinePom = child.getChild(j);
             if (refinePom instanceof Refine_pomContext) {
@@ -1249,15 +1256,13 @@ public final class YangModelBuilderUtil {
                         parseRefine(refine,
                                 (Refine_leaf_stmtsContext) refineStmt);
                     } else if (refineStmt instanceof Refine_container_stmtsContext) {
-                        parseRefine(
-                                refine,
+                        parseRefine(refine,
                                 (Refine_container_stmtsContext) refineStmt);
                     } else if (refineStmt instanceof Refine_list_stmtsContext) {
                         parseRefine(refine,
                                 (Refine_list_stmtsContext) refineStmt);
                     } else if (refineStmt instanceof Refine_leaf_list_stmtsContext) {
-                        parseRefine(
-                                refine,
+                        parseRefine(refine,
                                 (Refine_leaf_list_stmtsContext) refineStmt);
                     } else if (refineStmt instanceof Refine_choice_stmtsContext) {
                         parseRefine(refine,

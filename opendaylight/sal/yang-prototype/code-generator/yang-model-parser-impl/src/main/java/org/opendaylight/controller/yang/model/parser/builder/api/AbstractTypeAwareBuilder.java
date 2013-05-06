@@ -12,7 +12,7 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 /**
  * Basic implementation for TypeAwareBuilder builders.
  */
-public class AbstractTypeAwareBuilder implements TypeAwareBuilder {
+public abstract class AbstractTypeAwareBuilder implements TypeAwareBuilder {
 
     protected TypeDefinition<?> type;
     protected TypeDefinitionBuilder typedef;

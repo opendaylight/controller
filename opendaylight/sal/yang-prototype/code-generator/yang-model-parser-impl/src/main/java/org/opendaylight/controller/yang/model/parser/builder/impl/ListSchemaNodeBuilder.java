@@ -40,25 +40,31 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
         DataSchemaNodeBuilder, SchemaNodeBuilder, AugmentationTargetBuilder,
         TypeDefinitionAwareBuilder {
     private final ListSchemaNodeImpl instance;
-    private List<QName> keyDefinition;
-    private final ConstraintsBuilder constraints;
+    private final int line;
+    // SchemaNode args
     private SchemaPath schemaPath;
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    // DataSchemaNode args
     private boolean augmenting;
     private boolean configuration;
-    private boolean userOrdered;
-
+    private final ConstraintsBuilder constraints;
+    // DataNodeContainer args
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
+    // AugmentationTarget args
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    // ListSchemaNode args
+    private List<QName> keyDefinition;
+    private boolean userOrdered;
 
-    public ListSchemaNodeBuilder(final QName qname) {
+    public ListSchemaNodeBuilder(final QName qname, final int line) {
         super(qname);
+        this.line = line;
         instance = new ListSchemaNodeImpl(qname);
-        constraints = new ConstraintsBuilder();
+        constraints = new ConstraintsBuilder(line);
     }
 
     @Override
@@ -102,7 +108,7 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
 
         // AUGMENTATIONS
         final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
-        for(AugmentationSchemaBuilder builder : addedAugmentations) {
+        for (AugmentationSchemaBuilder builder : addedAugmentations) {
             augmentations.add(builder.build());
         }
         instance.setAvailableAugmentations(augmentations);
@@ -118,6 +124,11 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
         instance.setAvailableAugmentations(augmentations);
 
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     public Set<TypeDefinitionBuilder> getTypedefs() {
@@ -162,7 +173,7 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
 
     @Override
     public void setStatus(Status status) {
-        if(status != null) {
+        if (status != null) {
             this.status = status;
         }
     }

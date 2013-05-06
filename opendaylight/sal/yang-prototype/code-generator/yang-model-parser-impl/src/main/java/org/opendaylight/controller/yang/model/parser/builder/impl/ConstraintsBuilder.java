@@ -19,15 +19,16 @@ import org.opendaylight.controller.yang.model.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
 
 public class ConstraintsBuilder implements Builder {
-
     private final ConstraintDefinitionImpl instance;
+    private final int line;
     private final Set<MustDefinition> mustDefinitions;
     private String whenCondition;
     private boolean mandatory;
     private Integer min;
     private Integer max;
 
-    ConstraintsBuilder() {
+    ConstraintsBuilder(final int line) {
+        this.line = line;
         instance = new ConstraintDefinitionImpl();
         mustDefinitions = new HashSet<MustDefinition>();
     }
@@ -46,6 +47,11 @@ public class ConstraintsBuilder implements Builder {
         instance.setMinElements(min);
         instance.setMaxElements(max);
         return instance;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
     }
 
     public Integer getMinElements() {

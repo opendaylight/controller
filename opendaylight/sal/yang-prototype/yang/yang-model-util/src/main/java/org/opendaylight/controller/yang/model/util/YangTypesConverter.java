@@ -73,8 +73,6 @@ public class YangTypesConverter {
             type = new StringType(actualPath, namespace, revision);
         } else if("binary".equals(typeName)) {
             type = new BinaryType(actualPath, namespace, revision);
-        } else if("bits".equals(typeName)) {
-            type = new BitsType(actualPath, namespace, revision);
         } else if("boolean".equals(typeName)) {
             type = new BooleanType(actualPath, namespace, revision);
         } else if("empty".equals(typeName)) {

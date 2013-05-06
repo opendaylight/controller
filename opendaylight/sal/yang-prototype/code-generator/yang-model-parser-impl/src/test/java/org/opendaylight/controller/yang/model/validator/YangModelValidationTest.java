@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.yang.model.validator;
 
-import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.*;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Before;
 import org.junit.Test;
@@ -159,8 +160,11 @@ public class YangModelValidationTest {
         int thrown = 0;
         for (String id : ids) {
             try {
+                Module_stmtContext module = mock(Module_stmtContext.class);
+                Token token = mock(Token.class);
+                when(module.getStart()).thenReturn(token);
                 BasicValidations.checkIdentifierInternal(
-                        mock(Module_stmtContext.class), id);
+                        module, id);
             } catch (YangValidationException e) {
                 thrown++;
             }
@@ -176,6 +180,9 @@ public class YangModelValidationTest {
         Module_stmtContext mod1 = mockStatement(Module_stmtContext.class,
                 "mod1");
         addChild(mod1, augument);
+
+        Token token = mock(Token.class);
+        when(augument.getStart()).thenReturn(token);
 
         try {
             valid.enterAugment_stmt(augument);
