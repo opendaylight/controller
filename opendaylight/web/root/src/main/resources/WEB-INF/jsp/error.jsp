@@ -41,7 +41,7 @@
        <div class="login-form">
          <div id="logo"></div>
            <fieldset>
-            <p>Authentication failed or session might have timed out.<p>
+            <p>Login failed or session might have timed out.<p>
             <p>Please go back to the login page and try again.</p>
             <br/>
              <button class="btn btn-primary" type="submit" value="Log In" >Go To Login Page</button>

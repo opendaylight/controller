@@ -867,9 +867,11 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
         // First check in active users then in local configured users
         if (activeUsers.containsKey(username)) {
-            roleName = activeUsers.get(username).getUserRoles().get(0);
+            List<String> roles = activeUsers.get(username).getUserRoles();
+            roleName = (roles == null || roles.isEmpty())? null:roles.get(0);
         } else if (localUserConfigList.containsKey(username)) {
-            roleName = localUserConfigList.get(username).getRole();
+            UserConfig localUserConfig = localUserConfigList.get(username);
+            roleName = (localUserConfig == null)? null : localUserConfig.getRole();
         }
 
         if (roleName == null) {
