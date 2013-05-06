@@ -219,23 +219,21 @@ public abstract class NetUtils {
         if (isAny(testAddress) || isAny(filterAddress)) {
             return false;
         }
-
-        // Derive the masks length. A null mask means a full mask
-        int testMaskLen = (testMask != null) ? NetUtils
-                .getSubnetMaskLength(testMask.getAddress())
-                : (testAddress instanceof Inet6Address) ? 128 : 32;
-        int filterMaskLen = (filterMask != null) ? NetUtils
-                .getSubnetMaskLength(filterMask.getAddress())
-                : (filterAddress instanceof Inet6Address) ? 128 : 32;
-
-        // Mask length check. Test mask has to be more generic than filter one
-        if (testMaskLen < filterMaskLen) {
+        
+        int testMaskLen = (testMask != null) ? NetUtils.getSubnetMaskLength(testMask.getAddress()) : 0;
+        int filterMaskLen = (filterMask != null) ? NetUtils.getSubnetMaskLength(filterMask.getAddress()) : 0;
+        
+        int testPrefixLen = (testAddress instanceof Inet6Address) ? (128 - testMaskLen) : (32 - testMaskLen);
+        int filterPrefixLen = (filterAddress instanceof Inet6Address) ? (128 - filterMaskLen) : (32 - filterMaskLen);
+        
+        // Mask length check. Test mask has to be more specific than filter one
+        if (testPrefixLen < filterPrefixLen) {
             return true;
         }
 
         // Subnet Prefix on filter mask length must be the same
-        InetAddress prefix1 = getSubnetPrefix(testAddress, filterMaskLen);
-        InetAddress prefix2 = getSubnetPrefix(filterAddress, filterMaskLen);
+        InetAddress prefix1 = getSubnetPrefix(testAddress, filterPrefixLen);
+        InetAddress prefix2 = getSubnetPrefix(filterAddress, filterPrefixLen);
         return (!prefix1.equals(prefix2));
     }
 
