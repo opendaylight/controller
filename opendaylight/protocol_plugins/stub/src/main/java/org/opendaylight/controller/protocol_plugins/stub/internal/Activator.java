@@ -8,6 +8,7 @@ import org.apache.felix.dm.Component;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.discovery.IDiscoveryService;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
@@ -38,6 +39,8 @@ public class Activator extends ComponentActivatorAbstractBase {
      * 
      */
     public void init() {
+        Node.NodeIDType.registerIDType("STUB", Integer.class);
+        NodeConnector.NodeConnectorIDType.registerIDType("STUB", Integer.class, "STUB");
     }
 
     /**
@@ -46,6 +49,8 @@ public class Activator extends ComponentActivatorAbstractBase {
      * 
      */
     public void destroy() {
+        Node.NodeIDType.unRegisterIDType("STUB");
+        NodeConnector.NodeConnectorIDType.unRegisterIDType("STUB");
     }
 
     /**
@@ -83,7 +88,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put("protocolPluginType", Node.NodeIDType.OPENFLOW);
+            props.put("protocolPluginType", "STUB");
             c.setInterface(IPluginInReadService.class.getName(), props);
         }
 
@@ -92,7 +97,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put("protocolPluginType", Node.NodeIDType.OPENFLOW);
+            props.put("protocolPluginType", "STUB");
             c.setInterface(IPluginInInventoryService.class.getName(), props);
         }
     }
