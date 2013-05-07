@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.SetVlanId;
@@ -36,6 +38,7 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
+import org.opendaylight.controller.web.DaylightWebUtil;
 import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,7 +53,6 @@ public class Troubleshoot implements IDaylightWeb {
     private final String WEB_NAME = "Troubleshoot";
     private final String WEB_ID = "troubleshoot";
     private final short WEB_ORDER = 4;
-    private final String containerName = GlobalConstants.DEFAULT.toString();
 
     public Troubleshoot() {
         ServiceHelper.registerGlobalService(IDaylightWeb.class, this, null);
@@ -78,7 +80,8 @@ public class Troubleshoot implements IDaylightWeb {
 
     @RequestMapping(value = "/existingNodes", method = RequestMethod.GET)
     @ResponseBody
-    public TroubleshootingJsonBean getExistingNodes() {
+    public TroubleshootingJsonBean getExistingNodes(HttpServletRequest request, @RequestParam(required = false) String container) {
+        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         List<HashMap<String, String>> lines = new ArrayList<HashMap<String, String>>();
@@ -108,7 +111,8 @@ public class Troubleshoot implements IDaylightWeb {
 
     @RequestMapping(value = "/uptime", method = RequestMethod.GET)
     @ResponseBody
-    public TroubleshootingJsonBean getUptime() {
+    public TroubleshootingJsonBean getUptime(HttpServletRequest request, @RequestParam(required = false) String container) {
+        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         List<HashMap<String, String>> lines = new ArrayList<HashMap<String, String>>();
@@ -144,15 +148,17 @@ public class Troubleshoot implements IDaylightWeb {
     @RequestMapping(value = "/flowStats", method = RequestMethod.GET)
     @ResponseBody
     public TroubleshootingJsonBean getFlowStats(
-            @RequestParam("nodeId") String nodeId) {
+            @RequestParam("nodeId") String nodeId,
+            HttpServletRequest request, @RequestParam(required = false) String container) {
         Node node = Node.fromString(nodeId);
         List<HashMap<String, String>> cells = new ArrayList<HashMap<String, String>>();
+        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         IStatisticsManager statisticsManager = (IStatisticsManager) ServiceHelper
                 .getInstance(IStatisticsManager.class, containerName, this);
 
         List<FlowOnNode> statistics = statisticsManager.getFlows(node);
         for (FlowOnNode stats : statistics) {
-            cells.add(this.convertFlowStatistics(node, stats));
+            cells.add(this.convertFlowStatistics(node, stats, containerName));
         }
         List<String> columnNames = new ArrayList<String>();
         columnNames.addAll(Arrays.asList(new String[] { "Node", "In Port",
@@ -169,9 +175,11 @@ public class Troubleshoot implements IDaylightWeb {
     @RequestMapping(value = "/portStats", method = RequestMethod.GET)
     @ResponseBody
     public TroubleshootingJsonBean getPortStats(
-            @RequestParam("nodeId") String nodeId) {
+            @RequestParam("nodeId") String nodeId,
+            HttpServletRequest request, @RequestParam(required = false) String container) {
         Node node = Node.fromString(nodeId);
         List<HashMap<String, String>> cells = new ArrayList<HashMap<String, String>>();
+        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         IStatisticsManager statisticsManager = (IStatisticsManager) ServiceHelper
                 .getInstance(IStatisticsManager.class, containerName, this);
         List<NodeConnectorStatistics> statistics = statisticsManager
@@ -216,7 +224,8 @@ public class Troubleshoot implements IDaylightWeb {
     }
 
     private HashMap<String, String> convertFlowStatistics(Node node,
-            FlowOnNode flowOnNode) {
+            FlowOnNode flowOnNode,
+            String containerName) {
         HashMap<String, String> row = new HashMap<String, String>();
         Flow flow = flowOnNode.getFlow();
         Match match = flow.getMatch();

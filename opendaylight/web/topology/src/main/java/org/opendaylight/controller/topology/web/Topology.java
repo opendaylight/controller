@@ -21,21 +21,25 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.opendaylight.controller.containermanager.IContainerAuthorization;
+import org.opendaylight.controller.sal.authorization.Resource;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.packet.address.EthernetAddress;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.usermanager.IUserManager;
+import org.opendaylight.controller.web.DaylightWebUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,13 +55,14 @@ import edu.uci.ics.jung.graph.SparseMultigraph;
 @RequestMapping("/")
 public class Topology {
 
-    protected Map<String, Map<String, Object>> cache = new HashMap<String, Map<String, Object>>();
+    protected Map<String, Map<String, Map<String, Object>>> metaCache = new HashMap<String, Map<String, Map<String, Object>>>();
     protected Map<String, Map<String, Object>> stagedNodes;
     protected Map<String, Map<String, Object>> newNodes;
-    protected Integer nodeHash = null;
-    protected Integer hostHash = null;
-    protected Integer nodeSingleHash = null;
-    protected Integer nodeConfigurationHash = null;
+    
+    protected Map<String, Integer> metaNodeHash = new HashMap<String, Integer>();
+    protected Map<String, Integer> metaHostHash = new HashMap<String, Integer>();
+    protected Map<String, Integer> metaNodeSingleHash = new HashMap<String, Integer>();
+    protected Map<String, Integer> metaNodeConfigurationHash = new HashMap<String, Integer>();
     
     /**
      * Topology of nodes and hosts in the network in JSON format.
@@ -68,13 +73,19 @@ public class Topology {
      */
     @RequestMapping(value = "/visual.json", method = RequestMethod.GET)
     @ResponseBody
-    public Collection<Map<String, Object>> getLinkData() {
+    public Collection<Map<String, Object>> getLinkData(@RequestParam(required = false) String container, HttpServletRequest request) {
+    	String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+    	
         ITopologyManager topologyManager = (ITopologyManager) ServiceHelper
-                .getInstance(ITopologyManager.class, "default", this);
-        if (topologyManager == null) return null;
+                .getInstance(ITopologyManager.class, containerName, this);
+        if (topologyManager == null) {
+        	return null;
+        }
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, "default", this);
-        if (switchManager == null) return null;
+                .getInstance(ISwitchManager.class, containerName, this);
+        if (switchManager == null) {
+        	return null;
+        }
         
         Map<Node, Set<Edge>> nodeEdges = topologyManager.getNodeEdges();
         Map<Node, Set<NodeConnector>> hostEdges = topologyManager
@@ -88,35 +99,45 @@ public class Topology {
         	switchConfigurations.add(config);
         }
         
+        // initialize cache if needed
+        if (!metaCache.containsKey(containerName)) {
+        	metaCache.put(containerName, new HashMap<String, Map<String, Object>>());
+        	// initialize hashes
+        	metaNodeHash.put(containerName, null);
+        	metaHostHash.put(containerName, null);
+        	metaNodeSingleHash.put(containerName, null);
+        	metaNodeConfigurationHash.put(containerName, null);
+        }
+        
         // return cache if topology hasn't changed
         if (
-        	(nodeHash != null && hostHash != null && nodeSingleHash != null && nodeConfigurationHash != null) &&
-        	nodeHash == nodeEdges.hashCode() && hostHash == hostEdges.hashCode() && nodeSingleHash == nodes.hashCode() && nodeConfigurationHash == switchConfigurations.hashCode()
+        	(metaNodeHash.get(containerName) != null && metaHostHash.get(containerName) != null && metaNodeSingleHash.get(containerName) != null && metaNodeConfigurationHash.get(containerName) != null) &&
+        	metaNodeHash.get(containerName).equals(nodeEdges.hashCode()) && metaHostHash.get(containerName).equals(hostEdges.hashCode()) && metaNodeSingleHash.get(containerName).equals(nodes.hashCode()) && metaNodeConfigurationHash.get(containerName).equals(switchConfigurations.hashCode())
         ) {
-        	return cache.values();
+        	return metaCache.get(containerName).values();
         }
         
         // cache has changed, we must assign the new values
-        nodeHash = nodeEdges.hashCode();
-        hostHash = hostEdges.hashCode();
-        nodeSingleHash = nodes.hashCode();
-        nodeConfigurationHash = switchConfigurations.hashCode();
+        metaNodeHash.put(containerName, nodeEdges.hashCode());
+        metaHostHash.put(containerName, hostEdges.hashCode());
+        metaNodeSingleHash.put(containerName, nodes.hashCode());
+        metaNodeConfigurationHash.put(containerName, switchConfigurations.hashCode());
         
         stagedNodes = new HashMap<String, Map<String, Object>>();
         newNodes = new HashMap<String, Map<String, Object>>();
 
         // nodeEdges addition
-        addNodes(nodeEdges, topologyManager, switchManager);
+        addNodes(nodeEdges, topologyManager, switchManager, containerName);
 
         // single nodes addition
-        addSingleNodes(nodes, switchManager);
+        addSingleNodes(nodes, switchManager, containerName);
         
         // hostNodes addition
-        addHostNodes(hostEdges, topologyManager);
+        addHostNodes(hostEdges, topologyManager, containerName);
         
-        repositionTopology();
+        repositionTopology(containerName);
         
-        return cache.values();
+        return metaCache.get(containerName).values();
     }
 
     /**
@@ -126,20 +147,19 @@ public class Topology {
      * @param topology - the topology instance
      */
     private void addNodes(Map<Node, Set<Edge>> nodeEdges,
-            ITopologyManager topology, ISwitchManager switchManager) {
+            ITopologyManager topology, ISwitchManager switchManager, String containerName) {    	
         Bandwidth bandwidth = new Bandwidth(0);
         Map<Edge, Set<Property>> properties = topology.getEdges();
         
         for (Map.Entry<Node, Set<Edge>> e : nodeEdges.entrySet()) {
             Node n = e.getKey();
+            String description = switchManager.getNodeDescription(n);
+            NodeBean node = createNodeBean(description, n);
             
             // skip production node
             if (nodeIgnore(n)) {
                 continue;
             }
-            
-            String description = switchManager.getNodeDescription(n);
-            NodeBean node = createNodeBean(description, n);
             
             List<Map<String, Object>> adjacencies = new LinkedList<Map<String, Object>>();
             Set<Edge> links = e.getValue();
@@ -158,9 +178,9 @@ public class Topology {
             }
             
             node.setLinks(adjacencies);
-            if (cache.containsKey(node.id())) {
+            if (metaCache.get(containerName).containsKey(node.id())) {
             	// retrieve node from cache
-            	Map<String, Object> nodeEntry = cache.get(node.id());
+            	Map<String, Object> nodeEntry = metaCache.get(containerName).get(node.id());
 
         		Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
         		data.put("$desc", description);
@@ -224,26 +244,28 @@ public class Topology {
     }
     
     @SuppressWarnings("unchecked")
-	private void addSingleNodes(List<Switch> nodes, ISwitchManager switchManager) {
-    	if (nodes == null) return;
+	private void addSingleNodes(List<Switch> nodes, ISwitchManager switchManager, String containerName) {
+    	if (nodes == null) {
+    		return;
+    	}
     	for (Switch sw : nodes) {
     		Node n = sw.getNode();
     		
     		// skip production node
-                if (nodeIgnore(n)) {
-                    continue;
-                }
+    		if (nodeIgnore(n)) {
+    		    continue;
+    		}
 
     		String description = switchManager.getNodeDescription(n);
     		
-    		if ((stagedNodes.containsKey(n.toString()) && cache.containsKey(n.toString())) || newNodes.containsKey(n.toString())) {
+    		if ((stagedNodes.containsKey(n.toString()) && metaCache.get(containerName).containsKey(n.toString())) || newNodes.containsKey(n.toString())) {
     			continue;
     		}
     		NodeBean node = createNodeBean(description, n);
     		
     		// FIXME still doesn't display standalone node when last remaining link is removed
-    		if (cache.containsKey(node.id()) && !stagedNodes.containsKey(node.id())) {
-    			Map<String, Object> nodeEntry = cache.get(node.id());
+    		if (metaCache.get(containerName).containsKey(node.id()) && !stagedNodes.containsKey(node.id())) {
+    			Map<String, Object> nodeEntry = metaCache.get(containerName).get(node.id());
 				Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
         		data.put("$desc", description);
         		nodeEntry.put("data", data);
@@ -261,7 +283,7 @@ public class Topology {
      * @param topology - topology instance
      */
     private void addHostNodes(Map<Node, Set<NodeConnector>> hostEdges,
-            ITopologyManager topology) {
+            ITopologyManager topology, String containerName) {
         for (Map.Entry<Node, Set<NodeConnector>> e : hostEdges.entrySet()) {
             for (NodeConnector connector : e.getValue()) {
                 Host host = topology.getHostAttachedToNodeConnector(connector);
@@ -281,8 +303,8 @@ public class Topology {
                 adjacencies.add(edge.out());
                 hostBean.setLinks(adjacencies);
                 
-                if (cache.containsKey(hostId)) {
-                	Map<String, Object> hostEntry = cache.get(hostId);
+                if (metaCache.get(containerName).containsKey(hostId)) {
+                	Map<String, Object> hostEntry = metaCache.get(containerName).get(hostId);
                 	hostEntry.put("adjacencies", adjacencies);
                 	stagedNodes.put(hostId, hostEntry);
                 } else {
@@ -295,12 +317,14 @@ public class Topology {
     /**
      * Re-position nodes in circular layout
      */
-    private void repositionTopology() {
+    private void repositionTopology(String containerName) {
         Graph<String, String> graph = new SparseMultigraph<String, String>();
-        cache.clear();
-        cache.putAll(stagedNodes);
-        cache.putAll(newNodes);
-        for (Map<String, Object> on : cache.values()) {
+        
+        metaCache.get(containerName).clear();
+        metaCache.get(containerName).putAll(stagedNodes);
+        metaCache.get(containerName).putAll(newNodes);
+        
+        for (Map<String, Object> on : metaCache.get(containerName).values()) {
             graph.addVertex(on.toString());
 
             List<Map<String, Object>> adjacencies = (List<Map<String, Object>>) on.get("adjacencies");
@@ -313,7 +337,7 @@ public class Topology {
             }
         }
         
-        CircleLayout<String,String> layout = new CircleLayout<String,String>(graph);
+        CircleLayout<String, String> layout = new CircleLayout<String, String>(graph);
         layout.setSize(new Dimension(1200, 365));
         for (Map.Entry<String, Map<String, Object>> v : newNodes.entrySet()) {
             Double x = layout.transform(v.getKey()).getX();
@@ -338,17 +362,21 @@ public class Topology {
     @RequestMapping(value = "/node/{nodeId}", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> post(@PathVariable String nodeId, @RequestParam(required = true) String x,
-    		@RequestParam(required = true) String y, HttpServletRequest request) {
+    		@RequestParam(required = true) String y, @RequestParam(required = false) String container, 
+    		HttpServletRequest request) {
     	if (!authorize(UserLevel.NETWORKADMIN, request)) {
     		return new HashMap<String, Object>(); // silently disregard new node position
     	}
     	
+    	String containerName = getAuthorizedContainer(request, container);
+    	
         String id = new String(nodeId);
         
-        if (!cache.containsKey(id))
+        if (!metaCache.get(containerName).containsKey(id)) {
             return null;
+        }
 
-        Map<String, Object> node = cache.get(id);
+        Map<String, Object> node = metaCache.get(containerName).get(id);
         Map<String, String> data = (Map<String, String>) node.get("data");
 
         data.put("$x", x);
@@ -504,5 +532,30 @@ public class Topology {
         	return true;
         }
         return false;
+    }
+    
+    private String getAuthorizedContainer(HttpServletRequest request, String container) {
+    	String username = request.getUserPrincipal().getName();
+    	IContainerAuthorization containerAuthorization = (IContainerAuthorization) ServiceHelper.
+    			getGlobalInstance(IContainerAuthorization.class, this);
+    	if (containerAuthorization != null) {
+    		Set<Resource> resources = containerAuthorization.getAllResourcesforUser(username);
+    		if (authorizeContainer(container, resources)) {
+    			return container;
+    		}
+    	}
+    	
+    	return GlobalConstants.DEFAULT.toString();
+    }
+    
+    private boolean authorizeContainer(String container, Set<Resource> resources) {
+    	for(Resource resource : resources) {
+    		String containerName = (String) resource.getResource();
+    		if (containerName.equals(container)) {
+    			return true;
+    		}
+    	}
+    	
+    	return false;
     }
 }

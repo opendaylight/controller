@@ -22,7 +22,6 @@ import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -30,6 +29,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.usermanager.IUserManager;
+import org.opendaylight.controller.web.DaylightWebUtil;
 import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +47,6 @@ public class Flows implements IDaylightWeb {
     private static final String WEB_NAME = "Flows";
     private static final String WEB_ID = "flows";
     private static final short WEB_ORDER = 2;
-    private final String containerName = GlobalConstants.DEFAULT.toString();
 
     public Flows() {
         ServiceHelper.registerGlobalService(IDaylightWeb.class, this, null);
@@ -75,7 +74,9 @@ public class Flows implements IDaylightWeb {
 
     @RequestMapping(value = "/main")
     @ResponseBody
-    public Set<Map<String, Object>> getFlows() {
+    public Set<Map<String, Object>> getFlows(HttpServletRequest request, @RequestParam(required = false) String container) {
+        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+        
         // fetch frm
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, containerName, this);
@@ -110,7 +111,9 @@ public class Flows implements IDaylightWeb {
 
     @RequestMapping(value = "/node-ports")
     @ResponseBody
-    public Map<String, Object> getNodePorts() {
+    public Map<String, Object> getNodePorts(HttpServletRequest request, @RequestParam(required = false) String container) {
+        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+        
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         if (switchManager == null) {
@@ -155,14 +158,16 @@ public class Flows implements IDaylightWeb {
 
     @RequestMapping(value = "/node-flows")
     @ResponseBody
-    public Map<String, Object> getNodeFlows() {
+    public Map<String, Object> getNodeFlows(HttpServletRequest request, @RequestParam(required = false) String container) {
+        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+        
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         if (switchManager == null) {
             return null;
         }
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
-                .getInstance(IForwardingRulesManager.class, "default", this);
+                .getInstance(IForwardingRulesManager.class, containerName, this);
         if (frm == null) {
             return null;
         }
@@ -192,10 +197,12 @@ public class Flows implements IDaylightWeb {
     public String actionFlow(@RequestParam(required = true) String action,
             @RequestParam(required = false) String body,
             @RequestParam(required = true) String nodeId,
-            HttpServletRequest request) {
+            HttpServletRequest request, @RequestParam(required = false) String container) {
         if (!isUserAuthorized(UserLevel.NETWORKADMIN, request)) {
             return "Operation not authorized";
         }
+        
+        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
 
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, containerName, this);
@@ -221,11 +228,12 @@ public class Flows implements IDaylightWeb {
     public String removeFlow(@PathVariable("nodeId") String nodeId,
             @PathVariable("name") String name,
             @RequestParam(required = true) String action,
-            HttpServletRequest request) {
+            HttpServletRequest request, @RequestParam(required = false) String container) {
         if (!isUserAuthorized(UserLevel.NETWORKADMIN, request)) {
-
             return "Operation not authorized";
         }
+        
+        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
 
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, containerName, this);
