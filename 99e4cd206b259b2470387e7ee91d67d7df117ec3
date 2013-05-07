@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///MM\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/DiscoveryService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1527,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-07T00:31:33Z",
+      "side": 1,
+      "message": "In future we should have a constant for these, instead of hard-coded values inside the property parsing functions.",
+      "revId": "99e4cd206b259b2470387e7ee91d67d7df117ec3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
