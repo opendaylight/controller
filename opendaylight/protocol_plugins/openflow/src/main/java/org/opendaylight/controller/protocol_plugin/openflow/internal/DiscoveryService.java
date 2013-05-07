@@ -88,7 +88,7 @@ public class DiscoveryService implements IInventoryShimExternalListener,
     private int discoveryBatchRestartTicks = getDiscoveryInterval(); // periodically restart batching process
     private int discoveryBatchPausePeriod = 5; // pause for few secs
     private int discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod; // pause after this point
-    private int discoveryRetry = 2; // number of retry after initial timeout
+    private int discoveryRetry = getDiscoveryRetry(); // number of retries after initial timeout
     private int discoveryTimeoutTicks = getDiscoveryTimeout(); // timeout in sec
     private int discoveryAgeoutTicks = 120; // age out 2 min
     private int discoveryConsistencyCheckMultiple = 2; // multiple of discoveryBatchRestartTicks
@@ -968,7 +968,7 @@ public class DiscoveryService implements IInventoryShimExternalListener,
     public void _ptm(CommandInterpreter ci) {
         ci.println("Final timeout ticks " + getDiscoveryFinalTimeoutInterval());
         ci.println("Per timeout ticks " + discoveryTimeoutTicks);
-        ci.println("Retry after initial timeout " + discoveryRetry);
+        ci.println("Number of retries after initial timeout " + discoveryRetry);
     }
 
     public void _psize(CommandInterpreter ci) {
@@ -1482,7 +1482,7 @@ public class DiscoveryService implements IInventoryShimExternalListener,
      * 
      * @return The discovery interval in second
      */
-    private static int getDiscoveryInterval() {
+    private int getDiscoveryInterval() {
         String elapsedTime = System.getProperty("of.discoveryInterval");
         int rv = 300;
 
@@ -1502,7 +1502,7 @@ public class DiscoveryService implements IInventoryShimExternalListener,
      * 
      * @return The discovery timeout in second
      */
-    private static int getDiscoveryTimeout() {
+    private int getDiscoveryTimeout() {
         String elapsedTime = System.getProperty("of.discoveryTimeout");
         int rv = 60;
 
@@ -1511,6 +1511,26 @@ public class DiscoveryService implements IInventoryShimExternalListener,
                 rv = Integer.parseInt(elapsedTime);
             }
         } catch (Exception e) {
+        }
+
+        return rv;
+    }
+
+    /**
+     * This method returns the number of retries after the initial discovery
+     * packet is not received within the timeout period. Default is 2 times.
+     * 
+     * @return The number of discovery retries
+     */
+    private int getDiscoveryRetry() {
+        String retry = System.getProperty("of.discoveryRetry");
+        int rv = 2;
+
+        if (retry != null) {
+            try {
+                rv = Integer.parseInt(retry);
+            } catch (Exception e) {
+            }
         }
 
         return rv;
