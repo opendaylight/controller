@@ -761,7 +761,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     public void _printAAAServers(CommandInterpreter ci) {
         for (ServerConfig aaaServer : remoteServerConfigList.values()) {
-            String protocol = aaaServer.getProtocol();
             ci.println(aaaServer.getAddress() + "-" + aaaServer.getProtocol());
         }
     }
@@ -867,9 +866,11 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
         // First check in active users then in local configured users
         if (activeUsers.containsKey(username)) {
-            roleName = activeUsers.get(username).getUserRoles().get(0);
+            List<String> roles = activeUsers.get(username).getUserRoles();
+            roleName = (roles == null || roles.isEmpty())? null : roles.get(0);
         } else if (localUserConfigList.containsKey(username)) {
-            roleName = localUserConfigList.get(username).getRole();
+            UserConfig config = localUserConfigList.get(username);
+            roleName = (config == null)? null : config.getRole();
         }
 
         if (roleName == null) {
