@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yang_version_stmtContext;
-import org.opendaylight.controller.yang.model.parser.impl.YangModelParserListenerImpl;
+import org.opendaylight.controller.yang.model.parser.impl.YangParserListenerImpl;
 import org.opendaylight.controller.yang.model.parser.util.YangValidationException;
 
 import com.google.common.collect.Sets;
@@ -108,7 +108,7 @@ final class BasicValidations {
                             ValidationUtil.getRootParentName(stmt),
                             ValidationUtil.getSimpleStatementName(stmt
                                     .getClass()), ValidationUtil.getName(stmt),
-                            YangModelParserListenerImpl.simpleDateFormat
+                            YangParserListenerImpl.simpleDateFormat
                                     .format(new Date()));
             ValidationUtil.ex(exceptionMessage);
         }

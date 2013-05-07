@@ -84,10 +84,10 @@ import org.opendaylight.controller.yang.model.validator.YangModelBasicValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class YangModelParserImpl implements YangModelParser {
+public class YangParserImpl implements YangModelParser {
 
     private static final Logger logger = LoggerFactory
-            .getLogger(YangModelParserImpl.class);
+            .getLogger(YangParserImpl.class);
 
     @Override
     public Set<Module> parseYangModels(final List<File> yangFiles) {
@@ -130,9 +130,9 @@ public class YangModelParserImpl implements YangModelParser {
         // validate yang
         new YangModelBasicValidator(walker).validate(trees);
 
-        YangModelParserListenerImpl yangModelParser = null;
+        YangParserListenerImpl yangModelParser = null;
         for (int i = 0; i < trees.size(); i++) {
-            yangModelParser = new YangModelParserListenerImpl();
+            yangModelParser = new YangParserListenerImpl();
             walker.walk(yangModelParser, trees.get(i));
             builders[i] = yangModelParser.getModuleBuilder();
         }
@@ -656,59 +656,67 @@ public class YangModelParserImpl implements YangModelParser {
         if (module.getAugmentsResolved() < module.getAddedAugments().size()) {
             for (AugmentationSchemaBuilder augmentBuilder : module
                     .getAddedAugments()) {
-                final SchemaPath augmentTargetSchemaPath = augmentBuilder
-                        .getTargetPath();
-                final List<QName> path = augmentTargetSchemaPath.getPath();
 
-                int i = 0;
-                final QName qname = path.get(i);
-                String prefix = qname.getPrefix();
-                if (prefix == null) {
-                    prefix = module.getPrefix();
-                }
+                if(!augmentBuilder.isResolved()) {
+                    final SchemaPath augmentTargetSchemaPath = augmentBuilder
+                            .getTargetPath();
+                    final List<QName> path = augmentTargetSchemaPath.getPath();
 
-                DataSchemaNodeBuilder currentParent = null;
-                final ModuleBuilder dependentModule = findDependentModule(
-                        modules, module, prefix, augmentBuilder.getLine());
-                for (DataSchemaNodeBuilder child : dependentModule
-                        .getChildNodes()) {
-                    final QName childQName = child.getQName();
-                    if (childQName.getLocalName().equals(qname.getLocalName())) {
-                        currentParent = child;
-                        i++;
-                        break;
+                    int i = 0;
+                    final QName qname = path.get(i);
+                    String prefix = qname.getPrefix();
+                    if (prefix == null) {
+                        prefix = module.getPrefix();
                     }
-                }
 
-                for (; i < path.size(); i++) {
-                    final QName currentQName = path.get(i);
-                    DataSchemaNodeBuilder newParent = null;
-                    for (DataSchemaNodeBuilder child : ((ChildNodeBuilder) currentParent)
+                    DataSchemaNodeBuilder currentParent = null;
+                    final ModuleBuilder dependentModule = findDependentModule(
+                            modules, module, prefix, augmentBuilder.getLine());
+                    for (DataSchemaNodeBuilder child : dependentModule
                             .getChildNodes()) {
                         final QName childQName = child.getQName();
-                        if (childQName.getLocalName().equals(
-                                currentQName.getLocalName())) {
-                            newParent = child;
+                        if (childQName.getLocalName().equals(qname.getLocalName())) {
+                            currentParent = child;
+                            i++;
                             break;
                         }
                     }
-                    if (newParent == null) {
-                        break; // node not found, quit search
-                    } else {
-                        currentParent = newParent;
+
+                    for (; i < path.size(); i++) {
+                        final QName currentQName = path.get(i);
+                        DataSchemaNodeBuilder newParent = null;
+                        for (DataSchemaNodeBuilder child : ((ChildNodeBuilder) currentParent)
+                                .getChildNodes()) {
+                            final QName childQName = child.getQName();
+                            if (childQName.getLocalName().equals(
+                                    currentQName.getLocalName())) {
+                                newParent = child;
+                                break;
+                            }
+                        }
+                        if (newParent == null) {
+                            break; // node not found, quit search
+                        } else {
+                            currentParent = newParent;
+                        }
+                    }
+
+                    final QName currentQName = currentParent.getQName();
+                    final QName lastAugmentPathElement = path.get(path.size() - 1);
+                    if (currentQName.getLocalName().equals(
+                            lastAugmentPathElement.getLocalName())) {
+                        ParserUtils.fillAugmentTarget(augmentBuilder,
+                                (ChildNodeBuilder) currentParent);
+                        ((AugmentationTargetBuilder) currentParent)
+                                .addAugmentation(augmentBuilder);
+                        SchemaPath oldPath = currentParent.getPath();
+                        augmentBuilder.setTargetPath(new SchemaPath(oldPath.getPath(), oldPath.isAbsolute()));
+                        augmentBuilder.setResolved(true);
+                        module.augmentResolved();
                     }
                 }
 
-                final QName currentQName = currentParent.getQName();
-                final QName lastAugmentPathElement = path.get(path.size() - 1);
-                if (currentQName.getLocalName().equals(
-                        lastAugmentPathElement.getLocalName())) {
-                    ParserUtils.fillAugmentTarget(augmentBuilder,
-                            (ChildNodeBuilder) currentParent);
-                    ((AugmentationTargetBuilder) currentParent)
-                            .addAugmentation(augmentBuilder);
-                    module.augmentResolved();
-                }
+
             }
         }
     }

@@ -57,7 +57,7 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.Unique_stmtContex
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Uses_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Yin_element_argContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParserBaseListener;
-import org.opendaylight.controller.yang.model.parser.impl.YangModelParserListenerImpl;
+import org.opendaylight.controller.yang.model.parser.impl.YangParserListenerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,7 +185,7 @@ final class YangModelBasicValidationListener extends YangParserBaseListener {
     @Override
     public void enterRevision_stmt(Revision_stmtContext ctx) {
         BasicValidations.checkDateFormat(ctx,
-                YangModelParserListenerImpl.simpleDateFormat);
+                YangParserListenerImpl.simpleDateFormat);
 
     }
 
@@ -254,7 +254,7 @@ final class YangModelBasicValidationListener extends YangParserBaseListener {
     @Override
     public void enterRevision_date_stmt(Revision_date_stmtContext ctx) {
         BasicValidations.checkDateFormat(ctx,
-                YangModelParserListenerImpl.simpleDateFormat);
+                YangParserListenerImpl.simpleDateFormat);
     }
 
     /**

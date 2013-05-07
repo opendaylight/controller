@@ -73,7 +73,7 @@ public class ModuleBuilder implements Builder {
     private final Map<List<String>, DataSchemaNodeBuilder> addedChilds = new HashMap<List<String>, DataSchemaNodeBuilder>();
 
     private final Map<List<String>, GroupingBuilder> addedGroupings = new HashMap<List<String>, GroupingBuilder>();
-    private final Set<AugmentationSchemaBuilder> addedAugments = new HashSet<AugmentationSchemaBuilder>();
+    private final List<AugmentationSchemaBuilder> addedAugments = new ArrayList<AugmentationSchemaBuilder>();
     private final Map<List<String>, UsesNodeBuilder> addedUsesNodes = new HashMap<List<String>, UsesNodeBuilder>();
     private final Map<List<String>, RpcDefinitionBuilder> addedRpcs = new HashMap<List<String>, RpcDefinitionBuilder>();
     private final Set<NotificationBuilder> addedNotifications = new HashSet<NotificationBuilder>();
@@ -190,7 +190,7 @@ public class ModuleBuilder implements Builder {
         return dirtyNodes;
     }
 
-    public Set<AugmentationSchemaBuilder> getAddedAugments() {
+    public List<AugmentationSchemaBuilder> getAddedAugments() {
         return addedAugments;
     }
 

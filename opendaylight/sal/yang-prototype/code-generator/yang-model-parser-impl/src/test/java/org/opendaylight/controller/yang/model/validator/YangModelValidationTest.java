@@ -33,7 +33,7 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.Prefix_stmtContex
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Revision_date_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Status_argContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.StringContext;
-import org.opendaylight.controller.yang.model.parser.impl.YangModelParserListenerImpl;
+import org.opendaylight.controller.yang.model.parser.impl.YangParserListenerImpl;
 import org.opendaylight.controller.yang.model.parser.util.YangValidationException;
 
 import com.google.common.collect.Sets;
@@ -244,7 +244,7 @@ public class YangModelValidationTest {
     }
 
     static String getFormattedDate() {
-        return YangModelParserListenerImpl.simpleDateFormat.format(new Date());
+        return YangParserListenerImpl.simpleDateFormat.format(new Date());
     }
 
     private Include_stmtContext mockInclude(String name) {

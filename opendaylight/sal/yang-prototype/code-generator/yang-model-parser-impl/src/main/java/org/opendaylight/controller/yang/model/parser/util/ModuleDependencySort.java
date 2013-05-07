@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.opendaylight.controller.yang.model.api.ModuleImport;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ModuleBuilder;
-import org.opendaylight.controller.yang.model.parser.impl.YangModelParserListenerImpl;
+import org.opendaylight.controller.yang.model.parser.impl.YangParserListenerImpl;
 import org.opendaylight.controller.yang.model.parser.util.TopologicalSort.Node;
 import org.opendaylight.controller.yang.model.parser.util.TopologicalSort.NodeImpl;
 import org.slf4j.Logger;
@@ -197,7 +197,7 @@ public final class ModuleDependencySort {
 
     private static String formatRevDate(Date rev) {
         return rev == DEFAULT_REVISION ? "default"
-                : YangModelParserListenerImpl.simpleDateFormat.format(rev);
+                : YangParserListenerImpl.simpleDateFormat.format(rev);
     }
 
     /**
