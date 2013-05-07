@@ -31,7 +31,23 @@ public final class SchemaContextUtil {
     public SchemaContextUtil(final SchemaContext context) {
         this.context = context;
     }
-
+    
+    public SchemaContext getContext() {
+        return context;
+    }
+    
+    public DataSchemaNode findDataSchemaNode(final SchemaPath schemaPath) {
+        if (schemaPath != null) {
+            final Module module = resolveModuleFromSchemaPath(schemaPath);
+            final Queue<String> prefixedPath = schemaPathToQueuedPath(schemaPath);
+            
+            if ((module != null) && (prefixedPath != null)) {
+                return findSchemaNodeForGivenPath(module, prefixedPath);
+            }
+        }
+        return null;
+    }
+    
     public DataSchemaNode findDataSchemaNode(final Module module,
             final RevisionAwareXPath nonCondXPath) {
         if (nonCondXPath != null) {
@@ -187,7 +203,30 @@ public final class SchemaContextUtil {
         }
         return retQueue;
     }
-
+    
+    private Queue<String> schemaPathToQueuedPath(final SchemaPath schemaPath) {
+        final Queue<String> retQueue = new LinkedList<String>();
+        if ((schemaPath != null) && (schemaPath.getPath() != null)) {
+            final List<QName> listPath = schemaPath.getPath();
+            
+            for (final QName qname : listPath) {
+                if (qname != null) {
+                    final String prefix = qname.getPrefix();
+                    final String localName = qname.getLocalName();
+                    
+                    final StringBuilder builder = new StringBuilder();
+                    if (prefix != null) {
+                        builder.append(prefix);
+                        builder.append(":");
+                    }
+                    builder.append(localName);
+                    retQueue.add(builder.toString());
+                }
+            }
+        }
+        return retQueue;
+    }
+    
     private Queue<String> resolveRelativeXPath(
             final RevisionAwareXPath relativeXPath,
             final SchemaPath leafrefSchemaPath) {

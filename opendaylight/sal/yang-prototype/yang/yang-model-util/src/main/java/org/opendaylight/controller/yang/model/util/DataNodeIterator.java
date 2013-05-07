@@ -61,6 +61,9 @@ public class DataNodeIterator implements Iterator<DataSchemaNode> {
         final Set<DataSchemaNode> childs = dataNode.getChildNodes();
         if (childs != null) {
             for (DataSchemaNode childNode : childs) {
+                if (childNode.isAugmenting()) {
+                    continue;
+                }
                 allChilds.add(childNode);
                 if (childNode instanceof ContainerSchemaNode) {
                     final ContainerSchemaNode container = (ContainerSchemaNode) childNode;

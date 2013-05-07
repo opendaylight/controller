@@ -11,6 +11,8 @@ import java.util.List;
 
 public interface GeneratedTransferObject extends GeneratedType {
     
+    public GeneratedTransferObject getExtends();
+    
     public List<GeneratedProperty> getProperties();
     
     public List<GeneratedProperty> getEqualsIdentifiers();

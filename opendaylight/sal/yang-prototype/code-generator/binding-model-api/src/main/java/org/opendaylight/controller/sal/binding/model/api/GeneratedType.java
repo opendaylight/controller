@@ -36,6 +36,8 @@ public interface GeneratedType extends Type {
     
     public List<AnnotationType> getAnnotations();
     
+    public List<GeneratedType> getImplements();
+    
     /**
      * Returns Set of all Enumerator definitions associated with interface.
      * 

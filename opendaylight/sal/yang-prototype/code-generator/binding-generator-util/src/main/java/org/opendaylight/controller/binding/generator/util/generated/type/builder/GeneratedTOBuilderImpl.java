@@ -17,6 +17,7 @@ import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.AnnotationTypeBuilder;
@@ -30,7 +31,9 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     private String packageName;
     private final String name;
     private String comment = "";
-
+    
+    private GeneratedTransferObject extendsType;
+    private final List<GeneratedType> implementsTypes = new ArrayList<GeneratedType>();
     private final List<EnumBuilder> enumerations = new ArrayList<EnumBuilder>();
     private final List<GeneratedPropertyBuilder> properties = new ArrayList<GeneratedPropertyBuilder>();
     private final List<GeneratedPropertyBuilder> equalsProperties = new ArrayList<GeneratedPropertyBuilder>();
@@ -79,7 +82,24 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         }
         return null;
     }
+    
+    @Override
+    public boolean addImplementsType(final GeneratedType genType) {
+        if (genType != null) {
+            return implementsTypes.add(genType);
+        }
+        return false;
+    }
 
+    @Override
+    public boolean addExtendsType(final GeneratedTransferObject genTransObj) {
+        if (genTransObj != null) {
+            extendsType = genTransObj;
+            return true;
+        }
+        return false;
+    }
+    
     @Override
     public EnumBuilder addEnumeration(String name) {
         final EnumBuilder builder = new EnumerationBuilderImpl(packageName,
@@ -130,7 +150,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     @Override
     public GeneratedTransferObject toInstance() {
         return new GeneratedTransferObjectImpl(packageName, name, comment, 
-                annotationBuilders, constantDefintions, enumerations,
+                annotationBuilders, extendsType, implementsTypes, constantDefintions, enumerations,
                 methodDefinitions, properties, equalsProperties,
                 hashProperties, toStringProperties);
     }
@@ -388,11 +408,15 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         private final List<GeneratedProperty> stringProperties;
         private final List<AnnotationType> annotations;
         private final List<MethodSignature> methods;
+        private final GeneratedTransferObject extendsType;
+        private final List<GeneratedType> implementsTypes;
 
         public GeneratedTransferObjectImpl(final String packageName,
                 final String name,
                 final String comment,
                 final List<AnnotationTypeBuilder> annotationBuilders,
+                final GeneratedTransferObject extendsType,
+                final List<GeneratedType> implementsTypes,
                 final List<ConstantBuilder> constantBuilders,
                 final List<EnumBuilder> enumBuilders,
                 final List<MethodSignatureBuilder> methodBuilders,
@@ -405,6 +429,8 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             this.name = name;
             this.comment = comment;
             this.annotations = toUnmodifiableAnnotations(annotationBuilders);
+            this.extendsType = extendsType;
+            this.implementsTypes = Collections.unmodifiableList(implementsTypes);
             this.constants = toUnmodifiableConstant(constantBuilders);
             this.enumerations = toUnmodifiableEnumerations(enumBuilders);
             this.properties = toUnmodifiableProperties(propBuilers);
@@ -483,7 +509,17 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         public List<AnnotationType> getAnnotations() {
             return annotations;
         }
+        
+        @Override
+        public List<GeneratedType> getImplements() {
+            return implementsTypes;
+        }
 
+        @Override
+        public GeneratedTransferObject getExtends() {
+            return extendsType;
+        }
+        
         @Override
         public List<Enumeration> getEnumDefintions() {
             return enumerations;

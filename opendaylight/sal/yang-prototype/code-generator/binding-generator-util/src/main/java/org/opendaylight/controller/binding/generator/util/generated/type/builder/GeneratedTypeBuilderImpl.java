@@ -29,10 +29,11 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
     private String comment = "";
     private final String name;
     private final List<AnnotationTypeBuilder> annotationBuilders = new ArrayList<AnnotationTypeBuilder>();
+    private final List<GeneratedType> implementsTypes = new ArrayList<GeneratedType>();
     private final List<EnumBuilder> enumDefinitions = new ArrayList<EnumBuilder>();
     private final List<ConstantBuilder> constantDefintions = new ArrayList<ConstantBuilder>();
     private final List<MethodSignatureBuilder> methodDefinitions = new ArrayList<MethodSignatureBuilder>();
-
+    
     public GeneratedTypeBuilderImpl(final String packageName, final String name) {
         this.packageName = packageName;
         this.name = name;
@@ -96,12 +97,20 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
     }
 
     @Override
+    public boolean addImplementsType(final GeneratedType genType) {
+        if (genType != null) {
+            return implementsTypes.add(genType);
+        }
+        return false;
+    }
+    
+    @Override
     public GeneratedType toInstance() {
         return new GeneratedTypeImpl(this, packageName, name, comment,
-                annotationBuilders, enumDefinitions, constantDefintions,
+                annotationBuilders, implementsTypes, enumDefinitions, constantDefintions,
                 methodDefinitions);
     }
-
+    
     private static final class GeneratedTypeImpl implements GeneratedType {
 
         private final Type parent;
@@ -109,6 +118,7 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
         private final String name;
         private final String comment;
         private final List<AnnotationType> annotations;
+        private final List<GeneratedType> implementsTypes;
         private final List<Enumeration> enumDefinitions;
         private final List<Constant> constantDefintions;
         private final List<MethodSignature> methodDefinitions;
@@ -116,6 +126,7 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
         public GeneratedTypeImpl(final Type parent, final String packageName,
                 final String name, final String comment,
                 final List<AnnotationTypeBuilder> annotationBuilders,
+                final List<GeneratedType> implementsTypes,
                 final List<EnumBuilder> enumBuilders,
                 final List<ConstantBuilder> constantBuilders,
                 final List<MethodSignatureBuilder> methodBuilders) {
@@ -125,6 +136,7 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
             this.name = name;
             this.comment = comment;
             this.annotations = toUnmodifiableAnnotations(annotationBuilders);
+            this.implementsTypes = Collections.unmodifiableList(implementsTypes); 
             this.constantDefintions = toUnmodifiableConstants(constantBuilders);
             this.enumDefinitions = toUnmodifiableEnums(enumBuilders);
             this.methodDefinitions = toUnmodifiableMethods(methodBuilders);
@@ -190,7 +202,12 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
         public List<AnnotationType> getAnnotations() {
             return annotations;
         }
-
+        
+        @Override
+        public List<GeneratedType> getImplements() {
+            return implementsTypes;
+        }
+        
         @Override
         public List<Enumeration> getEnumDefintions() {
             return enumDefinitions;
