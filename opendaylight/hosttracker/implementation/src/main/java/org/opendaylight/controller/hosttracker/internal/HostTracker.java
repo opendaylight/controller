@@ -576,25 +576,6 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                 Tier tier = new Tier(1);
                 switchManager.setNodeProp(node, tier);
                 topologyManager.updateHostLink(p, h, UpdateType.ADDED, null);
-                /*
-                 * This is a temporary fix for Cisco Live's Hadoop
-                 * Demonstration. The concept of Tiering must be revisited based
-                 * on other application requirements and the design might
-                 * warrant a separate module (as it involves tracking the
-                 * topology/ host changes & updating the Tiering numbers in an
-                 * effective manner).
-                 */
-                updateSwitchTiers(node, 1);
-
-                /*
-                 * The following 2 lines are added for testing purposes. We can
-                 * remove it once the North-Bound APIs are available for
-                 * testing.
-                 * 
-                 * ArrayList<ArrayList<String>> hierarchies =
-                 * getHostNetworkHierarchy(host.getNetworkAddress());
-                 * logHierarchies(hierarchies);
-                 */
             } else {
                 // No need to reset the tiering if no other hosts are currently
                 // connected
@@ -899,16 +880,6 @@ public class HostTracker implements IfIptoHost, IfHostListener,
         logger.debug(
                 "HostTracker Topology linkUpdate handling src:{}[port {}] dst:{}[port {}] added: {}",
                 new Object[] { srcNid, srcPort, dstNid, dstPort, added });
-        clearTiers();
-        for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
-            HostNodeConnector host = entry.getValue();
-            Node node = host.getnodeconnectorNode();
-            if (node != null) {
-                Tier t = new Tier(1);
-                switchManager.setNodeProp(node, t);
-                updateSwitchTiers(node, 1);
-            }
-        }
     }
 
     @Override

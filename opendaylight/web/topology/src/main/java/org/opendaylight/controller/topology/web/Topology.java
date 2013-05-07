@@ -10,6 +10,9 @@
 package org.opendaylight.controller.topology.web;
 
 import java.awt.Dimension;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +24,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.opendaylight.controller.configuration.IConfigurationAware;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
 import org.opendaylight.controller.sal.authorization.Resource;
 import org.opendaylight.controller.sal.authorization.UserLevel;
@@ -33,13 +37,19 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.IObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectReader;
+import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.web.DaylightWebUtil;
+import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,7 +63,9 @@ import edu.uci.ics.jung.graph.SparseMultigraph;
 
 @Controller
 @RequestMapping("/")
-public class Topology {
+public class Topology implements IObjectReader, IConfigurationAware {
+    private static String ROOT = GlobalConstants.STARTUPHOME.toString();
+    private String topologyWebFileName = null;
 
     protected Map<String, Map<String, Map<String, Object>>> metaCache = new HashMap<String, Map<String, Map<String, Object>>>();
     protected Map<String, Map<String, Object>> stagedNodes;
@@ -63,6 +75,12 @@ public class Topology {
     protected Map<String, Integer> metaHostHash = new HashMap<String, Integer>();
     protected Map<String, Integer> metaNodeSingleHash = new HashMap<String, Integer>();
     protected Map<String, Integer> metaNodeConfigurationHash = new HashMap<String, Integer>();
+    
+    public Topology() {
+    	ServiceHelper.registerGlobalService(IConfigurationAware.class, this, null);
+    	topologyWebFileName = ROOT + "topologyCache.sav";
+    	loadConfiguration();
+    }
     
     /**
      * Topology of nodes and hosts in the network in JSON format.
@@ -557,5 +575,26 @@ public class Topology {
     	}
     	
     	return false;
+    }
+
+    @SuppressWarnings("unchecked")
+	private void loadConfiguration() {
+        ObjectReader objReader = new ObjectReader();
+        metaCache = (Map<String, Map<String, Map<String, Object>>>) objReader.read(this, topologyWebFileName);
+        if (metaCache == null) metaCache = new HashMap<String, Map<String, Map<String, Object>>>();
+    }
+
+    @Override
+    public Status saveConfiguration() {
+        ObjectWriter objWriter = new ObjectWriter();
+        objWriter.write(metaCache, topologyWebFileName);
+        return new Status(StatusCode.SUCCESS, null);
+    }
+
+    @Override
+    public Object readObject(ObjectInputStream ois)
+            throws FileNotFoundException, IOException, ClassNotFoundException {
+        // Perform the class deserialization locally, from inside the package where the class is defined
+        return ois.readObject();
     }
 }
