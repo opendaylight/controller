@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
@@ -175,23 +176,29 @@ public class StatisticsManagerIntegrationTest {
 
     @Test
     public void testGetFlows() {
-        Node node = NodeCreator.createOFNode(1L);
-        List<FlowOnNode> flows = this.manager.getFlows(node);
-        FlowOnNode fn = flows.get(0);
-        Assert.assertTrue(fn.getByteCount() == 100);
-        Assert.assertTrue(fn.getDurationNanoseconds() == 400);
-        Assert.assertTrue(fn.getDurationSeconds() == 40);
-        Assert.assertTrue(fn.getTableId() == (byte) 0x1);
-        Assert.assertTrue(fn.getPacketCount() == 200);
-
-        Match match = new Match();
         try {
-            match.setField(MatchType.NW_DST, InetAddress.getByName("1.1.1.1"));
-        } catch (UnknownHostException e) {
-            fail("Couldn't create match");
+            Node node = new Node("STUB", new Integer(0xCAFE));
+            List<FlowOnNode> flows = this.manager.getFlows(node);
+            FlowOnNode fn = flows.get(0);
+            Assert.assertTrue(fn.getByteCount() == 100);
+            Assert.assertTrue(fn.getDurationNanoseconds() == 400);
+            Assert.assertTrue(fn.getDurationSeconds() == 40);
+            Assert.assertTrue(fn.getTableId() == (byte) 0x1);
+            Assert.assertTrue(fn.getPacketCount() == 200);
+
+            Match match = new Match();
+            try {
+                match.setField(MatchType.NW_DST, InetAddress.getByName("1.1.1.1"));
+            } catch (UnknownHostException e) {
+                fail("Couldn't create match");
+            }
+            Assert.assertTrue(match.equals(fn.getFlow().getMatch()));
+            Assert.assertTrue(fn.getFlow().getActions().get(0).equals(new Drop()));
+        } catch (ConstructionException e) {
+            // Got an unexpected exception
+            Assert.assertTrue(false);
         }
-        Assert.assertTrue(match.equals(fn.getFlow().getMatch()));
-        Assert.assertTrue(fn.getFlow().getActions().get(0).equals(new Drop()));
+       
     }
 
     @Test
@@ -210,81 +217,98 @@ public class StatisticsManagerIntegrationTest {
         actions.add(action);
         flow.setActions(actions);
 
-        Node node = NodeCreator.createOFNode(1L);
-        FlowEntry fe = new FlowEntry("g1", "f1", flow, node);
-        List<FlowEntry> list = new ArrayList<FlowEntry>();
-        list.add(fe);
-        FlowEntry fe2 = new FlowEntry("g1", "f2", flow, node);
-        list.add(fe2);
-
-        Map<Node, List<FlowOnNode>> result = this.manager
-                .getFlowStatisticsForFlowList(null);
-        Assert.assertTrue(result.isEmpty());
-        result = this.manager.getFlowStatisticsForFlowList(list);
-        List<FlowOnNode> results = result.get(node);
-        FlowOnNode fn = results.get(0);
-        Assert.assertTrue(fn.getByteCount() == 100);
-        Assert.assertTrue(fn.getDurationNanoseconds() == 400);
-        Assert.assertTrue(fn.getDurationSeconds() == 40);
-        Assert.assertTrue(fn.getTableId() == (byte) 0x1);
-        Assert.assertTrue(fn.getPacketCount() == 200);
-        Assert.assertTrue(fn.getFlow().equals(flow));
+        try{
+            Node node = new Node("STUB", 0xCAFE);
+            FlowEntry fe = new FlowEntry("g1", "f1", flow, node);
+            List<FlowEntry> list = new ArrayList<FlowEntry>();
+            list.add(fe);
+            FlowEntry fe2 = new FlowEntry("g1", "f2", flow, node);
+            list.add(fe2);
+    
+            Map<Node, List<FlowOnNode>> result = this.manager
+                    .getFlowStatisticsForFlowList(null);
+            Assert.assertTrue(result.isEmpty());
+            result = this.manager.getFlowStatisticsForFlowList(list);
+            List<FlowOnNode> results = result.get(node);
+            FlowOnNode fn = results.get(0);
+            Assert.assertTrue(fn.getByteCount() == 100);
+            Assert.assertTrue(fn.getDurationNanoseconds() == 400);
+            Assert.assertTrue(fn.getDurationSeconds() == 40);
+            Assert.assertTrue(fn.getTableId() == (byte) 0x1);
+            Assert.assertTrue(fn.getPacketCount() == 200);
+            Assert.assertTrue(fn.getFlow().equals(flow));
+        }catch(ConstructionException e){
+            Assert.assertTrue(false);
+        }
 
     }
 
     @Test
     public void testGetFlowsNumber() {
-        Node node = NodeCreator.createOFNode(1L);
-        Assert.assertTrue(this.manager.getFlowsNumber(node) == 1);
+        try{
+            Node node = new Node("STUB", 0xCAFE);
+            Assert.assertTrue(this.manager.getFlowsNumber(node) == 1);
+        }catch(ConstructionException e){
+            Assert.assertTrue(false);
+        }
     }
 
     @Test
     public void testGetNodeDescription() {
-        Node node = NodeCreator.createOFNode(1L);
-        NodeDescription desc = this.manager.getNodeDescription(node);
-        Assert.assertTrue(desc.getDescription().equals(
-                "This is a sample node description"));
-        Assert.assertTrue(desc.getHardware().equals("stub hardware"));
-        Assert.assertTrue(desc.getSoftware().equals("stub software"));
-        Assert.assertTrue(desc.getSerialNumber().equals("123"));
-        Assert.assertTrue(desc.getManufacturer().equals("opendaylight"));
+        try{
+            Node node = new Node("STUB", 0xCAFE);
+            NodeDescription desc = this.manager.getNodeDescription(node);
+            Assert.assertTrue(desc.getDescription().equals(
+                    "This is a sample node description"));
+            Assert.assertTrue(desc.getHardware().equals("stub hardware"));
+            Assert.assertTrue(desc.getSoftware().equals("stub software"));
+            Assert.assertTrue(desc.getSerialNumber().equals("123"));
+            Assert.assertTrue(desc.getManufacturer().equals("opendaylight"));
+        }catch(ConstructionException e){
+            Assert.assertTrue(false);
+        }
 
     }
 
     @Test
     public void testGetNodeConnectorStatistics() {
-        Node node = NodeCreator.createOFNode(1L);
-        List<NodeConnectorStatistics> stats = this.manager
-                .getNodeConnectorStatistics(node);
-        NodeConnectorStatistics ns = stats.get(0);
-        Assert.assertTrue(ns.getCollisionCount() == 4);
-        Assert.assertTrue(ns.getReceiveByteCount() == 1000);
-        Assert.assertTrue(ns.getReceiveCRCErrorCount() == 1);
-        Assert.assertTrue(ns.getReceiveDropCount() == 2);
-        Assert.assertTrue(ns.getReceiveErrorCount() == 3);
-        Assert.assertTrue(ns.getReceiveFrameErrorCount() == 5);
-        Assert.assertTrue(ns.getReceiveOverRunErrorCount() == 6);
-        Assert.assertTrue(ns.getReceivePacketCount() == 250);
-        Assert.assertTrue(ns.getTransmitByteCount() == 5000);
-        Assert.assertTrue(ns.getTransmitDropCount() == 50);
-        Assert.assertTrue(ns.getTransmitErrorCount() == 10);
-        Assert.assertTrue(ns.getTransmitPacketCount() == 500);
-
-        NodeConnector nc = ns.getNodeConnector();
-        NodeConnectorStatistics ns2 = this.manager
-                .getNodeConnectorStatistics(nc);
-        Assert.assertTrue(ns2.getCollisionCount() == 4);
-        Assert.assertTrue(ns2.getReceiveByteCount() == 1000);
-        Assert.assertTrue(ns2.getReceiveCRCErrorCount() == 1);
-        Assert.assertTrue(ns2.getReceiveDropCount() == 2);
-        Assert.assertTrue(ns2.getReceiveErrorCount() == 3);
-        Assert.assertTrue(ns2.getReceiveFrameErrorCount() == 5);
-        Assert.assertTrue(ns2.getReceiveOverRunErrorCount() == 6);
-        Assert.assertTrue(ns2.getReceivePacketCount() == 250);
-        Assert.assertTrue(ns2.getTransmitByteCount() == 5000);
-        Assert.assertTrue(ns2.getTransmitDropCount() == 50);
-        Assert.assertTrue(ns2.getTransmitErrorCount() == 10);
-        Assert.assertTrue(ns2.getTransmitPacketCount() == 500);
+        try{
+            Node node = new Node("STUB", 0xCAFE);
+            List<NodeConnectorStatistics> stats = this.manager
+                    .getNodeConnectorStatistics(node);
+            NodeConnectorStatistics ns = stats.get(0);
+            Assert.assertTrue(ns.getCollisionCount() == 4);
+            Assert.assertTrue(ns.getReceiveByteCount() == 1000);
+            Assert.assertTrue(ns.getReceiveCRCErrorCount() == 1);
+            Assert.assertTrue(ns.getReceiveDropCount() == 2);
+            Assert.assertTrue(ns.getReceiveErrorCount() == 3);
+            Assert.assertTrue(ns.getReceiveFrameErrorCount() == 5);
+            Assert.assertTrue(ns.getReceiveOverRunErrorCount() == 6);
+            Assert.assertTrue(ns.getReceivePacketCount() == 250);
+            Assert.assertTrue(ns.getTransmitByteCount() == 5000);
+            Assert.assertTrue(ns.getTransmitDropCount() == 50);
+            Assert.assertTrue(ns.getTransmitErrorCount() == 10);
+            Assert.assertTrue(ns.getTransmitPacketCount() == 500);
+    
+            NodeConnector nc = ns.getNodeConnector();
+            NodeConnectorStatistics ns2 = this.manager
+                    .getNodeConnectorStatistics(nc);
+            Assert.assertTrue(ns2.getCollisionCount() == 4);
+            Assert.assertTrue(ns2.getReceiveByteCount() == 1000);
+            Assert.assertTrue(ns2.getReceiveCRCErrorCount() == 1);
+            Assert.assertTrue(ns2.getReceiveDropCount() == 2);
+            Assert.assertTrue(ns2.getReceiveErrorCount() == 3);
+            Assert.assertTrue(ns2.getReceiveFrameErrorCount() == 5);
+            Assert.assertTrue(ns2.getReceiveOverRunErrorCount() == 6);
+            Assert.assertTrue(ns2.getReceivePacketCount() == 250);
+            Assert.assertTrue(ns2.getTransmitByteCount() == 5000);
+            Assert.assertTrue(ns2.getTransmitDropCount() == 50);
+            Assert.assertTrue(ns2.getTransmitErrorCount() == 10);
+            Assert.assertTrue(ns2.getTransmitPacketCount() == 500);
+        
+        }catch(ConstructionException e){
+            Assert.assertTrue(false);
+        }
     }
 
 }

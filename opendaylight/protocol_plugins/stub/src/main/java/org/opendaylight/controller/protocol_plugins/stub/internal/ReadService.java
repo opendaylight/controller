@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
@@ -141,9 +142,13 @@ public class ReadService implements IPluginInReadService {
     @Override
     public List<NodeConnectorStatistics> readAllNodeConnector(Node node,
             boolean cached) {
-        NodeConnector nc = NodeConnector.fromStringNoNode("123", node);
         NodeConnectorStatistics stats = new NodeConnectorStatistics();
-        stats.setNodeConnector(nc);
+        try{
+            NodeConnector nc = new NodeConnector("STUB", 0xCAFE, node);
+            stats.setNodeConnector(nc);
+        }catch(ConstructionException e){
+            //couldn't create nodeconnector.
+        }
         stats.setCollisionCount(4);
         stats.setReceiveByteCount(1000);
         stats.setReceiveCRCErrorCount(1);
