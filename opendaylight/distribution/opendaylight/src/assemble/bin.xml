@@ -13,6 +13,8 @@
         <exclude>org.opendaylight.controller.thirdparty:org.openflow.openflowj</exclude>
         <exclude>org.opendaylight.controller:clustering.stub</exclude>
 		<exclude>org.opendaylight.controller:logging.bridge</exclude>
+		<exclude>org.opendaylight.controller:protocol_plugins.stub</exclude>
+		<exclude>org.opendaylight.controller:*.integrationtest</exclude>
       </excludes>
       <binaries>
         <outputDirectory>opendaylight/plugins</outputDirectory>
@@ -82,7 +84,6 @@
 		<include>com.sun.jersey:jersey-core</include>
 		<include>com.sun.jersey:jersey-json</include>
 		<include>com.sun.jersey:jersey-server</include>
-		
       </includes>
       <useTransitiveDependencies>false</useTransitiveDependencies>
       <outputFileNameMapping>
