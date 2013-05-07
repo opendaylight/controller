@@ -90,6 +90,12 @@ one.f.troubleshooting.existingNodes = {
 			popout: "one_f_troubleshooting_existingNodes_id_popout",
 			modal: "one_f_troubleshooting_existingNodes_id_modal"
 		},
+		// TODO: Make these values configurable.
+		autoRefreshInterval: {
+			flows: 10000,
+			ports: 10000,
+			refreshRateInterval: 5000
+		},
 		load: {
 			main: function($dashlet) {
 				one.lib.dashlet.empty($dashlet);
@@ -114,8 +120,15 @@ one.f.troubleshooting.existingNodes = {
 						one.lib.dashlet.empty($rightBottomDashlet);
 						$rightBottomDashlet.append(one.lib.dashlet.header("Flow Details"));
 						$rightBottomDashlet.append($table);
+						var numberOfFlows = content.nodeData.length;
+						var refreshRate = one.f.troubleshooting.existingNodes.autoRefreshInterval.flows;
+						if (numberOfFlows > 0) {
+							refreshRate += Math.floor(numberOfFlows / 500) *
+								one.f.troubleshooting.existingNodes.autoRefreshInterval.refreshRateInterval;
+						}
 						one.f.troubleshooting.existingNodes.registry.refreshTimer = setTimeout(
-								one.f.troubleshooting.existingNodes.load.flows, 5000, nodeId);
+								one.f.troubleshooting.existingNodes.load.flows,
+								refreshRate, nodeId);
 					});
 				} catch(e) {}
 			},
@@ -130,8 +143,15 @@ one.f.troubleshooting.existingNodes = {
 						one.lib.dashlet.empty($rightBottomDashlet);
 						$rightBottomDashlet.append(one.lib.dashlet.header("Port Details"));
 						$rightBottomDashlet.append($table);
+						var numberOfPorts = content.nodeData.length;
+						var refreshRate = one.f.troubleshooting.existingNodes.autoRefreshInterval.ports;
+						if (numberOfPorts > 0) {
+							refreshRate += Math.floor(numberOfPorts / 500) *
+								one.f.troubleshooting.existingNodes.autoRefreshInterval.refreshRateInterval;
+						}
 						one.f.troubleshooting.existingNodes.registry.refreshTimer = setTimeout(
-								one.f.troubleshooting.existingNodes.load.ports, 5000, nodeId);
+								one.f.troubleshooting.existingNodes.load.ports,
+								refreshRate, nodeId);
 					});
 				} catch(e) {}
 			} 
