@@ -884,34 +884,34 @@ public class DiscoveryService implements IInventoryShimExternalListener,
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---Topology Discovery---\n");
-        help.append("\t prlh                            - Print readyListHi entries\n");
-        help.append("\t prll                            - Print readyListLo entries\n");
-        help.append("\t pwl                             - Print waitingList entries\n");
-        help.append("\t ppl                             - Print pendingList entries\n");
-        help.append("\t ptick                           - Print tick time in msec\n");
-        help.append("\t pcc                             - Print CC info\n");
-        help.append("\t psize                           - Print sizes of all the lists\n");
-        help.append("\t ptm                             - Print timeout info\n");
-        help.append("\t ecc          	                - Enable CC\n");
-        help.append("\t dcc          	                - Disable CC\n");
-        help.append("\t scc [multiple]                  - Set/show CC multiple and interval\n");
-        help.append("\t sports [ports] 	                - Set/show max ports per batch\n");
-        help.append("\t spause [ticks]                  - Set/show pause period\n");
-        help.append("\t sdi [ticks]    	                - Set/show discovery interval in ticks\n");
-        help.append("\t stm [ticks]                     - Set/show per timeout ticks\n");
-        help.append("\t sretry [count] 	                - Set/show num of retries\n");
-        help.append("\t addsw <swid> 	                - Add a switch\n");
-        help.append("\t remsw <swid> 	                - Remove a switch\n");
-        help.append("\t page                            - Print aging info\n");
-        help.append("\t sage                            - Set/Show aging time limit\n");
-        help.append("\t eage          	                - Enable aging\n");
-        help.append("\t dage          	                - Disable aging\n");
-        help.append("\t pthrot                          - Print throttling\n");
-        help.append("\t ethrot                          - Enable throttling\n");
-        help.append("\t dthrot                          - Disable throttling\n");
-        help.append("\t psnp                            - Print LLDP snooping\n");
-        help.append("\t esnp <all|nodeConnector>        - Enable LLDP snooping\n");
-        help.append("\t dsnp <all|nodeConnector>        - Disable LLDP snooping\n");
+        help.append("\t prlh                                    - Print readyListHi entries\n");
+        help.append("\t prll                                    - Print readyListLo entries\n");
+        help.append("\t pwl                                     - Print waitingList entries\n");
+        help.append("\t ppl                                     - Print pendingList entries\n");
+        help.append("\t ptick                                   - Print tick time in msec\n");
+        help.append("\t pcc                                     - Print CC info\n");
+        help.append("\t psize                                   - Print sizes of all the lists\n");
+        help.append("\t ptm                                     - Print timeout info\n");
+        help.append("\t ecc          	                        - Enable CC\n");
+        help.append("\t dcc          	                        - Disable CC\n");
+        help.append("\t scc [multiple]                          - Set/show CC multiple and interval\n");
+        help.append("\t sports [ports] 	                        - Set/show max ports per batch\n");
+        help.append("\t spause [ticks]                          - Set/show pause period\n");
+        help.append("\t sdi [ticks]    	                        - Set/show discovery interval in ticks\n");
+        help.append("\t stm [ticks]                             - Set/show per timeout ticks\n");
+        help.append("\t sretry [count] 	                        - Set/show num of retries\n");
+        help.append("\t addsw <swid> 	                        - Add a switch\n");
+        help.append("\t remsw <swid> 	                        - Remove a switch\n");
+        help.append("\t page                                    - Print aging info\n");
+        help.append("\t sage                                    - Set/Show aging time limit\n");
+        help.append("\t eage          	                        - Enable aging\n");
+        help.append("\t dage          	                        - Disable aging\n");
+        help.append("\t pthrot                                  - Print throttling\n");
+        help.append("\t ethrot                                  - Enable throttling\n");
+        help.append("\t dthrot                                  - Disable throttling\n");
+        help.append("\t printSnooping                           - Print LLDP snooping configurations\n");
+        help.append("\t enableSnooping <all|nodeConnector>      - Enable LLDP snooping\n");
+        help.append("\t disableSnooping <all|nodeConnector>     - Disable LLDP snooping\n");
         return help.toString();
     }
 
@@ -1075,46 +1075,57 @@ public class DiscoveryService implements IInventoryShimExternalListener,
         return;
     }
 
-    public void _psnp(CommandInterpreter ci) {
+    public void _printSnooping(CommandInterpreter ci) {
         if (this.discoverySnoopingEnabled) {
             ci.println("Discovery snooping is globally enabled");
+
+            if (discoverySnoopingDisableList.size() > 0) {
+                ci.println("\nDiscovery snooping is locally disabled on these ports");
+                for (NodeConnector nodeConnector : discoverySnoopingDisableList) {
+                    ci.println(nodeConnector);
+                }
+            }
         } else {
             ci.println("Discovery snooping is globally disabled");
-        }
-        
-        ci.println("\nDiscovery snooping is locally disabled on these ports");
-        for (NodeConnector nodeConnector : discoverySnoopingDisableList) {
-            ci.println(nodeConnector);
         }
         return;
     }
 
-    public void _esnp(CommandInterpreter ci) {
+    public void _enableSnooping(CommandInterpreter ci) {
         String val = ci.nextArgument();
-        
+
         if (val == null) {
-            ci.println("Usage: esnp <all|nodeConnector>");            
+            ci.println("Usage: enableSnooping <all|nodeConnector>");        
         } else if (val.equalsIgnoreCase("all")) {
             this.discoverySnoopingEnabled = true;
             ci.println("Discovery snooping is globally enabled");
+            
+            if (discoverySnoopingDisableList.size() > 0) {
+                ci.println("\nDiscovery snooping is locally disabled on these ports");
+                for (NodeConnector nodeConnector : discoverySnoopingDisableList) {
+                    ci.println(nodeConnector);
+                }
+            }
         } else {
             NodeConnector nodeConnector = NodeConnector.fromString(val);
-            if (nodeConnector != null) {
-                discoverySnoopingDisableList.remove(nodeConnector); 
+            if (!this.discoverySnoopingEnabled) {
+                ci.println("Discovery snooping is currently globally disabled. Please enable it first.");
+            } else if (nodeConnector != null) {
+                discoverySnoopingDisableList.remove(nodeConnector);
                 ci.println("Discovery snooping is locally enabled on port "
                         + nodeConnector);
             } else {
-                ci.println("Entered invalid NodeConnector " + val);                
+                ci.println("Entered invalid NodeConnector " + val);
             }
         }
         return;
     }
 
-    public void _dsnp(CommandInterpreter ci) {
+    public void _disableSnooping(CommandInterpreter ci) {
         String val = ci.nextArgument();
-        
+
         if (val == null) {
-            ci.println("Usage: dsnp <all|nodeConnector>");            
+            ci.println("Usage: disableSnooping <all|nodeConnector>");         
         } else if (val.equalsIgnoreCase("all")) {
             this.discoverySnoopingEnabled = false;
             ci.println("Discovery snooping is globally disabled");
@@ -1125,7 +1136,7 @@ public class DiscoveryService implements IInventoryShimExternalListener,
                 ci.println("Discovery snooping is locally disabled on port "
                         + nodeConnector);
             } else {
-                ci.println("Entered invalid NodeConnector " + val);                
+                ci.println("Entered invalid NodeConnector " + val);
             }
         }
         return;
@@ -1134,16 +1145,17 @@ public class DiscoveryService implements IInventoryShimExternalListener,
     public void _spause(CommandInterpreter ci) {
         String val = ci.nextArgument();
         String out = "Please enter pause period less than "
-				+ discoveryBatchRestartTicks + ". Current pause period is "
-				+ discoveryBatchPausePeriod + " pause tick is "
-				+ discoveryBatchPauseTicks + ".";
+                + discoveryBatchRestartTicks + ". Current pause period is "
+                + discoveryBatchPausePeriod + " pause tick is "
+                + discoveryBatchPauseTicks + ".";
 
         if (val != null) {
             try {
                 int pause = Integer.parseInt(val);
                 if (pause < discoveryBatchRestartTicks) {
-                	discoveryBatchPausePeriod = pause;
-                    discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod;
+                    discoveryBatchPausePeriod = pause;
+                    discoveryBatchPauseTicks = discoveryBatchRestartTicks
+                            - discoveryBatchPausePeriod;
                     return;
                 }
             } catch (Exception e) {
