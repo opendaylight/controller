@@ -7,8 +7,7 @@
  */
 package org.opendaylight.controller.sal.java.api.generator.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +36,7 @@ import org.opendaylight.controller.sal.java.api.generator.GeneratorJavaFile;
 import org.opendaylight.controller.sal.java.api.generator.InterfaceGenerator;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.parser.impl.YangModelParserImpl;
+import org.opendaylight.controller.yang.model.parser.impl.YangParserImpl;
 
 public class GeneratorJavaFileTest {
     private static final String FS = File.separator;
@@ -91,7 +90,7 @@ public class GeneratorJavaFileTest {
 
     @Test
     public void compilationTest() throws Exception {
-        final YangModelParserImpl parser = new YangModelParserImpl();
+        final YangParserImpl parser = new YangParserImpl();
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
 
         final File sourcesDir = new File("src/test/resources/yang");
@@ -101,7 +100,7 @@ public class GeneratorJavaFileTest {
         for (int i = 0; i < fileArray.length; ++i) {
             sourceFiles.add(fileArray[i]);
         }
-        
+
         final Set<Module> modulesToBuild = parser.parseYangModels(sourceFiles);
 
         final SchemaContext context = parser
@@ -158,7 +157,7 @@ public class GeneratorJavaFileTest {
 
     /**
      * Search recursively given directory for *.java files.
-     * 
+     *
      * @param directory
      *            directory to search
      * @return List of java files found

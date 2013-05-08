@@ -32,8 +32,14 @@ public interface AugmentationSchemaBuilder extends ChildNodeBuilder {
 
     SchemaPath getTargetPath();
 
+    void setTargetPath(SchemaPath path);
+
     Set<DataSchemaNodeBuilder> getChildNodes();
 
     AugmentationSchema build();
+
+    boolean isResolved();
+
+    void setResolved(boolean resolved);
 
 }

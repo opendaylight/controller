@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.yang.model.parser.util;
 
-import static org.hamcrest.core.AnyOf.*;
-import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.*;
+import static org.hamcrest.core.AnyOf.anyOf;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.*;
 
 import java.util.Date;
@@ -23,7 +23,7 @@ import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.opendaylight.controller.yang.model.api.ModuleImport;
 import org.opendaylight.controller.yang.model.parser.builder.impl.ModuleBuilder;
-import org.opendaylight.controller.yang.model.parser.impl.YangModelParserListenerImpl;
+import org.opendaylight.controller.yang.model.parser.impl.YangParserListenerImpl;
 import org.opendaylight.controller.yang.model.parser.util.ModuleDependencySort.ModuleNodeImpl;
 import org.opendaylight.controller.yang.model.parser.util.ModuleDependencySort.ModuleSimple;
 import org.opendaylight.controller.yang.model.parser.util.TopologicalSort.Edge;
@@ -112,7 +112,7 @@ public class ModuleDependencySortTest {
         } catch (YangValidationException e) {
             assertThat(e.getMessage(),
                     containsString("Module:b imported twice with different revisions:default, "
-                            + YangModelParserListenerImpl.simpleDateFormat
+                            + YangParserListenerImpl.simpleDateFormat
                                     .format(date)));
             throw e;
         }
@@ -137,7 +137,7 @@ public class ModuleDependencySortTest {
             new ModuleDependencySort(builders);
         } catch (YangValidationException e) {
             assertThat(e.getMessage(), containsString("Module:a with revision:"
-                    + YangModelParserListenerImpl.simpleDateFormat.format(rev)
+                    + YangParserListenerImpl.simpleDateFormat.format(rev)
                     + " declared twice"));
             throw e;
         }

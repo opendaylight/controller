@@ -27,6 +27,10 @@ public class SchemaPath {
         return path;
     }
 
+    public boolean isAbsolute() {
+        return absolute;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

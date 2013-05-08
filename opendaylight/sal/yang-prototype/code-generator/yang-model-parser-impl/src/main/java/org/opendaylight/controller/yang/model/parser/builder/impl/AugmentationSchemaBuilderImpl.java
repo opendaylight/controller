@@ -34,11 +34,13 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
     private final AugmentationSchemaImpl instance;
     private final int line;
     private final String augmentTargetStr;
-    private final SchemaPath augmentTarget;
+    private SchemaPath augmentTarget;
+    private SchemaPath finalAugmentTarget;
     private String whenCondition;
     private final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
     private final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
+    private boolean resolved;
 
     AugmentationSchemaBuilderImpl(final String augmentTargetStr, final int line) {
         this.augmentTargetStr = augmentTargetStr;
@@ -84,6 +86,8 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
 
     @Override
     public AugmentationSchema build() {
+        instance.setTargetPath(finalAugmentTarget);
+
         RevisionAwareXPath whenStmt;
         if (whenCondition == null) {
             whenStmt = null;
@@ -114,6 +118,16 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         instance.setUses(usesNodeDefinitions);
 
         return instance;
+    }
+
+    @Override
+    public boolean isResolved() {
+        return resolved;
+    }
+
+    @Override
+    public void setResolved(boolean resolved) {
+        this.resolved = resolved;
     }
 
     public String getWhenCondition() {
@@ -148,6 +162,11 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
     @Override
     public SchemaPath getTargetPath() {
         return augmentTarget;
+    }
+
+    @Override
+    public void setTargetPath(SchemaPath path) {
+        this.finalAugmentTarget = path;
     }
 
     @Override
@@ -223,7 +242,7 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
 
 
     private static class AugmentationSchemaImpl implements AugmentationSchema {
-        private final SchemaPath targetPath;
+        private SchemaPath targetPath;
         private RevisionAwareXPath whenCondition;
         private Map<QName, DataSchemaNode> childNodes = Collections.emptyMap();
         private Set<GroupingDefinition> groupings = Collections.emptySet();
@@ -240,6 +259,10 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         @Override
         public SchemaPath getTargetPath() {
             return targetPath;
+        }
+
+        private void setTargetPath(SchemaPath path) {
+            this.targetPath = path;
         }
 
         @Override

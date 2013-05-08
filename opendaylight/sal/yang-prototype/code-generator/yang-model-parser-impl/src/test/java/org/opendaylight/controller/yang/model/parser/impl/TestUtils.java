@@ -30,7 +30,7 @@ final class TestUtils {
     }
 
     public static Set<Module> loadModules(String resourceDirectory) {
-        YangModelParser parser = new YangModelParserImpl();
+        YangModelParser parser = new YangParserImpl();
         final File testDir = new File(resourceDirectory);
         final String[] fileList = testDir.list();
         final List<File> testFiles = new ArrayList<File>();

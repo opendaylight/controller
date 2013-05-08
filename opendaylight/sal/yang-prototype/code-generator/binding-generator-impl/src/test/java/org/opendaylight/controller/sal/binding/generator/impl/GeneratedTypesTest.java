@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,19 +25,19 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
-import org.opendaylight.controller.yang.model.parser.impl.YangModelParserImpl;
+import org.opendaylight.controller.yang.model.parser.impl.YangParserImpl;
 
 public class GeneratedTypesTest {
 
     private SchemaContext resolveSchemaContextFromFiles(
             final String... yangFiles) {
-        final YangModelParser parser = new YangModelParserImpl();
-        
+        final YangModelParser parser = new YangParserImpl();
+
         final List<File> inputFiles = new ArrayList<File>();
         for (int i = 0; i < yangFiles.length; ++i) {
             inputFiles.add(new File(yangFiles[i]));
         }
-        
+
         final Set<Module> modules = parser.parseYangModels(inputFiles);
         return parser.resolveSchemaContext(modules);
     }
@@ -61,7 +59,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
         assertTrue(genTypes != null);
     }
-    
+
     @Test
     public void testTypedefEnumResolving() {
         final String ianaIfTypePath = getClass().getResource(

@@ -78,10 +78,10 @@ import org.opendaylight.controller.yang.model.util.YangTypesConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class YangModelParserListenerImpl extends YangParserBaseListener {
+public final class YangParserListenerImpl extends YangParserBaseListener {
 
     private static final Logger logger = LoggerFactory
-            .getLogger(YangModelParserListenerImpl.class);
+            .getLogger(YangParserListenerImpl.class);
 
     private ModuleBuilder moduleBuilder;
 
