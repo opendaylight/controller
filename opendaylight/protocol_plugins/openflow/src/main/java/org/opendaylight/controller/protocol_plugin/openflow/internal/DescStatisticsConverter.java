@@ -19,9 +19,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class for converting openflow description statistics into SAL
  * NodeDescription object
- * 
- * 
- * 
  */
 public class DescStatisticsConverter {
     private static final Logger log = LoggerFactory
@@ -31,7 +28,8 @@ public class DescStatisticsConverter {
 
     public DescStatisticsConverter(List<OFStatistics> statsList) {
         this.hwDesc = null;
-        this.ofDesc = (OFDescriptionStatistics) statsList.get(0);
+        this.ofDesc = (statsList == null || statsList.isEmpty())? 
+                null : (OFDescriptionStatistics) statsList.get(0);
     }
 
     public NodeDescription getHwDescription() {
