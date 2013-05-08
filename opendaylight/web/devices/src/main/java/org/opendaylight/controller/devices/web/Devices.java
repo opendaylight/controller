@@ -207,6 +207,9 @@ public class Devices implements IDaylightWeb {
         IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
                 .getInstance(IForwardingStaticRouting.class, containerName,
                         this);
+        if (staticRouting == null) {
+            return null;
+        }
         List<Map<String, String>> staticRoutes = new ArrayList<Map<String, String>>();
         ConcurrentMap<String, StaticRouteConfig> routeConfigs = staticRouting
                 .getStaticRouteConfigs();

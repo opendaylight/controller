@@ -162,7 +162,7 @@ one.f.detail = {
 			var body = [];
 			var tr = {};
 			var entry = [];
-
+                        entry.push(data['flow']['ingressPort']);
 			entry.push(data['flow']['etherType']);
 			entry.push(data['flow']['vlanId']);
 			entry.push(data['flow']['vlanPriority']);
@@ -212,7 +212,7 @@ one.f.detail = {
             return $table;
         },
 		description : function(body) {
-			var header = ['Ethernet Type', 'VLAN ID', 'VLAN Priority', 'Source MAC', 'Dest MAC', 'Source IP', 'Dest IP', 'TOS', 'Source Port', 'Dest Port', 'Protocol', 'Cookie'];
+			var header = ['Input Port', 'Ethernet Type', 'VLAN ID', 'VLAN Priority', 'Source MAC', 'Dest MAC', 'Source IP', 'Dest IP', 'TOS', 'Source Port', 'Dest Port', 'Protocol', 'Cookie'];
 			var $thead = one.lib.dashlet.table.header(header);
 			var attributes = ['table-striped', 'table-bordered', 'table-condensed'];
 			var $table = one.lib.dashlet.table.table(attributes);
