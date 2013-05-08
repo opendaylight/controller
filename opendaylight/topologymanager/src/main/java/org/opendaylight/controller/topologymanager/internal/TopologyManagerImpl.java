@@ -74,8 +74,9 @@ public class TopologyManagerImpl implements ITopologyManager,
     private IClusterContainerServices clusterContainerService = null;
     // DB of all the Edges with properties which constitute our topology
     private ConcurrentMap<Edge, Set<Property>> edgesDB = null;
-    // DB of all NodeConnector which are part of Edges, meaning they
-    // are connected to another NodeConnector on the other side
+    // DB of all NodeConnector which are part of ISL Edges, meaning they
+    // are connected to another NodeConnector on the other side of an ISL link.
+    // NodeConnector of a Production Edge is not part of this DB.
     private ConcurrentMap<NodeConnector, Set<Property>> nodeConnectorsDB = null;
     // DB of all the NodeConnectors with an Host attached to it
     private ConcurrentMap<NodeConnector, ImmutablePair<Host, Set<Property>>> hostsDB = null;
@@ -325,6 +326,31 @@ public class TopologyManagerImpl implements ITopologyManager,
     }
 
     /**
+     * This method returns true if the edge is an ISL link.
+     * 
+     * @param e
+     *            The edge
+     * @return true if it is an ISL link
+     */
+    public boolean isISLink(Edge e) {
+        return (!isProductionLink(e));
+    }
+
+    /**
+     * This method returns true if the edge is a production link.
+     * 
+     * @param e
+     *            The edge
+     * @return true if it is a production link
+     */
+    public boolean isProductionLink(Edge e) {
+        return (e.getHeadNodeConnector().getType()
+                .equals(NodeConnector.NodeConnectorIDType.PRODUCTION) || e
+                .getTailNodeConnector().getType()
+                .equals(NodeConnector.NodeConnectorIDType.PRODUCTION));
+    }
+
+    /**
      * The Map returned is a copy of the current topology hence if the topology
      * changes the copy doesn't
      * 
@@ -469,12 +495,15 @@ public class TopologyManagerImpl implements ITopologyManager,
             this.edgesDB.put(e, props);
 
             // Now populate the DB of NodeConnectors
-            // NOTE WELL: properties are empy sets, not really needed
+            // NOTE WELL: properties are empty sets, not really needed
             // for now.
-            this.nodeConnectorsDB.put(e.getHeadNodeConnector(),
-                    new HashSet<Property>());
-            this.nodeConnectorsDB.put(e.getTailNodeConnector(),
-                    new HashSet<Property>());
+            // The DB only contains ISL ports
+            if (isISLink(e)) {
+                this.nodeConnectorsDB.put(e.getHeadNodeConnector(),
+                        new HashSet<Property>());
+                this.nodeConnectorsDB.put(e.getTailNodeConnector(),
+                        new HashSet<Property>());
+            }
             log.trace("Edge {}  {}", e.toString(), type.name());
             break;
         case REMOVED:
