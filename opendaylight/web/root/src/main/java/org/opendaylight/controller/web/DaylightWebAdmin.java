@@ -100,8 +100,6 @@ public class DaylightWebAdmin {
     @ResponseBody
     public Status changePassword(@PathVariable("username") String username, HttpServletRequest request,
             @RequestParam("currentPassword") String currentPassword, @RequestParam("newPassword") String newPassword) {
-        String user = request.getUserPrincipal().getName();
-        
         IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
@@ -116,7 +114,7 @@ public class DaylightWebAdmin {
             return new Status(StatusCode.BADREQUEST, "Empty passwords not allowed");
         }
         
-        Status status = userManager.changeLocalUserPassword(user, currentPassword, newPassword);
+        Status status = userManager.changeLocalUserPassword(username, currentPassword, newPassword);
         
         return status;
     }
