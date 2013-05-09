@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -20,8 +19,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
@@ -36,6 +37,9 @@ import org.opendaylight.controller.northbound.commons.exception.NotAcceptableExc
 import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
+import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
+import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
@@ -44,19 +48,33 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 
 /**
  * Flow Configuration Northbound API
- *
- * <br><br>
+ * 
+ * <br>
+ * <br>
  * Authentication scheme : <b>HTTP Basic</b><br>
  * Authentication realm : <b>opendaylight</b><br>
  * Transport : <b>HTTP and HTTPS</b><br>
  * <br>
- * HTTPS Authentication is disabled by default. Administrator can enable it in tomcat-server.xml after adding 
- * a proper keystore / SSL certificate from a trusted authority.<br>
- * More info : http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
- *
+ * HTTPS Authentication is disabled by default. Administrator can enable it in
+ * tomcat-server.xml after adding a proper keystore / SSL certificate from a
+ * trusted authority.<br>
+ * More info :
+ * http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
+ * 
  */
 @Path("/")
 public class FlowProgrammerNorthbound {
+
+    private String username;
+
+    @Context
+    public void setSecurityContext(SecurityContext context) {
+        username = context.getUserPrincipal().getName();
+    }
+
+    protected String getUserName() {
+        return username;
+    }
 
     private IForwardingRulesManager getForwardingRulesManagerService(
             String containerName) {
@@ -129,38 +147,51 @@ public class FlowProgrammerNorthbound {
 
     /**
      * Returns a list of Flows configured on the given container
-     *
-     * @param containerName Name of the Container. The Container name for the base controller is "default".
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
      * @return List of configured flows configured on a given container
      */
     @Path("/{containerName}")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(FlowConfigs.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public FlowConfigs getStaticFlows(
             @PathParam("containerName") String containerName) {
-        List<FlowConfig> flowConfigs = getStaticFlowsInternal(containerName, null);
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
+
+        List<FlowConfig> flowConfigs = getStaticFlowsInternal(containerName,
+                null);
         return new FlowConfigs(flowConfigs);
     }
 
     /**
      * Returns a list of Flows configured on a Node in a given container
-     *
-     * @param containerName Name of the Container. The Container name
-     * for the base controller is "default".
-     * @param nodeType Type of the node being programmed
-     * @param nodeId Node Identifier
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param nodeType
+     *            Type of the node being programmed
+     * @param nodeId
+     *            Node Identifier
      * @return List of configured flows configured on a Node in a container
      */
     @Path("/{containerName}/{nodeType}/{nodeId}")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(FlowConfigs.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName or nodeId is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
@@ -168,6 +199,12 @@ public class FlowProgrammerNorthbound {
             @PathParam("containerName") String containerName,
             @PathParam("nodeType") String nodeType,
             @PathParam("nodeId") String nodeId) {
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         Node node = Node.fromString(nodeType, nodeId);
         if (node == null) {
             throw new ResourceNotFoundException(nodeId + " : "
@@ -178,29 +215,38 @@ public class FlowProgrammerNorthbound {
     }
 
     /**
-     * Returns the flow configuration matching a human-readable name and nodeId on a
-     * given Container.
-     *
-     * @param containerName Name of the Container. The Container name
-     * for the base controller is "default".
-     * @param nodeType Type of the node being programmed
-     * @param nodeId Node Identifier
-     * @param name Human-readable name for the configured flow.
+     * Returns the flow configuration matching a human-readable name and nodeId
+     * on a given Container.
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param nodeType
+     *            Type of the node being programmed
+     * @param nodeId
+     *            Node Identifier
+     * @param name
+     *            Human-readable name for the configured flow.
      * @return Flow configuration matching the name and nodeId on a Container
      */
     @Path("/{containerName}/{nodeType}/{nodeId}/{name}")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(FlowConfig.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName or NodeId or Configuration name is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public FlowConfig getStaticFlow(
             @PathParam("containerName") String containerName,
             @PathParam("nodeType") String nodeType,
-            @PathParam("nodeId") String nodeId,
-            @PathParam("name") String name) {
+            @PathParam("nodeId") String nodeId, @PathParam("name") String name) {
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         IForwardingRulesManager frm = getForwardingRulesManagerService(containerName);
 
         if (frm == null) {
@@ -220,20 +266,25 @@ public class FlowProgrammerNorthbound {
 
     /**
      * Add a flow configuration
-     *
-     * @param containerName Name of the Container. The Container name
-     * for the base controller is "default".
-     * @param nodeType Type of the node being programmed
-     * @param nodeId Node Identifier
-     * @param name Name of the Static Flow configuration
-     * @param FlowConfig Flow Configuration in JSON or XML format
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param nodeType
+     *            Type of the node being programmed
+     * @param nodeId
+     *            Node Identifier
+     * @param name
+     *            Name of the Static Flow configuration
+     * @param FlowConfig
+     *            Flow Configuration in JSON or XML format
      * @return Response as dictated by the HTTP Response Status code
      */
 
     @Path("/{containerName}/{nodeType}/{nodeId}/{name}")
     @POST
-    @Consumes( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes( {
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @StatusCodes({
             @ResponseCode(code = 201, condition = "Flow Config processed successfully"),
             @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
@@ -247,6 +298,12 @@ public class FlowProgrammerNorthbound {
             @PathParam(value = "nodeId") String nodeId,
             @TypeHint(FlowConfig.class) JAXBElement<FlowConfig> flowConfig) {
 
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         handleDefaultDisabled(containerName);
 
         IForwardingRulesManager frm = getForwardingRulesManagerService(containerName);
@@ -273,21 +330,25 @@ public class FlowProgrammerNorthbound {
 
     /**
      * Delete a Flow configuration
-     *
+     * 
      * DELETE /flows/{containerName}/{nodeType}/{nodeId}/{name}
-     *
-     * @param containerName Name of the Container. The Container name
-     * for the base controller is "default".
-     * @param nodeType Type of the node being programmed
-     * @param nodeId Node Identifier
-     * @param name Name of the Static Flow configuration
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param nodeType
+     *            Type of the node being programmed
+     * @param nodeId
+     *            Node Identifier
+     * @param name
+     *            Name of the Static Flow configuration
      * @return Response as dictated by the HTTP Response code
      */
 
     @Path("/{containerName}/{nodeType}/{nodeId}/{name}")
     @DELETE
-    @Consumes( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes( {
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Flow Config deleted successfully"),
             @ResponseCode(code = 404, condition = "The Container Name or Node-id or Flow Name passed is not found"),
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
@@ -299,6 +360,12 @@ public class FlowProgrammerNorthbound {
             @PathParam("nodeType") String nodeType,
             @PathParam(value = "nodeId") String nodeId) {
 
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         handleDefaultDisabled(containerName);
 
         IForwardingRulesManager frm = getForwardingRulesManagerService(containerName);
@@ -325,19 +392,23 @@ public class FlowProgrammerNorthbound {
 
     /**
      * Toggle a Flow configuration
-     *
-     * @param containerName Name of the Container. The Container name
-     * for the base controller is "default".
-     * @param nodeType Type of the node being programmed
-     * @param nodeId Node Identifier
-     * @param name Name of the Static Flow configuration
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param nodeType
+     *            Type of the node being programmed
+     * @param nodeId
+     *            Node Identifier
+     * @param name
+     *            Name of the Static Flow configuration
      * @return Response as dictated by the HTTP Response code
      */
 
     @Path("/{containerName}/{nodeType}/{nodeId}/{name}")
     @PUT
-    @Consumes( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes( {
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Flow Config deleted successfully"),
             @ResponseCode(code = 404, condition = "The Container Name or Node-id or Flow Name passed is not found"),
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
@@ -348,6 +419,13 @@ public class FlowProgrammerNorthbound {
             @PathParam("nodeType") String nodeType,
             @PathParam(value = "nodeId") String nodeId,
             @PathParam(value = "name") String name) {
+
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
 
         handleDefaultDisabled(containerName);
 
@@ -374,7 +452,7 @@ public class FlowProgrammerNorthbound {
     }
 
     private Node handleNodeAvailability(String containerName, String nodeType,
-                                        String nodeId) {
+            String nodeId) {
 
         Node node = Node.fromString(nodeType, nodeId);
         if (node == null) {
@@ -401,13 +479,13 @@ public class FlowProgrammerNorthbound {
         IContainerManager containerManager = (IContainerManager) ServiceHelper
                 .getGlobalInstance(IContainerManager.class, this);
         if (containerManager == null) {
-            throw new InternalServerErrorException(RestMessages.INTERNALERROR
-                    .toString());
+            throw new InternalServerErrorException(
+                    RestMessages.INTERNALERROR.toString());
         }
         if (containerName.equals(GlobalConstants.DEFAULT.toString())
                 && containerManager.hasNonDefaultContainer()) {
-            throw new NotAcceptableException(RestMessages.DEFAULTDISABLED
-                    .toString());
+            throw new NotAcceptableException(
+                    RestMessages.DEFAULTDISABLED.toString());
         }
     }
 

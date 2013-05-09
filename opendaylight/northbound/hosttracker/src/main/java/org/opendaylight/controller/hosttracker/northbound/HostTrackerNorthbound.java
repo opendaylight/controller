@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -11,10 +10,8 @@ package org.opendaylight.controller.hosttracker.northbound;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.Principal;
 import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -24,8 +21,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -38,7 +37,9 @@ import org.opendaylight.controller.northbound.commons.exception.InternalServerEr
 import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
+import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
 import org.opendaylight.controller.northbound.commons.exception.UnsupportedMediaTypeException;
+import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
@@ -47,25 +48,42 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 
+import org.opendaylight.controller.sal.authorization.Privilege;
+
 /**
  * Host Tracker Northbound REST APIs.<br>
- * This class provides REST APIs to track host location in a network. Host Location is represented by Host node connector 
- * which is essentially a logical entity that represents a Switch/Port. A host is represented by it's IP-address 
- * and mac-address.
- *
- * <br><br>
+ * This class provides REST APIs to track host location in a network. Host
+ * Location is represented by Host node connector which is essentially a logical
+ * entity that represents a Switch/Port. A host is represented by it's
+ * IP-address and mac-address.
+ * 
+ * <br>
+ * <br>
  * Authentication scheme : <b>HTTP Basic</b><br>
  * Authentication realm : <b>opendaylight</b><br>
  * Transport : <b>HTTP and HTTPS</b><br>
  * <br>
- * HTTPS Authentication is disabled by default. Administrator can enable it in tomcat-server.xml after adding
- * a proper keystore / SSL certificate from a trusted authority.<br>
- * More info : http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
- *
+ * HTTPS Authentication is disabled by default. Administrator can enable it in
+ * tomcat-server.xml after adding a proper keystore / SSL certificate from a
+ * trusted authority.<br>
+ * More info :
+ * http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
+ * 
  */
 
 @Path("/")
 public class HostTrackerNorthbound {
+
+    private String username;
+
+    @Context
+    public void setSecurityContext(SecurityContext context) {
+        username = context.getUserPrincipal().getName();
+    }
+
+    protected String getUserName() {
+        return username;
+    }
 
     private IfIptoHost getIfIpToHostService(String containerName) {
         IContainerManager containerManager = (IContainerManager) ServiceHelper
@@ -100,21 +118,30 @@ public class HostTrackerNorthbound {
     }
 
     /**
-     * Returns a list of all Hosts : both configured via PUT API and dynamically learnt on the network.
-     *
-     * @param containerName Name of the Container. The Container name for the base controller is "default".
+     * Returns a list of all Hosts : both configured via PUT API and dynamically
+     * learnt on the network.
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
      * @return List of Active Hosts.
      */
     @Path("/{containerName}")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Hosts.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
-    public Hosts getActiveHosts(
-            @PathParam("containerName") String containerName) {
+    public Hosts getActiveHosts(@PathParam("containerName") String containerName) {
+ 
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
         if (hostTracker == null) {
             throw new ServiceUnavailableException("Host Tracker "
@@ -125,21 +152,30 @@ public class HostTrackerNorthbound {
     }
 
     /**
-     * Returns a list of Hosts that are statically configured and are connected to a NodeConnector that is down.
-     *
-     * @param containerName Name of the Container. The Container name for the base controller is "default".
+     * Returns a list of Hosts that are statically configured and are connected
+     * to a NodeConnector that is down.
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
      * @return List of inactive Hosts.
      */
     @Path("/{containerName}/inactive")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Hosts.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Hosts getInactiveHosts(
             @PathParam("containerName") String containerName) {
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
         if (hostTracker == null) {
             throw new ServiceUnavailableException("Host Tracker "
@@ -151,16 +187,19 @@ public class HostTrackerNorthbound {
 
     /**
      * Returns a host that matches the IP Address value passed as parameter.
-     *
-     * @param containerName Name of the Container. The Container name for the base controller is "default".
-     * @param networkAddress IP Address being looked up
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param networkAddress
+     *            IP Address being looked up
      * @return host that matches the IP Address
      */
     @Path("/{containerName}/{networkAddress}")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(HostNodeConnector.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 415, condition = "Invalid IP Address passed in networkAddress parameter"),
@@ -168,6 +207,12 @@ public class HostTrackerNorthbound {
     public HostNodeConnector getHostDetails(
             @PathParam("containerName") String containerName,
             @PathParam("networkAddress") String networkAddress) {
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
         if (hostTracker == null) {
             throw new ServiceUnavailableException("Host Tracker "
@@ -191,22 +236,31 @@ public class HostTrackerNorthbound {
 
     /**
      * Add a Static Host configuration
-     *
-     * @param containerName Name of the Container. The Container name for the base controller is "default".
-     * @param networkAddress Host IP Address
-     * @param dataLayerAddress Host L2 data-layer address.
-     * @param nodeType Node Type as specifid by Node class
-     * @param nodeId Node Identifier as specifid by Node class
-     * @param nodeConnectorType Port Type as specified by NodeConnector class
-     * @param nodeConnectorId Port Identifier as specified by NodeConnector class
-     * @param vlan Vlan number
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param networkAddress
+     *            Host IP Address
+     * @param dataLayerAddress
+     *            Host L2 data-layer address.
+     * @param nodeType
+     *            Node Type as specifid by Node class
+     * @param nodeId
+     *            Node Identifier as specifid by Node class
+     * @param nodeConnectorType
+     *            Port Type as specified by NodeConnector class
+     * @param nodeConnectorId
+     *            Port Identifier as specified by NodeConnector class
+     * @param vlan
+     *            Vlan number
      * @return Response as dictated by the HTTP Response Status code
      */
 
     @Path("/{containerName}/{networkAddress}")
     @POST
-    @Consumes( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes( {
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @StatusCodes({
             @ResponseCode(code = 201, condition = "Flow Config processed successfully"),
             @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
@@ -222,6 +276,12 @@ public class HostTrackerNorthbound {
             @QueryParam("nodeConnectorId") String nodeConnectorId,
             @DefaultValue("0") @QueryParam("vlan") String vlan) {
 
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         handleDefaultDisabled(containerName);
 
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
@@ -232,8 +292,8 @@ public class HostTrackerNorthbound {
 
         Node node = handleNodeAvailability(containerName, nodeType, nodeId);
         if (node == null) {
-            throw new InternalServerErrorException(RestMessages.NONODE.
-                                                   toString());
+            throw new InternalServerErrorException(
+                    RestMessages.NONODE.toString());
         }
 
         try {
@@ -242,15 +302,14 @@ public class HostTrackerNorthbound {
             throw new UnsupportedMediaTypeException(networkAddress + " "
                     + RestMessages.INVALIDADDRESS.toString());
         }
-        NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType, nodeConnectorId,
-                                                          node);
+        NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType,
+                nodeConnectorId, node);
         if (nc == null) {
-            throw new ResourceNotFoundException(nodeConnectorType+"|"+nodeConnectorId + " : "
-                    + RestMessages.NONODE.toString());
+            throw new ResourceNotFoundException(nodeConnectorType + "|"
+                    + nodeConnectorId + " : " + RestMessages.NONODE.toString());
         }
         Status status = hostTracker.addStaticHost(networkAddress,
-                                               dataLayerAddress,
-                                               nc, vlan);
+                dataLayerAddress, nc, vlan);
         if (status.isSuccess()) {
             return Response.status(Response.Status.CREATED).build();
         } else if (status.getCode().equals(StatusCode.BADREQUEST)) {
@@ -261,16 +320,19 @@ public class HostTrackerNorthbound {
 
     /**
      * Delete a Static Host configuration
-     *
-     * @param containerName Name of the Container. The Container name for the base controller is "default".
-     * @param networkAddress   IP Address
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param networkAddress
+     *            IP Address
      * @return Response as dictated by the HTTP Response code.
      */
 
     @Path("/{containerName}/{networkAddress}")
     @DELETE
-    @Consumes( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes( {
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Flow Config deleted successfully"),
             @ResponseCode(code = 404, condition = "The Container Name or Node-id or Flow Name passed is not found"),
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
@@ -280,7 +342,13 @@ public class HostTrackerNorthbound {
     public Response deleteFlow(
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "networkAddress") String networkAddress) {
-
+ 
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         handleDefaultDisabled(containerName);
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
         if (hostTracker == null) {
@@ -307,18 +375,18 @@ public class HostTrackerNorthbound {
         IContainerManager containerManager = (IContainerManager) ServiceHelper
                 .getGlobalInstance(IContainerManager.class, this);
         if (containerManager == null) {
-            throw new InternalServerErrorException(RestMessages.INTERNALERROR
-                    .toString());
+            throw new InternalServerErrorException(
+                    RestMessages.INTERNALERROR.toString());
         }
         if (containerName.equals(GlobalConstants.DEFAULT.toString())
                 && containerManager.hasNonDefaultContainer()) {
-            throw new ResourceConflictException(RestMessages.DEFAULTDISABLED
-                    .toString());
+            throw new ResourceConflictException(
+                    RestMessages.DEFAULTDISABLED.toString());
         }
     }
 
     private Node handleNodeAvailability(String containerName, String nodeType,
-                                        String nodeId) {
+            String nodeId) {
 
         Node node = Node.fromString(nodeType, nodeId);
         if (node == null) {
@@ -340,4 +408,5 @@ public class HostTrackerNorthbound {
         }
         return node;
     }
+
 }

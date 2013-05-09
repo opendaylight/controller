@@ -15,7 +15,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -23,10 +25,9 @@ import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.containermanager.IContainerManager;
 
 import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
-import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
+import org.opendaylight.controller.northbound.commons.exception.*;
+import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
+import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
@@ -36,20 +37,35 @@ import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 
 /**
- * Northbound APIs that returns various Statistics exposed by the Southbound plugins such as Openflow.
+ * Northbound APIs that returns various Statistics exposed by the Southbound
+ * plugins such as Openflow.
  * 
- * <br><br>
+ * <br>
+ * <br>
  * Authentication scheme : <b>HTTP Basic</b><br>
  * Authentication realm : <b>opendaylight</b><br>
  * Transport : <b>HTTP and HTTPS</b><br>
  * <br>
- * HTTPS Authentication is disabled by default. Administrator can enable it in tomcat-server.xml after adding 
- * a proper keystore / SSL certificate from a trusted authority.<br>
- * More info : http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
- *
+ * HTTPS Authentication is disabled by default. Administrator can enable it in
+ * tomcat-server.xml after adding a proper keystore / SSL certificate from a
+ * trusted authority.<br>
+ * More info :
+ * http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
+ * 
  */
 @Path("/")
 public class StatisticsNorthbound {
+
+    private String username;
+
+    @Context
+    public void setSecurityContext(SecurityContext context) {
+        username = context.getUserPrincipal().getName();
+    }
+
+    protected String getUserName() {
+        return username;
+    }
 
     private IStatisticsManager getStatisticsService(String containerName) {
         IContainerManager containerManager = (IContainerManager) ServiceHelper
@@ -85,21 +101,29 @@ public class StatisticsNorthbound {
 
     /**
      * Returns a list of all Flow Statistics from all the Nodes.
-     *
-     * @param containerName Name of the Container. The Container name for the base controller is "default". 
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
      * @return List of FlowStatistics from all the Nodes
      */
 
     @Path("/{containerName}/flowstats")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(AllFlowStatistics.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public AllFlowStatistics getFlowStatistics(
             @PathParam("containerName") String containerName) {
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         IStatisticsManager statisticsManager = getStatisticsService(containerName);
         if (statisticsManager == null) {
             throw new ServiceUnavailableException("Statistics "
@@ -121,8 +145,7 @@ public class StatisticsNorthbound {
             for (FlowOnNode flowOnSwitch : flows) {
                 flowStats.add(flowOnSwitch);
             }
-            FlowStatistics stat = new FlowStatistics(node,
-                                                     flowStats);
+            FlowStatistics stat = new FlowStatistics(node, flowStats);
             statistics.add(stat);
         }
         return new AllFlowStatistics(statistics);
@@ -130,18 +153,21 @@ public class StatisticsNorthbound {
 
     /**
      * Returns a list of Flow Statistics for a given Node.
-     *
-     * @param containerName Name of the Container. The Container name
-     * for the base controller is "default". 
-     * @param nodeType Node Type as specifid by Node class
-     * @param nodeId Node Identifier
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param nodeType
+     *            Node Type as specifid by Node class
+     * @param nodeId
+     *            Node Identifier
      * @return List of Flow Statistics for a given Node.
      */
     @Path("/{containerName}/flowstats/{nodeType}/{nodeId}")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(FlowStatistics.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
@@ -149,7 +175,12 @@ public class StatisticsNorthbound {
             @PathParam("containerName") String containerName,
             @PathParam("nodeType") String nodeType,
             @PathParam("nodeId") String nodeId) {
-
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         handleDefaultDisabled(containerName);
 
         IStatisticsManager statisticsManager = getStatisticsService(containerName);
@@ -170,23 +201,33 @@ public class StatisticsNorthbound {
     }
 
     /**
-     * Returns a list of all the Port Statistics across all the NodeConnectors on all the Nodes.
-     *
-     * @param containerName Name of the Container. The Container name for the base controller is "default". 
-     * @return List of all the Port Statistics across all the NodeConnectors on all the Nodes.
+     * Returns a list of all the Port Statistics across all the NodeConnectors
+     * on all the Nodes.
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @return List of all the Port Statistics across all the NodeConnectors on
+     *         all the Nodes.
      */
 
     @Path("/{containerName}/portstats")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(AllPortStatistics.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public AllPortStatistics getPortStatistics(
             @PathParam("containerName") String containerName) {
 
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         IStatisticsManager statisticsManager = getStatisticsService(containerName);
         if (statisticsManager == null) {
             throw new ServiceUnavailableException("Statistics "
@@ -211,19 +252,24 @@ public class StatisticsNorthbound {
     }
 
     /**
-     * Returns a list of all the Port Statistics across all the NodeConnectors in a given Node.
-     *
-     * @param containerName Name of the Container. The Container name
-     * for the base controller is "default". 
-     * @param nodeType Node Type as specifid by Node class
-     * @param Node Identifier
-     * @return Returns a list of all the Port Statistics across all the NodeConnectors in a given Node.
+     * Returns a list of all the Port Statistics across all the NodeConnectors
+     * in a given Node.
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param nodeType
+     *            Node Type as specifid by Node class
+     * @param Node
+     *            Identifier
+     * @return Returns a list of all the Port Statistics across all the
+     *         NodeConnectors in a given Node.
      */
     @Path("/{containerName}/portstats/{nodeType}/{nodeId}")
     @GET
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(PortStatistics.class)
-    @StatusCodes( {
+    @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
@@ -232,6 +278,12 @@ public class StatisticsNorthbound {
             @PathParam("nodeType") String nodeType,
             @PathParam("nodeId") String nodeId) {
 
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         handleDefaultDisabled(containerName);
 
         IStatisticsManager statisticsManager = getStatisticsService(containerName);
@@ -247,28 +299,27 @@ public class StatisticsNorthbound {
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = handleNodeAvailability(containerName,
-                                           nodeType, nodeId);
-        return new PortStatistics(node, statisticsManager
-                .getNodeConnectorStatistics(node));
+        Node node = handleNodeAvailability(containerName, nodeType, nodeId);
+        return new PortStatistics(node,
+                statisticsManager.getNodeConnectorStatistics(node));
     }
 
     private void handleDefaultDisabled(String containerName) {
         IContainerManager containerManager = (IContainerManager) ServiceHelper
                 .getGlobalInstance(IContainerManager.class, this);
         if (containerManager == null) {
-            throw new InternalServerErrorException(RestMessages.INTERNALERROR
-                    .toString());
+            throw new InternalServerErrorException(
+                    RestMessages.INTERNALERROR.toString());
         }
         if (containerName.equals(GlobalConstants.DEFAULT.toString())
                 && containerManager.hasNonDefaultContainer()) {
-            throw new ResourceConflictException(RestMessages.DEFAULTDISABLED
-                    .toString());
+            throw new ResourceConflictException(
+                    RestMessages.DEFAULTDISABLED.toString());
         }
     }
 
     private Node handleNodeAvailability(String containerName, String nodeType,
-                                        String nodeId) {
+            String nodeId) {
 
         Node node = Node.fromString(nodeType, nodeId);
         if (node == null) {

@@ -19,8 +19,10 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
@@ -34,6 +36,9 @@ import org.opendaylight.controller.northbound.commons.exception.InternalServerEr
 import org.opendaylight.controller.northbound.commons.exception.NotAcceptableException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
+import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
+import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
+import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
@@ -53,6 +58,19 @@ import org.opendaylight.controller.sal.utils.Status;
 @Path("/")
 public class StaticRoutingNorthbound {
 
+
+	private String username;
+	
+    @Context
+    public void setSecurityContext(SecurityContext context) {
+    	username = context.getUserPrincipal().getName();
+    }
+    protected String getUserName() {
+        return username;
+    }
+	
+
+	
     private List<StaticRoute> getStaticRoutesInternal(String containerName) {
 
         IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
@@ -90,6 +108,13 @@ public class StaticRoutingNorthbound {
             @ResponseCode(code = 404, condition = "The containerName passed was not found") })
     public StaticRoutes getStaticRoutes(
             @PathParam("containerName") String containerName) {
+
+        if(!NorthboundUtils.isAuthorized(getUserName(), containerName, 
+                Privilege.WRITE, this)){
+            throw new 
+                UnauthorizedException("User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         return new StaticRoutes(getStaticRoutesInternal(containerName));
     }
 
@@ -110,6 +135,13 @@ public class StaticRoutingNorthbound {
     public StaticRoute getStaticRoute(
             @PathParam("containerName") String containerName,
             @PathParam("name") String name) {
+
+        if(!NorthboundUtils.isAuthorized(getUserName(), containerName, 
+                Privilege.WRITE, this)){
+            throw new 
+                UnauthorizedException("User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         List<StaticRoute> routes = this.getStaticRoutesInternal(containerName);
         for (StaticRoute route : routes) {
             if (route.getName().equalsIgnoreCase(name)) {
@@ -142,6 +174,13 @@ public class StaticRoutingNorthbound {
             @PathParam(value = "name") String name,
             @TypeHint(StaticRoute.class) JAXBElement<StaticRoute> staticRouteData) {
 
+   
+        if(!NorthboundUtils.isAuthorized(getUserName(), containerName, 
+                Privilege.WRITE, this)){
+            throw new 
+                UnauthorizedException("User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         handleDefaultDisabled(containerName);
 
         IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
@@ -182,7 +221,13 @@ public class StaticRoutingNorthbound {
     public Response removeStaticRoute(
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "name") String name) {
-
+ 
+        if(!NorthboundUtils.isAuthorized(getUserName(), containerName, 
+                Privilege.WRITE, this)){
+            throw new 
+                UnauthorizedException("User is not authorized to perform this operation on container "
+                            + containerName);
+        }
         handleDefaultDisabled(containerName);
 
         IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper

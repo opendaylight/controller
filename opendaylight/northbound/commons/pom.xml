@@ -24,12 +24,15 @@
           <instructions>
             <Export-Package>
               org.opendaylight.controller.northbound.commons.exception,
+              org.opendaylight.controller.northbound.commons.utils,
               org.opendaylight.controller.northbound.commons
             </Export-Package>
             <Import-Package>
               javax.ws.rs,
               javax.ws.rs.core,
               org.opendaylight.controller.sal.utils,
+              org.opendaylight.controller.sal.authorization,
+              org.opendaylight.controller.containermanager,
               org.opendaylight.controller.usermanager,
               javax.servlet.http, 
               org.slf4j,                              
