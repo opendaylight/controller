@@ -10,13 +10,10 @@
 package org.opendaylight.controller.arphandler.internal;
 
 
-import org.junit.Assert;
-import org.junit.Test;
 import junit.framework.TestCase;
 
-import org.opendaylight.controller.hosttracker.IfIptoHost;
-
-import org.opendaylight.controller.switchmanager.ISwitchManager;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ArphandlerTest extends TestCase {
 	 
