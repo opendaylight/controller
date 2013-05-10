@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -21,8 +20,8 @@ import org.openflow.util.U16;
 
 /**
  * This Class processes the OpenFlow Vendor Extension Reply message of a Stats
- * Request. It parses the reply message and initializes fields of  V6StatsReply
- * object. Multiple instances of this class objects are created and used by 
+ * Request. It parses the reply message and initializes fields of V6StatsReply
+ * object. Multiple instances of this class objects are created and used by
  * OpenDaylight's Troubleshooting Application.
  * 
  */
@@ -30,7 +29,7 @@ import org.openflow.util.U16;
 public class V6StatsReply extends OFVendorStatistics {
     private static final long serialVersionUID = 1L;
 
-    public static int MINIMUM_LENGTH = 48; //48 for nx_flow_stats
+    public static int MINIMUM_LENGTH = 48; // 48 for nx_flow_stats
 
     protected short length = (short) MINIMUM_LENGTH;
     protected byte tableId;
@@ -56,7 +55,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param vendor the vendor to set
+     * @param vendor
+     *            the vendor to set
      */
     public void setVendorId(int vendor) {
         this.vendor = vendor;
@@ -70,7 +70,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param tableId the tableId to set
+     * @param tableId
+     *            the tableId to set
      */
     public void setTableId(byte tableId) {
         this.tableId = tableId;
@@ -84,7 +85,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param durationSeconds the durationSeconds to set
+     * @param durationSeconds
+     *            the durationSeconds to set
      */
     public void setDurationSeconds(int durationSeconds) {
         this.durationSeconds = durationSeconds;
@@ -98,7 +100,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param durationNanoseconds the durationNanoseconds to set
+     * @param durationNanoseconds
+     *            the durationNanoseconds to set
      */
     public void setDurationNanoseconds(int durationNanoseconds) {
         this.durationNanoseconds = durationNanoseconds;
@@ -112,7 +115,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param priority the priority to set
+     * @param priority
+     *            the priority to set
      */
     public void setPriority(short priority) {
         this.priority = priority;
@@ -126,7 +130,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param idleTimeout the idleTimeout to set
+     * @param idleTimeout
+     *            the idleTimeout to set
      */
     public void setIdleTimeout(short idleTimeout) {
         this.idleTimeout = idleTimeout;
@@ -140,14 +145,16 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param hardTimeout the hardTimeout to set
+     * @param hardTimeout
+     *            the hardTimeout to set
      */
     public void setHardTimeout(short hardTimeout) {
         this.hardTimeout = hardTimeout;
     }
 
     /**
-     * @param match_len the match_len to set
+     * @param match_len
+     *            the match_len to set
      */
     public void setMatchLen(short match_len) {
         this.match_len = match_len;
@@ -168,7 +175,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param idleAge the idleAge to set
+     * @param idleAge
+     *            the idleAge to set
      */
     public void setIdleAge(short idleAge) {
         this.idleAge = idleAge;
@@ -182,7 +190,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param hardAge the hardAge to set
+     * @param hardAge
+     *            the hardAge to set
      */
     public void setHardAge(short hardAge) {
         this.hardAge = hardAge;
@@ -196,7 +205,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param cookie the cookie to set
+     * @param cookie
+     *            the cookie to set
      */
     public void setCookie(long cookie) {
         this.cookie = cookie;
@@ -210,7 +220,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param packetCount the packetCount to set
+     * @param packetCount
+     *            the packetCount to set
      */
     public void setPacketCount(long packetCount) {
         this.packetCount = packetCount;
@@ -224,14 +235,16 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param byteCount the byteCount to set
+     * @param byteCount
+     *            the byteCount to set
      */
     public void setByteCount(long byteCount) {
         this.byteCount = byteCount;
     }
 
     /**
-     * @param length the length to set
+     * @param length
+     *            the length to set
      */
     public void setLength(short length) {
         this.length = length;
@@ -257,7 +270,8 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     /**
-     * @param actions the actions to set
+     * @param actions
+     *            the actions to set
      */
     public void setActions(List<OFAction> actions) {
         this.actions = actions;
@@ -268,7 +282,7 @@ public class V6StatsReply extends OFVendorStatistics {
         short i;
         this.length = data.getShort();
         if (length < MINIMUM_LENGTH)
-            return; //TBD - Spurious Packet?
+            return; // TBD - Spurious Packet?
         this.tableId = data.get();
         data.get(); // pad
         this.durationSeconds = data.getInt();
@@ -283,7 +297,7 @@ public class V6StatsReply extends OFVendorStatistics {
         this.packetCount = data.getLong();
         this.byteCount = data.getLong();
         if (this.length == MINIMUM_LENGTH) {
-            return; //TBD - can this happen??
+            return; // TBD - can this happen??
         }
         if (this.match == null)
             this.match = new V6Match();
@@ -296,7 +310,8 @@ public class V6StatsReply extends OFVendorStatistics {
         if (this.actionFactory == null)
             throw new RuntimeException("OFActionFactory not set");
         /*
-         * action list may be preceded by a padding of 0 to 7 bytes based upon this:
+         * action list may be preceded by a padding of 0 to 7 bytes based upon
+         * this:
          */
         short pad_size = (short) (((match_len + 7) / 8) * 8 - match_len);
         for (i = 0; i < pad_size; i++)
@@ -308,7 +323,8 @@ public class V6StatsReply extends OFVendorStatistics {
 
     @Override
     public void writeTo(ByteBuffer data) {
-        super.writeTo(data);//TBD. This Fn needs work. Should never get called though.
+        super.writeTo(data);// TBD. This Fn needs work. Should never get called
+                            // though.
 
     }
 
