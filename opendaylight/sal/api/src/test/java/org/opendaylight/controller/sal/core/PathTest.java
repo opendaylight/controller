@@ -63,7 +63,7 @@ public class PathTest {
             Edge e2 = new Edge(c2, c3);
             Edge e3 = new Edge(c3, c4);
             Edge e4 = new Edge(c4, c5);
-            edges = new LinkedList(Arrays.asList(e0, e1, e2, e3, e4));
+            edges = Arrays.asList(e0, e1, e2, e3, e4);
         } catch (ConstructionException e) {
             // Exception is NOT expected if raised test will fail
             Assert.assertTrue(false);
@@ -130,7 +130,7 @@ public class PathTest {
             Edge e2 = new Edge(c2, c3);
             Edge e3 = new Edge(c3, c4);
             Edge e4 = new Edge(c4, c5);
-            edges1 = new LinkedList(Arrays.asList(e0, e1, e2, e3, e4));
+            edges1 = Arrays.asList(e0, e1, e2, e3, e4);
         } catch (ConstructionException e) {
             // Exception is NOT expected if raised test will fail
             Assert.assertTrue(false);
@@ -168,7 +168,7 @@ public class PathTest {
             Edge e2 = new Edge(c2, c3);
             Edge e3 = new Edge(c3, c4);
             Edge e4 = new Edge(c4, c5);
-            edges2 = new LinkedList(Arrays.asList(e0, e1, e2, e3, e4));
+            edges2 = Arrays.asList(e0, e1, e2, e3, e4);
         } catch (ConstructionException e) {
             // Exception is NOT expected if raised test will fail
             Assert.assertTrue(false);
@@ -206,7 +206,7 @@ public class PathTest {
             Edge e2 = new Edge(c2, c3);
             Edge e3 = new Edge(c3, c4);
             Edge e4 = new Edge(c4, c5);
-            edges3 = new LinkedList(Arrays.asList(e0, e1, e2, e3, e4));
+            edges3 = Arrays.asList(e0, e1, e2, e3, e4);
         } catch (ConstructionException e) {
             // Exception is NOT expected if raised test will fail
             Assert.assertTrue(false);
@@ -257,7 +257,7 @@ public class PathTest {
 
             Edge e0 = new Edge(c0, c1);
 
-            Path path = new Path(new LinkedList(Arrays.asList(e0)));
+            Path path = new Path(Arrays.asList(e0));
         } catch (ConstructionException e) {
             // Exception is NOT expected if raised test will fail
             Assert.assertTrue(false);
@@ -299,7 +299,7 @@ public class PathTest {
             Edge e2 = new Edge(c2, c3);
             Edge e3 = new Edge(c3, c4);
             Edge e4 = new Edge(c4, c5);
-            List<Edge> edges = new LinkedList(Arrays.asList(e0, e1, e2, e3, e4));
+            List<Edge> edges = Arrays.asList(e0, e1, e2, e3, e4);
             Path path = new Path(edges);
 
             // Test start node
@@ -325,7 +325,7 @@ public class PathTest {
                             (short) 0x1), n1);
 
             Edge e0 = new Edge(c0, c1);
-            List<Edge> edges = new LinkedList(Arrays.asList(e0));
+            List<Edge> edges = Arrays.asList(e0);
             Path path = new Path(edges);
 
             // Test start node
