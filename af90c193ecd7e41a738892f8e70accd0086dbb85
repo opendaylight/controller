@@ -16,6 +16,24 @@
       "revId": "af90c193ecd7e41a738892f8e70accd0086dbb85",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX///E0\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/DiscoveryService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2013-05-12T20:43:21Z",
+      "side": 1,
+      "message": "In this case, the dst node connector (ingress port) is an OF port while the src node connector is non-OF. The LLDP pkt was sent by the non-OF port and received by the OF port.",
+      "parentUuid": "AAAAEX///FA\u003d",
+      "revId": "af90c193ecd7e41a738892f8e70accd0086dbb85",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
