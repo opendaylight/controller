@@ -294,11 +294,13 @@ public class DiscoveryService implements IInventoryShimExternalListener,
         }
         if (ethPkt.getPayload() instanceof LLDP) {
             NodeConnector dst = inPkt.getIncomingNodeConnector();
-            if (!processDiscoveryPacket(dst, ethPkt)) {
-                /* Snoop the discovery pkt if not generated from us */
-                snoopDiscoveryPacket(dst, ethPkt);
+            if (isEnabled(dst)) {
+                if (!processDiscoveryPacket(dst, ethPkt)) {
+                    /* Snoop the discovery pkt if not generated from us */
+                    snoopDiscoveryPacket(dst, ethPkt);
+                }
+                return PacketResult.CONSUME;
             }
-            return PacketResult.CONSUME;
         }
         return PacketResult.IGNORED;
     }
