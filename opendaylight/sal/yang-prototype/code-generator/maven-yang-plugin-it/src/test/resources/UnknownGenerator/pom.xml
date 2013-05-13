@@ -39,6 +39,16 @@
                                     </outputBaseDir>
                                 </generator>
                             </codeGenerators>
+							<resourceProviders>
+                                <provider>
+                                    <resourceProviderClass>
+                                        org.opendaylight.controller.yang2sources.spi.ResourceProviderTestImpl
+                                    </resourceProviderClass>
+                                    <outputBaseDir>
+                                        outDir/
+                                    </outputBaseDir>
+                                </provider>
+                            </resourceProviders>
                         </configuration>
                     </execution>
                 </executions>

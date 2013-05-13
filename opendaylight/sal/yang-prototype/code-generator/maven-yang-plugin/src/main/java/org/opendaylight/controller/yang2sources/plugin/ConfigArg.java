@@ -40,6 +40,10 @@ public abstract class ConfigArg {
         public ResourceProviderArg() {
         }
 
+        public ResourceProviderArg(String resourceProviderClass) {
+            this(resourceProviderClass, new File("outDir/"));
+        }
+
         public ResourceProviderArg(String resourceProviderClass,
                 File outputBaseDir) {
             super(outputBaseDir);
@@ -51,9 +55,6 @@ public abstract class ConfigArg {
             Preconditions
                     .checkNotNull(resourceProviderClass,
                             "resourceProviderClass for ResourceProvider cannot be null");
-            Preconditions.checkNotNull(outputBaseDir,
-                    "outputBaseDir for ResourceProvider cannot be null, "
-                            + resourceProviderClass);
         }
 
         public String getResourceProviderClass() {
@@ -70,6 +71,10 @@ public abstract class ConfigArg {
         public CodeGeneratorArg() {
         }
 
+        public CodeGeneratorArg(String codeGeneratorClass) {
+            this(codeGeneratorClass, new File("outDir/"));
+        }
+
         public CodeGeneratorArg(String codeGeneratorClass, File outputBaseDir) {
             super(outputBaseDir);
             this.codeGeneratorClass = codeGeneratorClass;
@@ -79,9 +84,6 @@ public abstract class ConfigArg {
         public void check() {
             Preconditions.checkNotNull(codeGeneratorClass,
                     "codeGeneratorClass for CodeGenerator cannot be null");
-            Preconditions.checkNotNull(outputBaseDir,
-                    "outputBaseDir for CodeGenerator cannot be null, "
-                            + codeGeneratorClass);
         }
 
         public String getCodeGeneratorClass() {

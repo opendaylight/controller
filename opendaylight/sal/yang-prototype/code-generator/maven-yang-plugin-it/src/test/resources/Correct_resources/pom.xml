@@ -17,7 +17,7 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>generate-resources</goal>
+                            <goal>generate-sources</goal>
                         </goals>
                         <configuration>
                             <yangFilesRootDir>${basedir}/../../../../../yang-model-parser-impl/src/test/resources/model</yangFilesRootDir>
