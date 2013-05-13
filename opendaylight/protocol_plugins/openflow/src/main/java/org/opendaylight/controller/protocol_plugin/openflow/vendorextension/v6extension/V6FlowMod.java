@@ -204,7 +204,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
                 action.writeTo(data);
             }
         }
-        logger.trace("{}", this.toString());
+        logger.trace("{}", this);
     }
 
     /**

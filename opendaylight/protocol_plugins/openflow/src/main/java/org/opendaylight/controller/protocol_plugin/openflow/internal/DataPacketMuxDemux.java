@@ -195,13 +195,15 @@ public class DataPacketMuxDemux implements IContainerListener,
                         .get(GlobalConstants.DEFAULT.toString());
                 if (defaultOutService != null) {
                     defaultOutService.receiveDataPacket(dataPacket);
-                    logger.trace(
-                            "Dispatched to apps a frame of size: {} on container: {}: {}",
-                            new Object[] {
+                    if (logger.isTraceEnabled()) {
+                      logger.trace(
+                              "Dispatched to apps a frame of size: {} on " +
+                              "container: {}: {}", new Object[] {
                                     ofPacket.getPacketData().length,
                                     GlobalConstants.DEFAULT.toString(),
                                     HexEncode.bytesToHexString(dataPacket
                                             .getPacketData()) });
+                    }
                 }
                 // Now check the mapping between nodeConnector and
                 // Container and later on optimally filter based on
@@ -215,15 +217,15 @@ public class DataPacketMuxDemux implements IContainerListener,
                         if (s != null) {
                             // TODO add filtering on a per-flowSpec base
                             s.receiveDataPacket(dataPacket);
-                            logger.trace(
-                                    "Dispatched to apps a frame of size: {} on container: {}: {}",
-                                    new Object[] {
+                            if (logger.isTraceEnabled()) {
+                              logger.trace(
+                                      "Dispatched to apps a frame of size: {}" +
+                                      " on container: {}: {}", new Object[] {
                                             ofPacket.getPacketData().length,
-                                            GlobalConstants.DEFAULT.toString(),
-                                            HexEncode
-                                                    .bytesToHexString(dataPacket
-                                                            .getPacketData()) });
-
+                                            container,
+                                            HexEncode.bytesToHexString(dataPacket
+                                                    .getPacketData()) });
+                            }
                         }
                     }
                 }

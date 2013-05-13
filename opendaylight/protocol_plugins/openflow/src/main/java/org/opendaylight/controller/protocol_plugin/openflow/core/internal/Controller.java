@@ -70,7 +70,7 @@ public class Controller implements IController, CommandProvider {
                         ISwitch existingSwitch = switches.get(sid);
                         if (existingSwitch != null) {
                             logger.info("Replacing existing {} with New {}",
-                                    existingSwitch.toString(), sw.toString());
+                                    existingSwitch, sw);
                             disconnectSwitch(existingSwitch);
                         }
                         switches.put(sid, sw);
@@ -175,20 +175,18 @@ public class Controller implements IController, CommandProvider {
     public void addMessageListener(OFType type, IMessageListener listener) {
         IMessageListener currentListener = this.messageListeners.get(type);
         if (currentListener != null) {
-            logger.warn("{} is already listened by {}", type.toString(),
-                    currentListener.toString());
+            logger.warn("{} is already listened by {}", type,
+                    currentListener);
         }
         this.messageListeners.put(type, listener);
-        logger.debug("{} is now listened by {}", type.toString(),
-                listener.toString());
+        logger.debug("{} is now listened by {}", type, listener);
     }
 
     @Override
     public void removeMessageListener(OFType type, IMessageListener listener) {
         IMessageListener currentListener = this.messageListeners.get(type);
         if ((currentListener != null) && (currentListener == listener)) {
-            logger.debug("{} listener {} is Removed", type.toString(),
-                    listener.toString());
+            logger.debug("{} listener {} is Removed", type, listener);
             this.messageListeners.remove(type);
         }
     }
@@ -197,19 +195,17 @@ public class Controller implements IController, CommandProvider {
     public void addSwitchStateListener(ISwitchStateListener listener) {
         if (this.switchStateListener != null) {
             logger.warn("Switch events are already listened by {}",
-                    this.switchStateListener.toString());
+                    this.switchStateListener);
         }
         this.switchStateListener = listener;
-        logger.debug("Switch events are now listened by {}",
-                listener.toString());
+        logger.debug("Switch events are now listened by {}", listener);
     }
 
     @Override
     public void removeSwitchStateListener(ISwitchStateListener listener) {
         if ((this.switchStateListener != null)
                 && (this.switchStateListener == listener)) {
-            logger.debug("SwitchStateListener {} is Removed",
-                    listener.toString());
+            logger.debug("SwitchStateListener {} is Removed", listener);
             this.switchStateListener = null;
         }
     }
@@ -242,7 +238,7 @@ public class Controller implements IController, CommandProvider {
         if (((SwitchHandler) sw).isOperational()) {
             Long sid = sw.getId();
             if (this.switches.remove(sid, sw)) {
-                logger.warn("{} is Disconnected", sw.toString());
+                logger.warn("{} is Disconnected", sw);
                 notifySwitchDeleted(sw);
             }
         }

@@ -84,7 +84,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
                 this.clientSelectionKey = this.socket.register(this.selector,
                         SelectionKey.OP_WRITE, this);
             }
-            logger.trace("Message sent: {}", msg.toString());
+            logger.trace("Message sent: {}", msg);
         }
     }
 

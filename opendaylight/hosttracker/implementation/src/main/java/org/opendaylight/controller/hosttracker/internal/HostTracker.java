@@ -394,8 +394,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
         arphost.setHostIP(networkAddr);
         arphost.setSent_count((short) 1);
         ARPPendingList.add(arphost);
-        logger.debug("Host Added to ARPPending List, IP: {}",
-                networkAddr.toString());
+        logger.debug("Host Added to ARPPending List, IP: {}", networkAddr);
     }
 
     private void removePendingARPFromList(int index) {
@@ -434,7 +433,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                  */
                 removePendingARPFromList(i);
                 logger.debug("Host Removed from ARPPending List, IP: {}",
-                        networkAddr.toString());
+                          networkAddr);
                 return;
             }
         }
@@ -452,7 +451,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                  */
                 failedARPReqList.remove(i);
                 logger.debug("Host Removed from FailedARPReqList List, IP: {}",
-                        networkAddr.toString());
+                        networkAddr);
                 return;
             }
         }
@@ -708,7 +707,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
             for (String switchName : hierarchy) {
                 buf.append(switchName + "/");
             }
-            logger.debug("{} -> {}", getContainerName(), buf.toString());
+            logger.debug("{} -> {}", getContainerName(), buf);
             num++;
         }
     }
@@ -991,13 +990,15 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                      * Use the services of arphandler to check if host is still
                      * there
                      */
-                    logger.trace(
-                            "ARP Probing ({}) for {}({})",
-                            new Object[] {
-                                    arp_cntdown,
-                                    host.getNetworkAddress().getHostAddress(),
-                                    HexEncode.bytesToHexString(host
-                                            .getDataLayerAddressBytes()) });
+                    if (logger.isTraceEnabled()) {
+                      logger.trace(
+                              "ARP Probing ({}) for {}({})",
+                              new Object[] {
+                                      arp_cntdown,
+                                      host.getNetworkAddress().getHostAddress(),
+                                      HexEncode.bytesToHexString(host
+                                              .getDataLayerAddressBytes()) });
+                    }
                     host.setArpSendCountDown(arp_cntdown);
                     hostFinder.probe(host);
                 }
@@ -1160,8 +1161,10 @@ public class HostTracker implements IfIptoHost, IfHostListener,
         switch (type) {
         case REMOVED:
             long sid = (Long) node.getID();
-            logger.debug("Received removedSwitch for sw id {}",
-                    HexEncode.longToHexString(sid));
+            if (logger.isDebugEnabled()) {
+              logger.debug("Received removedSwitch for sw id {}",
+                      HexEncode.longToHexString(sid));
+            }
             for (Entry<InetAddress, HostNodeConnector> entry : hostsDB
                     .entrySet()) {
                 HostNodeConnector host = entry.getValue();

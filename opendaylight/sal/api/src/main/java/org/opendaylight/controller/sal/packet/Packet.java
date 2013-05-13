@@ -109,10 +109,12 @@ public abstract class Packet {
              * Store the raw read value, checks the payload type and set the
              * payloadClass accordingly
              */
-            logger.trace("{}: {}: {} (offset {} bitsize {})",
-                    new Object[] { this.getClass().getSimpleName(), hdrField,
-                            HexEncode.bytesToHexString(hdrFieldBytes),
-                            startOffset, numBits });
+            if (logger.isTraceEnabled()) {
+              logger.trace("{}: {}: {} (offset {} bitsize {})",
+                      new Object[] { this.getClass().getSimpleName(), hdrField,
+                              HexEncode.bytesToHexString(hdrFieldBytes),
+                              startOffset, numBits });
+            }
 
             this.setHeaderField(hdrField, hdrFieldBytes);
         }
@@ -189,8 +191,10 @@ public abstract class Packet {
         }
         postSerializeCustomOperation(headerBytes);
 
-        logger.trace("{}: {}", this.getClass().getSimpleName(),
-                HexEncode.bytesToHexString(headerBytes));
+        if (logger.isTraceEnabled()) {
+          logger.trace("{}: {}", this.getClass().getSimpleName(),
+                  HexEncode.bytesToHexString(headerBytes));
+        }
         return headerBytes;
     }
 

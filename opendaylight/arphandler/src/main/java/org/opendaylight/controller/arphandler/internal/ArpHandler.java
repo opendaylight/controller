@@ -156,9 +156,11 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
          * This is to avoid continuous flooding
          */
         if (Arrays.equals(sourceMAC, getControllerMAC())) {
-            logger.debug(
+            if (logger.isDebugEnabled()) {
+              logger.debug(
                     "Receive the self originated packet (srcMAC {}) --> DROP",
                     HexEncode.bytesToHexString(sourceMAC));
+            }
             return;
         }
 
@@ -167,18 +169,16 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             subnet = switchManager.getSubnetByNetworkAddress(sourceIP);
         }
         if (subnet == null) {
-            logger.debug("can't find subnet matching {}, drop packet", sourceIP
-                    .toString());
+            logger.debug("can't find subnet matching {}, drop packet",sourceIP);
             return;
         }
-        logger.debug("Found {} matching {}", subnet.toString(), sourceIP
-                .toString());
+        logger.debug("Found {} matching {}", subnet, sourceIP);
         /*
          * Make sure that the host is a legitimate member of this subnet
          */
         if (!subnet.hasNodeConnector(p)) {
             logger.debug("{} showing up on {} does not belong to {}",
-                    new Object[] { sourceIP.toString(), p, subnet.toString() });
+                    new Object[] { sourceIP, p, subnet });
             return;
         }
 
@@ -364,18 +364,17 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
     }
 
     public void find(InetAddress networkAddress) {
-        logger.debug("Received find IP {}", networkAddress.toString());
+        logger.debug("Received find IP {}", networkAddress);
 
         Subnet subnet = null;
         if (switchManager != null) {
             subnet = switchManager.getSubnetByNetworkAddress(networkAddress);
         }
         if (subnet == null) {
-            logger.debug("can't find subnet matching IP {}", networkAddress
-                    .toString());
+            logger.debug("can't find subnet matching IP {}", networkAddress);
             return;
         }
-        logger.debug("found subnet {}", subnet.toString());
+        logger.debug("found subnet {}", subnet);
 
         // send a broadcast ARP Request to this interface
         sendBcastARPRequest(networkAddress, subnet);
@@ -394,7 +393,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         }
         if (subnet == null) {
             logger.debug("can't find subnet matching {}", host
-                    .getNetworkAddress().toString());
+                    .getNetworkAddress());
             return;
         }
         sendUcastARPRequest(host, subnet);
@@ -419,11 +418,10 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             subnet = switchManager.getSubnetByNetworkAddress(dIP);
         }
         if (subnet == null) {
-            logger.debug("can't find subnet matching {}, drop packet", dIP
-                    .toString());
+            logger.debug("can't find subnet matching {}, drop packet", dIP);
             return;
         }
-        logger.debug("Found {} matching {}", subnet.toString(), dIP.toString());
+        logger.debug("Found {} matching {}", subnet, dIP);
         /*
          * unknown destination host, initiate ARP request
          */
