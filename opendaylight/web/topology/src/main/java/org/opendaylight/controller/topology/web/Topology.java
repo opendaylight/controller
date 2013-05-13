@@ -287,6 +287,8 @@ public class Topology implements IObjectReader, IConfigurationAware {
 				Map<String, String> data = (Map<String, String>) nodeEntry.get("data");
         		data.put("$desc", description);
         		nodeEntry.put("data", data);
+        		// clear adjacencies since this is now a single node
+        		nodeEntry.put("adjacencies", new LinkedList<Map<String, Object>>());
             	stagedNodes.put(node.id(), nodeEntry);
             } else {
             	newNodes.put(node.id(), node.out());
