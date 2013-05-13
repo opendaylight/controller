@@ -1479,9 +1479,13 @@ public class SwitchManagerImpl implements ISwitchManager,
             ci.println("Please enter node id");
             return;
         }
-        Long id = Long.decode(st);
 
-        Node node = NodeCreator.createOFNode(id);
+        Node node = Node.fromString(st);
+        if (node == null) {
+            ci.println("Please enter node id");
+            return;
+        }
+
         Set<NodeConnector> nodeConnectorSet = getUpNodeConnectors(node);
         if (nodeConnectorSet == null) {
             return;
@@ -1501,10 +1505,14 @@ public class SwitchManagerImpl implements ISwitchManager,
             ci.println("Please enter node id");
             return;
         }
-        Long id = Long.decode(st);
+
+        Node node = Node.fromString(st);
+        if (node == null) {
+            ci.println("Please enter node id");
+            return;
+        }
 
         ci.println("          NodeConnector               BandWidth(Gbps)     Admin     State");
-        Node node = NodeCreator.createOFNode(id);
         Set<NodeConnector> nodeConnectorSet = getNodeConnectors(node);
         if (nodeConnectorSet == null) {
             return;
@@ -1534,8 +1542,14 @@ public class SwitchManagerImpl implements ISwitchManager,
             ci.println("Please enter node id");
             return;
         }
-        Object id = Long.decode(st);
-        Switch sw = getSwitchByNode(NodeCreator.createOFNode((Long) id));
+
+        Node node = Node.fromString(st);
+        if (node == null) {
+            ci.println("Please enter node id");
+            return;
+        }
+
+        Switch sw = getSwitchByNode(node);
 
         ci.println("          NodeConnector                        Name");
         if (sw == null) {
@@ -1549,10 +1563,9 @@ public class SwitchManagerImpl implements ISwitchManager,
                 nodeConnectorName = (propMap == null) ? null : ((Name) propMap
                         .get(Name.NamePropName)).getValue();
                 if (nodeConnectorName != null) {
-                    Node node = nodeConnector.getNode();
-                    if (!node.equals(getNode((Long) id))) {
-                        log.debug("node not match {} {}", node,
-                                getNode((Long) id));
+                    Node nd = nodeConnector.getNode();
+                    if (!nd.equals(node)) {
+                        log.debug("node not match {} {}", nd, node);
                     }
                     Map<String, NodeConnector> map = nodeConnectorNames
                             .get(node);
@@ -1584,9 +1597,12 @@ public class SwitchManagerImpl implements ISwitchManager,
             ci.println("Please enter node id");
             return;
         }
-        Long id = Long.decode(st);
 
-        Node node = NodeCreator.createOFNode(id);
+        Node node = Node.fromString(st);
+        if (node == null) {
+            ci.println("Please enter node id");
+            return;
+        }
 
         st = ci.nextArgument();
         if (st == null) {
