@@ -285,12 +285,13 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                         //short tag = container.getTag((Long)nextNode.getNodeID());
                         short tag = 0;
                         if (tag != 0) {
-                            log.debug("adding SET_VLAN " + tag
-                                    + "  for traffic leaving " + currNode + "/"
-                                    + outPort + "toward switch " + nextNode);
+                            log.debug("adding SET_VLAN {} for traffic " +
+                                    "leaving {}/{} toward switch {}",
+                                    new Object[] { tag, currNode, outPort,
+                                    nextNode});
                             actions.add(new SetVlanId(tag));
                         } else {
-                            log.debug("No tag assigned to switch " + nextNode);
+                            log.debug("No tag assigned to switch {}", nextNode);
                         }
                     }
                 }
@@ -319,12 +320,12 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                     //short tag = container.getTag((Long)currNode.getNodeID());
                     short tag = 0;
                     if (tag != 0) {
-                        log.debug("adding MATCH VLAN " + tag
-                                + "  for traffic entering " + currNode + "/"
-                                + inPort);
+                        log.debug("adding MATCH VLAN {} for traffic entering" +
+                                "  {}/{}",
+                                new Object[] {tag, currNode, inPort});
                         match.setField(MatchType.DL_VLAN, tag);
                     } else {
-                        log.debug("No tag assigned to switch " + currNode);
+                        log.debug("No tag assigned to switch {}", currNode);
                     }
                 }
             }
@@ -351,10 +352,11 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
             pos.put(inPort, po);
             this.rulesDB.put(key, pos);
             if (!inPort.getType().equals(NodeConnectorIDType.ALL)) {
-                log.debug("Adding Match(inPort=" + inPort + ",DIP="
-                        + host.getNetworkAddress().getHostAddress()
-                        + ") Action(outPort=" + outPort + ") to node "
-                        + currNode);
+                log.debug("Adding Match(inPort = {} , DIP = {})" +
+                        " Action(outPort= {}) to node {}",
+                        new Object[] { inPort,
+                        host.getNetworkAddress().getHostAddress(),
+                        outPort, currNode});
                 if ((removed_po != null)
                         && (!po.getFlow().getMatch().equals(
                                 removed_po.getFlow().getMatch()))) {
@@ -365,10 +367,10 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                 }
 
             } else {
-                log.debug("Adding policy Match(DIP="
-                        + host.getNetworkAddress().getHostAddress()
-                        + ") Action(outPort=" + outPort + ") to node "
-                        + currNode);
+                log.debug("Adding policyMatch(DIP = {}) Action(outPort= {}) " + 
+                        "to node {}", new Object[] {
+                        host.getNetworkAddress().getHostAddress(), outPort,
+                        currNode});
             }
         }
     }
@@ -419,8 +421,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
             if ((res == null) || ((links = res.getEdges()) == null)) {
                 // Still the path that connect node to rootNode
                 // doesn't exists
-                log.debug("NO Route/Path between SW[" + node + "] --> SW["
-                        + rootNode + "] cleaning potentially existing entries");
+                log.debug("NO Route/Path between SW[{}] --> SW[{}] cleaning " +
+                        "potentially existing entries", node, rootNode);
                 key = new HostNodePair(host, node);
                 pos = this.rulesDB.get(key);
                 if (pos != null) {
@@ -436,8 +438,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                 continue;
             }
 
-            log.debug("Route between SW[" + node + "] --> SW[" + rootNode
-                            + "]");
+            log.debug("Route between SW[{}] --> SW[{}]", node, rootNode);
             Integer curr;
             Node currNode = node;
             key = new HostNodePair(host, currNode);
@@ -528,8 +529,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         if ((res == null) || ((links = res.getEdges()) == null)) {
             // Still the path that connect node to rootNode
             // doesn't exists
-            log.debug("NO Route/Path between SW[" + node + "] --> SW["
-                    + rootNode + "] cleaning potentially existing entries");
+            log.debug("NO Route/Path between SW[{}] --> SW[{}] cleaning " +
+                    "potentially existing entries", node, rootNode);
             key = new HostNodePair(host, node);
             pos = this.rulesDB.get(key);
             if (pos != null) {
@@ -545,7 +546,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
             return null;
         }
 
-        log.debug("Route between SW[" + node + "] --> SW[" + rootNode + "]");
+        log.debug("Route between SW[{}] --> SW[{}]", node, rootNode);
         Integer curr;
         Node currNode = node;
         key = new HostNodePair(host, currNode);
@@ -557,10 +558,10 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                 continue;
             }
 
-            log.debug("Link [" + currNode + "/" + link.getHeadNodeConnector()
-                    + "] --> ["
-                    + link.getHeadNodeConnector().getNode() + "/"
-                    + link.getTailNodeConnector() + "]");
+            log.debug("Link [{}/{}] --> [{}/{}]", new Object[] {
+                    currNode, link.getHeadNodeConnector(),
+                    link.getHeadNodeConnector().getNode(),
+                    link.getTailNodeConnector()});
 
             // Index all the switches to be programmed
             switchesToProgram.add(currNode);
@@ -627,8 +628,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                                 + po.toString() + " on switch " + swId);
                     }
                 } else {
-                    log.error("Cannot find a policy for SW:{" + swId
-                            + "} Host: {" + host + "}");
+                    log.error("Cannot find a policy for SW:({}) Host: ({})",
+                              swId, host);
                     /* // Now dump every single rule */
                     /* for (HostNodePair dumpkey : this.rulesDB.keySet()) { */
                     /* 	po = this.rulesDB.get(dumpkey); */
@@ -688,7 +689,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         for (HostNodePair key : this.rulesDB.keySet()) {
             Node node = key.getNode();
             if (targetNode == null || node.equals(targetNode)) {
-                log.debug("Work on " + node + " host " + key.getHost());
+                log.debug("Work on {} host {}", node, key.getHost());
                 pos = this.rulesDB.get(key);
                 for (Map.Entry<NodeConnector, FlowEntry> e : pos.entrySet()) {
                     po = e.getValue();
@@ -697,7 +698,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                         this.frm.uninstallFlowEntry(po);
                     }
                 }
-                log.debug("Remove " + key);
+                log.debug("Remove {}", key);
                 this.rulesDB.remove(key);
             }
         }
@@ -738,8 +739,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         }
         pl.add(po);
         log.debug("Adding Pruned Policy for SwId: {}", swId);
-        log.debug("Old Policy: " + po.toString());
-        log.debug("New Policy: " + new_po.toString());
+        log.debug("Old Policy: {}", po);
+        log.debug("New Policy: {}", new_po);
     }
 
     private void pruneExcessRules(Set<Node> switches) {
@@ -825,7 +826,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
 
         switch (type) {
         case REMOVED:
-            log.debug("Node " + node + " gone, doing a cleanup");
+            log.debug("Node {} gone, doing a cleanup", node);
             uninstallPerNodeRules(node);
             break;
         default:

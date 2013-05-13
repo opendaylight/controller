@@ -190,7 +190,7 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
                         SelectionKey.OP_READ, this);
             }
 
-            logger.trace("Message sent: {}", msg.toString());
+            logger.trace("Message sent: {}", msg);
         }
     }
 

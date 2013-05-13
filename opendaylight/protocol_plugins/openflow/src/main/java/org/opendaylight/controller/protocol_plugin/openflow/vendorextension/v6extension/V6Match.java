@@ -674,7 +674,7 @@ public class V6Match extends OFMatch implements Cloneable {
                 data.put(ipv6ext_dstport_msg);
             }
         }
-        logger.trace("{}", this.toString());
+        logger.trace("{}", this);
     }
 
     private void readInPort(ByteBuffer data, int nxmLen, boolean hasMask) {

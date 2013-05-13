@@ -184,16 +184,14 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         try {
             path = mtp.getMaxThroughputPath(src, dst);
         } catch (IllegalArgumentException ie) {
-            log.debug("A vertex is yet not known between {} {}",
-                    src.toString(), dst.toString());
+            log.debug("A vertex is yet not known between {} {}", src, dst);
             return null;
         }
         Path res;
         try {
             res = new Path(path);
         } catch (ConstructionException e) {
-            log.debug("A vertex is yet not known between {} {}",
-                    src.toString(), dst.toString());
+            log.debug("A vertex is yet not known between {} {}", src, dst);
             return null;
         }
         return res;
@@ -208,16 +206,14 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         try {
             path = spt.getPath(src, dst);
         } catch (IllegalArgumentException ie) {
-            log.debug("A vertex is yet not known between {} {}",
-                    src.toString(), dst.toString());
+            log.debug("A vertex is yet not known between {} {}", src, dst);
             return null;
         }
         Path res;
         try {
             res = new Path(path);
         } catch (ConstructionException e) {
-            log.debug("A vertex is yet not known between {} {}",
-                    src.toString(), dst.toString());
+            log.debug("A vertex is yet not known between {} {}", src, dst);
             return null;
         }
         return res;
@@ -343,7 +339,9 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         if (props != null)
             props.remove(bw);
 
-        log.debug("edgeUpdate: {} bw: {}", e.toString(), bw.getValue());
+        if (log.isDebugEnabled()) {
+          log.debug("edgeUpdate: {} bw: {}", e, bw.getValue());
+        }
 
         Short baseBW = Short.valueOf((short) 0);
         boolean add = (type == UpdateType.ADDED) ? true : false;

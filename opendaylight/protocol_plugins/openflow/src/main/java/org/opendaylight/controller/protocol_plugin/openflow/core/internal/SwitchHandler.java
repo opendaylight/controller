@@ -320,13 +320,13 @@ public class SwitchHandler implements ISwitch {
         }
 
         if (msgs == null) {
-            logger.debug("{} is down", toString());
+            logger.debug("{} is down", this);
             // the connection is down, inform core
             reportSwitchStateChange(false);
             return;
         }
         for (OFMessage msg : msgs) {
-            logger.trace("Message received: {}", msg.toString());
+            logger.trace("Message received: {}", msg);
             this.lastMsgReceivedTimeStamp = System.currentTimeMillis();
             OFType type = msg.getType();
             switch (type) {
@@ -418,7 +418,7 @@ public class SwitchHandler implements ISwitch {
                             // send a probe to see if the switch is still alive
                             logger.debug(
                                     "Send idle probe (Echo Request) to {}",
-                                    toString());
+                                    this);
                             probeSent = true;
                             OFMessage echo = factory
                                     .getMessage(OFType.ECHO_REQUEST);
@@ -462,7 +462,9 @@ public class SwitchHandler implements ISwitch {
                 || e instanceof InterruptedException
                 || e instanceof SocketException || e instanceof IOException
                 || e instanceof ClosedSelectorException) {
-            logger.debug("Caught exception {}", e.getMessage());
+            if (logger.isDebugEnabled()) {
+              logger.debug("Caught exception {}", e.getMessage());
+            }
         } else {
             logger.warn("Caught exception ", e);
         }
@@ -729,7 +731,7 @@ public class SwitchHandler implements ISwitch {
                     if (!transmitQ.isEmpty()) {
                         PriorityMessage pmsg = transmitQ.poll();
                         msgReadWriteService.asyncSend(pmsg.msg);
-                        logger.trace("Message sent: {}", pmsg.toString());
+                        logger.trace("Message sent: {}", pmsg);
                         /*
                          * If syncReply is set to true, wait for the response
                          * back.
@@ -883,8 +885,10 @@ public class SwitchHandler implements ISwitch {
                 // if result is not null, this means the switch can't handle
                 // this message
                 // the result if OFError already
-                logger.debug("Send {} failed --> {}", msg.getType().toString(),
-                        ((OFError) result).toString());
+                if (logger.isDebugEnabled()) {
+                  logger.debug("Send {} failed --> {}", msg.getType(),
+                               ((OFError) result));
+                }
             }
             return result;
         } catch (Exception e) {

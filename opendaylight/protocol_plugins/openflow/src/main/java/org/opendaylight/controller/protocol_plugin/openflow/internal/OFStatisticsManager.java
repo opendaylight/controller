@@ -176,7 +176,7 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         descriptionListeners = new HashSet<IStatisticsListener>();
 
         configStatsPollIntervals();
-        
+
         // Initialize managed timers
         statisticsTimer = new Timer();
         statisticsTimerTask = new TimerTask() {
@@ -703,8 +703,10 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         ByteBuffer data = ByteBuffer.allocate(length);
         stat.writeTo(data);
         data.rewind();
-        log.trace("getV6ReplyStatistics: Buffer BYTES ARE {}",
-                HexString.toHexString(data.array()));
+        if (log.isTraceEnabled()) {
+            log.trace("getV6ReplyStatistics: Buffer BYTES ARE {}",
+                    HexString.toHexString(data.array()));
+        }
 
         int vendor = data.getInt(); // first 4 bytes is vendor id.
         if (vendor != V6StatsRequest.NICIRA_VENDOR_ID) {
