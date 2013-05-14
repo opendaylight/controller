@@ -8,17 +8,29 @@
 package org.opendaylight.controller.yang2sources.plugin;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.project.MavenProject;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 final class Util {
-
     static final String YANG_SUFFIX = "yang";
 
     // Cache for listed directories and found yang files. Typically yang files
@@ -34,7 +46,6 @@ final class Util {
      * size 1.
      */
     static Collection<File> listFiles(String rootDir) {
-
         if (cache.get(rootDir) != null)
             return cache.get(rootDir);
 
@@ -43,6 +54,17 @@ final class Util {
 
         toCache(rootDir, yangFiles);
         return yangFiles;
+    }
+
+    static Collection<InputStream> listFilesAsStream(String rootDir) throws FileNotFoundException {
+        Collection<InputStream> is = new ArrayList<InputStream>();
+
+        Collection<File> files = listFiles(rootDir);
+        for(File f : files) {
+            is.add(new FileInputStream(f));
+        }
+
+        return is;
     }
 
     static String[] listFilesAsArrayOfPaths(String rootDir) {
@@ -99,4 +121,56 @@ final class Util {
         String innerMessage = String.format(message, args);
         return String.format("%s %s", logPrefix, innerMessage);
     }
+
+    public static List<File> getClassPath(MavenProject project)
+            throws DependencyResolutionRequiredException {
+        List<File> dependencies = Lists.newArrayList();
+        try {
+            for (Object element : project.getCompileClasspathElements()) {
+                File asFile = new File((String) element);
+                if (isJar(asFile)) {
+                    dependencies.add(asFile);
+                }
+            }
+        } catch (DependencyResolutionRequiredException e) {
+            throw e;
+        }
+        return dependencies;
+    }
+
+    private static final String JAR_SUFFIX = ".jar";
+
+    private static boolean isJar(File element) {
+        return (element.isFile() && element.getName().endsWith(JAR_SUFFIX)) ? true
+                : false;
+    }
+
+    public static Collection<File> getFilesFromClasspath(
+            List<File> jarsOnClasspath, List<String> classPathFilter)
+            throws ZipException, IOException {
+        List<File> yangs = Lists.newArrayList();
+
+        for (File file : jarsOnClasspath) {
+            ZipFile zip = new ZipFile(file);
+            Enumeration<? extends ZipEntry> entries = zip.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                if (entry.getName().endsWith(YANG_SUFFIX)) {
+                    InputStream stream = zip.getInputStream(entry);
+                }
+            }
+        }
+
+        return yangs;
+    }
+
+    public static boolean acceptedFilter(String name, List<String> filter) {
+        for(String f : filter) {
+            if(name.endsWith(f)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

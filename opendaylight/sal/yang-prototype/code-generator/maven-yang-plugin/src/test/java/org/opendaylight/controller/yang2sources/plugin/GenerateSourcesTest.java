@@ -7,25 +7,29 @@
  */
 package org.opendaylight.controller.yang2sources.plugin;
 
-import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.util.Collection;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang2sources.plugin.ConfigArg.CodeGeneratorArg;
+import org.opendaylight.controller.yang2sources.plugin.ConfigArg.ResourceProviderArg;
 import org.opendaylight.controller.yang2sources.spi.CodeGenerator;
+import org.opendaylight.controller.yang2sources.spi.ResourceGenerator;
 
 import com.google.common.collect.Lists;
 
+@Ignore
 public class GenerateSourcesTest {
 
     @Mock
@@ -42,6 +46,11 @@ public class GenerateSourcesTest {
                 .getParent();
         outDir = new File("outputDir");
         mojo = new YangToSourcesMojo(
+                new ResourceProviderArg[] {
+                        new ResourceProviderArg(ProviderMock.class.getName(),
+                                outDir),
+                        new ResourceProviderArg(ProviderMock2.class.getName(),
+                                outDir) },
                 new CodeGeneratorArg[] { new CodeGeneratorArg(
                         GeneratorMock.class.getName(), outDir) }, parser, yang);
     }
@@ -52,6 +61,15 @@ public class GenerateSourcesTest {
         verify(parser, times(1)).parseYangModels(anyListOf(File.class));
         assertThat(GeneratorMock.called, is(1));
         assertThat(GeneratorMock.outputDir, is(outDir));
+    }
+
+    @Test
+    public void testRes() throws Exception {
+        mojo.execute();
+        assertThat(ProviderMock.called, is(1));
+        assertThat(ProviderMock2.called, is(1));
+        assertThat(ProviderMock2.baseDir, is(outDir));
+        assertThat(ProviderMock.baseDir, is(outDir));
     }
 
     public static class GeneratorMock implements CodeGenerator {
@@ -65,6 +83,32 @@ public class GenerateSourcesTest {
             called++;
             outputDir = baseDir;
             return Lists.newArrayList();
+        }
+    }
+
+    public static class ProviderMock implements ResourceGenerator {
+
+        private static int called = 0;
+        private static File baseDir;
+
+        @Override
+        public void generateResourceFiles(Collection<File> resources,
+                File outputDir) {
+            called++;
+            baseDir = outputDir;
+        }
+    }
+
+    public static class ProviderMock2 implements ResourceGenerator {
+
+        private static int called = 0;
+        private static File baseDir;
+
+        @Override
+        public void generateResourceFiles(Collection<File> resources,
+                File outputDir) {
+            called++;
+            baseDir = outputDir;
         }
     }
 }

@@ -23,9 +23,27 @@
                             <yangFilesRootDir>${basedir}/../../../../../yang-model-parser-impl/src/test/resources/model</yangFilesRootDir>
                             <codeGenerators>
                             </codeGenerators>
+                            <resourceProviders>
+                                <provider>
+                                    <resourceProviderClass>
+                                        org.opendaylight.controller.yang2sources.spi.ResourceProviderTestImpl
+                                    </resourceProviderClass>
+                                    <outputBaseDir>
+                                        outDir/
+                                    </outputBaseDir>
+                                </provider>
+                            </resourceProviders>
                         </configuration>
                     </execution>
                 </executions>
+				<dependencies>
+                    <dependency>
+                        <groupId>org.opendaylight.controller</groupId>
+                        <artifactId>yang-maven-plugin-spi</artifactId>
+                        <version>0.5-SNAPSHOT</version>
+                        <type>test-jar</type>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

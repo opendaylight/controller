@@ -18,7 +18,6 @@
                     <execution>
                         <goals>
                             <goal>generate-sources</goal>
-                            <goal>generate-resources</goal>
                         </goals>
                         <configuration>
                             <yangFilesRootDir>${basedir}/../../../../../yang-model-parser-impl/src/test/resources/model</yangFilesRootDir>
@@ -28,7 +27,7 @@
                                         org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl
                                     </codeGeneratorClass>
                                     <outputBaseDir>
-                                        outDir/src
+                                        outDir/
                                     </outputBaseDir>
                                 </generator>
                             </codeGenerators>
@@ -38,7 +37,7 @@
                                         org.opendaylight.controller.yang2sources.spi.ResourceProviderTestImpl
                                     </resourceProviderClass>
                                     <outputBaseDir>
-                                        outDir/resources
+                                        outDir/
                                     </outputBaseDir>
                                 </provider>
                             </resourceProviders>
