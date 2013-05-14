@@ -15,7 +15,6 @@
 
 <c:set var="title" value="OpenDaylight login error" scope="application"/>
 <%
-	if (session != null) session.invalidate();
     String filePath = "/WEB-INF/jsp/customerror.jsp"; 
 	URL fileURL = pageContext.getServletContext().getResource(filePath);
 	if(fileURL!=null) {
@@ -51,5 +50,6 @@
     </div>
   </div> 
   </form>
+  <% if (session != null) session.invalidate(); %>  
 </body>
 </html>
