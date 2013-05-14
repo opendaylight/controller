@@ -45,7 +45,6 @@ abstract public class ComponentActivatorAbstractBase implements
         BundleActivator, IContainerAware {
     Logger logger = LoggerFactory
             .getLogger(ComponentActivatorAbstractBase.class);
-    private ServiceRegistration containerAwareRegistration;
     private DependencyManager dm;
     private ConcurrentMap<ImmutablePair<String, Object>, Component> dbInstances = (ConcurrentMap<ImmutablePair<String, Object>, Component>) new ConcurrentHashMap<ImmutablePair<String, Object>, Component>();
     private ConcurrentMap<Object, Component> dbGlobalInstances = (ConcurrentMap<Object, Component>) new ConcurrentHashMap<Object, Component>();
@@ -356,9 +355,9 @@ abstract public class ComponentActivatorAbstractBase implements
                     }
                 }
             }
-
+            
             // Register with OSGi the provider for the service IContainerAware
-            this.containerAwareRegistration = context.registerService(
+            context.registerService(
                     IContainerAware.class.getName(), this, null);
 
             // Now call the derived class init function
