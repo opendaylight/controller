@@ -10,6 +10,7 @@ package org.opendaylight.controller.yang2sources.plugin;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -206,7 +207,20 @@ public final class YangToSourcesMojo extends AbstractMojo {
     }
 
     private Collection<File> getFilesFromYangRoot() {
-        Collection<File> yangFilesLoaded = Util.listFiles(yangFilesRootDir);
+        Collection<File> yangFilesLoaded = null;
+
+        File rootDir = new File(yangFilesRootDir);
+        try {
+            if(!rootDir.isAbsolute()) {
+                yangFilesLoaded = Util.listFiles(project.getBasedir().getAbsolutePath() + yangFilesRootDir);
+            } else {
+                yangFilesLoaded = Util.listFiles(yangFilesRootDir);
+            }
+
+        } catch(FileNotFoundException e) {
+            getLog().warn("Directory '" + yangFilesRootDir + "' does not exists.");
+            yangFilesLoaded = new ArrayList<File>();
+        }
         Collection<File> yangFiles = new ArrayList<File>(yangFilesLoaded);
 
         try {

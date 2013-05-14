@@ -45,9 +45,14 @@ final class Util {
      * List files recursively and return as array of String paths. Use cache of
      * size 1.
      */
-    static Collection<File> listFiles(String rootDir) {
+    static Collection<File> listFiles(String rootDir) throws FileNotFoundException {
         if (cache.get(rootDir) != null)
             return cache.get(rootDir);
+
+        File file = new File(rootDir);
+        if(!file.exists()) {
+            throw new FileNotFoundException();
+        }
 
         Collection<File> yangFiles = FileUtils.listFiles(new File(rootDir),
                 new String[] { YANG_SUFFIX }, true);
@@ -67,7 +72,7 @@ final class Util {
         return is;
     }
 
-    static String[] listFilesAsArrayOfPaths(String rootDir) {
+    static String[] listFilesAsArrayOfPaths(String rootDir) throws FileNotFoundException {
         String[] filesArray = new String[] {};
         Collection<File> yangFiles = listFiles(rootDir);
 
