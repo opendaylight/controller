@@ -25,7 +25,7 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
-import org.opendaylight.controller.yang.model.parser.impl.YangParserImpl;
+import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
 
 public class GeneratedTypesTest {
 

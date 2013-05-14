@@ -36,7 +36,7 @@ import org.opendaylight.controller.sal.java.api.generator.GeneratorJavaFile;
 import org.opendaylight.controller.sal.java.api.generator.InterfaceGenerator;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.parser.impl.YangParserImpl;
+import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
 
 public class GeneratorJavaFileTest {
     private static final String FS = File.separator;
