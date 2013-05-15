@@ -11,8 +11,6 @@ package org.opendaylight.controller.sal.core;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.SetDlType;
 import org.opendaylight.controller.sal.action.SetNwDst;
@@ -48,12 +46,27 @@ public class ContainerFlow implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((match == null) ? 0 : match.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ContainerFlow other = (ContainerFlow) obj;
+        if (match == null) {
+            if (other.match != null)
+                return false;
+        } else if (!match.equals(other.match))
+            return false;
+        return true;
     }
 
     @Override
