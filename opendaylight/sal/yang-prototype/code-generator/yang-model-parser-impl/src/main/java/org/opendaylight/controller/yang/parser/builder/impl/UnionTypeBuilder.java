@@ -33,10 +33,14 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder
  */
 public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
         TypeDefinitionBuilder, Builder {
+    private final static String CLASS_NAME = UnionTypeBuilder.class
+            .getSimpleName();
+
     private final int line;
     private final List<TypeDefinition<?>> types;
     private final List<TypeDefinitionBuilder> typedefs;
     private final UnionType instance;
+    private boolean built;
 
     private final List<String> actualPath;
     private final URI namespace;
@@ -89,40 +93,43 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public UnionType build() {
-        for (TypeDefinitionBuilder tdb : typedefs) {
-            types.add(tdb.build());
+        if (built) {
+            return instance;
+        } else {
+            for (TypeDefinitionBuilder tdb : typedefs) {
+                types.add(tdb.build());
+            }
+            built = true;
+            return instance;
         }
-        return instance;
     }
 
     @Override
     public void setPath(final SchemaPath schemaPath) {
-        throw new IllegalStateException("Can not set path to "
-                + UnionTypeBuilder.class.getSimpleName());
+        throw new IllegalStateException("Can not set path to " + CLASS_NAME);
     }
 
     @Override
     public void setDescription(final String description) {
         throw new IllegalStateException("Can not set description to "
-                + UnionTypeBuilder.class.getSimpleName());
+                + CLASS_NAME);
     }
 
     @Override
     public void setReference(final String reference) {
         throw new IllegalStateException("Can not set reference to "
-                + UnionTypeBuilder.class.getSimpleName());
+                + CLASS_NAME);
     }
 
     @Override
     public void setStatus(final Status status) {
-        throw new IllegalStateException("Can not set status to "
-                + UnionTypeBuilder.class.getSimpleName());
+        throw new IllegalStateException("Can not set status to " + CLASS_NAME);
     }
 
     @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
         throw new IllegalStateException("Can not add unknown node to "
-                + UnionTypeBuilder.class.getSimpleName());
+                + CLASS_NAME);
     }
 
     @Override
