@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX///CU\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/PriorityMessage.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 14
+      },
+      "writtenOn": "2013-05-15T00:59:32Z",
+      "side": 1,
+      "message": "We\u0027re using the commons/opendaylight/sun_coding_style.xml to format the code and replace tabs with whitespaces.",
+      "revId": "b16932ea37e26620348ecd224a35f9e937f48574",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
