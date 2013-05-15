@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.utils.GUIField;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -328,12 +326,40 @@ public class StaticRouteConfig implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((nextHop == null) ? 0 : nextHop.hashCode());
+        result = prime * result
+                + ((staticRoute == null) ? 0 : staticRoute.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        StaticRouteConfig other = (StaticRouteConfig) obj;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (nextHop == null) {
+            if (other.nextHop != null)
+                return false;
+        } else if (!nextHop.equals(other.nextHop))
+            return false;
+        if (staticRoute == null) {
+            if (other.staticRoute != null)
+                return false;
+        } else if (!staticRoute.equals(other.staticRoute))
+            return false;
+        return true;
     }
 
     @Override
