@@ -12,9 +12,6 @@ package org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6e
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.statistics.OFVendorStatistics;
 import org.openflow.util.U16;
