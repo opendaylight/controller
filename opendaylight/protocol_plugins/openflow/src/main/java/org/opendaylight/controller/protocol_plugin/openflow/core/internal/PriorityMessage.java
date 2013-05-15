@@ -10,8 +10,6 @@ package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.openflow.protocol.OFMessage;
 
@@ -55,17 +53,41 @@ class PriorityMessage {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((msg == null) ? 0 : msg.hashCode());
+        result = prime * result + priority;
+        result = prime * result + (int) (seqNum ^ (seqNum >>> 32));
+        result = prime * result + (syncReply ? 1231 : 1237);
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PriorityMessage other = (PriorityMessage) obj;
+        if (msg == null) {
+            if (other.msg != null)
+                return false;
+        } else if (!msg.equals(other.msg))
+            return false;
+        if (priority != other.priority)
+            return false;
+        if (seqNum != other.seqNum)
+            return false;
+        if (syncReply != other.syncReply)
+            return false;
+        return true;
     }
 
     @Override
     public String toString() {
-        return "PriorityMessage[" + ReflectionToStringBuilder.toString(this)
-                + "]";
+        return "PriorityMessage [msg=" + msg + ", priority=" + priority
+                + ", seqNum=" + seqNum + ", syncReply=" + syncReply + "]";
     }
 }
