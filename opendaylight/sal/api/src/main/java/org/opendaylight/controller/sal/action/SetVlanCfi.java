@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -11,62 +10,37 @@ package org.opendaylight.controller.sal.action;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.opendaylight.controller.sal.utils.Arguments;
 
 /**
  * Set vlan CFI action
- *
+ * 
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
+public class SetVlanCfi extends AbstractParameterAction<Integer> {
 
-public class SetVlanCfi extends Action {
-	@XmlElement
-    private int cfi;
-
-    /* Dummy constructor for JAXB */
-    private SetVlanCfi () {
-    }
-
-    public SetVlanCfi(int cfi) {
-        type = ActionType.SET_VLAN_CFI;
-        this.cfi = cfi;
-        checkValue(cfi);
+    public SetVlanCfi(Integer cfi) {
+        super(cfi);
     }
 
     /**
      * Returns the 802.1q CFI value that this action will set
+     * 
      * @return
      */
     public int getCfi() {
-        return cfi;
+        return getValue();
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SetVlanCfi other = (SetVlanCfi) obj;
-        if (cfi != other.cfi)
-            return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + cfi;
-        return result;
+    protected boolean checkValue(Integer value) {
+        Arguments.argInRange(0, 0x1, value);
+        return super.checkValue(value);
     }
 
     @Override
     public String toString() {
-        return type + "[cfi = " + Integer.toHexString(cfi) + "]";
+        return "setVlanCfi" + "[cfi = " + Integer.toHexString(getValue()) + "]";
     }
 }

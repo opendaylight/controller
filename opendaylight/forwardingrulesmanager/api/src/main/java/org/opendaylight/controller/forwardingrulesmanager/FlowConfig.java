@@ -23,7 +23,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.sal.action.Action;
-import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Drop;
 import org.opendaylight.controller.sal.action.Flood;
@@ -1367,7 +1366,7 @@ public class FlowConfig implements Serializable {
                         ActionType.SET_NW_TOS.toString() + "=(.*)").matcher(
                         actiongrp);
                 if (sstr.matches()) {
-                    actionList.add(new SetNwTos(Byte.parseByte(sstr.group(1))));
+                    actionList.add(new SetNwTos((int) Byte.parseByte(sstr.group(1))));
                     continue;
                 }
 

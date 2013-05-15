@@ -18,7 +18,7 @@ import java.util.List;
  *
  *
  */
-public enum EtherTypes {
+public enum EtherTypes implements EtherType {
     PVSTP("PVSTP", 0x010B), // 802.2 + SNAP (Spanning Tree)
     CDP("CDP", 0x2000), // 802.2 + SNAP
     VTP("VTP", 0x2003), // 802.2 + SNAP
@@ -42,10 +42,18 @@ public enum EtherTypes {
         return description;
     }
 
+    /* (non-Javadoc)
+     * @see org.opendaylight.controller.sal.utils.EtherType#intValue()
+     */
+    @Override
     public int intValue() {
         return number;
     }
 
+    /* (non-Javadoc)
+     * @see org.opendaylight.controller.sal.utils.EtherType#shortValue()
+     */
+    @Override
     public short shortValue() {
         return ((Integer) number).shortValue();
     }
@@ -112,6 +120,11 @@ public enum EtherTypes {
             }
         }
         return null;
+    }
+
+    @Override
+    public String getDescription() {
+       return this.description;
     }
 
 }

@@ -9,11 +9,6 @@
 
 package org.opendaylight.controller.sal.action;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.opendaylight.controller.sal.core.NodeConnector;
 
 /**
@@ -22,54 +17,18 @@ import org.opendaylight.controller.sal.core.NodeConnector;
  *
  *
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-
-public class Output extends Action {
-	@XmlElement
-    private NodeConnector port;
-
-    /* Dummy constructor for JAXB */
-    private Output () {
-    }
+public class Output extends AbstractParameterAction<NodeConnector> {
 
     public Output(NodeConnector port) {
-        type = ActionType.OUTPUT;
-        this.port = port;
-        //checkValue(port);
+        super(port);
     }
-
+    @Deprecated
     public NodeConnector getPort() {
-        return port;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Output other = (Output) obj;
-        if (port == null) {
-            if (other.port != null)
-                return false;
-        } else if (!port.equals(other.port))
-            return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((port == null) ? 0 : port.hashCode());
-        return result;
+        return getValue();
     }
 
     @Override
     public String toString() {
-        return type + "[" + port.toString() + "]";
+        return "Output" + "[" + getValue().toString() + "]";
     }
 }

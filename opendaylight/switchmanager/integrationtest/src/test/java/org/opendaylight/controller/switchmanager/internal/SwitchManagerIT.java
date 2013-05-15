@@ -31,6 +31,8 @@ import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.runner.RunWith;
+import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.SetVlanId;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Buffers;

@@ -23,6 +23,9 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFTransformationContext;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFTransformationService;
+import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
@@ -55,9 +58,21 @@ public class InventoryService implements IInventoryShimInternalListener,
     private Set<IPluginOutInventoryService> pluginOutInventoryServices = Collections
             .synchronizedSet(new HashSet<IPluginOutInventoryService>());
     private IController controller = null;
-    private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in global container only
-    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in global container only
+    private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties
+                                                                  // are
+                                                                  // maintained
+                                                                  // in global
+                                                                  // container
+                                                                  // only
+    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties
+                                                                                    // are
+                                                                                    // maintained
+                                                                                    // in
+                                                                                    // global
+                                                                                    // container
+                                                                                    // only
     private boolean isDefaultContainer = false;
+    private OFTransformationService mappingService;
 
     void setController(IController s) {
         this.controller = s;
@@ -162,24 +177,24 @@ public class InventoryService implements IInventoryShimInternalListener,
                 propMap = new HashMap<String, Property>();
                 byte tables = sw.getTables();
                 Tables t = new Tables(tables);
-                if (t != null) {
-                    propMap.put(Tables.TablesPropName, t);
-                }
+                propMap.put(Tables.TablesPropName, t);
                 int cap = sw.getCapabilities();
                 Capabilities c = new Capabilities(cap);
-                if (c != null) {
-                    propMap.put(Capabilities.CapabilitiesPropName, c);
-                }
+                propMap.put(Capabilities.CapabilitiesPropName, c);
+
+                // refactor to support action classes
                 int act = sw.getActions();
-                Actions a = new Actions(act);
-                if (a != null) {
-                    propMap.put(Actions.ActionsPropName, a);
-                }
+                // Needs to introduce bitmask registry
+                // FIXME: Actions: refactor to use set of action classes.
+
+                // Set<Class<? extends Action>> supportedActions;
+                Actions actions = new Actions(act);
+
+                propMap.put(Actions.ActionsPropName, actions);
+
                 int buffers = sw.getBuffers();
                 Buffers b = new Buffers(buffers);
-                if (b != null) {
-                    propMap.put(Buffers.BuffersPropName, b);
-                }
+                propMap.put(Buffers.BuffersPropName, b);
                 Date connectedSince = sw.getConnectedDate();
                 Long connectedSinceTime = (connectedSince == null) ? 0
                         : connectedSince.getTime();
@@ -303,8 +318,8 @@ public class InventoryService implements IInventoryShimInternalListener,
 
     private void updateNode(Node node, Set<Property> properties) {
         logger.trace("{} updated, props: {}", node, properties);
-        if (nodeProps == null || !nodeProps.containsKey(node) ||
-                properties == null || properties.isEmpty()) {
+        if (nodeProps == null || !nodeProps.containsKey(node)
+                || properties == null || properties.isEmpty()) {
             return;
         }
 
@@ -345,6 +360,14 @@ public class InventoryService implements IInventoryShimInternalListener,
         default:
             break;
         }
+    }
+
+    public OFTransformationService getMappingService() {
+        return mappingService;
+    }
+
+    public void setMappingService(OFTransformationService mappingService) {
+        this.mappingService = mappingService;
     }
 
 }

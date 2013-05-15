@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -16,8 +15,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.protocol_plugin.openflow.internal.FlowConverter;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.impl.OFMappingServiceImpl;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.OFAction;
@@ -50,8 +51,16 @@ import org.opendaylight.controller.sal.utils.NodeCreator;
 
 public class FlowProgrammerServiceTest {
 
+    private OFMappingServiceImpl mappingService;
+
+    @Before
+    public void init() {
+        mappingService = new OFMappingServiceImpl();
+    }
+
     @Test
     public void testSALtoOFFlowConverter() throws UnknownHostException {
+
         Node node = NodeCreator.createOFNode(1000l);
         NodeConnector port = NodeConnectorCreator.createNodeConnector(
                 (short) 24, node);
@@ -115,38 +124,37 @@ public class FlowProgrammerServiceTest {
         /*
          * Convert the SAL aFlow to OF Flow
          */
-        FlowConverter salToOF = new FlowConverter(aFlow);
+        FlowConverter salToOF = new FlowConverter(
+                mappingService.getMappingContext(), aFlow);
         OFMatch ofMatch = salToOF.getOFMatch();
         List<OFAction> ofActions = salToOF.getOFActions();
 
         /*
          * Convert the OF Flow to SAL Flow bFlow
          */
-        FlowConverter ofToSal = new FlowConverter(ofMatch, ofActions);
+        FlowConverter ofToSal = new FlowConverter(
+                mappingService.getMappingContext(), ofMatch, ofActions);
         Flow bFlow = ofToSal.getFlow(node);
         Match bMatch = bFlow.getMatch();
         List<Action> bActions = bFlow.getActions();
 
         /*
-         * Verify the converted SAL flow bFlow is equivalent to the original SAL Flow
+         * Verify the converted SAL flow bFlow is equivalent to the original SAL
+         * Flow
          */
         Assert.assertTrue(((NodeConnector) match.getField(MatchType.IN_PORT)
                 .getValue()).equals(((NodeConnector) bMatch.getField(
                 MatchType.IN_PORT).getValue())));
-        Assert.assertTrue(Arrays.equals((byte[]) match.getField(
-                MatchType.DL_SRC).getValue(), (byte[]) bMatch.getField(
-                MatchType.DL_SRC).getValue()));
-        Assert.assertTrue(Arrays.equals((byte[]) match.getField(
-                MatchType.DL_DST).getValue(), (byte[]) bMatch.getField(
-                MatchType.DL_DST).getValue()));
-        Assert
-                .assertTrue(((Short) match.getField(MatchType.DL_TYPE)
-                        .getValue()).equals((Short) bMatch.getField(
-                        MatchType.DL_TYPE).getValue()));
-        Assert
-                .assertTrue(((Short) match.getField(MatchType.DL_VLAN)
-                        .getValue()).equals((Short) bMatch.getField(
-                        MatchType.DL_VLAN).getValue()));
+        Assert.assertTrue(Arrays.equals(
+                (byte[]) match.getField(MatchType.DL_SRC).getValue(),
+                (byte[]) bMatch.getField(MatchType.DL_SRC).getValue()));
+        Assert.assertTrue(Arrays.equals(
+                (byte[]) match.getField(MatchType.DL_DST).getValue(),
+                (byte[]) bMatch.getField(MatchType.DL_DST).getValue()));
+        Assert.assertTrue(((Short) match.getField(MatchType.DL_TYPE).getValue())
+                .equals((Short) bMatch.getField(MatchType.DL_TYPE).getValue()));
+        Assert.assertTrue(((Short) match.getField(MatchType.DL_VLAN).getValue())
+                .equals((Short) bMatch.getField(MatchType.DL_VLAN).getValue()));
         Assert.assertTrue(((Byte) match.getField(MatchType.DL_VLAN_PR)
                 .getValue()).equals((Byte) bMatch
                 .getField(MatchType.DL_VLAN_PR).getValue()));
@@ -162,10 +170,8 @@ public class FlowProgrammerServiceTest {
         Assert.assertTrue(((InetAddress) match.getField(MatchType.NW_DST)
                 .getMask()).equals((InetAddress) bMatch.getField(
                 MatchType.NW_DST).getMask()));
-        Assert
-                .assertTrue(((Byte) match.getField(MatchType.NW_PROTO)
-                        .getValue()).equals((Byte) bMatch.getField(
-                        MatchType.NW_PROTO).getValue()));
+        Assert.assertTrue(((Byte) match.getField(MatchType.NW_PROTO).getValue())
+                .equals((Byte) bMatch.getField(MatchType.NW_PROTO).getValue()));
         Assert.assertTrue(((Byte) match.getField(MatchType.NW_TOS).getValue())
                 .equals((Byte) bMatch.getField(MatchType.NW_TOS).getValue()));
         Assert.assertTrue(((Short) match.getField(MatchType.TP_SRC).getValue())
@@ -173,7 +179,8 @@ public class FlowProgrammerServiceTest {
         Assert.assertTrue(((Short) match.getField(MatchType.TP_DST).getValue())
                 .equals((Short) bMatch.getField(MatchType.TP_DST).getValue()));
 
-        // FlowConverter parses and sets the actions in the same order for sal match and of match
+        // FlowConverter parses and sets the actions in the same order for sal
+        // match and of match
         for (short i = 0; i < actions.size(); i++) {
             Assert.assertTrue(actions.get(i).equals(bActions.get(i)));
         }
@@ -236,42 +243,45 @@ public class FlowProgrammerServiceTest {
         byte mac[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5 };
         actions.add(new SetDlSrc(mac));
         actions.add(new SetDlDst(mac));
-        //actions.add(new SetNwSrc(dstIP)); Nicira extensions do not provide IPv6 match addresses change
-        //actions.add(new SetNwDst(srcIP));
+        // actions.add(new SetNwSrc(dstIP)); Nicira extensions do not provide
+        // IPv6 match addresses change
+        // actions.add(new SetNwDst(srcIP));
         actions.add(new SetNwTos(3));
         actions.add(new SetTpSrc(10));
         actions.add(new SetTpDst(65535));
         actions.add(new SetVlanId(200));
-
         Flow aFlow = new Flow(aMatch, actions);
 
         /*
          * Convert the SAL aFlow to OF Flow
          */
-        FlowConverter salToOF = new FlowConverter(aFlow);
+        FlowConverter salToOF = new FlowConverter(
+                mappingService.getMappingContext(), aFlow);
         V6Match v6Match = (V6Match) salToOF.getOFMatch();
         List<OFAction> ofActions = salToOF.getOFActions();
 
         /*
          * Convert the OF Flow to SAL Flow bFlow
          */
-        FlowConverter ofToSal = new FlowConverter(v6Match, ofActions);
+        FlowConverter ofToSal = new FlowConverter(
+                mappingService.getMappingContext(), v6Match, ofActions);
         Flow bFlow = ofToSal.getFlow(node);
         Match bMatch = bFlow.getMatch();
         List<Action> bActions = bFlow.getActions();
 
         /*
-         * Verify the converted SAL flow bFlow is equivalent to the original SAL Flow
+         * Verify the converted SAL flow bFlow is equivalent to the original SAL
+         * Flow
          */
         Assert.assertTrue(((NodeConnector) aMatch.getField(MatchType.IN_PORT)
                 .getValue()).equals(((NodeConnector) bMatch.getField(
                 MatchType.IN_PORT).getValue())));
-        Assert.assertTrue(Arrays.equals((byte[]) aMatch.getField(
-                MatchType.DL_SRC).getValue(), (byte[]) bMatch.getField(
-                MatchType.DL_SRC).getValue()));
-        Assert.assertTrue(Arrays.equals((byte[]) aMatch.getField(
-                MatchType.DL_DST).getValue(), (byte[]) bMatch.getField(
-                MatchType.DL_DST).getValue()));
+        Assert.assertTrue(Arrays.equals(
+                (byte[]) aMatch.getField(MatchType.DL_SRC).getValue(),
+                (byte[]) bMatch.getField(MatchType.DL_SRC).getValue()));
+        Assert.assertTrue(Arrays.equals(
+                (byte[]) aMatch.getField(MatchType.DL_DST).getValue(),
+                (byte[]) bMatch.getField(MatchType.DL_DST).getValue()));
         Assert.assertTrue(((Short) aMatch.getField(MatchType.DL_TYPE)
                 .getValue()).equals((Short) bMatch.getField(MatchType.DL_TYPE)
                 .getValue()));
@@ -298,16 +308,13 @@ public class FlowProgrammerServiceTest {
                 .getValue()));
         Assert.assertTrue(((Byte) aMatch.getField(MatchType.NW_TOS).getValue())
                 .equals((Byte) bMatch.getField(MatchType.NW_TOS).getValue()));
-        Assert
-                .assertTrue(((Short) aMatch.getField(MatchType.TP_SRC)
-                        .getValue()).equals((Short) bMatch.getField(
-                        MatchType.TP_SRC).getValue()));
-        Assert
-                .assertTrue(((Short) aMatch.getField(MatchType.TP_DST)
-                        .getValue()).equals((Short) bMatch.getField(
-                        MatchType.TP_DST).getValue()));
+        Assert.assertTrue(((Short) aMatch.getField(MatchType.TP_SRC).getValue())
+                .equals((Short) bMatch.getField(MatchType.TP_SRC).getValue()));
+        Assert.assertTrue(((Short) aMatch.getField(MatchType.TP_DST).getValue())
+                .equals((Short) bMatch.getField(MatchType.TP_DST).getValue()));
 
-        // FlowConverter parses and sets the actions in the same order for sal match and of match
+        // FlowConverter parses and sets the actions in the same order for sal
+        // match and of match
         for (short i = 0; i < actions.size(); i++) {
             Assert.assertTrue(actions.get(i).equals(bActions.get(i)));
         }
@@ -326,7 +333,7 @@ public class FlowProgrammerServiceTest {
                 .getByName("2001:420:281:1004:407a:57f4:4d15:c355");
         InetAddress dstIP = InetAddress
                 .getByName("2001:420:281:1004:e123:e688:d655:a1b0");
-        InetAddress ipMask = null;//InetAddress.getByName("ffff:ffff:ffff:ffff:0:0:0:0");
+        InetAddress ipMask = null;// InetAddress.getByName("ffff:ffff:ffff:ffff:0:0:0:0");
         short ethertype = EtherTypes.IPv6.shortValue();
         short vlan = (short) 27;
         byte vlanPr = 3;

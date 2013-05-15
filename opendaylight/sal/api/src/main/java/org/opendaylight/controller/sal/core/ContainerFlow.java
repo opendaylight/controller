@@ -93,32 +93,31 @@ public class ContainerFlow implements Serializable {
             return true;
         }
         Match actionMatch = new Match();
+        // FIXME: Actions: refactor to support extension by registering
+        // flow modifiers for particular action types.
         for (Action action : flow.getActions()) {
-            switch (action.getType()) {
-            case SET_DL_TYPE:
-                actionMatch.setField(MatchType.DL_TYPE,
+        	
+        	if(action instanceof SetDlType) {
+        		actionMatch.setField(MatchType.DL_TYPE,
                         ((Integer) ((SetDlType) action).getDlType())
                                 .shortValue());
-                break;
-            case SET_NW_SRC:
-                actionMatch.setField(MatchType.NW_SRC, ((SetNwSrc) action)
+                
+        	} else if (action instanceof SetNwSrc) {
+        		actionMatch.setField(MatchType.NW_SRC, ((SetNwSrc) action)
                         .getAddress());
-                break;
-            case SET_NW_DST:
-                actionMatch.setField(MatchType.NW_DST, ((SetNwDst) action)
+                
+        	} else if (action instanceof SetNwSrc) {
+        		actionMatch.setField(MatchType.NW_DST, ((SetNwDst) action)
                         .getAddress());
-                break;
-            case SET_TP_SRC:
-                actionMatch.setField(MatchType.TP_SRC,
+        	} else if (action instanceof SetTpSrc) {
+        		actionMatch.setField(MatchType.TP_SRC,
                         ((Integer) ((SetTpSrc) action).getPort()).shortValue());
-                break;
-            case SET_TP_DST:
-                actionMatch.setField(MatchType.TP_DST,
+                
+        	} else if (action instanceof SetTpDst) {
+        		actionMatch.setField(MatchType.TP_DST,
                         ((Integer) ((SetTpDst) action).getPort()).shortValue());
-                break;
-            default:
-                // This action cannot conflict
-            }
+                
+			}
         }
 
         return this.allowsMatch(actionMatch);

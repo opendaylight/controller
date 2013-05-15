@@ -9,63 +9,34 @@
 
 package org.opendaylight.controller.sal.action;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import org.opendaylight.controller.sal.utils.Arguments;
 
 /**
  * Set vlan PCP action
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-
-public class SetVlanPcp extends Action {
-	@XmlElement
-    private int pcp;
-
-	private SetVlanPcp() {
-		
-	}
+public class SetVlanPcp extends AbstractParameterAction<Integer>{
 	
     public SetVlanPcp(int pcp) {
-        type = ActionType.SET_VLAN_PCP;
-        this.pcp = pcp;
-        checkValue(pcp);
+        super(pcp);
     }
-
+    
     /**
      * Returns the value of the vlan PCP this action will set
      * @return int
      */
     public int getPcp() {
-        return pcp;
+        return getValue();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SetVlanPcp other = (SetVlanPcp) obj;
-        if (pcp != other.pcp)
-            return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + pcp;
-        return result;
-    }
-
+    
     @Override
     public String toString() {
-        return type + "[pcp = " + Integer.toHexString(pcp) + "]";
+        return "setVlanPcp" + "[pcp = " + Integer.toHexString(getValue()) + "]";
+    }
+
+    @Override
+    protected boolean checkValue(Integer value) throws IllegalArgumentException {
+        Arguments.argInRange(0, 0x7, value);
+        return true;
     }
 }

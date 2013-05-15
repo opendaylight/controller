@@ -9,12 +9,8 @@
 
 package org.opendaylight.controller.sal.action;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.opendaylight.controller.sal.utils.EtherTypes;
+import org.opendaylight.controller.sal.utils.EtherType;
+import org.opendaylight.controller.sal.utils.Vlan;
 
 /**
  * Insert a 802.1q (outermost) header action
@@ -26,76 +22,33 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
  *
  *
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
+public class PushVlan extends AbstractParameterAction<Vlan> {
 
-public class PushVlan extends Action {
-    private int tag; // TPID - 16 bits
-    private int pcp; // PCP - 3 bits
-    private int cfi; // CFI - 1 bit (drop eligible)
-    private int vlanId; // VID - 12 bits
-    private transient int tci; // TCI = [PCP + CFI + VID] - 16 bits
-    private transient int header; // full 802.1q header [TPID + TCI] - 32 bits
-
-    /* Dummy constructor for JAXB */
-    private PushVlan () {
-    }
-
+    @Deprecated
     public PushVlan(int tag, int pcp, int cfi, int vlanId) {
-        type = ActionType.PUSH_VLAN;
-        this.tag = tag;
-        this.cfi = cfi;
-        this.pcp = pcp;
-        this.vlanId = vlanId;
-        this.tci = createTci();
-        this.header = createHeader();
-        runChecks();
+        super(new Vlan(tag, pcp, cfi, vlanId));
+        
     }
 
-    public PushVlan(EtherTypes tag, int pcp, int cfi, int vlanId) {
-        type = ActionType.PUSH_VLAN;
-        this.tag = tag.intValue();
-        this.cfi = cfi;
-        this.pcp = pcp;
-        this.vlanId = vlanId;
-        this.tci = createTci();
-        this.header = createHeader();
-        runChecks();
+    @Deprecated
+    public PushVlan(EtherType tag, int pcp, int cfi, int vlanId) {
+        super(new Vlan(tag, pcp, cfi, vlanId));
     }
 
-    private int createTci() {
-        return (pcp & 0x7) << 13 | (cfi & 0x1) << 12 | (vlanId & 0xfff);
+    public PushVlan(Vlan vlan){
+        super(vlan);
     }
+    
 
-    private int createHeader() {
-        return (tag & 0xffff) << 16 | (pcp & 0x7) << 13 | (cfi & 0x1) << 12
-                | (vlanId & 0xfff);
-    }
-
-    private void runChecks() {
-        checkValue(ActionType.SET_DL_TYPE, tag);
-        checkValue(ActionType.SET_VLAN_PCP, pcp);
-        checkValue(ActionType.SET_VLAN_CFI, cfi);
-        checkValue(ActionType.SET_VLAN_ID, vlanId);
-        checkValue(tci);
-
-        // Run action specific check which cannot be run by parent
-        if (tag != EtherTypes.VLANTAGGED.intValue()
-                && tag != EtherTypes.QINQ.intValue()
-                && tag != EtherTypes.OLDQINQ.intValue()
-                && tag != EtherTypes.CISCOQINQ.intValue()) {
-            // pass a value which will tell fail and tell something about the original wrong value
-            checkValue(ActionType.SET_DL_TYPE, 0xBAD << 16 | tag);
-        }
-    }
 
     /**
      * Returns the VID portion of the 802.1q header this action will insert
      * VID - (12 bits)
      * @return byte[]
      */
+    @Deprecated
     public int getVlanId() {
-        return vlanId;
+        return getValue().getVlanId();
     }
 
     /**
@@ -103,8 +56,9 @@ public class PushVlan extends Action {
      * CFI - (1 bit)
      * @return
      */
+    @Deprecated
     public int getCfi() {
-        return cfi;
+        return getValue().getCfi();
     }
 
     /**
@@ -112,16 +66,18 @@ public class PushVlan extends Action {
      * PCP - (3 bits)
      * @return byte[]
      */
+    @Deprecated
     public int getPcp() {
-        return pcp;
+        return getValue().getPcp();
     }
 
     /**
      * Returns the TPID portion of the 802.1q header this action will insert
      * TPID - (16 bits)
      */
+    @Deprecated
     public int getTag() {
-        return tag;
+        return getValue().getTag();
     }
 
     /**
@@ -129,8 +85,9 @@ public class PushVlan extends Action {
      * TCI = [PCP + CFI + VID] - (16 bits)
      * @return
      */
+    @Deprecated
     public int getTci() {
-        return tci;
+        return getValue().getTci();
     }
 
     /**
@@ -139,46 +96,14 @@ public class PushVlan extends Action {
      *
      * @return int
      */
-    @XmlElement(name="VlanHeader")
+    @Deprecated
     public int getHeader() {
-        return header;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        PushVlan other = (PushVlan) obj;
-        if (cfi != other.cfi)
-            return false;
-        if (pcp != other.pcp)
-            return false;
-        if (tag != other.tag)
-            return false;
-        if (vlanId != other.vlanId)
-            return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + cfi;
-        result = prime * result + pcp;
-        result = prime * result + tag;
-        result = prime * result + vlanId;
-        return result;
+        return getValue().getHeader();
     }
 
     @Override
     public String toString() {
-        return type + "[tag = " + tag + ", pcp = " + pcp + ", cfi = " + cfi
-                + ", vlanId = " + vlanId + "]";
+        return "pushVlan" + "[vlan = " + getValue() + "]";
     }
 
 }

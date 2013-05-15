@@ -98,10 +98,9 @@ public class FlowTest {
         flow.removeAction(new Loopback());
         Assert.assertTrue(flow.getActions().equals(actions));
 
-        // Add a malformed action
-        Assert.assertFalse(flow.addAction(new PushVlan(EtherTypes.CISCOQINQ, 3,
-                3, 8000)));
     }
+    
+    
 
     private Flow getSampleFlow(Node node) throws UnknownHostException {
         NodeConnector port = NodeConnectorCreator.createOFNodeConnector(

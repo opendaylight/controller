@@ -320,7 +320,7 @@ public class Troubleshoot implements IDaylightWeb {
         StringBuffer outPorts = new StringBuffer();
         String outVlanId = null;
         for (Action action : flow.getActions()) {
-            actions.append(action.getType().toString() + "\n");
+            actions.append(action.toString() + "\n");
             if (action instanceof Output) {
                 Output ao = (Output) action;
                 if (outPorts.length() > 0) {

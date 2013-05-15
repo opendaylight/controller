@@ -16,13 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * Represent the action of dropping the matched packet
  *
- *
- *
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
 public class Drop extends Action {
-    public Drop() {
-        type = ActionType.DROP;
-    }
+
 }

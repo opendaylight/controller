@@ -35,6 +35,7 @@ import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.forwardingrulesmanager.ActionType;
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntryInstall;
@@ -46,7 +47,6 @@ import org.opendaylight.controller.forwardingrulesmanager.PortGroupConfig;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupProvider;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.sal.action.Action;
-import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.Output;
@@ -1140,7 +1140,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         newFlowEntry = currentFlowEntry.clone();
         Action target = null;
         for (Action action : newFlowEntry.getFlow().getActions()) {
-            if (action.getType() == ActionType.OUTPUT) {
+            if (action instanceof Output) {
                 target = action;
                 break;
             }
@@ -1169,7 +1169,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         for (FlowEntryInstall flow : flowEntryList) {
             if (flow.getFlowName().equals(flowName)) {
                 for (Action action : flow.getOriginal().getFlow().getActions()) {
-                    if (action.getType() == ActionType.OUTPUT) {
+                    if (action instanceof Output) {
                         return ((Output) action).getPort();
                     }
                 }

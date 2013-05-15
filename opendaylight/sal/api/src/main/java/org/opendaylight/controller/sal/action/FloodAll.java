@@ -8,23 +8,10 @@
  */
 
 package org.opendaylight.controller.sal.action;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * Represents the action of flooding the packet out all the physical ports except the input port
  *
- *
- *
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-
 public class FloodAll extends Action {
 
-    public FloodAll() {
-        type = ActionType.FLOOD_ALL;
-    }
 }
