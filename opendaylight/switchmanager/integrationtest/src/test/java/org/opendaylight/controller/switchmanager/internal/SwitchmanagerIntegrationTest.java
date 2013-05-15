@@ -33,6 +33,8 @@ import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.runner.RunWith;
+import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.SetVlanId;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Buffers;
@@ -196,9 +198,13 @@ public class SwitchmanagerIntegrationTest {
         Assert.assertTrue(this.switchManager.getNodeProp
                 (node, Capabilities.CapabilitiesPropName)
                 .equals(new Capabilities((int)3)));
+        Set<Class<? extends Action>> supportedActions = new HashSet<Class<? extends Action>>();
+        supportedActions.add(SetVlanId.class);
+        
+        
         Assert.assertTrue(this.switchManager.getNodeProp
                 (node, Actions.ActionsPropName)
-                .equals(new Actions((int)2)));
+                .equals(new Actions(supportedActions)));
         Assert.assertTrue(this.switchManager.getNodeProp
                 (node, Buffers.BuffersPropName)
                 .equals(new Buffers((int)1)));
