@@ -319,7 +319,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
         // If an outgoing port is specified, it must belong to this container
         for (Action action : flow.getActions()) {
-            if (action.getType() == ActionType.OUTPUT) {
+            if (action instanceof Output) {
                 NodeConnector outPort = (NodeConnector) ((Output) action)
                         .getPort();
                 if (!containerOwnsNodeConnector(container, outPort)) {

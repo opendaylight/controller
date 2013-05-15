@@ -9,11 +9,14 @@
 
 package org.opendaylight.controller.sal.core;
 
+import java.util.Set;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.opendaylight.controller.sal.action.Action;
 
 /**
  * @file   Actions.java
@@ -29,6 +32,10 @@ public class Actions extends Property {
     @XmlElement
     private int actionsValue;
     
+    private Set<Class<? extends Action>> supportedActions;
+    
+    
+    @Deprecated
     public enum ActionType { 
     	OUTPUT_PORT_ACTION(1<<0),
     	VLAN_VID_ACTION(1<<1),
@@ -59,9 +66,14 @@ public class Actions extends Property {
      * @param actions the actions value
      * @return Constructed object
      */
-    public Actions(int actions) {
+    public Actions(Set<Class<? extends Action>> actions) {
         super(ActionsPropName);
-        this.actionsValue = actions;
+        this.supportedActions = actions;
+    }
+    
+    @Deprecated
+    public Actions(int actions){
+    	super(ActionsPropName);
     }
 
     /*
@@ -73,11 +85,11 @@ public class Actions extends Property {
     }
 
     public Actions clone() {
-        return new Actions(this.actionsValue);
+        return new Actions(this.supportedActions);
     }
     
-    public int getValue() {
-    	return this.actionsValue;
+    public Set<Class<? extends Action>> getValue() {
+    	return this.supportedActions;
     }
     
     

@@ -24,6 +24,8 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateListener;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFMappingService;
+import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
@@ -62,7 +64,8 @@ public class InventoryServiceShim implements IContainerListener,
     private ConcurrentMap<String, IInventoryShimInternalListener> inventoryShimInternalListeners = new ConcurrentHashMap<String, IInventoryShimInternalListener>();
     private List<IInventoryShimExternalListener> inventoryShimExternalListeners = new CopyOnWriteArrayList<IInventoryShimExternalListener>();
     private ConcurrentMap<NodeConnector, List<String>> containerMap = new ConcurrentHashMap<NodeConnector, List<String>>();
-
+    private OFMappingService mappingService;
+    
     void setController(IController s) {
         this.controller = s;
     }
@@ -392,24 +395,21 @@ public class InventoryServiceShim implements IContainerListener,
 
         byte tables = sw.getTables();
         Tables t = new Tables(tables);
-        if (t != null) {
-            props.add(t);
-        }
+        props.add(t);
         int cap = sw.getCapabilities();
         Capabilities c = new Capabilities(cap);
-        if (c != null) {
-            props.add(c);
-        }
+        props.add(c);
+
         int act = sw.getActions();
+        // Needs to introduce bitmask registry
+        // FIXME: Actions: refactor to use set of action classes.
+        
+        //Set<Class<? extends Action>> supportedActions;
         Actions a = new Actions(act);
-        if (a != null) {
-            props.add(a);
-        }
+        props.add(a);
         int buffers = sw.getBuffers();
         Buffers b = new Buffers(buffers);
-        if (b != null) {
-            props.add(b);
-        }
+        props.add(b);
         // Notify all internal and external listeners
         notifyInventoryShimListener(node, type, props);
     }
@@ -455,7 +455,15 @@ public class InventoryServiceShim implements IContainerListener,
         
         // Notify all internal and external listeners
         notifyInventoryShimListener(node, UpdateType.CHANGED, properties);
-    }  
+    }
+
+	public OFMappingService getMappingService() {
+		return mappingService;
+	}
+
+	public void setMappingService(OFMappingService mappingService) {
+		this.mappingService = mappingService;
+	}  
 
    
 }
