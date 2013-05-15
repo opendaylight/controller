@@ -29,8 +29,10 @@ import org.slf4j.LoggerFactory;
 			 PopVlan.class, PushVlan.class, SetDlDst.class, SetDlSrc.class, SetDlType.class, SetNwDst.class, SetNwSrc.class,
 			 SetNwTos.class, SetTpDst.class, SetTpSrc.class, SetVlanCfi.class, SetVlanId.class, SetVlanPcp.class, SwPath.class})
 public abstract class Action {
+	
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
     private static boolean debug = false; // Enable to find where in the code an invalid assignment is made
+    
     @XmlTransient
     protected ActionType type;
     private transient boolean isValid = true;
@@ -98,17 +100,9 @@ public abstract class Action {
      *
      * @return ActionType
      */
+    @Deprecated
     public ActionType getType() {
         return type;
-    }
-
-    /**
-     * Returns the id of this action
-     *
-     * @return String
-     */
-    public String getId() {
-        return type.getId();
     }
 
     /**

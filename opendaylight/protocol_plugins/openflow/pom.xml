@@ -42,6 +42,7 @@
 			  javax.net.ssl
             </Import-Package>
             <Export-Package>
+            
 			  org.opendaylight.controller.protocol_plugin.openflow.internal
             </Export-Package>
             <Embed-Dependency>

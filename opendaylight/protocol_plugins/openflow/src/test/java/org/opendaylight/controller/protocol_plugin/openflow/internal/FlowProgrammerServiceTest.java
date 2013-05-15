@@ -16,8 +16,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.protocol_plugin.openflow.internal.FlowConverter;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.impl.OFMappingServiceImpl;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.OFAction;
@@ -49,9 +51,18 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
 public class FlowProgrammerServiceTest {
+	
+	
+	private OFMappingServiceImpl mappingService;
+	
+	@Before
+	public void init() {
+		mappingService = new OFMappingServiceImpl();
+	}
 
     @Test
     public void testSALtoOFFlowConverter() throws UnknownHostException {
+    	
         Node node = NodeCreator.createOFNode(1000l);
         NodeConnector port = NodeConnectorCreator.createNodeConnector(
                 (short) 24, node);
@@ -115,14 +126,14 @@ public class FlowProgrammerServiceTest {
         /*
          * Convert the SAL aFlow to OF Flow
          */
-        FlowConverter salToOF = new FlowConverter(aFlow);
+        FlowConverter salToOF = new FlowConverter(mappingService.getMappingContext(),aFlow);
         OFMatch ofMatch = salToOF.getOFMatch();
         List<OFAction> ofActions = salToOF.getOFActions();
 
         /*
          * Convert the OF Flow to SAL Flow bFlow
          */
-        FlowConverter ofToSal = new FlowConverter(ofMatch, ofActions);
+        FlowConverter ofToSal = new FlowConverter(mappingService.getMappingContext(),ofMatch, ofActions);
         Flow bFlow = ofToSal.getFlow(node);
         Match bMatch = bFlow.getMatch();
         List<Action> bActions = bFlow.getActions();
@@ -242,20 +253,19 @@ public class FlowProgrammerServiceTest {
         actions.add(new SetTpSrc(10));
         actions.add(new SetTpDst(65535));
         actions.add(new SetVlanId(200));
-
         Flow aFlow = new Flow(aMatch, actions);
 
         /*
          * Convert the SAL aFlow to OF Flow
          */
-        FlowConverter salToOF = new FlowConverter(aFlow);
+        FlowConverter salToOF = new FlowConverter(mappingService.getMappingContext(),aFlow);
         V6Match v6Match = (V6Match) salToOF.getOFMatch();
         List<OFAction> ofActions = salToOF.getOFActions();
 
         /*
          * Convert the OF Flow to SAL Flow bFlow
          */
-        FlowConverter ofToSal = new FlowConverter(v6Match, ofActions);
+        FlowConverter ofToSal = new FlowConverter(mappingService.getMappingContext(),v6Match, ofActions);
         Flow bFlow = ofToSal.getFlow(node);
         Match bMatch = bFlow.getMatch();
         List<Action> bActions = bFlow.getActions();

@@ -23,6 +23,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExtern
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFMappingService;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
@@ -61,7 +62,10 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     private static final Logger log = LoggerFactory
             .getLogger(FlowProgrammerService.class);
     private IController controller;
-    private ConcurrentMap<String, IFlowProgrammerNotifier> flowProgrammerNotifiers;
+    private OFMappingService mappingService;
+    
+
+	private ConcurrentMap<String, IFlowProgrammerNotifier> flowProgrammerNotifiers;
     private Map<String, Set<NodeConnector>> containerToNc;
     private ConcurrentMap<Long, Map<Integer, Long>> xid2rid;
     private int barrierMessagePriorCount = getBarrierMessagePriorCount();
@@ -83,6 +87,15 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         }
     }
 
+    public OFMappingService getMappingService() {
+		return mappingService;
+	}
+
+	public void setMappingService(OFMappingService mappingService) {
+		this.mappingService = mappingService;
+	}
+    
+    
     public void setFlowProgrammerNotifier(Map<String, ?> props,
             IFlowProgrammerNotifier s) {
         if (props == null || props.get("containerName") == null) {
@@ -344,7 +357,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     private void handleFlowRemovedMessage(ISwitch sw, OFFlowRemoved msg) {
         Node node = NodeCreator.createOFNode(sw.getId());
-        Flow flow = new FlowConverter(msg.getMatch(),
+        Flow flow = new FlowConverter(mappingService.getMappingContext(),msg.getMatch(),
                 new ArrayList<OFAction>(0)).getFlow(node);
         flow.setPriority(msg.getPriority());
         flow.setIdleTimeout(msg.getIdleTimeout());
