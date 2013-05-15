@@ -5,9 +5,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <artifactId>commons.integrationtest</artifactId>
+    <version>0.5.0-SNAPSHOT</version>
+    <relativePath>../../commons/integrationtest</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
+      <version>0.6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -32,8 +32,23 @@
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
     <dependency>
+    	<groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal.rest</artifactId>
+      <version>0.5.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        	<groupId>org.opendaylight.controller</groupId>
+      <artifactId>concepts</artifactId>
+      <version>0.5.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwarding.staticrouting</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>security</artifactId>
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -126,12 +141,6 @@
       <artifactId>usermanager</artifactId>
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>security</artifactId>
-      <version>0.4.0-SNAPSHOT</version>
-    </dependency>
-
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>net.sf.jung2</artifactId>

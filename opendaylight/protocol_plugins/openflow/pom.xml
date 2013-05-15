@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
-  </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.opendaylight.controller</groupId>
+		<artifactId>commons.opendaylight</artifactId>
+		<version>1.4.0-SNAPSHOT</version>
+		<relativePath>../../commons/opendaylight</relativePath>
+	</parent>
 
-  <artifactId>protocol_plugins.openflow</artifactId>
-  <version>0.4.0-SNAPSHOT</version>
-  <packaging>bundle</packaging>
+	<artifactId>protocol_plugins.openflow</artifactId>
+	<version>0.4.0-SNAPSHOT</version>
+	<packaging>bundle</packaging>
 
   <build>
     <plugins>
@@ -22,6 +23,7 @@
         <configuration>
           <instructions>
             <Import-Package>
+              org.opendaylight.controller.concepts.transform,
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.sal.action,
               org.opendaylight.controller.sal.discovery,
@@ -41,7 +43,11 @@
               javax.net.ssl
             </Import-Package>
             <Export-Package>
-              org.opendaylight.controller.protocol_plugin.openflow.internal
+              org.opendaylight.controller.protocol_plugin.openflow.internal,
+              org.opendaylight.controller.protocol_plugin.openflow.mapping.api,
+              org.openflow.protocol,
+              org.openflow.protocol.action,
+              org.openflow.protocol.util
             </Export-Package>
             <Embed-Dependency>
               org.openflow.openflowj
@@ -62,7 +68,13 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
+      <version>0.6.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>concepts</artifactId>
       <version>0.5.0-SNAPSHOT</version>
+    
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>

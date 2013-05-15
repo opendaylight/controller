@@ -11,71 +11,33 @@ package org.opendaylight.controller.sal.action;
 
 import java.net.InetAddress;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * Set network source address action
  */
 
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-
-public class SetNwSrc extends Action {
-    InetAddress address;
-
-    /* Dummy constructor for JAXB */
-    private SetNwSrc () {
-    }
+public class SetNwSrc extends AbstractParameterAction<InetAddress> {
 
     public SetNwSrc(InetAddress address) {
-        type = ActionType.SET_NW_SRC;
-        this.address = address;
+        super(address);
     }
 
     /**
      * Returns the network address this action will set
      *
-     * @return	InetAddress
+     * @return  InetAddress
      */
     public InetAddress getAddress() {
-        return address;
+        return getValue();
     }
-
-    @XmlElement (name="address")
+    
+    @Deprecated
     public String getAddressAsString() {
-    	return address.getHostAddress();
+        return getValue().getHostAddress();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SetNwSrc other = (SetNwSrc) obj;
-        if (address == null) {
-            if (other.address != null)
-                return false;
-        } else if (!address.equals(other.address))
-            return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((address == null) ? 0 : address.hashCode());
-        return result;
-    }
-
+    
     @Override
     public String toString() {
-        return type + "[address = " + address + "]";
+        return "setNwSrc" + "[address = " + getValue() + "]";
     }
 }

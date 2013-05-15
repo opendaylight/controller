@@ -168,7 +168,7 @@ public class NorthboundIT {
     }
 
     @Test
-    public void testStatistics() {
+    public void testStatistics() throws JSONException {
         String actionTypes[] = { "drop", "loopback", "flood", "floodAll",
                 "controller", "swPath", "hwPath", "output", "setDlSrc",
                 "setDlDst", "setDlType", "setVlanId", "setVlanPcp",
@@ -177,7 +177,7 @@ public class NorthboundIT {
         System.out.println("Starting Statistics JAXB client.");
 
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/statistics/default/";
-        try {
+
             String result = getJsonResult(baseURL + "flowstats");
             JSONTokener jt = new JSONTokener(result);
             JSONObject json = new JSONObject(jt);
@@ -261,16 +261,9 @@ public class NorthboundIT {
             Assert.assertTrue(portStat.getInt("receiveOverRunError") == 6);
             Assert.assertTrue(portStat.getInt("receiveCrcError") == 1);
             Assert.assertTrue(portStat.getInt("collisionCount") == 4);
-
-        } catch (Exception e) {
-            // Got an unexpected exception
-            Assert.assertTrue(false);
-
-        }
     }
 
-    private void testFlowStat(JSONObject flowStat, String actionType) {
-        try {
+    private void testFlowStat(JSONObject flowStat, String actionType) throws JSONException {
             Assert.assertTrue(flowStat.getInt("tableId") == 1);
             Assert.assertTrue(flowStat.getInt("durationSeconds") == 40);
             Assert.assertTrue(flowStat.getInt("durationNanoseconds") == 400);
@@ -358,9 +351,7 @@ public class NorthboundIT {
                 Assert.assertTrue(act.getInt("port") == 4201);
             if (act.getString("@type").equals("setTpDst"))
                 Assert.assertTrue(act.getInt("port") == 8080);
-        } catch (Exception e) {
-            Assert.assertTrue(false);
-        }
+
     }
 
     @Test
@@ -750,77 +741,65 @@ public class NorthboundIT {
                         "protocol_plugins.stub", "0.4.0-SNAPSHOT"),
 
                 // List all the opendaylight modules
-                mavenBundle("org.opendaylight.controller", "security",
-                        "0.4.0-SNAPSHOT").noStart(),
-                mavenBundle("org.opendaylight.controller", "sal",
-                        "0.5.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "security").versionAsInProject().noStart(),
+                mavenBundle("org.opendaylight.controller", "concepts").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal.rest").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "sal.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "statisticsmanager",
-                        "0.4.0-SNAPSHOT"),
+                        "sal.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "statisticsmanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "containermanager",
-                        "0.4.0-SNAPSHOT"),
+                        "statisticsmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "containermanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "containermanager.implementation", "0.4.0-SNAPSHOT"),
+                        "containermanager.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "forwardingrulesmanager", "0.4.0-SNAPSHOT"),
+                        "forwardingrulesmanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "forwardingrulesmanager.implementation",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "arphandler",
-                        "0.4.0-SNAPSHOT"),
+                        "forwardingrulesmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "arphandler").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "clustering.services", "0.4.0-SNAPSHOT"),
+                        "clustering.services").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "clustering.services-implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "switchmanager",
-                        "0.4.0-SNAPSHOT"),
+                        "clustering.services-implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "switchmanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "switchmanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration",
-                        "0.4.0-SNAPSHOT"),
+                        "switchmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "configuration.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "hosttracker",
-                        "0.4.0-SNAPSHOT"),
+                        "configuration.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "hosttracker").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "hosttracker.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "arphandler",
-                        "0.4.0-SNAPSHOT"),
+                        "hosttracker.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "arphandler").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "routing.dijkstra_implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "topologymanager",
-                        "0.4.0-SNAPSHOT"),
+                        "routing.dijkstra_implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "topologymanager").versionAsInProject(),
 
-                mavenBundle("org.opendaylight.controller", "usermanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "logging.bridge",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "clustering.test",
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "usermanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "logging.bridge").versionAsInProject(),
+                //mavenBundle("org.opendaylight.controller", "clustering.test").versionAsInProject(),
 
                 mavenBundle("org.opendaylight.controller",
-                        "forwarding.staticrouting", "0.4.0-SNAPSHOT"),
+                        "forwarding.staticrouting").versionAsInProject(),
 
                 // Northbound bundles
                 mavenBundle("org.opendaylight.controller",
-                        "commons.northbound", "0.4.0-SNAPSHOT"),
+                        "commons.northbound").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "forwarding.staticrouting.northbound", "0.4.0-SNAPSHOT"),
+                        "forwarding.staticrouting.northbound").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "statistics.northbound", "0.4.0-SNAPSHOT"),
+                        "statistics.northbound").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "topology.northbound", "0.4.0-SNAPSHOT"),
+                        "topology.northbound").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "hosttracker.northbound", "0.4.0-SNAPSHOT"),
+                        "hosttracker.northbound").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "switchmanager.northbound", "0.4.0-SNAPSHOT"),
+                        "switchmanager.northbound").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "flowprogrammer.northbound", "0.4.0-SNAPSHOT"),
+                        "flowprogrammer.northbound").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "subnets.northbound", "0.4.0-SNAPSHOT"),
+                        "subnets.northbound").versionAsInProject(),
 
                 mavenBundle("org.codehaus.jackson", "jackson-mapper-asl",
                         "1.9.8"),

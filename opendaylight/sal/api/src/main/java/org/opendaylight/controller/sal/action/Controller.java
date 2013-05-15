@@ -9,22 +9,18 @@
 
 package org.opendaylight.controller.sal.action;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * Represents the action of punting the packet to the controller
  *
  *
  *
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-
 public class Controller extends Action {
 
-    public Controller() {
-        type = ActionType.CONTROLLER;
+    @Override
+    public String toString() {
+        return "controller";
     }
+    
+
 }

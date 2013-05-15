@@ -16,15 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * Represents the action of flooding the packet out
  *
- *
- *
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-
 public class Flood extends Action {
 
-    public Flood() {
-        type = ActionType.FLOOD;
-    }
 }

@@ -9,22 +9,9 @@
 
 package org.opendaylight.controller.sal.action;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * Represents the action of looping the packet back the port it came in from
  *
- *
- *
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-
 public class Loopback extends Action {
-
-    public Loopback() {
-        type = ActionType.LOOPBACK;
-    }
 }

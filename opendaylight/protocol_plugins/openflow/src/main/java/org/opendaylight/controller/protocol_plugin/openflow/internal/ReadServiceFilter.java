@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -19,6 +18,7 @@ import java.util.Set;
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
 import org.opendaylight.controller.protocol_plugin.openflow.IPluginReadServiceFilter;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFTransformationService;
 import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.statistics.OFPortStatisticsReply;
 import org.openflow.protocol.statistics.OFStatistics;
@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.opendaylight.controller.sal.action.Action;
-import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerListener;
@@ -50,9 +49,9 @@ import org.openflow.protocol.statistics.OFTableStatistics;
 /**
  * Read Service shim layer which is in charge of filtering the flow statistics
  * based on container. It is a Global instance.
- *
- *
- *
+ * 
+ * 
+ * 
  */
 public class ReadServiceFilter implements IPluginReadServiceFilter,
         IContainerListener {
@@ -62,6 +61,8 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     private IOFStatisticsManager statsMgr = null;
     private Map<String, Set<NodeConnector>> containerToNc;
     private Map<String, Set<NodeTable>> containerToNt;
+
+    private OFTransformationService mappingService;
 
     public void setController(IController core) {
         this.controller = core;
@@ -76,7 +77,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
         containerToNc = new HashMap<String, Set<NodeConnector>>();
@@ -84,28 +85,27 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
-     *
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     * 
      */
     void start() {
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
-     *
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     * 
      */
     void stop() {
     }
@@ -130,7 +130,8 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         }
 
         long sid = (Long) node.getID();
-        OFMatch ofMatch = new FlowConverter(flow).getOFMatch();
+        OFMatch ofMatch = new FlowConverter(mappingService.getMappingContext(),
+                flow).getOFMatch();
         List<OFStatistics> ofList = (cached == true) ? statsMgr
                 .getOFFlowStatistics(sid, ofMatch) : statsMgr.queryStatistics(
                 sid, OFStatisticsType.FLOW, ofMatch);
@@ -138,7 +139,8 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         /*
          * Convert and filter the statistics per container
          */
-        List<FlowOnNode> flowOnNodeList = new FlowStatisticsConverter(ofList)
+        List<FlowOnNode> flowOnNodeList = new FlowStatisticsConverter(
+                mappingService.getMappingContext(), ofList)
                 .getFlowOnNodeList(node);
         List<FlowOnNode> filteredList = filterFlowListPerContainer(container,
                 node, flowOnNodeList);
@@ -159,7 +161,8 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         /*
          * Convert and filter the statistics per container
          */
-        List<FlowOnNode> flowOnNodeList = new FlowStatisticsConverter(ofList)
+        List<FlowOnNode> flowOnNodeList = new FlowStatisticsConverter(
+                mappingService.getMappingContext(), ofList)
                 .getFlowOnNodeList(node);
         List<FlowOnNode> filteredList = filterFlowListPerContainer(container,
                 node, flowOnNodeList);
@@ -186,7 +189,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
     /**
      * Filters a list of FlowOnNode elements based on the container
-     *
+     * 
      * @param container
      * @param nodeId
      * @param list
@@ -202,7 +205,8 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         List<FlowOnNode> newList = new ArrayList<FlowOnNode>();
 
         for (FlowOnNode target : list) {
-            // Check whether the described flow (match + actions) belongs to this container
+            // Check whether the described flow (match + actions) belongs to
+            // this container
             if (flowBelongToContainer(container, nodeId, target.getFlow())) {
                 newList.add(target);
             }
@@ -213,7 +217,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
     /**
      * Filters a list of FlowOnNode elements based on the container
-     *
+     * 
      * @param container
      * @param nodeId
      * @param list
@@ -263,9 +267,9 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     }
 
     /**
-     * Returns whether the specified flow (flow match + actions)
-     * belongs to the container
-     *
+     * Returns whether the specified flow (flow match + actions) belongs to the
+     * container
+     * 
      * @param container
      * @param node
      * @param flow
@@ -283,10 +287,12 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
     /**
      * Returns whether the passed NodeConnector belongs to the container
-     *
-     * @param container	container name
-     * @param p		node connector to test
-     * @return 		true if belongs false otherwise
+     * 
+     * @param container
+     *            container name
+     * @param p
+     *            node connector to test
+     * @return true if belongs false otherwise
      */
     public boolean containerOwnsNodeConnector(String container, NodeConnector p) {
         // All node connectors belong to the default container
@@ -315,7 +321,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
     /**
      * Returns whether the container flowspec allows the passed flow
-     *
+     * 
      * @param container
      * @param match
      * @return
@@ -325,9 +331,9 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     }
 
     /**
-     * Check whether the vlan field in the flow match is the same
-     * of the static vlan configured for the container
-     *
+     * Check whether the vlan field in the flow match is the same of the static
+     * vlan configured for the container
+     * 
      * @param container
      * @param node
      * @param flow
@@ -339,9 +345,9 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     }
 
     /**
-     * Check whether the ports in the flow match and flow actions for
-     * the specified node belong to the container
-     *
+     * Check whether the ports in the flow match and flow actions for the
+     * specified node belong to the container
+     * 
      * @param container
      * @param node
      * @param flow
@@ -362,7 +368,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
         // If an outgoing port is specified, it must belong to this container
         for (Action action : flow.getActions()) {
-            if (action.getType() == ActionType.OUTPUT) {
+            if (action instanceof Output) {
                 NodeConnector outPort = (NodeConnector) ((Output) action)
                         .getPort();
                 if (!containerOwnsNodeConnector(container, outPort)) {
@@ -461,6 +467,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         return statsMgr.getTransmitRate(switchId, port);
     }
 
+
     @Override
     public NodeTableStatistics readNodeTable(String containerName,
             NodeTable table, boolean cached) {
@@ -494,6 +501,15 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
                 return new TableStatisticsConverter(sid, filteredList)
                 .getNodeTableStatsList();
+
+    }
+    
+    public OFTransformationService getMappingService() {
+        return mappingService;
+    }
+
+    public void setMappingService(OFTransformationService mappingService) {
+        this.mappingService = mappingService;
     }
 
 }

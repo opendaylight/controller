@@ -9,22 +9,10 @@
 
 package org.opendaylight.controller.sal.action;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * Represents the action of sending the packet to the local hardware path for processing
  *
- *
- *
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
-
 public class HwPath extends Action {
 
-    public HwPath() {
-        type = ActionType.HW_PATH;
-    }
 }
