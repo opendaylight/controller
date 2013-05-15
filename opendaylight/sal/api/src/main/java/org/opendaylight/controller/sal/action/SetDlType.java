@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.opendaylight.controller.sal.utils.EtherTypes;
+import org.opendaylight.controller.sal.utils.EtherType;
 
 /**
  * Set ethertype/length field action
@@ -23,24 +23,10 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class SetDlType extends Action {
-	@XmlElement
-    private int dlType;
+public class SetDlType extends AbstractParameterAction<EtherType> {
 
-    /* Dummy constructor for JAXB */
-    private SetDlType () {
-    }
-
-    public SetDlType(int dlType) {
-        type = ActionType.SET_DL_TYPE;
-        this.dlType = dlType;
-        checkValue(dlType);
-    }
-
-    public SetDlType(EtherTypes dlType) {
-        type = ActionType.SET_DL_TYPE;
-        this.dlType = dlType.intValue();
-        checkValue(this.dlType);
+    public SetDlType(EtherType dlType) {
+        super(dlType);
     }
 
     /**
@@ -48,34 +34,14 @@ public class SetDlType extends Action {
      *
      * @return byte[]
      */
+    @XmlElement
+    @Deprecated
     public int getDlType() {
-        return dlType;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SetDlType other = (SetDlType) obj;
-        if (dlType != other.dlType)
-            return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + dlType;
-        return result;
+        return getValue().shortValue();
     }
 
     @Override
     public String toString() {
-        return type + "[dlType = 0x" + Integer.toHexString(dlType) + "]";
+        return "setDlType" + "[dlType = 0x" + Integer.toHexString(getDlType()) + "]";
     }
 }

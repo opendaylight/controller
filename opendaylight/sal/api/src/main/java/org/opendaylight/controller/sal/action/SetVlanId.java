@@ -11,9 +11,8 @@ package org.opendaylight.controller.sal.action;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
+import static org.opendaylight.controller.sal.utils.Arguments.*;
 /**
  * Set vlan id action
  */
@@ -21,18 +20,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class SetVlanId extends Action {
-	@XmlElement
-    private int vlanId;
+public class SetVlanId extends AbstractParameterAction<Integer> {
 
-	private SetVlanId() {
-		
-	}
 	
     public SetVlanId(int vlanId) {
-        type = ActionType.SET_VLAN_ID;
-        this.vlanId = vlanId;
-        checkValue(vlanId);
+        super(vlanId);
     }
 
     /**
@@ -40,34 +32,19 @@ public class SetVlanId extends Action {
      *
      * @return int
      */
+    @Deprecated
     public int getVlanId() {
-        return vlanId;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SetVlanId other = (SetVlanId) obj;
-        if (vlanId != other.vlanId)
-            return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + vlanId;
-        return result;
+        return getValue();
     }
 
     @Override
     public String toString() {
-        return type + "[vlanId = " + vlanId + "]";
+        return "setVlan" + "[vlanId = " + getValue() + "]";
+    }
+    
+    @Override
+    protected boolean checkValue(Integer value) throws IllegalArgumentException {
+        argInRange(0, 0xfff, value);
+        return true;
     }
 }

@@ -23,8 +23,4 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class Loopback extends Action {
-
-    public Loopback() {
-        type = ActionType.LOOPBACK;
-    }
 }

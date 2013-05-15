@@ -21,20 +21,15 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 /**
  * Set destination datalayer address action
  *
+ * TODO: Datalayer Address should be encapsulated in type.
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class SetDlDst extends Action {
-    private byte[] address;
-
-    /* Dummy constructor for JAXB */
-    private SetDlDst () {
-    }
+public class SetDlDst  extends AbstractParameterAction<byte[]> {
 
     public SetDlDst(byte[] dlAddress) {
-        type = ActionType.SET_DL_DST;
-        this.address = dlAddress.clone();
+        super(dlAddress.clone());
     }
 
     /**
@@ -42,25 +37,26 @@ public class SetDlDst extends Action {
      *
      * @return byte[]
      */
+    @Deprecated
     public byte[] getDlAddress() {
-        return address.clone();
+        return getValue().clone();
     }
     
+    // FIXME: Should be moved into RTO
+    @Deprecated
     @XmlElement(name = "address")
     public String getDlAddressString() {
-        return HexEncode.bytesToHexString(address);
+        return HexEncode.bytesToHexString(getValue());
     }
     
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!super.equals(obj))
-            return false;
         if (getClass() != obj.getClass())
             return false;
         SetDlDst other = (SetDlDst) obj;
-        if (!Arrays.equals(address, other.address))
+        if (!Arrays.equals(getValue(), other.getValue()))
             return false;
         return true;
     }
@@ -69,12 +65,12 @@ public class SetDlDst extends Action {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Arrays.hashCode(address);
+        result = prime * result + Arrays.hashCode(getValue());
         return result;
     }
 
     @Override
     public String toString() {
-        return type + "[address = " + HexEncode.bytesToHexString(address) + "]";
+        return "setDlDst" + "[address = " + HexEncode.bytesToHexString(getValue()) + "]";
     }
 }

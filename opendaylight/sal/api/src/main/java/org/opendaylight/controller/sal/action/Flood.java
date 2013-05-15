@@ -24,7 +24,4 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 public class Flood extends Action {
 
-    public Flood() {
-        type = ActionType.FLOOD;
-    }
 }

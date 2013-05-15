@@ -45,6 +45,7 @@ import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
+import org.opendaylight.controller.sal.utils.EtherType;
 /**
  * Stub Implementation for IPluginInReadService used by SAL
  * 
@@ -120,7 +121,24 @@ public class ReadService implements IPluginInReadService {
         byte src[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1 };
         actionList.add(new SetDlSrc(src));
         actionList.add(new SetDlDst(dst));
-        actionList.add(new SetDlType(10));
+        actionList.add(new SetDlType(new EtherType() {
+            
+            @Override
+            public short shortValue() {
+                return 10;
+            }
+            
+            @Override
+            public int intValue() {
+                return 10;
+            }
+            
+            @Override
+            public String getDescription() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        }));
 
         actionList.add(new SetVlanId(2));
         actionList.add(new SetVlanPcp(3));

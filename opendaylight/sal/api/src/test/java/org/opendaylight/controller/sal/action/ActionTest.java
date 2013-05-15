@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -40,20 +39,15 @@ import org.slf4j.LoggerFactory;
 
 public class ActionTest {
     protected static final Logger logger = LoggerFactory
-    .getLogger(ActionTest.class);
+            .getLogger(ActionTest.class);
+
     @Test
     public void tesActionCreationValidation() {
         Action action = new PopVlan();
-        Assert.assertTrue(action.isValid());
-
         byte mac[] = { (byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0x11,
                 (byte) 0x22, (byte) 0x33 };
-
         action = new SetDlSrc(mac);
-        Assert.assertTrue(action.isValid());
-
         action = new SetDlSrc(mac);
-        Assert.assertTrue(action.isValid());
     }
 
     @Test
@@ -61,19 +55,14 @@ public class ActionTest {
         Action action = null;
 
         action = new SetVlanId(2);
-        Assert.assertTrue(action.isValid());
-
         action = new SetVlanId(4095);
-        Assert.assertTrue(action.isValid());
-
         action = new SetVlanId(0);
-        Assert.assertFalse(action.isValid());
-
         action = new SetVlanId(1);
-        Assert.assertTrue(action.isValid());
+    }
 
-        action = new SetVlanId(4096);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetVlanIdIncorrect1() {
+        new SetVlanId(4096);
     }
 
     @Test
@@ -81,28 +70,36 @@ public class ActionTest {
         Action action = null;
 
         action = new PushVlan(EtherTypes.QINQ, 0x4, 0x1, 2000);
-        Assert.assertTrue(action.isValid());
 
         action = new PushVlan(EtherTypes.QINQ.intValue(), 0x4, 0x1, 2000);
-        Assert.assertTrue(action.isValid());
-
-        action = new PushVlan(EtherTypes.OLDQINQ, 0x4, 2, 2000);
-        Assert.assertFalse(action.isValid());
 
         action = new PushVlan(EtherTypes.VLANTAGGED, 0x4, 0, 2000);
-        Assert.assertTrue(action.isValid());
 
-        action = new PushVlan(EtherTypes.QINQ.intValue(), 0x4, 0x1, 5000);
-        Assert.assertFalse(action.isValid());
+    }
 
-        action = new PushVlan(EtherTypes.LLDP, 0x4, 0x1, 2000);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testPushVlanIncorrect1() {
+        new PushVlan(EtherTypes.OLDQINQ, 0x4, 2, 2000);
+    }
 
-        action = new PushVlan(EtherTypes.PVSTP, 0x4, 2, 2000);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testPushVlanIncorrect2() {
+        new PushVlan(EtherTypes.QINQ.intValue(), 0x4, 0x1, 5000);
+    }
 
-        action = new PushVlan(EtherTypes.QINQ, 0x4, -1, 2000);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testPushVlanIncorrect3() {
+        new PushVlan(EtherTypes.LLDP, 0x4, 0x1, 2000);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPushVlanIncorrect4() {
+        new PushVlan(EtherTypes.PVSTP, 0x4, 2, 2000);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPushVlanIncorrect5() {
+        new PushVlan(EtherTypes.QINQ, 0x4, -1, 2000);
     }
 
     @Test
@@ -110,30 +107,33 @@ public class ActionTest {
         Action action = null;
 
         action = new SetVlanPcp(0x4);
-        Assert.assertTrue(action.isValid());
+    }
 
-        action = new SetVlanPcp(0x8);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetVlanPcepIncorrect() {
+        new SetVlanPcp(0x8);
+    }
 
-        action = new SetVlanPcp(-1);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetVlanPcepIncorrect2() {
+        new SetVlanPcp(-1);
     }
 
     @Test
     public void testSetVlanCfiActionCreation() {
         Action action = null;
-
         action = new SetVlanCfi(0x0);
-        Assert.assertTrue(action.isValid());
-
         action = new SetVlanCfi(0x1);
-        Assert.assertTrue(action.isValid());
+    }
 
-        action = new SetVlanCfi(0x2);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetVlanCfiIncorrect() {
+        new SetVlanCfi(0x2);
+    }
 
-        action = new SetVlanCfi(-1);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetVlanCfiIncorrect2() {
+        new SetVlanCfi(-1);
     }
 
     @Test
@@ -144,40 +144,36 @@ public class ActionTest {
         try {
             ip = InetAddress.getByName("171.71.9.52");
         } catch (UnknownHostException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
 
         action = new SetNwSrc(ip);
-        Assert.assertTrue(action.isValid());
-
         action = new SetNwDst(ip);
-        Assert.assertTrue(action.isValid());
 
         try {
             ip = InetAddress.getByName("2001:420:281:1003:f2de:f1ff:fe71:728d");
         } catch (UnknownHostException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         action = new SetNwSrc(ip);
-        Assert.assertTrue(action.isValid());
-
         action = new SetNwDst(ip);
-        Assert.assertTrue(action.isValid());
-
         action = new SetNwTos(0xf);
-        Assert.assertTrue(action.isValid());
-
         action = new SetNwTos(0x3f);
-        Assert.assertTrue(action.isValid());
+    }
 
-        action = new SetNwTos(0x40);
-        Assert.assertFalse(action.isValid());
-        
-        action = new SetNwTos(0xff1);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetNwTosIncorrect1() {
+        new SetNwTos(0x40);
+    }
 
-        action = new SetNwTos(-1);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetNwTosIncorrect2() {
+        new SetNwTos(0xff1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetNwTosIncorrect3() {
+        new SetNwTos(-1);
     }
 
     @Test
@@ -185,25 +181,28 @@ public class ActionTest {
         Action action = null;
 
         action = new SetTpSrc(50000);
-        Assert.assertTrue(action.isValid());
-
         action = new SetTpDst(65535);
-        Assert.assertTrue(action.isValid());
-
         action = new SetTpDst(0);
-        Assert.assertFalse(action.isValid());
+    }
 
-        action = new SetTpSrc(-1);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetTpSrcIncorrect1() {
+        new SetTpSrc(-1);
+    }
 
-        action = new SetTpDst(-1);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetTpSrcIncorrect2() {
+        new SetTpSrc(65536);
+    }
 
-        action = new SetTpSrc(65536);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetTpDstIncorrect1() {
+        new SetTpDst(-1);
+    }
 
-        action = new SetTpDst(65536);
-        Assert.assertFalse(action.isValid());
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetTpDstIncorrect2() {
+        new SetTpDst(65536);
     }
 
     @Test
@@ -226,15 +225,13 @@ public class ActionTest {
         try {
             ip = InetAddress.getByName("1.1.1.1");
         } catch (UnknownHostException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
 
         actions.add(new SetDlSrc(mac));
         actions.add(new SetNwSrc(ip));
         actions.add(new Output(nc));
         Assert.assertTrue(actions.size() == 3);
-        Assert.assertTrue(actions.get(0).isValid());
-
         Action probe = new Output(nc);
         Assert.assertTrue(actions.contains(probe));
         Assert.assertFalse(actions.contains(new Output(NodeConnectorCreator

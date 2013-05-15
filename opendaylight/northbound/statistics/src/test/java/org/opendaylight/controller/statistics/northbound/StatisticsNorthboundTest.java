@@ -20,13 +20,14 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
+import org.opendaylight.controller.sal.rest.flow.NodeFlowRTO;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
 public class StatisticsNorthboundTest extends TestCase {
 
     @Test
     public void testFlowStatistics() {
-        List<FlowOnNode> fon = new ArrayList<FlowOnNode>();
+        List<NodeFlowRTO> fon = new ArrayList<NodeFlowRTO>();
         Node node = NodeCreator.createOFNode(1L);
         FlowStatistics fs = new FlowStatistics(node, fon);
         Assert.assertTrue(fs.getNode().equals(node));

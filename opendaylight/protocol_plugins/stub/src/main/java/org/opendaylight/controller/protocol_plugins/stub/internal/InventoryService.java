@@ -3,6 +3,7 @@ package org.opendaylight.controller.protocol_plugins.stub.internal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -17,6 +18,8 @@ import org.apache.felix.dm.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.SetVlanId;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Buffers;
@@ -97,7 +100,12 @@ public class InventoryService implements IPluginInInventoryService {
         propMap.put(Tables.TablesPropName, t);
         Capabilities c = new Capabilities((int)3);
         propMap.put(Capabilities.CapabilitiesPropName, c);
-        Actions a = new Actions((int)2);
+        
+        // FIXME: Actions: refactor to use classes
+        
+        Set<Class<? extends Action>> supportedActions = new HashSet<Class<? extends Action>>();
+        supportedActions.add(SetVlanId.class);
+        Actions a = new Actions(supportedActions);
         propMap.put(Actions.ActionsPropName, a);
         Buffers b = new Buffers((int)1);
         propMap.put(Buffers.BuffersPropName, b);

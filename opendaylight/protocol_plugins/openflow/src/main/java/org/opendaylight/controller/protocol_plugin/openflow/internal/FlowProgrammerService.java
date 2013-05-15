@@ -23,6 +23,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExtern
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFTransformationService;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
@@ -61,6 +62,8 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     private static final Logger log = LoggerFactory
             .getLogger(FlowProgrammerService.class);
     private IController controller;
+    private OFTransformationService mappingService;
+
     private ConcurrentMap<String, IFlowProgrammerNotifier> flowProgrammerNotifiers;
     private Map<String, Set<NodeConnector>> containerToNc;
     private ConcurrentMap<Long, Map<Integer, Long>> xid2rid;
@@ -81,6 +84,14 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         if (this.controller == core) {
             this.controller = null;
         }
+    }
+
+    public OFTransformationService getMappingService() {
+        return mappingService;
+    }
+
+    public void setMappingService(OFTransformationService mappingService) {
+        this.mappingService = mappingService;
     }
 
     public void setFlowProgrammerNotifier(Map<String, ?> props,
@@ -185,7 +196,8 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
-                FlowConverter x = new FlowConverter(flow);
+                FlowConverter x = new FlowConverter(
+                        mappingService.getMappingContext(), flow);
                 OFMessage msg = x.getOFFlowMod(OFFlowMod.OFPFC_ADD, null);
 
                 Object result;
@@ -201,7 +213,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                      * will be inserted automatically to synchronize the
                      * progression.
                      */
-                    result = asyncMsgSend(node, sw, msg, rid);  
+                    result = asyncMsgSend(node, sw, msg, rid);
                 }
                 return getStatusInternal(result, action, rid);
             } else {
@@ -213,7 +225,8 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 "Internal plugin error"));
     }
 
-    private Status modifyFlowInternal(Node node, Flow oldFlow, Flow newFlow, long rid) {
+    private Status modifyFlowInternal(Node node, Flow oldFlow, Flow newFlow,
+            long rid) {
         String action = "modify";
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             return new Status(StatusCode.NOTACCEPTABLE, errorString("send",
@@ -228,13 +241,17 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 // modification message
                 if (oldFlow.getPriority() != newFlow.getPriority()
                         || !oldFlow.getMatch().equals(newFlow.getMatch())) {
-                    msg1 = new FlowConverter(oldFlow).getOFFlowMod(
-                            OFFlowMod.OFPFC_DELETE_STRICT, OFPort.OFPP_NONE);
-                    msg2 = new FlowConverter(newFlow).getOFFlowMod(
-                            OFFlowMod.OFPFC_ADD, null);
+                    msg1 = new FlowConverter(
+                            mappingService.getMappingContext(), oldFlow)
+                            .getOFFlowMod(OFFlowMod.OFPFC_DELETE_STRICT,
+                                    OFPort.OFPP_NONE);
+                    msg2 = new FlowConverter(
+                            mappingService.getMappingContext(), newFlow)
+                            .getOFFlowMod(OFFlowMod.OFPFC_ADD, null);
                 } else {
-                    msg1 = new FlowConverter(newFlow).getOFFlowMod(
-                            OFFlowMod.OFPFC_MODIFY_STRICT, null);
+                    msg1 = new FlowConverter(
+                            mappingService.getMappingContext(), newFlow)
+                            .getOFFlowMod(OFFlowMod.OFPFC_MODIFY_STRICT, null);
                 }
                 /*
                  * Synchronous message send
@@ -295,7 +312,8 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
-                OFMessage msg = new FlowConverter(flow).getOFFlowMod(
+                OFMessage msg = new FlowConverter(
+                        mappingService.getMappingContext(), flow).getOFFlowMod(
                         OFFlowMod.OFPFC_DELETE_STRICT, OFPort.OFPP_NONE);
                 Object result;
                 if (rid == 0) {
@@ -344,8 +362,8 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     private void handleFlowRemovedMessage(ISwitch sw, OFFlowRemoved msg) {
         Node node = NodeCreator.createOFNode(sw.getId());
-        Flow flow = new FlowConverter(msg.getMatch(),
-                new ArrayList<OFAction>(0)).getFlow(node);
+        Flow flow = new FlowConverter(mappingService.getMappingContext(),
+                msg.getMatch(), new ArrayList<OFAction>(0)).getFlow(node);
         flow.setPriority(msg.getPriority());
         flow.setIdleTimeout(msg.getIdleTimeout());
         flow.setId(msg.getCookie());
@@ -392,7 +410,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         if ((rid == null) || (rid == 0)) {
             return;
         }
-        
+
         /*
          * Notifies the caller that error has been reported for a previous flow
          * programming request
@@ -466,7 +484,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         return new Status(StatusCode.INTERNALERROR,
                 "Failed to send Barrier message.");
     }
-    
+
     @Override
     public Status asyncSendBarrierMessage(Node node) {
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
@@ -489,7 +507,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         return new Status(StatusCode.INTERNALERROR,
                 "Failed to send Barrier message.");
     }
-    
+
     /**
      * This method sends the message asynchronously until the number of messages
      * sent reaches a threshold. Then a Barrier message is sent automatically
@@ -514,20 +532,20 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
         xid = sw.asyncSend(msg);
         addXid2Rid(swid, xid, rid);
-        
+
         Map<Integer, Long> swxid2rid = this.xid2rid.get(swid);
         if (swxid2rid == null) {
             return result;
         }
-        
+
         int size = swxid2rid.size();
         if (size % barrierMessagePriorCount == 0) {
             result = asyncSendBarrierMessage(node);
         }
-        
+
         return result;
     }
-    
+
     /**
      * A number of async messages are sent followed by a synchronous Barrier
      * message. This method returns the maximum async messages that can be sent
@@ -548,7 +566,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
         return rv;
     }
-    
+
     /**
      * This method returns the message Request ID previously assigned by the
      * caller for a given OF message xid
@@ -583,7 +601,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
      */
     public Map<Integer, Long> getSwXid2Rid(long swid) {
         Map<Integer, Long> swxid2rid = this.xid2rid.get(swid);
-        
+
         if (swxid2rid != null) {
             return new HashMap<Integer, Long>(swxid2rid);
         } else {
@@ -638,21 +656,20 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     private Status getStatusInternal(Object result, String action, long rid) {
         if (result instanceof Boolean) {
             return ((Boolean) result == Boolean.TRUE) ? new Status(
-                    StatusCode.SUCCESS, rid) : new Status(
-                    StatusCode.TIMEOUT, errorString(null, action,
-                            "Request Timed Out"));
+                    StatusCode.SUCCESS, rid) : new Status(StatusCode.TIMEOUT,
+                    errorString(null, action, "Request Timed Out"));
         } else if (result instanceof Status) {
             return (Status) result;
         } else if (result instanceof OFError) {
             OFError res = (OFError) result;
-            return new Status(StatusCode.INTERNALERROR, errorString(
-                    "program", action, Utils.getOFErrorString(res)));
+            return new Status(StatusCode.INTERNALERROR, errorString("program",
+                    action, Utils.getOFErrorString(res)));
         } else {
-            return new Status(StatusCode.INTERNALERROR, errorString(
-                    "send", action, "Internal Error"));
+            return new Status(StatusCode.INTERNALERROR, errorString("send",
+                    action, "Internal Error"));
         }
     }
-    
+
     /**
      * When a Barrier reply is received, this method will be invoked to clear
      * the local DB
@@ -669,8 +686,8 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public void updateNode(Node node, UpdateType type, Set<Property> props) {
-        long swid = (Long)node.getID();
-        
+        long swid = (Long) node.getID();
+
         switch (type) {
         case ADDED:
             Map<Integer, Long> swxid2rid = new HashMap<Integer, Long>();
@@ -712,7 +729,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             ci.println("Please enter a valid node id");
             return;
         }
-        
+
         long sid;
         try {
             sid = HexEncode.stringToLong(st);
@@ -720,7 +737,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             ci.println("Please enter a valid node id");
             return;
         }
-        
+
         Map<Integer, Long> swxid2rid = this.xid2rid.get(sid);
         if (swxid2rid == null) {
             ci.println("The node id entered does not exist");
@@ -728,7 +745,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         }
 
         ci.println("xid             rid");
-        
+
         Set<Integer> xidSet = swxid2rid.keySet();
         if (xidSet == null) {
             return;

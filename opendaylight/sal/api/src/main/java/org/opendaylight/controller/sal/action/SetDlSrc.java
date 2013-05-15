@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -20,41 +19,32 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 
 /**
  * Set source datalayer address action
- *
+ * 
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
-public class SetDlSrc extends Action {
-    private byte[] address;
-
-    /* Dummy constructor for JAXB */
-    private SetDlSrc  () {
-    }
-
+public class SetDlSrc extends AbstractParameterAction<byte[]> {
     public SetDlSrc(byte[] dlAddress) {
-        type = ActionType.SET_DL_SRC;
-        if (dlAddress != null) {
-            this.address = dlAddress.clone();
-        } else {
-            this.address = null;
-        }
+        super(dlAddress.clone());
     }
 
     /**
      * Returns the datalayer address that this action will set
-     *
+     * 
      * @return byte[]
      */
+    @Deprecated
     public byte[] getDlAddress() {
-        return address.clone();
+        return getValue().clone();
     }
 
+    // FIXME: Should be moved into RTO
+    @Deprecated
     @XmlElement(name = "address")
     public String getDlAddressString() {
-        return HexEncode.bytesToHexString(address);
+        return HexEncode.bytesToHexString(getValue());
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -63,8 +53,8 @@ public class SetDlSrc extends Action {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SetDlSrc other = (SetDlSrc) obj;
-        if (!Arrays.equals(address, other.address))
+        SetDlDst other = (SetDlDst) obj;
+        if (!Arrays.equals(getValue(), other.getValue()))
             return false;
         return true;
     }
@@ -73,12 +63,13 @@ public class SetDlSrc extends Action {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Arrays.hashCode(address);
+        result = prime * result + Arrays.hashCode(getValue());
         return result;
     }
 
     @Override
     public String toString() {
-        return type + "[address = " + HexEncode.bytesToHexString(address) + "]";
+        return "setDlSrc" + "[address = "
+                + HexEncode.bytesToHexString(getValue()) + "]";
     }
 }

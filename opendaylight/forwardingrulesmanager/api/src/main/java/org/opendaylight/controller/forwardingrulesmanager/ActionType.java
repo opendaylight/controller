@@ -7,7 +7,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.sal.action;
+package org.opendaylight.controller.forwardingrulesmanager;
 
 /**
  * The enumeration of actions supported by the controller

@@ -21,7 +21,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.sal.action.Action;
-import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.SetDlType;
 import org.opendaylight.controller.sal.action.SetNwDst;
 import org.opendaylight.controller.sal.action.SetNwSrc;
@@ -115,9 +114,9 @@ public class Flow implements Cloneable, Serializable {
 
         this.actions = new ArrayList<Action>(actions.size());
         for (Action action : actions) {
-            if (action.isValid()) {
-                this.actions.add(action);
-            }
+            //if (action.isValid()) {
+            this.actions.add(action);
+            //}
         }
     }
 
@@ -140,25 +139,22 @@ public class Flow implements Cloneable, Serializable {
     private boolean actionsAreIPv6() {
         if (this.actions != null) {
             for (Action action : actions) {
-                switch (action.getType()) {
-                case SET_NW_SRC:
-                    if (((SetNwSrc) action).getAddress() instanceof Inet6Address) {
-                        return true;
-                    }
-                    break;
-                case SET_NW_DST:
-                    if (((SetNwDst) action).getAddress() instanceof Inet6Address) {
-                        return true;
-                    }
-                    break;
-                case SET_DL_TYPE:
-                    if (((SetDlType) action).getDlType() == EtherTypes.IPv6
+            	
+            	if(action instanceof SetNwSrc &&
+            			((SetNwSrc) action).getAddress() instanceof Inet6Address
+            			) {
+            		return true;
+            	}
+            	if(action instanceof SetNwDst &&
+            			((SetNwDst) action).getAddress() instanceof Inet6Address
+            			) {
+            		return true;
+            	}
+            	if(action instanceof SetDlType && 
+            			((SetDlType) action).getDlType() == EtherTypes.IPv6
                             .intValue()) {
-                        return true;
-                    }
-                    break;
-                default:
-                }
+            		return true;
+            	}
             }
         }
         return false;
@@ -267,8 +263,8 @@ public class Flow implements Cloneable, Serializable {
      * @return false if the passed action is null or not valid or if it fails to add it
      */
     public boolean addAction(Action action) {
-        if (action == null || !action.isValid()) {
-            return false;
+        if (action == null ) {
+            throw new IllegalArgumentException("Action should not be null.");
         }
         return actions.add(action);
     }
@@ -286,11 +282,12 @@ public class Flow implements Cloneable, Serializable {
      * @param actionType
      * @return false if an action of that type is present and it fails to remove it
      */
-    public boolean removeAction(ActionType actionType) {
+    public boolean removeAction(Class<? extends Action> actionType) {
         Iterator<Action> actionIter = this.getActions().iterator();
         while (actionIter.hasNext()) {
             Action action = actionIter.next();
-            if (action.getType() == actionType) {
+            // TODO: Explore use cases where we have hierarchy of actions.
+            if (actionType.isInstance(action)) {
                 if (!this.removeAction(action))
                     return false;
             }

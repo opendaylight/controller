@@ -24,7 +24,4 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 public class HwPath extends Action {
 
-    public HwPath() {
-        type = ActionType.HW_PATH;
-    }
 }

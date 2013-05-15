@@ -21,10 +21,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class Controller extends Action {
 
-    public Controller() {
-        type = ActionType.CONTROLLER;
+    @Override
+    public String toString() {
+        return "controller";
     }
+    
+
 }

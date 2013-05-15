@@ -18,10 +18,5 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class SwPath extends Action {
-
-    public SwPath() {
-        type = ActionType.SW_PATH;
-    }
 }

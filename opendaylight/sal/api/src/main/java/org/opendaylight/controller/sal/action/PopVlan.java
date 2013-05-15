@@ -23,8 +23,4 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class PopVlan extends Action {
-
-    public PopVlan() {
-        type = ActionType.POP_VLAN;
-    }
 }

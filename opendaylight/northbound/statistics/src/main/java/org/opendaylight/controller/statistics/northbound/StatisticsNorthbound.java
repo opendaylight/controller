@@ -22,6 +22,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
+import org.opendaylight.controller.concepts.transform.Transformer;
 import org.opendaylight.controller.containermanager.IContainerManager;
 
 import org.opendaylight.controller.northbound.commons.RestMessages;
@@ -32,6 +33,8 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
+import org.opendaylight.controller.sal.rest.flow.NodeFlowRTO;
+import org.opendaylight.controller.sal.rest.transform.FlowOnNodeToRestTransformer;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
@@ -140,16 +143,22 @@ public class StatisticsNorthbound {
 
         List<FlowStatistics> statistics = new ArrayList<FlowStatistics>();
         for (Node node : switchManager.getNodes()) {
-            List<FlowOnNode> flowStats = new ArrayList<FlowOnNode>();
+            
 
             List<FlowOnNode> flows = statisticsManager.getFlows(node);
-            for (FlowOnNode flowOnSwitch : flows) {
-                flowStats.add(flowOnSwitch);
-            }
+            
+            FlowOnNodeToRestTransformer transformer = getFlowToRestTransformer();
+            List<NodeFlowRTO> flowStats = new ArrayList<NodeFlowRTO>(transformer.transformAll(flows));
+            
             FlowStatistics stat = new FlowStatistics(node, flowStats);
             statistics.add(stat);
         }
         return new AllFlowStatistics(statistics);
+    }
+
+    private FlowOnNodeToRestTransformer getFlowToRestTransformer() {
+        return (FlowOnNodeToRestTransformer) ServiceHelper
+                .getGlobalInstance(FlowOnNodeToRestTransformer.class, this);
     }
 
     /**
@@ -198,7 +207,9 @@ public class StatisticsNorthbound {
         }
 
         Node node = handleNodeAvailability(containerName, nodeType, nodeId);
-        return new FlowStatistics(node, statisticsManager.getFlows(node));
+        FlowOnNodeToRestTransformer transformer = getFlowToRestTransformer();
+        List<NodeFlowRTO> flowStats = new ArrayList<NodeFlowRTO>(transformer.transformAll(statisticsManager.getFlows(node)));
+        return new FlowStatistics(node, flowStats);
     }
 
     /**

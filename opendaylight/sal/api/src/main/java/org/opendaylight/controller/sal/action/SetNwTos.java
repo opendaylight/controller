@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import static org.opendaylight.controller.sal.utils.Arguments.*;
 
 /**
  * Set network TOS action
@@ -20,18 +21,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
-public class SetNwTos extends Action {
-	@XmlElement
-    private int tos;
+public class SetNwTos extends AbstractParameterAction<Integer> {
 
-    /* Dummy constructor for JAXB */
-    private SetNwTos () {
-    }
 
-    public SetNwTos(int tos) {
-        type = ActionType.SET_NW_TOS;
-        this.tos = tos;
-        checkValue(tos);
+    public SetNwTos(Integer tos) {
+        super(tos);
     }
 
     /**
@@ -39,34 +33,20 @@ public class SetNwTos extends Action {
      *
      * @return int
      */
+    @Deprecated
+    @XmlElement
     public int getNwTos() {
-        return tos;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SetNwTos other = (SetNwTos) obj;
-        if (tos != other.tos)
-            return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + tos;
-        return result;
+        return getValue();
     }
 
     @Override
     public String toString() {
-        return type + "[tos = 0x" + Integer.toHexString(tos) + "]";
+        return "setNwTos" + "[tos = 0x" + Integer.toHexString(getValue()) + "]";
+    }
+    
+    @Override
+    protected boolean checkValue(Integer value) throws IllegalArgumentException {
+        argInRange(0, 0x3f, value);
+        return super.checkValue(value);
     }
 }

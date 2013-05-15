@@ -22,7 +22,5 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class Drop extends Action {
-    public Drop() {
-        type = ActionType.DROP;
-    }
+
 }
