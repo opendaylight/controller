@@ -32,7 +32,6 @@ import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.ServiceDependency;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
