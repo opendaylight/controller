@@ -11,9 +11,6 @@ package org.opendaylight.controller.sal.authorization;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * It represents the elementary resource along with
  * the access privilege associated to it
@@ -38,12 +35,32 @@ public class Resource implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((privilege == null) ? 0 : privilege.hashCode());
+        result = prime * result
+                + ((resource == null) ? 0 : resource.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Resource other = (Resource) obj;
+        if (privilege != other.privilege)
+            return false;
+        if (resource == null) {
+            if (other.resource != null)
+                return false;
+        } else if (!resource.equals(other.resource))
+            return false;
+        return true;
     }
 
     @Override
