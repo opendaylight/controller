@@ -116,4 +116,17 @@ public class YangToSourcesPluginTest {
         verifyCorrectLog(v);
     }
 
+    @Test
+    public void testFindResourceOnCp() throws VerificationException {
+        Verifier v1 = new Verifier(new File("src/test/resources/GenerateTest1/").getAbsolutePath());
+        v1.executeGoal("package");
+        v1.assertFilePresent("target/external-resources/testfile1.yang");
+        v1.assertFilePresent("target/external-resources/testfile2.yang");
+        v1.assertFilePresent("target/external-resources/testfile3.yang");
+
+        Verifier v2 = YangToSourcesPluginTest.setUp("GenerateTest2/",
+                false);
+        v2.executeGoal("package");
+    }
+
 }
