@@ -81,10 +81,10 @@ public class GeneratorJavaFile {
         return result;
     }
 
-    public List<File> generateToFile(final File directory) throws IOException {
+    public List<File> generateToFile(final File parentDirectory) throws IOException {
         final List<File> result = new ArrayList<File>();
         for (GeneratedType type : genTypes) {
-            final File genFile = generateTypeToJavaFile(directory, type,
+            final File genFile = generateTypeToJavaFile(parentDirectory, type,
                     interfaceGenerator);
 
             if (genFile != null) {
@@ -92,7 +92,7 @@ public class GeneratorJavaFile {
             }
         }
         for (GeneratedTransferObject transferObject : genTransferObjects) {
-            final File genFile = generateTypeToJavaFile(directory,
+            final File genFile = generateTypeToJavaFile(parentDirectory,
                     transferObject, classGenerator);
 
             if (genFile != null) {
@@ -102,32 +102,60 @@ public class GeneratorJavaFile {
         return result;
     }
 
-    private File generateTypeToJavaFile(final File directory, final Type type,
+    private File generateTypeToJavaFile(final File parentDir, final Type type,
             final CodeGenerator generator) throws IOException {
-        if ((directory != null) && (type != null) && (generator != null)) {
-
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-
-            final File file = new File(directory, type.getName() + ".java");
-            try (final FileWriter fw = new FileWriter(file)) {
-                file.createNewFile();
-
-                try (final BufferedWriter bw = new BufferedWriter(fw)) {
-                    Writer writer = generator.generate(type);
-                    bw.write(writer.toString());
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage());
-                throw new IOException(e.getMessage());
-            }
-
-            return file;
+        if (parentDir == null) {
+            log.warn("Parent Directory not specified, files will be generated "
+                    + "accordingly to generated Type package path.");
         }
-        return null;
+        if (type == null) {
+            log.error("Cannot generate Type into Java File because " +
+                        "Generated Type is NULL!");
+            throw new IllegalArgumentException("Generated Type Cannot be NULL!");
+        }
+        if (generator == null) {
+            log.error("Cannot generate Type into Java File because " +
+                        "Code Generator instance is NULL!");
+            throw new IllegalArgumentException("Code Generator Cannot be NULL!");
+        }
+        final File packageDir = packageToDirectory(parentDir,
+                type.getPackageName());
+
+        if (!packageDir.exists()) {
+            packageDir.mkdirs();
+        }
+        final File file = new File(packageDir, type.getName() + ".java");
+        try (final FileWriter fw = new FileWriter(file)) {
+            file.createNewFile();
+
+            try (final BufferedWriter bw = new BufferedWriter(fw)) {
+                Writer writer = generator.generate(type);
+                bw.write(writer.toString());
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new IOException(e.getMessage());
+        }
+        return file;
     }
 
+    private File packageToDirectory(final File parentDirectory,
+            final String packageName) {
+        if (packageName == null) {
+            throw new IllegalArgumentException("Package Name cannot be NULL!");
+        }
+
+        final String[] subDirNames = packageName.split("\\.");
+        final StringBuilder dirPathBuilder = new StringBuilder();
+        dirPathBuilder.append(subDirNames[0]);
+        for (int i = 1; i < subDirNames.length; ++i) {
+            dirPathBuilder.append(File.separator);
+            dirPathBuilder.append(subDirNames[i]);
+        }
+        return new File(parentDirectory, dirPathBuilder.toString());
+    }
+    
+    @Deprecated
     private String generateParentPath(String path, String pkg) {
         List<String> dirs = new ArrayList<String>();
         String pkgPath = "";

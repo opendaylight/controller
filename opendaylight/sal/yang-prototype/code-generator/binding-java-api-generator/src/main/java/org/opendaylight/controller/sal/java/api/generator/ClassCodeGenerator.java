@@ -44,19 +44,31 @@ public class ClassCodeGenerator implements CodeGenerator {
                 writer.write(NL);
                 for (GeneratedProperty field : fields) {
                     writer.write(GeneratorUtil.createGetter(field, TAB) + NL);
+                    if (!field.isReadOnly()) {
+                        writer.write(GeneratorUtil.createSetter(field, TAB) + NL);
+                    }
                 }
                 writer.write(NL);
+                
+                if (!genTO.getHashCodeIdentifiers().isEmpty()) {
+                    writer.write(GeneratorUtil.createHashCode(
+                            genTO.getHashCodeIdentifiers(), TAB)
+                            + NL);
+                }
+                
+                if (!genTO.getEqualsIdentifiers().isEmpty()) {
+                    writer.write(GeneratorUtil.createEquals(genTO,
+                            genTO.getEqualsIdentifiers(), TAB)
+                            + NL);
+                }
+                
+                if (!genTO.getToStringIdentifiers().isEmpty()) {
+                    writer.write(GeneratorUtil.createToString(genTO,
+                            genTO.getToStringIdentifiers(), TAB)
+                            + NL);
 
-                writer.write(GeneratorUtil.createHashCode(
-                        genTO.getHashCodeIdentifiers(), TAB)
-                        + NL);
-                writer.write(GeneratorUtil.createEquals(genTO,
-                        genTO.getEqualsIdentifiers(), TAB)
-                        + NL);
-                writer.write(GeneratorUtil.createToString(genTO,
-                        genTO.getToStringIdentifiers(), TAB)
-                        + NL);
-
+                }
+                
                 writer.write(RCB);
             }
         }

@@ -76,7 +76,7 @@ public class GeneratorJavaFileTest {
         types.add(t3);
         GeneratorJavaFile generator = new GeneratorJavaFile(
                 new InterfaceGenerator(), types);
-        generator.generateToFile(PATH);
+        generator.generateToFile(new File(PATH));
 
         String[] files = new File(PATH + FS + "org" + FS + "opendaylight" + FS
                 + "controller" + FS + "gen").list();
@@ -121,7 +121,7 @@ public class GeneratorJavaFileTest {
 
         final GeneratorJavaFile generator = new GeneratorJavaFile(
                 typesToGenerate, tosToGenerate);
-        generator.generateToFile(GENERATOR_OUTPUT_PATH);
+        generator.generateToFile(new File(GENERATOR_OUTPUT_PATH));
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(

@@ -30,5 +30,6 @@ public class Constants {
     public static final String PRIVATE = "private";
     public static final String STATIC = "static";
     public static final String FINAL = "final";
-
+    public static final String EXTENDS = "extends";
+    public static final String IMPLEMENTS = "implements";
 }

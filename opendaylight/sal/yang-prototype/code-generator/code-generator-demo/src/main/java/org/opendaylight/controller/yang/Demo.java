@@ -21,7 +21,8 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.java.api.generator.GeneratorJavaFile;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.parser.impl.YangModelParserImpl;
+import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
+import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
 
 public class Demo {
     private static final String ERR_MSG = "2 parameters expected: 1. -f=<path-to-input-folder>, 2. -o=<output-folder>";
@@ -59,7 +60,7 @@ public class Demo {
             inputFiles.add(new File(resourceDir, fileName));
         }
 
-        final YangModelParserImpl parser = new YangModelParserImpl();
+        final YangModelParser parser = new YangParserImpl();
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
         final Set<Module> modulesToBuild = parser.parseYangModels(inputFiles);
 
