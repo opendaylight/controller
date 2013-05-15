@@ -11,6 +11,7 @@ package org.opendaylight.controller.protocol_plugin.openflow.internal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFMappingContext;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6StatsReply;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
@@ -32,8 +33,10 @@ public class FlowStatisticsConverter {
             .getLogger(FlowStatisticsConverter.class);
     private List<OFStatistics> ofStatsList;
     private List<FlowOnNode> flowOnNodeList;
+    private OFMappingContext mapping;
 
-    public FlowStatisticsConverter(List<OFStatistics> statsList) {
+    public FlowStatisticsConverter(OFMappingContext mapping,List<OFStatistics> statsList) {
+        this.mapping = mapping;
         if (statsList == null) {// || statsList.isEmpty()) {
             this.ofStatsList = new ArrayList<OFStatistics>(1); // dummy list
         } else {
@@ -53,7 +56,7 @@ public class FlowStatisticsConverter {
                 FlowOnNode flowOnNode = null;
                 if (ofStat instanceof OFFlowStatisticsReply) {
                     ofFlowStat = (OFFlowStatisticsReply) ofStat;
-                    flowConverter = new FlowConverter(ofFlowStat.getMatch(),
+                    flowConverter = new FlowConverter(mapping,ofFlowStat.getMatch(),
                             ofFlowStat.getActions());
                     Flow flow = flowConverter.getFlow(node);
                     flow.setPriority(ofFlowStat.getPriority());
@@ -68,7 +71,7 @@ public class FlowStatisticsConverter {
                             .getDurationNanoseconds());
                 } else if (ofStat instanceof V6StatsReply) {
                     v6StatsReply = (V6StatsReply) ofStat;
-                    flowConverter = new FlowConverter(v6StatsReply.getMatch(),
+                    flowConverter = new FlowConverter(mapping,v6StatsReply.getMatch(),
                             v6StatsReply.getActions());
                     Flow flow = flowConverter.getFlow(node);
                     flow.setPriority(v6StatsReply.getPriority());

@@ -25,6 +25,8 @@ import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShim
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFMappingService;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.impl.OFMappingServiceImpl;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
@@ -79,7 +81,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     public Object[] getImplementations() {
         Object[] res = { TopologyServices.class, DataPacketServices.class,
                 InventoryService.class, ReadService.class,
-                FlowProgrammerNotifier.class };
+                FlowProgrammerNotifier.class,OFMappingServiceImpl.class };
         return res;
     }
 
@@ -203,7 +205,8 @@ public class Activator extends ComponentActivatorAbstractBase {
         Object[] res = { Controller.class, OFStatisticsManager.class,
                 FlowProgrammerService.class, ReadServiceFilter.class,
                 DiscoveryService.class, DataPacketMuxDemux.class,
-                InventoryServiceShim.class, TopologyServiceShim.class };
+                InventoryServiceShim.class, TopologyServiceShim.class,
+                OFMappingServiceImpl.class };
         return res;
     }
 
@@ -246,14 +249,23 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setController", "unsetController")
                     .setRequired(true));
 
+            c.add(createServiceDependency().setService(OFMappingService.class)
+                    .setCallbacks("setMappingService", "getMappingService")
+                    .setRequired(true));
+            
             c.add(createServiceDependency()
                     .setService(IFlowProgrammerNotifier.class)
                     .setCallbacks("setFlowProgrammerNotifier",
                             "unsetsetFlowProgrammerNotifier")
                     .setRequired(false));
 
-        }
+            
 
+        }
+        if(imp.equals(OFMappingServiceImpl.class)) {
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            c.setInterface(OFMappingService.class.getName(), props);
+        }
         if (imp.equals(ReadServiceFilter.class)) {
 
             c.setInterface(
@@ -267,6 +279,9 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                     .setService(IOFStatisticsManager.class)
                     .setCallbacks("setService", "unsetService")
+                    .setRequired(true));
+            c.add(createServiceDependency().setService(OFMappingService.class)
+                    .setCallbacks("setMappingService", "getMappingService")
                     .setRequired(true));
         }
 
@@ -336,7 +351,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(InventoryServiceShim.class)) {
             c.setInterface(new String[] { IContainerListener.class.getName(),
-                    IStatisticsListener.class.getName()}, null);
+                    IStatisticsListener.class.getName() }, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -359,7 +374,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     IContainerListener.class.getName(),
                     IRefreshInternalProvider.class.getName(),
                     IInventoryShimExternalListener.class.getName() }, null);
-          c.add(createServiceDependency()
+            c.add(createServiceDependency()
                     .setService(ITopologyServiceShimListener.class)
                     .setCallbacks("setTopologyServiceShimListener",
                             "unsetTopologyServiceShimListener")

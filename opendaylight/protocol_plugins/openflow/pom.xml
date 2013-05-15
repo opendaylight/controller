@@ -42,7 +42,11 @@
 			  javax.net.ssl
             </Import-Package>
             <Export-Package>
-			  org.opendaylight.controller.protocol_plugin.openflow.internal
+			  org.opendaylight.controller.protocol_plugin.openflow.internal,
+			  org.opendaylight.controller.protocol_plugin.openflow.mapping.api,
+			  org.openflow.protocol,
+			  org.openflow.protocol.action,
+			  org.openflow.protocol.util
             </Export-Package>
             <Embed-Dependency>
               org.openflow.openflowj

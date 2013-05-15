@@ -1142,7 +1142,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         newFlowEntry = currentFlowEntry.clone();
         Action target = null;
         for (Action action : newFlowEntry.getFlow().getActions()) {
-            if (action.getType() == ActionType.OUTPUT) {
+            if (action instanceof Output) {
                 target = action;
                 break;
             }
@@ -1171,7 +1171,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         for (FlowEntryInstall flow : flowEntryList) {
             if (flow.getFlowName().equals(flowName)) {
                 for (Action action : flow.getOriginal().getFlow().getActions()) {
-                    if (action.getType() == ActionType.OUTPUT) {
+                    if (action instanceof Output) {
                         return ((Output) action).getPort();
                     }
                 }

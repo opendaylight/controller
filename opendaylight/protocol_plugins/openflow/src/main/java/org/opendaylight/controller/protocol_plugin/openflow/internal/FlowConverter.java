@@ -14,6 +14,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.SALActionMapper;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFActionMapper;
+import org.opendaylight.controller.protocol_plugin.openflow.mapping.api.OFMappingContext;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6FlowMod;
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
 import org.opendaylight.controller.sal.action.Action;
@@ -81,7 +84,11 @@ public class FlowConverter {
     private int actionsLength;
     private boolean isIPv6;
 
-    public FlowConverter(OFMatch ofMatch, List<OFAction> actionsList) {
+    private OFMappingContext mapping;
+
+    public FlowConverter(OFMappingContext context, OFMatch ofMatch,
+            List<OFAction> actionsList) {
+        this.mapping = context;
         this.ofMatch = ofMatch;
         this.actionsList = actionsList;
         this.actionsLength = 0;
@@ -89,7 +96,8 @@ public class FlowConverter {
         this.isIPv6 = ofMatch instanceof V6Match;
     }
 
-    public FlowConverter(Flow flow) {
+    public FlowConverter(OFMappingContext context, Flow flow) {
+        this.mapping = context;
         this.ofMatch = null;
         this.actionsList = null;
         this.actionsLength = 0;
@@ -265,160 +273,36 @@ public class FlowConverter {
      * 
      * @return
      */
+    @Deprecated
     public List<OFAction> getOFActions() {
         if (this.actionsList == null) {
-            actionsList = new ArrayList<OFAction>();
-            for (Action action : flow.getActions()) {
-                if (action.getType() == ActionType.OUTPUT) {
-                    Output a = (Output) action;
-                    OFActionOutput ofAction = new OFActionOutput();
-                    ofAction.setMaxLength((short) 0xffff);
-                    ofAction.setPort(PortConverter.toOFPort(a.getPort()));
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionOutput.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.DROP) {
-                    continue;
-                }
-                if (action.getType() == ActionType.LOOPBACK) {
-                    OFActionOutput ofAction = new OFActionOutput();
-                    ofAction.setPort(OFPort.OFPP_IN_PORT.getValue());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionOutput.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.FLOOD) {
-                    OFActionOutput ofAction = new OFActionOutput();
-                    ofAction.setPort(OFPort.OFPP_FLOOD.getValue());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionOutput.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.FLOOD_ALL) {
-                    OFActionOutput ofAction = new OFActionOutput();
-                    ofAction.setPort(OFPort.OFPP_ALL.getValue());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionOutput.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.CONTROLLER) {
-                    OFActionOutput ofAction = new OFActionOutput();
-                    ofAction.setPort(OFPort.OFPP_CONTROLLER.getValue());
-                    // We want the whole frame hitting the match be sent to the
-                    // controller
-                    ofAction.setMaxLength((short) 0xffff);
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionOutput.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SW_PATH) {
-                    OFActionOutput ofAction = new OFActionOutput();
-                    ofAction.setPort(OFPort.OFPP_LOCAL.getValue());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionOutput.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.HW_PATH) {
-                    OFActionOutput ofAction = new OFActionOutput();
-                    ofAction.setPort(OFPort.OFPP_NORMAL.getValue());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionOutput.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_VLAN_ID) {
-                    SetVlanId a = (SetVlanId) action;
-                    OFActionVirtualLanIdentifier ofAction = new OFActionVirtualLanIdentifier();
-                    ofAction.setVirtualLanIdentifier((short) a.getVlanId());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionVirtualLanIdentifier.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_VLAN_PCP) {
-                    SetVlanPcp a = (SetVlanPcp) action;
-                    OFActionVirtualLanPriorityCodePoint ofAction = new OFActionVirtualLanPriorityCodePoint();
-                    ofAction.setVirtualLanPriorityCodePoint(Integer.valueOf(
-                            a.getPcp()).byteValue());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionVirtualLanPriorityCodePoint.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.POP_VLAN) {
-                    OFActionStripVirtualLan ofAction = new OFActionStripVirtualLan();
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionStripVirtualLan.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_DL_SRC) {
-                    SetDlSrc a = (SetDlSrc) action;
-                    OFActionDataLayerSource ofAction = new OFActionDataLayerSource();
-                    ofAction.setDataLayerAddress(a.getDlAddress());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionDataLayerSource.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_DL_DST) {
-                    SetDlDst a = (SetDlDst) action;
-                    OFActionDataLayerDestination ofAction = new OFActionDataLayerDestination();
-                    ofAction.setDataLayerAddress(a.getDlAddress());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionDataLayerDestination.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_NW_SRC) {
-                    SetNwSrc a = (SetNwSrc) action;
-                    OFActionNetworkLayerSource ofAction = new OFActionNetworkLayerSource();
-                    ofAction.setNetworkAddress(NetUtils.byteArray4ToInt(a
-                            .getAddress().getAddress()));
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionNetworkLayerAddress.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_NW_DST) {
-                    SetNwDst a = (SetNwDst) action;
-                    OFActionNetworkLayerDestination ofAction = new OFActionNetworkLayerDestination();
-                    ofAction.setNetworkAddress(NetUtils.byteArray4ToInt(a
-                            .getAddress().getAddress()));
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionNetworkLayerAddress.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_NW_TOS) {
-                    SetNwTos a = (SetNwTos) action;
-                    OFActionNetworkTypeOfService ofAction = new OFActionNetworkTypeOfService();
-                    ofAction.setNetworkTypeOfService(Integer.valueOf(
-                            a.getNwTos()).byteValue());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionNetworkTypeOfService.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_TP_SRC) {
-                    SetTpSrc a = (SetTpSrc) action;
-                    OFActionTransportLayerSource ofAction = new OFActionTransportLayerSource();
-                    ofAction.setTransportPort(Integer.valueOf(a.getPort())
-                            .shortValue());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionTransportLayer.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_TP_DST) {
-                    SetTpDst a = (SetTpDst) action;
-                    OFActionTransportLayerDestination ofAction = new OFActionTransportLayerDestination();
-                    ofAction.setTransportPort(Integer.valueOf(a.getPort())
-                            .shortValue());
-                    actionsList.add(ofAction);
-                    actionsLength += OFActionTransportLayer.MINIMUM_LENGTH;
-                    continue;
-                }
-                if (action.getType() == ActionType.SET_NEXT_HOP) {
-                    // TODO
-                    continue;
-                }
-            }
+            actionsList = createOFActions();
+
+            // FIXME: Actions: Refactor to have mappers
+            // for converting SAL actions to Openflow Actions
+
         }
         logger.trace("SAL Actions: {} Openflow Actions: {}", flow.getActions(),
                 actionsList);
         return actionsList;
+    }
+
+    public List<OFAction> createOFActions() {
+        List<Action> salActions = flow.getActions();
+        List<OFAction> openflowActions = new ArrayList<OFAction>(
+                salActions.size());
+
+        for (Action action : salActions) {
+            SALActionMapper<? extends Action> mapper = mapping
+                    .getMapperForSalAction(action.getClass());
+            if (mapper == null) {
+                throw new IllegalStateException("Openflow mapping for "
+                        + action.getClass() + "is not defined.");
+            }
+            OFAction ofAction = mapper.ofActionFromSal(action);
+            openflowActions.add(ofAction);
+        }
+        return openflowActions;
     }
 
     /**
@@ -633,91 +517,16 @@ public class FlowConverter {
             }
 
             // Convert actions
-            Action salAction = null;
             List<Action> salActionList = new ArrayList<Action>();
             if (actionsList == null) {
                 salActionList.add(new Drop());
             } else {
                 for (OFAction ofAction : actionsList) {
-                    if (ofAction instanceof OFActionOutput) {
-                        short ofPort = ((OFActionOutput) ofAction).getPort();
-                        if (ofPort == OFPort.OFPP_CONTROLLER.getValue()) {
-                            salAction = new Controller();
-                        } else if (ofPort == OFPort.OFPP_NONE.getValue()) {
-                            salAction = new Drop();
-                        } else if (ofPort == OFPort.OFPP_IN_PORT.getValue()) {
-                            salAction = new Loopback();
-                        } else if (ofPort == OFPort.OFPP_FLOOD.getValue()) {
-                            salAction = new Flood();
-                        } else if (ofPort == OFPort.OFPP_ALL.getValue()) {
-                            salAction = new FloodAll();
-                        } else if (ofPort == OFPort.OFPP_LOCAL.getValue()) {
-                            salAction = new SwPath();
-                        } else if (ofPort == OFPort.OFPP_NORMAL.getValue()) {
-                            salAction = new HwPath();
-                        } else if (ofPort == OFPort.OFPP_TABLE.getValue()) {
-                            salAction = new HwPath(); // TODO: we do not handle
-                                                      // table in sal for now
-                        } else {
-                            salAction = new Output(
-                                    NodeConnectorCreator.createOFNodeConnector(
-                                            ofPort, node));
-                        }
-                    } else if (ofAction instanceof OFActionVirtualLanIdentifier) {
-                        salAction = new SetVlanId(
-                                ((OFActionVirtualLanIdentifier) ofAction)
-                                        .getVirtualLanIdentifier());
-                    } else if (ofAction instanceof OFActionStripVirtualLan) {
-                        salAction = new PopVlan();
-                    } else if (ofAction instanceof OFActionVirtualLanPriorityCodePoint) {
-                        salAction = new SetVlanPcp(
-                                ((OFActionVirtualLanPriorityCodePoint) ofAction)
-                                        .getVirtualLanPriorityCodePoint());
-                    } else if (ofAction instanceof OFActionDataLayerSource) {
-                        salAction = new SetDlSrc(
-                                ((OFActionDataLayerSource) ofAction)
-                                        .getDataLayerAddress().clone());
-                    } else if (ofAction instanceof OFActionDataLayerDestination) {
-                        salAction = new SetDlDst(
-                                ((OFActionDataLayerDestination) ofAction)
-                                        .getDataLayerAddress().clone());
-                    } else if (ofAction instanceof OFActionNetworkLayerSource) {
-                        byte addr[] = BigInteger.valueOf(
-                                ((OFActionNetworkLayerSource) ofAction)
-                                        .getNetworkAddress()).toByteArray();
-                        InetAddress ip = null;
-                        try {
-                            ip = InetAddress.getByAddress(addr);
-                        } catch (UnknownHostException e) {
-                            logger.error("", e);
-                        }
-                        salAction = new SetNwSrc(ip);
-                    } else if (ofAction instanceof OFActionNetworkLayerDestination) {
-                        byte addr[] = BigInteger.valueOf(
-                                ((OFActionNetworkLayerDestination) ofAction)
-                                        .getNetworkAddress()).toByteArray();
-                        InetAddress ip = null;
-                        try {
-                            ip = InetAddress.getByAddress(addr);
-                        } catch (UnknownHostException e) {
-                            logger.error("", e);
-                        }
-                        salAction = new SetNwDst(ip);
-                    } else if (ofAction instanceof OFActionNetworkTypeOfService) {
-                        salAction = new SetNwTos(
-                                ((OFActionNetworkTypeOfService) ofAction)
-                                        .getNetworkTypeOfService());
-                    } else if (ofAction instanceof OFActionTransportLayerSource) {
-                        Short port = ((OFActionTransportLayerSource) ofAction)
-                                .getTransportPort();
-                        int intPort = NetUtils.getUnsignedShort(port);
-                        salAction = new SetTpSrc(intPort);
-                    } else if (ofAction instanceof OFActionTransportLayerDestination) {
-                        Short port = ((OFActionTransportLayerDestination) ofAction)
-                                .getTransportPort();
-                        int intPort = NetUtils.getUnsignedShort(port);
-                        salAction = new SetTpDst(intPort);
-                    }
+                    Class<? extends OFAction> ofClass = ofAction.getClass();
+                    OFActionMapper<? extends OFAction> mapper = mapping
+                            .getMapperForOFAction(ofClass);
+                    Action salAction = mapper.salFromOpenflow(ofAction, node);
+
                     salActionList.add(salAction);
                 }
             }
