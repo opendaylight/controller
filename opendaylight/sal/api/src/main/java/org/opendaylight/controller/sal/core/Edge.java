@@ -19,13 +19,11 @@
 package org.opendaylight.controller.sal.core;
 
 import java.io.Serializable;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -126,12 +124,39 @@ public class Edge implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime
+                * result
+                + ((headNodeConnector == null) ? 0 : headNodeConnector
+                        .hashCode());
+        result = prime
+                * result
+                + ((tailNodeConnector == null) ? 0 : tailNodeConnector
+                        .hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Edge other = (Edge) obj;
+        if (headNodeConnector == null) {
+            if (other.headNodeConnector != null)
+                return false;
+        } else if (!headNodeConnector.equals(other.headNodeConnector))
+            return false;
+        if (tailNodeConnector == null) {
+            if (other.tailNodeConnector != null)
+                return false;
+        } else if (!tailNodeConnector.equals(other.tailNodeConnector))
+            return false;
+        return true;
     }
 
     @Override

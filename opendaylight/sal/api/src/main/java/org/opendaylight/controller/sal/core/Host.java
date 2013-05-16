@@ -17,9 +17,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opendaylight.controller.sal.packet.address.DataLinkAddress;
 
 @XmlRootElement(name="host")
@@ -93,16 +90,41 @@ public class Host implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime
+                * result
+                + ((dataLayerAddress == null) ? 0 : dataLayerAddress.hashCode());
+        result = prime * result
+                + ((networkAddress == null) ? 0 : networkAddress.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Host other = (Host) obj;
+        if (dataLayerAddress == null) {
+            if (other.dataLayerAddress != null)
+                return false;
+        } else if (!dataLayerAddress.equals(other.dataLayerAddress))
+            return false;
+        if (networkAddress == null) {
+            if (other.networkAddress != null)
+                return false;
+        } else if (!networkAddress.equals(other.networkAddress))
+            return false;
+        return true;
     }
 
     @Override
     public String toString() {
-        return "Host[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "Host [dataLayerAddress=" + dataLayerAddress
+                + ", networkAddress=" + networkAddress + "]";
     }
 }
