@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.yang.parser.util;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.ModuleImport;
 import org.opendaylight.controller.yang.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.parser.impl.YangParserListenerImpl;
@@ -38,32 +40,45 @@ public final class ModuleDependencySort {
     private static final Logger logger = LoggerFactory
             .getLogger(ModuleDependencySort.class);
 
-    private final Map<String, Map<Date, ModuleNodeImpl>> moduleGraph;
-
     /**
+     * Topological sort of module builder dependency graph.
      *
-     * @param builders
-     *            Source for module dependency graph.
-     * @throws YangValidationException
-     *             if 1. there are module:revision duplicates 2. there is
-     *             imported not existing module 3. module is imported twice
+     * @return Sorted list of Module builders. Modules can be further processed
+     *         in returned order.
      */
-    public ModuleDependencySort(ModuleBuilder... builders) {
-        this.moduleGraph = createModuleGraph(builders);
-    }
+    public static List<ModuleBuilder> sort(ModuleBuilder... builders) {
+        List<Node> sorted = sortInternal(Arrays.asList(builders));
+        // Cast to ModuleBuilder from Node and return
+        return Lists.transform(sorted, new Function<Node, ModuleBuilder>() {
 
-    @VisibleForTesting
-    Map<String, Map<Date, ModuleNodeImpl>> getModuleGraph() {
-        return moduleGraph;
+            @Override
+            public ModuleBuilder apply(Node input) {
+                return (ModuleBuilder) ((ModuleNodeImpl) input).getReference();
+            }
+        });
     }
 
     /**
      * Topological sort of module dependency graph.
      *
-     * @return Sorted list of modules. Modules can be further processed in
+     * @return Sorted list of Modules. Modules can be further processed in
      *         returned order.
      */
-    public List<ModuleSimple> sort() {
+    public static List<Module> sort(Module... modules) {
+        List<Node> sorted = sortInternal(Arrays.asList(modules));
+        // Cast to Module from Node and return
+        return Lists.transform(sorted, new Function<Node, Module>() {
+
+            @Override
+            public Module apply(Node input) {
+                return (Module) ((ModuleNodeImpl) input).getReference();
+            }
+        });
+    }
+
+    private static List<Node> sortInternal(List<?> modules) {
+        Map<String, Map<Date, ModuleNodeImpl>> moduleGraph = createModuleGraph(modules);
+
         Set<Node> nodes = Sets.newHashSet();
         for (Map<Date, ModuleNodeImpl> map : moduleGraph.values()) {
             for (ModuleNodeImpl node : map.values()) {
@@ -71,19 +86,12 @@ public final class ModuleDependencySort {
             }
         }
 
-        // Cast to ModuleNode from Node
-        return Lists.transform(TopologicalSort.sort(nodes),
-                new Function<Node, ModuleSimple>() {
-
-                    @Override
-                    public ModuleSimple apply(Node input) {
-                        return (ModuleSimple) input;
-                    }
-                });
+        return TopologicalSort.sort(nodes);
     }
 
-    private Map<String, Map<Date, ModuleNodeImpl>> createModuleGraph(
-            ModuleBuilder... builders) {
+    @VisibleForTesting
+    static Map<String, Map<Date, ModuleNodeImpl>> createModuleGraph(
+            List<?> builders) {
         Map<String, Map<Date, ModuleNodeImpl>> moduleGraph = Maps.newHashMap();
 
         processModules(moduleGraph, builders);
@@ -95,17 +103,33 @@ public final class ModuleDependencySort {
     /**
      * Extract module:revision from module builders
      */
-    private void processDependencies(
-            Map<String, Map<Date, ModuleNodeImpl>> moduleGraph,
-            ModuleBuilder... builders) {
+    private static void processDependencies(
+            Map<String, Map<Date, ModuleNodeImpl>> moduleGraph, List<?> builders) {
         Map<String, Date> imported = Maps.newHashMap();
 
         // Create edges in graph
-        for (ModuleBuilder mb : builders) {
-            String fromName = mb.getName();
-            Date fromRevision = mb.getRevision() == null ? DEFAULT_REVISION
-                    : mb.getRevision();
-            for (ModuleImport imprt : mb.getModuleImports()) {
+        for (Object mb : builders) {
+
+            String fromName = null;
+            Date fromRevision = null;
+            Set<ModuleImport> imports = null;
+
+            if (mb instanceof Module) {
+                fromName = ((Module) mb).getName();
+                fromRevision = ((Module) mb).getRevision();
+                imports = ((Module) mb).getImports();
+            } else if (mb instanceof ModuleBuilder) {
+                fromName = ((ModuleBuilder) mb).getName();
+                fromRevision = ((ModuleBuilder) mb).getRevision();
+                imports = ((ModuleBuilder) mb).getModuleImports();
+            }
+            // no need to check if other Type of object, check is performed in
+            // process modules
+
+            if (fromRevision == null)
+                fromRevision = DEFAULT_REVISION;
+
+            for (ModuleImport imprt : imports) {
                 String toName = imprt.getModuleName();
                 Date toRevision = imprt.getRevision() == null ? DEFAULT_REVISION
                         : imprt.getRevision();
@@ -137,7 +161,7 @@ public final class ModuleDependencySort {
     /**
      * Get imported module by its name and revision from moduleGraph
      */
-    private ModuleNodeImpl getModuleByNameAndRevision(
+    private static ModuleNodeImpl getModuleByNameAndRevision(
             Map<String, Map<Date, ModuleNodeImpl>> moduleGraph,
             String fromName, Date fromRevision, String toName, Date toRevision) {
         ModuleNodeImpl to = null;
@@ -165,22 +189,37 @@ public final class ModuleDependencySort {
         return to;
     }
 
-    private void ex(String message) {
+    private static void ex(String message) {
         throw new YangValidationException(message);
     }
 
     /**
-     * Extract dependencies from module builders to fill dependency graph
+     * Extract dependencies from module builders or modules to fill dependency
+     * graph
      */
-    private void processModules(
-            Map<String, Map<Date, ModuleNodeImpl>> moduleGraph,
-            ModuleBuilder... builders) {
+    private static void processModules(
+            Map<String, Map<Date, ModuleNodeImpl>> moduleGraph, List<?> builders) {
 
         // Process nodes
-        for (ModuleBuilder mb : builders) {
-            String name = mb.getName();
+        for (Object mb : builders) {
 
-            Date rev = mb.getRevision();
+            String name = null;
+            Date rev = null;
+
+            if (mb instanceof Module) {
+                name = ((Module) mb).getName();
+                rev = ((Module) mb).getRevision();
+            } else if (mb instanceof ModuleBuilder) {
+                name = ((ModuleBuilder) mb).getName();
+                rev = ((ModuleBuilder) mb).getRevision();
+            } else {
+                throw new IllegalStateException(
+                        String.format(
+                                "Unexpected type of node for sort, expected only:%s, %s, got:%s",
+                                Module.class, ModuleBuilder.class,
+                                mb.getClass()));
+            }
+
             if (rev == null)
                 rev = DEFAULT_REVISION;
 
@@ -191,7 +230,7 @@ public final class ModuleDependencySort {
                 ex(String.format("Module:%s with revision:%s declared twice",
                         name, formatRevDate(rev)));
 
-            moduleGraph.get(name).put(rev, new ModuleNodeImpl(name, rev));
+            moduleGraph.get(name).put(rev, new ModuleNodeImpl(name, rev, mb));
         }
     }
 
@@ -200,30 +239,22 @@ public final class ModuleDependencySort {
                 : YangParserListenerImpl.simpleDateFormat.format(rev);
     }
 
-    /**
-     * Simple representation of module. Contains name and revision.
-     */
-    public interface ModuleSimple {
-        String getName();
-
-        Date getRevision();
-    }
-
-    static class ModuleNodeImpl extends NodeImpl implements ModuleSimple {
+    @VisibleForTesting
+    static class ModuleNodeImpl extends NodeImpl {
         private final String name;
         private final Date revision;
+        private final Object originalObject;
 
-        public ModuleNodeImpl(String name, Date revision) {
+        public ModuleNodeImpl(String name, Date revision, Object builder) {
             this.name = name;
             this.revision = revision;
+            this.originalObject = builder;
         }
 
-        @Override
         public String getName() {
             return name;
         }
 
-        @Override
         public Date getRevision() {
             return revision;
         }
@@ -264,6 +295,10 @@ public final class ModuleDependencySort {
         public String toString() {
             return "Module [name=" + name + ", revision="
                     + formatRevDate(revision) + "]";
+        }
+
+        public Object getReference() {
+            return originalObject;
         }
 
     }
