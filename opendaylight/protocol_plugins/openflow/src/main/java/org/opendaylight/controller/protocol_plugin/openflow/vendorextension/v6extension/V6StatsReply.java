@@ -314,17 +314,84 @@ public class V6StatsReply extends OFVendorStatistics {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((actions == null) ? 0 : actions.hashCode());
+        result = prime * result + (int) (byteCount ^ (byteCount >>> 32));
+        result = prime * result + (int) (cookie ^ (cookie >>> 32));
+        result = prime * result + durationNanoseconds;
+        result = prime * result + durationSeconds;
+        result = prime * result + hardAge;
+        result = prime * result + hardTimeout;
+        result = prime * result + idleAge;
+        result = prime * result + idleTimeout;
+        result = prime * result + length;
+        result = prime * result + ((match == null) ? 0 : match.hashCode());
+        result = prime * result + match_len;
+        result = prime * result + (int) (packetCount ^ (packetCount >>> 32));
+        result = prime * result + priority;
+        result = prime * result + tableId;
+        return result;
     }
 
     @Override
     public String toString() {
-        return "V6StatsReply[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "V6StatsReply [length=" + length + ", tableId=" + tableId
+                + ", durationSeconds=" + durationSeconds
+                + ", durationNanoseconds=" + durationNanoseconds
+                + ", priority=" + priority + ", idleTimeout=" + idleTimeout
+                + ", hardTimeout=" + hardTimeout + ", match_len=" + match_len
+                + ", idleAge=" + idleAge + ", hardAge=" + hardAge + ", cookie="
+                + cookie + ", packetCount=" + packetCount + ", byteCount="
+                + byteCount + ", match=" + match + ", actions=" + actions + "]";
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        V6StatsReply other = (V6StatsReply) obj;
+        if (actions == null) {
+            if (other.actions != null)
+                return false;
+        } else if (!actions.equals(other.actions))
+            return false;
+        if (byteCount != other.byteCount)
+            return false;
+        if (cookie != other.cookie)
+            return false;
+        if (durationNanoseconds != other.durationNanoseconds)
+            return false;
+        if (durationSeconds != other.durationSeconds)
+            return false;
+        if (hardAge != other.hardAge)
+            return false;
+        if (hardTimeout != other.hardTimeout)
+            return false;
+        if (idleAge != other.idleAge)
+            return false;
+        if (idleTimeout != other.idleTimeout)
+            return false;
+        if (length != other.length)
+            return false;
+        if (match == null) {
+            if (other.match != null)
+                return false;
+        } else if (!match.equals(other.match))
+            return false;
+        if (match_len != other.match_len)
+            return false;
+        if (packetCount != other.packetCount)
+            return false;
+        if (priority != other.priority)
+            return false;
+        if (tableId != other.tableId)
+            return false;
+        return true;
     }
 
 }

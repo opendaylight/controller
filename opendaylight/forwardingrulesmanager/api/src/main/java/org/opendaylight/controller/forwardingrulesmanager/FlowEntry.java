@@ -11,8 +11,6 @@ package org.opendaylight.controller.forwardingrulesmanager;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
@@ -90,12 +88,47 @@ public class FlowEntry implements Cloneable, Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((flow == null) ? 0 : flow.hashCode());
+        result = prime * result
+                + ((flowName == null) ? 0 : flowName.hashCode());
+        result = prime * result
+                + ((groupName == null) ? 0 : groupName.hashCode());
+        result = prime * result + ((node == null) ? 0 : node.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FlowEntry other = (FlowEntry) obj;
+        if (flow == null) {
+            if (other.flow != null)
+                return false;
+        } else if (!flow.equals(other.flow))
+            return false;
+        if (flowName == null) {
+            if (other.flowName != null)
+                return false;
+        } else if (!flowName.equals(other.flowName))
+            return false;
+        if (groupName == null) {
+            if (other.groupName != null)
+                return false;
+        } else if (!groupName.equals(other.groupName))
+            return false;
+        if (node == null) {
+            if (other.node != null)
+                return false;
+        } else if (!node.equals(other.node))
+            return false;
+        return true;
     }
 
     @Override

@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.forwardingrulesmanager;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Node;
 
@@ -42,12 +40,40 @@ public class FlowEntryInstall {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((cFlow == null) ? 0 : cFlow.hashCode());
+        result = prime * result + ((install == null) ? 0 : install.hashCode());
+        result = prime * result
+                + ((original == null) ? 0 : original.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FlowEntryInstall other = (FlowEntryInstall) obj;
+        if (cFlow == null) {
+            if (other.cFlow != null)
+                return false;
+        } else if (!cFlow.equals(other.cFlow))
+            return false;
+        if (install == null) {
+            if (other.install != null)
+                return false;
+        } else if (!install.equals(other.install))
+            return false;
+        if (original == null) {
+            if (other.original != null)
+                return false;
+        } else if (!original.equals(other.original))
+            return false;
+        return true;
     }
 
     public String getFlowName() {

@@ -1,10 +1,8 @@
 package org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.openflow.protocol.OFError;
 
 public class V6Error extends OFError {
@@ -65,16 +63,44 @@ public class V6Error extends OFError {
     
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Arrays.hashCode(V6ErrorData);
+        result = prime * result + V6VendorErrorCode;
+        result = prime * result + V6VendorErrorType;
+        result = prime * result + V6VendorId;
+        return result;
     }
 
     @Override
     public String toString() {
-        return "V6Error[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "V6Error [V6VendorId=" + V6VendorId + ", V6VendorErrorType="
+                + V6VendorErrorType + ", V6VendorErrorCode="
+                + V6VendorErrorCode + ", V6ErrorData="
+                + Arrays.toString(V6ErrorData) + ", errorType=" + errorType
+                + ", errorCode=" + errorCode + ", factory=" + factory
+                + ", error=" + Arrays.toString(error) + ", errorIsAscii="
+                + errorIsAscii + ", version=" + version + ", type=" + type
+                + ", length=" + length + ", xid=" + xid + "]";
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        V6Error other = (V6Error) obj;
+        if (!Arrays.equals(V6ErrorData, other.V6ErrorData))
+            return false;
+        if (V6VendorErrorCode != other.V6VendorErrorCode)
+            return false;
+        if (V6VendorErrorType != other.V6VendorErrorType)
+            return false;
+        if (V6VendorId != other.V6VendorId)
+            return false;
+        return true;
     }
 }

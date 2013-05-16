@@ -19,8 +19,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Host;
@@ -140,20 +138,36 @@ public class HostNodeConnector extends Host {
         return this;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + ((nodeConnector == null) ? 0 : nodeConnector.hashCode());
+        result = prime * result + (staticHost ? 1231 : 1237);
+        result = prime * result + vlan;
+        return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        HostNodeConnector other = (HostNodeConnector) obj;
+        if (nodeConnector == null) {
+            if (other.nodeConnector != null)
+                return false;
+        } else if (!nodeConnector.equals(other.nodeConnector))
+            return false;
+        if (staticHost != other.staticHost)
+            return false;
+        if (vlan != other.vlan)
+            return false;
+        return true;
     }
 
     public boolean equalsByIP(InetAddress networkAddress) {
