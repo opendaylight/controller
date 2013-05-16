@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX//+9E\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/Activator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-16T17:23:18Z",
+      "side": 1,
+      "message": "I am not sure we need the mapper in the container context. One in the global context should be enough.",
+      "revId": "6a7b488f9a80fc59af91b8c3f49bd9c454b35766",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX//+9A\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/FlowConverter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-16T17:23:18Z",
+      "side": 1,
+      "message": "Given this utility class is inside the OF1.0 plugin bundle and it\u0027s for  F1.0\u003c-\u003eSAL conversions only, is it possible to have the OFMappingService service being pulled from inside this class through the ServiceHelper.getGlobalInstance(OFMappingService.class, this);\nand then get the mapping context, instead of having the caller pass it ?\nIf not, please discard this comment.",
+      "revId": "6a7b488f9a80fc59af91b8c3f49bd9c454b35766",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX//+9I\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/FlowConverter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-16T17:23:18Z",
+      "side": 1,
+      "message": "Should this be private?",
+      "revId": "6a7b488f9a80fc59af91b8c3f49bd9c454b35766",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX//+80\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/InventoryService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-16T17:23:18Z",
+      "side": 1,
+      "message": "This is not used in this file. Are you planning to use it when addressing the FIXME below ?",
+      "revId": "6a7b488f9a80fc59af91b8c3f49bd9c454b35766",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX//+8w\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/InventoryService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-16T17:23:18Z",
+      "side": 1,
+      "message": "This will never be called as in Activator no dependency on OFMappingService is being specified for Inventory",
+      "revId": "6a7b488f9a80fc59af91b8c3f49bd9c454b35766",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX//+88\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/InventoryServiceShim.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-16T17:23:18Z",
+      "side": 1,
+      "message": "I don\u0027t see this being used in this file.",
+      "revId": "6a7b488f9a80fc59af91b8c3f49bd9c454b35766",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX//+84\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/InventoryServiceShim.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-16T17:23:18Z",
+      "side": 1,
+      "message": "This will never be called as in Activator no dependency on OFMappingService is being specified for InventoryShim",
+      "revId": "6a7b488f9a80fc59af91b8c3f49bd9c454b35766",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX//+8o\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/mapping/impl/OFActionMappings.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-16T17:23:18Z",
+      "side": 1,
+      "message": "Why \"flowNode\" ? Can we change this to \"node\" ?",
+      "revId": "6a7b488f9a80fc59af91b8c3f49bd9c454b35766",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX//+8s\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/mapping/impl/OFActionMappings.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-16T17:23:18Z",
+      "side": 1,
+      "message": "You may want to reuse the\nInetAddress NetUtils.getInetAddress(int x) here",
+      "revId": "6a7b488f9a80fc59af91b8c3f49bd9c454b35766",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
