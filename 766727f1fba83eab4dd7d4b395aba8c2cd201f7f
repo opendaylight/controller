@@ -16,6 +16,24 @@
       "revId": "766727f1fba83eab4dd7d4b395aba8c2cd201f7f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEX//+8Q\u003d",
+        "filename": "opendaylight/distribution/opendaylight/opendaylight.target",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-16T21:21:32Z",
+      "side": 1,
+      "message": "This P2 site will generated after this patch will go in. In fact as soon as the patch is committed i will modify the merge job jenkins to generate the update site. In this way every time there will be a fresh P2 repository and folks don\u0027t have to worry to mantain it because will be maintained by the jenkins.\n\nIf someone wants to generate a different target with it\u0027s own repo it can be free to do it, but it needs to create it\u0027s own. Here i\u0027m setting up a target-platform for general use.",
+      "parentUuid": "AAAAEX//+8k\u003d",
+      "revId": "766727f1fba83eab4dd7d4b395aba8c2cd201f7f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
