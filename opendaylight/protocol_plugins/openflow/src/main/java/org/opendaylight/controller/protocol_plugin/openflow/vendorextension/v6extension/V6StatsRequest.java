@@ -9,11 +9,10 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import java.nio.ByteBuffer;
+
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.openflow.protocol.statistics.OFVendorStatistics;
-import java.nio.ByteBuffer;
 
 
 /**
@@ -140,7 +139,13 @@ public class V6StatsRequest extends OFVendorStatistics {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + match_len;
+        result = prime * result + msgsubtype;
+        result = prime * result + outPort;
+        result = prime * result + tableId;
+        return result;
     }
 
     @Override
@@ -151,6 +156,21 @@ public class V6StatsRequest extends OFVendorStatistics {
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        V6StatsRequest other = (V6StatsRequest) obj;
+        if (match_len != other.match_len)
+            return false;
+        if (msgsubtype != other.msgsubtype)
+            return false;
+        if (outPort != other.outPort)
+            return false;
+        if (tableId != other.tableId)
+            return false;
+        return true;
     }
 }
