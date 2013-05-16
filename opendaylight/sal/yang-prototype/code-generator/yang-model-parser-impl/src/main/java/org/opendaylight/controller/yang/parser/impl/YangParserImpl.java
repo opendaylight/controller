@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -122,7 +124,7 @@ public class YangParserImpl implements YangModelParser {
 
     private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
             final List<InputStream> yangFileStreams) {
-        final Map<String, TreeMap<Date, ModuleBuilder>> modules = new HashMap<String, TreeMap<Date, ModuleBuilder>>();
+        final Map<String, TreeMap<Date, ModuleBuilder>> modules = new LinkedHashMap<String, TreeMap<Date, ModuleBuilder>>();
         final ParseTreeWalker walker = new ParseTreeWalker();
         final List<ParseTree> trees = parseStreams(yangFileStreams);
         final ModuleBuilder[] builders = new ModuleBuilder[trees.size()];
@@ -140,7 +142,22 @@ public class YangParserImpl implements YangModelParser {
         // module dependency graph sorted
         List<ModuleSimple> sorted = new ModuleDependencySort(builders).sort();
 
-        for (ModuleBuilder builder : builders) {
+        // TODO FIX THIS ASAP!
+        // FIXME this is just temp workaround the ModuleDependencySort MUST
+        // RETURN ordered List
+        // of SORTED and DEPENDECNY RESOLVED MODULE BUILDERS!!!!!!
+        final List<ModuleBuilder> orderedBuilders = new ArrayList<ModuleBuilder>();
+        for (final ModuleSimple ms : sorted) {
+            for (int i = 0; i < builders.length; ++i) {
+                if (ms.getName().equals(builders[i].getName())
+                        && ms.getRevision().equals(builders[i].getRevision())) {
+                    orderedBuilders.add(builders[i]);
+                }
+            }
+        }
+        // FIXME END OF WORKAROUND
+
+        for (ModuleBuilder builder : orderedBuilders) {
             final String builderName = builder.getName();
             Date builderRevision = builder.getRevision();
             if (builderRevision == null) {
@@ -193,7 +210,7 @@ public class YangParserImpl implements YangModelParser {
         resolveAugments(modules);
 
         // build
-        final Set<Module> result = new HashSet<Module>();
+        final Set<Module> result = new LinkedHashSet<Module>();
         for (Map.Entry<String, TreeMap<Date, ModuleBuilder>> entry : modules
                 .entrySet()) {
             final Map<Date, Module> modulesByRevision = new HashMap<Date, Module>();
@@ -485,7 +502,7 @@ public class YangParserImpl implements YangModelParser {
         List<PatternConstraint> patterns = Collections.emptyList();
         Integer fractionDigits = null;
         if (referencedType == null) {
-            final TypeDefinitionBuilder tdb = (TypeDefinitionBuilder) nodeToResolve;
+            final TypeDefinitionBuilder tdb = nodeToResolve.getTypedef();
             ranges = tdb.getRanges();
             constraints.addRanges(ranges);
             lengths = tdb.getLengths();
@@ -657,7 +674,7 @@ public class YangParserImpl implements YangModelParser {
             for (AugmentationSchemaBuilder augmentBuilder : module
                     .getAddedAugments()) {
 
-                if(!augmentBuilder.isResolved()) {
+                if (!augmentBuilder.isResolved()) {
                     final SchemaPath augmentTargetSchemaPath = augmentBuilder
                             .getTargetPath();
                     final List<QName> path = augmentTargetSchemaPath.getPath();
@@ -675,7 +692,8 @@ public class YangParserImpl implements YangModelParser {
                     for (DataSchemaNodeBuilder child : dependentModule
                             .getChildNodes()) {
                         final QName childQName = child.getQName();
-                        if (childQName.getLocalName().equals(qname.getLocalName())) {
+                        if (childQName.getLocalName().equals(
+                                qname.getLocalName())) {
                             currentParent = child;
                             i++;
                             break;
@@ -702,7 +720,8 @@ public class YangParserImpl implements YangModelParser {
                     }
 
                     final QName currentQName = currentParent.getQName();
-                    final QName lastAugmentPathElement = path.get(path.size() - 1);
+                    final QName lastAugmentPathElement = path
+                            .get(path.size() - 1);
                     if (currentQName.getLocalName().equals(
                             lastAugmentPathElement.getLocalName())) {
                         ParserUtils.fillAugmentTarget(augmentBuilder,
@@ -710,12 +729,12 @@ public class YangParserImpl implements YangModelParser {
                         ((AugmentationTargetBuilder) currentParent)
                                 .addAugmentation(augmentBuilder);
                         SchemaPath oldPath = currentParent.getPath();
-                        augmentBuilder.setTargetPath(new SchemaPath(oldPath.getPath(), oldPath.isAbsolute()));
+                        augmentBuilder.setTargetPath(new SchemaPath(oldPath
+                                .getPath(), oldPath.isAbsolute()));
                         augmentBuilder.setResolved(true);
                         module.augmentResolved();
                     }
                 }
-
 
             }
         }
@@ -1130,9 +1149,13 @@ public class YangParserImpl implements YangModelParser {
 
         @Override
         public Module findModuleByName(final String name, final Date revision) {
-            if ((name != null) && (revision != null)) {
+            if (name != null) {
                 for (final Module module : modules) {
-                    if (module.getName().equals(name)
+                    if (revision == null) {
+                        if (module.getName().equals(name)) {
+                            return module;
+                        }
+                    } else if (module.getName().equals(name)
                             && module.getRevision().equals(revision)) {
                         return module;
                     }
