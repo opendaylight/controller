@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEX//+8k\u003d",
+        "filename": "opendaylight/distribution/opendaylight/opendaylight.target",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 120
+      },
+      "writtenOn": "2013-05-16T17:28:52Z",
+      "side": 1,
+      "message": "Is this the location that we want for clients to reference?  This could be somebody else\u0027s build that differs from what a client has in their local repo.  Should we reference a locally generated p2 site rather than remote?  Or whom is going to maintain the main one if remote?",
+      "revId": "766727f1fba83eab4dd7d4b395aba8c2cd201f7f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
