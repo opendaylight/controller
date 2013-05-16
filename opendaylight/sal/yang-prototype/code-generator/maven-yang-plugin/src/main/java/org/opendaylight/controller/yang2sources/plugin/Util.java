@@ -51,7 +51,7 @@ final class Util {
 
         File file = new File(rootDir);
         if(!file.exists()) {
-            throw new FileNotFoundException();
+            throw new FileNotFoundException(rootDir);
         }
 
         Collection<File> yangFiles = FileUtils.listFiles(new File(rootDir),

@@ -45,6 +45,7 @@ import org.opendaylight.controller.yang2sources.spi.ResourceGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 
 /**
  * Generate sources from yang files using user provided set of
@@ -62,7 +63,7 @@ import com.google.common.collect.Maps;
 @Mojo(name = "generate-sources", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE, requiresProject = true)
 public final class YangToSourcesMojo extends AbstractMojo {
     private static final String LOG_PREFIX = "yang-to-sources:";
-    private static final String INPUT_RESOURCE_DIR = "META-INF/yangs/";
+    private static final String INPUT_RESOURCE_DIR = "META-INF/yang/";
     private static final String OUTPUT_RESOURCE_DIR = "/target/external-resources/";
 
     /**
@@ -131,8 +132,9 @@ public final class YangToSourcesMojo extends AbstractMojo {
 
             if (yangFiles.isEmpty()) {
                 getLog().warn(
-                        Util.message("No %s file found in %s", LOG_PREFIX,
-                                Util.YANG_SUFFIX, yangFilesRootDir));
+                        Util.message(
+                                "No %s file found in %s or in dependencies",
+                                LOG_PREFIX, Util.YANG_SUFFIX, yangFilesRootDir));
                 return null;
             }
 
@@ -178,8 +180,8 @@ public final class YangToSourcesMojo extends AbstractMojo {
         yangFiles.addAll(getFilesFromYangRoot());
 
         // load files from dependencies
-        yangFiles.addAll(getFilesFromDependencies());
-
+        Collection<File> filesFromDependencies = getFilesFromDependencies();
+        yangFiles.addAll(filesFromDependencies);
 
         for (ResourceProviderArg resourceProvider : resourceProviders) {
             try {
@@ -211,25 +213,31 @@ public final class YangToSourcesMojo extends AbstractMojo {
 
         File rootDir = new File(yangFilesRootDir);
         try {
-            if(!rootDir.isAbsolute()) {
-                yangFilesLoaded = Util.listFiles(project.getBasedir().getAbsolutePath() + yangFilesRootDir);
-            } else {
+            if (rootDir.isAbsolute()) {
                 yangFilesLoaded = Util.listFiles(yangFilesRootDir);
+            } else {
+                String path = project.getBasedir().getAbsolutePath()
+                        + File.separator + yangFilesRootDir;
+                yangFilesLoaded = Util.listFiles(path);
             }
-
-        } catch(FileNotFoundException e) {
-            getLog().warn("Directory '" + yangFilesRootDir + "' does not exists.");
+        } catch (FileNotFoundException e) {
+            getLog().warn(
+                    "yangFilesRootDir[" + rootDir.getAbsolutePath()
+                            + "] does not exists.");
             yangFilesLoaded = new ArrayList<File>();
         }
+
         Collection<File> yangFiles = new ArrayList<File>(yangFilesLoaded);
 
         try {
-            for(File yangFile : yangFilesLoaded) {
+            for (File yangFile : yangFilesLoaded) {
                 InputStream is = new FileInputStream(yangFile);
-                yangFiles.add(createFileFromStream(is, project.getBasedir().getAbsolutePath() + OUTPUT_RESOURCE_DIR + yangFile.getName()));
+                yangFiles.add(createFileFromStream(is,
+                        project.getBasedir().getAbsolutePath()
+                                + OUTPUT_RESOURCE_DIR + yangFile.getName()));
                 resources.add(is);
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             getLog().warn("Exception while loading yang files.", e);
         }
         return yangFiles;
@@ -256,8 +264,11 @@ public final class YangToSourcesMojo extends AbstractMojo {
                             continue;
                         }
                         InputStream entryStream = zip.getInputStream(entry);
-                        String newEntryName = entryName.substring(INPUT_RESOURCE_DIR.length());
-                        File f = createFileFromStream(entryStream, project.getBasedir().getAbsolutePath() + OUTPUT_RESOURCE_DIR + newEntryName);
+                        String newEntryName = entryName
+                                .substring(INPUT_RESOURCE_DIR.length());
+                        File tmp = Files.createTempDir();
+                        File f = createFileFromStream(entryStream,
+                                tmp.getAbsolutePath() + newEntryName);
                         yangFiles.add(f);
 
                         resources.add(entryStream);
@@ -272,9 +283,10 @@ public final class YangToSourcesMojo extends AbstractMojo {
         return yangFiles;
     }
 
-    private File createFileFromStream(InputStream is, String absoluteName) throws IOException {
+    private File createFileFromStream(InputStream is, String absoluteName)
+            throws IOException {
         File f = new File(absoluteName);
-        if(!f.exists()) {
+        if (!f.exists()) {
             f.getParentFile().mkdirs();
         }
         f.createNewFile();
@@ -392,8 +404,8 @@ public final class YangToSourcesMojo extends AbstractMojo {
                     ZipEntry entry = entries.nextElement();
                     String entryName = entry.getName();
 
-                    if(entryName.startsWith(INPUT_RESOURCE_DIR)) {
-                        if(entry.isDirectory()) {
+                    if (entryName.startsWith(INPUT_RESOURCE_DIR)) {
+                        if (entry.isDirectory()) {
                             continue;
                         }
                         if (!Util.acceptedFilter(entryName, filter)) {
@@ -422,7 +434,7 @@ public final class YangToSourcesMojo extends AbstractMojo {
             try {
                 resource.close();
             } catch (IOException e) {
-                getLog().warn("Failed to close resources: "+ resource, e);
+                getLog().warn("Failed to close resources: " + resource, e);
             }
         }
     }
