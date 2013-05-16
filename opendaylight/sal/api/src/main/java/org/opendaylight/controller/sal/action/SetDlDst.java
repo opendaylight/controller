@@ -9,13 +9,13 @@
 
 package org.opendaylight.controller.sal.action;
 
+import java.util.Arrays;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.utils.HexEncode;
 
 /**
@@ -52,13 +52,25 @@ public class SetDlDst extends Action {
     }
     
     @Override
-    public boolean equals(Object other) {
-        return EqualsBuilder.reflectionEquals(this, other);
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SetDlDst other = (SetDlDst) obj;
+        if (!Arrays.equals(address, other.address))
+            return false;
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Arrays.hashCode(address);
+        return result;
     }
 
     @Override
