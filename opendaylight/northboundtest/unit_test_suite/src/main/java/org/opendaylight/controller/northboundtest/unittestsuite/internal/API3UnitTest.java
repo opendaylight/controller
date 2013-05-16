@@ -145,7 +145,7 @@ public class API3UnitTest implements CommandProvider {
             printStream(process.getErrorStream());
         } catch (Exception e) {
             System.out.println("Exception!");
-            logger.error("",e);
+            log.error("",e);
         }
     }
 
@@ -197,7 +197,7 @@ public class API3UnitTest implements CommandProvider {
             printStream(process.getErrorStream());
         } catch (Exception e) {
             System.out.println("Exception!");
-            logger.error("",e);
+            log.error("",e);
         }
     }
 
