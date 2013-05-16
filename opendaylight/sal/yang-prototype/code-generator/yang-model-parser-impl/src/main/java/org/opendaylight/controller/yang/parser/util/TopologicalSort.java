@@ -17,7 +17,7 @@ import com.google.common.collect.Sets;
 /**
  * Utility class that provides topological sort
  */
-public class TopologicalSort {
+public final class TopologicalSort {
 
     /**
      * Topological sort of dependent nodes in acyclic graphs.

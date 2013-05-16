@@ -77,7 +77,6 @@ import org.opendaylight.controller.yang.parser.builder.impl.TypedefBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.UnionTypeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.ModuleDependencySort;
-import org.opendaylight.controller.yang.parser.util.ModuleDependencySort.ModuleSimple;
 import org.opendaylight.controller.yang.parser.util.ParserUtils;
 import org.opendaylight.controller.yang.parser.util.RefineHolder;
 import org.opendaylight.controller.yang.parser.util.TypeConstraints;
@@ -140,7 +139,7 @@ public class YangParserImpl implements YangModelParser {
         }
 
         // module dependency graph sorted
-        List<ModuleSimple> sorted = new ModuleDependencySort(builders).sort();
+        List<ModuleBuilder> sorted = ModuleDependencySort.sort(builders);
 
         // TODO FIX THIS ASAP!
         // FIXME this is just temp workaround the ModuleDependencySort MUST
