@@ -89,66 +89,77 @@ public class Devices implements IDaylightWeb {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         List<Map<String, String>> nodeData = new ArrayList<Map<String, String>>();
-        for (Switch device : switchManager.getNetworkDevices()) {
-            HashMap<String, String> nodeDatum = new HashMap<String, String>();
-            Node node = device.getNode();
-            Tier tier = (Tier) switchManager.getNodeProp(node,
-                    Tier.TierPropName);
+        if (switchManager != null) {
+            for (Switch device : switchManager.getNetworkDevices()) {
+                HashMap<String, String> nodeDatum = new HashMap<String, String>();
+                Node node = device.getNode();
+                Tier tier = (Tier) switchManager.getNodeProp(node,
+                        Tier.TierPropName);
 
-            nodeDatum.put("containerName", containerName);
-            nodeDatum.put("nodeName", switchManager.getNodeDescription(node));
-            nodeDatum.put("nodeId", node.toString());
-            int tierNumber = (tier == null) ? TierHelper.unknownTierNumber
-                    : tier.getValue();
-            nodeDatum.put("tierName", TierHelper.getTierName(tierNumber)
-                    + " (Tier-" + tierNumber + ")");
-            nodeDatum.put("tier", tierNumber + "");
-            SwitchConfig sc = switchManager.getSwitchConfig(device.getNode()
-                    .toString());
-            String modeStr = (sc != null) ? sc.getMode() : "0";
-            nodeDatum.put("mode", modeStr);
+                nodeDatum.put("containerName", containerName);
+                nodeDatum.put("nodeName",
+                        switchManager.getNodeDescription(node));
+                nodeDatum.put("nodeId", node.toString());
+                int tierNumber = (tier == null) ? TierHelper.unknownTierNumber
+                        : tier.getValue();
+                nodeDatum.put("tierName", TierHelper.getTierName(tierNumber)
+                        + " (Tier-" + tierNumber + ")");
+                nodeDatum.put("tier", tierNumber + "");
+                SwitchConfig sc = switchManager.getSwitchConfig(device
+                        .getNode().toString());
+                String modeStr = (sc != null) ? sc.getMode() : "0";
+                nodeDatum.put("mode", modeStr);
 
-            nodeDatum.put("json", gson.toJson(nodeDatum));
-            nodeDatum.put("mac",
-                    HexEncode.bytesToHexString(device.getDataLayerAddress()));
-            StringBuffer sb1 = new StringBuffer();
-            Set<NodeConnector> nodeConnectorSet = device.getNodeConnectors();
-            if (nodeConnectorSet != null && nodeConnectorSet.size() > 0) {
-                Map<Short, String> portList = new HashMap<Short, String>();
-                for (NodeConnector nodeConnector : nodeConnectorSet) {
-                    String nodeConnectorNumberToStr = nodeConnector.getID().toString();
-                    Name ncName = ((Name) switchManager.getNodeConnectorProp(
-                            nodeConnector, Name.NamePropName));
-                    Config portStatus = ((Config) switchManager
-                            .getNodeConnectorProp(nodeConnector,
-                                    Config.ConfigPropName));
-                    
-                    String nodeConnectorName = (ncName != null) ? ncName.getValue()
-                            : "";
-                    nodeConnectorName += " ("+nodeConnector.getID()+")";
-                    
-                    if (portStatus != null) {
-                        if (portStatus.getValue() == Config.ADMIN_UP) {
-                            nodeConnectorName = "<span style='color:green;'>"+nodeConnectorName+"</span>";
-                        } else if (portStatus.getValue() == Config.ADMIN_DOWN) {
-                            nodeConnectorName = "<span style='color:red;'>"+nodeConnectorName+"</span>";
+                nodeDatum.put("json", gson.toJson(nodeDatum));
+                nodeDatum.put("mac", HexEncode.bytesToHexString(device
+                        .getDataLayerAddress()));
+                StringBuffer sb1 = new StringBuffer();
+                Set<NodeConnector> nodeConnectorSet = device
+                        .getNodeConnectors();
+                if (nodeConnectorSet != null && nodeConnectorSet.size() > 0) {
+                    Map<Short, String> portList = new HashMap<Short, String>();
+                    for (NodeConnector nodeConnector : nodeConnectorSet) {
+                        String nodeConnectorNumberToStr = nodeConnector.getID()
+                                .toString();
+                        Name ncName = ((Name) switchManager
+                                .getNodeConnectorProp(nodeConnector,
+                                        Name.NamePropName));
+                        Config portStatus = ((Config) switchManager
+                                .getNodeConnectorProp(nodeConnector,
+                                        Config.ConfigPropName));
+
+                        String nodeConnectorName = (ncName != null) ? ncName
+                                .getValue() : "";
+                        nodeConnectorName += " (" + nodeConnector.getID() + ")";
+
+                        if (portStatus != null) {
+                            if (portStatus.getValue() == Config.ADMIN_UP) {
+                                nodeConnectorName = "<span style='color:green;'>"
+                                        + nodeConnectorName + "</span>";
+                            } else if (portStatus.getValue() == Config.ADMIN_DOWN) {
+                                nodeConnectorName = "<span style='color:red;'>"
+                                        + nodeConnectorName + "</span>";
+                            }
                         }
+
+                        portList.put(
+                                Short.parseShort(nodeConnectorNumberToStr),
+                                nodeConnectorName);
                     }
-                    
-                    portList.put(Short.parseShort(nodeConnectorNumberToStr),
-                            nodeConnectorName);
-                }
 
-                Map<Short, String> sortedPortList = new TreeMap<Short, String>(portList);
+                    Map<Short, String> sortedPortList = new TreeMap<Short, String>(
+                            portList);
 
-                for (Entry<Short, String> e : sortedPortList.entrySet()) {
-                    sb1.append(e.getValue());
-                    sb1.append("<br>");
+                    for (Entry<Short, String> e : sortedPortList.entrySet()) {
+                        sb1.append(e.getValue());
+                        sb1.append("<br>");
+                    }
                 }
+                nodeDatum.put("ports", sb1.toString());
+                nodeData.add(nodeDatum);
             }
-            nodeDatum.put("ports", sb1.toString());
-            nodeData.add(nodeDatum);
         }
+
         DevicesJsonBean result = new DevicesJsonBean();
         result.setNodeData(nodeData);
         List<String> columnNames = new ArrayList<String>();
@@ -312,12 +323,14 @@ public class Devices implements IDaylightWeb {
         String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
-        for (SubnetConfig conf : switchManager.getSubnetsConfigList()) {
-            Map<String, String> subnet = new HashMap<String, String>();
-            subnet.put("name", conf.getName());
-            subnet.put("subnet", conf.getSubnet());
-            subnet.put("json", gson.toJson(conf));
-            subnets.add(subnet);
+        if (switchManager != null) {
+            for (SubnetConfig conf : switchManager.getSubnetsConfigList()) {
+                Map<String, String> subnet = new HashMap<String, String>();
+                subnet.put("name", conf.getName());
+                subnet.put("subnet", conf.getSubnet());
+                subnet.put("json", gson.toJson(conf));
+                subnets.add(subnet);
+            }
         }
         DevicesJsonBean result = new DevicesJsonBean();
         result.setColumnNames(SubnetConfig.getGuiFieldsNames());
@@ -464,8 +477,10 @@ public class Devices implements IDaylightWeb {
         String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
-        for (SpanConfig conf : switchManager.getSpanConfigList()) {
-            spanConfigs_json.add(gson.toJson(conf));
+        if (switchManager != null) {
+            for (SpanConfig conf : switchManager.getSpanConfigList()) {
+                spanConfigs_json.add(gson.toJson(conf));
+            }
         }
         ObjectMapper mapper = new ObjectMapper();
         List<Map<String, String>> spanConfigs = new ArrayList<Map<String, String>>();
@@ -499,8 +514,9 @@ public class Devices implements IDaylightWeb {
         String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
-        if (switchManager == null)
+        if (switchManager == null) {
             return null;
+        }
 
         Map<String, Object> nodes = new HashMap<String, Object>();
         Map<Short, String> port;
