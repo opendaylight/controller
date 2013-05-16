@@ -14,9 +14,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * Set network TOS action
  */
@@ -47,13 +44,25 @@ public class SetNwTos extends Action {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return EqualsBuilder.reflectionEquals(this, other);
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SetNwTos other = (SetNwTos) obj;
+        if (tos != other.tos)
+            return false;
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + tos;
+        return result;
     }
 
     @Override
