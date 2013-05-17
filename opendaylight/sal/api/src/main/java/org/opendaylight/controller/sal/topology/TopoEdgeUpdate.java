@@ -10,8 +10,6 @@ package org.opendaylight.controller.sal.topology;
 
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Property;
@@ -46,7 +44,12 @@ public class TopoEdgeUpdate {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((edge == null) ? 0 : edge.hashCode());
+        result = prime * result + ((props == null) ? 0 : props.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
     }
 
     @Override
@@ -57,6 +60,25 @@ public class TopoEdgeUpdate {
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TopoEdgeUpdate other = (TopoEdgeUpdate) obj;
+        if (edge == null) {
+            if (other.edge != null)
+                return false;
+        } else if (!edge.equals(other.edge))
+            return false;
+        if (props == null) {
+            if (other.props != null)
+                return false;
+        } else if (!props.equals(other.props))
+            return false;
+        if (type != other.type)
+            return false;
+        return true;
     }
 }
