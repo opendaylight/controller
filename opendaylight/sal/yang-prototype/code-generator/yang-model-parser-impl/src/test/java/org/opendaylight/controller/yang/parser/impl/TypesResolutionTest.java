@@ -19,6 +19,7 @@ import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
+import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
@@ -78,7 +79,8 @@ public class TypesResolutionTest {
 
     @Test
     public void testEnumeration() {
-        Module tested = TestUtils.findModule(testedModules, "custom-types-test");
+        Module tested = TestUtils
+                .findModule(testedModules, "custom-types-test");
         Set<TypeDefinition<?>> typedefs = tested.getTypeDefinitions();
 
         TypeDefinition<?> type = TestUtils.findTypedef(typedefs, "ip-version");
@@ -108,8 +110,7 @@ public class TypesResolutionTest {
         EnumPair value3 = values.get(3);
         assertEquals("default", value3.getName());
         assertEquals(20, (int) value3.getValue());
-        assertEquals("default ip",
-                value3.getDescription());
+        assertEquals("default ip", value3.getDescription());
     }
 
     @Test
@@ -254,20 +255,18 @@ public class TypesResolutionTest {
         assertEquals(502L, (long) bit4.getPosition());
     }
 
-
     @Test
     public void testIanaTimezones() {
         Module tested = TestUtils.findModule(testedModules, "iana-timezones");
         Set<TypeDefinition<?>> typedefs = tested.getTypeDefinitions();
         TypeDefinition<?> testedType = TestUtils.findTypedef(typedefs,
                 "iana-timezone");
-        /*
-        // FIXME: Refactor sources not to be timezone specific.
-        String expectedDesc = "A timezone location as defined by the IANA timezone\n       database (http://www.iana.org/time-zones)";
-        assertEquals(expectedDesc, testedType.getDescription());
+
+        String expectedDesc = "A timezone location as defined by the IANA timezone";
+        assertTrue(testedType.getDescription().contains(expectedDesc));
         assertNull(testedType.getReference());
         assertEquals(Status.CURRENT, testedType.getStatus());
-        */
+
         QName testedTypeQName = testedType.getQName();
         assertEquals(URI.create("urn:ietf:params:xml:ns:yang:iana-timezones"),
                 testedTypeQName.getNamespace());
@@ -335,9 +334,10 @@ public class TypesResolutionTest {
         Set<TypeDefinition<?>> typedefs = tested.getTypeDefinitions();
         TypeDefinition<?> testedType = TestUtils.findTypedef(typedefs,
                 "service-type-ref");
-        IdentityrefType baseType = (IdentityrefType)testedType.getBaseType();
+        IdentityrefType baseType = (IdentityrefType) testedType.getBaseType();
         QName identity = baseType.getIdentity();
-        assertEquals(URI.create("urn:simple.container.demo"), identity.getNamespace());
+        assertEquals(URI.create("urn:simple.container.demo"),
+                identity.getNamespace());
         assertEquals(TestUtils.createDate("2012-04-16"), identity.getRevision());
         assertEquals("iit", identity.getPrefix());
         assertEquals("service-type", identity.getLocalName());

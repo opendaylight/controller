@@ -21,12 +21,11 @@ import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.RefineHolder;
 
-final class UsesNodeBuilderImpl implements UsesNodeBuilder, Builder {
+final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     private final UsesNodeImpl instance;
     private final int line;
     private final SchemaPath groupingPath;

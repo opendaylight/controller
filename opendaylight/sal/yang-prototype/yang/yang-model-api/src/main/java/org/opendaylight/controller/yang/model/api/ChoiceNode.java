@@ -9,7 +9,15 @@ package org.opendaylight.controller.yang.model.api;
 
 import java.util.Set;
 
+/**
+ * The ChoiceNode defines a set of alternatives. It consists of a number of
+ * branches defined as ChoiceCaseNode objects.
+ */
 public interface ChoiceNode extends DataSchemaNode, AugmentationTarget {
 
+    /**
+     * @return ChoiceCaseNode objects defined in this node
+     */
     Set<ChoiceCaseNode> getCases();
+
 }

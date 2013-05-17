@@ -189,11 +189,6 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         result = prime * result
                 + ((augmentTargetStr == null) ? 0 : augmentTargetStr.hashCode());
         result = prime * result
-                + ((childNodes == null) ? 0 : childNodes.hashCode());
-        result = prime * result
-                + ((groupings == null) ? 0 : groupings.hashCode());
-        result = prime * result + ((usesNodes == null) ? 0 : usesNodes.hashCode());
-        result = prime * result
                 + ((whenCondition == null) ? 0 : whenCondition.hashCode());
         return result;
     }
@@ -215,27 +210,6 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
                 return false;
             }
         } else if (!augmentTargetStr.equals(other.augmentTargetStr)) {
-            return false;
-        }
-        if (childNodes == null) {
-            if (other.childNodes != null) {
-                return false;
-            }
-        } else if (!childNodes.equals(other.childNodes)) {
-            return false;
-        }
-        if (groupings == null) {
-            if (other.groupings != null) {
-                return false;
-            }
-        } else if (!groupings.equals(other.groupings)) {
-            return false;
-        }
-        if (usesNodes == null) {
-            if (other.usesNodes != null) {
-                return false;
-            }
-        } else if (!usesNodes.equals(other.usesNodes)) {
             return false;
         }
         if (whenCondition == null) {
@@ -375,11 +349,6 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
             result = prime * result
                     + ((targetPath == null) ? 0 : targetPath.hashCode());
             result = prime * result
-                    + ((childNodes == null) ? 0 : childNodes.hashCode());
-            result = prime * result
-                    + ((groupings == null) ? 0 : groupings.hashCode());
-            result = prime * result + ((uses == null) ? 0 : uses.hashCode());
-            result = prime * result
                     + ((whenCondition == null) ? 0 : whenCondition.hashCode());
             return result;
         }
@@ -401,27 +370,6 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
                     return false;
                 }
             } else if (!targetPath.equals(other.targetPath)) {
-                return false;
-            }
-            if (childNodes == null) {
-                if (other.childNodes != null) {
-                    return false;
-                }
-            } else if (!childNodes.equals(other.childNodes)) {
-                return false;
-            }
-            if (groupings == null) {
-                if (other.groupings != null) {
-                    return false;
-                }
-            } else if (!groupings.equals(other.groupings)) {
-                return false;
-            }
-            if (uses == null) {
-                if (other.uses != null) {
-                    return false;
-                }
-            } else if (!uses.equals(other.uses)) {
                 return false;
             }
             if (whenCondition == null) {

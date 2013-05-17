@@ -678,6 +678,13 @@ public final class YangModelBuilderUtil {
         return result;
     }
 
+    /**
+     * Parse type body and return pattern constraints.
+     *
+     * @param ctx
+     *            type body
+     * @return list of pattern constraints
+     */
     private static List<PatternConstraint> getPatternConstraint(
             final Type_body_stmtsContext ctx) {
         List<PatternConstraint> patterns = new ArrayList<PatternConstraint>();
@@ -748,7 +755,7 @@ public final class YangModelBuilderUtil {
     }
 
     /**
-     * Get fraction digits value from context.
+     * Get fraction digits value from type body.
      *
      * @param ctx
      *            type body context to parse
@@ -766,6 +773,13 @@ public final class YangModelBuilderUtil {
         return result;
     }
 
+    /**
+     * Parse decimal64 fraction-digits value.
+     *
+     * @param ctx
+     *            decimal64 context
+     * @return fraction-digits value as Integer
+     */
     private static Integer parseFractionDigits(
             Decimal64_specificationContext ctx) {
         Integer result = null;
@@ -946,7 +960,6 @@ public final class YangModelBuilderUtil {
     public static TypeDefinition<?> parseUnknownTypeBody(QName typedefQName,
             Type_body_stmtsContext ctx) {
         UnknownType.Builder unknownType = new UnknownType.Builder(typedefQName);
-
         if (ctx != null) {
             List<RangeConstraint> rangeStatements = getRangeConstraints(ctx);
             List<LengthConstraint> lengthStatements = getLengthConstraints(ctx);
@@ -958,7 +971,6 @@ public final class YangModelBuilderUtil {
             unknownType.patterns(patternStatements);
             unknownType.fractionDigits(fractionDigits);
         }
-
         return unknownType.build();
     }
 
@@ -996,30 +1008,30 @@ public final class YangModelBuilderUtil {
             type = new Decimal64(actualPath, namespace, revision,
                     fractionDigits);
         } else if (typeName.startsWith("int")) {
-            if (typeName.equals("int8")) {
+            if ("int8".equals(typeName)) {
                 type = new Int8(actualPath, namespace, revision,
                         rangeStatements, null, null);
-            } else if (typeName.equals("int16")) {
+            } else if ("int16".equals(typeName)) {
                 type = new Int16(actualPath, namespace, revision,
                         rangeStatements, null, null);
-            } else if (typeName.equals("int32")) {
+            } else if ("int32".equals(typeName)) {
                 type = new Int32(actualPath, namespace, revision,
                         rangeStatements, null, null);
-            } else if (typeName.equals("int64")) {
+            } else if ("int64".equals(typeName)) {
                 type = new Int64(actualPath, namespace, revision,
                         rangeStatements, null, null);
             }
         } else if (typeName.startsWith("uint")) {
-            if (typeName.equals("uint8")) {
+            if ("uint8".equals(typeName)) {
                 type = new Uint8(actualPath, namespace, revision,
                         rangeStatements, null, null);
-            } else if (typeName.equals("uint16")) {
+            } else if ("uint16".equals(typeName)) {
                 type = new Uint16(actualPath, namespace, revision,
                         rangeStatements, null, null);
-            } else if (typeName.equals("uint32")) {
+            } else if ("uint32".equals(typeName)) {
                 type = new Uint32(actualPath, namespace, revision,
                         rangeStatements, null, null);
-            } else if (typeName.equals("uint64")) {
+            } else if ("uint64".equals(typeName)) {
                 type = new Uint64(actualPath, namespace, revision,
                         rangeStatements, null, null);
             }
@@ -1050,6 +1062,13 @@ public final class YangModelBuilderUtil {
         return type;
     }
 
+    /**
+     * Parse given context and find identityref base value.
+     *
+     * @param ctx
+     *            type body
+     * @return identityref base value as String
+     */
     public static String getIdentityrefBase(Type_body_stmtsContext ctx) {
         String result = null;
         outer: for (int i = 0; i < ctx.getChildCount(); i++) {
@@ -1067,6 +1086,13 @@ public final class YangModelBuilderUtil {
         return result;
     }
 
+    /**
+     * Parse given context and find require-instance value.
+     *
+     * @param ctx
+     *            type body
+     * @return require-instance value
+     */
     private static boolean isRequireInstance(Type_body_stmtsContext ctx) {
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree child = ctx.getChild(i);
@@ -1082,6 +1108,13 @@ public final class YangModelBuilderUtil {
         return false;
     }
 
+    /**
+     * Parse given context and find leafref path.
+     *
+     * @param ctx
+     *            type body
+     * @return leafref path as String
+     */
     private static String parseLeafrefPath(Type_body_stmtsContext ctx) {
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree child = ctx.getChild(i);
@@ -1234,21 +1267,26 @@ public final class YangModelBuilderUtil {
         } else if ("leafref".equals(typeName)) {
             throw new YangParseException(moduleName, line,
                     "The 'path' statement MUST be present if the type is 'leafref'.");
-        } else if("bits".equals(typeName)) {
+        } else if ("bits".equals(typeName)) {
             throw new YangParseException(moduleName, line,
                     "The 'bit' statement MUST be present if the type is 'bits'.");
-        } else if("enumeration".equals(typeName)) {
+        } else if ("enumeration".equals(typeName)) {
             throw new YangParseException(moduleName, line,
                     "The 'enum' statement MUST be present if the type is 'enumeration'.");
         }
     }
 
-    public static RefineHolder parseRefine(Refine_stmtContext child) {
-        final String refineTarget = stringFromNode(child);
-        final RefineHolder refine = new RefineHolder(refineTarget, child
+    /**
+     * Parse refine statement.
+     * @param refineCtx refine statement
+     * @return
+     */
+    public static RefineHolder parseRefine(Refine_stmtContext refineCtx) {
+        final String refineTarget = stringFromNode(refineCtx);
+        final RefineHolder refine = new RefineHolder(refineTarget, refineCtx
                 .getStart().getLine());
-        for (int j = 0; j < child.getChildCount(); j++) {
-            ParseTree refinePom = child.getChild(j);
+        for (int j = 0; j < refineCtx.getChildCount(); j++) {
+            ParseTree refinePom = refineCtx.getChild(j);
             if (refinePom instanceof Refine_pomContext) {
                 for (int k = 0; k < refinePom.getChildCount(); k++) {
                     ParseTree refineStmt = refinePom.getChild(k);

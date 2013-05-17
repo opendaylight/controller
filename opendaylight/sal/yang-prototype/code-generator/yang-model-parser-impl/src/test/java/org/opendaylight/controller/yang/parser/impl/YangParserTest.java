@@ -212,9 +212,15 @@ public class YangParserTest {
                 .getDataChildByName("ifEntry");
         ContainerSchemaNode augmentedContainer = (ContainerSchemaNode) ifEntry
                 .getDataChildByName("augment-holder");
-        // Set<AugmentationSchema> augmentedContainerAugments =
-        // augmentedContainer
-        // .getAvailableAugmentations();
+
+        // augmentation defined in testfile1 and augmentation returned from
+        // augmented container have to be same
+        Set<AugmentationSchema> augmentedContainerAugments = augmentedContainer
+                .getAvailableAugmentations();
+        AugmentationSchema augmentDefinition = augmentedContainerAugments
+                .iterator().next();
+        assertEquals(augment1, augmentDefinition);
+
         LeafSchemaNode augmentedLeaf = (LeafSchemaNode) augmentedContainer
                 .getDataChildByName("ds0ChannelNumber");
         assertTrue(augmentedLeaf.isAugmenting());
@@ -230,18 +236,22 @@ public class YangParserTest {
         Set<AugmentationSchema> module3Augmentations = module3
                 .getAugmentations();
         assertEquals(2, module3Augmentations.size());
-        // AugmentationSchema augment3 = module3Augmentations.iterator().next();
-        // ContainerSchemaNode augmentedContainerDefinition =
-        // (ContainerSchemaNode) augment3
-        // .getDataChildByName("augment-holder");
-        // assertTrue(augmentedContainerDefinition.isAugmenting());
-        //
-        // // check
-        // assertEquals(augmentedContainer, augmentedContainerDefinition);
-        // assertEquals(augmentedContainerAugments.iterator().next(), augment1);
-        //
-        // assertEquals(augmentedLeaf, augmentedLeafDefinition);
-        // assertEquals(ifEntryAugments.iterator().next(), augment3);
+        AugmentationSchema augment3 = null;
+        for (AugmentationSchema as : module3Augmentations) {
+            if ("if:ifType='ds0'".equals(as.getWhenCondition().toString())) {
+                augment3 = as;
+            }
+        }
+        ContainerSchemaNode augmentedContainerDefinition = (ContainerSchemaNode) augment3
+                .getDataChildByName("augment-holder");
+        assertTrue(augmentedContainerDefinition.isAugmenting());
+
+        // check
+        assertEquals(augmentedContainer, augmentedContainerDefinition);
+        assertEquals(augmentedContainerAugments.iterator().next(), augment1);
+
+        assertEquals(augmentedLeaf, augmentedLeafDefinition);
+        assertEquals(ifEntryAugments.iterator().next(), augment3);
     }
 
     @Test
@@ -256,17 +266,21 @@ public class YangParserTest {
                 .getAvailableAugmentations();
         assertEquals(2, augmentations.size());
 
-        // AugmentationSchema augment = augmentations.iterator().next();
-
-        // ContainerSchemaNode augmentHolder = (ContainerSchemaNode) augment
-        // .getDataChildByName("augment-holder");
-        // assertNotNull(augmentHolder);
-        // assertTrue(augmentHolder.isAugmenting());
-        // QName augmentHolderQName = augmentHolder.getQName();
-        // assertEquals("augment-holder", augmentHolderQName.getLocalName());
-        // assertEquals("t3", augmentHolderQName.getPrefix());
-        // assertEquals("Description for augment holder",
-        // augmentHolder.getDescription());
+        AugmentationSchema augment = null;
+        for (AugmentationSchema as : augmentations) {
+            if ("if:ifType='ds0'".equals(as.getWhenCondition().toString())) {
+                augment = as;
+            }
+        }
+        ContainerSchemaNode augmentHolder = (ContainerSchemaNode) augment
+                .getDataChildByName("augment-holder");
+        assertNotNull(augmentHolder);
+        assertTrue(augmentHolder.isAugmenting());
+        QName augmentHolderQName = augmentHolder.getQName();
+        assertEquals("augment-holder", augmentHolderQName.getLocalName());
+        assertEquals("t3", augmentHolderQName.getPrefix());
+        assertEquals("Description for augment holder",
+                augmentHolder.getDescription());
     }
 
     @Test
@@ -285,7 +299,7 @@ public class YangParserTest {
         List<RangeConstraint> ranges = leafType.getRanges();
         assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
-        assertEquals(11L, range.getMin());
+        assertEquals(3L, range.getMin());
         assertEquals(20L, range.getMax());
     }
 

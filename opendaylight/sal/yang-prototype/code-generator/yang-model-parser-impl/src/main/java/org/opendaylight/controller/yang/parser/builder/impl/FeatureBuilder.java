@@ -85,7 +85,7 @@ public class FeatureBuilder implements SchemaNodeBuilder {
         addedUnknownNodes.add(unknownNode);
     }
 
-    private static class FeatureDefinitionImpl implements FeatureDefinition {
+    private class FeatureDefinitionImpl implements FeatureDefinition {
         private final QName qname;
         private SchemaPath path;
         private String description;

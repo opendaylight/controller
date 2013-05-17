@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
-import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
@@ -96,17 +95,11 @@ public class ConstraintsBuilder implements Builder {
 
     private static class ConstraintDefinitionImpl implements
             ConstraintDefinition {
-        private DataSchemaNode parent;
         private RevisionAwareXPath whenCondition;
         private Set<MustDefinition> mustConstraints;
         private boolean mandatory;
         private Integer minElements;
         private Integer maxElements;
-
-        @Override
-        public DataSchemaNode getParent() {
-            return parent;
-        }
 
         @Override
         public RevisionAwareXPath getWhenCondition() {
@@ -164,8 +157,6 @@ public class ConstraintsBuilder implements Builder {
             final int prime = 31;
             int result = 1;
             result = prime * result
-                    + ((parent == null) ? 0 : parent.hashCode());
-            result = prime * result
                     + ((whenCondition == null) ? 0 : whenCondition.hashCode());
             result = prime
                     * result
@@ -191,13 +182,6 @@ public class ConstraintsBuilder implements Builder {
                 return false;
             }
             ConstraintDefinitionImpl other = (ConstraintDefinitionImpl) obj;
-            if (parent == null) {
-                if (other.parent != null) {
-                    return false;
-                }
-            } else if (!parent.equals(other.parent)) {
-                return false;
-            }
             if (whenCondition == null) {
                 if (other.whenCondition != null) {
                     return false;
@@ -237,8 +221,7 @@ public class ConstraintsBuilder implements Builder {
             StringBuilder sb = new StringBuilder(
                     ConstraintDefinitionImpl.class.getSimpleName());
             sb.append("[");
-            sb.append("parent=" + parent);
-            sb.append(", whenCondition=" + whenCondition);
+            sb.append("whenCondition=" + whenCondition);
             sb.append(", mustConstraints=" + mustConstraints);
             sb.append(", mandatory=" + mandatory);
             sb.append(", minElements=" + minElements);

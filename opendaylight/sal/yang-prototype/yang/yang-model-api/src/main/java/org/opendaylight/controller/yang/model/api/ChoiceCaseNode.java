@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
+/**
+ * The ChoiceCaseNode interface is used to define branches of the ChoiceNode.
+ */
 public interface ChoiceCaseNode extends DataSchemaNode, DataNodeContainer,
         AugmentationTarget {
 
