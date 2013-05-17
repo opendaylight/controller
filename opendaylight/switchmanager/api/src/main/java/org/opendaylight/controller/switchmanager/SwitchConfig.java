@@ -11,9 +11,6 @@ package org.opendaylight.controller.switchmanager;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * The class describes a switch configuration including node identifier, node
  * name, tier number and proactive/reactive mode.
@@ -59,11 +56,45 @@ public class SwitchConfig implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((mode == null) ? 0 : mode.hashCode());
+        result = prime * result + ((nodeId == null) ? 0 : nodeId.hashCode());
+        result = prime * result + ((tier == null) ? 0 : tier.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SwitchConfig other = (SwitchConfig) obj;
+        if (description == null) {
+            if (other.description != null)
+                return false;
+        } else if (!description.equals(other.description))
+            return false;
+        if (mode == null) {
+            if (other.mode != null)
+                return false;
+        } else if (!mode.equals(other.mode))
+            return false;
+        if (nodeId == null) {
+            if (other.nodeId != null)
+                return false;
+        } else if (!nodeId.equals(other.nodeId))
+            return false;
+        if (tier == null) {
+            if (other.tier != null)
+                return false;
+        } else if (!tier.equals(other.tier))
+            return false;
+        return true;
     }
 }

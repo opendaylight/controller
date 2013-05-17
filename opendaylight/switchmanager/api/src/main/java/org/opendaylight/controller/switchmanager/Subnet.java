@@ -15,12 +15,7 @@ import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.core.NodeConnector;
-
-import org.opendaylight.controller.switchmanager.Subnet;
-import org.opendaylight.controller.switchmanager.SubnetConfig;
 
 /**
  * The class describes subnet information including L3 address, vlan and set of
@@ -179,33 +174,43 @@ public class Subnet implements Serializable {
         return this;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(networkAddress).append(
-                subnetMaskLength).toHashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((networkAddress == null) ? 0 : networkAddress.hashCode());
+        result = prime * result
+                + ((nodeConnectors == null) ? 0 : nodeConnectors.hashCode());
+        result = prime * result + subnetMaskLength;
+        result = prime * result + vlan;
+        return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (obj.getClass() != getClass()) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         Subnet other = (Subnet) obj;
-        // Check only equality for the key fields
-        return new EqualsBuilder().append(networkAddress, other.networkAddress)
-                .append(subnetMaskLength, other.subnetMaskLength).isEquals();
+        if (networkAddress == null) {
+            if (other.networkAddress != null)
+                return false;
+        } else if (!networkAddress.equals(other.networkAddress))
+            return false;
+        if (nodeConnectors == null) {
+            if (other.nodeConnectors != null)
+                return false;
+        } else if (!nodeConnectors.equals(other.nodeConnectors))
+            return false;
+        if (subnetMaskLength != other.subnetMaskLength)
+            return false;
+        if (vlan != other.vlan)
+            return false;
+        return true;
     }
 
     /* (non-Javadoc)
