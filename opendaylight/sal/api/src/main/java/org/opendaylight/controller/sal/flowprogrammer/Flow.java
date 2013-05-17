@@ -20,8 +20,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.SetDlType;
@@ -181,12 +179,45 @@ public class Flow implements Cloneable, Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((actions == null) ? 0 : actions.hashCode());
+        result = prime * result + hardTimeout;
+        result = prime * result + (int) (id ^ (id >>> 32));
+        result = prime * result + idleTimeout;
+        result = prime * result + ((match == null) ? 0 : match.hashCode());
+        result = prime * result + priority;
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Flow other = (Flow) obj;
+        if (actions == null) {
+            if (other.actions != null)
+                return false;
+        } else if (!actions.equals(other.actions))
+            return false;
+        if (hardTimeout != other.hardTimeout)
+            return false;
+        if (id != other.id)
+            return false;
+        if (idleTimeout != other.idleTimeout)
+            return false;
+        if (match == null) {
+            if (other.match != null)
+                return false;
+        } else if (!match.equals(other.match))
+            return false;
+        if (priority != other.priority)
+            return false;
+        return true;
     }
 
     @Override
