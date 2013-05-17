@@ -11,9 +11,6 @@ package org.opendaylight.controller.usermanager.internal;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * Configuration Java Object which represents a Remote AAA server configuration
  * information for User Manager.
@@ -49,12 +46,40 @@ public class ServerConfig implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((ip == null) ? 0 : ip.hashCode());
+        result = prime * result
+                + ((protocol == null) ? 0 : protocol.hashCode());
+        result = prime * result + ((secret == null) ? 0 : secret.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ServerConfig other = (ServerConfig) obj;
+        if (ip == null) {
+            if (other.ip != null)
+                return false;
+        } else if (!ip.equals(other.ip))
+            return false;
+        if (protocol == null) {
+            if (other.protocol != null)
+                return false;
+        } else if (!protocol.equals(other.protocol))
+            return false;
+        if (secret == null) {
+            if (other.secret != null)
+                return false;
+        } else if (!secret.equals(other.secret))
+            return false;
+        return true;
     }
 
     public boolean isValid() {
