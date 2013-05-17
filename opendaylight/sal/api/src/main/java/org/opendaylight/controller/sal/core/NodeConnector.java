@@ -27,8 +27,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 /**
@@ -53,14 +51,14 @@ public class NodeConnector implements Serializable {
         ConcurrentHashMap<String, ImmutablePair<Class<? extends Object>, String>> compatibleType =
             new ConcurrentHashMap<String, ImmutablePair<Class<? extends Object>, String>>();
         /**
-         * Represents the OFPP_CONTROLLER reserved port to forward a 
-         * packet to the controller, this is to send data packets 
-         * to the controller from the data plane triggering 
+         * Represents the OFPP_CONTROLLER reserved port to forward a
+         * packet to the controller, this is to send data packets
+         * to the controller from the data plane triggering
          * a packet_in event.
          */
         public static String CONTROLLER = "CTRL";
         /**
-         * Represents the OFPP_ALL reserved OF port 
+         * Represents the OFPP_ALL reserved OF port
          * to forward to ALL the ports in the system ,
          * should be used for flooding like mechanism to
          * be used cautiously to avoid excessive flooding.
@@ -74,8 +72,8 @@ public class NodeConnector implements Serializable {
          */
         public static String SWSTACK = "SW";
         /**
-         * Describes OFPP_Normal reserved port destination that invokes 
-         * the traditional native L2/L3 HW normal forwarding functionality 
+         * Describes OFPP_Normal reserved port destination that invokes
+         * the traditional native L2/L3 HW normal forwarding functionality
          * if supported on the forwarding element.
          */
         public static String HWPATH = "HW";
@@ -332,10 +330,10 @@ public class NodeConnector implements Serializable {
         }
     }
 
-    /** 
+    /**
      * Private setter for nodeConnectorType to be called by JAXB not by anyone
      * else, NodeConnector is immutable
-     * 
+     *
      * @param type of node to be set
      */
     private void setType(String type) {
@@ -366,9 +364,9 @@ public class NodeConnector implements Serializable {
         return this.nodeConnectorID.toString();
     }
 
-    /** 
+    /**
      * private setter to be used by JAXB
-     * 
+     *
      * @param nodeConnectorIDString String representation for NodeConnectorID
      */
     private void setNodeConnectorIDString(String IDStr) {
@@ -390,26 +388,46 @@ public class NodeConnector implements Serializable {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(63389, 4951)
-            .append(nodeConnectorType)
-            .append(nodeConnectorID)
-            .append(nodeConnectorNode)
-            .hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((nodeConnectorID == null) ? 0 : nodeConnectorID.hashCode());
+        result = prime
+                * result
+                + ((nodeConnectorNode == null) ? 0 : nodeConnectorNode
+                        .hashCode());
+        result = prime
+                * result
+                + ((nodeConnectorType == null) ? 0 : nodeConnectorType
+                        .hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) {
+        if (this == obj)
+            return true;
+        if (obj == null)
             return false;
-        }
-        NodeConnector rhs = (NodeConnector)obj;
-        return new EqualsBuilder()
-            .append(this.getType(), rhs.getType())
-            .append(this.getID(), rhs.getID())
-            .append(this.getNode(), rhs.getNode())
-            .isEquals();
+        if (getClass() != obj.getClass())
+            return false;
+        NodeConnector other = (NodeConnector) obj;
+        if (nodeConnectorID == null) {
+            if (other.nodeConnectorID != null)
+                return false;
+        } else if (!nodeConnectorID.equals(other.nodeConnectorID))
+            return false;
+        if (nodeConnectorNode == null) {
+            if (other.nodeConnectorNode != null)
+                return false;
+        } else if (!nodeConnectorNode.equals(other.nodeConnectorNode))
+            return false;
+        if (nodeConnectorType == null) {
+            if (other.nodeConnectorType != null)
+                return false;
+        } else if (!nodeConnectorType.equals(other.nodeConnectorType))
+            return false;
+        return true;
     }
 
     @Override

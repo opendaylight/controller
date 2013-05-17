@@ -29,8 +29,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.utils.HexEncode;
 
 /**
@@ -233,10 +231,10 @@ public class Node implements Serializable {
         }
     }
 
-    /** 
+    /**
      * Private setter for nodeType to be called by JAXB not by anyone
      * else, Node is immutable
-     * 
+     *
      * @param type of node to be set
      */
     private void setType(String type) {
@@ -269,10 +267,10 @@ public class Node implements Serializable {
             return this.nodeID.toString();
         }
     }
-    
-    /** 
+
+    /**
      * private setter to be used by JAXB
-     * 
+     *
      * @param nodeIDString String representation for NodeID
      */
     private void setNodeIDString(String nodeIDString) {
@@ -284,24 +282,34 @@ public class Node implements Serializable {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(163841, 56473)
-            .append(nodeType)
-            .append(nodeID)
-            .hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((nodeID == null) ? 0 : nodeID.hashCode());
+        result = prime * result
+                + ((nodeType == null) ? 0 : nodeType.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) {
+        if (this == obj)
+            return true;
+        if (obj == null)
             return false;
-        }
-        Node rhs = (Node)obj;
-        return new EqualsBuilder()
-            .append(this.getType(), rhs.getType())
-            .append(this.getID(), rhs.getID())
-            .isEquals();
+        if (getClass() != obj.getClass())
+            return false;
+        Node other = (Node) obj;
+        if (nodeID == null) {
+            if (other.nodeID != null)
+                return false;
+        } else if (!nodeID.equals(other.nodeID))
+            return false;
+        if (nodeType == null) {
+            if (other.nodeType != null)
+                return false;
+        } else if (!nodeType.equals(other.nodeType))
+            return false;
+        return true;
     }
 
     @Override
