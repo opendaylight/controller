@@ -29,8 +29,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.utils.HexEncode;
 
 /**
@@ -284,24 +282,41 @@ public class Node implements Serializable {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(163841, 56473)
-            .append(nodeType)
-            .append(nodeID)
-            .hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((nodeID == null) ? 0 : nodeID.hashCode());
+        result = prime * result
+                + ((nodeIDString == null) ? 0 : nodeIDString.hashCode());
+        result = prime * result
+                + ((nodeType == null) ? 0 : nodeType.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) {
+        if (this == obj)
+            return true;
+        if (obj == null)
             return false;
-        }
-        Node rhs = (Node)obj;
-        return new EqualsBuilder()
-            .append(this.getType(), rhs.getType())
-            .append(this.getID(), rhs.getID())
-            .isEquals();
+        if (getClass() != obj.getClass())
+            return false;
+        Node other = (Node) obj;
+        if (nodeID == null) {
+            if (other.nodeID != null)
+                return false;
+        } else if (!nodeID.equals(other.nodeID))
+            return false;
+        if (nodeIDString == null) {
+            if (other.nodeIDString != null)
+                return false;
+        } else if (!nodeIDString.equals(other.nodeIDString))
+            return false;
+        if (nodeType == null) {
+            if (other.nodeType != null)
+                return false;
+        } else if (!nodeType.equals(other.nodeType))
+            return false;
+        return true;
     }
 
     @Override

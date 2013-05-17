@@ -27,8 +27,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 /**
@@ -390,26 +388,55 @@ public class NodeConnector implements Serializable {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(63389, 4951)
-            .append(nodeConnectorType)
-            .append(nodeConnectorID)
-            .append(nodeConnectorNode)
-            .hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((nodeConnectorID == null) ? 0 : nodeConnectorID.hashCode());
+        result = prime
+                * result
+                + ((nodeConnectorIDString == null) ? 0 : nodeConnectorIDString
+                        .hashCode());
+        result = prime
+                * result
+                + ((nodeConnectorNode == null) ? 0 : nodeConnectorNode
+                        .hashCode());
+        result = prime
+                * result
+                + ((nodeConnectorType == null) ? 0 : nodeConnectorType
+                        .hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) {
+        if (this == obj)
+            return true;
+        if (obj == null)
             return false;
-        }
-        NodeConnector rhs = (NodeConnector)obj;
-        return new EqualsBuilder()
-            .append(this.getType(), rhs.getType())
-            .append(this.getID(), rhs.getID())
-            .append(this.getNode(), rhs.getNode())
-            .isEquals();
+        if (getClass() != obj.getClass())
+            return false;
+        NodeConnector other = (NodeConnector) obj;
+        if (nodeConnectorID == null) {
+            if (other.nodeConnectorID != null)
+                return false;
+        } else if (!nodeConnectorID.equals(other.nodeConnectorID))
+            return false;
+        if (nodeConnectorIDString == null) {
+            if (other.nodeConnectorIDString != null)
+                return false;
+        } else if (!nodeConnectorIDString.equals(other.nodeConnectorIDString))
+            return false;
+        if (nodeConnectorNode == null) {
+            if (other.nodeConnectorNode != null)
+                return false;
+        } else if (!nodeConnectorNode.equals(other.nodeConnectorNode))
+            return false;
+        if (nodeConnectorType == null) {
+            if (other.nodeConnectorType != null)
+                return false;
+        } else if (!nodeConnectorType.equals(other.nodeConnectorType))
+            return false;
+        return true;
     }
 
     @Override

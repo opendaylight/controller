@@ -12,9 +12,6 @@ package org.opendaylight.controller.sal.core;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * The class represents the Name property of an element.
  */
@@ -48,12 +45,28 @@ public class Name extends Property {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + ((nameValue == null) ? 0 : nameValue.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Name other = (Name) obj;
+        if (nameValue == null) {
+            if (other.nameValue != null)
+                return false;
+        } else if (!nameValue.equals(other.nameValue))
+            return false;
+        return true;
     }
 
     @Override

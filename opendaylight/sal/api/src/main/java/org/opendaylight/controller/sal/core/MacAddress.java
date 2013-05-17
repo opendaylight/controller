@@ -9,13 +9,13 @@
 
 package org.opendaylight.controller.sal.core;
 
+import java.util.Arrays;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
@@ -79,12 +79,27 @@ public class MacAddress extends Property {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Arrays.hashCode(controllerMacAddress);
+        result = prime * result + Arrays.hashCode(nodeMacAddress);
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MacAddress other = (MacAddress) obj;
+        if (!Arrays.equals(controllerMacAddress, other.controllerMacAddress))
+            return false;
+        if (!Arrays.equals(nodeMacAddress, other.nodeMacAddress))
+            return false;
+        return true;
     }
 
     @Override
