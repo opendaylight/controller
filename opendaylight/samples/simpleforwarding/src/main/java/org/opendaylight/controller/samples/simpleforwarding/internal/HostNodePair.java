@@ -11,10 +11,6 @@ package org.opendaylight.controller.samples.simpleforwarding.internal;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.Node;
 
@@ -53,16 +49,37 @@ public class HostNodePair implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((host == null) ? 0 : host.hashCode());
+        result = prime * result + ((node == null) ? 0 : node.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        HostNodePair other = (HostNodePair) obj;
+        if (host == null) {
+            if (other.host != null)
+                return false;
+        } else if (!host.equals(other.host))
+            return false;
+        if (node == null) {
+            if (other.node != null)
+                return false;
+        } else if (!node.equals(other.node))
+            return false;
+        return true;
     }
 
     @Override
     public String toString() {
-        return "HostNodePair[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "HostNodePair [host=" + host + ", node=" + node + "]";
     }
 }

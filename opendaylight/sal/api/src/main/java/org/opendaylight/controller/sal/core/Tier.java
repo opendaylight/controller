@@ -12,9 +12,6 @@ package org.opendaylight.controller.sal.core;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * The class represents the Tier property of a node
  *
@@ -50,12 +47,24 @@ public class Tier extends Property {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + tierValue;
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Tier other = (Tier) obj;
+        if (tierValue != other.tierValue)
+            return false;
+        return true;
     }
 
     @Override
