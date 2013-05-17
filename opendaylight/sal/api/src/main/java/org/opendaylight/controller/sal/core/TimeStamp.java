@@ -12,9 +12,6 @@ package org.opendaylight.controller.sal.core;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * @file   TimeStamp.java
  *
@@ -74,12 +71,31 @@ public class TimeStamp extends Property {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+        result = prime * result
+                + ((timestampName == null) ? 0 : timestampName.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TimeStamp other = (TimeStamp) obj;
+        if (timestamp != other.timestamp)
+            return false;
+        if (timestampName == null) {
+            if (other.timestampName != null)
+                return false;
+        } else if (!timestampName.equals(other.timestampName))
+            return false;
+        return true;
     }
 
     @Override
