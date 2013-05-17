@@ -11,12 +11,11 @@ package org.opendaylight.controller.switchmanager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -125,12 +124,44 @@ public class Switch implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(dataLayerAddress);
+        result = prime * result + ((node == null) ? 0 : node.hashCode());
+        result = prime * result
+                + ((nodeConnectors == null) ? 0 : nodeConnectors.hashCode());
+        result = prime * result
+                + ((spanPorts == null) ? 0 : spanPorts.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Switch other = (Switch) obj;
+        if (!Arrays.equals(dataLayerAddress, other.dataLayerAddress))
+            return false;
+        if (node == null) {
+            if (other.node != null)
+                return false;
+        } else if (!node.equals(other.node))
+            return false;
+        if (nodeConnectors == null) {
+            if (other.nodeConnectors != null)
+                return false;
+        } else if (!nodeConnectors.equals(other.nodeConnectors))
+            return false;
+        if (spanPorts == null) {
+            if (other.spanPorts != null)
+                return false;
+        } else if (!spanPorts.equals(other.spanPorts))
+            return false;
+        return true;
     }
 
     @Override
