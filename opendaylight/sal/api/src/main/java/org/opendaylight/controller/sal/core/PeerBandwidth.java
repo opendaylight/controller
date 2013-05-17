@@ -11,9 +11,6 @@ package org.opendaylight.controller.sal.core;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * @file   PeerBandWidth.java
  *
@@ -45,16 +42,7 @@ public class PeerBandwidth extends Bandwidth {
 		return new PeerBandwidth(this.bandwidthValue);  
     }
 	
-	@Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
 
-    @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
-    }  
-    
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
