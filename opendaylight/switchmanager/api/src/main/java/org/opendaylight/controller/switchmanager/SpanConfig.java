@@ -14,15 +14,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.utils.GUIField;
-
-import org.opendaylight.controller.switchmanager.SpanConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,12 +65,34 @@ public class SpanConfig implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((nodeId == null) ? 0 : nodeId.hashCode());
+        result = prime * result
+                + ((spanPort == null) ? 0 : spanPort.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SpanConfig other = (SpanConfig) obj;
+        if (nodeId == null) {
+            if (other.nodeId != null)
+                return false;
+        } else if (!nodeId.equals(other.nodeId))
+            return false;
+        if (spanPort == null) {
+            if (other.spanPort != null)
+                return false;
+        } else if (!spanPort.equals(other.spanPort))
+            return false;
+        return true;
     }
 
     public static ArrayList<String> getFieldsNames() {
