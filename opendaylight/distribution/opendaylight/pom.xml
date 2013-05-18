@@ -57,26 +57,24 @@
     <module>../../topologymanager</module>
     <module>../../usermanager</module>
     <module>../../security</module>
-    
-    
+
+
     <module>../../../third-party/openflowj</module>
     <module>../../../third-party/net.sf.jung2</module>
     <module>../../../third-party/jersey-servlet</module>
-    
+
     <!-- SAL bundles -->
     <module>../../sal/api</module>
     <module>../../sal/implementation</module>
-    
+
     <!--  Web bundles -->
     <module>../../web/root</module>
     <module>../../web/flows</module>
     <module>../../web/devices</module>
     <module>../../web/troubleshoot</module>
     <module>../../web/topology</module>
-    
+
     <!-- Northbound bundles -->
-    
-     
     <module>../../northbound/commons</module>
     <module>../../northbound/topology</module>
     <module>../../northbound/staticrouting</module>
@@ -85,20 +83,20 @@
     <module>../../northbound/hosttracker</module>
     <module>../../northbound/subnets</module>
     <module>../../northbound/switchmanager</module>
-    
+
     <!-- Debug and logging -->
     <module>../../logging/bridge</module>
 
-	<!-- Southbound bundles -->
+    <!-- Southbound bundles -->
     <module>../../protocol_plugins/openflow</module>
     <module>../../protocol_plugins/stub</module>
-	
+
     <!-- Samples -->
     <module>../../samples/simpleforwarding</module>
     <module>../../samples/loadbalancer</module>
     <module>../../samples/northbound/loadbalancer</module>
   </modules>
-  
+
   <build>
     <plugins>
       <plugin>

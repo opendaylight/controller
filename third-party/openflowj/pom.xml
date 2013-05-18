@@ -78,52 +78,52 @@
   <build>
     <plugins>
       <plugin>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>maven-bundle-plugin</artifactId>
-	<version>2.3.6</version>
-	<extensions>true</extensions>
-	<configuration>
-	  <instructions>
-	    <Export-Package>
-	      org.openflow.example;version="1.0.1";
-	      uses:="org.openflow.example.cli,
-	      org.openflow.protocol,
-	      org.openflow.io,
-	      org.openflow.protocol.factory",
-	      org.openflow.io;version="1.0.1";
-	      uses:="org.openflow.protocol,
-	      org.openflow.protocol.factory",
-	      org.openflow.protocol;version="1.0.1";
-	      uses:="org.openflow.protocol.statistics,
-	      org.openflow.protocol,
-	      org.openflow.protocol.factory",
-	      org.openflow.protocol.action;version="1.0.1";
-	      uses:="org.openflow.protocol",
-	      org.openflow.protocol.factory;version="1.0.1";
-	      uses:="org.openflow.protocol.statistics,
-	      org.openflow.protocol,
-	      org.openflow.protocol.action,
-	      org.openflow.protocol.queue",
-	      org.openflow.protocol.queue;version="1.0.2";
-	      uses:="org.openflow.protocol,
-	      org.openflow.protocol.factory",
-	      org.openflow.protocol.statistics;version="1.0.1";
-	      uses:="org.openflow.protocol,
-	      org.openflow.protocol.factory",
-	      org.openflow.util;version="1.0.1"
-	    </Export-Package>
-	  </instructions>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.6</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.openflow.example;version="1.0.1";
+              uses:="org.openflow.example.cli,
+              org.openflow.protocol,
+              org.openflow.io,
+              org.openflow.protocol.factory",
+              org.openflow.io;version="1.0.1";
+              uses:="org.openflow.protocol,
+              org.openflow.protocol.factory",
+              org.openflow.protocol;version="1.0.1";
+              uses:="org.openflow.protocol.statistics,
+              org.openflow.protocol,
+              org.openflow.protocol.factory",
+              org.openflow.protocol.action;version="1.0.1";
+              uses:="org.openflow.protocol",
+              org.openflow.protocol.factory;version="1.0.1";
+              uses:="org.openflow.protocol.statistics,
+              org.openflow.protocol,
+              org.openflow.protocol.action,
+              org.openflow.protocol.queue",
+              org.openflow.protocol.queue;version="1.0.2";
+              uses:="org.openflow.protocol,
+              org.openflow.protocol.factory",
+              org.openflow.protocol.statistics;version="1.0.1";
+              uses:="org.openflow.protocol,
+              org.openflow.protocol.factory",
+              org.openflow.util;version="1.0.1"
+            </Export-Package>
+          </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
-	</configuration>
+        </configuration>
       </plugin>
       <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-compiler-plugin</artifactId>
-	<version>2.3.2</version>
-	<configuration>
-	  <source>1.6</source>
-	  <target>1.6</target>
-	</configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
       </plugin>
     </plugins>
   </build>

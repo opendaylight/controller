@@ -15,21 +15,21 @@
   <build>
     <plugins>
       <plugin>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>maven-bundle-plugin</artifactId>
-	<version>2.3.6</version>
-	<extensions>true</extensions>
-	<configuration>
-	  <instructions>
-	    <Export-Package>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.6</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
               org.opendaylight.controller.clustering.services
             </Export-Package>
             <Import-Package>
               javax.transaction
             </Import-Package>
-	  </instructions>
+          </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
-	</configuration>
+        </configuration>
       </plugin>
     </plugins>
   </build>

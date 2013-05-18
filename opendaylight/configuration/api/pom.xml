@@ -16,30 +16,30 @@
   <build>
     <plugins>
       <plugin>
-	<groupId>org.apache.felix</groupId>
+        <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>2.3.6</version>
         <extensions>true</extensions>
-	<configuration>
-	  <instructions>
-	    <Import-Package>
+        <configuration>
+          <instructions>
+            <Import-Package>
               org.opendaylight.controller.sal.utils,
               org.apache.commons.lang3.builder
-	    </Import-Package>
-	    <Export-Package>
+            </Import-Package>
+            <Export-Package>
               org.opendaylight.controller.configuration
-	    </Export-Package>
-	  </instructions>
+            </Export-Package>
+          </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
-	</configuration>
+        </configuration>
       </plugin>
     </plugins>
   </build>
   <dependencies>
-	<dependency>
-		<groupId>org.opendaylight.controller</groupId>
-		<artifactId>sal</artifactId>
-		<version>0.5.0-SNAPSHOT</version>
-	</dependency> 
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.5.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>

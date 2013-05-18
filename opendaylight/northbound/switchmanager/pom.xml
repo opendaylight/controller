@@ -24,8 +24,8 @@
             <version>0.5.0-SNAPSHOT</version>
           </dependency>
         </dependencies>
-      </plugin>    
-    
+      </plugin>
+
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -40,13 +40,13 @@
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.usermanager,
               org.apache.commons.lang3.tuple,
-              org.apache.commons.logging,              
+              org.apache.commons.logging,
               com.sun.jersey.spi.container.servlet,
               org.opendaylight.controller.northbound.commons,
               org.opendaylight.controller.northbound.commons.exception,
               org.opendaylight.controller.northbound.commons.utils,
               org.opendaylight.controller.sal.authorization,
-			  javax.ws.rs,
+              javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind.annotation,
               javax.xml.bind,
@@ -66,7 +66,7 @@
       <artifactId>com.sun.jersey.jersey-servlet</artifactId>
       <version>1.17-SNAPSHOT</version>
     </dependency>
-  
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
@@ -78,30 +78,30 @@
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
 
-	<dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
       <version>0.5.0-SNAPSHOT</version>
-	</dependency> 
+    </dependency>
 
     <dependency>
-	  <groupId>org.opendaylight.controller</groupId>
-	  <artifactId>commons.northbound</artifactId>
-	  <version>0.4.0-SNAPSHOT</version>
-	</dependency>
-        
-	<dependency>
-		<groupId>org.springframework</groupId>
-		<artifactId>spring-web</artifactId>
-		<version>${spring.version}</version>
-		<scope>provided</scope>
-	</dependency>
-	        
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>commons.northbound</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>${spring.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-core-annotations</artifactId>
       <version>${enunciate.version}</version>
     </dependency>
-    
+
   </dependencies>
 </project>

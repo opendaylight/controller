@@ -34,7 +34,7 @@
               org.opendaylight.controller.containermanager,
               org.opendaylight.controller.usermanager,
               javax.servlet.http, 
-              org.slf4j,                              
+              org.slf4j
             </Import-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>

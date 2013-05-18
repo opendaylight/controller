@@ -32,7 +32,7 @@
             </Import-Package>
             <Export-Package>
               org.opendaylight.controller.sal.authorization,
-			  org.opendaylight.controller.sal.action,
+              org.opendaylight.controller.sal.action,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.discovery,
               org.opendaylight.controller.sal.topology,
