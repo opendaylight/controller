@@ -62,6 +62,7 @@
 						<Service-Component>
 						</Service-Component>
 					</instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -57,6 +57,7 @@
               org.apache.commons.lang3.builder
             </Import-Package>
 	      </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
 	    </configuration>
       </plugin>
       <plugin>

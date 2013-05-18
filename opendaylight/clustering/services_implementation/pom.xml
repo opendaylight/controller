@@ -67,6 +67,7 @@
               true
             </Embed-Transitive>
 	  </instructions>
+        <manifestLocation>${project.basedir}/META-INF</manifestLocation>
 	</configuration>
       </plugin>
       <plugin>

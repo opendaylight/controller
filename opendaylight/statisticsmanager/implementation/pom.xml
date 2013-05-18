@@ -52,6 +52,7 @@
             <Export-Package>
             </Export-Package>
           </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
       <plugin>

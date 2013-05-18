@@ -55,6 +55,7 @@
             </Import-Package>
             <Web-ContextPath>/one/nb/v2/lb</Web-ContextPath>
           </instructions>
+          <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

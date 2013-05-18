@@ -77,6 +77,7 @@
 						</Import-Package>
 						<Web-ContextPath>/controller/web/devices</Web-ContextPath>
 					</instructions>
+          <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
 				</configuration>
 			</plugin>
 		</plugins>

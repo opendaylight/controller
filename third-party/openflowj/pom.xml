@@ -113,6 +113,7 @@
 	      org.openflow.util;version="1.0.1"
 	    </Export-Package>
 	  </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
 	</configuration>
       </plugin>
       <plugin>

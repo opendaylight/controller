@@ -60,6 +60,7 @@
           	  org.opendaylight.controller.switchmanager.internal.Activator
             </Bundle-Activator>
 	      </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
 	    </configuration>
       </plugin>
       <plugin>

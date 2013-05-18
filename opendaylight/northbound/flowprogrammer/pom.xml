@@ -55,6 +55,7 @@
             </Export-Package>
             <Web-ContextPath>/controller/nb/v2/flow</Web-ContextPath>
           </instructions>
+          <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

@@ -70,6 +70,7 @@
             </Export-Package>
             <Web-ContextPath>/controller/nb/v2/subnet</Web-ContextPath>
           </instructions>
+          <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

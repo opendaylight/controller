@@ -32,6 +32,7 @@
               org.opendaylight.controller.statisticsmanager 
             </Export-Package>
           </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

@@ -64,6 +64,7 @@
             </Export-Package>
             <Web-ContextPath>/controller/nb/v2/statistics</Web-ContextPath>
           </instructions>
+          <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

@@ -46,6 +46,7 @@
               org.opendaylight.controller.sal.reader
             </Export-Package>
           </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
