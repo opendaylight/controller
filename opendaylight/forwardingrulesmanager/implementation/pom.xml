@@ -10,7 +10,6 @@
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>forwardingrulesmanager.implementation</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
