@@ -37,6 +37,7 @@ import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.State;
@@ -189,7 +190,14 @@ public class SwitchmanagerIntegrationTest {
     public void testNodeProp() throws UnknownHostException {
         assertNotNull(this.switchManager);
 
-        Node node = NodeCreator.createOFNode((long)2);
+        Node node;
+        try{
+            node = new Node("STUB", new Integer(0xCAFE));
+        }catch(ConstructionException e){
+            //test failed if node cannot be created.
+            node = null;
+            Assert.assertTrue(false);
+        }
         Map<String, Property> propMap = this.switchManager.getNodeProps(node);
         Assert.assertFalse(propMap.isEmpty());
 
@@ -210,9 +218,17 @@ public class SwitchmanagerIntegrationTest {
     @Test
     public void testNodeConnectorProp() throws UnknownHostException {
         assertNotNull(this.switchManager);
-
-        NodeConnector nc = NodeConnectorCreator.createOFNodeConnector
-                ((short)2, NodeCreator.createOFNode((long)3));
+        Node node;
+        NodeConnector nc;
+        try {
+            node = new Node("STUB", 0xCAFE);
+            nc = new NodeConnector("STUB", 0xCAFE, node);
+        }
+        catch(ConstructionException e){
+            node = null;
+            nc = null;
+            Assert.assertTrue(false);
+        }
         Map<String, Property> propMap = this.switchManager.getNodeConnectorProps(nc);
         Assert.assertFalse(propMap.isEmpty());
 

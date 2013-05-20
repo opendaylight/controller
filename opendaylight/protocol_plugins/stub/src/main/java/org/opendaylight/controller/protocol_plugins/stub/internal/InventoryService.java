@@ -22,6 +22,7 @@ import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
 import org.opendaylight.controller.sal.core.Capabilities.CapabilitiesType;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
@@ -53,7 +54,8 @@ public class InventoryService implements IPluginInInventoryService {
     void init() {
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
-
+        Node.NodeIDType.registerIDType("STUB", Integer.class);
+        NodeConnector.NodeConnectorIDType.registerIDType("STUB", Integer.class, "STUB");
     }
 
     /**
@@ -106,9 +108,13 @@ public class InventoryService implements IPluginInInventoryService {
 
         // setup property map for all nodes
         Node node;
-        node = NodeCreator.createOFNode(2L);
+        try{
+            node = new Node("STUB", new Integer(0xCAFE));
+        }catch(ConstructionException e){
+            node = null;
+        }       
+     
         nodeProps.put(node, propMap);
-
         return nodeProps;
     }
 
@@ -130,10 +136,16 @@ public class InventoryService implements IPluginInInventoryService {
         ncPropMap.put(State.StatePropName, st);
 
         // setup property map for all node connectors
-        NodeConnector nc = NodeConnectorCreator.createOFNodeConnector
-                ((short)2, NodeCreator.createOFNode(3L));
+        NodeConnector nc;
+        Node node;
+        try{
+            node = new Node("STUB", new Integer(0xCAFE));
+            nc = new NodeConnector("STUB", 0xCAFE, node);
+        }catch(ConstructionException e){
+            nc = null;
+            node = null;
+        }
         nodeConnectorProps.put(nc, ncPropMap);
-
         return nodeConnectorProps;
     }
 
