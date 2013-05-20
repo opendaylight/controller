@@ -9,11 +9,28 @@ package org.opendaylight.controller.yang.model.api;
 
 import java.util.Date;
 
+/**
+ * Interface describing YANG 'import' statement.
+ * <p>
+ * The import statement makes definitions from one module available inside
+ * another module or submodule.
+ * </p>
+ */
 public interface ModuleImport {
 
+    /**
+     * @return Name of the module to import
+     */
     String getModuleName();
 
+    /**
+     * @return Revision of module to import
+     */
     Date getRevision();
 
+    /**
+     * @return Prefix used to point to imported module
+     */
     String getPrefix();
+
 }

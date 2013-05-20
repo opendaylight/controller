@@ -7,10 +7,14 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
-import java.util.Set;
-
+/**
+ * Interface describing YANG 'grouping' statement.
+ * <p>
+ * It is used to define a reusable block of nodes, which may be used locally in
+ * the module, in modules that include it, and by other modules that import from
+ * it.
+ * </p>
+ */
 public interface GroupingDefinition extends DataNodeContainer, SchemaNode {
-
-    Set<UsesNode> getUses();
 
 }

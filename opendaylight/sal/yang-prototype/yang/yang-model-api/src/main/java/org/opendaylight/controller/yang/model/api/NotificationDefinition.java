@@ -7,5 +7,10 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
+/**
+ * Interface describing YANG 'notification' statement. The
+ * notification statement is used to define a NETCONF notification.
+ */
 public interface NotificationDefinition extends SchemaNode, DataNodeContainer {
+
 }

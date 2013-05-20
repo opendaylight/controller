@@ -7,8 +7,17 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
+/**
+ * Interface describing YANG 'leaf' statement.
+ * <p>
+ * The 'leaf' statement is used to define a leaf node in the schema tree.
+ * </p>
+ */
 public interface LeafSchemaNode extends DataSchemaNode {
 
+    /**
+     * @return type of this leaf
+     */
     TypeDefinition<?> getType();
 
 }
