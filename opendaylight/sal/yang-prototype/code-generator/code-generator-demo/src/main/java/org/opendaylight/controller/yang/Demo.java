@@ -21,7 +21,6 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.java.api.generator.GeneratorJavaFile;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
 
 public class Demo {
@@ -46,21 +45,26 @@ public class Demo {
         } else {
             System.err.println("Missing output-folder declaration (-o=)");
         }
-
+        
         File resourceDir = new File(inputFilesDir);
         if (!resourceDir.exists()) {
             throw new IllegalArgumentException(
                     "Specified input-folder does not exists: "
                             + resourceDir.getAbsolutePath());
         }
-
+        
+        final File outputFolder = new File(outputFilesDir);
+        if (!outputFolder.exists()) {
+            outputFolder.mkdirs();
+        }
+        
         String[] dirList = resourceDir.list();
         List<File> inputFiles = new ArrayList<File>();
         for (String fileName : dirList) {
             inputFiles.add(new File(resourceDir, fileName));
         }
 
-        final YangModelParser parser = new YangParserImpl();
+        final YangParserImpl parser = new YangParserImpl();
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
         final Set<Module> modulesToBuild = parser.parseYangModels(inputFiles);
 
@@ -83,7 +87,7 @@ public class Demo {
 
         final GeneratorJavaFile generator = new GeneratorJavaFile(typesToGenerate, tosToGenerate);
         
-        generator.generateToFile(outputFilesDir);
+        generator.generateToFile(outputFolder);
         System.out.println("Modules built: " + modulesToBuild.size());
     }
 }

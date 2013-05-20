@@ -1,6 +1,6 @@
 module abstract-topology {
     yang-version 1;
-    namespace "urn:opendaylight:sal:topology";
+    namespace "urn:model:abstract:topology";
     prefix "tp";
 
     import ietf-inet-types { 
@@ -13,10 +13,12 @@ module abstract-topology {
 
     description
         "This module contains the definitions of elements that creates network 
-    topology i.e. definition of network nodes and links. This module is not designed to be used solely for network representation. This module SHOULD be used as base module in defining the network topology.";
+    topology i.e. definition of network nodes and links. This module is not designed 
+    to be used solely for network representation. This module SHOULD be used as base 
+    module in defining the network topology.";
 
     revision "2013-02-08" {
-        reference "~~~ WILL BE DEFINED LATER";
+        reference "http://www.opendaylight.org/";
     }
     
     typedef node-id-ref {
@@ -34,11 +36,14 @@ module abstract-topology {
     }
 
     container topology {
-        description "This is the model of abstract topology which contains only Network Nodes and Network Links. Each topology MUST be identified by unique topology-id for reason that the store could contain many topologies.";
+        description "This is the model of abstract topology which contains 
+        only Network Nodes and Network Links. Each topology MUST be identified by unique 
+        topology-id for reason that the store could contain many topologies.";
 
         leaf topology-id {
             type inet:uri;
-            description "It is presumed that datastore will contain many topologies. To distinguish between topologies it is vital to have
+            description "It is presumed that datastore will contain many topologies. 
+            To distinguish between topologies it is vital to have
             UNIQUE topology identifier.";
         }
 
@@ -84,8 +89,12 @@ module abstract-topology {
                 container attributes {
                     description "Aditional attributes that can Network Link contains.";
                 }
-                description "The Network Link which is defined by Local (Source) and Remote (Destination) Network Nodes. Every link MUST be defined either by identifier and
-                his local and remote Network Nodes (In real applications it is common that many links are originated from one node and end up in same remote node). To ensure that we would always know to distinguish between links, every link SHOULD have identifier.";
+                description "The Network Link which is defined by Local (Source) and Remote (Destination) 
+                Network Nodes. Every link MUST be defined either by identifier and
+                his local and remote Network Nodes (In real applications it is common that 
+                many links are originated from one node and end up in same remote node). 
+                To ensure that we would always know to distinguish between links, every link 
+                SHOULD have identifier.";
             }
         }
     }
