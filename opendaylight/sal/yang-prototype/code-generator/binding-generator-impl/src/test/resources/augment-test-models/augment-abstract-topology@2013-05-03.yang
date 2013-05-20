@@ -1,0 +1,75 @@
+module augment-abstract-topology {
+	yang-version 1;
+    namespace "urn:model:augment:abstract:topology";
+    prefix "atp";
+
+    import ietf-inet-types { 
+        prefix "inet"; 
+        revision-date 2010-09-24;
+    }
+	
+	import ietf-interfaces {
+        prefix "if";
+        revision-date 2012-11-15;
+    }
+	
+    import abstract-topology {
+    	prefix "at";
+    	revision-date 2013-02-08;
+    }
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    revision "2013-05-03" {
+        reference "http://www.opendaylight.org/";
+    }
+
+    augment "at:topology" {
+    	container interfaces {
+            list interface {
+                key "interface-id";
+
+                leaf interface-id {
+                    type leafref {
+                        path "/if:interfaces/if:interface/if:name";
+                    }
+                }
+
+                leaf-list higher-layer-if {
+                    type leafref {
+                        path "/if:interfaces/if:interface/if:higher-layer-if";
+                    }
+                }
+            }
+        }
+    }
+
+    augment "at:topology/at:network-links/at:network-link" {
+    	container tunnels {
+            list tunnel {
+            	key "tunnel-id";
+
+                leaf tunnel-id {
+                    type leafref {
+                        path "../../../link-id";
+                    }
+                }
+                
+                container foo {
+                	leaf bar {
+                		type string;
+                	}
+                }
+            }
+        }
+    }
+
+    augment "at:topology/at:network-links/at:network-link" {
+    	leaf interface {
+        	type leafref {
+                path "/at:topology/atp:interfaces/atp:interface/atp:interface-id";
+            }
+        }
+    }
+}

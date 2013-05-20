@@ -6,4 +6,11 @@
     <version>0.5-SNAPSHOT</version>
   </parent>
   <artifactId>yang-common</artifactId>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.slf4j</groupId>
+  		<artifactId>slf4j-simple</artifactId>
+  		<version>1.7.5</version>
+  	</dependency>
+  </dependencies>
 </project>

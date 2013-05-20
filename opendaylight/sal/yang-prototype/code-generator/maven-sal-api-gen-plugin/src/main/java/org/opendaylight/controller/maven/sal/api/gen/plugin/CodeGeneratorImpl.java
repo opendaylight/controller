@@ -44,7 +44,7 @@ public class CodeGeneratorImpl implements CodeGenerator {
         }
 
         final GeneratorJavaFile generator = new GeneratorJavaFile(typesToGenerate, tosToGenerate);
-        return generator.generateToFile(outputBaseDir.getAbsolutePath());
+        return generator.generateToFile(outputBaseDir);
     }
 
 }

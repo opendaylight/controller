@@ -37,7 +37,7 @@ public class GeneratorJavaFile {
             final Set<GeneratedType> types) {
         this.interfaceGenerator = codeGenerator;
         this.genTypes = types;
-        this.genTransferObjects = new HashSet<GeneratedTransferObject>();
+        this.genTransferObjects = new HashSet<>();
         classGenerator = new ClassCodeGenerator();
     }
 
@@ -49,40 +49,8 @@ public class GeneratorJavaFile {
         this.genTransferObjects = genTransferObjects;
     }
 
-    @Deprecated
-    public List<File> generateToFile(String path) throws IOException {
-        final List<File> result = new ArrayList<File>();
-
-        for (GeneratedType genType : genTypes) {
-            final String parentPath = generateParentPath(path,
-                    genType.getPackageName());
-
-            final File directory = new File(parentPath);
-            final File genFile = generateTypeToJavaFile(directory, genType,
-                    interfaceGenerator);
-            
-            if (genFile != null) {
-                result.add(genFile);
-            }
-        }
-
-        for (GeneratedTransferObject transferObject : genTransferObjects) {
-            final String parentPath = generateParentPath(path,
-                    transferObject.getPackageName());
-
-            final File directory = new File(parentPath);
-            final File genFile = generateTypeToJavaFile(directory,
-                    transferObject, classGenerator);
-
-            if (genFile != null) {
-                result.add(genFile);
-            }
-        }
-        return result;
-    }
-
     public List<File> generateToFile(final File parentDirectory) throws IOException {
-        final List<File> result = new ArrayList<File>();
+        final List<File> result = new ArrayList<>();
         for (GeneratedType type : genTypes) {
             final File genFile = generateTypeToJavaFile(parentDirectory, type,
                     interfaceGenerator);
@@ -110,12 +78,12 @@ public class GeneratorJavaFile {
         }
         if (type == null) {
             log.error("Cannot generate Type into Java File because " +
-                        "Generated Type is NULL!");
+            		"Generated Type is NULL!");
             throw new IllegalArgumentException("Generated Type Cannot be NULL!");
         }
         if (generator == null) {
             log.error("Cannot generate Type into Java File because " +
-                        "Code Generator instance is NULL!");
+            		"Code Generator instance is NULL!");
             throw new IllegalArgumentException("Code Generator Cannot be NULL!");
         }
         final File packageDir = packageToDirectory(parentDir,
@@ -153,41 +121,5 @@ public class GeneratorJavaFile {
             dirPathBuilder.append(subDirNames[i]);
         }
         return new File(parentDirectory, dirPathBuilder.toString());
-    }
-    
-    @Deprecated
-    private String generateParentPath(String path, String pkg) {
-        List<String> dirs = new ArrayList<String>();
-        String pkgPath = "";
-        if (pkg != null) {
-            if (pkg.length() > 0) {
-                if (pkg.contains(".")) {
-                    String[] split = pkg.split("\\.");
-                    for (String dir : split) {
-                        dirs.add(dir);
-                    }
-                } else {
-                    dirs.add(pkg);
-                }
-                for (int i = 0; i < dirs.size(); i++) {
-                    if (i == 0) {
-                        pkgPath += dirs.get(i);
-                    } else {
-                        pkgPath += File.separator + dirs.get(i);
-                    }
-                }
-            }
-        }
-        String fullPath = "";
-        if (path != null) {
-            if (path.endsWith(File.separator)) {
-                fullPath = path + pkgPath;
-            } else {
-                fullPath = path + File.separator + pkgPath;
-            }
-        } else {
-            fullPath = pkgPath;
-        }
-        return fullPath;
     }
 }

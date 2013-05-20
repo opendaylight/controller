@@ -21,7 +21,6 @@ public class AbstractBaseType implements Type {
 
     @Override
     public String getName() {
-
         return name;
     }
 
@@ -52,7 +51,7 @@ public class AbstractBaseType implements Type {
         if (name == null) {
             if (other.getName() != null)
                 return false;
-        } else if (!name.equals(other.getPackageName()))
+        } else if (!name.equals(other.getName()))
             return false;
         if (packageName == null) {
             if (other.getPackageName() != null)

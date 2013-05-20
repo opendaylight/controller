@@ -7,25 +7,20 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
+import org.opendaylight.controller.sal.binding.model.api.*;
+import org.opendaylight.controller.yang.model.api.Module;
+import org.opendaylight.controller.yang.model.api.SchemaContext;
+import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
+import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
-import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
-import org.opendaylight.controller.sal.binding.model.api.Enumeration;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
-import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
-import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
-import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
+import static org.junit.Assert.*;
 
 public class GeneratedTypesTest {
 
@@ -67,19 +62,25 @@ public class GeneratedTypesTest {
 
         final SchemaContext context = resolveSchemaContextFromFiles(ianaIfTypePath);
         assertTrue(context != null);
-
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
         final List<Type> genTypes = bindingGen.generateTypes(context);
         assertTrue(genTypes != null);
         assertEquals(2, genTypes.size());
 
-        final Type type = genTypes.get(0);
-        assertTrue(type instanceof GeneratedType);
+        final Type type = genTypes.get(1);
+        assertTrue(type instanceof GeneratedTransferObject);
 
-        final GeneratedType genType = (GeneratedType) type;
-        assertEquals(1, genType.getEnumDefintions().size());
+        final GeneratedTransferObject genTransObj = (GeneratedTransferObject) type;
+        final List<GeneratedProperty> properties = genTransObj.getProperties();
+        assertNotNull(properties);
+        assertEquals(1, properties.size());
 
-        final Enumeration enumer = genType.getEnumDefintions().get(0);
+        GeneratedProperty property = properties.get(0);
+        assertNotNull(property);
+        assertNotNull(property.getReturnType());
+
+        assertTrue(property.getReturnType() instanceof Enumeration);
+        final Enumeration enumer = (Enumeration) property.getReturnType();
         assertEquals(272, enumer.getValues().size());
     }
 
@@ -419,7 +420,8 @@ public class GeneratedTypesTest {
         int genTypesCount = 0;
         int genTOsCount = 0;
         for (final Type type : genTypes) {
-            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
+            if (type instanceof GeneratedType &&
+                    !(type instanceof GeneratedTransferObject)) {
                 final GeneratedType genType = (GeneratedType) type;
                 if (genType.getName().equals("ListParentContainer")) {
                     assertEquals(2, genType.getMethodDefinitions().size());
@@ -502,7 +504,8 @@ public class GeneratedTypesTest {
         int genTypesCount = 0;
         int genTOsCount = 0;
         for (final Type type : genTypes) {
-            if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
+            if (type instanceof GeneratedType &&
+                    !(type instanceof GeneratedTransferObject)) {
                 genTypesCount++;
             } else if (type instanceof GeneratedTransferObject) {
                 final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
