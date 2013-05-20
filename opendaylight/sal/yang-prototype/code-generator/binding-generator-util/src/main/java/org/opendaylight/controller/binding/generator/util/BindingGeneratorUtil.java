@@ -1,22 +1,15 @@
 package org.opendaylight.controller.binding.generator.util;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.SchemaNode;
-import org.opendaylight.controller.yang.model.api.SchemaPath;
+import org.opendaylight.controller.yang.model.api.*;
+
+import java.util.*;
 
 public class BindingGeneratorUtil {
 
-    private static final String[] SET_VALUES = new String[] { "abstract",
+    private static final String[] SET_VALUES = new String[]{"abstract",
             "assert", "boolean", "break", "byte", "case", "catch", "char",
             "class", "const", "continue", "default", "double", "do", "else",
             "enum", "extends", "false", "final", "finally", "float", "for",
@@ -24,9 +17,7 @@ public class BindingGeneratorUtil {
             "interface", "long", "native", "new", "null", "package", "private",
             "protected", "public", "return", "short", "static", "strictfp",
             "super", "switch", "synchronized", "this", "throw", "throws",
-            "transient", "true", "try", "void", "volatile", "while" };
-
-    private static Calendar calendar = new GregorianCalendar();
+            "transient", "true", "try", "void", "volatile", "while"};
 
     private BindingGeneratorUtil() {
     }
@@ -53,7 +44,7 @@ public class BindingGeneratorUtil {
         }
         return packageName;
     }
-    
+
     public static String validateParameterName(final String parameterName) {
         if (parameterName != null) {
             if (JAVA_RESERVED_WORDS.contains(parameterName)) {
@@ -62,38 +53,40 @@ public class BindingGeneratorUtil {
         }
         return parameterName;
     }
-    
+
     public static GeneratedTOBuilder schemaNodeToTransferObjectBuilder(
-            final String basePackageName, final SchemaNode schemaNode, final String transObjectName) {
-        if (basePackageName != null && schemaNode != null && transObjectName != null) {
-            final String packageName = packageNameForGeneratedType(basePackageName,
-                    schemaNode.getPath());
+            final String packageName, final SchemaNode schemaNode,
+            final String transObjectName) {
+        if (packageName != null && schemaNode != null
+                && transObjectName != null) {
 
-            if (packageName != null) {
-                final String genTOName = BindingGeneratorUtil
-                        .parseToClassName(transObjectName);
-                final GeneratedTOBuilder newType = new GeneratedTOBuilderImpl(
-                        packageName, genTOName);
+            final String genTOName = BindingGeneratorUtil
+                    .parseToClassName(transObjectName);
+            final GeneratedTOBuilder newType = new GeneratedTOBuilderImpl(
+                    packageName, genTOName);
 
-                return newType;
-            }
+            return newType;
+
         }
         return null;
     }
 
     public static String moduleNamespaceToPackageName(
-            final URI moduleNamespace, final String yangVersion) {
+            final Module module) {
         final StringBuilder packageNameBuilder = new StringBuilder();
 
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(module.getRevision());
+
         packageNameBuilder.append("org.opendaylight.yang.gen.v");
-        packageNameBuilder.append(yangVersion);
+        packageNameBuilder.append(module.getYangVersion());
         packageNameBuilder.append(".rev");
         packageNameBuilder.append(calendar.get(Calendar.YEAR));
         packageNameBuilder.append((calendar.get(Calendar.MONTH) + 1));
         packageNameBuilder.append(calendar.get(Calendar.DAY_OF_MONTH));
         packageNameBuilder.append(".");
 
-        String namespace = moduleNamespace.toString();
+        String namespace = module.getNamespace().toString();
         namespace = namespace.replace("://", ".");
         namespace = namespace.replace("/", ".");
         namespace = namespace.replace(":", ".");
@@ -110,7 +103,7 @@ public class BindingGeneratorUtil {
 
         packageNameBuilder.append(namespace);
 
-        return packageNameBuilder.toString();
+        return validateJavaPackage(packageNameBuilder.toString());
     }
 
     public static String packageNameForGeneratedType(
@@ -132,7 +125,29 @@ public class BindingGeneratorUtil {
         }
         return null;
     }
-    
+
+    public static String packageNameForAugmentedType(
+            final String parentPackageName, final SchemaPath schemaPath) {
+        if ((parentPackageName != null) && (schemaPath != null)
+                && (schemaPath.getPath() != null)) {
+            final List<QName> pathToNode = schemaPath.getPath();
+            final int traversalSteps = (pathToNode.size() - 1);
+            final StringBuilder builder = new StringBuilder();
+            builder.append(parentPackageName);
+
+            for (int i = 1; i < traversalSteps; ++i) {
+                builder.append(".");
+                String nodeLocalName = pathToNode.get(i).getLocalName();
+
+                nodeLocalName = nodeLocalName.replace(":", ".");
+                nodeLocalName = nodeLocalName.replace("-", ".");
+                builder.append(nodeLocalName);
+            }
+            return validateJavaPackage(builder.toString());
+        }
+        return null;
+    }
+
     public static String parseToClassName(String token) {
         token = token.replace(".", "");
         String correctStr = parseToCamelCase(token);
@@ -142,7 +157,7 @@ public class BindingGeneratorUtil {
         correctStr = first + correctStr.substring(1);
         return correctStr;
     }
-    
+
     public static String parseToValidParamName(final String token) {
         final String validToken = token.replace(".", "");
         String correctStr = parseToCamelCase(validToken);
@@ -152,7 +167,7 @@ public class BindingGeneratorUtil {
         correctStr = first + correctStr.substring(1);
         return validateParameterName(correctStr);
     }
-    
+
     private static String parseToCamelCase(String token) {
         if (token == null) {
             throw new NullPointerException("Name can not be null");
@@ -168,7 +183,7 @@ public class BindingGeneratorUtil {
         correctStr = replaceWithCamelCase(correctStr, '_');
         return correctStr;
     }
-    
+
     private static String replaceWithCamelCase(String text, char removalChar) {
         StringBuilder sb = new StringBuilder(text);
         String toBeRemoved = String.valueOf(removalChar);

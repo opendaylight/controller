@@ -123,6 +123,7 @@ public class YangParserImpl implements YangModelParser {
 
     private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
             final List<InputStream> yangFileStreams) {
+        //Linked Hash Map MUST be used because Linked Hash Map preserves ORDER of items stored in map.
         final Map<String, TreeMap<Date, ModuleBuilder>> modules = new LinkedHashMap<String, TreeMap<Date, ModuleBuilder>>();
         final ParseTreeWalker walker = new ParseTreeWalker();
         final List<ParseTree> trees = parseStreams(yangFileStreams);
@@ -140,7 +141,7 @@ public class YangParserImpl implements YangModelParser {
 
         // module dependency graph sorted
         List<ModuleBuilder> sorted = ModuleDependencySort.sort(builders);
-
+        
         for (ModuleBuilder builder : sorted) {
             final String builderName = builder.getName();
             Date builderRevision = builder.getRevision();
@@ -194,6 +195,8 @@ public class YangParserImpl implements YangModelParser {
         resolveAugments(modules);
 
         // build
+        // Linked Hash Set MUST be used otherwise the Set will not maintain order!
+        // http://docs.oracle.com/javase/6/docs/api/java/util/LinkedHashSet.html
         final Set<Module> result = new LinkedHashSet<Module>();
         for (Map.Entry<String, TreeMap<Date, ModuleBuilder>> entry : modules
                 .entrySet()) {
@@ -221,7 +224,7 @@ public class YangParserImpl implements YangModelParser {
     /**
      * Search for dirty nodes (node which contains UnknownType) and resolve
      * unknown types.
-     *
+     * 
      * @param modules
      *            all available modules
      * @param module
@@ -543,7 +546,7 @@ public class YangParserImpl implements YangModelParser {
     /**
      * Go through all typedef statements from given module and search for one
      * with given name
-     *
+     * 
      * @param typedefs
      *            typedef statements to search
      * @param name
@@ -572,7 +575,7 @@ public class YangParserImpl implements YangModelParser {
 
     /**
      * Pull restriction from referenced type and add them to given constraints
-     *
+     * 
      * @param referencedType
      * @param constraints
      */
@@ -602,7 +605,7 @@ public class YangParserImpl implements YangModelParser {
     /**
      * Go through all augmentation definitions and resolve them. This method
      * also finds referenced node and add child nodes to it.
-     *
+     * 
      * @param modules
      *            all available modules
      */
@@ -645,7 +648,7 @@ public class YangParserImpl implements YangModelParser {
     }
 
     /**
-     *
+     * 
      * @param modules
      *            all available modules
      * @param module
@@ -727,7 +730,7 @@ public class YangParserImpl implements YangModelParser {
     /**
      * Go through identity statements defined in current module and resolve
      * their 'base' statement if present.
-     *
+     * 
      * @param modules
      *            all modules
      * @param module
@@ -769,7 +772,7 @@ public class YangParserImpl implements YangModelParser {
     /**
      * Go through uses statements defined in current module and resolve their
      * refine statements.
-     *
+     * 
      * @param modules
      *            all modules
      * @param module
@@ -897,7 +900,7 @@ public class YangParserImpl implements YangModelParser {
 
     /**
      * Find original builder of refine node and return copy of this builder.
-     *
+     * 
      * @param groupingPath
      *            path to grouping which contains node to refine
      * @param refine
@@ -943,7 +946,7 @@ public class YangParserImpl implements YangModelParser {
 
     /**
      * Find builder of refine node.
-     *
+     * 
      * @param groupingPath
      *            path to grouping which contains node to refine
      * @param refineNodeName
@@ -1030,7 +1033,7 @@ public class YangParserImpl implements YangModelParser {
 
     /**
      * Find dependent module based on given prefix
-     *
+     * 
      * @param modules
      *            all available modules
      * @param module

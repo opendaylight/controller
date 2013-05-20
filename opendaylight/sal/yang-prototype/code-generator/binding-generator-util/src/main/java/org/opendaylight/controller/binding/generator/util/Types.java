@@ -14,12 +14,17 @@ import java.util.Set;
 import org.opendaylight.controller.sal.binding.model.api.ConcreteType;
 import org.opendaylight.controller.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
+import org.opendaylight.controller.yang.binding.Augmentable;
+import org.opendaylight.controller.yang.binding.Augmentation;
+import org.opendaylight.controller.yang.binding.DataObject;
 
 public class Types {
     private static final Type SET_TYPE = typeForClass(Set.class);
     private static final Type LIST_TYPE = typeForClass(List.class);
     private static final Type MAP_TYPE = typeForClass(Map.class);
-
+    
+    public static final Type DATA_OBJECT = typeForClass(DataObject.class);
+    
     private Types() {
     }
 
@@ -88,7 +93,17 @@ public class Types {
             Type... parameters) {
         return new ParametrizedTypeImpl(type, parameters);
     }
-
+    
+    public static ParameterizedType augmentableTypeFor(Type valueType) {
+        final Type augmentable = typeForClass(Augmentable.class);
+        return parameterizedTypeFor(augmentable, valueType);
+    }
+    
+    public static ParameterizedType augmentationTypeFor(Type valueType) {
+        final Type augmentation = typeForClass(Augmentation.class);
+        return parameterizedTypeFor(augmentation, valueType);
+    }
+    
     private static class ConcreteTypeImpl extends AbstractBaseType implements
             ConcreteType {
         private ConcreteTypeImpl(String pkName, String name) {

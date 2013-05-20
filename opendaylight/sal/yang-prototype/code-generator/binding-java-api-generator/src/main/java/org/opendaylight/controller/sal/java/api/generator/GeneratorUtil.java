@@ -73,7 +73,7 @@ public class GeneratorUtil {
         }
         builder.append(PUBLIC + GAP + type + GAP + genType.getName() + GAP);
 
-        final List<GeneratedType> genImplements = genType.getImplements();
+        final List<Type> genImplements = genType.getImplements();
         if (genType instanceof GeneratedTransferObject) {
             GeneratedTransferObject genTO = (GeneratedTransferObject) genType;
 
@@ -88,12 +88,10 @@ public class GeneratorUtil {
             } else {
                 builder.append(EXTENDS + GAP);
             }
-            builder.append(genImplements.get(0).getPackageName()
-                    + "." + genImplements.get(0).getName());
+            builder.append(getExplicitType(genImplements.get(0)));
             for (int i = 1; i < genImplements.size(); ++i) {
                 builder.append(", ");
-                builder.append(genImplements.get(i).getPackageName()
-                        + "." + genImplements.get(i).getName());
+                builder.append(getExplicitType(genImplements.get(i)));
             }
         }
 
@@ -192,9 +190,21 @@ public class GeneratorUtil {
      */
     public static String createMethodDeclaration(final MethodSignature method,
             final String indent) {
+        if (method == null) {
+            throw new IllegalArgumentException("Method Signature parameter MUST be specified and cannot be NULL!");
+        }
+
         final String comment = method.getComment();
-        final Type type = method.getReturnType();
         final String name = method.getName();
+        if (name == null) {
+            throw new IllegalStateException("Method Name cannot be NULL!");
+        }
+
+        final Type type = method.getReturnType();
+        if (type == null) {
+            throw new IllegalStateException("Method Return type cannot be NULL!");
+        }
+
         final List<Parameter> parameters = method.getParameters();
 
         final StringBuilder builder = new StringBuilder();
@@ -452,14 +462,18 @@ public class GeneratorUtil {
     }
 
     private static String getExplicitType(final Type type) {
+        if (type == null) {
+            throw new IllegalArgumentException("Type parameter MUST be specified and cannot be NULL!");
+        }
         String packageName = type.getPackageName();
         if (packageName.endsWith(".")) {
             packageName = packageName.substring(0, packageName.length() - 1);
         }
+
         final StringBuilder builder = new StringBuilder(packageName + "."
                 + type.getName());
         if (type instanceof ParameterizedType) {
-            ParameterizedType pType = (ParameterizedType) type;
+            final ParameterizedType pType = (ParameterizedType) type;
             Type[] pTypes = pType.getActualTypeArguments();
             builder.append("<");
             builder.append(getParameters(pTypes));

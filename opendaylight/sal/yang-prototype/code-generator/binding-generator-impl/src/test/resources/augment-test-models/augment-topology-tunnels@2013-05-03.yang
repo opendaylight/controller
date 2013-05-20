@@ -1,0 +1,28 @@
+module augment-topology-tunnels {
+	yang-version 1;
+    namespace "urn:model:augment:topology:tunnels";
+    prefix "tp";
+
+    import abstract-topology {
+    	prefix "at";
+    	revision-date 2013-02-08;
+    }
+
+    import augment-abstract-topology {
+        prefix "aug-at";
+        revision-date 2013-05-03;
+    }
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    revision "2013-05-03" {
+        reference "http://www.opendaylight.org/";
+    }
+
+    augment "at:topology/at:network-links/at:network-link/aug-at:tunnels/aug-at:tunnel" {
+    	leaf tunnel-name {
+            type string;
+        }
+    }
+}

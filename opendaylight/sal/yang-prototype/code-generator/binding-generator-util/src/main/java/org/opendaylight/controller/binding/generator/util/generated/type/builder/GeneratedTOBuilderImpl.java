@@ -17,7 +17,6 @@ import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.AnnotationTypeBuilder;
@@ -33,7 +32,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     private String comment = "";
     
     private GeneratedTransferObject extendsType;
-    private final List<GeneratedType> implementsTypes = new ArrayList<GeneratedType>();
+    private final List<Type> implementsTypes = new ArrayList<Type>();
     private final List<EnumBuilder> enumerations = new ArrayList<EnumBuilder>();
     private final List<GeneratedPropertyBuilder> properties = new ArrayList<GeneratedPropertyBuilder>();
     private final List<GeneratedPropertyBuilder> equalsProperties = new ArrayList<GeneratedPropertyBuilder>();
@@ -84,7 +83,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     }
     
     @Override
-    public boolean addImplementsType(final GeneratedType genType) {
+    public boolean addImplementsType(final Type genType) {
         if (genType != null) {
             return implementsTypes.add(genType);
         }
@@ -409,14 +408,14 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         private final List<AnnotationType> annotations;
         private final List<MethodSignature> methods;
         private final GeneratedTransferObject extendsType;
-        private final List<GeneratedType> implementsTypes;
+        private final List<Type> implementsTypes;
 
         public GeneratedTransferObjectImpl(final String packageName,
                 final String name,
                 final String comment,
                 final List<AnnotationTypeBuilder> annotationBuilders,
                 final GeneratedTransferObject extendsType,
-                final List<GeneratedType> implementsTypes,
+                final List<Type> implementsTypes,
                 final List<ConstantBuilder> constantBuilders,
                 final List<EnumBuilder> enumBuilders,
                 final List<MethodSignatureBuilder> methodBuilders,
@@ -511,7 +510,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         }
         
         @Override
-        public List<GeneratedType> getImplements() {
+        public List<Type> getImplements() {
             return implementsTypes;
         }
 
