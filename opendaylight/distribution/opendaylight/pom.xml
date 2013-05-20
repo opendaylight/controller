@@ -26,7 +26,6 @@
     </repository>
   </repositories>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>distribution.opendaylight</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>

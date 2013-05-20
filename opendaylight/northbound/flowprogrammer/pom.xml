@@ -8,7 +8,6 @@
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>flowprogrammer.northbound</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -56,6 +55,7 @@
             </Export-Package>
             <Web-ContextPath>/controller/nb/v2/flow</Web-ContextPath>
           </instructions>
+          <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

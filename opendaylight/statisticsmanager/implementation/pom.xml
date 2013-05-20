@@ -8,7 +8,6 @@
     <version>1.4.0-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>statisticsmanager.implementation</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -53,6 +52,7 @@
             <Export-Package>
             </Export-Package>
           </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
       <plugin>

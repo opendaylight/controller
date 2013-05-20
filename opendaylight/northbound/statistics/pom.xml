@@ -7,8 +7,7 @@
     <version>1.4.0-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  
-  <groupId>org.opendaylight.controller</groupId>
+
   <artifactId>statistics.northbound</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -65,6 +64,7 @@
             </Export-Package>
             <Web-ContextPath>/controller/nb/v2/statistics</Web-ContextPath>
           </instructions>
+          <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

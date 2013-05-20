@@ -8,7 +8,6 @@
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>commons.northbound</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -38,6 +37,7 @@
               org.slf4j,                              
             </Import-Package>
           </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

@@ -9,7 +9,6 @@
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>switchmanager</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -58,6 +57,7 @@
               org.apache.commons.lang3.builder
             </Import-Package>
 	      </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
 	    </configuration>
       </plugin>
       <plugin>
