@@ -5,12 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.binding.generator.impl;
+package org.opendaylight.controller.binding.generator.util;
 
 import org.opendaylight.controller.sal.binding.model.api.Type;
 
 
-final class ReferencedTypeImpl implements Type {
+public final class ReferencedTypeImpl implements Type {
     
     private final String packageName;
     private final String name;

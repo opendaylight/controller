@@ -22,7 +22,7 @@ public interface GeneratedTypeBuilder extends Type {
     
     public AnnotationTypeBuilder addAnnotation(final String packageName, final String name);
     
-    public boolean addImplementsType(final GeneratedType genType);
+    public boolean addImplementsType(final Type genType);
     
     public ConstantBuilder addConstant(final Type type, final String name,
             final Object value);

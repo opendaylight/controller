@@ -15,26 +15,28 @@ import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 public class DataNodeIterator implements Iterator<DataSchemaNode> {
     
     private final DataNodeContainer container;
-    private final List<ListSchemaNode> allLists;
-    private final List<ContainerSchemaNode> allContainers;
-    private final List<LeafSchemaNode> allLeafs;
-    private final List<LeafListSchemaNode> allLeafLists;
-    private final List<DataSchemaNode> allChilds;
+    private List<ListSchemaNode> allLists;
+    private List<ContainerSchemaNode> allContainers;
+    private List<LeafSchemaNode> allLeafs;
+    private List<LeafListSchemaNode> allLeafLists;
+    private List<DataSchemaNode> allChilds;
     
     public DataNodeIterator(final DataNodeContainer container) {
         if (container == null) {
-            throw new IllegalArgumentException("Data Node Container MUST be specified!");
+            throw new IllegalArgumentException("Data Node Container MUST be specified and cannot be NULL!");
         }
         
+        init();
+        this.container = container;
+        traverse(this.container);
+    }
+    
+    private void init() {
         this.allContainers = new ArrayList<ContainerSchemaNode>();
         this.allLists = new ArrayList<ListSchemaNode>();
         this.allLeafs = new ArrayList<LeafSchemaNode>();
         this.allLeafLists = new ArrayList<LeafListSchemaNode>();
         this.allChilds = new ArrayList<DataSchemaNode>();
-        
-        this.container = container;
-        
-        traverse(this.container);
     }
     
     public List<ContainerSchemaNode> allContainers() {
@@ -54,10 +56,10 @@ public class DataNodeIterator implements Iterator<DataSchemaNode> {
     }
     
     private void traverse(final DataNodeContainer dataNode) {
-        if (!containChildDataNodeContainer(dataNode)) {
+        if (dataNode == null) {
             return;
         }
-
+        
         final Set<DataSchemaNode> childs = dataNode.getChildNodes();
         if (childs != null) {
             for (DataSchemaNode childNode : childs) {
@@ -81,32 +83,8 @@ public class DataNodeIterator implements Iterator<DataSchemaNode> {
                     allLeafLists.add(leafList);
                 }
             }
+            return;
         }
-    }
-
-    /**
-     * Returns <code>true</code> if and only if the child node contain at least
-     * one child container schema node or child list schema node, otherwise will
-     * always returns <code>false</code>
-     * 
-     * @param container
-     * @return <code>true</code> if and only if the child node contain at least
-     *         one child container schema node or child list schema node,
-     *         otherwise will always returns <code>false</code>
-     */
-    private boolean containChildDataNodeContainer(
-            final DataNodeContainer container) {
-        if (container != null) {
-            final Set<DataSchemaNode> childs = container.getChildNodes();
-            if ((childs != null) && (childs.size() > 0)) {
-                for (final DataSchemaNode childNode : childs) {
-                    if (childNode instanceof DataNodeContainer) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
     
     @Override

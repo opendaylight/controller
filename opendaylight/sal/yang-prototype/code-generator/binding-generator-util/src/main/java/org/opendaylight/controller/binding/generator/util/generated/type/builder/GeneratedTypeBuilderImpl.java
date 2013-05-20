@@ -29,7 +29,7 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
     private String comment = "";
     private final String name;
     private final List<AnnotationTypeBuilder> annotationBuilders = new ArrayList<AnnotationTypeBuilder>();
-    private final List<GeneratedType> implementsTypes = new ArrayList<GeneratedType>();
+    private final List<Type> implementsTypes = new ArrayList<Type>();
     private final List<EnumBuilder> enumDefinitions = new ArrayList<EnumBuilder>();
     private final List<ConstantBuilder> constantDefintions = new ArrayList<ConstantBuilder>();
     private final List<MethodSignatureBuilder> methodDefinitions = new ArrayList<MethodSignatureBuilder>();
@@ -97,7 +97,7 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
     }
 
     @Override
-    public boolean addImplementsType(final GeneratedType genType) {
+    public boolean addImplementsType(final Type genType) {
         if (genType != null) {
             return implementsTypes.add(genType);
         }
@@ -118,7 +118,7 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
         private final String name;
         private final String comment;
         private final List<AnnotationType> annotations;
-        private final List<GeneratedType> implementsTypes;
+        private final List<Type> implementsTypes;
         private final List<Enumeration> enumDefinitions;
         private final List<Constant> constantDefintions;
         private final List<MethodSignature> methodDefinitions;
@@ -126,7 +126,7 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
         public GeneratedTypeImpl(final Type parent, final String packageName,
                 final String name, final String comment,
                 final List<AnnotationTypeBuilder> annotationBuilders,
-                final List<GeneratedType> implementsTypes,
+                final List<Type> implementsTypes,
                 final List<EnumBuilder> enumBuilders,
                 final List<ConstantBuilder> constantBuilders,
                 final List<MethodSignatureBuilder> methodBuilders) {
@@ -204,7 +204,7 @@ public final class GeneratedTypeBuilderImpl implements GeneratedTypeBuilder {
         }
         
         @Override
-        public List<GeneratedType> getImplements() {
+        public List<Type> getImplements() {
             return implementsTypes;
         }
         
