@@ -33,19 +33,19 @@
     </pluginManagement>
     <plugins>
       <plugin>
-	    <groupId>org.apache.felix</groupId>
-	    <artifactId>maven-bundle-plugin</artifactId>
-	    <version>2.3.6</version>
-	    <extensions>true</extensions>
-	    <configuration>
-	      <instructions>
-	        <Export-Package>
-	        </Export-Package>
-	        <Import-Package>
-	    	  org.opendaylight.controller.switchmanager,
-	    	  org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.configuration,	    	
-	    	  org.opendaylight.controller.sal.core,
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.6</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+            </Export-Package>
+            <Import-Package>
+              org.opendaylight.controller.switchmanager,
+              org.opendaylight.controller.clustering.services,
+              org.opendaylight.controller.configuration,
+              org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.sal.inventory,
@@ -57,11 +57,11 @@
               org.apache.commons.lang3.builder
             </Import-Package>
             <Bundle-Activator>
-          	  org.opendaylight.controller.switchmanager.internal.Activator
+              org.opendaylight.controller.switchmanager.internal.Activator
             </Bundle-Activator>
-	      </instructions>
+          </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
-	    </configuration>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -88,25 +88,25 @@
     </plugins>
   </build>
   <dependencies>
-	<dependency>
-	  <groupId>org.opendaylight.controller</groupId>
-	  <artifactId>clustering.services</artifactId>
-	  <version>0.4.0-SNAPSHOT</version>
-	</dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>clustering.services</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
       <version>0.4.0-SNAPSHOT</version>
-    </dependency>	
-	<dependency>
-		<groupId>org.opendaylight.controller</groupId>
-		<artifactId>sal</artifactId>
-		<version>0.5.0-SNAPSHOT</version>
-	</dependency>
-	<dependency>
-		<groupId>org.opendaylight.controller</groupId>
-		<artifactId>switchmanager</artifactId>
-		<version>0.4.0-SNAPSHOT</version>
-	</dependency>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.5.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>switchmanager</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>

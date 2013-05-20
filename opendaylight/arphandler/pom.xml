@@ -16,29 +16,29 @@
   <build>
     <plugins>
       <plugin>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>maven-bundle-plugin</artifactId>
-	<version>2.3.6</version>
-	<extensions>true</extensions>
-	<configuration>
-	  <instructions>
-	    <Import-Package>
-		  org.opendaylight.controller.sal.core,
-	      org.opendaylight.controller.sal.utils,
-	      org.opendaylight.controller.sal.packet,
-          org.opendaylight.controller.switchmanager,
-          org.opendaylight.controller.hosttracker,
-	      org.opendaylight.controller.hosttracker.hostAware,
-          org.apache.felix.dm,
-          org.osgi.service.component,
-	      org.slf4j
-	    </Import-Package>
-        <Bundle-Activator>
-          org.opendaylight.controller.arphandler.internal.Activator
-       	</Bundle-Activator>
-	  </instructions>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.6</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.opendaylight.controller.sal.core,
+              org.opendaylight.controller.sal.utils,
+              org.opendaylight.controller.sal.packet,
+              org.opendaylight.controller.switchmanager,
+              org.opendaylight.controller.hosttracker,
+              org.opendaylight.controller.hosttracker.hostAware,
+              org.apache.felix.dm,
+              org.osgi.service.component,
+              org.slf4j
+            </Import-Package>
+            <Bundle-Activator>
+              org.opendaylight.controller.arphandler.internal.Activator
+            </Bundle-Activator>
+          </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
-	</configuration>
+        </configuration>
       </plugin>
     </plugins>
   </build>

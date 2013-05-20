@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
@@ -16,20 +17,20 @@
   <build>
     <plugins>
       <plugin>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>maven-bundle-plugin</artifactId>
-	<version>2.3.6</version>
-	<extensions>true</extensions>
-	<configuration>
-	  <instructions>
-	    <Include-Resource>
-	    </Include-Resource>
-	    <Export-Package>
-	      org.opendaylight.controller.forwardingrulesmanager
-	    </Export-Package>
-	    <Import-Package>
-		      org.opendaylight.controller.clustering.services,
-		      org.opendaylight.controller.configuration,
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.6</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Include-Resource>
+            </Include-Resource>
+            <Export-Package>
+              org.opendaylight.controller.forwardingrulesmanager
+            </Export-Package>
+            <Import-Package>
+              org.opendaylight.controller.clustering.services,
+              org.opendaylight.controller.configuration,
               org.opendaylight.controller.hosttracker,
               org.opendaylight.controller.hosttracker.hostAware,
               org.opendaylight.controller.switchmanager,
@@ -37,7 +38,7 @@
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.flowprogrammer,
               org.opendaylight.controller.sal.match,
-			  org.opendaylight.controller.sal.utils,
+              org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
               javax.xml.bind.annotation,
               javax.xml.bind,
@@ -46,11 +47,11 @@
               org.osgi.service.component,
               org.slf4j,
               org.eclipse.osgi.framework.console,
-			  org.osgi.framework
-	    </Import-Package>
-        <Require-Bundle>
+              org.osgi.framework
+            </Import-Package>
+            <Require-Bundle>
               org.opendaylight.controller.hosttracker
-        </Require-Bundle>
+            </Require-Bundle>
             <Service-Component>
             </Service-Component>
           </instructions>
@@ -69,7 +70,7 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
       <version>0.4.0-SNAPSHOT</version>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
@@ -80,11 +81,11 @@
       <artifactId>switchmanager</artifactId>
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
-	<dependency>
-		<groupId>org.opendaylight.controller</groupId>
-		<artifactId>sal</artifactId>
-		<version>0.5.0-SNAPSHOT</version>
-	</dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.5.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

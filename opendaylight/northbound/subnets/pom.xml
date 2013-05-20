@@ -50,17 +50,17 @@
             <Export-Package>
             </Export-Package>
             <Import-Package>
-			  org.opendaylight.controller.sal.core,
-			  org.opendaylight.controller.sal.utils,
-			  org.opendaylight.controller.containermanager,
-			  org.opendaylight.controller.switchmanager,
+              org.opendaylight.controller.sal.core,
+              org.opendaylight.controller.sal.utils,
+              org.opendaylight.controller.containermanager,
+              org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.northbound.commons,
               org.opendaylight.controller.northbound.commons.exception,
               org.opendaylight.controller.northbound.commons.utils,
               com.sun.jersey.spi.container.servlet,
               org.opendaylight.controller.sal.authorization,
               org.opendaylight.controller.usermanager,
-			  javax.ws.rs,
+              javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind.annotation,
               org.slf4j,
@@ -96,11 +96,11 @@
       <artifactId>com.sun.jersey.jersey-servlet</artifactId>
       <version>1.17-SNAPSHOT</version>
     </dependency>
-	<dependency>
-	  <groupId>org.opendaylight.controller</groupId>
-	  <artifactId>commons.northbound</artifactId>
-	  <version>0.4.0-SNAPSHOT</version>
-	</dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>commons.northbound</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-core-annotations</artifactId>

@@ -24,7 +24,7 @@
             <version>0.5.0-SNAPSHOT</version>
           </dependency>
         </dependencies>
-      </plugin>    
+      </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -33,25 +33,25 @@
         <configuration>
           <instructions>
             <Import-Package>
-				org.opendaylight.controller.samples.loadbalancer,
- 				org.opendaylight.controller.samples.loadbalancer.entities,
-				org.opendaylight.controller.samples.loadbalancer.internal,
-				org.opendaylight.controller.samples.loadbalancer.policies,
-				org.opendaylight.controller.hosttracker,
-				org.opendaylight.controller.sal.core,
-				org.opendaylight.controller.sal.utils,
-				org.opendaylight.controller.containermanager,
-				org.opendaylight.controller.switchmanager,
-				org.apache.commons.logging,
-				com.sun.jersey.spi.container.servlet,
-				org.opendaylight.controller.northbound.commons,
-				org.opendaylight.controller.northbound.commons.exception,
-				javax.ws.rs,
-				javax.ws.rs.core,
-				javax.xml.bind.annotation,
-				javax.xml.bind,
-				org.slf4j,
-				!org.codehaus.enunciate.jaxrs
+              org.opendaylight.controller.samples.loadbalancer,
+              org.opendaylight.controller.samples.loadbalancer.entities,
+              org.opendaylight.controller.samples.loadbalancer.internal,
+              org.opendaylight.controller.samples.loadbalancer.policies,
+              org.opendaylight.controller.hosttracker,
+              org.opendaylight.controller.sal.core,
+              org.opendaylight.controller.sal.utils,
+              org.opendaylight.controller.containermanager,
+              org.opendaylight.controller.switchmanager,
+              org.apache.commons.logging,
+              com.sun.jersey.spi.container.servlet,
+              org.opendaylight.controller.northbound.commons,
+              org.opendaylight.controller.northbound.commons.exception,
+              javax.ws.rs,
+              javax.ws.rs.core,
+              javax.xml.bind.annotation,
+              javax.xml.bind,
+              org.slf4j,
+              !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Web-ContextPath>/one/nb/v2/lb</Web-ContextPath>
           </instructions>
@@ -80,17 +80,17 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>samples.loadbalancer</artifactId>
       <version>0.4.0-SNAPSHOT</version>
-    </dependency>
-	<dependency>
+      </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
       <version>0.5.0-SNAPSHOT</version>
-	</dependency> 
+    </dependency>
     <dependency>
-	  <groupId>org.opendaylight.controller</groupId>
-	  <artifactId>commons.northbound</artifactId>
-	  <version>0.4.0-SNAPSHOT</version>
-	</dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>commons.northbound</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-core-annotations</artifactId>

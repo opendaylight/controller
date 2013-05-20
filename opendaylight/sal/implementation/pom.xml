@@ -35,13 +35,13 @@
               org.opendaylight.controller.sal.utils,
               org.apache.felix.dm,
               org.eclipse.osgi.framework.console,
-			  org.osgi.framework
+              org.osgi.framework
             </Import-Package>
             <Export-Package>
             </Export-Package>
-	        <Bundle-Activator>
-    	      org.opendaylight.controller.sal.implementation.internal.Activator
-        	</Bundle-Activator>
+            <Bundle-Activator>
+              org.opendaylight.controller.sal.implementation.internal.Activator
+            </Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>

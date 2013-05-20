@@ -29,70 +29,70 @@
         </plugin>
       </plugins>
     </pluginManagement>
-    <plugins>
-      <plugin>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>maven-bundle-plugin</artifactId>
-	<version>2.3.6</version>
-	<extensions>true</extensions>
-	<configuration>
-	  <instructions>
-	    <Import-Package>
-              org.slf4j,
-              !org.jboss.*,
-              !bsh*,
-              !net.jcip.*,
-              javax.transaction,
-              *,
-              org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.sal.core
-            </Import-Package>
-            <Bundle-Activator>
-              org.opendaylight.controller.clustering.services_implementation.internal.Activator
-            </Bundle-Activator>
-            <!-- Add in the DynamicImport-Package ONLY the packages that -->
-            <!-- contains types that MUST be unmarshalled by the -->
-            <!-- infinispan. They need to be wired at runtime even during -->
-            <!-- the bundle is already RESOLVED, but at the same time if -->
-            <!-- those are missing the bundle will still come up, this is -->
-            <!-- why those dependencies ends in the DynamicImport-Package -->
-            <!-- rather in the Import-Package  -->
-            <DynamicImport-Package>
-              *
-            </DynamicImport-Package>
-            <Embed-Dependency>
-              infinispan-core,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper;type=!pom;inline=false
-            </Embed-Dependency>
-            <Embed-Transitive>
-              true
-            </Embed-Transitive>
-	  </instructions>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>maven-bundle-plugin</artifactId>
+      <version>2.3.6</version>
+      <extensions>true</extensions>
+      <configuration>
+        <instructions>
+          <Import-Package>
+            org.slf4j,
+            !org.jboss.*,
+            !bsh*,
+            !net.jcip.*,
+            javax.transaction,
+            *,
+            org.opendaylight.controller.clustering.services,
+            org.opendaylight.controller.sal.core
+          </Import-Package>
+          <Bundle-Activator>
+            org.opendaylight.controller.clustering.services_implementation.internal.Activator
+          </Bundle-Activator>
+          <!-- Add in the DynamicImport-Package ONLY the packages that -->
+          <!-- contains types that MUST be unmarshalled by the -->
+          <!-- infinispan. They need to be wired at runtime even during -->
+          <!-- the bundle is already RESOLVED, but at the same time if -->
+          <!-- those are missing the bundle will still come up, this is -->
+          <!-- why those dependencies ends in the DynamicImport-Package -->
+          <!-- rather in the Import-Package -->
+          <DynamicImport-Package>
+            *
+          </DynamicImport-Package>
+          <Embed-Dependency>
+            infinispan-core,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper;type=!pom;inline=false
+          </Embed-Dependency>
+          <Embed-Transitive>
+            true
+          </Embed-Transitive>
+        </instructions>
         <manifestLocation>${project.basedir}/META-INF</manifestLocation>
-	</configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <includes>org.opendaylight.controller.*</includes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>pre-test</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>post-test</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>      
-    </plugins>
+      </configuration>
+    </plugin>
+    <plugin>
+      <groupId>org.jacoco</groupId>
+      <artifactId>jacoco-maven-plugin</artifactId>
+      <configuration>
+        <includes>org.opendaylight.controller.*</includes>
+      </configuration>
+      <executions>
+        <execution>
+          <id>pre-test</id>
+          <goals>
+            <goal>prepare-agent</goal>
+          </goals>
+        </execution>
+        <execution>
+          <id>post-test</id>
+          <phase>test</phase>
+          <goals>
+            <goal>report</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
   </build>
   <dependencies>
     <dependency>
