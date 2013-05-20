@@ -7,8 +7,8 @@
   </prerequisites>
 
   <scm>
-    <connection>scm:svn:https://wwwin-svn-sjc.cisco.com/eng/csdncontroller/trunk/</connection>
-    <developerConnection>scm:svn:https://wwwin-svn-sjc.cisco.com/eng/csdncontroller/trunk/</developerConnection>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
   </scm>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
