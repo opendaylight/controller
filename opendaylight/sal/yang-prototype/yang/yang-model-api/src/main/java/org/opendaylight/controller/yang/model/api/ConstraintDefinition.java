@@ -10,7 +10,6 @@ package org.opendaylight.controller.yang.model.api;
 import java.util.Set;
 
 public interface ConstraintDefinition {
-    DataSchemaNode getParent();
 
     RevisionAwareXPath getWhenCondition();
 

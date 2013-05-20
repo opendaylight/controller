@@ -993,26 +993,12 @@ public class ModuleBuilder implements Builder {
         public String toString() {
             StringBuilder sb = new StringBuilder(
                     ModuleImpl.class.getSimpleName());
-            sb.append("[\n");
-            sb.append("name=" + name + ",\n");
-            sb.append("namespace=" + namespace + ",\n");
-            sb.append("revision=" + revision + ",\n");
-            sb.append("prefix=" + prefix + ",\n");
-            sb.append("yangVersion=" + yangVersion + ",\n");
-            sb.append("description=" + description + ",\n");
-            sb.append("reference=" + reference + ",\n");
-            sb.append("organization=" + organization + ",\n");
-            sb.append("contact=" + contact + ",\n");
-            sb.append("childNodes=" + childNodes.values() + ",\n");
-            sb.append("groupings=" + groupings + ",\n");
-            sb.append("imports=" + imports + ",\n");
-            sb.append("features=" + features + ",\n");
-            sb.append("typeDefinitions=" + typeDefinitions + ",\n");
-            sb.append("notifications=" + notifications + ",\n");
-            sb.append("augmentations=" + augmentations + ",\n");
-            sb.append("rpcs=" + rpcs + ",\n");
-            sb.append("deviations=" + deviations + "\n");
-            sb.append("uses=" + uses + "\n");
+            sb.append("[");
+            sb.append("name=" + name);
+            sb.append(", namespace=" + namespace);
+            sb.append(", revision=" + revision);
+            sb.append(", prefix=" + prefix);
+            sb.append(", yangVersion=" + yangVersion);
             sb.append("]");
             return sb.toString();
         }

@@ -135,7 +135,7 @@ public class AnyXmlBuilder implements DataSchemaNodeBuilder {
         instance.setConfiguration(configuration);
     }
 
-    private static class AnyXmlSchemaNodeImpl implements AnyXmlSchemaNode {
+    private class AnyXmlSchemaNodeImpl implements AnyXmlSchemaNode {
         private final QName qname;
         private SchemaPath path;
         private String description;

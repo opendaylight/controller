@@ -9,8 +9,6 @@ package org.opendaylight.controller.yang.parser.builder.api;
 
 import java.util.List;
 
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
@@ -25,10 +23,6 @@ public interface TypeDefinitionBuilder extends TypeAwareBuilder,
         SchemaNodeBuilder {
 
     TypeDefinition<?> build();
-
-    QName getQName();
-
-    SchemaPath getPath();
 
     String getDescription();
 

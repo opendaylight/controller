@@ -11,18 +11,45 @@ import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
 
+/**
+ * Node which can contains other nodes.
+ */
 public interface DataNodeContainer {
 
+    /**
+     * @return Set of all newly defined types within this DataNodeContainer
+     */
     Set<TypeDefinition<?>> getTypeDefinitions();
 
+    /**
+     * Set of all child nodes defined within this DataNodeContainer
+     */
     Set<DataSchemaNode> getChildNodes();
 
+    /**
+     * Set of all groupings defined within this DataNodeContainer
+     */
     Set<GroupingDefinition> getGroupings();
 
+    /**
+     * @param name
+     *            QName of seeked child
+     * @return child node of this DataNodeContainer if child with given name is
+     *         present, null otherwise
+     */
     DataSchemaNode getDataChildByName(QName name);
 
+    /**
+     * @param name
+     *            name of seeked child as String
+     * @return child node of this DataNodeContainer if child with given name is
+     *         present, null otherwise
+     */
     DataSchemaNode getDataChildByName(String name);
 
+    /**
+     * @return Set of all uses nodes defined within this DataNodeContainer
+     */
     Set<UsesNode> getUses();
 
 }

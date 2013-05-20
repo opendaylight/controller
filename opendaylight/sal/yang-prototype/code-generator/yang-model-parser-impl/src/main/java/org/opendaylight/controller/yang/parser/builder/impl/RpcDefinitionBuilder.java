@@ -154,8 +154,7 @@ public class RpcDefinitionBuilder implements SchemaNodeBuilder,
         return true;
     }
 
-    private static class RpcDefinitionImpl implements RpcDefinition {
-
+    private class RpcDefinitionImpl implements RpcDefinition {
         private final QName qname;
         private SchemaPath path;
         private String description;
@@ -264,6 +263,7 @@ public class RpcDefinitionBuilder implements SchemaNodeBuilder,
             final int prime = 31;
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
+            result = prime * result + ((path == null) ? 0 : path.hashCode());
             return result;
         }
 
@@ -284,6 +284,13 @@ public class RpcDefinitionBuilder implements SchemaNodeBuilder,
                     return false;
                 }
             } else if (!qname.equals(other.qname)) {
+                return false;
+            }
+            if (path == null) {
+                if (other.path != null) {
+                    return false;
+                }
+            } else if (!path.equals(other.path)) {
                 return false;
             }
             return true;

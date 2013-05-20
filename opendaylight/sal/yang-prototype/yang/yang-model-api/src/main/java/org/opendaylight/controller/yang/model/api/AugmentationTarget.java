@@ -9,11 +9,16 @@ package org.opendaylight.controller.yang.model.api;
 
 import java.util.Set;
 
+/**
+ * Interface for all nodes which are possible targets of augmentation. The
+ * target node of augmentation MUST be either a container, list, choice, case,
+ * input, output, or notification node.
+ */
 public interface AugmentationTarget {
+
     /**
-     * Returns a set of augmentations targeting this element.
-     * 
-     * @return
+     * @return set of augmentations targeting this element.
      */
     Set<AugmentationSchema> getAvailableAugmentations();
+
 }

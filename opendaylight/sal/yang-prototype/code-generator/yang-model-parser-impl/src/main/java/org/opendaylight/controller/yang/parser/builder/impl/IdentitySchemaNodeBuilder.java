@@ -186,6 +186,7 @@ public final class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
+            result = prime * result + ((path == null) ? 0 : path.hashCode());
             return result;
         }
 
@@ -206,6 +207,13 @@ public final class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
                     return false;
                 }
             } else if (!qname.equals(other.qname)) {
+                return false;
+            }
+            if (path == null) {
+                if (other.path != null) {
+                    return false;
+                }
+            } else if (!path.equals(other.path)) {
                 return false;
             }
             return true;

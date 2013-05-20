@@ -31,13 +31,12 @@ import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBui
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 
 public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
-        DataSchemaNodeBuilder, SchemaNodeBuilder, AugmentationTargetBuilder,
+        DataSchemaNodeBuilder, AugmentationTargetBuilder,
         TypeDefinitionAwareBuilder {
     private final ListSchemaNodeImpl instance;
     private final int line;
@@ -57,7 +56,7 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
     // AugmentationTarget args
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
     // ListSchemaNode args
-    private List<QName> keyDefinition;
+    private List<QName> keyDefinition = Collections.emptyList();
     private boolean userOrdered;
 
     public ListSchemaNodeBuilder(final QName qname, final int line) {
@@ -201,7 +200,9 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
     }
 
     public void setKeyDefinition(final List<QName> keyDefinition) {
-        this.keyDefinition = keyDefinition;
+        if (keyDefinition != null) {
+            this.keyDefinition = keyDefinition;
+        }
     }
 
     public boolean isAugmenting() {

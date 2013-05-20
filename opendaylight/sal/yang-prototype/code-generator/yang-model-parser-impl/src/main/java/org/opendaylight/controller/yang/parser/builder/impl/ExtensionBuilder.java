@@ -98,7 +98,7 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
         addedUnknownNodes.add(unknownNode);
     }
 
-    private static class ExtensionDefinitionImpl implements ExtensionDefinition {
+    private class ExtensionDefinitionImpl implements ExtensionDefinition {
         private final QName qname;
         private String argument;
         private SchemaPath schemaPath;
@@ -193,11 +193,6 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
             result = prime * result
                     + ((schemaPath == null) ? 0 : schemaPath.hashCode());
-            result = prime
-                    * result
-                    + ((unknownNodes == null) ? 0
-                            : unknownNodes.hashCode());
-            result = prime * result + (yin ? 1231 : 1237);
             return result;
         }
 
@@ -225,16 +220,6 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
                     return false;
                 }
             } else if (!schemaPath.equals(other.schemaPath)) {
-                return false;
-            }
-            if (unknownNodes == null) {
-                if (other.unknownNodes != null) {
-                    return false;
-                }
-            } else if (!unknownNodes.equals(other.unknownNodes)) {
-                return false;
-            }
-            if (yin != other.yin) {
                 return false;
             }
             return true;

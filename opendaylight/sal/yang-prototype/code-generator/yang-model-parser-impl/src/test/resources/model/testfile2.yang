@@ -20,7 +20,7 @@ module types2 {
 
     typedef my-type1 {
         type my-base-int32-type {
-            range "11..max";
+            range "3..9|11..max";
         }
         units "mile";
         default "11";

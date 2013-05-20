@@ -12,6 +12,7 @@ import org.opendaylight.controller.yang.model.api.Deviation.Deviate;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public class DeviationBuilder implements Builder {
     private final DeviationImpl instance;
@@ -44,7 +45,7 @@ public class DeviationBuilder implements Builder {
         } else if ("delete".equals(deviate)) {
             instance.setDeviate(Deviate.DELETE);
         } else {
-            throw new IllegalArgumentException(
+            throw new YangParseException(line,
                     "Unsupported type of 'deviate' statement: " + deviate);
         }
     }
@@ -53,7 +54,7 @@ public class DeviationBuilder implements Builder {
         instance.setReference(reference);
     }
 
-    private static class DeviationImpl implements Deviation {
+    private class DeviationImpl implements Deviation {
         private final SchemaPath targetPath;
         private Deviate deviate;
         private String reference;

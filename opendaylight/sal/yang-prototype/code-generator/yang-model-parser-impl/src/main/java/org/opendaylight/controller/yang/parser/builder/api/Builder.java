@@ -12,7 +12,8 @@ package org.opendaylight.controller.yang.parser.builder.api;
  */
 public interface Builder {
 
-	Object build();
-	int getLine();
+    Object build();
+
+    int getLine();
 
 }

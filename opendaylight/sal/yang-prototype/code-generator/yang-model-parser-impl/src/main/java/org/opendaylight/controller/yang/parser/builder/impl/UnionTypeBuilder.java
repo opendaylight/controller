@@ -22,8 +22,8 @@ import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.util.UnionType;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 /**
  * Builder for YANG union type. User can add type to this union as
@@ -32,9 +32,8 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder
  * types.
  */
 public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
-        TypeDefinitionBuilder, Builder {
-    private final static String CLASS_NAME = UnionTypeBuilder.class
-            .getSimpleName();
+        TypeDefinitionBuilder {
+    private final static String NAME = "union";
 
     private final int line;
     private final List<TypeDefinition<?>> types;
@@ -106,30 +105,28 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setPath(final SchemaPath schemaPath) {
-        throw new IllegalStateException("Can not set path to " + CLASS_NAME);
+        throw new YangParseException(line, "Can not set path to " + NAME);
     }
 
     @Override
     public void setDescription(final String description) {
-        throw new IllegalStateException("Can not set description to "
-                + CLASS_NAME);
+        throw new YangParseException(line, "Can not set description to " + NAME);
     }
 
     @Override
     public void setReference(final String reference) {
-        throw new IllegalStateException("Can not set reference to "
-                + CLASS_NAME);
+        throw new YangParseException(line, "Can not set reference to " + NAME);
     }
 
     @Override
     public void setStatus(final Status status) {
-        throw new IllegalStateException("Can not set status to " + CLASS_NAME);
+        throw new YangParseException(line, "Can not set status to " + NAME);
     }
 
     @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        throw new IllegalStateException("Can not add unknown node to "
-                + CLASS_NAME);
+        throw new YangParseException(line, "Can not add unknown node to "
+                + NAME);
     }
 
     @Override
@@ -164,8 +161,7 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setRanges(List<RangeConstraint> ranges) {
-        throw new IllegalStateException("Can not set ranges to "
-                + UnionTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set ranges to " + NAME);
     }
 
     @Override
@@ -175,8 +171,7 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setLengths(List<LengthConstraint> lengths) {
-        throw new IllegalStateException("Can not set lengths to "
-                + UnionTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set lengths to " + NAME);
     }
 
     @Override
@@ -186,8 +181,7 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setPatterns(List<PatternConstraint> patterns) {
-        throw new IllegalStateException("Can not set patterns to "
-                + UnionTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set patterns to " + NAME);
     }
 
     @Override
@@ -197,8 +191,8 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setFractionDigits(Integer fractionDigits) {
-        throw new IllegalStateException("Can not set fraction digits to "
-                + UnionTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set fraction digits to "
+                + NAME);
     }
 
     @Override
@@ -213,8 +207,8 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setDefaultValue(Object defaultValue) {
-        throw new IllegalStateException("Can not set default value to "
-                + UnionTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set default value to "
+                + NAME);
     }
 
     @Override
@@ -224,8 +218,7 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setUnits(String units) {
-        throw new IllegalStateException("Can not set units to "
-                + UnionTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set units to " + NAME);
     }
 
     public List<String> getActualPath() {

@@ -19,8 +19,8 @@ import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.util.IdentityrefType;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 /**
  * Builder for YANG union type. User can add type to this union as
@@ -29,17 +29,24 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder
  * types.
  */
 public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
-        TypeDefinitionBuilder, Builder {
+        TypeDefinitionBuilder {
+    private static final String NAME = "identityref";
+
     private final int line;
     private final String baseString;
     private final SchemaPath schemaPath;
     private QName baseQName;
 
-
-    public IdentityrefTypeBuilder(final String baseString, final SchemaPath schemaPath, final int line) {
+    IdentityrefTypeBuilder(final String baseString,
+            final SchemaPath schemaPath, final int line) {
         this.line = line;
         this.baseString = baseString;
         this.schemaPath = schemaPath;
+    }
+
+    @Override
+    public IdentityrefType build() {
+        return new IdentityrefType(baseQName, schemaPath);
     }
 
     public String getBaseString() {
@@ -67,49 +74,38 @@ public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setType(final TypeDefinition<?> type) {
-        throw new IllegalStateException("Can not set type to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set type to " + NAME);
     }
 
     @Override
     public void setType(final TypeDefinitionBuilder tdb) {
-        throw new IllegalStateException("Can not set type to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
-    }
-
-    @Override
-    public IdentityrefType build() {
-        return new IdentityrefType(baseQName, schemaPath);
+        throw new YangParseException(line, "Can not set type to " + NAME);
     }
 
     @Override
     public void setPath(final SchemaPath schemaPath) {
-        throw new IllegalStateException("Can not set path to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set path to " + NAME);
     }
 
     @Override
     public void setDescription(final String description) {
-        throw new IllegalStateException("Can not set description to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set description to " + NAME);
     }
 
     @Override
     public void setReference(final String reference) {
-        throw new IllegalStateException("Can not set reference to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set reference to " + NAME);
     }
 
     @Override
     public void setStatus(final Status status) {
-        throw new IllegalStateException("Can not set status to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set status to " + NAME);
     }
 
     @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        throw new IllegalStateException("Can not add unknown node to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not add unknown node to "
+                + NAME);
     }
 
     @Override
@@ -144,8 +140,7 @@ public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setRanges(List<RangeConstraint> ranges) {
-        throw new IllegalStateException("Can not set ranges to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set ranges to " + NAME);
     }
 
     @Override
@@ -155,8 +150,7 @@ public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setLengths(List<LengthConstraint> lengths) {
-        throw new IllegalStateException("Can not set lengths to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set lengths to " + NAME);
     }
 
     @Override
@@ -166,8 +160,7 @@ public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setPatterns(List<PatternConstraint> patterns) {
-        throw new IllegalStateException("Can not set patterns to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set patterns to " + NAME);
     }
 
     @Override
@@ -177,8 +170,8 @@ public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setFractionDigits(Integer fractionDigits) {
-        throw new IllegalStateException("Can not set fraction digits to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set fraction digits to "
+                + NAME);
     }
 
     @Override
@@ -193,8 +186,8 @@ public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setDefaultValue(Object defaultValue) {
-        throw new IllegalStateException("Can not set default value to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set default value to "
+                + NAME);
     }
 
     @Override
@@ -204,8 +197,7 @@ public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setUnits(String units) {
-        throw new IllegalStateException("Can not set units to "
-                + IdentityrefTypeBuilder.class.getSimpleName());
+        throw new YangParseException(line, "Can not set units to " + NAME);
     }
 
     @Override
