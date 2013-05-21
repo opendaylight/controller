@@ -308,6 +308,48 @@ public class SwitchHandler implements ISwitch {
         }
     }
 
+    /**
+     * This method bypasses the transmit queue and sends the message over the
+     * socket directly. If the input xid is not null, the specified xid is
+     * inserted into the message. Otherwise, an unique xid is generated
+     * automatically and inserted into the message.
+     * 
+     * @param msg
+     *            Message to be sent
+     * @param xid
+     *            Message xid
+     */
+    private void asyncSendNow(OFMessage msg, Integer xid) {
+        if (xid == null) {
+            xid = getNextXid();
+        }
+        msg.setXid(xid);
+
+        asyncSendNow(msg);
+    }
+
+    /**
+     * This method bypasses the transmit queue and sends the message over the
+     * socket directly.
+     * 
+     * @param msg
+     *            Message to be sent
+     */
+    private void asyncSendNow(OFMessage msg) {
+        if (msgReadWriteService == null) {
+            logger.warn(
+                    "asyncSendNow: {} is not sent because Message ReadWrite Service is not available.",
+                    msg);
+            return;
+        }
+
+        try {
+            msgReadWriteService.asyncSend(msg);
+        } catch (Exception e) {
+            reportError(e);
+        }
+    }
+
     public void handleMessages() {
         List<OFMessage> msgs = null;
 
@@ -349,7 +391,8 @@ public class SwitchHandler implements ISwitch {
             case ECHO_REQUEST:
                 OFEchoReply echoReply = (OFEchoReply) factory
                         .getMessage(OFType.ECHO_REPLY);
-                asyncFastSend(echoReply);
+                // respond immediately
+                asyncSendNow(echoReply, msg.getXid());
                 break;
             case ECHO_REPLY:
                 this.probeSent = false;
