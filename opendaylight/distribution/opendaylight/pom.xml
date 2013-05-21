@@ -84,6 +84,8 @@
     <module>../../northbound/subnets</module>
     <module>../../northbound/switchmanager</module>
 
+    <!-- Northbound integration tests -->
+    <module>../../northbound/integrationtest</module>
     <!-- Debug and logging -->
     <module>../../logging/bridge</module>
 
