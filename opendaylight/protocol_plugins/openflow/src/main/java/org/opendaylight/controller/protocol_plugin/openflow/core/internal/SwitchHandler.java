@@ -228,7 +228,7 @@ public class SwitchHandler implements ISwitch {
      * should be used for non-critical messages such as statistics request,
      * discovery packets, etc. An unique XID is generated automatically and
      * inserted into the message.
-     * 
+     *
      * @param msg
      *            The OF message to be sent
      * @return The XID used
@@ -247,7 +247,7 @@ public class SwitchHandler implements ISwitch {
      * priority. It will be served after high priority messages. The method
      * should be used for non-critical messages such as statistics request,
      * discovery packets, etc. The specified XID is inserted into the message.
-     * 
+     *
      * @param msg
      *            The OF message to be Sent
      * @param xid
@@ -269,7 +269,7 @@ public class SwitchHandler implements ISwitch {
      * method should be used for critical messages such as hello, echo reply
      * etc. An unique XID is generated automatically and inserted into the
      * message.
-     * 
+     *
      * @param msg
      *            The OF message to be sent
      * @return The XID used
@@ -284,7 +284,7 @@ public class SwitchHandler implements ISwitch {
      * priority. It will be served first before normal priority messages. The
      * method should be used for critical messages such as hello, echo reply
      * etc. The specified XID is inserted into the message.
-     * 
+     *
      * @param msg
      *            The OF message to be sent
      * @return The XID used
@@ -303,6 +303,48 @@ public class SwitchHandler implements ISwitch {
             if (msgReadWriteService != null) {
                 msgReadWriteService.resumeSend();
             }
+        } catch (Exception e) {
+            reportError(e);
+        }
+    }
+
+    /**
+     * This method bypasses the transmit queue and sends the message over the
+     * socket directly. If the input xid is not null, the specified xid is
+     * inserted into the message. Otherwise, an unique xid is generated
+     * automatically and inserted into the message.
+     *
+     * @param msg
+     *            Message to be sent
+     * @param xid
+     *            Message xid
+     */
+    private void asyncSendNow(OFMessage msg, Integer xid) {
+        if (xid == null) {
+            xid = getNextXid();
+        }
+        msg.setXid(xid);
+
+        asyncSendNow(msg);
+    }
+
+    /**
+     * This method bypasses the transmit queue and sends the message over the
+     * socket directly.
+     *
+     * @param msg
+     *            Message to be sent
+     */
+    private void asyncSendNow(OFMessage msg) {
+        if (msgReadWriteService == null) {
+            logger.warn(
+                    "asyncSendNow: {} is not sent because Message ReadWrite Service is not available.",
+                    msg);
+            return;
+        }
+
+        try {
+            msgReadWriteService.asyncSend(msg);
         } catch (Exception e) {
             reportError(e);
         }
@@ -349,7 +391,8 @@ public class SwitchHandler implements ISwitch {
             case ECHO_REQUEST:
                 OFEchoReply echoReply = (OFEchoReply) factory
                         .getMessage(OFType.ECHO_REPLY);
-                asyncFastSend(echoReply);
+                // respond immediately
+                asyncSendNow(echoReply, msg.getXid());
                 break;
             case ECHO_REPLY:
                 this.probeSent = false;
@@ -822,7 +865,7 @@ public class SwitchHandler implements ISwitch {
 
         barrierMsg.setXid(xid);
         transmitQ.add(new PriorityMessage(barrierMsg, 0, true));
-        
+
         return Boolean.TRUE;
     }
 
@@ -830,7 +873,7 @@ public class SwitchHandler implements ISwitch {
      * This method returns the switch liveness timeout value. If controller did
      * not receive any message from the switch for such a long period,
      * controller will tear down the connection to the switch.
-     * 
+     *
      * @return The timeout value
      */
     private static int getSwitchLivenessTimeout() {
@@ -853,7 +896,7 @@ public class SwitchHandler implements ISwitch {
      * Barrier request message. Then it's blocked until the Barrier rely arrives
      * or timeout. If syncRequest is false, it simply skips the message send and
      * just waits for the response back.
-     * 
+     *
      * @param msg
      *            Message to be sent
      * @param xid
