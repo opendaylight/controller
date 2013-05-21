@@ -94,7 +94,11 @@ public class ReadService implements IPluginInReadService {
         List<Action> actions = new ArrayList<Action>();
         actions.add(action);
         flow.setActions(actions);
-
+        flow.setPriority((short)3500);
+        flow.setIdleTimeout((short)1000);
+        flow.setHardTimeout((short)2000);
+        flow.setId(12345);
+        
         FlowOnNode fn1 = new FlowOnNode(flow);
         fn1.setByteCount(100);
         fn1.setDurationNanoseconds(400);
