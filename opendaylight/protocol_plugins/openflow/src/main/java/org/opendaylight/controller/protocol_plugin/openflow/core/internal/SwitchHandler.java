@@ -308,6 +308,29 @@ public class SwitchHandler implements ISwitch {
         }
     }
 
+    /**
+     * This method bypasses the transmit queue and sends the message over the
+     * socket directly.
+     * 
+     * @param msg
+     *            the message to send
+     */
+    private void asyncSendNow(OFMessage msg) {
+        if (msgReadWriteService == null) {
+            logger.warn(
+                    "asyncSendNow: {} is not sent because Message ReadWrite Service is not available.",
+                    msg);
+            return;
+        }
+        
+        msg.setXid(getNextXid());
+        try {
+            msgReadWriteService.asyncSend(msg);
+        } catch (Exception e) {
+            reportError(e);
+        }
+    }
+
     public void handleMessages() {
         List<OFMessage> msgs = null;
 
@@ -349,7 +372,8 @@ public class SwitchHandler implements ISwitch {
             case ECHO_REQUEST:
                 OFEchoReply echoReply = (OFEchoReply) factory
                         .getMessage(OFType.ECHO_REPLY);
-                asyncFastSend(echoReply);
+                // respond immediately
+                asyncSendNow(echoReply);
                 break;
             case ECHO_REPLY:
                 this.probeSent = false;
