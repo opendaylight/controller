@@ -1,11 +1,11 @@
 module augment-topology-tunnels {
-	yang-version 1;
+    yang-version 1;
     namespace "urn:model:augment:topology:tunnels";
     prefix "tp";
 
     import abstract-topology {
-    	prefix "at";
-    	revision-date 2013-02-08;
+        prefix "at";
+        revision-date 2013-02-08;
     }
 
     import augment-abstract-topology {
@@ -21,7 +21,7 @@ module augment-topology-tunnels {
     }
 
     augment "at:topology/at:network-links/at:network-link/aug-at:tunnels/aug-at:tunnel" {
-    	leaf tunnel-name {
+        leaf tunnel-name {
             type string;
         }
     }

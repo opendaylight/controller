@@ -1,0 +1,23 @@
+module types1 {
+    yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+
+    import types2 {
+        prefix "data";
+        revision-date 2013-02-27;
+    }
+
+   import types3 {
+        prefix "t3";
+        revision-date 2013-02-27;
+    }
+
+    organization "opendaylight";
+    contact "http://www.opendaylight.org/";
+
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+
+}

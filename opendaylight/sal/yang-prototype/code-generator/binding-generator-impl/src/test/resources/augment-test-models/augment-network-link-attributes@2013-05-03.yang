@@ -1,11 +1,11 @@
 module augment-network-link-attributes {
-	yang-version 1;
+    yang-version 1;
     namespace "urn:model:augment:network:link:attributes";
     prefix "tp";
 
     import abstract-topology {
-    	prefix "at";
-    	revision-date 2013-02-08;
+        prefix "at";
+        revision-date 2013-02-08;
     }
 
     organization "OPEN DAYLIGHT";
@@ -16,7 +16,7 @@ module augment-network-link-attributes {
     }
 
     augment "at:topology/at:network-links/at:network-link/at:attributes" {
-    	leaf longitude {
+        leaf longitude {
             type decimal64 {    
                 fraction-digits 2;
             }
