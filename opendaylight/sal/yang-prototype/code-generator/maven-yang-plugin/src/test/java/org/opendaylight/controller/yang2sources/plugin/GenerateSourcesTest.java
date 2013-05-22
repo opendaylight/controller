@@ -14,6 +14,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -79,7 +80,7 @@ public class GenerateSourcesTest {
 
         @Override
         public Collection<File> generateSources(SchemaContext context,
-                File baseDir) {
+                File baseDir, Set<String> yangModulesNames) {
             called++;
             outputDir = baseDir;
             return Lists.newArrayList();
