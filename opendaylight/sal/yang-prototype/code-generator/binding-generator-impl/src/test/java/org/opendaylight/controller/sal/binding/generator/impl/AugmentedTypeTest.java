@@ -7,10 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -161,7 +158,7 @@ public class AugmentedTypeTest {
                 }
             }
         }
-        assertEquals(6, resolvedAugmentsCount);
+        assertEquals(7, resolvedAugmentsCount);
     }
 
     @Test

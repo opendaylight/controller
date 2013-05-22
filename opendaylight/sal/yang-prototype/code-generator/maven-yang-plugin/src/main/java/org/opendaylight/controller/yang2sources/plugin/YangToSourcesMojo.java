@@ -16,7 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,9 +70,9 @@ public final class YangToSourcesMojo extends AbstractMojo {
 
     /**
      * Classes implementing {@link CodeGenerator} interface. An instance will be
-     * created out of every class using default constructor. Method
-     * {@link CodeGenerator#generateSources(SchemaContext, File)} will be called
-     * on every instance.
+     * created out of every class using default constructor. Method {@link
+     * CodeGenerator#generateSources(SchemaContext, File, Set<String>
+     * yangModulesNames)} will be called on every instance.
      */
     @Parameter(required = true)
     private CodeGeneratorArg[] codeGenerators;
@@ -114,7 +116,7 @@ public final class YangToSourcesMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        SchemaContext context = processYang();
+        ContextHolder context = processYang();
         generateSources(context);
         generateResources();
 
@@ -124,29 +126,40 @@ public final class YangToSourcesMojo extends AbstractMojo {
     /**
      * Generate {@link SchemaContext} with {@link YangModelParserImpl}
      */
-    private SchemaContext processYang() throws MojoExecutionException {
+    private ContextHolder processYang() throws MojoExecutionException {
         try {
-            Collection<InputStream> yangFiles = Util
+            List<InputStream> yangFiles = Util
                     .listFilesAsStream(yangFilesRootDir);
-            yangFiles.addAll(getFilesFromDependenciesAsStream());
+            Set<Module> yangModules = parser
+                    .parseYangModelsFromStreams(yangFiles);
 
-            if (yangFiles.isEmpty()) {
+            Set<String> yangModulesNames = new HashSet<String>();
+            for (Module module : yangModules) {
+                yangModulesNames.add(module.getName());
+            }
+
+            List<InputStream> yangFilesFromDependencies = getFilesFromDependenciesAsStream();
+            Set<Module> yangModulesFromDependencies = parser
+                    .parseYangModelsFromStreams(yangFilesFromDependencies);
+
+            Set<Module> parsedYang = new HashSet<Module>(yangModules);
+            parsedYang.addAll(yangModulesFromDependencies);
+
+            if (yangFiles.isEmpty() && yangFilesFromDependencies.isEmpty()) {
                 getLog().warn(
                         Util.message(
                                 "No %s file found in %s or in dependencies",
                                 LOG_PREFIX, Util.YANG_SUFFIX, yangFilesRootDir));
-                return null;
+                Set<String> names = Collections.emptySet();
+                return new ContextHolder(null, names);
             }
 
-            Set<Module> parsedYang = parser
-                    .parseYangModelsFromStreams(new ArrayList<InputStream>(
-                            yangFiles));
             SchemaContext resolveSchemaContext = parser
                     .resolveSchemaContext(parsedYang);
             getLog().info(
                     Util.message("%s files parsed from %s", LOG_PREFIX,
                             Util.YANG_SUFFIX, yangFiles));
-            return resolveSchemaContext;
+            return new ContextHolder(resolveSchemaContext, yangModulesNames);
 
             // MojoExecutionException is thrown since execution cannot continue
         } catch (Exception e) {
@@ -322,7 +335,7 @@ public final class YangToSourcesMojo extends AbstractMojo {
     /**
      * Call generate on every generator from plugin configuration
      */
-    private void generateSources(SchemaContext context)
+    private void generateSources(ContextHolder context)
             throws MojoFailureException {
         if (codeGenerators.length == 0) {
             getLog().warn(
@@ -359,7 +372,7 @@ public final class YangToSourcesMojo extends AbstractMojo {
     /**
      * Instantiate generator from class and call required method
      */
-    private void generateSourcesWithOneGenerator(SchemaContext context,
+    private void generateSourcesWithOneGenerator(ContextHolder context,
             CodeGeneratorArg codeGeneratorCfg) throws ClassNotFoundException,
             InstantiationException, IllegalAccessException, IOException {
 
@@ -375,7 +388,8 @@ public final class YangToSourcesMojo extends AbstractMojo {
         if (project != null && outputDir != null) {
             project.addCompileSourceRoot(outputDir.getPath());
         }
-        Collection<File> generated = g.generateSources(context, outputDir);
+        Collection<File> generated = g.generateSources(context.getContext(),
+                outputDir, context.getYangModulesNames());
         getLog().info(
                 Util.message("Sources generated by %s: %s", LOG_PREFIX,
                         codeGeneratorCfg.getCodeGeneratorClass(), generated));
@@ -436,6 +450,25 @@ public final class YangToSourcesMojo extends AbstractMojo {
             } catch (IOException e) {
                 getLog().warn("Failed to close resources: " + resource, e);
             }
+        }
+    }
+
+    private class ContextHolder {
+        private final SchemaContext context;
+        private final Set<String> yangModulesNames;
+
+        private ContextHolder(SchemaContext context,
+                Set<String> yangModulesNames) {
+            this.context = context;
+            this.yangModulesNames = yangModulesNames;
+        }
+
+        public SchemaContext getContext() {
+            return context;
+        }
+
+        public Set<String> getYangModulesNames() {
+            return yangModulesNames;
         }
     }
 
