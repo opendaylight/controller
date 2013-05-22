@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///4U\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2013-05-22T00:22:08Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAAEn///5A\u003d",
+      "revId": "a811eb141d885dad74b7c9f1d86536d90cecdfa0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///48\u003d",
         "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-05-21T19:46:32Z",
       "side": 1,
       "message": "Is there any particular reason to set the transaction id for every message?",
+      "revId": "a811eb141d885dad74b7c9f1d86536d90cecdfa0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///34\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2013-05-22T00:22:08Z",
+      "side": 1,
+      "message": "Made changes to introduce two APIs, one without xid setting, one with xid setting. Thanks.",
+      "parentUuid": "AAAAEn///48\u003d",
       "revId": "a811eb141d885dad74b7c9f1d86536d90cecdfa0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
