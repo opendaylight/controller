@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///z8\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Node.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-22T12:07:35Z",
+      "side": 1,
+      "message": "nodeIDString should not be part of the hashCode",
+      "revId": "f44d2fe3a819874b41bb3a178147ccfa9e412da3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///0I\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Node.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-22T12:07:35Z",
+      "side": 1,
+      "message": "The nodeIDString is not part of the key so should not be considered in the equal, this would break some of the northbound API",
+      "revId": "f44d2fe3a819874b41bb3a178147ccfa9e412da3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///0A\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeConnector.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-22T12:07:35Z",
+      "side": 1,
+      "message": "The nodeIDString should not be there because is an attribute",
+      "revId": "f44d2fe3a819874b41bb3a178147ccfa9e412da3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///0E\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeConnector.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-22T12:07:35Z",
+      "side": 1,
+      "message": "The nodeConnectorIDString is not part of the equal because is just a supporting data.",
+      "revId": "f44d2fe3a819874b41bb3a178147ccfa9e412da3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
