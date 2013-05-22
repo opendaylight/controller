@@ -82,13 +82,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     private static final String authFileName = ROOT + "authorization.conf";
     private ConcurrentMap<String, UserConfig> localUserConfigList;
     private ConcurrentMap<String, ServerConfig> remoteServerConfigList;
-    private ConcurrentMap<String, AuthorizationConfig> authorizationConfList; // local
-                                                                              // authorization
-                                                                              // info
-                                                                              // for
-                                                                              // remotely
-                                                                              // authenticated
-                                                                              // users
+    // local authorization info for remotely authenticated users
+    private ConcurrentMap<String, AuthorizationConfig> authorizationConfList; 
     private ConcurrentMap<String, AuthenticatedUser> activeUsers;
     private ConcurrentMap<String, IAAAProvider> authProviders;
     private ConcurrentMap<Long, String> localUserListSaveConfigEvent,
@@ -243,8 +238,10 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         // If startup config is not there, it's old or it was deleted,
         // need to add Default Admin
         if (!localUserConfigList.containsKey(defaultAdmin)) {
+            List<String> roles = new ArrayList<String>(1);
+            roles.add(defaultAdminRole);
             localUserConfigList.put(defaultAdmin, new UserConfig(defaultAdmin,
-                    defaultAdminPassword, defaultAdminRole));
+                    defaultAdminPassword, roles));
         }
     }
 
@@ -253,7 +250,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         IAAAProvider aaaClient;
         AuthResponse rcResponse = null;
         AuthenticatedUser result;
-        String[] adminRoles = null;
         boolean remotelyAuthenticated = false;
         boolean authorizationInfoIsPresent = false;
         boolean authorized = false;
@@ -342,7 +338,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             if (resource != null) {
                 logger.info("Found Local Authorization Info for User: \"{}\"",
                         userName);
-                attributes = resource.getRolesData();
+                attributes = resource.getRolesString();
 
             }
             authorizationInfoIsPresent = checkAuthorizationInfo(attributes);
@@ -354,8 +350,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
          */
         if (authorizationInfoIsPresent) {
             // Identifying the administrative role
-            adminRoles = attributes.split(" ");
-            result.setRoleList(adminRoles);
+            result.setRoleList(attributes.split(" "));
             authorized = true;
         } else {
             logger.info("Not able to find Authorization Info for User: \"{}\"",
@@ -504,6 +499,12 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                 return new Status(StatusCode.NOTALLOWED, msg);
             }
             localUserConfigList.remove(AAAconf.getUser());
+            /*
+             * A user account has been removed form local database, we assume
+             * admin does not want this user to stay connected, in case he has
+             * an open session. So we clean the active list as well.
+             */
+            removeUserFromActiveList(AAAconf.getUser());
         } else {
             if (AAAconf.getUser().equals(UserManagerImpl.defaultAdmin)) {
                 String msg = "Invalid Request: Default Network Admin  User "
@@ -621,16 +622,17 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         if (targetConfigEntry == null) {
             return new Status(StatusCode.NOTFOUND, "User not found");
         }
-        if (false == targetConfigEntry.update(curPassword, newPassword, null)) {
-            return new Status(StatusCode.BADREQUEST,
-                    "Current password is incorrect");
+        Status status = targetConfigEntry
+                .update(curPassword, newPassword, null);
+        if (!status.isSuccess()) {
+            return status;
         }
-        localUserConfigList.put(user, targetConfigEntry); // trigger cluster
-                                                          // update
+        // Trigger cluster update
+        localUserConfigList.put(user, targetConfigEntry); 
 
         logger.info("Password changed for User \"{}\"", user);
 
-        return new Status(StatusCode.SUCCESS, null);
+        return status;
     }
 
     @Override
@@ -701,35 +703,44 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         String userName = ci.nextArgument();
         String password = ci.nextArgument();
         String role = ci.nextArgument();
+        
+        List<String> roles = new ArrayList<String>();
+        while (role != null) {
+            if (!role.trim().isEmpty()) {
+                roles.add(role);
+            }
+            role = ci.nextArgument();
+        }
 
         if (userName == null || userName.trim().isEmpty() || password == null
-                || password.trim().isEmpty() || role == null
-                || role.trim().isEmpty()) {
+                || password.trim().isEmpty() || roles == null
+                || roles.isEmpty()) {
             ci.println("Invalid Arguments");
             ci.println("umAddUser <user_name> <password> <user_role>");
             return;
         }
-        this.addLocalUser(new UserConfig(userName, password, role));
+        ci.print(this.addLocalUser(new UserConfig(userName, password, roles)));
     }
 
     public void _umRemUser(CommandInterpreter ci) {
         String userName = ci.nextArgument();
-        String password = ci.nextArgument();
-        String role = ci.nextArgument();
 
-        if (userName == null || userName.trim().isEmpty() || password == null
-                || password.trim().isEmpty() || role == null
-                || role.trim().isEmpty()) {
+        if (userName == null || userName.trim().isEmpty()) {
             ci.println("Invalid Arguments");
-            ci.println("umRemUser <user_name> <password> <user_role>");
+            ci.println("umRemUser <user_name>");
             return;
         }
-        this.removeLocalUser(new UserConfig(userName, password, role));
+        UserConfig target = localUserConfigList.get(userName);
+        if (target == null) {
+            ci.println("User not found");
+            return;
+        }       
+        ci.println(this.removeLocalUser(target));
     }
 
     public void _umGetUsers(CommandInterpreter ci) {
         for (UserConfig conf : this.getLocalUserList()) {
-            ci.println(conf.getUser() + " " + conf.getRole());
+            ci.println(conf.getUser() + " " + conf.getRoles());
         }
     }
 
@@ -862,39 +873,47 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     @Override
     public UserLevel getUserLevel(String username) {
         // Returns the controller well-know user level for the passed user
-        String roleName = null;
+        List<String> rolesNames = null;
 
         // First check in active users then in local configured users
         if (activeUsers.containsKey(username)) {
             List<String> roles = activeUsers.get(username).getUserRoles();
-            roleName = (roles == null || roles.isEmpty())? null : roles.get(0);
+            rolesNames = (roles == null || roles.isEmpty()) ? null : roles;
         } else if (localUserConfigList.containsKey(username)) {
             UserConfig config = localUserConfigList.get(username);
-            roleName = (config == null)? null : config.getRole();
+            rolesNames = (config == null) ? null : config.getRoles();
         }
 
-        if (roleName == null) {
+        if (rolesNames == null) {
             return UserLevel.NOUSER;
         }
 
-        // For now only one role per user is allowed
-        if (roleName.equals(UserLevel.SYSTEMADMIN.toString())) {
+        // Check against the well known controller roles first
+        if (rolesNames.contains(UserLevel.SYSTEMADMIN.toString())) {
             return UserLevel.SYSTEMADMIN;
         }
-        if (roleName.equals(UserLevel.NETWORKADMIN.toString())) {
+        if (rolesNames.contains(UserLevel.NETWORKADMIN.toString())) {
             return UserLevel.NETWORKADMIN;
         }
-        if (roleName.equals(UserLevel.NETWORKOPERATOR.toString())) {
+        if (rolesNames.contains(UserLevel.NETWORKOPERATOR.toString())) {
             return UserLevel.NETWORKOPERATOR;
         }
-        if (this.containerAuthorizationClient != null
-                && this.containerAuthorizationClient
-                        .isApplicationRole(roleName)) {
-            return UserLevel.CONTAINERUSER;
+        // Check if container user now
+        if (containerAuthorizationClient != null) {
+            for (String roleName : rolesNames) {
+                if (containerAuthorizationClient.isApplicationRole(roleName)) {
+                    return UserLevel.CONTAINERUSER;
+                }
+            }
         }
-        for (IResourceAuthorization client : this.applicationAuthorizationClients) {
-            if (client.isApplicationRole(roleName)) {
-                return UserLevel.APPUSER;
+        // Finally check if application user
+        if (applicationAuthorizationClients != null) {
+            for (String roleName : rolesNames) {
+                for (IResourceAuthorization client : this.applicationAuthorizationClients) {
+                    if (client.isApplicationRole(roleName)) {
+                        return UserLevel.APPUSER;
+                    }
+                }
             }
         }
         return UserLevel.NOUSER;

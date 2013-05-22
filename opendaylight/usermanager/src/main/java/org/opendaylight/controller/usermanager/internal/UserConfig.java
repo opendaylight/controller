@@ -9,6 +9,9 @@
 package org.opendaylight.controller.usermanager.internal;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +34,7 @@ public class UserConfig implements Serializable {
      * configurations
      */
     protected String user;
-    protected String role;
+    protected List<String> roles;
     private String password;
     private static final int USERNAME_MAXLENGTH = 32;
     private static final int PASSWORD_MINLENGTH = 5;
@@ -42,12 +45,13 @@ public class UserConfig implements Serializable {
     public UserConfig() {
     }
 
-    public UserConfig(String user, String password, String role) {
+    public UserConfig(String user, String password, List<String> roles) {
         this.user = user;
         this.password = password;
-        this.role = role;
+        this.roles = (roles == null) ? new ArrayList<String>()
+                : new ArrayList<String>(roles);
     }
-
+    
     public String getUser() {
         return user;
     }
@@ -56,8 +60,8 @@ public class UserConfig implements Serializable {
         return password;
     }
 
-    public String getRole() {
-        return role;
+    public List<String> getRoles() {
+        return new ArrayList<String>(roles);
     }
 
     @Override
@@ -72,22 +76,21 @@ public class UserConfig implements Serializable {
 
     @Override
     public String toString() {
-        return "UserConfig[user=" + user + ", password=" + password + "]";
+        return "UserConfig[user=" + user + ", password=" + password + ", roles=" + roles +"]";
     }
 
     public Status validate() {
-        Status validCheck = new Status(StatusCode.SUCCESS, null);
-        validCheck = isRoleValid();
-
-        if (validCheck.isSuccess())
-            validCheck = isUsernameValid();
-        if (validCheck.isSuccess())
-            validCheck = isPasswordValid();
-
+        Status validCheck = validateRoles();
+        if (validCheck.isSuccess()) {
+            validCheck = validateUsername();
+        }
+        if (validCheck.isSuccess()) {
+            validCheck = validatePassword();
+        }
         return validCheck;
     }
 
-    protected Status isUsernameValid() {
+    protected Status validateUsername() {
         if (user == null || user.isEmpty()) {
             return new Status(StatusCode.BADREQUEST, "Username cannot be empty");
         }
@@ -101,10 +104,10 @@ public class UserConfig implements Serializable {
                             + "characters except ./#%;?\\");
         }
 
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
-    private Status isPasswordValid() {
+    private Status validatePassword() {
         if (password == null || password.isEmpty()) {
             return new Status(StatusCode.BADREQUEST, "Password cannot be empty");
         }
@@ -114,41 +117,66 @@ public class UserConfig implements Serializable {
             return new Status(StatusCode.BADREQUEST,
                     "Password should have 5-256 characters");
         }
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
-    protected Status isRoleValid() {
-        if (role == null || role.isEmpty()) {
-            return new Status(StatusCode.BADREQUEST,
-                    "Role name cannot be empty");
+    protected Status validateRoles() {
+        if (roles == null || roles.isEmpty()) {
+            return new Status(StatusCode.BADREQUEST, "No role specified");
         }
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
-    public boolean update(String currentPassword, String newPassword,
-            String newRole) {
+    public Status update(String currentPassword, String newPassword,
+            List<String> newRoles) {
         // To make any changes to a user configured profile, current password
         // must always be provided
         if (!this.password.equals(currentPassword)) {
-            return false;
+            return new Status(StatusCode.BADREQUEST,
+                    "Current password is incorrect");
         }
-        if (newPassword != null) {
-            this.password = newPassword;
+        
+        // Create a new object with the proposed modifications
+        UserConfig proposed = new UserConfig();
+        proposed.user = this.user;
+        proposed.password = (newPassword != null)? newPassword : this.password;
+        proposed.roles = (newRoles != null)? newRoles : this.roles;
+        
+        // Validate it
+        Status status = proposed.validate();
+        if (!status.isSuccess()) {
+            return status;
         }
-        if (newRole != null) {
-            this.role = newRole;
-        }
-        return true;
+        
+        // Accept the modifications
+        this.user = proposed.user;
+        this.password = proposed.password;
+        this.roles = new ArrayList<String>(proposed.roles);
+        
+        return status;
     }
 
     public AuthResponse authenticate(String clearTextPass) {
         AuthResponse locResponse = new AuthResponse();
         if (password.equals(clearTextPass)) {
             locResponse.setStatus(AuthResultEnum.AUTH_ACCEPT_LOC);
-            locResponse.addData(role.replace(",", " "));
+            locResponse.addData(getRolesString());
         } else {
             locResponse.setStatus(AuthResultEnum.AUTH_REJECT_LOC);
         }
         return locResponse;
+    }
+    
+    protected String getRolesString() {
+        StringBuffer buffer = new StringBuffer();
+        if (!roles.isEmpty()) {
+            Iterator<String> iter = roles.iterator();
+            buffer.append(iter.next());
+            while (iter.hasNext()) {
+                buffer.append(" ");
+                buffer.append(iter.next());
+            }
+        }
+        return buffer.toString();
     }
 }
