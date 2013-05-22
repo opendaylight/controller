@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///0w\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/maven-yang-plugin/src/main/java/org/opendaylight/controller/yang2sources/plugin/YangToSourcesMojo.java.bak",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-22T10:41:26Z",
+      "side": 1,
+      "message": "Please remove the .bak file i don\u0027t think it\u0027s functional.",
+      "revId": "0b33d4dc79b1a60b3a62e1bfc848c352cf5acdb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
