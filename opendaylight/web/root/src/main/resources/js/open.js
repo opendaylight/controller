@@ -201,7 +201,7 @@ one.main.admin = {
                 var tr = {};
                 var entry = [];
                 entry.push(value['user']);
-                entry.push(value['role']);
+                entry.push(value['roles']);
                 tr['entry'] = entry;
                 tr['id'] = value['user'];
                 body.push(tr);
@@ -385,9 +385,11 @@ one.main.admin = {
                         '#' + one.main.admin.id.modal.add.form.name).val();
                 user['password'] = $modal.find(
                         '#' + one.main.admin.id.modal.add.form.password).val();
-                user['role'] = $modal.find(
+                roles = new Array();
+                roles[0] = $modal.find(
                         '#' + one.main.admin.id.modal.add.form.role).find(
                         'option:selected').attr('value');
+                user['roles'] = roles;
 
 				// password check
 				var verify = $('#'+one.main.admin.id.modal.add.form.verify).val();

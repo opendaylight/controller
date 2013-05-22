@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.usermanager.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
@@ -22,22 +25,23 @@ public class AuthorizationConfig extends UserConfig {
     }
 
     // Constructor may be needed for autocontainer logic
-    public AuthorizationConfig(String user, String role) {
+    public AuthorizationConfig(String user, List<String> roles) {
         super();
         this.user = user;
-        this.role = role;
+        this.roles = (roles == null) ? new ArrayList<String>()
+                : new ArrayList<String>(roles);
     }
 
     @Override
     public Status validate() {
-        return (!isRoleValid().isSuccess() ? isRoleValid() : isUsernameValid());
-    }
-
-    public String getRolesData() {
-        return (role.replace(",", " "));
+        Status status = validateUsername();
+        if (status.isSuccess()) {
+            status = validateRoles();
+        }
+        return status;
     }
 
     public String toString() {
-        return "AuthorizationConfig=[user: " + user + ", role: " + role + "]";
+        return "AuthorizationConfig=[user: " + user + ", roles: " + roles + "]";
     }
 }

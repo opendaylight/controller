@@ -11,6 +11,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.authorization.UserLevel;
@@ -24,61 +27,75 @@ public class AuthorizationUserConfigTest {
     @Test
     public void AuthorizationConfigTest() {
         AuthorizationConfig authConfig;
+        List<String> roles = new ArrayList<String>();
 
         // test isValid
-        authConfig = new AuthorizationConfig(null,
-                UserLevel.SYSTEMADMIN.toString());
+        roles.add(UserLevel.SYSTEMADMIN.toString());
+        authConfig = new AuthorizationConfig(null, roles);
         assertFalse(authConfig.validate().isSuccess());
-        authConfig = new AuthorizationConfig("admin", "");
+        authConfig = new AuthorizationConfig("admin", new ArrayList<String>());
         assertFalse(authConfig.validate().isSuccess());
-        authConfig = new AuthorizationConfig("admin",
-                UserLevel.SYSTEMADMIN.toString());
+        authConfig = new AuthorizationConfig("admin", roles);
         assertTrue(authConfig.validate().isSuccess());
     }
 
     @Test
     public void UserConfigTest() {
         UserConfig userConfig;
+        List<String> roles = new ArrayList<String>();
 
-        userConfig = new UserConfig(null, "cisco",
-                UserLevel.NETWORKOPERATOR.toString());
+        roles.add(UserLevel.SYSTEMADMIN.toString());
+        userConfig = new UserConfig(null, "cisco", roles);
         assertFalse(userConfig.validate().isSuccess());
 
-        userConfig = new UserConfig("uname", "", "cisco");
+        roles.clear();
+        roles.add("cisco");
+        userConfig = new UserConfig("uname", "", roles);
         assertFalse(userConfig.validate().isSuccess());
 
-        userConfig = new UserConfig("uname", "ciscocisco",
-                UserLevel.NETWORKOPERATOR.toString());
+        roles.clear();
+        roles.add(UserLevel.NETWORKOPERATOR.toString());
+        userConfig = new UserConfig("uname", "ciscocisco", roles);
         assertTrue(userConfig.validate().isSuccess());
 
-        /* currentPassword mismatch */
-        assertFalse(userConfig.update("Cisco", "cisco123",
-                UserLevel.NETWORKOPERATOR.toString()));
+        // currentPassword mismatch
+        assertFalse(userConfig.update("Cisco", "cisco123", roles).isSuccess());
 
-        assertTrue(userConfig.update("ciscocisco", null,
-                UserLevel.NETWORKOPERATOR.toString()));
-        /* New Password = null, No change in password */
+        // Role change only
+        roles.clear();
+        roles.add(UserLevel.NETWORKADMIN.toString());
+        assertTrue(userConfig.update("ciscocisco", null, roles).isSuccess());
+        
+        // Role change and same new password
+        roles.clear();
+        roles.add(UserLevel.NETWORKOPERATOR.toString());
+        assertTrue(userConfig.update("ciscocisco", "ciscocisco", roles)
+                .isSuccess());
+        
+        // New Password = null, No change in password
         assertTrue(userConfig.getPassword().equals("ciscocisco"));
 
-        /* Password changed successfully, no change in user role */
-        assertTrue(userConfig.update("ciscocisco", "cisco123",
-                UserLevel.NETWORKOPERATOR.toString()));
+        // Password changed successfully, no change in user role
+        assertTrue(userConfig.update("ciscocisco", "cisco123", roles)
+                .isSuccess());
         assertTrue(userConfig.getPassword().equals("cisco123"));
-        assertTrue(userConfig.getRole().equals(
+        assertTrue(userConfig.getRoles().get(0).equals(
                 UserLevel.NETWORKOPERATOR.toString()));
 
-        /* Password not changed, role changed successfully */
-        assertTrue(userConfig.update("cisco123", "cisco123",
-                UserLevel.SYSTEMADMIN.toString()));
+        // Password not changed, role changed successfully
+        roles.clear();
+        roles.add(UserLevel.SYSTEMADMIN.toString());
+        assertTrue(userConfig.update("cisco123", "cisco123", roles)
+                .isSuccess());
         assertTrue(userConfig.getPassword().equals("cisco123"));
-        assertTrue(userConfig.getRole()
+        assertTrue(userConfig.getRoles().get(0)
                 .equals(UserLevel.SYSTEMADMIN.toString()));
 
-        /* Password and role changed successfully */
-        assertTrue(userConfig.update("cisco123", "ciscocisco",
-                UserLevel.SYSTEMADMIN.toString()));
+        // Password and role changed successfully
+        assertTrue(userConfig.update("cisco123", "ciscocisco", roles)
+                .isSuccess());
         assertTrue(userConfig.getPassword().equals("ciscocisco"));
-        assertTrue(userConfig.getRole()
+        assertTrue(userConfig.getRoles().get(0)
                 .equals(UserLevel.SYSTEMADMIN.toString()));
 
         String username = userConfig.getUser();
@@ -91,11 +108,11 @@ public class AuthorizationUserConfigTest {
         assertTrue(authresp.getStatus().equals(AuthResultEnum.AUTH_REJECT_LOC));
 
         // test equals()
-        userConfig = new UserConfig("uname", "ciscocisco",
-                UserLevel.NETWORKOPERATOR.toString());
+        roles.clear();
+        roles.add(UserLevel.NETWORKOPERATOR.toString());
+        userConfig = new UserConfig("uname", "ciscocisco", roles);
         assertEquals(userConfig, userConfig);
-        UserConfig userConfig2 = new UserConfig("uname", "ciscocisco",
-                UserLevel.NETWORKOPERATOR.toString());
+        UserConfig userConfig2 = new UserConfig("uname", "ciscocisco", roles);
         assertEquals(userConfig, userConfig2);
     }
 }

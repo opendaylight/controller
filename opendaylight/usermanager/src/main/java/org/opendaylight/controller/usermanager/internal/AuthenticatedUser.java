@@ -40,7 +40,10 @@ public class AuthenticatedUser implements Serializable {
     public void setRoleList(String[] roleArray) {
         userRoles = new ArrayList<String>(roleArray.length);
         for (String role : roleArray) {
-            userRoles.add(role);
+            String target = role.trim();
+            if (!target.isEmpty()) {
+                userRoles.add(target);
+            }
         }
     }
 

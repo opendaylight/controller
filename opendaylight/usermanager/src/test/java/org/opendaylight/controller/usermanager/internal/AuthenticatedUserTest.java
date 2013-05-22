@@ -35,7 +35,6 @@ public class AuthenticatedUserTest {
 
 		Assert.assertFalse(user.getAccessDate().isEmpty());
 		Assert.assertNull(user.getUserRoles());
-
 	}
 
 	@Test
