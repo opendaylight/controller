@@ -27,7 +27,7 @@ public class CodeGeneratorImpl implements CodeGenerator {
 
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir) throws IOException {
+            File outputBaseDir, Set<String> yangModulesNames) throws IOException {
 
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
         final List<Type> types = bindingGenerator.generateTypes(context);
