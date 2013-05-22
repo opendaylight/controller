@@ -62,5 +62,4 @@ public class BaseYangTypes {
             return null;
         }
     };
-
 }

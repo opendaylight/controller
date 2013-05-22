@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.sal.binding.yang.types;
 
+import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findDataSchemaNode;
+import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findDataSchemaNodeForRelativeXPath;
+import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.resolveModuleFromSchemaPath;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,14 +42,12 @@ import org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition
 import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.UnionTypeDefinition;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
-import org.opendaylight.controller.yang.model.util.SchemaContextUtil;
 
 public class TypeProviderImpl implements TypeProvider {
 
     private final SchemaContext schemaContext;
-    private final SchemaContextUtil schemaContextUtil;
-    private Map<String, Map<String, GeneratedTransferObject>> generatedTypeDefinitions;
-    private final List<GeneratedTransferObject> generatedTypeDefs = new ArrayList<GeneratedTransferObject>();
+    private Map<String, Map<String, GeneratedTransferObject>> genTypeDefsContextMap;
+    private final List<GeneratedTransferObject> allTypeDefinitions;
 
     public TypeProviderImpl(final SchemaContext schemaContext) {
         if (schemaContext == null) {
@@ -53,21 +55,12 @@ public class TypeProviderImpl implements TypeProvider {
         }
 
         this.schemaContext = schemaContext;
-        schemaContextUtil = new SchemaContextUtil(schemaContext);
-        this.generatedTypeDefinitions = new HashMap<String, Map<String, GeneratedTransferObject>>();
-
-        resolveTypeDefsFromContext();
-
-        final Set<String> moduleNames = generatedTypeDefinitions.keySet();
-
-        for (final String moduleName : moduleNames) {
-            generatedTypeDefs.addAll(generatedTypeDefinitions.get(moduleName)
-                    .values());
-        }
+        this.genTypeDefsContextMap = new HashMap<String, Map<String, GeneratedTransferObject>>();
+        allTypeDefinitions = resolveTypeDefsFromContext();
     }
 
     public List<GeneratedTransferObject> getGeneratedTypeDefs() {
-        return generatedTypeDefs;
+        return allTypeDefinitions;
     }
 
     /*
@@ -102,12 +95,11 @@ public class TypeProviderImpl implements TypeProvider {
                     returnType = resolveEnumFromTypeDefinition(enumTypeDef,
                             typedefName);
                 } else {
-                    final Module module = schemaContextUtil
-                            .resolveModuleFromSchemaPath(typeDefinition
+                    final Module module = resolveModuleFromSchemaPath(schemaContext, typeDefinition
                                     .getPath());
 
                     if (module != null) {
-                        final Map<String, GeneratedTransferObject> genTOs = generatedTypeDefinitions
+                        final Map<String, GeneratedTransferObject> genTOs = genTypeDefsContextMap
                                 .get(module.getName());
                         if (genTOs != null) {
                             returnType = genTOs.get(typedefName);
@@ -129,19 +121,6 @@ public class TypeProviderImpl implements TypeProvider {
                             .javaTypeForSchemaDefinitionType(typeDefinition);
                 }
             }
-
-            // if (typeDefinition instanceof Leafref) {
-            // final LeafrefTypeDefinition leafref = (LeafrefTypeDefinition)
-            // typeDefinition;
-            // returnType = provideTypeForLeafref(leafref);
-            // } else if (typeDefinition instanceof IdentityrefTypeDefinition) {
-            //
-            // } else if (typeDefinition instanceof ExtendedType) {
-            // final TypeDefinition<?> baseType = typeDefinition.getBaseType();
-            // return javaTypeForSchemaDefinitionType(baseType);
-            // } else {
-            // returnType = baseTypeForExtendedType(typeDefinition);
-            // }
         }
         return returnType;
     }
@@ -151,7 +130,7 @@ public class TypeProviderImpl implements TypeProvider {
         if (extendTypeDef != null) {
             final TypeDefinition<?> baseTypeDef = extendTypeDef.getBaseType();
             if (baseTypeDef instanceof ExtendedType) {
-                baseTypeDefForExtendedType(baseTypeDef);
+                return baseTypeDefForExtendedType(baseTypeDef);
             } else {
                 return baseTypeDef;
             }
@@ -172,19 +151,6 @@ public class TypeProviderImpl implements TypeProvider {
                 returnType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
                         .javaTypeForSchemaDefinitionType(typeDefinition);
             }
-
-            // if (typeDefinition instanceof ExtendedType) {
-            // final TypeDefinition<?> extType = typeDefinition.getBaseType();
-            // return baseTypeForExtendedType(extType);
-            // } else if (typeDefinition instanceof EnumerationType) {
-            // final EnumTypeDefinition enumTypeDef = (EnumTypeDefinition)
-            // typeDefinition;
-            // final String enumName = enumTypeDef.getQName().getLocalName();
-            // return resolveEnumFromTypeDefinition(enumTypeDef, enumName);
-            // } else {
-            // returnType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
-            // .javaTypeForSchemaDefinitionType(typeDefinition);
-            // }
         }
         return returnType;
     }
@@ -201,16 +167,14 @@ public class TypeProviderImpl implements TypeProvider {
                 if (strXPath.matches(".*//[.* | .*//].*")) {
                     returnType = Types.typeForClass(Object.class);
                 } else {
-                    final Module module = schemaContextUtil
-                            .resolveModuleFromSchemaPath(leafrefType.getPath());
+                    final Module module = resolveModuleFromSchemaPath(schemaContext, leafrefType.getPath());
                     if (module != null) {
                         final DataSchemaNode dataNode;
                         if (xpath.isAbsolute()) {
-                            dataNode = schemaContextUtil.findDataSchemaNode(
+                            dataNode = findDataSchemaNode(schemaContext, 
                                     module, xpath);
                         } else {
-                            dataNode = schemaContextUtil
-                                    .findDataSchemaNodeForRelativeXPath(module,
+                            dataNode = findDataSchemaNodeForRelativeXPath(schemaContext, module,
                                             leafrefType, xpath);
                         }
                         returnType = resolveTypeFromDataSchemaNode(dataNode);
@@ -265,11 +229,9 @@ public class TypeProviderImpl implements TypeProvider {
             final String enumerationName = BindingGeneratorUtil
                     .parseToClassName(enumName);
 
-            Module module = schemaContextUtil
-                    .resolveModuleFromSchemaPath(enumTypeDef.getPath());
+            Module module = resolveModuleFromSchemaPath(schemaContext, enumTypeDef.getPath());
             final String basePackageName = BindingGeneratorUtil
-                    .moduleNamespaceToPackageName(module.getNamespace(),
-                            module.getYangVersion());
+                    .moduleNamespaceToPackageName(module);
             final String packageName = BindingGeneratorUtil
                     .packageNameForGeneratedType(basePackageName,
                             enumTypeDef.getPath());
@@ -315,23 +277,26 @@ public class TypeProviderImpl implements TypeProvider {
         return returnType;
     }
 
-    private void resolveTypeDefsFromContext() {
+    private List<GeneratedTransferObject> resolveTypeDefsFromContext() {
+        final List<GeneratedTransferObject> genTypeDefs = new ArrayList<GeneratedTransferObject>();
         final Set<Module> modules = schemaContext.getModules();
         if (modules != null) {
             for (final Module module : modules) {
                 if (module != null) {
+                    final String moduleName = module.getName();
                     final String basePackageName = BindingGeneratorUtil
-                            .moduleNamespaceToPackageName(
-                                    module.getNamespace(),
-                                    module.getYangVersion());
+                            .moduleNamespaceToPackageName(module);
 
                     final Set<TypeDefinition<?>> typeDefinitions = module
                             .getTypeDefinitions();
 
                     if ((typeDefinitions != null) && (basePackageName != null)) {
                         for (final TypeDefinition<?> typedef : typeDefinitions) {
-                            addGeneratedTypeDefinition(basePackageName,
-                                    module.getName(), typedef);
+                            final GeneratedTransferObject genTransObj = toGeneratedTransferObject(
+                                    basePackageName, moduleName, typedef);
+                            if (genTransObj != null) {
+                                genTypeDefs.add(genTransObj);
+                            }
                         }
                         // for (final TypeDefinition<?> typedef :
                         // typeDefinitions) {
@@ -342,17 +307,20 @@ public class TypeProviderImpl implements TypeProvider {
                 }
             }
         }
+        return genTypeDefs;
     }
 
-    private void addGeneratedTypeDefinition(final String basePackageName,
-            final String moduleName, final TypeDefinition<?> typedef) {
+    private GeneratedTransferObject toGeneratedTransferObject(
+            final String basePackageName, final String moduleName,
+            final TypeDefinition<?> typedef) {
         if ((basePackageName != null) && (moduleName != null)
                 && (typedef != null) && (typedef.getQName() != null)) {
-            final GeneratedTOBuilder genTO = typedefToTransferObject(
+            final GeneratedTOBuilder genTOBuilder = typedefToTransferObject(
                     basePackageName, typedef);
 
+            final String typedefName = typedef.getQName().getLocalName();
             final String propertyName = BindingGeneratorUtil
-                    .parseToValidParamName(typedef.getQName().getLocalName());
+                    .parseToValidParamName(typedefName);
 
             final TypeDefinition<?> baseTypeDefinition = baseTypeDefForExtendedType(typedef);
             if (!(baseTypeDefinition instanceof LeafrefTypeDefinition)
@@ -360,34 +328,40 @@ public class TypeProviderImpl implements TypeProvider {
                 Type returnType = null;
                 if (baseTypeDefinition instanceof EnumTypeDefinition) {
                     final EnumTypeDefinition enumTypeDef = (EnumTypeDefinition) baseTypeDefinition;
-                    final String enumName = typedef.getQName().getLocalName();
                     returnType = resolveEnumFromTypeDefinition(enumTypeDef,
-                            enumName);
+                            typedefName);
                 } else {
                     returnType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
                             .javaTypeForSchemaDefinitionType(baseTypeDefinition);
                 }
 
                 if (returnType != null) {
-                    final GeneratedPropertyBuilder genPropBuilder = genTO
+                    final GeneratedPropertyBuilder genPropBuilder = genTOBuilder
                             .addProperty(propertyName);
-                            
+
                     genPropBuilder.addReturnType(returnType);
-                    genTO.addEqualsIdentity(genPropBuilder);
-                    genTO.addHashIdentity(genPropBuilder);
-                    genTO.addToStringProperty(genPropBuilder);
-                    
-                    Map<String, GeneratedTransferObject> genTOsMap = generatedTypeDefinitions
+                    genTOBuilder.addEqualsIdentity(genPropBuilder);
+                    genTOBuilder.addHashIdentity(genPropBuilder);
+                    genTOBuilder.addToStringProperty(genPropBuilder);
+
+                    Map<String, GeneratedTransferObject> transferObjectsMap = genTypeDefsContextMap
                             .get(moduleName);
-                    if (genTOsMap == null) {
-                        genTOsMap = new HashMap<String, GeneratedTransferObject>();
-                        generatedTypeDefinitions.put(moduleName, genTOsMap);
+                    if (transferObjectsMap == null) {
+                        transferObjectsMap = new HashMap<String, GeneratedTransferObject>();
+                        genTypeDefsContextMap.put(moduleName,
+                                transferObjectsMap);
                     }
-                    genTOsMap.put(typedef.getQName().getLocalName(),
-                            genTO.toInstance());
+
+                    final GeneratedTransferObject transferObject = genTOBuilder
+                            .toInstance();
+                    if (transferObject != null) {
+                        transferObjectsMap.put(typedefName, transferObject);
+                        return transferObject;
+                    }
                 }
             }
         }
+        return null;
     }
 
     private void addUnionGeneratedTypeDefinition(final String basePackageName,
@@ -402,7 +376,7 @@ public class TypeProviderImpl implements TypeProvider {
 
                 final List<TypeDefinition<?>> unionTypes = unionTypeDef
                         .getTypes();
-                final Map<String, GeneratedTransferObject> genTOsMap = generatedTypeDefinitions
+                final Map<String, GeneratedTransferObject> genTOsMap = genTypeDefsContextMap
                         .get(moduleName);
                 final GeneratedTOBuilder unionGenTransObject = typedefToTransferObject(
                         basePackageName, typedef);

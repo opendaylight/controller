@@ -7,9 +7,7 @@
 		<version>0.5-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.opendaylight.controller</groupId>
 	<artifactId>yang</artifactId>
-	<version>0.5-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>yang-common</module>
@@ -25,23 +23,6 @@
 		<module>../code-generator/maven-yang-plugin-it</module>
 
 	</modules>
-	<dependencies>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-		</dependency>
-	</dependencies>
 	<build>
 		<plugins>
 			<plugin>

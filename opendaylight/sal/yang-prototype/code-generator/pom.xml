@@ -8,9 +8,7 @@
 		<version>0.5-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.opendaylight.controller</groupId>
 	<artifactId>binding-generator</artifactId>
-	<version>0.5-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>binding-generator</name>
 
@@ -27,23 +25,6 @@
 		<module>binding-java-api-generator</module>
 		<module>maven-sal-api-gen-plugin</module>
 	</modules>
-	<dependencies>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-		</dependency>
-	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
