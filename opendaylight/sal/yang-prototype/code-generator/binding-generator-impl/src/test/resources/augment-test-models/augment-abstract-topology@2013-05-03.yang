@@ -51,9 +51,7 @@ module augment-abstract-topology {
             	key "tunnel-id";
 
                 leaf tunnel-id {
-                    type leafref {
-                        path "../../../link-id";
-                    }
+                    type int32;
                 }
                 
                 container foo {

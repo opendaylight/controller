@@ -28,15 +28,12 @@
 							<goal>generate-sources</goal>
 						</goals>
 						<configuration>
-							<yangFilesRootDir>${basedir}/../../../../../yang-model-parser-impl/src/test/resources/model</yangFilesRootDir>
+							<yangFilesRootDir>../files</yangFilesRootDir>
 							<codeGenerators>
 								<generator>
 									<codeGeneratorClass>
 										org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl
 									</codeGeneratorClass>
-									<outputBaseDir>
-										outDir/
-									</outputBaseDir>
 								</generator>
 							</codeGenerators>
 							<resourceProviders>

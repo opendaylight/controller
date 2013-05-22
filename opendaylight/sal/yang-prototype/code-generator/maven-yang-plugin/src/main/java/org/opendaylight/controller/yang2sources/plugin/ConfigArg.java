@@ -15,6 +15,8 @@ import com.google.common.base.Preconditions;
  * Base complex configuration arguments
  */
 public abstract class ConfigArg {
+    public static final String CODE_GEN_DEFAULT_DIR = "code-generator-files/";
+    public static final String RESOURCE_GEN_DEFAULT_DIR = "resource-generator-files/";
 
     protected File outputBaseDir;
 
@@ -41,7 +43,7 @@ public abstract class ConfigArg {
         }
 
         public ResourceProviderArg(String resourceProviderClass) {
-            this(resourceProviderClass, new File("outDir/"));
+            this(resourceProviderClass, new File(RESOURCE_GEN_DEFAULT_DIR));
         }
 
         public ResourceProviderArg(String resourceProviderClass,
@@ -69,10 +71,11 @@ public abstract class ConfigArg {
         private String codeGeneratorClass;
 
         public CodeGeneratorArg() {
+            super(new File(CODE_GEN_DEFAULT_DIR));
         }
 
         public CodeGeneratorArg(String codeGeneratorClass) {
-            this(codeGeneratorClass, new File("outDir/"));
+            this(codeGeneratorClass, new File(CODE_GEN_DEFAULT_DIR));
         }
 
         public CodeGeneratorArg(String codeGeneratorClass, File outputBaseDir) {

@@ -61,8 +61,8 @@ final class Util {
         return yangFiles;
     }
 
-    static Collection<InputStream> listFilesAsStream(String rootDir) throws FileNotFoundException {
-        Collection<InputStream> is = new ArrayList<InputStream>();
+    static List<InputStream> listFilesAsStream(String rootDir) throws FileNotFoundException {
+        List<InputStream> is = new ArrayList<InputStream>();
 
         Collection<File> files = listFiles(rootDir);
         for(File f : files) {
