@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///2c\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 120
+      },
+      "writtenOn": "2013-05-22T03:02:46Z",
+      "side": 1,
+      "message": "Actually it is inserted by the code templates you are currently using, see Preferences -\u003e Java -\u003e Code Style -\u003e Code Templates.  \n\nThere are no options in the Formatter that I am aware of that eliminate whitespace.",
+      "parentUuid": "AAAAEn///20\u003d",
+      "revId": "b4bd59832f8e1c50c0315483d3d8c5fd82b6258c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///3A\u003d",
         "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/SwitchHandler.java",
         "patchSetId": 1
