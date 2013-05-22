@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///wE\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Node.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-22T18:36:57Z",
+      "side": 1,
+      "message": "nodeIDString should not be part of the hashcode as it wasn\u0027t in the hashcode.",
+      "revId": "d0a574392e0ae90bbe36cfa21c99669606028096",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///wA\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Node.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-22T18:36:57Z",
+      "side": 1,
+      "message": "nodeIDString should not be considered as part of the equal being an attribute rather than a key value",
+      "revId": "d0a574392e0ae90bbe36cfa21c99669606028096",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///v8\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeConnector.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-22T18:36:57Z",
+      "side": 1,
+      "message": "nodeConnectorIDString  shoul not be part of the hashcode being an attribute and not a key value",
+      "revId": "d0a574392e0ae90bbe36cfa21c99669606028096",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///v4\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeConnector.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-22T18:36:57Z",
+      "side": 1,
+      "message": "nodeConnectorIDString shoul not be part of the equal being an attribute and not a key value",
+      "revId": "d0a574392e0ae90bbe36cfa21c99669606028096",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
