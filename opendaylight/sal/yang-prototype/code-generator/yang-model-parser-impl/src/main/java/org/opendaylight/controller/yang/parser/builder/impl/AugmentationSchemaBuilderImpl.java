@@ -350,6 +350,8 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
                     + ((targetPath == null) ? 0 : targetPath.hashCode());
             result = prime * result
                     + ((whenCondition == null) ? 0 : whenCondition.hashCode());
+            result = prime * result
+                    + ((childNodes == null) ? 0 : childNodes.hashCode());
             return result;
         }
 
@@ -377,6 +379,13 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
                     return false;
                 }
             } else if (!whenCondition.equals(other.whenCondition)) {
+                return false;
+            }
+            if (childNodes == null) {
+                if (other.childNodes != null) {
+                    return false;
+                }
+            } else if (!childNodes.equals(other.childNodes)) {
                 return false;
             }
             return true;

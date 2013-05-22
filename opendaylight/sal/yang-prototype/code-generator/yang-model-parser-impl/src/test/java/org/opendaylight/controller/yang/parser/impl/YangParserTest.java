@@ -248,10 +248,7 @@ public class YangParserTest {
 
         // check
         assertEquals(augmentedContainer, augmentedContainerDefinition);
-        assertEquals(augmentedContainerAugments.iterator().next(), augment1);
-
         assertEquals(augmentedLeaf, augmentedLeafDefinition);
-        assertEquals(ifEntryAugments.iterator().next(), augment3);
     }
 
     @Test
