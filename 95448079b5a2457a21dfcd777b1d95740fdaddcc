@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///sk\u003d",
+        "filename": "opendaylight/usermanager/src/main/java/org/opendaylight/controller/usermanager/internal/UserConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-23T09:38:46Z",
+      "side": 1,
+      "message": "By the time the patch is rolling in the data structure has changed. This is causing some issues. The patch need to be realigned.",
+      "revId": "95448079b5a2457a21dfcd777b1d95740fdaddcc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
