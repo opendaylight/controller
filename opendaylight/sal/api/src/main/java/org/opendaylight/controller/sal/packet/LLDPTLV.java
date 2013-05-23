@@ -9,6 +9,7 @@
 package org.opendaylight.controller.sal.packet;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 
 import java.util.Arrays;
@@ -31,7 +32,7 @@ public class LLDPTLV extends Packet {
     private static final String VALUE = "Value";
     private static final int LLDPTLVFields = 3;
     public static final byte[] OFOUI = new byte[] { (byte) 0x00, (byte) 0x26,
-            (byte) 0xe1 }; // OpenFlow OUI
+        (byte) 0xe1 }; // OpenFlow OUI
     public static final byte[] customTlvSubType = new byte[] { 0 };
     public static final int customTlvOffset = OFOUI.length
             + customTlvSubType.length;
@@ -41,7 +42,7 @@ public class LLDPTLV extends Packet {
     public enum TLVType {
         Unknown((byte) 0), ChassisID((byte) 1), PortID((byte) 2), TTL((byte) 3), PortDesc(
                 (byte) 4), SystemName((byte) 5), SystemDesc((byte) 6), Custom(
-                (byte) 127);
+                        (byte) 127);
 
         private byte value;
 
@@ -154,9 +155,9 @@ public class LLDPTLV extends Packet {
     @Override
     public int getfieldnumBits(String fieldName) {
         if (fieldName.equals(VALUE)) {
-            return (NetUtils.NumBitsInAByte * (int) BitBufferHelper.getShort(
+            return (NetUtils.NumBitsInAByte * BitBufferHelper.getShort(
                     fieldValues.get(LENGTH), fieldCoordinates.get(LENGTH)
-                            .getRight().intValue()));
+                    .getRight().intValue()));
         }
         return fieldCoordinates.get(fieldName).getRight();
     }
@@ -169,7 +170,7 @@ public class LLDPTLV extends Packet {
     public int getTLVSize() {
         return (LLDPTLV.fieldCoordinates.get(TYPE).getRight() + // static
                 LLDPTLV.fieldCoordinates.get(LENGTH).getRight() + // static
-        getfieldnumBits(VALUE)); // variable
+                getfieldnumBits(VALUE)); // variable
     }
 
     /**
@@ -209,7 +210,7 @@ public class LLDPTLV extends Packet {
      * @return the PortID TLV value in byte array
      */
     static public byte[] createPortIDTLVValue(String portId) {
-        byte[] pid = portId.getBytes();
+        byte[] pid = portId.getBytes(Charset.defaultCharset());
         byte[] pidValue = new byte[pid.length + portIDSubType.length];
 
         System.arraycopy(portIDSubType, 0, pidValue, 0, portIDSubType.length);
@@ -226,7 +227,7 @@ public class LLDPTLV extends Packet {
      * @return the custom TLV value in byte array
      */
     static public byte[] createCustomTLVValue(String customString) {
-        byte[] customArray = customString.getBytes();
+        byte[] customArray = customString.getBytes(Charset.defaultCharset());
         byte[] customValue = new byte[customTlvOffset + customArray.length];
 
         System.arraycopy(OFOUI, 0, customValue, 0, OFOUI.length);
@@ -267,7 +268,7 @@ public class LLDPTLV extends Packet {
         byte[] pidBytes = new byte[tlvLen - portIDSubType.length];
         System.arraycopy(tlvValue, portIDSubType.length, pidBytes, 0,
                 pidBytes.length);
-        return (new String(pidBytes));
+        return (new String(pidBytes, Charset.defaultCharset()));
     }
 
     /**

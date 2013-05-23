@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -12,9 +11,7 @@ package org.opendaylight.controller.sal.packet;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.opendaylight.controller.sal.packet.ICMP;
-import org.opendaylight.controller.sal.packet.IPv4;
-import org.opendaylight.controller.sal.packet.Packet;
+import org.opendaylight.controller.sal.utils.NetUtils;
 
 public class IPv4Test {
 
@@ -51,7 +48,6 @@ public class IPv4Test {
         byte[] iptotLength = { 3, -24 };
         ip.hdrFieldsMap.put("TotalLength", iptotLength);
         short totalLength = ip.getTotalLength();
-        //System.out.println(totalLength);
         Assert.assertTrue(totalLength == 1000);
     }
 
@@ -91,7 +87,6 @@ public class IPv4Test {
         Assert.assertTrue(protocol == 1);
 
         Class<? extends Packet> clazz = IPv4.protocolClassMap.get(protocol);
-        System.out.printf("clazz = %s\n", clazz.getName());
         Assert.assertTrue(clazz == ICMP.class);
     }
 
@@ -206,7 +201,6 @@ public class IPv4Test {
         Assert.assertTrue(fragmentOffset[1] == -35);
     }
 
-
     @Test
     public void testSetDestinationAddress() {
         IPv4 ip = new IPv4();
@@ -217,6 +211,55 @@ public class IPv4Test {
         Assert.assertTrue(destinationAddress[1] == 55);
         Assert.assertTrue(destinationAddress[2] == 62);
         Assert.assertTrue(destinationAddress[3] == 110);
+    }
+
+    @Test
+    public void testChecksum() {
+        byte header[] = { (byte) 0x45, 00, 00, (byte) 0x3c, (byte) 0x1c,
+                (byte) 0x46, (byte) 0x40, 00, (byte) 0x40, 06, (byte) 0xb1,
+                (byte) 0xe6, (byte) 0xac, (byte) 0x10, (byte) 0x0a,
+                (byte) 0x63, (byte) 0xac, (byte) 0x10, (byte) 0x0a, (byte) 0x0c };
+        byte header2[] = { (byte) 0x45, 00, 00, (byte) 0x73, 00, 00,
+                (byte) 0x40, 00, (byte) 0x40, (byte) 0x11, (byte) 0xb8,
+                (byte) 0x61, (byte) 0xc0, (byte) 0xa8, 00, 01, (byte) 0xc0,
+                (byte) 0xa8, 00, (byte) 0xc7 };
+        byte header3[] = { (byte) 0x45, 00, 00, (byte) 0x47, (byte) 0x73,
+                (byte) 0x88, (byte) 0x40, 00, (byte) 0x40, 06, (byte) 0xA2,
+                (byte) 0xC4, (byte) 0x83, (byte) 0x9F, (byte) 0x0E,
+                (byte) 0x85, (byte) 0x83, (byte) 0x9F, (byte) 0x0E, (byte) 0xA1 };
+        byte header4[] = { (byte) 0x45, 00, 00, (byte) 0x54, 00, 00,
+                (byte) 0x40, 00, (byte) 0x40, 01, (byte) 0xf0, (byte) 0x8e,
+                (byte) 0xc0, (byte) 0xa8, (byte) 0x64, (byte) 0x65,
+                (byte) 0xc0, (byte) 0xa8, (byte) 0x64, (byte) 0x64 };
+        byte header5[] = { (byte) 0x45, 00, 00, (byte) 0x54, 00, 00,
+                (byte) 0x40, 00, (byte) 0x40, 01, (byte) 0xef, (byte) 0x8d,
+                (byte) 0xc0, (byte) 0xa8, (byte) 0x64, (byte) 0x65,
+                (byte) 0xc0, (byte) 0xa8, (byte) 0x65, (byte) 0x65 };
+        byte header6[] = { (byte) 0x45, 00, 00, (byte) 0x54, 00, 00,
+                (byte) 0x40, 00, (byte) 0x40, 01, (byte) 0x0b, (byte) 0x92,
+                (byte) 0xc0, (byte) 0xa8, (byte) 0x64, (byte) 0x65, (byte) 0x9,
+                (byte) 0x9, (byte) 0x1, (byte) 0x1 };
+        byte header7[] = { (byte) 0x45, 00, 00, (byte) 0x54, 00, 00,
+                (byte) 0x40, 00, (byte) 0x40, 01, (byte) 0, (byte) 0,
+                (byte) 0xc0, (byte) 0xa8, (byte) 0x64, (byte) 0x65, (byte) 0x9,
+                (byte) 0x9, (byte) 0x2, (byte) 0x2 };
+
+        IPv4 ip = new IPv4();
+
+        Assert.assertTrue(NetUtils.getUnsignedShort(ip.computeChecksum(header,
+                header.length)) == 0xB1E6);
+        Assert.assertTrue(NetUtils.getUnsignedShort(ip.computeChecksum(header2,
+                header.length)) == 0xb861);
+        Assert.assertTrue(NetUtils.getUnsignedShort(ip.computeChecksum(header3,
+                header.length)) == 0xa2c4);
+        Assert.assertTrue(NetUtils.getUnsignedShort(ip.computeChecksum(header4,
+                header.length)) == 0xf08e);
+        Assert.assertTrue(NetUtils.getUnsignedShort(ip.computeChecksum(header5,
+                header.length)) == 0xef8d);
+        Assert.assertTrue(NetUtils.getUnsignedShort(ip.computeChecksum(header6,
+                header.length)) == 0x0b92);
+        Assert.assertTrue(NetUtils.getUnsignedShort(ip.computeChecksum(header7,
+                header.length)) == 0x0a91);
     }
 
 }

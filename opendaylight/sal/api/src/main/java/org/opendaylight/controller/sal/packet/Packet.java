@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.packet;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -23,8 +24,6 @@ import org.slf4j.LoggerFactory;
  * Abstract class which represents the generic network packet object It provides
  * the basic methods which are common for all the packets, like serialize and
  * deserialize
- * 
- * 
  */
 
 public abstract class Packet {
@@ -32,12 +31,12 @@ public abstract class Packet {
             .getLogger(Packet.class);
     // Access level granted to this packet
     protected boolean writeAccess;
-    // When deserialized from wire, packet could result corrupted
-    protected boolean corrupted;
     // The packet that encapsulate this packet
     protected Packet parent;
     // The packet encapsulated by this packet
     protected Packet payload;
+    // The unparsed raw payload carried by this packet
+    protected byte[] rawPayload;
     // Bit coordinates of packet header fields
     protected Map<String, Pair<Integer, Integer>> hdrFieldCoordMap;
     // Header fields values: Map<FieldName,Value>
@@ -47,12 +46,10 @@ public abstract class Packet {
 
     public Packet() {
         writeAccess = false;
-        corrupted = false;
     }
 
     public Packet(boolean writeAccess) {
         this.writeAccess = writeAccess;
-        this.corrupted = false;
     }
 
     public Packet getParent() {
@@ -110,10 +107,10 @@ public abstract class Packet {
              * payloadClass accordingly
              */
             if (logger.isTraceEnabled()) {
-              logger.trace("{}: {}: {} (offset {} bitsize {})",
-                      new Object[] { this.getClass().getSimpleName(), hdrField,
-                              HexEncode.bytesToHexString(hdrFieldBytes),
-                              startOffset, numBits });
+                logger.trace("{}: {}: {} (offset {} bitsize {})",
+                        new Object[] { this.getClass().getSimpleName(), hdrField,
+                        HexEncode.bytesToHexString(hdrFieldBytes),
+                        startOffset, numBits });
             }
 
             this.setHeaderField(hdrField, hdrFieldBytes);
@@ -122,7 +119,6 @@ public abstract class Packet {
         postDeserializeCustomOperation(data, startOffset);
 
         int payloadStart = startOffset + numBits;
-        // int payloadSize = size - payloadStart;
         int payloadSize = data.length * NetUtils.NumBitsInAByte - payloadStart;
 
         if (payloadClass != null) {
@@ -135,7 +131,13 @@ public abstract class Packet {
             payload.deserialize(data, payloadStart, payloadSize);
             payload.setParent(this);
         } else {
-            // For now let's discard unparsable payload
+            /*
+             *  The payload class was not set, it means no class for parsing
+             *  this payload is present. Let's store the raw payload if any.
+             */
+            int start = payloadStart / NetUtils.NumBitsInAByte;
+            int stop = start + payloadSize / NetUtils.NumBitsInAByte;
+            rawPayload = Arrays.copyOfRange(data, start, stop);
         }
         return this;
     }
@@ -192,8 +194,8 @@ public abstract class Packet {
         postSerializeCustomOperation(headerBytes);
 
         if (logger.isTraceEnabled()) {
-          logger.trace("{}: {}", this.getClass().getSimpleName(),
-                  HexEncode.bytesToHexString(headerBytes));
+            logger.trace("{}: {}", this.getClass().getSimpleName(),
+                    HexEncode.bytesToHexString(headerBytes));
         }
         return headerBytes;
     }
@@ -260,8 +262,7 @@ public abstract class Packet {
      * @return Integer - startOffset of the requested field
      */
     public int getfieldOffset(String fieldName) {
-        return (((Pair<Integer, Integer>) hdrFieldCoordMap.get(fieldName))
-                .getLeft());
+        return hdrFieldCoordMap.get(fieldName).getLeft();
     }
 
     /**
@@ -274,8 +275,7 @@ public abstract class Packet {
      * @return Integer - number of bits of the requested field
      */
     public int getfieldnumBits(String fieldName) {
-        return (((Pair<Integer, Integer>) hdrFieldCoordMap.get(fieldName))
-                .getRight());
+        return hdrFieldCoordMap.get(fieldName).getRight();
     }
 
     @Override
@@ -301,11 +301,12 @@ public abstract class Packet {
     }
 
     /**
-     * Returns true if the packet is corrupted
+     * Returns the raw payload carried by this packet in case payload was not
+     * parsed. Caller can call this function in case the getPaylod() returns null.
      * 
-     * @return boolean
+     * @return The raw payload if not parsable as an array of bytes, null otherwise
      */
-    protected boolean isPacketCorrupted() {
-        return corrupted;
+    public byte[] getRawPayload() {
+        return rawPayload;
     }
 }

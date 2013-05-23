@@ -29,13 +29,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class that represents the IPv4  packet objects
- *
- *
  */
 
 public class IPv4 extends Packet {
     protected static final Logger logger = LoggerFactory
-    .getLogger(IPv4.class);
+            .getLogger(IPv4.class);
     private static final String VERSION = "Version";
     private static final String HEADERLENGTH = "HeaderLength";
     private static final String DIFFSERV = "DiffServ";
@@ -78,7 +76,8 @@ public class IPv4 extends Packet {
         }
     };
 
-    private Map<String, byte[]> fieldValues;
+    private final Map<String, byte[]> fieldValues;
+    private boolean corrupted;
 
     /**
      * Default constructor that sets the version to 4, headerLength to 5,
@@ -90,6 +89,7 @@ public class IPv4 extends Packet {
         fieldValues = new HashMap<String, byte[]>();
         hdrFieldCoordMap = fieldCoordinates;
         hdrFieldsMap = fieldValues;
+        corrupted = false;
 
         setVersion((byte) 4);
         setHeaderLength((byte) 5);
@@ -112,6 +112,7 @@ public class IPv4 extends Packet {
         fieldValues = new HashMap<String, byte[]>();
         hdrFieldCoordMap = fieldCoordinates;
         hdrFieldsMap = fieldValues;
+        corrupted = false;
 
         setVersion((byte) 4);
         setHeaderLength((byte) 5);
@@ -145,12 +146,14 @@ public class IPv4 extends Packet {
     @Override
     public int getHeaderSize() {
         int headerLen = this.getHeaderLen();
-        if (headerLen == 0)
+        if (headerLen == 0) {
             headerLen = 20;
+        }
 
         byte[] options = hdrFieldsMap.get(OPTIONS);
-        if (options != null)
+        if (options != null) {
             headerLen += options.length;
+        }
 
         return headerLen * NetUtils.NumBitsInAByte;
 
@@ -447,7 +450,7 @@ public class IPv4 extends Packet {
      * @param int endBitOffset - end bit Offset
      * @return short - the computed checksum
      */
-    private short computeChecksum(byte[] hdrBytes, int endByteOffset) {
+    short computeChecksum(byte[] hdrBytes, int endByteOffset) {
         int startByteOffset = endByteOffset - getHeaderLen();
         short checkSum = (short) 0;
         int sum = 0, carry = 0, finalSum = 0;
@@ -457,12 +460,14 @@ public class IPv4 extends Packet {
 
         for (int i = startByteOffset; i <= (endByteOffset - 1); i = i + 2) {
             //Skip, if the current bytes are checkSum bytes
-            if (i == checksumStartByte)
+            if (i == checksumStartByte) {
                 continue;
+            }
             StringBuffer sbuffer = new StringBuffer();
             sbuffer.append(String.format("%02X", hdrBytes[i]));
-            if (i < (hdrBytes.length - 1))
+            if (i < (hdrBytes.length - 1)) {
                 sbuffer.append(String.format("%02X", hdrBytes[i + 1]));
+            }
 
             parsedHex = Integer.valueOf(sbuffer.toString(), 16);
             sum += parsedHex;
@@ -496,8 +501,7 @@ public class IPv4 extends Packet {
             byte[] options = getOptions();
             return ((options == null) ? 0 : (options.length - getHeaderLen()));
         }
-        return (((Pair<Integer, Integer>) hdrFieldCoordMap.get(fieldName))
-                .getRight());
+        return hdrFieldCoordMap.get(fieldName).getRight();
     }
 
     @Override
@@ -550,10 +554,19 @@ public class IPv4 extends Packet {
      */
     protected void postDeserializeCustomOperation(byte[] data, int endBitOffset) {
         int endByteOffset = endBitOffset / NetUtils.NumBitsInAByte;
-        int computedChecksum = computeChecksum(data, endByteOffset);
-        int actualChecksum = BitBufferHelper.getInt(fieldValues.get(CHECKSUM));
+        short computedChecksum = computeChecksum(data, endByteOffset);
+        short actualChecksum = BitBufferHelper.getShort(fieldValues.get(CHECKSUM));
         if (computedChecksum != actualChecksum) {
             corrupted = true;
         }
+    }
+
+    /**
+     * Return whether the IPv4 header is corrupted
+     * 
+     * @return true if the deserialized IPv4 packet's header is corrupted
+     */
+    public boolean isCorrupted() {
+        return corrupted;
     }
 }
