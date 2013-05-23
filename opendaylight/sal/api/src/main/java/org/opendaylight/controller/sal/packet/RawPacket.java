@@ -31,10 +31,10 @@ import org.opendaylight.controller.sal.core.TimeStamp;
  */
 public class RawPacket {
     private byte[] packetData;
-    private LinkEncap encap;
-    private TimeStamp incomingTime;
-    private TimeStamp copyTime;
-    private Map props;
+    private final LinkEncap encap;
+    private final TimeStamp incomingTime;
+    private final TimeStamp copyTime;
+    private Map<Object, Object> props;
     private NodeConnector incomingNodeConnector;
     private NodeConnector outgoingNodeConnector;
 
@@ -103,7 +103,7 @@ public class RawPacket {
      */
     public void setProps(Object key, Object value) {
         if (this.props == null) {
-            this.props = new HashMap();
+            this.props = new HashMap<Object, Object>();
         }
 
         this.props.put(key, value);
@@ -157,7 +157,8 @@ public class RawPacket {
         this.incomingTime = src.getIncomingTime();
         this.incomingNodeConnector = src.getIncomingNodeConnector();
         this.outgoingNodeConnector = src.getOutgoingNodeConnector();
-        this.props = (src.props == null ? null : new HashMap(src.props));
+        this.props = (src.props == null ? null : new HashMap<Object, Object>(
+                src.props));
         this.copyTime = new TimeStamp(System.currentTimeMillis(), "CopyTime");
     }
 
@@ -173,9 +174,9 @@ public class RawPacket {
     }
 
     /**
-     * Read the timestamp when the packet has entered the system
+     * Read the time stamp when the packet has entered the system
      * 
-     * @return The timestamp when the packet has entered the system
+     * @return The time stamp when the packet has entered the system
      */
     public TimeStamp getIncomingTime() {
         return this.incomingTime;
@@ -198,5 +199,16 @@ public class RawPacket {
      */
     public byte[] getPacketData() {
         return this.packetData;
+    }
+
+    /**
+     * Returns the time at which the current instance of RawPacket was created
+     * as a copy of the original one.
+     * 
+     * @return The time stamp at which this RawPacket instance was created. null
+     *         if this is the original instance.
+     */
+    public TimeStamp getCopyTime() {
+        return this.copyTime;
     }
 }

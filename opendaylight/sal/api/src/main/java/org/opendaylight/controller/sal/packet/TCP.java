@@ -12,15 +12,12 @@ package org.opendaylight.controller.sal.packet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Class that represents the TCP segment objects
- *
- *
  */
 public class TCP extends Packet {
 
@@ -51,7 +48,7 @@ public class TCP extends Packet {
         }
     };
 
-    private Map<String, byte[]> fieldValues;
+    private final Map<String, byte[]> fieldValues;
 
     /**
      * Default constructor that sets all the header fields to zero
@@ -231,16 +228,6 @@ public class TCP extends Packet {
      */
     public short getDestinationPort() {
         return (BitBufferHelper.getShort(fieldValues.get(DESTPORT)));
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
 }
