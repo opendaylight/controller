@@ -19,13 +19,11 @@ package org.opendaylight.controller.sal.core;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Describe a path as a sequence of Edge such that from
@@ -129,12 +127,27 @@ public class Path implements Serializable {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((edges == null) ? 0 : edges.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Path other = (Path) obj;
+        if (edges == null) {
+            if (other.edges != null)
+                return false;
+        } else if (!edges.equals(other.edges))
+            return false;
+        return true;
     }
 
     @Override
