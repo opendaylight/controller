@@ -21,6 +21,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang2sources.plugin.ConfigArg.CodeGeneratorArg;
@@ -80,7 +81,7 @@ public class GenerateSourcesTest {
 
         @Override
         public Collection<File> generateSources(SchemaContext context,
-                File baseDir, Set<String> yangModulesNames) {
+                File baseDir, Set<Module> yangModules) {
             called++;
             outputDir = baseDir;
             return Lists.newArrayList();

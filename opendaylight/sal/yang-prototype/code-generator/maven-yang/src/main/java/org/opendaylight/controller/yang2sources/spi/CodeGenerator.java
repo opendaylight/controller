@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
+import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 
 /**
@@ -28,11 +29,11 @@ public interface CodeGenerator {
      * @param outputBaseDir
      *            expected output directory for generated sources configured by
      *            user
-     * @param yangModulesNames
-     *            name of yangs provided by current module
+     * @param yangModules
+     *            yang modules parsed from yangFilesRootDir
      * @return collection of files that were generated from schema context
      * @throws IOException
      */
     Collection<File> generateSources(SchemaContext context, File outputBaseDir,
-            Set<String> yangModulesNames) throws IOException;
+            Set<Module> yangModules) throws IOException;
 }
