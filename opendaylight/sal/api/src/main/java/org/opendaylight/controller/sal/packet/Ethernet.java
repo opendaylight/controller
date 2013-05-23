@@ -13,16 +13,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 
 /**
  * Class that represents the Ethernet frame objects
- *
- *
  */
 public class Ethernet extends Packet {
     private static final String DMAC = "DestinationMACAddress";
@@ -46,7 +42,7 @@ public class Ethernet extends Packet {
             put(ETHT, new ImmutablePair<Integer, Integer>(96, 16));
         }
     };
-    private Map<String, byte[]> fieldValues;
+    private final Map<String, byte[]> fieldValues;
 
     /**
      * Default constructor that creates and sets the HashMap
@@ -128,16 +124,6 @@ public class Ethernet extends Packet {
         byte[] ethType = BitBufferHelper.toByteArray(etherType);
         fieldValues.put(ETHT, ethType);
         return this;
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
 }

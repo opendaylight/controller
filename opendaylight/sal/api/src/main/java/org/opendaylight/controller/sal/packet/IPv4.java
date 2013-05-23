@@ -18,8 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.sal.utils.IPProtocols;
@@ -29,13 +27,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class that represents the IPv4  packet objects
- *
- *
  */
 
 public class IPv4 extends Packet {
     protected static final Logger logger = LoggerFactory
-    .getLogger(IPv4.class);
+            .getLogger(IPv4.class);
     private static final String VERSION = "Version";
     private static final String HEADERLENGTH = "HeaderLength";
     private static final String DIFFSERV = "DiffServ";
@@ -78,7 +74,8 @@ public class IPv4 extends Packet {
         }
     };
 
-    private Map<String, byte[]> fieldValues;
+    private final Map<String, byte[]> fieldValues;
+
 
     /**
      * Default constructor that sets the version to 4, headerLength to 5,
@@ -90,14 +87,15 @@ public class IPv4 extends Packet {
         fieldValues = new HashMap<String, byte[]>();
         hdrFieldCoordMap = fieldCoordinates;
         hdrFieldsMap = fieldValues;
+        corrupted = false;
 
         setVersion((byte) 4);
         setHeaderLength((byte) 5);
         setDiffServ((byte) 0);
+        setECN((byte) 0);
         setIdentification(generateId());
         setFlags((byte) 2);
         setFragmentOffset((short) 0);
-        setECN((byte) 0);
     }
 
     /**
@@ -112,14 +110,15 @@ public class IPv4 extends Packet {
         fieldValues = new HashMap<String, byte[]>();
         hdrFieldCoordMap = fieldCoordinates;
         hdrFieldsMap = fieldValues;
+        corrupted = false;
 
         setVersion((byte) 4);
         setHeaderLength((byte) 5);
         setDiffServ((byte) 0);
+        setECN((byte) 0);
         setIdentification(generateId());
         setFlags((byte) 2);
         setFragmentOffset((short) 0);
-        setECN((byte) 0);
     }
 
     /**
@@ -139,21 +138,22 @@ public class IPv4 extends Packet {
     }
 
     /**
-     * Gets the header length in bits, from the header length stored and options if any
-     * @return HeaderLength to serialize code
+     * Gets the header size in bits
+     * @return The number of bits constituting the header
      */
     @Override
     public int getHeaderSize() {
         int headerLen = this.getHeaderLen();
-        if (headerLen == 0)
+        if (headerLen == 0) {
             headerLen = 20;
+        }
 
         byte[] options = hdrFieldsMap.get(OPTIONS);
-        if (options != null)
+        if (options != null) {
             headerLen += options.length;
+        }
 
         return headerLen * NetUtils.NumBitsInAByte;
-
     }
 
     /**
@@ -442,27 +442,33 @@ public class IPv4 extends Packet {
     }
 
     /**
-     * Computes the header checksum
-     * @param byte[] hdrBytes - serialized bytes
-     * @param int endBitOffset - end bit Offset
-     * @return short - the computed checksum
+     * Computes the IPv4 header checksum on the passed stream of bytes
+     * representing the packet
+     * 
+     * @param data
+     *            The byte stream
+     * @param offset
+     *            The byte offset from where the IPv4 packet starts
+     * @return The computed checksum
      */
-    private short computeChecksum(byte[] hdrBytes, int endByteOffset) {
-        int startByteOffset = endByteOffset - getHeaderLen();
+    short computeChecksum(byte[] data, int start) {
+        int end = start + getHeaderLen();
         short checkSum = (short) 0;
         int sum = 0, carry = 0, finalSum = 0;
         int parsedHex = 0;
-        int checksumStartByte = startByteOffset + getfieldOffset(CHECKSUM)
-                / NetUtils.NumBitsInAByte;
+        int checksumStart = start
+                + (getfieldOffset(CHECKSUM) / NetUtils.NumBitsInAByte);
 
-        for (int i = startByteOffset; i <= (endByteOffset - 1); i = i + 2) {
-            //Skip, if the current bytes are checkSum bytes
-            if (i == checksumStartByte)
+        for (int i = start; i <= (end - 1); i = i + 2) {
+            // Skip, if the current bytes are checkSum bytes
+            if (i == checksumStart) {
                 continue;
+            }
             StringBuffer sbuffer = new StringBuffer();
-            sbuffer.append(String.format("%02X", hdrBytes[i]));
-            if (i < (hdrBytes.length - 1))
-                sbuffer.append(String.format("%02X", hdrBytes[i + 1]));
+            sbuffer.append(String.format("%02X", data[i]));
+            if (i < (data.length - 1)) {
+                sbuffer.append(String.format("%02X", data[i + 1]));
+            }
 
             parsedHex = Integer.valueOf(sbuffer.toString(), 16);
             sum += parsedHex;
@@ -470,17 +476,8 @@ public class IPv4 extends Packet {
         carry = (sum >> 16) & 0xFF;
         finalSum = (sum & 0xFFFF) + carry;
         checkSum = (short) ~((short) finalSum & 0xFFFF);
+
         return checkSum;
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -496,26 +493,34 @@ public class IPv4 extends Packet {
             byte[] options = getOptions();
             return ((options == null) ? 0 : (options.length - getHeaderLen()));
         }
-        return (((Pair<Integer, Integer>) hdrFieldCoordMap.get(fieldName))
-                .getRight());
+        return hdrFieldCoordMap.get(fieldName).getRight();
     }
 
     @Override
     /**
      * Method to perform post serialization - like computation of checksum of serialized header
-     * @param serializedBytes
+     * @param data
      * @return void
      * @Exception throws PacketException
      */
-    protected void postSerializeCustomOperation(byte[] serializedBytes)
+    protected void postSerializeCustomOperation(byte[] data)
             throws PacketException {
-        int startOffset = this.getfieldOffset(CHECKSUM);
-        int numBits = this.getfieldnumBits(CHECKSUM);
-        byte[] checkSum = BitBufferHelper.toByteArray(computeChecksum(
-                serializedBytes, serializedBytes.length));
+
+        // Recompute the total length field here
+        byte[] totalLength = BitBufferHelper.toByteArray((short) data.length);
         try {
-            BitBufferHelper.setBytes(serializedBytes, checkSum, startOffset,
-                    numBits);
+            BitBufferHelper.setBytes(data, totalLength, getfieldOffset(TOTLENGTH),
+                    getfieldnumBits(TOTLENGTH));
+        } catch (BufferException e) {
+            throw new PacketException(e.getMessage());
+        }
+
+        // Now compute the Header Checksum
+        byte[] checkSum = BitBufferHelper.toByteArray(computeChecksum(data, 0));
+
+        try {
+            BitBufferHelper.setBytes(data, checkSum, getfieldOffset(CHECKSUM),
+                    getfieldnumBits(CHECKSUM));
         } catch (BufferException e) {
             throw new PacketException(e.getMessage());
         }
@@ -527,31 +532,35 @@ public class IPv4 extends Packet {
      * bytes in Total Length
      * @param payload - Packet
      */
+    /**
+     * Set the total length field in the IPv4 Object
+     * Note: this field will get overwritten during serialization phase.
+     */
     public void setPayload(Packet payload) {
         this.payload = payload;
         /*
-         * Deriving the Total Lenght here
-         * TODO: See if we can derive the total length during
-         * another phase (during serialization/deserialization)
-         * */
+         * Deriving the Total Length here
+         */
         int payloadLength = 0;
         try {
             payloadLength = payload.serialize().length;
         } catch (PacketException e) {
             logger.error("", e);
         }
+
         this.setTotalLength((short) (this.getHeaderLen() + payloadLength));
     }
 
-    @Override
+
     /**
      * Method to perform post deserialization - like compare computed checksum with
      * the one obtained from IP header
      */
-    protected void postDeserializeCustomOperation(byte[] data, int endBitOffset) {
-        int endByteOffset = endBitOffset / NetUtils.NumBitsInAByte;
-        int computedChecksum = computeChecksum(data, endByteOffset);
-        int actualChecksum = BitBufferHelper.getInt(fieldValues.get(CHECKSUM));
+    @Override
+    protected void postDeserializeCustomOperation(byte[] data, int startBitOffset) {
+        int start = startBitOffset / NetUtils.NumBitsInAByte;
+        short computedChecksum = computeChecksum(data, start);
+        short actualChecksum = BitBufferHelper.getShort(fieldValues.get(CHECKSUM));
         if (computedChecksum != actualChecksum) {
             corrupted = true;
         }
