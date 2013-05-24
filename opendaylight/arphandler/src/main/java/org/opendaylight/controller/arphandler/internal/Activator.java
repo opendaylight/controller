@@ -22,6 +22,7 @@ import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
+import org.opendaylight.controller.topologymanager.ITopologyManager;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -86,6 +87,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     "unsetSwitchManager").setRequired(true));
 
             c.add(createContainerServiceDependency(containerName).setService(
+                    ITopologyManager.class).setCallbacks("setTopologyManager",
+                    "unsetTopologyMananger").setRequired(true));
+
+           c.add(createContainerServiceDependency(containerName).setService(
                     IDataPacketService.class).setCallbacks(
                     "setDataPacketService", "unsetDataPacketService")
                     .setRequired(true));
