@@ -19,11 +19,15 @@ import org.ops4j.pax.exam.util.PathUtils;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+
 import org.apache.commons.codec.binary.Base64;
 
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONTokener;
 
@@ -83,14 +87,9 @@ public class NorthboundIntegrationTest {
 
     }
 
-    @Test
-    public void testStatistics() {
-
-        System.out.println("Starting Statistics JAXB client.");
-
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/statistics/default/flowstats";
+    private String getJsonResult(String restUrl) {
         try {
-            URL url = new URL(baseURL);
+            URL url = new URL(restUrl);
 
             this.users.getAuthorizationList();
             this.users.authenticate("admin", "admin");
@@ -116,7 +115,26 @@ public class NorthboundIntegrationTest {
                 sb.append((char) cp);
             }
             is.close();
-            JSONTokener jt = new JSONTokener(sb.toString());
+            return sb.toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Test
+    public void testStatistics() {
+
+        System.out.println("Starting Statistics JAXB client.");
+
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/statistics/default/";
+        try {
+            String actionTypes[] = { "drop", "loopback", "flood", "floodAll",
+                    "controller", "swPath", "hwPath", "output", "setDlSrc",
+                    "setDlDst", "setDlType", "setVlanId", "setVlanPcp",
+                    "setVlanCfi", "popVlan", "pushVlan", "setNwSrc",
+                    "setNwDst", "setNwTos", "setTpSrc", "setTpDst" };
+            String result = getJsonResult(baseURL + "flowstats");
+            JSONTokener jt = new JSONTokener(result);
             JSONObject json = new JSONObject(jt);
             JSONObject flowStatistics = json.getJSONObject("flowStatistics");
             JSONObject node = flowStatistics.getJSONObject("node");
@@ -125,27 +143,129 @@ public class NorthboundIntegrationTest {
             Assert.assertTrue(node.getString("@type").equals("STUB"));
 
             // test that flow statistics results are correct
-            JSONObject flowStat = flowStatistics.getJSONObject("flowStat");
-            Assert.assertTrue(flowStat.getInt("tableId") == 1);
-            Assert.assertTrue(flowStat.getInt("durationSeconds") == 40);
-            Assert.assertTrue(flowStat.getInt("durationNanoseconds") == 400);
-            Assert.assertTrue(flowStat.getInt("packetCount") == 200);
-            Assert.assertTrue(flowStat.getInt("byteCount") == 100);
+            JSONArray flowStats = flowStatistics.getJSONArray("flowStat");
+            for (int i = 0; i < flowStats.length(); i++) {
 
-            // test that flow information is correct
-            JSONObject flow = flowStat.getJSONObject("flow");
-            Assert.assertTrue(flow.getInt("priority") == 3500);
-            Assert.assertTrue(flow.getInt("idleTimeout") == 1000);
-            Assert.assertTrue(flow.getInt("hardTimeout") == 2000);
-            Assert.assertTrue(flow.getInt("id") == 12345);
+                JSONObject flowStat = flowStats.getJSONObject(i);
+                Assert.assertTrue(flowStat.getInt("tableId") == 1);
+                Assert.assertTrue(flowStat.getInt("durationSeconds") == 40);
+                Assert.assertTrue(flowStat.getInt("durationNanoseconds") == 400);
+                Assert.assertTrue(flowStat.getInt("packetCount") == 200);
+                Assert.assertTrue(flowStat.getInt("byteCount") == 100);
 
-            JSONObject match = (flow.getJSONObject("match")
-                    .getJSONObject("matchField"));
-            Assert.assertTrue(match.getString("type").equals("NW_DST"));
-            Assert.assertTrue(match.getString("value").equals("1.1.1.1"));
+                // test that flow information is correct
+                JSONObject flow = flowStat.getJSONObject("flow");
+                Assert.assertTrue(flow.getInt("priority") == 3500);
+                Assert.assertTrue(flow.getInt("idleTimeout") == 1000);
+                Assert.assertTrue(flow.getInt("hardTimeout") == 2000);
+                Assert.assertTrue(flow.getInt("id") == 12345);
 
-            Assert.assertTrue(flow.getJSONObject("actions").getString("@type")
-                    .equals("drop"));
+                JSONObject match = (flow.getJSONObject("match")
+                        .getJSONObject("matchField"));
+                Assert.assertTrue(match.getString("type").equals("NW_DST"));
+                Assert.assertTrue(match.getString("value").equals("1.1.1.1"));
+
+                JSONObject act = flow.getJSONObject("actions");
+                Assert.assertTrue(act.getString("@type").equals(actionTypes[i]));
+
+                if (act.getString("@type").equals("output")) {
+                    JSONObject port = act.getJSONObject("port");
+                    JSONObject port_node = port.getJSONObject("node");
+                    Assert.assertTrue(port.getInt("@id") == 51966);
+                    Assert.assertTrue(port.getString("@type").equals("STUB"));
+                    Assert.assertTrue(port_node.getInt("@id") == 51966);
+                    Assert.assertTrue(port_node.getString("@type").equals(
+                            "STUB"));
+                }
+
+                if (act.getString("@type").equals("setDlSrc")) {
+                    byte srcMatch[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2,
+                            (byte) 1 };
+                    String src = act.getString("address");
+                    byte srcBytes[] = new byte[5];
+                    srcBytes[0] = Byte.parseByte(src.substring(0, 2));
+                    srcBytes[1] = Byte.parseByte(src.substring(2, 4));
+                    srcBytes[2] = Byte.parseByte(src.substring(4, 6));
+                    srcBytes[3] = Byte.parseByte(src.substring(6, 8));
+                    srcBytes[4] = Byte.parseByte(src.substring(8, 10));
+                    Assert.assertTrue(Arrays.equals(srcBytes, srcMatch));
+                }
+
+                if (act.getString("@type").equals("setDlDst")) {
+                    byte dstMatch[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4,
+                            (byte) 5 };
+                    String dst = act.getString("address");
+                    byte dstBytes[] = new byte[5];
+                    dstBytes[0] = Byte.parseByte(dst.substring(0, 2));
+                    dstBytes[1] = Byte.parseByte(dst.substring(2, 4));
+                    dstBytes[2] = Byte.parseByte(dst.substring(4, 6));
+                    dstBytes[3] = Byte.parseByte(dst.substring(6, 8));
+                    dstBytes[4] = Byte.parseByte(dst.substring(8, 10));
+                    Assert.assertTrue(Arrays.equals(dstBytes, dstMatch));
+                }
+                if (act.getString("@type").equals("setDlType"))
+                    Assert.assertTrue(act.getInt("dlType") == 10);
+                if (act.getString("@type").equals("setVlanId"))
+                    Assert.assertTrue(act.getInt("vlanId") == 2);
+                if (act.getString("@type").equals("setVlanPcp"))
+                    Assert.assertTrue(act.getInt("pcp") == 3);
+                if (act.getString("@type").equals("setVlanCfi"))
+                    Assert.assertTrue(act.getInt("cfi") == 1);
+
+                if (act.getString("@type").equals("setNwSrc"))
+                    Assert.assertTrue(act.getString("address")
+                            .equals("2.2.2.2"));
+                if (act.getString("@type").equals("setNwDst"))
+                    Assert.assertTrue(act.getString("address")
+                            .equals("1.1.1.1"));
+
+                if (act.getString("@type").equals("pushVlan")) {
+                    int head = act.getInt("VlanHeader");
+                    // parsing vlan header
+                    int id = head & 0xfff;
+                    int cfi = (head >> 12) & 0x1;
+                    int pcp = (head >> 13) & 0x7;
+                    int tag = (head >> 16) & 0xffff;
+                    Assert.assertTrue(id == 1234);
+                    Assert.assertTrue(cfi == 1);
+                    Assert.assertTrue(pcp == 1);
+                    Assert.assertTrue(tag == 0x8100);
+                }
+                if (act.getString("@type").equals("setNwTos"))
+                    Assert.assertTrue(act.getInt("tos") == 16);
+                if (act.getString("@type").equals("setTpSrc"))
+                    Assert.assertTrue(act.getInt("port") == 4201);
+                if (act.getString("@type").equals("setTpDst"))
+                    Assert.assertTrue(act.getInt("port") == 8080);
+            }
+
+            // for /controller/nb/v2/statistics/default/portstats
+            result = getJsonResult(baseURL + "portstats");
+            jt = new JSONTokener(result);
+            json = new JSONObject(jt);
+            JSONObject portStatistics = json.getJSONObject("portStatistics");
+            JSONObject node2 = portStatistics.getJSONObject("node");
+            // test that node was returned properly
+            Assert.assertTrue(node2.getInt("@id") == 0xCAFE);
+            Assert.assertTrue(node2.getString("@type").equals("STUB"));
+
+            // test that port statistic results are correct
+            JSONObject portStat = portStatistics.getJSONObject("portStat");
+            Assert.assertTrue(portStat.getInt("receivePackets") == 250);
+            Assert.assertTrue(portStat.getInt("transmitPackets") == 500);
+            Assert.assertTrue(portStat.getInt("receiveBytes") == 1000);
+            Assert.assertTrue(portStat.getInt("transmitBytes") == 5000);
+            Assert.assertTrue(portStat.getInt("receiveDrops") == 2);
+            Assert.assertTrue(portStat.getInt("transmitDrops") == 50);
+            Assert.assertTrue(portStat.getInt("receiveErrors") == 3);
+            Assert.assertTrue(portStat.getInt("transmitErrors") == 10);
+            Assert.assertTrue(portStat.getInt("receiveFrameError") == 5);
+            Assert.assertTrue(portStat.getInt("receiveOverRunError") == 6);
+            Assert.assertTrue(portStat.getInt("receiveCrcError") == 1);
+            Assert.assertTrue(portStat.getInt("collisionCount") == 4);
+
+            // String result = getJsonResult(baseURL+"flowstats/STUB/51966");
+            // System.out.println(result);
 
         } catch (Exception e) {
             // Got an unexpected exception
