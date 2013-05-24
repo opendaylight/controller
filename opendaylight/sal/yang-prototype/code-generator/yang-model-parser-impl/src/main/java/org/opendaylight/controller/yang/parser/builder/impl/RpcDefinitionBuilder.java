@@ -28,6 +28,7 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder
 
 public class RpcDefinitionBuilder implements SchemaNodeBuilder,
         TypeDefinitionAwareBuilder {
+    private boolean built;
     private final RpcDefinitionImpl instance;
     private final int line;
     private final QName qname;
@@ -46,34 +47,37 @@ public class RpcDefinitionBuilder implements SchemaNodeBuilder,
 
     @Override
     public RpcDefinition build() {
-        final ContainerSchemaNode input = inputBuilder.build();
-        final ContainerSchemaNode output = outputBuilder.build();
-        instance.setInput(input);
-        instance.setOutput(output);
+        if(!built) {
+            final ContainerSchemaNode input = inputBuilder.build();
+            final ContainerSchemaNode output = outputBuilder.build();
+            instance.setInput(input);
+            instance.setOutput(output);
 
-        instance.setPath(schemaPath);
+            instance.setPath(schemaPath);
 
-        // TYPEDEFS
-        final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
-        for (TypeDefinitionBuilder entry : addedTypedefs) {
-            typedefs.add(entry.build());
+            // TYPEDEFS
+            final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
+            for (TypeDefinitionBuilder entry : addedTypedefs) {
+                typedefs.add(entry.build());
+            }
+            instance.setTypeDefinitions(typedefs);
+
+            // GROUPINGS
+            final Set<GroupingDefinition> groupings = new HashSet<GroupingDefinition>();
+            for (GroupingBuilder entry : addedGroupings) {
+                groupings.add(entry.build());
+            }
+            instance.setGroupings(groupings);
+
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
+            instance.setUnknownSchemaNodes(unknownNodes);
+
+            built = true;
         }
-        instance.setTypeDefinitions(typedefs);
-
-        // GROUPINGS
-        final Set<GroupingDefinition> groupings = new HashSet<GroupingDefinition>();
-        for (GroupingBuilder entry : addedGroupings) {
-            groupings.add(entry.build());
-        }
-        instance.setGroupings(groupings);
-
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
-        }
-        instance.setUnknownSchemaNodes(unknownNodes);
-
         return instance;
     }
 

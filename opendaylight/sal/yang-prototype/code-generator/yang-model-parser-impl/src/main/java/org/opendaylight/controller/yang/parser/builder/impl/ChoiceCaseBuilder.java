@@ -23,6 +23,7 @@ import org.opendaylight.controller.yang.parser.builder.api.AbstractChildNodeBuil
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
         DataSchemaNodeBuilder {
@@ -151,13 +152,13 @@ public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
 
     @Override
     public void addTypedef(TypeDefinitionBuilder typedefBuilder) {
-        throw new UnsupportedOperationException(
+        throw new YangParseException(line,
                 "Can not add type definition to choice case.");
     }
 
     @Override
     public void setConfiguration(boolean configuration) {
-        throw new UnsupportedOperationException(
+        throw new YangParseException(line,
                 "Can not add config definition to choice case.");
     }
 
@@ -372,7 +373,6 @@ public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
             sb.append("]");
             return sb.toString();
         }
-
     }
 
 }

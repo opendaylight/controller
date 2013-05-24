@@ -53,8 +53,9 @@ container_stmt : CONTAINER_KEYWORD string (SEMICOLON | (LEFT_BRACE  (identifier_
 grouping_stmt : GROUPING_KEYWORD string (SEMICOLON | (LEFT_BRACE  (identifier_stmt |status_stmt | description_stmt | reference_stmt | typedef_stmt | grouping_stmt | data_def_stmt )* RIGHT_BRACE));
 value_stmt : VALUE_KEYWORD string stmtend;
 max_value_arg : /*UNBOUNDED_KEYWORD |*/ string;
+min_value_arg : /*UNBOUNDED_KEYWORD |*/ string;
 max_elements_stmt : MAX_ELEMENTS_KEYWORD max_value_arg stmtend;
-min_elements_stmt : MIN_ELEMENTS_KEYWORD string stmtend;
+min_elements_stmt : MIN_ELEMENTS_KEYWORD min_value_arg stmtend;
 error_app_tag_stmt : ERROR_APP_TAG_KEYWORD string stmtend;
 error_message_stmt : ERROR_MESSAGE_KEYWORD string stmtend;
 must_stmt : MUST_KEYWORD string (SEMICOLON | (LEFT_BRACE  (identifier_stmt |error_message_stmt | error_app_tag_stmt | description_stmt | reference_stmt )* RIGHT_BRACE));

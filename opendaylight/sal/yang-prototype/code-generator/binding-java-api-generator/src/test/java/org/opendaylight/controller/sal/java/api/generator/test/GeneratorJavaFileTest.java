@@ -7,9 +7,23 @@
  */
 package org.opendaylight.controller.sal.java.api.generator.test;
 
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTypeBuilderImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
@@ -24,39 +38,34 @@ import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class GeneratorJavaFileTest {
     private static final String FS = File.separator;
-    private static final String PATH = "test-dir";
+    private static final String PATH = "target/test/test-dir";
     private final File testDir = new File(PATH);
 
-    private static final String GENERATOR_OUTPUT_PATH = "src/test/resources/src";
+    private static final String GENERATOR_OUTPUT_PATH = "target/test/src";
     private static final File GENERATOR_OUTPUT = new File(GENERATOR_OUTPUT_PATH);
-    private static final String COMPILER_OUTPUT_PATH = "src/test/resources/bin";
+    private static final String COMPILER_OUTPUT_PATH = "target/test/bin";
     private static final File COMPILER_OUTPUT = new File(COMPILER_OUTPUT_PATH);
 
     @Before
     public void init() {
-        assertTrue(testDir.mkdir());
+        assertTrue(testDir.mkdirs());
         assertTrue(COMPILER_OUTPUT.mkdirs());
         assertTrue(GENERATOR_OUTPUT.mkdirs());
     }
 
     @After
     public void cleanUp() {
-        deleteTestDir(testDir);
-        deleteTestDir(COMPILER_OUTPUT);
-        deleteTestDir(GENERATOR_OUTPUT);
+        if(testDir.exists()) {
+            deleteTestDir(testDir);
+        }
+        if(COMPILER_OUTPUT.exists()) {
+            deleteTestDir(COMPILER_OUTPUT);
+        }
+        if(GENERATOR_OUTPUT.exists()) {
+            deleteTestDir(GENERATOR_OUTPUT);
+        }
     }
 
     @Test
@@ -85,7 +94,6 @@ public class GeneratorJavaFileTest {
         assertTrue(filesList.contains("Type3.java"));
     }
 
-    @Ignore
     @Test
     public void compilationTest() throws Exception {
         final YangParserImpl parser = new YangParserImpl();

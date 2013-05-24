@@ -21,6 +21,7 @@ public class BaseYangTypes {
     private static Map<String, Type> typeMap = new HashMap<String, Type>();
 
     public static final Type BOOLEAN_TYPE = Types.typeForClass(Boolean.class);
+    public static final Type EMPTY_TYPE = Types.typeForClass(Boolean.class);
     public static final Type INT8_TYPE = Types.typeForClass(Byte.class);
     public static final Type INT16_TYPE = Types.typeForClass(Short.class);
     public static final Type INT32_TYPE = Types.typeForClass(Integer.class);
@@ -34,6 +35,7 @@ public class BaseYangTypes {
 
     static {
         typeMap.put("boolean", BOOLEAN_TYPE);
+        typeMap.put("empty", EMPTY_TYPE);
         typeMap.put("int8", INT8_TYPE);
         typeMap.put("int16", INT16_TYPE);
         typeMap.put("int32", INT32_TYPE);

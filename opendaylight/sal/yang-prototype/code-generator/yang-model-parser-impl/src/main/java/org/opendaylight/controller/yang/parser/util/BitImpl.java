@@ -17,7 +17,7 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 
-public final class BitImpl implements BitsTypeDefinition.Bit {
+final class BitImpl implements BitsTypeDefinition.Bit {
     private final Long position;
     private final QName qname;
     private final SchemaPath schemaPath;

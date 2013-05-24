@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.sal.java.api.generator;
 
-import static org.opendaylight.controller.sal.java.api.generator.Constants.NL;
-import static org.opendaylight.controller.sal.java.api.generator.Constants.RCB;
-import static org.opendaylight.controller.sal.java.api.generator.Constants.TAB;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
 import org.opendaylight.controller.sal.binding.model.api.Constant;
@@ -26,31 +26,47 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 
 public class InterfaceGenerator implements CodeGenerator {
 
+    private Map<String, LinkedHashMap<String, Integer>> imports;
+
     public Writer generate(Type type) throws IOException {
         Writer writer = new StringWriter();
-        if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
+        if (type instanceof GeneratedType
+                && !(type instanceof GeneratedTransferObject)) {
             GeneratedType genType = (GeneratedType) type;
+            imports = GeneratorUtil.createImports(genType);
 
+            final String currentPkg = genType.getPackageName();
             final List<Constant> constants = genType.getConstantDefinitions();
             final List<MethodSignature> methods = genType
                     .getMethodDefinitions();
             final List<Enumeration> enums = genType.getEnumDefintions();
 
-            writer.write(GeneratorUtil.createIfcDeclarationWithPkgName(genType,
-                    ""));
+            writer.write(GeneratorUtil.createPackageDeclaration(genType
+                    .getPackageName()));
+            writer.write(NL);
+
+            List<String> importLines = GeneratorUtil.createImportLines(imports);
+            for (String line : importLines) {
+                writer.write(line + NL);
+            }
+            writer.write(NL);
+
+            writer.write(GeneratorUtil.createIfcDeclaration(genType, "",
+                    imports));
             writer.write(NL);
 
             if (constants != null) {
                 for (Constant c : constants) {
-                    writer.write(GeneratorUtil.createConstant(c, TAB) + NL);
+                    writer.write(GeneratorUtil.createConstant(c, TAB, imports,
+                            currentPkg) + NL);
                 }
                 writer.write(NL);
             }
 
             if (methods != null) {
                 for (MethodSignature m : methods) {
-                    writer.write(GeneratorUtil.createMethodDeclaration(m, TAB)
-                            + NL);
+                    writer.write(GeneratorUtil.createMethodDeclaration(m, TAB,
+                            imports, currentPkg) + NL);
                 }
                 writer.write(NL);
             }

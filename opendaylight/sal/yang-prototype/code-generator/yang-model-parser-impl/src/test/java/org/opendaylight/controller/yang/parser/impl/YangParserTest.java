@@ -165,8 +165,8 @@ public class YangParserTest {
         assertNull(constraints.getWhenCondition());
         assertEquals(0, constraints.getMustConstraints().size());
         assertFalse(constraints.isMandatory());
-        assertNull(constraints.getMinElements());
-        assertNull(constraints.getMaxElements());
+        assertEquals(1, (int)constraints.getMinElements());
+        assertEquals(11, (int)constraints.getMaxElements());
         // test AugmentationTarget args
         Set<AugmentationSchema> availableAugmentations = ifEntry
                 .getAvailableAugmentations();
@@ -551,25 +551,62 @@ public class YangParserTest {
         assertEquals(1, usesNodes.size());
         UsesNode usesNode = usesNodes.iterator().next();
         Map<SchemaPath, SchemaNode> refines = usesNode.getRefines();
-        assertEquals(2, refines.size());
+        assertEquals(3, refines.size());
 
+        LeafSchemaNode refineLeaf = null;
+        ContainerSchemaNode refineContainer = null;
+        ListSchemaNode refineList = null;
         for (Map.Entry<SchemaPath, SchemaNode> entry : refines.entrySet()) {
             SchemaNode value = entry.getValue();
-
             if (value instanceof LeafSchemaNode) {
-                LeafSchemaNode refineLeaf = (LeafSchemaNode) value;
-                assertNotNull(refineLeaf);
-            } else {
-                ContainerSchemaNode refineContainer = (ContainerSchemaNode) value;
-                Set<MustDefinition> mustConstraints = refineContainer
-                        .getConstraints().getMustConstraints();
-                assertEquals(1, mustConstraints.size());
-                MustDefinition must = mustConstraints.iterator().next();
-                assertEquals("must-condition", must.toString());
-                assertEquals("An error message test", must.getErrorMessage());
-                assertEquals(("An error app tag test"), must.getErrorAppTag());
+                refineLeaf = (LeafSchemaNode) value;
+            } else if(value instanceof ContainerSchemaNode) {
+                refineContainer = (ContainerSchemaNode) value;
+            } else if(value instanceof ListSchemaNode) {
+                refineList = (ListSchemaNode)value;
             }
         }
+
+        // leaf address
+        assertNotNull(refineLeaf);
+        assertEquals("address", refineLeaf.getQName().getLocalName());
+        assertEquals("description of address defined by refine",
+                refineLeaf.getDescription());
+        assertEquals("address reference added by refine",
+                refineLeaf.getReference());
+        assertFalse(refineLeaf.isConfiguration());
+        assertTrue(refineLeaf.getConstraints().isMandatory());
+        Set<MustDefinition> leafMustConstraints = refineLeaf.getConstraints()
+                .getMustConstraints();
+        assertEquals(1, leafMustConstraints.size());
+        MustDefinition leafMust = leafMustConstraints.iterator().next();
+        assertEquals(
+                "\"ifType != 'ethernet' or (ifType = 'ethernet' and ifMTU = 1500)\"",
+                leafMust.toString());
+
+        // container port
+        assertNotNull(refineContainer);
+        Set<MustDefinition> mustConstraints = refineContainer.getConstraints()
+                .getMustConstraints();
+        assertEquals(1, mustConstraints.size());
+        MustDefinition must = mustConstraints.iterator().next();
+        assertEquals("must-condition", must.toString());
+        assertEquals("An error message test", must.getErrorMessage());
+        assertEquals(("An error app tag test"), must.getErrorAppTag());
+        assertEquals("description of port defined by refine",
+                refineContainer.getDescription());
+        assertEquals("port reference added by refine",
+                refineContainer.getReference());
+        assertFalse(refineContainer.isConfiguration());
+        assertTrue(refineContainer.isPresenceContainer());
+
+        // list addresses
+        assertNotNull(refineList);
+        assertEquals("description of addresses defined by refine", refineList.getDescription());
+        assertEquals("addresses reference added by refine", refineList.getReference());
+        assertFalse(refineList.isConfiguration());
+        assertEquals(2, (int)refineList.getConstraints().getMinElements());
+        assertEquals(12, (int)refineList.getConstraints().getMaxElements());
     }
 
     @Test

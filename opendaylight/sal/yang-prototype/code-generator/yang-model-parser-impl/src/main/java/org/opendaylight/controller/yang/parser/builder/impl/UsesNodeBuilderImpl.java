@@ -26,6 +26,7 @@ import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.RefineHolder;
 
 final class UsesNodeBuilderImpl implements UsesNodeBuilder {
+    private boolean built;
     private final UsesNodeImpl instance;
     private final int line;
     private final SchemaPath groupingPath;
@@ -41,21 +42,24 @@ final class UsesNodeBuilderImpl implements UsesNodeBuilder {
 
     @Override
     public UsesNode build() {
-        // AUGMENTATIONS
-        final Set<AugmentationSchema> augments = new HashSet<AugmentationSchema>();
-        for (AugmentationSchemaBuilder builder : addedAugments) {
-            augments.add(builder.build());
-        }
-        instance.setAugmentations(augments);
+        if(!built) {
+            // AUGMENTATIONS
+            final Set<AugmentationSchema> augments = new HashSet<AugmentationSchema>();
+            for (AugmentationSchemaBuilder builder : addedAugments) {
+                augments.add(builder.build());
+            }
+            instance.setAugmentations(augments);
 
-        // REFINES
-        final Map<SchemaPath, SchemaNode> refineNodes = new HashMap<SchemaPath, SchemaNode>();
-        for (SchemaNodeBuilder refineBuilder : refineBuilders) {
-            SchemaNode refineNode = refineBuilder.build();
-            refineNodes.put(refineNode.getPath(), refineNode);
-        }
-        instance.setRefines(refineNodes);
+            // REFINES
+            final Map<SchemaPath, SchemaNode> refineNodes = new HashMap<SchemaPath, SchemaNode>();
+            for (SchemaNodeBuilder refineBuilder : refineBuilders) {
+                SchemaNode refineNode = refineBuilder.build();
+                refineNodes.put(refineNode.getPath(), refineNode);
+            }
+            instance.setRefines(refineNodes);
 
+            built = true;
+        }
         return instance;
     }
 

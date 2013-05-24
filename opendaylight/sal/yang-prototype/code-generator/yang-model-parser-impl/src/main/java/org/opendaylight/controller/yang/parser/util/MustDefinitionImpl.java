@@ -10,15 +10,15 @@ package org.opendaylight.controller.yang.parser.util;
 import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 
-public final class MustDefinitionImpl implements MustDefinition {
+final class MustDefinitionImpl implements MustDefinition {
     private final String mustStr;
     private final String description;
     private final String reference;
     private final String errorAppTag;
     private final String errorMessage;
 
-    public MustDefinitionImpl(String mustStr, String description,
-            String reference, String errorAppTag, String errorMessage) {
+    MustDefinitionImpl(String mustStr, String description, String reference,
+            String errorAppTag, String errorMessage) {
         this.mustStr = mustStr;
         this.description = description;
         this.reference = reference;

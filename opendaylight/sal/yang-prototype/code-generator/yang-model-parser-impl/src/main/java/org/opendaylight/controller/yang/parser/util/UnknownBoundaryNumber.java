@@ -10,7 +10,7 @@ package org.opendaylight.controller.yang.parser.util;
 /**
  * Marker object representing special 'min' or 'max' values in YANG.
  */
-public final class UnknownBoundaryNumber extends Number {
+final class UnknownBoundaryNumber extends Number {
     private static final long serialVersionUID = 1464861684686434869L;
 
     private final String value;

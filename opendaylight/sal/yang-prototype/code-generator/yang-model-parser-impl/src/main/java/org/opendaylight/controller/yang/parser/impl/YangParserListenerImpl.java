@@ -409,8 +409,7 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
         QName containerQName = new QName(namespace, revision, yangModelPrefix,
                 containerName);
         ContainerSchemaNodeBuilder containerBuilder = moduleBuilder
-                .addContainerNode(containerQName, actualPath, ctx.getStart()
-                        .getLine());
+                .addContainerNode(containerQName, actualPath, ctx.getStart().getLine());
         updatePath(containerName);
 
         containerBuilder.setPath(createActualSchemaPath(actualPath, namespace,

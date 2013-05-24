@@ -38,6 +38,7 @@ import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
         DataSchemaNodeBuilder, AugmentationTargetBuilder,
         TypeDefinitionAwareBuilder {
+    private boolean built;
     private final ListSchemaNodeImpl instance;
     private final int line;
     // SchemaNode args
@@ -68,60 +69,63 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
 
     @Override
     public ListSchemaNode build() {
-        instance.setKeyDefinition(keyDefinition);
-        instance.setPath(schemaPath);
-        instance.setDescription(description);
-        instance.setReference(reference);
-        instance.setStatus(status);
-        instance.setAugmenting(augmenting);
-        instance.setConfiguration(configuration);
-        instance.setUserOrdered(userOrdered);
+        if(!built) {
+            instance.setKeyDefinition(keyDefinition);
+            instance.setPath(schemaPath);
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
+            instance.setAugmenting(augmenting);
+            instance.setConfiguration(configuration);
+            instance.setUserOrdered(userOrdered);
 
-        // CHILD NODES
-        final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
-        for (DataSchemaNodeBuilder node : childNodes) {
-            childs.put(node.getQName(), node.build());
+            // CHILD NODES
+            final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+            for (DataSchemaNodeBuilder node : childNodes) {
+                childs.put(node.getQName(), node.build());
+            }
+            instance.setChildNodes(childs);
+
+            // TYPEDEFS
+            final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
+            for (TypeDefinitionBuilder entry : addedTypedefs) {
+                typedefs.add(entry.build());
+            }
+            instance.setTypeDefinitions(typedefs);
+
+            // USES
+            final Set<UsesNode> usesNodeDefs = new HashSet<UsesNode>();
+            for (UsesNodeBuilder builder : addedUsesNodes) {
+                usesNodeDefs.add(builder.build());
+            }
+            instance.setUses(usesNodeDefs);
+
+            // GROUPINGS
+            final Set<GroupingDefinition> groupingDefs = new HashSet<GroupingDefinition>();
+            for (GroupingBuilder builder : groupings) {
+                groupingDefs.add(builder.build());
+            }
+            instance.setGroupings(groupingDefs);
+
+            // AUGMENTATIONS
+            final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
+            for (AugmentationSchemaBuilder builder : addedAugmentations) {
+                augmentations.add(builder.build());
+            }
+            instance.setAvailableAugmentations(augmentations);
+
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
+            instance.setUnknownSchemaNodes(unknownNodes);
+
+            instance.setConstraints(constraints.build());
+            instance.setAvailableAugmentations(augmentations);
+
+            built = true;
         }
-        instance.setChildNodes(childs);
-
-        // TYPEDEFS
-        final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
-        for (TypeDefinitionBuilder entry : addedTypedefs) {
-            typedefs.add(entry.build());
-        }
-        instance.setTypeDefinitions(typedefs);
-
-        // USES
-        final Set<UsesNode> usesNodeDefs = new HashSet<UsesNode>();
-        for (UsesNodeBuilder builder : addedUsesNodes) {
-            usesNodeDefs.add(builder.build());
-        }
-        instance.setUses(usesNodeDefs);
-
-        // GROUPINGS
-        final Set<GroupingDefinition> groupingDefs = new HashSet<GroupingDefinition>();
-        for (GroupingBuilder builder : groupings) {
-            groupingDefs.add(builder.build());
-        }
-        instance.setGroupings(groupingDefs);
-
-        // AUGMENTATIONS
-        final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
-        for (AugmentationSchemaBuilder builder : addedAugmentations) {
-            augmentations.add(builder.build());
-        }
-        instance.setAvailableAugmentations(augmentations);
-
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
-        }
-        instance.setUnknownSchemaNodes(unknownNodes);
-
-        instance.setConstraints(constraints.build());
-        instance.setAvailableAugmentations(augmentations);
-
         return instance;
     }
 

@@ -1,8 +1,6 @@
 package org.opendaylight.controller.sal.java.api.generator.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +71,7 @@ public class ClassCodeGeneratorTest {
                             propertyCount++;
                         }
                     }
-                    
+
                     final ClassCodeGenerator clsGen = new ClassCodeGenerator();
                     try {
                         final Writer writer = clsGen.generate(genTO);
@@ -81,16 +79,16 @@ public class ClassCodeGeneratorTest {
 
                         final String outputStr = writer.toString();
                         writer.close();
-                        
+
                         assertNotNull(outputStr);
                         assertTrue(outputStr
-                                .contains("public CompositeKeyListKey(java.lang.String Key2, " +
-                                		"java.lang.Byte Key1)"));
+                                .contains("public CompositeKeyListKey(String Key2, "
+                                        + "Byte Key1)"));
 
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    
+
                     assertEquals(2, propertyCount);
                     genTOsCount++;
                 } else if (genTO.getName().equals("InnerListKey")) {
@@ -108,18 +106,19 @@ public class ClassCodeGeneratorTest {
 
     @Test
     public void defaultConstructorTest() {
-        final GeneratedTOBuilder toBuilder = new GeneratedTOBuilderImpl("simple.pack", "DefCtor");
-        
+        final GeneratedTOBuilder toBuilder = new GeneratedTOBuilderImpl(
+                "simple.pack", "DefCtor");
+
         GeneratedPropertyBuilder propBuilder = toBuilder.addProperty("foo");
         propBuilder.addReturnType(Types.typeForClass(String.class));
         propBuilder.setReadOnly(false);
-        
+
         propBuilder = toBuilder.addProperty("bar");
         propBuilder.addReturnType(Types.typeForClass(Integer.class));
         propBuilder.setReadOnly(false);
-        
+
         final GeneratedTransferObject genTO = toBuilder.toInstance();
-        
+
         final ClassCodeGenerator clsGen = new ClassCodeGenerator();
         try {
             final Writer writer = clsGen.generate(genTO);
@@ -127,10 +126,9 @@ public class ClassCodeGeneratorTest {
 
             final String outputStr = writer.toString();
             writer.close();
-            
+
             assertNotNull(outputStr);
-            assertTrue(outputStr
-                    .contains("public DefCtor()"));
+            assertTrue(outputStr.contains("public DefCtor()"));
 
         } catch (IOException e) {
             e.printStackTrace();

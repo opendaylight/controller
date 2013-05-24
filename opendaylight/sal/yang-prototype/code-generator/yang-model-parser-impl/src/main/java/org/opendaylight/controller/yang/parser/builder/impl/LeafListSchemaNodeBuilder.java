@@ -24,6 +24,7 @@ import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 
 public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
         implements SchemaNodeBuilder, DataSchemaNodeBuilder {
+    private boolean built;
     private final LeafListSchemaNodeImpl instance;
     private final int line;
     // SchemaNode args
@@ -49,28 +50,31 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
 
     @Override
     public LeafListSchemaNode build() {
-        instance.setConstraints(constraints.build());
-        instance.setPath(schemaPath);
-        instance.setDescription(description);
-        instance.setReference(reference);
-        instance.setStatus(status);
-        instance.setAugmenting(augmenting);
-        instance.setConfiguration(configuration);
-        instance.setUserOrdered(userOrdered);
+        if (!built) {
+            instance.setConstraints(constraints.build());
+            instance.setPath(schemaPath);
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
+            instance.setAugmenting(augmenting);
+            instance.setConfiguration(configuration);
+            instance.setUserOrdered(userOrdered);
 
-        if (type == null) {
-            instance.setType(typedef.build());
-        } else {
-            instance.setType(type);
+            if (type == null) {
+                instance.setType(typedef.build());
+            } else {
+                instance.setType(type);
+            }
+
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
+            instance.setUnknownSchemaNodes(unknownNodes);
+
+            built = true;
         }
-
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
-        }
-        instance.setUnknownSchemaNodes(unknownNodes);
-
         return instance;
     }
 

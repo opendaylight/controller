@@ -28,9 +28,11 @@ import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
         AugmentationTargetBuilder {
+    private boolean built;
     private final ChoiceNodeImpl instance;
     private final int line;
     // SchemaNode args
@@ -62,36 +64,39 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
 
     @Override
     public ChoiceNode build() {
-        instance.setPath(schemaPath);
-        instance.setDescription(description);
-        instance.setReference(reference);
-        instance.setStatus(status);
-        instance.setAugmenting(augmenting);
-        instance.setConfiguration(configuration);
-        instance.setConstraints(constraints.build());
-        instance.setDefaultCase(defaultCase);
+        if (!built) {
+            instance.setPath(schemaPath);
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
+            instance.setAugmenting(augmenting);
+            instance.setConfiguration(configuration);
+            instance.setConstraints(constraints.build());
+            instance.setDefaultCase(defaultCase);
 
-        // CASES
-        final Set<ChoiceCaseNode> choiceCases = new HashSet<ChoiceCaseNode>();
-        for (ChoiceCaseBuilder caseBuilder : cases) {
-            choiceCases.add(caseBuilder.build());
+            // CASES
+            final Set<ChoiceCaseNode> choiceCases = new HashSet<ChoiceCaseNode>();
+            for (ChoiceCaseBuilder caseBuilder : cases) {
+                choiceCases.add(caseBuilder.build());
+            }
+            instance.setCases(choiceCases);
+
+            // AUGMENTATIONS
+            final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
+            for (AugmentationSchemaBuilder builder : addedAugmentations) {
+                augmentations.add(builder.build());
+            }
+            instance.setAvailableAugmentations(augmentations);
+
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
+            instance.setUnknownSchemaNodes(unknownNodes);
+
+            built = true;
         }
-        instance.setCases(choiceCases);
-
-        // AUGMENTATIONS
-        final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
-        for (AugmentationSchemaBuilder builder : addedAugmentations) {
-            augmentations.add(builder.build());
-        }
-        instance.setAvailableAugmentations(augmentations);
-
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
-        }
-        instance.setUnknownSchemaNodes(unknownNodes);
-
         return instance;
     }
 
@@ -125,7 +130,7 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
      * Choice can not contains grouping statements, so this method always
      * returns an empty set.
      *
-     * @return
+     * @return empty set
      */
     public Set<GroupingBuilder> getGroupings() {
         return Collections.emptySet();
@@ -133,7 +138,7 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
 
     @Override
     public void addGrouping(GroupingBuilder groupingBuilder) {
-        throw new IllegalStateException(
+        throw new YangParseException(line,
                 "Can not add grouping to 'choice' node.");
     }
 
@@ -247,7 +252,7 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
         return new HashSet<DataSchemaNodeBuilder>(cases);
     }
 
-    private static class ChoiceNodeImpl implements ChoiceNode {
+    private class ChoiceNodeImpl implements ChoiceNode {
         private final QName qname;
         private SchemaPath path;
         private String description;

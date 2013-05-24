@@ -18,8 +18,10 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public class AnyXmlBuilder implements DataSchemaNodeBuilder {
+    private boolean built;
     private final int line;
     private final QName qname;
     private SchemaPath path;
@@ -41,20 +43,23 @@ public class AnyXmlBuilder implements DataSchemaNodeBuilder {
 
     @Override
     public AnyXmlSchemaNode build() {
-        instance.setPath(path);
-        instance.setConstraints(constraints.build());
-        instance.setDescription(description);
-        instance.setReference(reference);
-        instance.setStatus(status);
+        if (!built) {
+            instance.setPath(path);
+            instance.setConstraints(constraints.build());
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
+            instance.setConfiguration(configuration);
 
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
+            instance.setUnknownSchemaNodes(unknownNodes);
+
+            built = true;
         }
-        instance.setUnknownSchemaNodes(unknownNodes);
-
-        instance.setConfiguration(configuration);
         return instance;
     }
 
@@ -122,7 +127,7 @@ public class AnyXmlBuilder implements DataSchemaNodeBuilder {
 
     @Override
     public void setAugmenting(final boolean augmenting) {
-        throw new UnsupportedOperationException(
+        throw new YangParseException(line,
                 "An anyxml node cannot be augmented.");
     }
 
@@ -135,7 +140,7 @@ public class AnyXmlBuilder implements DataSchemaNodeBuilder {
         instance.setConfiguration(configuration);
     }
 
-    private class AnyXmlSchemaNodeImpl implements AnyXmlSchemaNode {
+    private final class AnyXmlSchemaNodeImpl implements AnyXmlSchemaNode {
         private final QName qname;
         private SchemaPath path;
         private String description;

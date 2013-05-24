@@ -36,7 +36,9 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.Length_stmtContex
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Mandatory_argContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Mandatory_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Max_elements_stmtContext;
+import org.opendaylight.controller.antlrv4.code.gen.YangParser.Max_value_argContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Min_elements_stmtContext;
+import org.opendaylight.controller.antlrv4.code.gen.YangParser.Min_value_argContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Must_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Numerical_restrictionsContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Ordered_by_argContext;
@@ -372,6 +374,7 @@ public final class YangModelBuilderUtil {
         }
         if (value < -2147483648 || value > 2147483647) {
             throw new YangParseException(
+                    ctx.getStart().getLine(),
                     "Error on enum '"
                             + name
                             + "': the enum value MUST be in the range from -2147483648 to 2147483647, but was: "
@@ -671,8 +674,8 @@ public final class YangModelBuilderUtil {
             try {
                 result = Long.valueOf(value);
             } catch (NumberFormatException e) {
-                throw new YangParseException("Error on line " + line
-                        + ": Unable to parse range value '" + value + "'.", e);
+                throw new YangParseException(line,
+                        "Unable to parse range value '" + value + "'.", e);
             }
         }
         return result;
@@ -790,7 +793,7 @@ public final class YangModelBuilderUtil {
                 try {
                     result = Integer.valueOf(value);
                 } catch (NumberFormatException e) {
-                    throw new YangParseException(
+                    throw new YangParseException(ctx.getStart().getLine(),
                             "Unable to parse fraction digits value '" + value
                                     + "'.", e);
                 }
@@ -888,6 +891,7 @@ public final class YangModelBuilderUtil {
         }
         if (position < 0 || position > 4294967295L) {
             throw new YangParseException(
+                    ctx.getStart().getLine(),
                     "Error on bit '"
                             + name
                             + "': the position value MUST be in the range 0 to 4294967295");
@@ -1193,10 +1197,10 @@ public final class YangModelBuilderUtil {
         for (int i = 0; i < ctx.getChildCount(); ++i) {
             final ParseTree childNode = ctx.getChild(i);
             if (childNode instanceof Max_elements_stmtContext) {
-                Integer max = Integer.valueOf(stringFromNode(childNode));
-                constraints.setMinElements(max);
+                Integer max = parseMaxElements((Max_elements_stmtContext) childNode);
+                constraints.setMaxElements(max);
             } else if (childNode instanceof Min_elements_stmtContext) {
-                Integer min = Integer.valueOf(stringFromNode(childNode));
+                Integer min = parseMinElements((Min_elements_stmtContext) childNode);
                 constraints.setMinElements(min);
             } else if (childNode instanceof Must_stmtContext) {
                 MustDefinition must = parseMust((Must_stmtContext) childNode);
@@ -1213,6 +1217,44 @@ public final class YangModelBuilderUtil {
             } else if (childNode instanceof When_stmtContext) {
                 constraints.addWhenCondition(stringFromNode(childNode));
             }
+        }
+    }
+
+    private static Integer parseMinElements(Min_elements_stmtContext ctx) {
+        Integer result = null;
+        try {
+            for (int j = 0; j < ctx.getChildCount(); j++) {
+                ParseTree minArg = ctx.getChild(j);
+                if (minArg instanceof Min_value_argContext) {
+                    result = Integer.valueOf(stringFromNode(minArg));
+                }
+            }
+            if (result == null) {
+                throw new IllegalArgumentException();
+            }
+            return result;
+        } catch (Exception e) {
+            throw new YangParseException(ctx.getStart().getLine(),
+                    "Failed to parse min-elements.", e);
+        }
+    }
+
+    private static Integer parseMaxElements(Max_elements_stmtContext ctx) {
+        Integer result = null;
+        try {
+            for (int j = 0; j < ctx.getChildCount(); j++) {
+                ParseTree maxArg = ctx.getChild(j);
+                if (maxArg instanceof Max_value_argContext) {
+                    result = Integer.valueOf(stringFromNode(maxArg));
+                }
+            }
+            if (result == null) {
+                throw new IllegalArgumentException();
+            }
+            return result;
+        } catch (Exception e) {
+            throw new YangParseException(ctx.getStart().getLine(),
+                    "Failed to parse max-elements.", e);
         }
     }
 
@@ -1278,8 +1320,12 @@ public final class YangModelBuilderUtil {
 
     /**
      * Parse refine statement.
-     * @param refineCtx refine statement
-     * @return
+     *
+     * @param refineCtx
+     *            refine statement
+     * @param line
+     *            current line in yang model
+     * @return RefineHolder object representing this refine statement
      */
     public static RefineHolder parseRefine(Refine_stmtContext refineCtx) {
         final String refineTarget = stringFromNode(refineCtx);
@@ -1290,6 +1336,8 @@ public final class YangModelBuilderUtil {
             if (refinePom instanceof Refine_pomContext) {
                 for (int k = 0; k < refinePom.getChildCount(); k++) {
                     ParseTree refineStmt = refinePom.getChild(k);
+                    parseRefineDefault(refine, refineStmt);
+
                     if (refineStmt instanceof Refine_leaf_stmtsContext) {
                         parseRefine(refine,
                                 (Refine_leaf_stmtsContext) refineStmt);
@@ -1313,6 +1361,23 @@ public final class YangModelBuilderUtil {
             }
         }
         return refine;
+    }
+
+    private static void parseRefineDefault(RefineHolder refine,
+            ParseTree refineStmt) {
+        for (int i = 0; i < refineStmt.getChildCount(); i++) {
+            ParseTree refineArg = refineStmt.getChild(i);
+            if (refineArg instanceof Description_stmtContext) {
+                String description = stringFromNode(refineArg);
+                refine.setDescription(description);
+            } else if (refineArg instanceof Reference_stmtContext) {
+                String reference = stringFromNode(refineArg);
+                refine.setReference(reference);
+            } else if (refineArg instanceof Config_stmtContext) {
+                boolean config = parseConfig((Config_stmtContext) refineArg);
+                refine.setConfig(config);
+            }
+        }
     }
 
     private static RefineHolder parseRefine(RefineHolder refine,
@@ -1362,10 +1427,10 @@ public final class YangModelBuilderUtil {
                 MustDefinition must = parseMust((Must_stmtContext) refineArg);
                 refine.setMust(must);
             } else if (refineArg instanceof Max_elements_stmtContext) {
-                Integer max = Integer.valueOf(stringFromNode(refineArg));
-                refine.setMinElements(max);
+                Integer max = parseMaxElements((Max_elements_stmtContext) refineArg);
+                refine.setMaxElements(max);
             } else if (refineArg instanceof Min_elements_stmtContext) {
-                Integer min = Integer.valueOf(stringFromNode(refineArg));
+                Integer min = parseMinElements((Min_elements_stmtContext) refineArg);
                 refine.setMinElements(min);
             }
         }
@@ -1380,10 +1445,10 @@ public final class YangModelBuilderUtil {
                 MustDefinition must = parseMust((Must_stmtContext) refineArg);
                 refine.setMust(must);
             } else if (refineArg instanceof Max_elements_stmtContext) {
-                Integer max = Integer.valueOf(stringFromNode(refineArg));
-                refine.setMinElements(max);
+                Integer max = parseMaxElements((Max_elements_stmtContext) refineArg);
+                refine.setMaxElements(max);
             } else if (refineArg instanceof Min_elements_stmtContext) {
-                Integer min = Integer.valueOf(stringFromNode(refineArg));
+                Integer min = parseMinElements((Min_elements_stmtContext) refineArg);
                 refine.setMinElements(min);
             }
         }

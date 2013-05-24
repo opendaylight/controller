@@ -24,6 +24,7 @@ import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 
 public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements
         DataSchemaNodeBuilder, SchemaNodeBuilder {
+    private boolean built;
     private final LeafSchemaNodeImpl instance;
     private final int line;
     // SchemaNode args
@@ -50,30 +51,33 @@ public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public LeafSchemaNode build() {
-        instance.setPath(path);
-        instance.setConstraints(constraints.build());
-        instance.setDescription(description);
-        instance.setReference(reference);
-        instance.setStatus(status);
+        if(!built) {
+            instance.setPath(path);
+            instance.setConstraints(constraints.build());
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
+            instance.setAugmenting(augmenting);
+            instance.setConfiguration(configuration);
+            instance.setDefault(defaultStr);
+            instance.setUnits(unitsStr);
 
-        // TYPE
-        if (type == null) {
-            instance.setType(typedef.build());
-        } else {
-            instance.setType(type);
+            // TYPE
+            if (type == null) {
+                instance.setType(typedef.build());
+            } else {
+                instance.setType(type);
+            }
+
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
+            instance.setUnknownSchemaNodes(unknownNodes);
+
+            built = true;
         }
-
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
-        }
-        instance.setUnknownSchemaNodes(unknownNodes);
-
-        instance.setAugmenting(augmenting);
-        instance.setConfiguration(configuration);
-        instance.setDefault(defaultStr);
-        instance.setUnits(unitsStr);
         return instance;
     }
 
@@ -147,6 +151,8 @@ public class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements
     public void setAugmenting(final boolean augmenting) {
         this.augmenting = augmenting;
     }
+
+
 
     public boolean isConfiguration() {
         return configuration;

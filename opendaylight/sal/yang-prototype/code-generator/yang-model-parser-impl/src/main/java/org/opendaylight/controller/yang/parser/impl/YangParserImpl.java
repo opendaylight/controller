@@ -12,7 +12,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -34,13 +33,8 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.opendaylight.controller.antlrv4.code.gen.YangLexer;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.DataSchemaNode;
-import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.ModuleImport;
-import org.opendaylight.controller.yang.model.api.MustDefinition;
-import org.opendaylight.controller.yang.model.api.NotificationDefinition;
-import org.opendaylight.controller.yang.model.api.RpcDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
@@ -123,7 +117,8 @@ public class YangParserImpl implements YangModelParser {
 
     private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
             final List<InputStream> yangFileStreams) {
-        //Linked Hash Map MUST be used because Linked Hash Map preserves ORDER of items stored in map.
+        // Linked Hash Map MUST be used because Linked Hash Map preserves ORDER
+        // of items stored in map.
         final Map<String, TreeMap<Date, ModuleBuilder>> modules = new LinkedHashMap<String, TreeMap<Date, ModuleBuilder>>();
         final ParseTreeWalker walker = new ParseTreeWalker();
         final List<ParseTree> trees = parseStreams(yangFileStreams);
@@ -141,7 +136,7 @@ public class YangParserImpl implements YangModelParser {
 
         // module dependency graph sorted
         List<ModuleBuilder> sorted = ModuleDependencySort.sort(builders);
-        
+
         for (ModuleBuilder builder : sorted) {
             final String builderName = builder.getName();
             Date builderRevision = builder.getRevision();
@@ -195,7 +190,8 @@ public class YangParserImpl implements YangModelParser {
         resolveAugments(modules);
 
         // build
-        // Linked Hash Set MUST be used otherwise the Set will not maintain order!
+        // Linked Hash Set MUST be used otherwise the Set will not maintain
+        // order!
         // http://docs.oracle.com/javase/6/docs/api/java/util/LinkedHashSet.html
         final Set<Module> result = new LinkedHashSet<Module>();
         for (Map.Entry<String, TreeMap<Date, ModuleBuilder>> entry : modules
@@ -224,7 +220,7 @@ public class YangParserImpl implements YangModelParser {
     /**
      * Search for dirty nodes (node which contains UnknownType) and resolve
      * unknown types.
-     * 
+     *
      * @param modules
      *            all available modules
      * @param module
@@ -544,38 +540,36 @@ public class YangParserImpl implements YangModelParser {
     }
 
     /**
-     * Go through all typedef statements from given module and search for one
-     * with given name
-     * 
-     * @param typedefs
-     *            typedef statements to search
+     * Search for type definition builder by name.
+     *
+     * @param dependentModule
+     *            module to search
      * @param name
-     *            name of searched typedef
-     * @return typedef with name equals to given name
+     *            name of type definition
+     * @param currentModuleName
+     *            current module name
+     * @param line
+     *            current line in yang model
+     * @return
      */
     private TypeDefinitionBuilder findTypedefBuilderByName(
             final ModuleBuilder dependentModule, final String name,
             final String currentModuleName, final int line) {
-        TypeDefinitionBuilder result = null;
         final Set<TypeDefinitionBuilder> typedefs = dependentModule
                 .getModuleTypedefs();
         for (TypeDefinitionBuilder td : typedefs) {
             if (td.getQName().getLocalName().equals(name)) {
-                result = td;
-                break;
+                return td;
             }
         }
-        if (result == null) {
-            throw new YangParseException(currentModuleName, line,
-                    "Target module '" + dependentModule.getName()
-                            + "' does not contain typedef '" + name + "'.");
-        }
-        return result;
+        throw new YangParseException(currentModuleName, line, "Target module '"
+                + dependentModule.getName() + "' does not contain typedef '"
+                + name + "'.");
     }
 
     /**
      * Pull restriction from referenced type and add them to given constraints
-     * 
+     *
      * @param referencedType
      * @param constraints
      */
@@ -603,9 +597,9 @@ public class YangParserImpl implements YangModelParser {
     }
 
     /**
-     * Go through all augmentation definitions and resolve them. This method
-     * also finds referenced node and add child nodes to it.
-     * 
+     * Go through all augment definitions and resolve them. This method also
+     * finds augment target node and add child nodes to it.
+     *
      * @param modules
      *            all available modules
      */
@@ -648,7 +642,7 @@ public class YangParserImpl implements YangModelParser {
     }
 
     /**
-     * 
+     *
      * @param modules
      *            all available modules
      * @param module
@@ -666,8 +660,7 @@ public class YangParserImpl implements YangModelParser {
                             .getTargetPath();
                     final List<QName> path = augmentTargetSchemaPath.getPath();
 
-                    int i = 0;
-                    final QName qname = path.get(i);
+                    final QName qname = path.get(0);
                     String prefix = qname.getPrefix();
                     if (prefix == null) {
                         prefix = module.getPrefix();
@@ -682,12 +675,11 @@ public class YangParserImpl implements YangModelParser {
                         if (childQName.getLocalName().equals(
                                 qname.getLocalName())) {
                             currentParent = child;
-                            i++;
                             break;
                         }
                     }
 
-                    for (; i < path.size(); i++) {
+                    for (int i = 1; i < path.size(); i++) {
                         final QName currentQName = path.get(i);
                         DataSchemaNodeBuilder newParent = null;
                         for (DataSchemaNodeBuilder child : ((ChildNodeBuilder) currentParent)
@@ -730,7 +722,7 @@ public class YangParserImpl implements YangModelParser {
     /**
      * Go through identity statements defined in current module and resolve
      * their 'base' statement if present.
-     * 
+     *
      * @param modules
      *            all modules
      * @param module
@@ -772,7 +764,7 @@ public class YangParserImpl implements YangModelParser {
     /**
      * Go through uses statements defined in current module and resolve their
      * refine statements.
-     * 
+     *
      * @param modules
      *            all modules
      * @param module
@@ -787,120 +779,52 @@ public class YangParserImpl implements YangModelParser {
                 .entrySet()) {
             final List<String> key = entry.getKey();
             final UsesNodeBuilder usesNode = entry.getValue();
+            final int line = usesNode.getLine();
 
             final String groupingName = key.get(key.size() - 1);
 
             for (RefineHolder refine : usesNode.getRefines()) {
-                // refine statements
-                final String defaultStr = refine.getDefaultStr();
-                final Boolean mandatory = refine.isMandatory();
-                final MustDefinition must = refine.getMust();
-                final Boolean presence = refine.isPresence();
-                final Integer min = refine.getMinElements();
-                final Integer max = refine.getMaxElements();
-                final List<UnknownSchemaNodeBuilder> unknownNodes = refine
-                        .getUnknownNodes();
-
-                Builder refineTarget = getRefineTargetBuilder(groupingName,
+                Builder refineTarget = getRefineNodeBuilderCopy(groupingName,
                         refine, modules, module);
+                ParserUtils.refineDefault(refineTarget, refine, line);
                 if (refineTarget instanceof LeafSchemaNodeBuilder) {
                     final LeafSchemaNodeBuilder leaf = (LeafSchemaNodeBuilder) refineTarget;
-                    if (defaultStr != null && !("".equals(defaultStr))) {
-                        leaf.setDefaultStr(defaultStr);
-                    }
-                    if (mandatory != null) {
-                        leaf.getConstraints().setMandatory(mandatory);
-                    }
-                    if (must != null) {
-                        leaf.getConstraints().addMustDefinition(must);
-                    }
-                    if (unknownNodes != null) {
-                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
-                            leaf.addUnknownSchemaNode(unknown);
-                        }
-                    }
+                    ParserUtils.refineLeaf(leaf, refine, line);
                     usesNode.addRefineNode(leaf);
                 } else if (refineTarget instanceof ContainerSchemaNodeBuilder) {
                     final ContainerSchemaNodeBuilder container = (ContainerSchemaNodeBuilder) refineTarget;
-                    if (presence != null) {
-                        container.setPresence(presence);
-                    }
-                    if (must != null) {
-                        container.getConstraints().addMustDefinition(must);
-                    }
-                    if (unknownNodes != null) {
-                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
-                            container.addUnknownSchemaNode(unknown);
-                        }
-                    }
+                    ParserUtils.refineContainer(container, refine, line);
                     usesNode.addRefineNode(container);
                 } else if (refineTarget instanceof ListSchemaNodeBuilder) {
                     final ListSchemaNodeBuilder list = (ListSchemaNodeBuilder) refineTarget;
-                    if (must != null) {
-                        list.getConstraints().addMustDefinition(must);
-                    }
-                    if (min != null) {
-                        list.getConstraints().setMinElements(min);
-                    }
-                    if (max != null) {
-                        list.getConstraints().setMaxElements(max);
-                    }
-                    if (unknownNodes != null) {
-                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
-                            list.addUnknownSchemaNode(unknown);
-                        }
-                    }
+                    ParserUtils.refineList(list, refine, line);
+                    usesNode.addRefineNode(list);
                 } else if (refineTarget instanceof LeafListSchemaNodeBuilder) {
-                    final LeafListSchemaNodeBuilder leafList = (LeafListSchemaNodeBuilder) getRefineTargetBuilder(
+                    final LeafListSchemaNodeBuilder leafList = (LeafListSchemaNodeBuilder) getRefineNodeBuilderCopy(
                             groupingName, refine, modules, module);
-                    if (must != null) {
-                        leafList.getConstraints().addMustDefinition(must);
-                    }
-                    if (min != null) {
-                        leafList.getConstraints().setMinElements(min);
-                    }
-                    if (max != null) {
-                        leafList.getConstraints().setMaxElements(max);
-                    }
-                    if (unknownNodes != null) {
-                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
-                            leafList.addUnknownSchemaNode(unknown);
-                        }
-                    }
+                    ParserUtils.refineLeafList(leafList, refine, line);
+                    usesNode.addRefineNode(leafList);
                 } else if (refineTarget instanceof ChoiceBuilder) {
                     final ChoiceBuilder choice = (ChoiceBuilder) refineTarget;
-                    if (defaultStr != null) {
-                        choice.setDefaultCase(defaultStr);
-                    }
-                    if (mandatory != null) {
-                        choice.getConstraints().setMandatory(mandatory);
-                    }
-                    if (unknownNodes != null) {
-                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
-                            choice.addUnknownSchemaNode(unknown);
-                        }
-                    }
+                    ParserUtils.refineChoice(choice, refine, line);
+                    usesNode.addRefineNode(choice);
                 } else if (refineTarget instanceof AnyXmlBuilder) {
                     final AnyXmlBuilder anyXml = (AnyXmlBuilder) refineTarget;
-                    if (mandatory != null) {
-                        anyXml.getConstraints().setMandatory(mandatory);
-                    }
-                    if (must != null) {
-                        anyXml.getConstraints().addMustDefinition(must);
-                    }
-                    if (unknownNodes != null) {
-                        for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
-                            anyXml.addUnknownSchemaNode(unknown);
-                        }
-                    }
+                    ParserUtils.refineAnyxml(anyXml, refine, line);
+                    usesNode.addRefineNode(anyXml);
                 }
             }
         }
     }
 
     /**
-     * Find original builder of refine node and return copy of this builder.
-     * 
+     * Find original builder of node to refine and return copy of this builder.
+     * <p>
+     * We must make a copy of builder to preserve original builder, because this
+     * object will be refined (modified) and later added to
+     * {@link UsesNodeBuilder}.
+     * </p>
+     *
      * @param groupingPath
      *            path to grouping which contains node to refine
      * @param refine
@@ -909,10 +833,10 @@ public class YangParserImpl implements YangModelParser {
      *            all loaded modules
      * @param module
      *            current module
-     * @return copy of Builder object of node to be refined if it is present in
-     *         grouping, null otherwise
+     * @return copy of node to be refined if it is present in grouping, null
+     *         otherwise
      */
-    private Builder getRefineTargetBuilder(final String groupingPath,
+    private Builder getRefineNodeBuilderCopy(final String groupingPath,
             final RefineHolder refine,
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module) {
@@ -946,7 +870,7 @@ public class YangParserImpl implements YangModelParser {
 
     /**
      * Find builder of refine node.
-     * 
+     *
      * @param groupingPath
      *            path to grouping which contains node to refine
      * @param refineNodeName
@@ -1033,7 +957,7 @@ public class YangParserImpl implements YangModelParser {
 
     /**
      * Find dependent module based on given prefix
-     * 
+     *
      * @param modules
      *            all available modules
      * @param module
@@ -1084,84 +1008,6 @@ public class YangParserImpl implements YangModelParser {
                             + "'.");
         }
         return dependentModule;
-    }
-
-    private static class SchemaContextImpl implements SchemaContext {
-        private final Set<Module> modules;
-
-        private SchemaContextImpl(final Set<Module> modules) {
-            this.modules = modules;
-        }
-
-        @Override
-        public Set<DataSchemaNode> getDataDefinitions() {
-            final Set<DataSchemaNode> dataDefs = new HashSet<DataSchemaNode>();
-            for (Module m : modules) {
-                dataDefs.addAll(m.getChildNodes());
-            }
-            return dataDefs;
-        }
-
-        @Override
-        public Set<Module> getModules() {
-            return modules;
-        }
-
-        @Override
-        public Set<NotificationDefinition> getNotifications() {
-            final Set<NotificationDefinition> notifications = new HashSet<NotificationDefinition>();
-            for (Module m : modules) {
-                notifications.addAll(m.getNotifications());
-            }
-            return notifications;
-        }
-
-        @Override
-        public Set<RpcDefinition> getOperations() {
-            final Set<RpcDefinition> rpcs = new HashSet<RpcDefinition>();
-            for (Module m : modules) {
-                rpcs.addAll(m.getRpcs());
-            }
-            return rpcs;
-        }
-
-        @Override
-        public Set<ExtensionDefinition> getExtensions() {
-            final Set<ExtensionDefinition> extensions = new HashSet<ExtensionDefinition>();
-            for (Module m : modules) {
-                extensions.addAll(m.getExtensionSchemaNodes());
-            }
-            return extensions;
-        }
-
-        @Override
-        public Module findModuleByName(final String name, final Date revision) {
-            if (name != null) {
-                for (final Module module : modules) {
-                    if (revision == null) {
-                        if (module.getName().equals(name)) {
-                            return module;
-                        }
-                    } else if (module.getName().equals(name)
-                            && module.getRevision().equals(revision)) {
-                        return module;
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public Module findModuleByNamespace(final URI namespace) {
-            if (namespace != null) {
-                for (final Module module : modules) {
-                    if (module.getNamespace().equals(namespace)) {
-                        return module;
-                    }
-                }
-            }
-            return null;
-        }
     }
 
 }

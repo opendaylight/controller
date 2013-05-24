@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.parser.util;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.ChildNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
@@ -103,17 +105,202 @@ public final class ParserUtils {
 
     private static void correctPath(final ChildNodeBuilder node,
             final SchemaPath parentSchemaPath) {
-        for(DataSchemaNodeBuilder builder : node.getChildNodes()) {
+        for (DataSchemaNodeBuilder builder : node.getChildNodes()) {
 
             // add correct path
             SchemaPath targetNodeSchemaPath = parentSchemaPath;
-            List<QName> targetNodePath = new ArrayList<QName>(targetNodeSchemaPath.getPath());
+            List<QName> targetNodePath = new ArrayList<QName>(
+                    targetNodeSchemaPath.getPath());
             targetNodePath.add(builder.getQName());
             builder.setPath(new SchemaPath(targetNodePath, true));
 
-            if(builder instanceof ChildNodeBuilder) {
-                ChildNodeBuilder cnb = (ChildNodeBuilder)builder;
+            if (builder instanceof ChildNodeBuilder) {
+                ChildNodeBuilder cnb = (ChildNodeBuilder) builder;
                 correctPath(cnb, builder.getPath());
+            }
+        }
+    }
+
+    public static void refineLeaf(LeafSchemaNodeBuilder leaf,
+            RefineHolder refine, int line) {
+        String defaultStr = refine.getDefaultStr();
+        Boolean mandatory = refine.isMandatory();
+        MustDefinition must = refine.getMust();
+        List<UnknownSchemaNodeBuilder> unknownNodes = refine.getUnknownNodes();
+
+        if (defaultStr != null && !("".equals(defaultStr))) {
+            leaf.setDefaultStr(defaultStr);
+        }
+        if (mandatory != null) {
+            leaf.getConstraints().setMandatory(mandatory);
+        }
+        if (must != null) {
+            leaf.getConstraints().addMustDefinition(must);
+        }
+        if (unknownNodes != null) {
+            for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                leaf.addUnknownSchemaNode(unknown);
+            }
+        }
+    }
+
+    public static void refineContainer(ContainerSchemaNodeBuilder container,
+            RefineHolder refine, int line) {
+        Boolean presence = refine.isPresence();
+        MustDefinition must = refine.getMust();
+        List<UnknownSchemaNodeBuilder> unknownNodes = refine.getUnknownNodes();
+
+        if (presence != null) {
+            container.setPresence(presence);
+        }
+        if (must != null) {
+            container.getConstraints().addMustDefinition(must);
+        }
+        if (unknownNodes != null) {
+            for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                container.addUnknownSchemaNode(unknown);
+            }
+        }
+    }
+
+    public static void refineList(ListSchemaNodeBuilder list,
+            RefineHolder refine, int line) {
+        MustDefinition must = refine.getMust();
+        Integer min = refine.getMinElements();
+        Integer max = refine.getMaxElements();
+        List<UnknownSchemaNodeBuilder> unknownNodes = refine.getUnknownNodes();
+
+        if (must != null) {
+            list.getConstraints().addMustDefinition(must);
+        }
+        if (min != null) {
+            list.getConstraints().setMinElements(min);
+        }
+        if (max != null) {
+            list.getConstraints().setMaxElements(max);
+        }
+        if (unknownNodes != null) {
+            for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                list.addUnknownSchemaNode(unknown);
+            }
+        }
+    }
+
+    public static void refineLeafList(LeafListSchemaNodeBuilder leafList,
+            RefineHolder refine, int line) {
+        MustDefinition must = refine.getMust();
+        Integer min = refine.getMinElements();
+        Integer max = refine.getMaxElements();
+        List<UnknownSchemaNodeBuilder> unknownNodes = refine.getUnknownNodes();
+
+        if (must != null) {
+            leafList.getConstraints().addMustDefinition(must);
+        }
+        if (min != null) {
+            leafList.getConstraints().setMinElements(min);
+        }
+        if (max != null) {
+            leafList.getConstraints().setMaxElements(max);
+        }
+        if (unknownNodes != null) {
+            for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                leafList.addUnknownSchemaNode(unknown);
+            }
+        }
+    }
+
+    public static void refineChoice(ChoiceBuilder choice, RefineHolder refine,
+            int line) {
+        String defaultStr = refine.getDefaultStr();
+        Boolean mandatory = refine.isMandatory();
+        List<UnknownSchemaNodeBuilder> unknownNodes = refine.getUnknownNodes();
+
+        if (defaultStr != null) {
+            choice.setDefaultCase(defaultStr);
+        }
+        if (mandatory != null) {
+            choice.getConstraints().setMandatory(mandatory);
+        }
+        if (unknownNodes != null) {
+            for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                choice.addUnknownSchemaNode(unknown);
+            }
+        }
+    }
+
+    public static void refineAnyxml(AnyXmlBuilder anyXml, RefineHolder refine,
+            int line) {
+        Boolean mandatory = refine.isMandatory();
+        MustDefinition must = refine.getMust();
+        List<UnknownSchemaNodeBuilder> unknownNodes = refine.getUnknownNodes();
+
+        if (mandatory != null) {
+            anyXml.getConstraints().setMandatory(mandatory);
+        }
+        if (must != null) {
+            anyXml.getConstraints().addMustDefinition(must);
+        }
+        if (unknownNodes != null) {
+            for (UnknownSchemaNodeBuilder unknown : unknownNodes) {
+                anyXml.addUnknownSchemaNode(unknown);
+            }
+        }
+    }
+
+    /**
+     * Perform refine operation of following parameters:
+     * <ul>
+     * <li>description</li>
+     * <li>reference</li>
+     * <li>config</li>
+     * </ul>
+     *
+     * These parameters may be refined for any node.
+     *
+     * @param node
+     *            node to refine
+     * @param refine
+     *            refine holder containing values to refine
+     * @param line
+     *            current line in yang model
+     */
+    public static void refineDefault(Builder node, RefineHolder refine,
+            int line) {
+        Class<? extends Builder> cls = node.getClass();
+
+        String description = refine.getDescription();
+        if (description != null) {
+            try {
+                Method method = cls.getDeclaredMethod("setDescription",
+                        String.class);
+                method.invoke(node, description);
+            } catch (Exception e) {
+                throw new YangParseException(line,
+                        "Cannot refine description in " + cls.getName(), e);
+            }
+        }
+
+        String reference = refine.getReference();
+        if (reference != null) {
+            try {
+                Method method = cls.getDeclaredMethod("setReference",
+                        String.class);
+                method.invoke(node, reference);
+            } catch (Exception e) {
+                throw new YangParseException(line,
+                        "Cannot refine reference in " + cls.getName(), e);
+            }
+        }
+
+        Boolean config = refine.isConfig();
+        if (config != null) {
+            try {
+                Method method = cls.getDeclaredMethod("setConfiguration",
+                        Boolean.TYPE);
+                method.invoke(node, config);
+            } catch (Exception e) {
+                throw new YangParseException(line, "Cannot refine config in "
+                        + cls.getName(), e);
             }
         }
     }
@@ -244,7 +431,8 @@ public final class ParserUtils {
     }
 
     public static ChoiceBuilder copyChoiceBuilder(final ChoiceBuilder old) {
-        final ChoiceBuilder copy = new ChoiceBuilder(old.getQName(), old.getLine());
+        final ChoiceBuilder copy = new ChoiceBuilder(old.getQName(),
+                old.getLine());
         copy.setPath(old.getPath());
         copyConstraints(old, copy);
         for (ChoiceCaseBuilder caseBuilder : old.getCases()) {
@@ -272,7 +460,8 @@ public final class ParserUtils {
     }
 
     public static AnyXmlBuilder copyAnyXmlBuilder(final AnyXmlBuilder old) {
-        final AnyXmlBuilder copy = new AnyXmlBuilder(old.getQName(), old.getLine());
+        final AnyXmlBuilder copy = new AnyXmlBuilder(old.getQName(),
+                old.getLine());
         copy.setPath(old.getPath());
         copyConstraints(old, copy);
         for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {

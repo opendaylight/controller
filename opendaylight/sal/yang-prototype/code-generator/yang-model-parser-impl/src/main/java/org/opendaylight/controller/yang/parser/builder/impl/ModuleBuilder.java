@@ -555,7 +555,7 @@ public class ModuleBuilder implements Builder {
                 .get(pathToAnyXml);
         if (parent != null) {
             if (parent instanceof AugmentationSchemaBuilder) {
-                throw new UnsupportedOperationException(
+                throw new YangParseException(
                         "An anyxml node cannot be augmented.");
             }
             parent.addChildNode(builder);
@@ -646,9 +646,11 @@ public class ModuleBuilder implements Builder {
         Builder builder = moduleNodes.get(parentPath);
         // current api did not support adding config to deviate
         if (!(builder instanceof DeviationBuilder)) {
-            DataSchemaNodeBuilder configBuilder = (DataSchemaNodeBuilder) moduleNodes
-                    .get(parentPath);
-            configBuilder.setConfiguration(configuration);
+            if(builder instanceof RefineHolder) {
+                ((RefineHolder)builder).setConfig(configuration);
+            } else {
+                ((DataSchemaNodeBuilder)builder).setConfiguration(configuration);
+            }
         }
     }
 

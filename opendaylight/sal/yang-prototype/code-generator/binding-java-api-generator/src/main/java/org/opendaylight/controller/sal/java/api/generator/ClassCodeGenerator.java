@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.sal.java.api.generator;
 
-import static org.opendaylight.controller.sal.java.api.generator.Constants.NL;
-import static org.opendaylight.controller.sal.java.api.generator.Constants.RCB;
-import static org.opendaylight.controller.sal.java.api.generator.Constants.TAB;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
@@ -23,52 +23,70 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 
 public class ClassCodeGenerator implements CodeGenerator {
 
+    private Map<String, LinkedHashMap<String, Integer>> imports;
+
     @Override
     public Writer generate(Type type) throws IOException {
         final Writer writer = new StringWriter();
         if (type instanceof GeneratedTransferObject) {
             GeneratedTransferObject genTO = (GeneratedTransferObject) type;
+            imports = GeneratorUtil.createImports(genTO);
+
+            final String currentPkg = genTO.getPackageName();
             final List<GeneratedProperty> fields = genTO.getProperties();
 
-            writer.write(GeneratorUtil.createClassDeclarationWithPkgName(genTO,
-                    ""));
+            writer.write(GeneratorUtil.createPackageDeclaration(currentPkg));
+            writer.write(NL);
+
+            List<String> importLines = GeneratorUtil.createImportLines(imports);
+            for (String line : importLines) {
+                writer.write(line + NL);
+            }
+            writer.write(NL);
+
+            writer.write(GeneratorUtil.createClassDeclaration(genTO, "",
+                    imports));
             writer.write(NL);
             writer.write(NL);
 
             if (fields != null) {
                 for (GeneratedProperty field : fields) {
-                    writer.write(GeneratorUtil.createField(field, TAB) + NL);
+                    writer.write(GeneratorUtil.createField(field, TAB, imports,
+                            currentPkg) + NL);
                 }
                 writer.write(NL);
-                writer.write(GeneratorUtil.createConstructor(genTO, TAB) + NL);
+                writer.write(GeneratorUtil.createConstructor(genTO, TAB,
+                        imports) + NL);
                 writer.write(NL);
                 for (GeneratedProperty field : fields) {
-                    writer.write(GeneratorUtil.createGetter(field, TAB) + NL);
+                    writer.write(GeneratorUtil.createGetter(field, TAB,
+                            imports, currentPkg) + NL);
                     if (!field.isReadOnly()) {
-                        writer.write(GeneratorUtil.createSetter(field, TAB) + NL);
+                        writer.write(GeneratorUtil.createSetter(field, TAB,
+                                imports, currentPkg) + NL);
                     }
                 }
                 writer.write(NL);
-                
+
                 if (!genTO.getHashCodeIdentifiers().isEmpty()) {
                     writer.write(GeneratorUtil.createHashCode(
                             genTO.getHashCodeIdentifiers(), TAB)
                             + NL);
                 }
-                
+
                 if (!genTO.getEqualsIdentifiers().isEmpty()) {
                     writer.write(GeneratorUtil.createEquals(genTO,
                             genTO.getEqualsIdentifiers(), TAB)
                             + NL);
                 }
-                
+
                 if (!genTO.getToStringIdentifiers().isEmpty()) {
                     writer.write(GeneratorUtil.createToString(genTO,
                             genTO.getToStringIdentifiers(), TAB)
                             + NL);
 
                 }
-                
+
                 writer.write(RCB);
             }
         }

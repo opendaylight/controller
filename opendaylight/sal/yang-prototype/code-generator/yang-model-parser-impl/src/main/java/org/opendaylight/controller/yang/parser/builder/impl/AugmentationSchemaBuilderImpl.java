@@ -29,8 +29,10 @@ import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder {
+    private boolean built;
     private final AugmentationSchemaImpl instance;
     private final int line;
     private final String augmentTargetStr;
@@ -94,37 +96,40 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
 
     @Override
     public AugmentationSchema build() {
-        instance.setTargetPath(finalAugmentTarget);
+        if (!built) {
+            instance.setTargetPath(finalAugmentTarget);
 
-        RevisionAwareXPath whenStmt;
-        if (whenCondition == null) {
-            whenStmt = null;
-        } else {
-            whenStmt = new RevisionAwareXPathImpl(whenCondition, false);
+            RevisionAwareXPath whenStmt;
+            if (whenCondition == null) {
+                whenStmt = null;
+            } else {
+                whenStmt = new RevisionAwareXPathImpl(whenCondition, false);
+            }
+            instance.setWhenCondition(whenStmt);
+
+            // CHILD NODES
+            final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+            for (DataSchemaNodeBuilder node : childNodes) {
+                childs.put(node.getQName(), node.build());
+            }
+            instance.setChildNodes(childs);
+
+            // GROUPINGS
+            final Set<GroupingDefinition> groupingDefinitions = new HashSet<GroupingDefinition>();
+            for (GroupingBuilder builder : groupings) {
+                groupingDefinitions.add(builder.build());
+            }
+            instance.setGroupings(groupingDefinitions);
+
+            // USES
+            final Set<UsesNode> usesNodeDefinitions = new HashSet<UsesNode>();
+            for (UsesNodeBuilder builder : usesNodes) {
+                usesNodeDefinitions.add(builder.build());
+            }
+            instance.setUses(usesNodeDefinitions);
+
+            built = true;
         }
-        instance.setWhenCondition(whenStmt);
-
-        // CHILD NODES
-        final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
-        for (DataSchemaNodeBuilder node : childNodes) {
-            childs.put(node.getQName(), node.build());
-        }
-        instance.setChildNodes(childs);
-
-        // GROUPINGS
-        final Set<GroupingDefinition> groupingDefinitions = new HashSet<GroupingDefinition>();
-        for (GroupingBuilder builder : groupings) {
-            groupingDefinitions.add(builder.build());
-        }
-        instance.setGroupings(groupingDefinitions);
-
-        // USES
-        final Set<UsesNode> usesNodeDefinitions = new HashSet<UsesNode>();
-        for (UsesNodeBuilder builder : usesNodes) {
-            usesNodeDefinitions.add(builder.build());
-        }
-        instance.setUses(usesNodeDefinitions);
-
         return instance;
     }
 
@@ -148,7 +153,7 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
 
     @Override
     public void addTypedef(TypeDefinitionBuilder type) {
-        throw new UnsupportedOperationException(
+        throw new YangParseException(line,
                 "Augmentation can not contains type definitions");
     }
 
@@ -186,7 +191,8 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
     public int hashCode() {
         final int prime = 17;
         int result = 1;
-        result = prime * result
+        result = prime
+                * result
                 + ((augmentTargetStr == null) ? 0 : augmentTargetStr.hashCode());
         result = prime * result
                 + ((whenCondition == null) ? 0 : whenCondition.hashCode());
@@ -231,8 +237,7 @@ public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder 
         return true;
     }
 
-
-    private static class AugmentationSchemaImpl implements AugmentationSchema {
+    private final class AugmentationSchemaImpl implements AugmentationSchema {
         private SchemaPath targetPath;
         private RevisionAwareXPath whenCondition;
         private Map<QName, DataSchemaNode> childNodes = Collections.emptyMap();
