@@ -9,6 +9,7 @@ package org.opendaylight.controller.yang2sources.spi;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Set;
 
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 
@@ -16,7 +17,7 @@ public class CodeGeneratorTestImpl implements CodeGenerator {
 
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir) {
+            File outputBaseDir, Set<String> yangModulesNames) {
         // no-op
         return null;
     }
