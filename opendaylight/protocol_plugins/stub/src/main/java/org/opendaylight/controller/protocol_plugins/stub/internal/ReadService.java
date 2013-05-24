@@ -12,7 +12,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.action.Flood;
+import org.opendaylight.controller.sal.action.FloodAll;
+import org.opendaylight.controller.sal.action.HwPath;
+import org.opendaylight.controller.sal.action.Loopback;
+import org.opendaylight.controller.sal.action.Output;
+import org.opendaylight.controller.sal.action.PopVlan;
+import org.opendaylight.controller.sal.action.PushVlan;
+import org.opendaylight.controller.sal.action.SetDlDst;
+import org.opendaylight.controller.sal.action.SetDlSrc;
+import org.opendaylight.controller.sal.action.SetDlType;
+import org.opendaylight.controller.sal.action.SetNwDst;
+import org.opendaylight.controller.sal.action.SetNwSrc;
+import org.opendaylight.controller.sal.action.SetNwTos;
+import org.opendaylight.controller.sal.action.SetTpDst;
+import org.opendaylight.controller.sal.action.SetTpSrc;
+import org.opendaylight.controller.sal.action.SetVlanCfi;
+import org.opendaylight.controller.sal.action.SetVlanId;
+import org.opendaylight.controller.sal.action.SetVlanPcp;
+import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -80,34 +100,71 @@ public class ReadService implements IPluginInReadService {
 
     @Override
     public List<FlowOnNode> readAllFlow(Node node, boolean cached) {
-        Flow flow = new Flow();
 
-        Match match = new Match();
+        ArrayList<FlowOnNode> list = new ArrayList<FlowOnNode>();
+        ArrayList<Action> actionList = new ArrayList<Action>();
+        actionList.add(new Drop());
+        actionList.add(new Loopback());
+        actionList.add(new Flood());
+        actionList.add(new FloodAll());
+        actionList.add(new Controller());
+        actionList.add(new SwPath());
+        actionList.add(new HwPath());
         try {
-            match.setField(MatchType.NW_DST, InetAddress.getByName("1.1.1.1"));
+            actionList.add(new Output(new NodeConnector("STUB", 0xCAFE, node)));
+        } catch (ConstructionException e) {
+
+        }
+        byte dst[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5 };
+        byte src[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1 };
+        actionList.add(new SetDlSrc(src));
+        actionList.add(new SetDlDst(dst));
+        actionList.add(new SetDlType(10));
+
+        actionList.add(new SetVlanId(2));
+        actionList.add(new SetVlanPcp(3));
+        actionList.add(new SetVlanCfi(1));
+
+        actionList.add(new PopVlan());
+        actionList.add(new PushVlan(0x8100, 1, 1, 1234));
+
+        try {
+            actionList.add(new SetNwSrc(InetAddress.getByName("2.2.2.2")));
+            actionList.add(new SetNwDst(InetAddress.getByName("1.1.1.1")));
         } catch (UnknownHostException e) {
 
         }
-        flow.setMatch(match);
-        Action action = new Drop();
+        actionList.add(new SetNwTos(0x10));
+        actionList.add(new SetTpSrc(4201));
+        actionList.add(new SetTpDst(8080));
 
-        List<Action> actions = new ArrayList<Action>();
-        actions.add(action);
-        flow.setActions(actions);
-        flow.setPriority((short)3500);
-        flow.setIdleTimeout((short)1000);
-        flow.setHardTimeout((short)2000);
-        flow.setId(12345);
-        
-        FlowOnNode fn1 = new FlowOnNode(flow);
-        fn1.setByteCount(100);
-        fn1.setDurationNanoseconds(400);
-        fn1.setDurationSeconds(40);
-        fn1.setTableId((byte) 0x1);
-        fn1.setPacketCount(200);
+        for (Action a : actionList) {
+            Flow flow = new Flow();
+            Match match = new Match();
+            try {
+                match.setField(MatchType.NW_DST,
+                        InetAddress.getByName("1.1.1.1"));
+            } catch (UnknownHostException e) {
 
-        ArrayList<FlowOnNode> list = new ArrayList<FlowOnNode>();
-        list.add(fn1);
+            }
+            flow.setMatch(match);
+            List<Action> actions = new ArrayList<Action>();
+            actions.add(a);
+            flow.setActions(actions);
+            flow.setPriority((short) 3500);
+            flow.setIdleTimeout((short) 1000);
+            flow.setHardTimeout((short) 2000);
+            flow.setId(12345);
+
+            FlowOnNode fn1 = new FlowOnNode(flow);
+            fn1.setByteCount(100);
+            fn1.setDurationNanoseconds(400);
+            fn1.setDurationSeconds(40);
+            fn1.setTableId((byte) 0x1);
+            fn1.setPacketCount(200);
+
+            list.add(fn1);
+        }
         return list;
     }
 
@@ -147,11 +204,11 @@ public class ReadService implements IPluginInReadService {
     public List<NodeConnectorStatistics> readAllNodeConnector(Node node,
             boolean cached) {
         NodeConnectorStatistics stats = new NodeConnectorStatistics();
-        try{
+        try {
             NodeConnector nc = new NodeConnector("STUB", 0xCAFE, node);
             stats.setNodeConnector(nc);
-        }catch(ConstructionException e){
-            //couldn't create nodeconnector.
+        } catch (ConstructionException e) {
+            // couldn't create nodeconnector.
         }
         stats.setCollisionCount(4);
         stats.setReceiveByteCount(1000);

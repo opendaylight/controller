@@ -247,7 +247,7 @@ public class StatisticsManagerIntegrationTest {
     public void testGetFlowsNumber() {
         try{
             Node node = new Node("STUB", 0xCAFE);
-            Assert.assertTrue(this.manager.getFlowsNumber(node) == 1);
+            Assert.assertTrue(this.manager.getFlowsNumber(node) == 21);
         }catch(ConstructionException e){
             Assert.assertTrue(false);
         }
