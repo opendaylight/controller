@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.java.api.generator.GeneratorJavaFile;
+import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang2sources.spi.CodeGenerator;
 
@@ -27,7 +28,7 @@ public class CodeGeneratorImpl implements CodeGenerator {
 
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir, Set<String> yangModulesNames) throws IOException {
+            File outputBaseDir, Set<Module> yangModules) throws IOException {
 
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
         final List<Type> types = bindingGenerator.generateTypes(context);
