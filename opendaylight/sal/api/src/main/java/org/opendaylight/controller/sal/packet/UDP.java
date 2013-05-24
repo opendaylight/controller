@@ -13,15 +13,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Class that represents the UDP datagram objects
- *
- *
  */
 
 public class UDP extends Packet {
@@ -67,7 +63,7 @@ public class UDP extends Packet {
         setChecksum((short) 0);
     }
 
-    private Map<String, byte[]> fieldValues;
+    private final Map<String, byte[]> fieldValues;
 
     /* public static Map<Short, Class<? extends Packet>> decodeMap;
 
@@ -162,15 +158,5 @@ public class UDP extends Packet {
         byte[] checksum = BitBufferHelper.toByteArray(udpChecksum);
         fieldValues.put(CHECKSUM, checksum);
         return this;
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
     }
 }

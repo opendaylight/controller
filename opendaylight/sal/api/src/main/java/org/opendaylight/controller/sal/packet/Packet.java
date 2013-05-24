@@ -8,8 +8,7 @@
 
 package org.opendaylight.controller.sal.packet;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -23,8 +22,6 @@ import org.slf4j.LoggerFactory;
  * Abstract class which represents the generic network packet object It provides
  * the basic methods which are common for all the packets, like serialize and
  * deserialize
- * 
- * 
  */
 
 public abstract class Packet {
@@ -38,6 +35,8 @@ public abstract class Packet {
     protected Packet parent;
     // The packet encapsulated by this packet
     protected Packet payload;
+    // The unparsed raw payload carried by this packet
+    protected byte[] rawPayload;
     // Bit coordinates of packet header fields
     protected Map<String, Pair<Integer, Integer>> hdrFieldCoordMap;
     // Header fields values: Map<FieldName,Value>
@@ -52,7 +51,7 @@ public abstract class Packet {
 
     public Packet(boolean writeAccess) {
         this.writeAccess = writeAccess;
-        this.corrupted = false;
+        corrupted = false;
     }
 
     public Packet getParent() {
@@ -86,43 +85,41 @@ public abstract class Packet {
      * @return Packet
      * @throws PacketException
      */
-
     public Packet deserialize(byte[] data, int bitOffset, int size)
             throws PacketException {
-        String hdrField;
-        Integer startOffset = 0, numBits = 0;
-        byte[] hdrFieldBytes;
 
+        // Deserialize the header fields one by one
+        int startOffset = 0, numBits = 0;
         for (Entry<String, Pair<Integer, Integer>> pairs : hdrFieldCoordMap
                 .entrySet()) {
-            hdrField = pairs.getKey();
+            String hdrField = pairs.getKey();
             startOffset = bitOffset + this.getfieldOffset(hdrField);
             numBits = this.getfieldnumBits(hdrField);
 
+            byte[] hdrFieldBytes = null;
             try {
                 hdrFieldBytes = BitBufferHelper.getBits(data, startOffset,
                         numBits);
             } catch (BufferException e) {
                 throw new PacketException(e.getMessage());
             }
+
             /*
              * Store the raw read value, checks the payload type and set the
              * payloadClass accordingly
              */
-            if (logger.isTraceEnabled()) {
-              logger.trace("{}: {}: {} (offset {} bitsize {})",
-                      new Object[] { this.getClass().getSimpleName(), hdrField,
-                              HexEncode.bytesToHexString(hdrFieldBytes),
-                              startOffset, numBits });
-            }
-
             this.setHeaderField(hdrField, hdrFieldBytes);
+
+            if (logger.isTraceEnabled()) {
+                logger.trace("{}: {}: {} (offset {} bitsize {})",
+                        new Object[] { this.getClass().getSimpleName(), hdrField,
+                        HexEncode.bytesToHexString(hdrFieldBytes),
+                        startOffset, numBits });
+            }
         }
 
-        postDeserializeCustomOperation(data, startOffset);
-
+        // Deserialize the payload now
         int payloadStart = startOffset + numBits;
-        // int payloadSize = size - payloadStart;
         int payloadSize = data.length * NetUtils.NumBitsInAByte - payloadStart;
 
         if (payloadClass != null) {
@@ -135,67 +132,72 @@ public abstract class Packet {
             payload.deserialize(data, payloadStart, payloadSize);
             payload.setParent(this);
         } else {
-            // For now let's discard unparsable payload
+            /*
+             *  The payload class was not set, it means no class for parsing
+             *  this payload is present. Let's store the raw payload if any.
+             */
+            int start = payloadStart / NetUtils.NumBitsInAByte;
+            int stop = start + payloadSize / NetUtils.NumBitsInAByte;
+            rawPayload = Arrays.copyOfRange(data, start, stop);
         }
+
+
+        // Take care of computation that can be done only after deserialization
+        postDeserializeCustomOperation(data, payloadStart - getHeaderSize());
+
         return this;
     }
 
     /**
-     * This method serializes the header and payload bytes from the respective
+     * This method serializes the header and payload from the respective
      * packet class, into a single stream of bytes to be sent on the wire
      * 
-     * @return byte[] - serialized bytes
+     * @return The byte array representing the serialized Packet
      * @throws PacketException
      */
-
     public byte[] serialize() throws PacketException {
-        byte[] payloadBytes = null;
-        int payloadSize = 0;
-        int headerSize = this.getHeaderSize();
-        int payloadByteOffset = headerSize / NetUtils.NumBitsInAByte;
-        int size = 0;
 
+        // Acquire or compute the serialized payload
+        byte[] payloadBytes = null;
         if (payload != null) {
             payloadBytes = payload.serialize();
-            payloadSize = payloadBytes.length * NetUtils.NumBitsInAByte;
+        } else if (rawPayload != null) {
+            payloadBytes = rawPayload;
+        }
+        int payloadSize = (payloadBytes == null) ? 0 : payloadBytes.length;
+
+        // Allocate the buffer to contain the full (header + payload) packet
+        int headerSize = this.getHeaderSize() / NetUtils.NumBitsInAByte;
+        byte packetBytes[] = new byte[headerSize + payloadSize];
+        if (payloadBytes != null) {
+            System.arraycopy(payloadBytes, 0, packetBytes, headerSize, payloadSize);
         }
 
-        size = headerSize + payloadSize;
-        int length = size / NetUtils.NumBitsInAByte;
-        byte headerBytes[] = new byte[length];
-
-        if (payload != null) {
-            System.arraycopy(payloadBytes, 0, headerBytes, payloadByteOffset,
-                    payloadBytes.length);
-        }
-
-        String field;
-        byte[] fieldBytes;
-        Integer startOffset, numBits;
-
+        // Serialize this packet header, field by field
         for (Map.Entry<String, Pair<Integer, Integer>> pairs : hdrFieldCoordMap
                 .entrySet()) {
-            field = pairs.getKey();
-            fieldBytes = hdrFieldsMap.get(field);
+            String field = pairs.getKey();
+            byte[] fieldBytes = hdrFieldsMap.get(field);
             // Let's skip optional fields when not set
             if (fieldBytes != null) {
-                startOffset = this.getfieldOffset(field);
-                numBits = this.getfieldnumBits(field);
                 try {
-                    BitBufferHelper.setBytes(headerBytes, fieldBytes,
-                            startOffset, numBits);
+                    BitBufferHelper.setBytes(packetBytes, fieldBytes,
+                            getfieldOffset(field), getfieldnumBits(field));
                 } catch (BufferException e) {
                     throw new PacketException(e.getMessage());
                 }
             }
         }
-        postSerializeCustomOperation(headerBytes);
+
+        // Perform post serialize operations (like checksum computation)
+        postSerializeCustomOperation(packetBytes);
 
         if (logger.isTraceEnabled()) {
-          logger.trace("{}: {}", this.getClass().getSimpleName(),
-                  HexEncode.bytesToHexString(headerBytes));
+            logger.trace("{}: {}", this.getClass().getSimpleName(),
+                    HexEncode.bytesToHexString(packetBytes));
         }
-        return headerBytes;
+
+        return packetBytes;
     }
 
     /**
@@ -216,15 +218,15 @@ public abstract class Packet {
     /**
      * This method re-computes the checksum of the bits received on the wire and
      * validates it with the checksum in the bits received Since the computation
-     * of checksum varies based on the protocol, this method is overridden
-     * Currently only IPv4 does checksum computation and validation TCP and UDP
-     * need to implement these if required
+     * of checksum varies based on the protocol, this method is overridden.
+     * Currently only IPv4 and ICMP do checksum computation and validation. TCP
+     * and UDP need to implement these if required.
      * 
-     * @param byte[] data
-     * @param int endBitOffset
+     * @param byte[] data The byte stream representing the Ethernet frame
+     * @param int startBitOffset The bit offset from where the byte array corresponding to this Packet starts in the frame
      * @throws PacketException
      */
-    protected void postDeserializeCustomOperation(byte[] data, int endBitOffset)
+    protected void postDeserializeCustomOperation(byte[] data, int startBitOffset)
             throws PacketException {
         // no op
     }
@@ -260,8 +262,7 @@ public abstract class Packet {
      * @return Integer - startOffset of the requested field
      */
     public int getfieldOffset(String fieldName) {
-        return (((Pair<Integer, Integer>) hdrFieldCoordMap.get(fieldName))
-                .getLeft());
+        return hdrFieldCoordMap.get(fieldName).getLeft();
     }
 
     /**
@@ -274,38 +275,93 @@ public abstract class Packet {
      * @return Integer - number of bits of the requested field
      */
     public int getfieldnumBits(String fieldName) {
-        return (((Pair<Integer, Integer>) hdrFieldCoordMap.get(fieldName))
-                .getRight());
+        return hdrFieldCoordMap.get(fieldName).getRight();
     }
 
     @Override
     public String toString() {
-        StringBuffer ret = new StringBuffer();
-        for (Map.Entry<String, byte[]> entry : hdrFieldsMap.entrySet()) {
-            ret.append(entry.getKey() + ": ");
-            if (entry.getValue().length == 6) {
-                ret.append(HexEncode.bytesToHexString(entry.getValue()) + " ");
-            } else if (entry.getValue().length == 4) {
-                try {
-                    ret.append(InetAddress.getByAddress(entry.getValue())
-                            .getHostAddress() + " ");
-                } catch (UnknownHostException e) {
-                    logger.error("", e);
-                }
-            } else {
-                ret.append(((Long) BitBufferHelper.getLong(entry.getValue()))
-                        .toString() + " ");
-            }
+        StringBuilder ret = new StringBuilder();
+        ret.append(this.getClass().getSimpleName());
+        ret.append(": [");
+        for (String field : hdrFieldCoordMap.keySet()) {
+            byte[] value = hdrFieldsMap.get(field);
+            ret.append(field);
+            ret.append(": ");
+            ret.append(HexEncode.bytesToHexString(value));
+            ret.append(", ");
         }
+        ret.replace(ret.length()-2, ret.length()-1, "]");
         return ret.toString();
     }
 
     /**
-     * Returns true if the packet is corrupted
+     * Returns the raw payload carried by this packet in case payload was not
+     * parsed. Caller can call this function in case the getPaylod() returns null.
      * 
-     * @return boolean
+     * @return The raw payload if not parsable as an array of bytes, null otherwise
      */
-    protected boolean isPacketCorrupted() {
+    public byte[] getRawPayload() {
+        return rawPayload;
+    }
+
+    /**
+     * Set a raw payload in the packet class
+     * 
+     * @param payload The raw payload as byte array
+     */
+    public void setRawPayload(byte[] payload) {
+        this.rawPayload = Arrays.copyOf(payload, payload.length);
+    }
+
+    /**
+     * Return whether the deserialized packet is to be considered corrupted.
+     * This is the case when the checksum computed after reconstructing the
+     * packet received from wire is not equal to the checksum read from the
+     * stream. For the Packet class which do not have a checksum field, this
+     * function will always return false.
+     * 
+     * 
+     * @return true if the deserialized packet's recomputed checksum is not
+     *         equal to the packet carried checksum
+     */
+    public boolean isCorrupted() {
         return corrupted;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + ((this.hdrFieldsMap == null) ? 0 : hdrFieldsMap.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Packet other = (Packet) obj;
+        if (hdrFieldsMap == other.hdrFieldsMap) {
+            return true;
+        }
+        if (hdrFieldsMap == null || other.hdrFieldsMap == null) {
+            return false;
+        }
+        if (hdrFieldsMap != null && other.hdrFieldsMap != null) {
+            for (String field : hdrFieldsMap.keySet()) {
+                if (!Arrays.equals(hdrFieldsMap.get(field), other.hdrFieldsMap.get(field))) {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
+
 }
