@@ -7,7 +7,12 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
+import java.util.List;
+import java.util.Set;
+
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
+import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 /**
  * Interface for builders of 'grouping' statement.
@@ -15,8 +20,22 @@ import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 public interface GroupingBuilder extends ChildNodeBuilder, SchemaNodeBuilder,
         TypeDefinitionAwareBuilder {
 
-    DataSchemaNodeBuilder getChildNode(String name);
+    String getDescription();
+
+    String getReference();
+
+    Status getStatus();
 
     GroupingDefinition build();
+
+    DataSchemaNodeBuilder getChildNode(String name);
+
+    List<UnknownSchemaNodeBuilder> getUnknownNodes();
+
+    Set<GroupingBuilder> getGroupings();
+
+    Set<TypeDefinitionBuilder> getTypedefs();
+
+    Set<UsesNodeBuilder> getUses();
 
 }

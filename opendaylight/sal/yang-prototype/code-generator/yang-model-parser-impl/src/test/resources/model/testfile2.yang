@@ -136,6 +136,36 @@ module types2 {
     }
     
     grouping target {
+        anyxml data {
+            config true;
+            description "Copy of the source datastore subset.";
+            mandatory false;
+            must "test-condition-text";
+            reference "test-no-reference";
+            status "obsolete";
+            when "test-when-text";
+        }
+        choice how {
+            description "test choice description";
+            default interval;
+            case interval {
+                leaf interval {
+                    type uint16;
+                    default 30;
+                    units minutes;
+                }
+            }
+            case daily {
+                leaf daily {
+                    type empty;
+                }
+                leaf time-of-day {
+                    type string;
+                    units 24-hour-clock;
+                    default 1am;
+                }
+            }
+        }
         leaf address {
             type string;
             description "Target IP address";
@@ -143,12 +173,20 @@ module types2 {
         container port {
             description "Target port container";
         }
-        
         list addresses {
             key "id";
             leaf id {
                 type int8;
             }
+        }
+        grouping target-inner {
+            description "target-inner default description";
+            leaf inner-grouping-id {
+                type int8;
+            }
+        }
+        typedef group-type {
+            type my-decimal-type;
         }
     }
 
@@ -182,6 +220,13 @@ module types2 {
                     config false;
                     min-elements 2;
                     max-elements 12;
+                }
+                refine target-inner {
+                    description "new target-inner grouping description";
+                }
+                refine group-type {
+                    description "new group-type description";
+                    reference "new group-type reference";
                 }
             }
         }

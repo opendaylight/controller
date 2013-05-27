@@ -21,6 +21,7 @@ import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.ChildNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.AnyXmlBuilder;
@@ -28,11 +29,14 @@ import org.opendaylight.controller.yang.parser.builder.impl.ChoiceBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ChoiceCaseBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ConstraintsBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.GroupingBuilderImpl;
 import org.opendaylight.controller.yang.parser.builder.impl.LeafListSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ListSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ModuleBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.TypedefBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.UsesNodeBuilderImpl;
 
 public final class ParserUtils {
 
@@ -264,8 +268,7 @@ public final class ParserUtils {
      * @param line
      *            current line in yang model
      */
-    public static void refineDefault(Builder node, RefineHolder refine,
-            int line) {
+    public static void refineDefault(Builder node, RefineHolder refine, int line) {
         Class<? extends Builder> cls = node.getClass();
 
         String description = refine.getDescription();
@@ -355,9 +358,6 @@ public final class ParserUtils {
         for (UsesNodeBuilder use : old.getUsesNodes()) {
             copy.addUsesNode(use);
         }
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
         copy.setDescription(old.getDescription());
         copy.setReference(old.getReference());
         copy.setStatus(old.getStatus());
@@ -391,9 +391,6 @@ public final class ParserUtils {
         for (UsesNodeBuilder use : old.getUsesNodes()) {
             copy.addUsesNode(use);
         }
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
         copy.setDescription(old.getDescription());
         copy.setReference(old.getReference());
         copy.setStatus(old.getStatus());
@@ -414,9 +411,6 @@ public final class ParserUtils {
             copy.setType(old.getTypedef());
         } else {
             copy.setType(type);
-        }
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
         }
         for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
             copy.addUnknownSchemaNode(unknown);
@@ -447,9 +441,6 @@ public final class ParserUtils {
         for (UsesNodeBuilder use : old.getUsesNodes()) {
             copy.addUsesNode(use);
         }
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
         copy.setDefaultCase(old.getDefaultCase());
         copy.setDescription(old.getDescription());
         copy.setReference(old.getReference());
@@ -471,6 +462,72 @@ public final class ParserUtils {
         copy.setReference(old.getReference());
         copy.setStatus(old.getStatus());
         copy.setConfiguration(old.isConfiguration());
+        return copy;
+    }
+
+    public static GroupingBuilder copyGroupingBuilder(final GroupingBuilder old) {
+        final GroupingBuilder copy = new GroupingBuilderImpl(old.getQName(),
+                old.getLine());
+        copy.setPath(old.getPath());
+        for (DataSchemaNodeBuilder child : old.getChildNodes()) {
+            copy.addChildNode(child);
+        }
+        for (GroupingBuilder grouping : old.getGroupings()) {
+            copy.addGrouping(grouping);
+        }
+        for (TypeDefinitionBuilder typedef : old.getTypedefs()) {
+            copy.addTypedef(typedef);
+        }
+        for (UsesNodeBuilder use : old.getUses()) {
+            copy.addUsesNode(use);
+        }
+        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
+            copy.addUnknownSchemaNode(unknown);
+        }
+        copy.setDescription(old.getDescription());
+        copy.setReference(old.getReference());
+        copy.setStatus(old.getStatus());
+        return copy;
+    }
+
+    public static TypedefBuilder copyTypedefBuilder(TypedefBuilder old) {
+        final TypedefBuilder copy = new TypedefBuilder(old.getQName(),
+                old.getLine());
+        copy.setPath(old.getPath());
+        copy.setDefaultValue(old.getDefaultValue());
+        copy.setUnits(old.getUnits());
+        copy.setDescription(old.getDescription());
+        copy.setReference(old.getReference());
+        copy.setStatus(old.getStatus());
+
+        copy.setRanges(old.getRanges());
+        copy.setLengths(old.getLengths());
+        copy.setPatterns(old.getPatterns());
+        copy.setFractionDigits(old.getFractionDigits());
+
+        TypeDefinition<?> type = old.getType();
+        if(type == null) {
+            copy.setType(old.getTypedef());
+        } else {
+            copy.setType(old.getType());
+        }
+        copy.setUnits(old.getUnits());
+        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
+            copy.addUnknownSchemaNode(unknown);
+        }
+        return copy;
+    }
+
+    public static UsesNodeBuilder copyUsesNodeBuilder(UsesNodeBuilder old) {
+        final UsesNodeBuilder copy = new UsesNodeBuilderImpl(
+                old.getGroupingPathString(), old.getLine());
+        for (AugmentationSchemaBuilder augment : old.getAugmentations()) {
+            copy.addAugment(augment);
+        }
+        copy.setAugmenting(old.isAugmenting());
+        for (SchemaNodeBuilder refineNode : old.getRefineNodes()) {
+            copy.addRefineNode(refineNode);
+        }
         return copy;
     }
 
