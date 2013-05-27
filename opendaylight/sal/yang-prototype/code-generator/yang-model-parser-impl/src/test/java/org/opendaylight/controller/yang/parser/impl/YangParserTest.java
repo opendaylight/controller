@@ -26,10 +26,12 @@ import org.opendaylight.controller.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.controller.yang.model.api.ChoiceNode;
 import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.Deviation;
 import org.opendaylight.controller.yang.model.api.Deviation.Deviate;
 import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.FeatureDefinition;
+import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
@@ -551,11 +553,13 @@ public class YangParserTest {
         assertEquals(1, usesNodes.size());
         UsesNode usesNode = usesNodes.iterator().next();
         Map<SchemaPath, SchemaNode> refines = usesNode.getRefines();
-        assertEquals(3, refines.size());
+        assertEquals(5, refines.size());
 
         LeafSchemaNode refineLeaf = null;
         ContainerSchemaNode refineContainer = null;
         ListSchemaNode refineList = null;
+        GroupingDefinition refineGrouping = null;
+        TypeDefinition<?> typedef = null;
         for (Map.Entry<SchemaPath, SchemaNode> entry : refines.entrySet()) {
             SchemaNode value = entry.getValue();
             if (value instanceof LeafSchemaNode) {
@@ -564,6 +568,10 @@ public class YangParserTest {
                 refineContainer = (ContainerSchemaNode) value;
             } else if(value instanceof ListSchemaNode) {
                 refineList = (ListSchemaNode)value;
+            } else if(value instanceof GroupingDefinition) {
+                refineGrouping = (GroupingDefinition)value;
+            } else if(value instanceof TypeDefinition<?>) {
+                typedef = (TypeDefinition<?>)value;
             }
         }
 
@@ -607,6 +615,20 @@ public class YangParserTest {
         assertFalse(refineList.isConfiguration());
         assertEquals(2, (int)refineList.getConstraints().getMinElements());
         assertEquals(12, (int)refineList.getConstraints().getMaxElements());
+
+        // grouping target-inner
+        assertNotNull(refineGrouping);
+        Set<DataSchemaNode> refineGroupingChildren = refineGrouping.getChildNodes();
+        assertEquals(1, refineGroupingChildren.size());
+        LeafSchemaNode refineGroupingLeaf = (LeafSchemaNode)refineGroupingChildren.iterator().next();
+        assertEquals("inner-grouping-id", refineGroupingLeaf.getQName().getLocalName());
+        assertEquals("new target-inner grouping description", refineGrouping.getDescription());
+
+        // typedef group-type
+        assertNotNull(typedef);
+        assertEquals("new group-type description", typedef.getDescription());
+        assertEquals("new group-type reference", typedef.getReference());
+        assertTrue(typedef.getBaseType() instanceof ExtendedType);
     }
 
     @Test
@@ -727,6 +749,16 @@ public class YangParserTest {
         assertNotNull(input.getDataChildByName("filter"));
         ContainerSchemaNode output = rpc.getOutput();
         assertNotNull(output.getDataChildByName("data"));
+    }
+
+    @Test
+    public void testGrouping() {
+        Module testModule = TestUtils.findModule(modules, "types2");
+        Set<GroupingDefinition> groupings = testModule.getGroupings();
+        assertEquals(1, groupings.size());
+        GroupingDefinition grouping = groupings.iterator().next();
+        Set<DataSchemaNode> children = grouping.getChildNodes();
+        assertEquals(5, children.size());
     }
 
 }

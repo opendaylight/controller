@@ -1119,7 +1119,7 @@ public class ModuleBuilder implements Builder {
         final Set<GroupingDefinition> groupings = new HashSet<GroupingDefinition>();
         for (Map.Entry<List<String>, GroupingBuilder> entry : addedGroupings
                 .entrySet()) {
-            if (entry.getKey().size() == 2) {
+            if (entry.getKey().size() == 3) {
                 groupings.add(entry.getValue().build());
             }
         }

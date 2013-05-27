@@ -800,8 +800,7 @@ public class YangParserImpl implements YangModelParser {
                     ParserUtils.refineList(list, refine, line);
                     usesNode.addRefineNode(list);
                 } else if (refineTarget instanceof LeafListSchemaNodeBuilder) {
-                    final LeafListSchemaNodeBuilder leafList = (LeafListSchemaNodeBuilder) getRefineNodeBuilderCopy(
-                            groupingName, refine, modules, module);
+                    final LeafListSchemaNodeBuilder leafList = (LeafListSchemaNodeBuilder) refineTarget;
                     ParserUtils.refineLeafList(leafList, refine, line);
                     usesNode.addRefineNode(leafList);
                 } else if (refineTarget instanceof ChoiceBuilder) {
@@ -812,6 +811,10 @@ public class YangParserImpl implements YangModelParser {
                     final AnyXmlBuilder anyXml = (AnyXmlBuilder) refineTarget;
                     ParserUtils.refineAnyxml(anyXml, refine, line);
                     usesNode.addRefineNode(anyXml);
+                } else if(refineTarget instanceof GroupingBuilder) {
+                    usesNode.addRefineNode((GroupingBuilder)refineTarget);
+                } else if(refineTarget instanceof TypedefBuilder) {
+                    usesNode.addRefineNode((TypedefBuilder)refineTarget);
                 }
             }
         }
@@ -861,6 +864,12 @@ public class YangParserImpl implements YangModelParser {
         } else if (lookedUpBuilder instanceof AnyXmlBuilder) {
             result = ParserUtils
                     .copyAnyXmlBuilder((AnyXmlBuilder) lookedUpBuilder);
+        } else if (lookedUpBuilder instanceof GroupingBuilder) {
+            result = ParserUtils
+                    .copyGroupingBuilder((GroupingBuilder) lookedUpBuilder);
+        } else if (lookedUpBuilder instanceof TypeDefinitionBuilder) {
+            result = ParserUtils
+                    .copyTypedefBuilder((TypedefBuilder) lookedUpBuilder);
         } else {
             throw new YangParseException(module.getName(), refine.getLine(),
                     "Target '" + refine.getName() + "' can not be refined");
@@ -873,8 +882,8 @@ public class YangParserImpl implements YangModelParser {
      *
      * @param groupingPath
      *            path to grouping which contains node to refine
-     * @param refineNodeName
-     *            name of node to be refined
+     * @param refine
+     *            object containing refine information
      * @param modules
      *            all loaded modules
      * @param module
@@ -886,6 +895,7 @@ public class YangParserImpl implements YangModelParser {
             final RefineHolder refine,
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module) {
+        final String refineNodeName = refine.getName();
         final SchemaPath path = ParserUtils.parseUsesPath(groupingPath);
         final List<String> builderPath = new ArrayList<String>();
         String prefix = null;
@@ -904,7 +914,26 @@ public class YangParserImpl implements YangModelParser {
         final GroupingBuilder builder = (GroupingBuilder) dependentModule
                 .getNode(builderPath);
 
-        return builder.getChildNode(refine.getName());
+        Builder result = builder.getChildNode(refineNodeName);
+        if(result == null) {
+            Set<GroupingBuilder> grps = builder.getGroupings();
+            for(GroupingBuilder gr : grps) {
+                if(gr.getQName().getLocalName().equals(refineNodeName)) {
+                    result = gr;
+                    break;
+                }
+            }
+        }
+        if(result == null) {
+            Set<TypeDefinitionBuilder> typedefs = builder.getTypedefs();
+            for(TypeDefinitionBuilder typedef : typedefs) {
+                if(typedef.getQName().getLocalName().equals(refineNodeName)) {
+                    result = typedef;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     private QName findFullQName(
