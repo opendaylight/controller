@@ -98,7 +98,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             this.hostTracker = null;
         }
     }
-    
+
     public void setTopologyManager(ITopologyManager tm) {
         this.topologyManager = tm;
     }
@@ -242,7 +242,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             generateAndSendReply(sourceIP, sourceMAC);
             return;
         }
-    
+
         /*
          * ARP Request Handling:
          * If targetIP is the IP of the subnet, reply with ARP REPLY
@@ -321,9 +321,9 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             nodeConnectors = subnet.getNodeConnectors();
         }
         for (NodeConnector p : nodeConnectors) {
-        	if (topologyManager.isInternal(p)) {
-        		continue;
-        	}
+            if (topologyManager.isInternal(p)) {
+                continue;
+            }
             ARP arp = new ARP();
             byte[] senderIP = subnet.getNetworkAddress().getAddress();
             byte[] targetIPB = targetIP.getAddress();
@@ -552,7 +552,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         }
         return PacketResult.IGNORED;
     }
-    
+
     private void startPeriodicTimer() {
         this.periodicTimer = new Timer("ArpHandler Periodic Timer");
         this.periodicTimer.scheduleAtFixedRate(new TimerTask() {
