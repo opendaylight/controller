@@ -30,6 +30,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.sal.utils.HexEncode;
+import org.opendaylight.controller.sal.utils.INodeFactory;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
  * Describe a generic network element in multiple SDNs technologies. A
@@ -437,9 +439,13 @@ public class Node implements Serializable {
                 return null;
             }
         } else {
-            // We need to lookup via OSGi service registry for an
-            // handler for this
+            //Use INodeFactory to create a Node of registered Node type.
+            //The protocol plugin being used depends on typeStr.
+            INodeFactory f = (INodeFactory) ServiceHelper
+                    .getGlobalInstance(INodeFactory.class, new Node(), "(protocolName="+typeStr+")");
+            if(f==null)
+                return null;
+            return f.fromString(IDStr, typeStr);
         }
-        return null;
     }
 }
