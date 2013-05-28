@@ -6,27 +6,23 @@
     <version>0.5-SNAPSHOT</version>
   </parent>
   <artifactId>binding-generator-impl</artifactId>
+  <version>${release.version}</version>
   <dependencies>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>binding-generator-util</artifactId>
-          <version>0.5-SNAPSHOT</version>
       </dependency>
-
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-model-parser-impl</artifactId>
-          <version>0.5-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>binding-generator-api</artifactId>
-          <version>0.5-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>binding-generator-spi</artifactId>
-          <version>0.5-SNAPSHOT</version>
       </dependency>
       <dependency>
       	<groupId>junit</groupId>
