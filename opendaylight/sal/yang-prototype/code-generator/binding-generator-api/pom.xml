@@ -6,16 +6,15 @@
     <version>0.5-SNAPSHOT</version>
   </parent>
   <artifactId>binding-generator-api</artifactId>
+  <version>${release.version}</version>
   <dependencies>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>binding-model-api</artifactId>
-          <version>0.5-SNAPSHOT</version>
       </dependency>
       <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>yang-model-api</artifactId>
-      <version>0.5-SNAPSHOT</version>
       </dependency>
   </dependencies>
 </project>

@@ -6,13 +6,12 @@
     <version>0.5-SNAPSHOT</version>
   </parent>
   <artifactId>yang-data-api</artifactId>
-  
+  <version>${release.version}</version>
   
   <dependencies>
   	<dependency>
   		<groupId>org.opendaylight.controller</groupId>
   		<artifactId>yang-common</artifactId>
-  		<version>${project.version}</version>
   	</dependency>
   </dependencies>
 </project>

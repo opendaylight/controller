@@ -8,12 +8,11 @@
         <relativePath>../../yang/pom.xml</relativePath>
     </parent>
     <artifactId>yang-maven-plugin-spi</artifactId>
-
+    <version>${release.version}</version>
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>yang-model-api</artifactId>
-            <version>0.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

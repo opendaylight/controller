@@ -6,4 +6,5 @@
     <version>0.5-SNAPSHOT</version>
   </parent>
   <artifactId>yang-binding</artifactId>
+  <version>${release.version}</version>
 </project>

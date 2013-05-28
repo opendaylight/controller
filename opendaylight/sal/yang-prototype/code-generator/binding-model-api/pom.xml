@@ -6,4 +6,5 @@
     <version>0.5-SNAPSHOT</version>
   </parent>
   <artifactId>binding-model-api</artifactId>
+  <version>${release.version}</version>
 </project>

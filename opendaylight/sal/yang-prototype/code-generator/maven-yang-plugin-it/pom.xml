@@ -8,7 +8,7 @@
         <relativePath>../../yang/pom.xml</relativePath>
     </parent>
     <artifactId>yang-maven-plugin-it</artifactId>
-
+    <version>${release.version}</version>
 
     <dependencies>
         <dependency>
