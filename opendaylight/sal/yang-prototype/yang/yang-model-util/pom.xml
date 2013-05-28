@@ -4,7 +4,6 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>yang</artifactId>
     <version>0.5-SNAPSHOT</version>
-    <relativePath>../../yang/pom.xml</relativePath>
   </parent>
   <artifactId>yang-model-util</artifactId>
   <version>${release.version}</version>
