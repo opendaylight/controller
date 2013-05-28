@@ -25,16 +25,19 @@ import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.RefineHolder;
 
-final class UsesNodeBuilderImpl implements UsesNodeBuilder {
+public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     private boolean built;
     private final UsesNodeImpl instance;
     private final int line;
+    private final String groupingPathStr;
     private final SchemaPath groupingPath;
+    private boolean augmenting;
     private final Set<AugmentationSchemaBuilder> addedAugments = new HashSet<AugmentationSchemaBuilder>();
     private List<SchemaNodeBuilder> refineBuilders = new ArrayList<SchemaNodeBuilder>();
     private List<RefineHolder> refines = new ArrayList<RefineHolder>();
 
-    UsesNodeBuilderImpl(final String groupingPathStr, final int line) {
+    public UsesNodeBuilderImpl(final String groupingPathStr, final int line) {
+        this.groupingPathStr = groupingPathStr;
         this.groupingPath = parseUsesPath(groupingPathStr);
         this.line = line;
         instance = new UsesNodeImpl(groupingPath);
@@ -42,7 +45,9 @@ final class UsesNodeBuilderImpl implements UsesNodeBuilder {
 
     @Override
     public UsesNode build() {
-        if(!built) {
+        if (!built) {
+            instance.setAugmenting(augmenting);
+
             // AUGMENTATIONS
             final Set<AugmentationSchema> augments = new HashSet<AugmentationSchema>();
             for (AugmentationSchemaBuilder builder : addedAugments) {
@@ -69,8 +74,18 @@ final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     }
 
     @Override
+    public String getGroupingPathString() {
+        return groupingPathStr;
+    }
+
+    @Override
     public SchemaPath getGroupingPath() {
         return groupingPath;
+    }
+
+    @Override
+    public Set<AugmentationSchemaBuilder> getAugmentations() {
+        return addedAugments;
     }
 
     @Override
@@ -79,8 +94,18 @@ final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     }
 
     @Override
+    public boolean isAugmenting() {
+        return augmenting;
+    }
+
+    @Override
     public void setAugmenting(final boolean augmenting) {
-        instance.setAugmenting(augmenting);
+        this.augmenting = augmenting;
+    }
+
+    @Override
+    public List<SchemaNodeBuilder> getRefineNodes() {
+        return refineBuilders;
     }
 
     @Override
