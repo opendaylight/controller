@@ -3,16 +3,14 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>yang</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5.1-SNAPSHOT</version>
     <relativePath>../../yang/pom.xml</relativePath>
   </parent>
   <artifactId>yang-model-parser-api</artifactId>
-  
   <dependencies>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-model-api</artifactId>
-          <version>0.5-SNAPSHOT</version>
       </dependency>
   </dependencies>
 </project>

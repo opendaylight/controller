@@ -4,14 +4,14 @@
 
 	<groupId>org.opendaylight.controller</groupId>
 	<artifactId>generator-test1</artifactId>
-	<version>0.5-SNAPSHOT</version>
+	<version>0.5.1-SNAPSHOT</version>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.opendaylight.controller</groupId>
 				<artifactId>yang-maven-plugin</artifactId>
-				<version>0.5-SNAPSHOT</version>
+				<version>0.5.1-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>
@@ -41,7 +41,7 @@
 					<dependency>
 						<groupId>org.opendaylight.controller</groupId>
 						<artifactId>yang-maven-plugin-spi</artifactId>
-						<version>0.5-SNAPSHOT</version>
+						<version>0.5.1-SNAPSHOT</version>
 						<type>test-jar</type>
 					</dependency>
 				</dependencies>

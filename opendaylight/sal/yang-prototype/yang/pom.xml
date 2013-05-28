@@ -6,14 +6,13 @@
 		<artifactId>yang-prototype</artifactId>
 		<version>0.5-SNAPSHOT</version>
 	</parent>
-
+	<version>0.5.1-SNAPSHOT</version>
 	<artifactId>yang</artifactId>
 	<packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Version of all child artifacts -->
-        <release.version>0.5-SNAPSHOT</release.version>
     </properties>
 
 	<modules>
@@ -35,53 +34,53 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-common</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-data-api</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-data-util</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-model-api</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-model-util</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-binding</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-model-parser-api</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-model-parser-impl
                 </artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-maven-plugin-spi</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

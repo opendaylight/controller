@@ -1,11 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>binding-generator</artifactId>
+
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.5-SNAPSHOT</version>
-    </parent>
+        <version>0.5.1-SNAPSHOT</version>
     <artifactId>test</artifactId>
 
     <build>
@@ -13,7 +11,7 @@
             <plugin>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>0.5-SNAPSHOT</version>
+                <version>0.5.1-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <goals>
@@ -40,7 +38,7 @@
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>yang-maven-plugin-spi</artifactId>
-                        <version>0.5-SNAPSHOT</version>
+                        <version>0.5.1-SNAPSHOT</version>
                         <type>test-jar</type>
                     </dependency>
                 </dependencies>

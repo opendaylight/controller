@@ -8,6 +8,7 @@
         <artifactId>yang-prototype</artifactId>
         <version>0.5-SNAPSHOT</version>
     </parent>
+    <version>0.5.1-SNAPSHOT</version>
 
     <artifactId>binding-generator</artifactId>
     <packaging>pom</packaging>
@@ -16,9 +17,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- version of YANG tools dependencies -->
-        <yang.version>0.5-SNAPSHOT</yang.version>
-        <!-- Version of all child artifacts -->
-        <release.version>0.5-SNAPSHOT</release.version>
+        <yang.version>0.5.1-SNAPSHOT</yang.version>
     </properties>
 
     <modules>
@@ -36,37 +35,37 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>binding-model-api</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>binding-generator-api</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>binding-generator-spi</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>binding-generator-util</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>binding-generator-impl</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>binding-java-api-generator</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>maven-sal-api-gen-plugin</artifactId>
-                <version>${release.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>

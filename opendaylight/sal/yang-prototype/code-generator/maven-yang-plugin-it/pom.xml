@@ -4,11 +4,10 @@
     <parent>
         <artifactId>yang</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.5.1-SNAPSHOT</version>
         <relativePath>../../yang/pom.xml</relativePath>
     </parent>
     <artifactId>yang-maven-plugin-it</artifactId>
-    <version>${release.version}</version>
 
     <dependencies>
         <dependency>

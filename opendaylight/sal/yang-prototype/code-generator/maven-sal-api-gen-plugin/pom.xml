@@ -4,10 +4,9 @@
     <parent>
         <artifactId>binding-generator</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.5.1-SNAPSHOT</version>
     </parent>
     <artifactId>maven-sal-api-gen-plugin</artifactId>
-    <version>${release.version}</version>
 
     <dependencies>
         <dependency>

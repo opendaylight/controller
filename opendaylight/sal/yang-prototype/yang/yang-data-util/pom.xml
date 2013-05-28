@@ -3,10 +3,9 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>yang</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5.1-SNAPSHOT</version>
   </parent>
   <artifactId>yang-data-util</artifactId>
-  <version>${release.version}</version>
   <dependencies>
   	<dependency>
   		<groupId>org.opendaylight.controller</groupId>
