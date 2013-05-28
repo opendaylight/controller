@@ -13,7 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Version of all child artifacts -->
-        <release.version>0.5-SNAPSHOT</release.version>
+        <release.version>0.5.0</release.version>
     </properties>
 
 	<modules>
