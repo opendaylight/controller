@@ -19,6 +19,7 @@ import org.ops4j.pax.exam.util.PathUtils;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -87,39 +88,55 @@ public class NorthboundIntegrationTest {
 
     }
 
+    // static variable to pass response code from getJsonResult()
+    private static Integer httpResponseCode = null;
+
     private String getJsonResult(String restUrl) {
-        try {
-            URL url = new URL(restUrl);
-
-            this.users.getAuthorizationList();
-            this.users.authenticate("admin", "admin");
-            String authString = "admin:admin";
-            byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-            String authStringEnc = new String(authEncBytes);
-            URLConnection connection = url.openConnection();
-            connection.setRequestProperty("Authorization", "Basic "
-                    + authStringEnc);
-
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Accept", "application/json");
-
-            connection.connect();
-            connection.getContentType();
-            InputStream is = connection.getInputStream();
-            // InputStream is = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is,
-                    Charset.forName("UTF-8")));
-            StringBuilder sb = new StringBuilder();
-            int cp;
-            while ((cp = rd.read()) != -1) {
-                sb.append((char) cp);
-            }
-            is.close();
-            return sb.toString();
-        } catch (Exception e) {
-            return null;
-        }
+        return getJsonResult(restUrl, "GET");
     }
+
+    private String getJsonResult(String restUrl, String method) {
+        // initialize response code to indicate error
+        httpResponseCode = 400;
+        
+        try {
+          URL url = new URL(restUrl);
+
+          this.users.getAuthorizationList();
+          this.users.authenticate("admin", "admin");
+          String authString = "admin:admin";
+          byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
+          String authStringEnc = new String(authEncBytes);
+          
+          HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+          connection.setRequestMethod(method);
+          connection.setRequestProperty("Authorization", "Basic "
+                  + authStringEnc);
+          connection.setRequestProperty("Content-Type", "application/json");
+          connection.setRequestProperty("Accept", "application/json");
+
+          connection.connect();
+          connection.getContentType();
+          
+          // Response code for success should be 2xx
+          httpResponseCode = connection.getResponseCode();
+          
+          InputStream is = connection.getInputStream();
+          BufferedReader rd = new BufferedReader(new InputStreamReader(is,
+                  Charset.forName("UTF-8")));
+          StringBuilder sb = new StringBuilder();
+          int cp;
+          while ((cp = rd.read()) != -1) {
+              sb.append((char) cp);
+          }
+          is.close();
+          connection.disconnect();
+          return sb.toString();
+      } catch (Exception e) {
+          return null;
+      }
+      
+  }
 
     @Test
     public void testStatistics() {
