@@ -445,7 +445,7 @@ public class Node implements Serializable {
                     .getGlobalInstance(INodeFactory.class, new Node(), "(protocolName="+typeStr+")");
             if(f==null)
                 return null;
-            return f.fromString(IDStr, typeStr);
+            return f.fromString(typeStr, IDStr);
         }
     }
 }

@@ -10,6 +10,7 @@
 package org.opendaylight.controller.sal.utils;
 
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
 
 /**
  * @file   INodeFactory.java
@@ -18,10 +19,11 @@ import org.opendaylight.controller.sal.core.Node;
  *
  */
 
-public interface INodeFactory {
+public interface INodeConnectorFactory {
     /**
-     * Method to get custom node types from protocol plugins
+     * Method to get custom NodeConnector types from protocol plugins
      *
      */
-    public Node fromString(String nodeType, String nodeId);
+    public NodeConnector fromStringNoNode(String typeStr, String IDStr,
+            Node n);
 }

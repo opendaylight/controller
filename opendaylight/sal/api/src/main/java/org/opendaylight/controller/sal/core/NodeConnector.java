@@ -28,6 +28,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
+import org.opendaylight.controller.sal.utils.INodeFactory;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
  * Describe a generic network element attachment points,
@@ -602,8 +605,13 @@ public class NodeConnector implements Serializable {
                 return null;
             }
         } else {
-            // Lookup via OSGi service registry
+            //Use INodeConnectorFactory to create a NodeConnector of registered type.
+            //The protocol plugin being used depends on typeStr.
+            INodeConnectorFactory f = (INodeConnectorFactory) ServiceHelper
+                    .getGlobalInstance(INodeConnectorFactory.class, new NodeConnector(), "(protocolName="+typeStr+")");
+            if(f==null)
+                return null;
+            return f.fromStringNoNode(typeStr, IDStr, n);
         }
-        return null;
     }
 }

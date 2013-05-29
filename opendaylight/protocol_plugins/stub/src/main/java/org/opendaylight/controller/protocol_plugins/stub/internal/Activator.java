@@ -7,6 +7,7 @@ import org.apache.felix.dm.Component;
 
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainerListener;
+import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -104,7 +105,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     }
     
     public Object[] getGlobalImplementations() {
-        Object[] res = { FlowProgrammerService.class, StubNodeFactory.class };
+        Object[] res = { FlowProgrammerService.class, StubNodeFactory.class, StubNodeConnectorFactory.class };
         return res;
     }
     
@@ -126,5 +127,15 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("protocolName", "STUB");
             c.setInterface(INodeFactory.class.getName(), props);
         }
+        if (imp.equals(StubNodeConnectorFactory.class)) {
+            // export the service to be used by SAL
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            // Set the protocolPluginType property which will be used
+            // by SAL
+            props.put("protocolPluginType", "STUB");
+            props.put("protocolName", "STUB");
+            c.setInterface(INodeConnectorFactory.class.getName(), props);
+        }
+        
     }
 }
