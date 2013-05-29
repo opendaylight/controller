@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///hs\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-29T14:28:18Z",
+      "side": 1,
+      "message": "Be careful here, if i understand correct this will cause all the generated artifact to have version 0.5.0. Now the issue you will run into is this:\n1) At the moment of the merge of this patch the mvn deploy phase will be done. This will cause the artifacts 0.5.0 to be saved in nexus repository.\n2) Another merge gets into the repository, this again will run a mvn deploy for the artifacts that have revision 0.5.0, the deploy phase this time will break! The reason for the breakage is because the nexus prevent the deploy of a release artifact when one with same version already exists. This is expected because the released artifact are supposed to be only one, of course if the revision exists.\n\nThe proper way of handling the release is actually to perform a mvn release process on the artifacts.",
+      "revId": "9c9e731557f34a3f29fba2f3cd7b3f8988bd004d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
