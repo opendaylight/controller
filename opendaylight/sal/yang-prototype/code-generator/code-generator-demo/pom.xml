@@ -15,12 +15,10 @@
 		<dependency>
 			<groupId>org.opendaylight.controller</groupId>
 			<artifactId>binding-generator-impl</artifactId>
-			<version>0.5-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opendaylight.controller</groupId>
 			<artifactId>binding-java-api-generator</artifactId>
-			<version>0.5-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

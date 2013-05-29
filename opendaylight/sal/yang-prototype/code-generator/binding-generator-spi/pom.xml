@@ -3,10 +3,9 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>binding-generator</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5.1-SNAPSHOT</version>
   </parent>
   <artifactId>binding-generator-spi</artifactId>
-  <version>${release.version}</version>
   <dependencies>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
