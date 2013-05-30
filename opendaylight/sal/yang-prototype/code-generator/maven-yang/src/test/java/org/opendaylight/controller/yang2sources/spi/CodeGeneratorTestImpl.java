@@ -9,8 +9,10 @@ package org.opendaylight.controller.yang2sources.spi;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.maven.plugin.logging.Log;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 
@@ -18,9 +20,20 @@ public class CodeGeneratorTestImpl implements CodeGenerator {
 
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir, Set<Module> yangModules) {
+            File outputBaseDir, Set<Module> currentModuleBuilders,
+            File projectMainDir) {
         // no-op
         return null;
+    }
+
+    @Override
+    public void setLog(Log log) {
+        // no-op
+    }
+
+    @Override
+    public void setAdditionalConfig(Map<String, String> additionalConfiguration) {
+        // no-op
     }
 
 }

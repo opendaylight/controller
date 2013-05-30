@@ -1,15 +1,10 @@
-module types1 {
+module private {
     yang-version 1;
     namespace "urn:simple.container.demo";
-    prefix "t1";
+    prefix "p";
 
     import types2 {
         prefix "data";
-        revision-date 2013-02-27;
-    }
-
-   import types3 {
-        prefix "t3";
         revision-date 2013-02-27;
     }
 
@@ -19,5 +14,6 @@ module types1 {
     revision "2013-02-27" {
         reference " WILL BE DEFINED LATER";
     }
+    
 
 }
