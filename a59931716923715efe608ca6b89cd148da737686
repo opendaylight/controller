@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///e8\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 472
+      },
+      "writtenOn": "2013-05-30T21:01:53Z",
+      "side": 1,
+      "message": "Yes, it is not necessary, but to keep in sync with PortStatistics, I thought it would be better to create it now.",
+      "parentUuid": "AAAAEn///fY\u003d",
+      "revId": "a59931716923715efe608ca6b89cd148da737686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///fg\u003d",
         "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-05-30T19:23:23Z",
       "side": 1,
       "message": "Bug, please set the right class name for the logger",
+      "revId": "a59931716923715efe608ca6b89cd148da737686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///fE\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 472
+      },
+      "writtenOn": "2013-05-30T21:01:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAEn///fg\u003d",
       "revId": "a59931716923715efe608ca6b89cd148da737686",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///fA\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 472
+      },
+      "writtenOn": "2013-05-30T21:01:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAEn///fc\u003d",
+      "revId": "a59931716923715efe608ca6b89cd148da737686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///fw\u003d",
         "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeTable.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2013-05-30T19:23:23Z",
       "side": 1,
       "message": "Do we need these three static strings for NodeTableIdType ?",
+      "revId": "a59931716923715efe608ca6b89cd148da737686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///e4\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeTable.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 472
+      },
+      "writtenOn": "2013-05-30T21:01:53Z",
+      "side": 1,
+      "message": "Nope. Removed.",
+      "parentUuid": "AAAAEn///fw\u003d",
       "revId": "a59931716923715efe608ca6b89cd148da737686",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///e0\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeTable.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 472
+      },
+      "writtenOn": "2013-05-30T21:01:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAEn///fs\u003d",
+      "revId": "a59931716923715efe608ca6b89cd148da737686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///fo\u003d",
         "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeTable.java",
         "patchSetId": 1
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///ew\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeTable.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 472
+      },
+      "writtenOn": "2013-05-30T21:01:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAEn///fo\u003d",
+      "revId": "a59931716923715efe608ca6b89cd148da737686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///fk\u003d",
         "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeTable.java",
         "patchSetId": 1
@@ -115,6 +223,24 @@
       "writtenOn": "2013-05-30T19:23:23Z",
       "side": 1,
       "message": "Others have pointed out the run time inefficiency of hashcode and equals helper functions which make use of reflection. And have started replacing them in the code.\n\nYou may want to fall back to the regular eclipse autogenerated hashCode and equals methods here.",
+      "revId": "a59931716923715efe608ca6b89cd148da737686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///es\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeTable.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 472
+      },
+      "writtenOn": "2013-05-30T21:01:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAEn///fk\u003d",
       "revId": "a59931716923715efe608ca6b89cd148da737686",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
