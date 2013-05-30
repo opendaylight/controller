@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///f8\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/StatisticsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-30T18:35:55Z",
+      "side": 1,
+      "message": "missing the {tableId} path parameter",
+      "revId": "5b1a1e39f2b6f450dc47bc6ad78ba9b2248f765e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///gQ\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/OFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-30T18:35:55Z",
+      "side": 1,
+      "message": "I don\u0027t think we need this for table stats, please see comment below.",
+      "revId": "5b1a1e39f2b6f450dc47bc6ad78ba9b2248f765e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///gM\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/OFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-30T18:35:55Z",
+      "side": 1,
+      "message": "Why is all this new code commented out ? Are you planning to activate it later on ?",
+      "revId": "5b1a1e39f2b6f450dc47bc6ad78ba9b2248f765e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///gI\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/OFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-30T18:35:55Z",
+      "side": 1,
+      "message": "Please take care of tabs (import opendaylight/commons/opendaylight/sun_coding_style.xml as your eclipse Java/Code Style/Formatter) here and in the other files.\n\nTo take care of blank changes you can configure your Java/Code Style/Clean Up or the Java/Code Style/Editor/Save Actions settings",
+      "revId": "5b1a1e39f2b6f450dc47bc6ad78ba9b2248f765e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///gU\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/OFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-30T18:35:55Z",
+      "side": 1,
+      "message": "I don\u0027t think we need this for table stats. For port stats, we want to notify the tx rate calculator thread that new samples of ports stats are present. I don\u0027t think that Table stats are of interest for the tx rate computation.",
+      "revId": "5b1a1e39f2b6f450dc47bc6ad78ba9b2248f765e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///gE\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/OFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-30T18:35:55Z",
+      "side": 1,
+      "message": "If the \"all table\" stats request is not supported in OF, then what is OFStatisticsManager caching every tableStatsPeriod ?",
+      "revId": "5b1a1e39f2b6f450dc47bc6ad78ba9b2248f765e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///gA\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/OFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 860,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-30T18:35:55Z",
+      "side": 1,
+      "message": "In line with the other target statistics in this file, \n\ngetOFtableStatistics(Long switchId, Byte tableId)\n\nshould return the cached statistics for the specified table on the specified switch.\nIt should go through the all table cached stats list and return the ones for the specified table, it should not trigger an direct read of the stats from the switch.\n\nFor that the generic function \n\npublic List\u003cOFStatistics\u003e queryStatistics(Long switchId, OFStatisticsType statType, Object target) {\n\nalready does the job.",
+      "revId": "5b1a1e39f2b6f450dc47bc6ad78ba9b2248f765e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
