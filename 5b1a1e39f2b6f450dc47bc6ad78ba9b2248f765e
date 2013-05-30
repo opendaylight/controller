@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///eg\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/StatisticsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-30T21:35:02Z",
+      "side": 1,
+      "message": "I thought the @PathParam gets the value from the URI parameter specified in the @Path expression. If you do not specify that parameter in @Path, how can JAX-RS find \"tableId\" ?",
+      "parentUuid": "AAAAEn///f0\u003d",
+      "revId": "5b1a1e39f2b6f450dc47bc6ad78ba9b2248f765e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///gQ\u003d",
         "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/OFStatisticsManager.java",
         "patchSetId": 1
