@@ -10,6 +10,7 @@ package org.opendaylight.controller.yang.model.parser.api;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.model.api.Module;
@@ -34,8 +35,8 @@ public interface YangModelParser {
      * @return Set of Yang Modules
      */
     public Set<Module> parseYangModels(final List<File> yangFiles);
-    
-    public Set<Module> parseYangModelsFromStreams(
+
+    public Map<InputStream, Module> parseYangModelsFromStreams(
             final List<InputStream> yangModelStreams);
 
     /**

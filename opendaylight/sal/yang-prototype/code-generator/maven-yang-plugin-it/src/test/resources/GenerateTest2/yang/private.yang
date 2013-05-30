@@ -1,15 +1,19 @@
-module types2 {
+module private {
     yang-version 1;
-    namespace "urn:simple.types.data.demo";
-    prefix "t2";
-    
+    namespace "urn:simple.container.demo";
+    prefix "p";
+
+    import types2 {
+        prefix "data";
+        revision-date 2013-02-27;
+    }
+
     organization "opendaylight";
     contact "http://www.opendaylight.org/";
-    
-    description "This is types-data test description";
 
     revision "2013-02-27" {
         reference " WILL BE DEFINED LATER";
     }
+    
 
 }
