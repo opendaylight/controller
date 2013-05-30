@@ -9,76 +9,48 @@ package org.opendaylight.controller.yang2sources.plugin;
 
 import java.io.File;
 
+import org.apache.maven.project.MavenProject;
+
 import com.google.common.base.Preconditions;
 
 /**
  * Base complex configuration arguments
  */
 public abstract class ConfigArg {
-    public static final String CODE_GEN_DEFAULT_DIR = "code-generator-files/";
-    public static final String RESOURCE_GEN_DEFAULT_DIR = "resource-generator-files/";
 
-    protected File outputBaseDir;
+    private final File outputBaseDir;
 
-    public ConfigArg(File outputBaseDir) {
-        this.outputBaseDir = outputBaseDir;
+    public ConfigArg(String outputBaseDir) {
+        this.outputBaseDir = new File(outputBaseDir);
     }
 
-    public ConfigArg() {
-    }
-
-    public File getOutputBaseDir() {
-        return outputBaseDir;
+    public File getOutputBaseDir(MavenProject project) {
+        if (outputBaseDir.isAbsolute()) {
+            return outputBaseDir;
+        } else {
+            return new File(project.getBasedir(), outputBaseDir.getPath());
+        }
     }
 
     public abstract void check();
 
     /**
-     * Configuration argument for resource generator class and output directory.
-     */
-    public static final class ResourceProviderArg extends ConfigArg {
-        private String resourceProviderClass;
-
-        public ResourceProviderArg() {
-        }
-
-        public ResourceProviderArg(String resourceProviderClass) {
-            this(resourceProviderClass, new File(RESOURCE_GEN_DEFAULT_DIR));
-        }
-
-        public ResourceProviderArg(String resourceProviderClass,
-                File outputBaseDir) {
-            super(outputBaseDir);
-            this.resourceProviderClass = resourceProviderClass;
-        }
-
-        @Override
-        public void check() {
-            Preconditions
-                    .checkNotNull(resourceProviderClass,
-                            "resourceProviderClass for ResourceProvider cannot be null");
-        }
-
-        public String getResourceProviderClass() {
-            return resourceProviderClass;
-        }
-    }
-
-    /**
      * Configuration argument for code generator class and output directory.
      */
     public static final class CodeGeneratorArg extends ConfigArg {
+        private static final String CODE_GEN_DEFAULT_DIR = "target"
+                + File.separator + "generated-sources";
         private String codeGeneratorClass;
 
         public CodeGeneratorArg() {
-            super(new File(CODE_GEN_DEFAULT_DIR));
+            super(CODE_GEN_DEFAULT_DIR);
         }
 
         public CodeGeneratorArg(String codeGeneratorClass) {
-            this(codeGeneratorClass, new File(CODE_GEN_DEFAULT_DIR));
+            this(codeGeneratorClass, CODE_GEN_DEFAULT_DIR);
         }
 
-        public CodeGeneratorArg(String codeGeneratorClass, File outputBaseDir) {
+        public CodeGeneratorArg(String codeGeneratorClass, String outputBaseDir) {
             super(outputBaseDir);
             this.codeGeneratorClass = codeGeneratorClass;
         }

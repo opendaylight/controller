@@ -28,7 +28,8 @@ public class CodeGeneratorImpl implements CodeGenerator {
 
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir, Set<Module> yangModules) throws IOException {
+            File outputBaseDir, Set<Module> yangModules, File projectBaseDir)
+            throws IOException {
 
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
         final List<Type> types = bindingGenerator.generateTypes(context);
@@ -41,11 +42,14 @@ public class CodeGeneratorImpl implements CodeGenerator {
                 typesToGenerate.add((GeneratedType) type);
             }
 
-
         }
 
-        final GeneratorJavaFile generator = new GeneratorJavaFile(typesToGenerate, tosToGenerate);
-        return generator.generateToFile(outputBaseDir);
+        final GeneratorJavaFile generator = new GeneratorJavaFile(
+                typesToGenerate, tosToGenerate);
+
+        return generator.generateToFile(outputBaseDir.getPath().startsWith(
+                projectBaseDir.getPath()) ? outputBaseDir : new File(
+                projectBaseDir, outputBaseDir.getPath()));
     }
 
 }

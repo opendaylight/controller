@@ -115,13 +115,12 @@ public class YangParserImpl implements YangModelParser {
         return new SchemaContextImpl(modules);
     }
 
-    private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
-            final List<InputStream> yangFileStreams) {
-        // Linked Hash Map MUST be used because Linked Hash Map preserves ORDER
-        // of items stored in map.
-        final Map<String, TreeMap<Date, ModuleBuilder>> modules = new LinkedHashMap<String, TreeMap<Date, ModuleBuilder>>();
+    // TODO Set as private after parseYangModels method is modified (returns
+    // information about Module -> inputStream mapping)
+    public ModuleBuilder[] parseModuleBuilders(List<InputStream> inputStreams) {
+
         final ParseTreeWalker walker = new ParseTreeWalker();
-        final List<ParseTree> trees = parseStreams(yangFileStreams);
+        final List<ParseTree> trees = parseStreams(inputStreams);
         final ModuleBuilder[] builders = new ModuleBuilder[trees.size()];
 
         // validate yang
@@ -133,6 +132,18 @@ public class YangParserImpl implements YangModelParser {
             walker.walk(yangModelParser, trees.get(i));
             builders[i] = yangModelParser.getModuleBuilder();
         }
+        return builders;
+    }
+
+    private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
+            final List<InputStream> yangFileStreams) {
+
+	    final ModuleBuilder[] builders = parseModuleBuilders(yangFileStreams);
+
+
+	    // Linked Hash Map MUST be used because Linked Hash Map preserves ORDER
+	    // of items stored in map.
+	    final LinkedHashMap<String, TreeMap<Date, ModuleBuilder>> modules = new LinkedHashMap<String, TreeMap<Date, ModuleBuilder>>();
 
         // module dependency graph sorted
         List<ModuleBuilder> sorted = ModuleDependencySort.sort(builders);

@@ -29,11 +29,11 @@ public interface CodeGenerator {
      * @param outputBaseDir
      *            expected output directory for generated sources configured by
      *            user
-     * @param yangModules
+     * @param currentModules
      *            yang modules parsed from yangFilesRootDir
      * @return collection of files that were generated from schema context
      * @throws IOException
      */
     Collection<File> generateSources(SchemaContext context, File outputBaseDir,
-            Set<Module> yangModules) throws IOException;
+            Set<Module> currentModules, File projectBaseDir) throws IOException;
 }
