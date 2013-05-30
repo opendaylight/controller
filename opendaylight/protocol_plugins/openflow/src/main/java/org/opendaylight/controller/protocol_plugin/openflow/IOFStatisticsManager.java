@@ -96,5 +96,16 @@ public interface IOFStatisticsManager {
      * @return the median transmit rate in bits per second
      */
     long getTransmitRate(Long switchId, Short port);
+    
+    /**
+     * Returns the statistics for the specified switch table
+     *
+	 * @param switchId the openflow datapath id
+     * @param tableId the openflow switch table id
+     * @return the list of openflow statistics
+     */
+    List<OFStatistics> getOFTableStatistics(Long switchId, Byte tableId);
+
+	List<OFStatistics> getOFTableStatistics(Long switchId);
 
 }

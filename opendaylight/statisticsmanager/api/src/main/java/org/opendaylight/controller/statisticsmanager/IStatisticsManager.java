@@ -15,9 +15,11 @@ import java.util.Map;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 
 /**
  * Interface which defines the available methods for retrieving
@@ -79,4 +81,12 @@ public interface IStatisticsManager {
      * @return
      */
     List<NodeConnectorStatistics> getNodeConnectorStatistics(Node node);
+    
+    /**
+     * Returns the statistics for the specified table of the node
+     *
+     * @param nodeTable
+     * @return
+     */
+    NodeTableStatistics getNodeTableStatistics(NodeTable nodeTable);
 }

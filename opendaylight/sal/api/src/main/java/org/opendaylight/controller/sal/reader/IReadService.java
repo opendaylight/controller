@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 
 /**
@@ -87,6 +88,28 @@ public interface IReadService {
      * @param connector
      */
     List<NodeConnectorStatistics> readNodeConnectors(Node node);
+    
+    /**
+     * Read the Table statistics for the given node table
+     * @param table
+     */
+    NodeTableStatistics readNodeTable(NodeTable table);
+    
+    /**
+     * Read the Table statistics for the given node
+     * This is not used. Querying all tables on a node is not currently a feature.
+     * @param table
+     */    
+    List<NodeTableStatistics> readNodeTable(Node node);
+    
+    /**
+     * Get the table statistics for the given node table
+     * This call results in a direct polling of the information from the node
+     * Caller will be blocked until the node replies or request times out
+     *
+     * @param table
+     */
+    NodeTableStatistics nonCachedReadNodeTable(NodeTable table);
 
     /**
      * Get the node connectors statistics information for the network node

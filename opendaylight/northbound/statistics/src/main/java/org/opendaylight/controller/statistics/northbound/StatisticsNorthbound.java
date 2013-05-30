@@ -29,9 +29,11 @@ import org.opendaylight.controller.northbound.commons.exception.*;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.NodeTableCreator;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
@@ -302,6 +304,61 @@ public class StatisticsNorthbound {
         Node node = handleNodeAvailability(containerName, nodeType, nodeId);
         return new PortStatistics(node,
                 statisticsManager.getNodeConnectorStatistics(node));
+    }
+    
+    /**
+     * Returns a list of all the Table Statistics in a given Node.
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param nodeType
+     *            Node Type as specifid by Node class
+     * @param Node
+     *            Identifier
+     * @param TableID
+     * 			  table identifier
+     * @return Returns a list of all the Table Statistics in a given Node.
+     */
+    @Path("/{containerName}/tablestats/{nodeType}/{nodeId}")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @TypeHint(TableStatistics.class)
+    @StatusCodes({
+            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 404, condition = "The containerName is not found"),
+            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public TableStatistics getTableStatistics(
+            @PathParam("containerName") String containerName,
+            @PathParam("nodeType") String nodeType,
+            @PathParam("nodeId") String nodeId,
+            @PathParam("tableId") String tableId) {
+
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
+        handleDefaultDisabled(containerName);
+
+        IStatisticsManager statisticsManager = getStatisticsService(containerName);
+        if (statisticsManager == null) {
+            throw new ServiceUnavailableException("Statistics "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
+                .getInstance(ISwitchManager.class, containerName, this);
+        if (switchManager == null) {
+            throw new ServiceUnavailableException("Switch manager "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        Node node = handleNodeAvailability(containerName, nodeType, nodeId);
+        NodeTable nodetable = NodeTableCreator.createNodeTable((byte) Byte.valueOf(tableId), node);
+        return new TableStatistics(node,
+                statisticsManager.getNodeTableStatistics(nodetable));
     }
 
     private void handleDefaultDisabled(String containerName) {

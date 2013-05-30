@@ -33,6 +33,7 @@ import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
@@ -40,10 +41,12 @@ import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
-
+import org.opendaylight.controller.sal.utils.NodeTableCreator;
+import org.openflow.protocol.statistics.OFTableStatistics;
 /**
  * Read Service shim layer which is in charge of filtering the flow statistics
  * based on container. It is a Global instance.
@@ -58,6 +61,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     private IController controller = null;
     private IOFStatisticsManager statsMgr = null;
     private Map<String, Set<NodeConnector>> containerToNc;
+    private Map<String, Set<NodeTable>> containerToNt;
 
     public void setController(IController core) {
         this.controller = core;
@@ -76,6 +80,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
      */
     void init() {
         containerToNc = new HashMap<String, Set<NodeConnector>>();
+        containerToNt = new HashMap<String, Set<NodeTable>>();
     }
 
     /**
@@ -235,6 +240,28 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         return newList;
     }
 
+
+	public List<OFStatistics> filterTableListPerContainer(
+			String container, long switchId, List<OFStatistics> list) {
+        if (list == null) {
+            return null;
+        }
+
+        // Create new filtered list of node tables
+        List<OFStatistics> newList = new ArrayList<OFStatistics>();
+
+        for (OFStatistics stat : list) {
+            OFTableStatistics target = (OFTableStatistics) stat;
+            NodeTable nt = NodeTableCreator.createOFNodeTable(
+            		target.getTableId(), NodeCreator.createOFNode(switchId));
+            if (containerOwnsNodeTable(container, nt)) {
+                newList.add(target);
+            }
+        }
+
+        return newList;
+	}
+	
     /**
      * Returns whether the specified flow (flow match + actions)
      * belongs to the container
@@ -269,6 +296,22 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         Set<NodeConnector> portSet = containerToNc.get(container);
         return (portSet == null) ? false : portSet.contains(p);
     }
+    
+    /**
+     * Returns whether the passed NodeConnector belongs to the container
+     *
+     * @param container	container name
+     * @param table		node table to test
+     * @return 		true if belongs false otherwise
+     */
+	public boolean containerOwnsNodeTable(String container, NodeTable table) {
+        // All node table belong to the default container
+        if (container.equals(GlobalConstants.DEFAULT.toString())) {
+            return true;
+        }
+        Set<NodeTable> tableSet = containerToNt.get(container);
+        return (tableSet == null) ? false : tableSet.contains(table);
+	}
 
     /**
      * Returns whether the container flowspec allows the passed flow
@@ -417,5 +460,44 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
         return statsMgr.getTransmitRate(switchId, port);
     }
+
+	@Override
+	public NodeTableStatistics readNodeTable(String containerName,
+			NodeTable table, boolean cached) {
+        if (!containerOwnsNodeTable(containerName, table)) {
+            return null;
+        }
+        Node node = table.getNode();
+        long sid = (Long) node.getID();
+        Byte tableId = (Byte) table.getID();
+        List<OFStatistics> ofList = (cached == true) ? statsMgr
+        		.getOFTableStatistics(sid, tableId) : statsMgr.queryStatistics(
+        				sid, OFStatisticsType.TABLE, tableId);
+        List<NodeTableStatistics> ntStatistics = new TableStatisticsConverter(
+        		sid, ofList).getNodeTableStatsList();
+        return (ntStatistics.isEmpty()) ? new NodeTableStatistics()
+                : ntStatistics.get(0);
+	}
+
+	/**
+	 * Current behavior is to return null for readAllNodeTable
+	 * 
+	 * */
+	@Override
+	public List<NodeTableStatistics> readAllNodeTable(String containerName,
+			Node node, boolean cached) {
+
+        long sid = (Long) node.getID();
+        List<OFStatistics> ofList = (cached == true) ? statsMgr
+                .getOFTableStatistics(sid) : statsMgr.queryStatistics(sid,
+                OFStatisticsType.FLOW, null);
+
+        List<OFStatistics> filteredList = filterTableListPerContainer(
+                containerName, sid, ofList);
+        
+        return new TableStatisticsConverter(sid, filteredList)
+        		.getNodeTableStatsList();
+
+	}
 
 }

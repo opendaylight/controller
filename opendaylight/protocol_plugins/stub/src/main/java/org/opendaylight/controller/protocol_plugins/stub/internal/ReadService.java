@@ -36,6 +36,7 @@ import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
@@ -44,6 +45,7 @@ import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 /**
  * Stub Implementation for IPluginInReadService used by SAL
  * 
@@ -232,5 +234,17 @@ public class ReadService implements IPluginInReadService {
     public long getTransmitRate(NodeConnector connector) {
         return 100;
     }
+
+	@Override
+	public NodeTableStatistics readNodeTable(NodeTable table, boolean b) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<NodeTableStatistics> readAllNodeTable(Node node, boolean cached) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
