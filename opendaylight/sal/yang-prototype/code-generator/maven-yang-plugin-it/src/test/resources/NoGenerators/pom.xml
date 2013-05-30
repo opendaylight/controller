@@ -19,6 +19,7 @@
                         </goals>
                         <configuration>
                             <yangFilesRootDir>../files</yangFilesRootDir>
+                            <inspectDependencies>false</inspectDependencies>
                             <codeGenerators>
                             </codeGenerators>
                             <resourceProviders>

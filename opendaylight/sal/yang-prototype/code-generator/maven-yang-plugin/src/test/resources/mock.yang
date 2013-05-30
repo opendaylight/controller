@@ -1,0 +1,11 @@
+ module mock {
+
+   namespace "a:b:c";
+   prefix "m";
+
+   revision 2010-09-24 {
+     description
+      "Initial revision.";
+   }
+
+ }

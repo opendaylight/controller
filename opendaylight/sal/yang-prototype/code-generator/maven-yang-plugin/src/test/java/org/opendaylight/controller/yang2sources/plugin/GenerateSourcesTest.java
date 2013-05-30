@@ -7,38 +7,36 @@
  */
 package org.opendaylight.controller.yang2sources.plugin;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyListOf;
+import static org.hamcrest.core.Is.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang2sources.plugin.ConfigArg.CodeGeneratorArg;
-import org.opendaylight.controller.yang2sources.plugin.ConfigArg.ResourceProviderArg;
 import org.opendaylight.controller.yang2sources.spi.CodeGenerator;
-import org.opendaylight.controller.yang2sources.spi.ResourceGenerator;
 
 import com.google.common.collect.Lists;
 
-@Ignore
 public class GenerateSourcesTest {
 
-    @Mock
-    private YangModelParser parser;
     private String yang;
     private YangToSourcesMojo mojo;
     private File outDir;
+    @Mock
+    private MavenProject project;
 
     @Before
     public void setUp() {
@@ -46,71 +44,49 @@ public class GenerateSourcesTest {
 
         yang = new File(getClass().getResource("/mock.yang").getFile())
                 .getParent();
-        outDir = new File("outputDir");
+        outDir = new File("/outputDir");
         mojo = new YangToSourcesMojo(
-                new ResourceProviderArg[] {
-                        new ResourceProviderArg(ProviderMock.class.getName(),
-                                outDir),
-                        new ResourceProviderArg(ProviderMock2.class.getName(),
-                                outDir) },
                 new CodeGeneratorArg[] { new CodeGeneratorArg(
-                        GeneratorMock.class.getName(), outDir) }, parser, yang);
+                        GeneratorMock.class.getName(), "outputDir") }, yang);
+        doReturn(new File("")).when(project).getBasedir();
+        mojo.project = project;
     }
 
     @Test
     public void test() throws Exception {
         mojo.execute();
-        verify(parser, times(1)).parseYangModels(anyListOf(File.class));
         assertThat(GeneratorMock.called, is(1));
         assertThat(GeneratorMock.outputDir, is(outDir));
-    }
-
-    @Test
-    public void testRes() throws Exception {
-        mojo.execute();
-        assertThat(ProviderMock.called, is(1));
-        assertThat(ProviderMock2.called, is(1));
-        assertThat(ProviderMock2.baseDir, is(outDir));
-        assertThat(ProviderMock.baseDir, is(outDir));
+        assertNotNull(GeneratorMock.log);
+        assertTrue(GeneratorMock.additionalCfg.isEmpty());
     }
 
     public static class GeneratorMock implements CodeGenerator {
 
         private static int called = 0;
         private static File outputDir;
+        private static Log log;
+        private static Map<String, String> additionalCfg;
 
         @Override
         public Collection<File> generateSources(SchemaContext context,
-                File baseDir, Set<Module> yangModules) {
+                File outputBaseDir, Set<Module> currentModules,
+                File projectBaseDir) throws IOException {
             called++;
-            outputDir = baseDir;
+            outputDir = outputBaseDir;
             return Lists.newArrayList();
         }
-    }
-
-    public static class ProviderMock implements ResourceGenerator {
-
-        private static int called = 0;
-        private static File baseDir;
 
         @Override
-        public void generateResourceFiles(Collection<File> resources,
-                File outputDir) {
-            called++;
-            baseDir = outputDir;
+        public void setLog(Log log) {
+            this.log = log;
+        }
+
+        @Override
+        public void setAdditionalConfig(
+                Map<String, String> additionalConfiguration) {
+            this.additionalCfg = additionalConfiguration;
         }
     }
 
-    public static class ProviderMock2 implements ResourceGenerator {
-
-        private static int called = 0;
-        private static File baseDir;
-
-        @Override
-        public void generateResourceFiles(Collection<File> resources,
-                File outputDir) {
-            called++;
-            baseDir = outputDir;
-        }
-    }
 }
