@@ -361,15 +361,14 @@ public class YangParserImpl implements YangModelParser {
             final TypeDefinitionBuilder old, final boolean seekByTypedefBuilder) {
         if (old instanceof UnionTypeBuilder) {
             final UnionTypeBuilder oldUnion = (UnionTypeBuilder) old;
-            final UnionTypeBuilder newUnion = new UnionTypeBuilder(
-                    oldUnion.getActualPath(), oldUnion.getNamespace(),
-                    oldUnion.getRevision(), old.getLine());
+            final UnionTypeBuilder newUnion = new UnionTypeBuilder(old.getLine());
             for (TypeDefinition<?> td : oldUnion.getTypes()) {
                 newUnion.setType(td);
             }
             for (TypeDefinitionBuilder tdb : oldUnion.getTypedefs()) {
                 newUnion.setType(copyTypedefBuilder(tdb, true));
             }
+            newUnion.setPath(old.getPath());
             return newUnion;
         }
 

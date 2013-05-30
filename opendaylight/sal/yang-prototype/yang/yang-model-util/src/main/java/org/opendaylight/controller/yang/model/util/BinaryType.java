@@ -1,16 +1,14 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -25,7 +23,7 @@ import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
  *
  * @see BinaryTypeDefinition
  */
-public class BinaryType implements BinaryTypeDefinition {
+public final class BinaryType implements BinaryTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("binary");
     private final SchemaPath path;
@@ -40,22 +38,23 @@ public class BinaryType implements BinaryTypeDefinition {
         super();
 
         final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
-        constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+        constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "",
+                ""));
         this.lengthConstraints = Collections.unmodifiableList(constraints);
         this.bytes = Collections.emptyList();
         this.path = BaseTypes.schemaPath(name);
         this.baseType = this;
     }
 
-    public BinaryType(final List<String> actualPath, final URI namespace,
-            final Date revision) {
+    public BinaryType(final SchemaPath path) {
         super();
 
         final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
-        constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+        constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "",
+                ""));
         this.lengthConstraints = Collections.unmodifiableList(constraints);
         this.bytes = Collections.emptyList();
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.baseType = new BinaryType();
     }
 
@@ -66,20 +65,21 @@ public class BinaryType implements BinaryTypeDefinition {
      * @param lengthConstraints
      * @param units
      */
-    public BinaryType(final List<String> actualPath, final URI namespace,
-            final Date revision, final List<Byte> bytes,
+    public BinaryType(final SchemaPath path, final List<Byte> bytes,
             final List<LengthConstraint> lengthConstraints, final String units) {
         super();
 
         if ((lengthConstraints == null) || (lengthConstraints.isEmpty())) {
             final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
-            constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
+            constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE,
+                    "", ""));
             this.lengthConstraints = Collections.unmodifiableList(constraints);
         } else {
-            this.lengthConstraints = Collections.unmodifiableList(lengthConstraints);
+            this.lengthConstraints = Collections
+                    .unmodifiableList(lengthConstraints);
         }
 
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.bytes = Collections.unmodifiableList(bytes);
         this.units = units;
         this.baseType = new BinaryType();
@@ -88,7 +88,8 @@ public class BinaryType implements BinaryTypeDefinition {
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
     public BinaryTypeDefinition getBaseType() {
@@ -108,7 +109,9 @@ public class BinaryType implements BinaryTypeDefinition {
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
+     * ()
      */
     @Override
     public Object getDefaultValue() {
@@ -138,7 +141,8 @@ public class BinaryType implements BinaryTypeDefinition {
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
+     * @see
+     * org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
     @Override
     public String getDescription() {
@@ -169,8 +173,8 @@ public class BinaryType implements BinaryTypeDefinition {
      * (non-Javadoc)
      *
      * @see
-     * org.opendaylight.controller.yang.model.base.type.api.BinaryTypeDefinition#getLengthConstraint
-     * ()
+     * org.opendaylight.controller.yang.model.base.type.api.BinaryTypeDefinition
+     * #getLengthConstraint ()
      */
     @Override
     public List<LengthConstraint> getLengthConstraints() {
@@ -191,7 +195,8 @@ public class BinaryType implements BinaryTypeDefinition {
                 + ((description == null) ? 0 : description.hashCode());
         result = prime
                 * result
-                + ((lengthConstraints == null) ? 0 : lengthConstraints.hashCode());
+                + ((lengthConstraints == null) ? 0 : lengthConstraints
+                        .hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((path == null) ? 0 : path.hashCode());
         result = prime * result

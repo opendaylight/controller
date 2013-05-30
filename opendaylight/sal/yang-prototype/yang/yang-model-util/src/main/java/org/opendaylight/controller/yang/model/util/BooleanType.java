@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -23,7 +21,7 @@ import org.opendaylight.controller.yang.model.api.type.BooleanTypeDefinition;
  *
  * @see BooleanTypeDefinition
  */
-public class BooleanType implements BooleanTypeDefinition {
+public final class BooleanType implements BooleanTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("boolean");
     private final SchemaPath path;
@@ -43,11 +41,10 @@ public class BooleanType implements BooleanTypeDefinition {
         this.baseType = this;
     }
 
-    public BooleanType(final List<String> actualPath, final URI namespace,
-            final Date revision) {
+    public BooleanType(final SchemaPath path) {
         super();
         this.defaultValue = false;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.baseType = new BooleanType();
     }
 
@@ -57,11 +54,10 @@ public class BooleanType implements BooleanTypeDefinition {
      * @param defaultValue
      *            Default Value
      */
-    public BooleanType(final List<String> actualPath, final URI namespace,
-            final Date revision, final Boolean defaultValue) {
+    public BooleanType(final SchemaPath path, final Boolean defaultValue) {
         super();
         this.defaultValue = defaultValue;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.baseType = new BooleanType();
     }
 
@@ -73,12 +69,11 @@ public class BooleanType implements BooleanTypeDefinition {
      * @param units
      *            Units
      */
-    public BooleanType(final List<String> actualPath, final URI namespace,
-            final Date revision, final Boolean defaultValue, final String units) {
+    public BooleanType(final SchemaPath path, final Boolean defaultValue, final String units) {
         super();
         this.defaultValue = defaultValue;
         this.units = units;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.baseType = new BooleanType();
     }
 

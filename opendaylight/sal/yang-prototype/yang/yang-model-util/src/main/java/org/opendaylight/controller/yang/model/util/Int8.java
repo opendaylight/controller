@@ -1,34 +1,31 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
 /**
- * Implementation of Yang int8 built-in type.
- * <br>
- * int8 represents integer values between -128 and 127, inclusively. The Java counterpart of
- * Yang int8 built-in type is {@link Byte}.
+ * Implementation of Yang int8 built-in type. <br>
+ * int8 represents integer values between -128 and 127, inclusively. The Java
+ * counterpart of Yang int8 built-in type is {@link Byte}.
  *
  * @see AbstractSignedInteger
  */
-public class Int8 extends AbstractSignedInteger {
+public final class Int8 extends AbstractSignedInteger {
 
     private static final QName name = BaseTypes.constructQName("int8");
     private Byte defaultValue = null;
-    private static final String description =
-            "represents integer values between -128 and 127, inclusively.";
+    private static final String description = "represents integer values between -128 and 127, inclusively.";
     private final IntegerTypeDefinition baseType;
 
     private Int8() {
@@ -36,23 +33,21 @@ public class Int8 extends AbstractSignedInteger {
         this.baseType = this;
     }
 
-    public Int8(final List<String> actualPath, final URI namespace,
-            final Date revision) {
-        super(actualPath, namespace, revision, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
+    public Int8(final SchemaPath path) {
+        super(path, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
         this.baseType = new Int8();
     }
 
-    public Int8(final List<String> actualPath, final URI namespace,
-            final Date revision, final Byte defaultValue) {
-        super(actualPath, namespace, revision, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
+    public Int8(final SchemaPath path, final Byte defaultValue) {
+        super(path, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
         this.baseType = new Int8();
         this.defaultValue = defaultValue;
     }
 
-    public Int8(final List<String> actualPath, final URI namespace,
-            final Date revision, final List<RangeConstraint> rangeStatements,
-            final String units, final Byte defaultValue) {
-        super(actualPath, namespace, revision, name, description, rangeStatements, units);
+    public Int8(final SchemaPath path,
+            final List<RangeConstraint> rangeStatements, final String units,
+            final Byte defaultValue) {
+        super(path, name, description, rangeStatements, units);
         this.baseType = new Int8();
         this.defaultValue = defaultValue;
     }
@@ -60,7 +55,8 @@ public class Int8 extends AbstractSignedInteger {
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
     public IntegerTypeDefinition getBaseType() {
@@ -70,7 +66,9 @@ public class Int8 extends AbstractSignedInteger {
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
+     * ()
      */
     @Override
     public Object getDefaultValue() {

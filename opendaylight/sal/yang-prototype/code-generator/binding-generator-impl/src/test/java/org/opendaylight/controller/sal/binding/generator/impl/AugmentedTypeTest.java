@@ -158,19 +158,22 @@ public class AugmentedTypeTest {
 
         final List<MethodSignature> networkLink2Methods = gtNetworkLink2.getMethodDefinitions();
         assertNotNull("networkLink2Methods is null", networkLink2Methods);
-//      FIXME: in some cases getIfcMethod is null which causes test fail. fix ASAP
-//      MethodSignature getIfcMethod = null;
-//      for (MethodSignature method : networkLink2Methods) {
-//          if (method.getName().equals("getInterface")) {
-//              getIfcMethod = method;
-//              break;
-//          }
-//      }
 
-//      assertNotNull("getIfcMethod is null", getIfcMethod);
-//      assertNotNull("getIfcMethod.getReturnType() is null", getIfcMethod.getReturnType());
-//      assertFalse("getIfcMethod.getReturnType() should not be Void", getIfcMethod.getReturnType().equals("java.lang.Void"));
-//      assertTrue("getIfcMethod.getReturnType().getName() must be String", getIfcMethod.getReturnType().getName().equals("String"));
+        MethodSignature getIfcMethod = null;
+        for (MethodSignature method : networkLink2Methods) {
+            if (method.getName().equals("getInterface")) {
+                getIfcMethod = method;
+                break;
+            }
+        }
+
+        assertNotNull("getIfcMethod is null", getIfcMethod);
+        assertNotNull("getIfcMethod.getReturnType() is null",
+                getIfcMethod.getReturnType());
+        assertFalse("getIfcMethod.getReturnType() should not be Void",
+                getIfcMethod.getReturnType().equals("java.lang.Void"));
+        assertTrue("getIfcMethod.getReturnType().getName() must be String",
+                getIfcMethod.getReturnType().getName().equals("String"));
     }
 
     @Test

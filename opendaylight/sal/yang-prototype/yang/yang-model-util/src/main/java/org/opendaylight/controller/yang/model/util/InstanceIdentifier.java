@@ -7,9 +7,7 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -24,7 +22,7 @@ import org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDef
  *
  * @see InstanceIdentifierTypeDefinition
  */
-public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
+public final class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
 
     private static final QName name = BaseTypes
             .constructQName("instance-identifier");
@@ -46,10 +44,9 @@ public class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
         this.baseType = this;
     }
 
-    public InstanceIdentifier(final List<String> actualPath, final URI namespace,
-            final Date revision, RevisionAwareXPath xpath, boolean requireInstance) {
+    public InstanceIdentifier(final SchemaPath path, RevisionAwareXPath xpath, boolean requireInstance) {
         super();
-        path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.xpath = xpath;
         this.requireInstance = requireInstance;
         this.baseType = new InstanceIdentifier(xpath, requireInstance);

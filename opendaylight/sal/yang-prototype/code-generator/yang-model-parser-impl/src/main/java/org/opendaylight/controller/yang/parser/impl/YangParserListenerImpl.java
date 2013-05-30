@@ -73,6 +73,7 @@ import org.opendaylight.controller.yang.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.NotificationBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.RpcDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.TypedefBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.UnionTypeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.RefineHolder;
 import org.slf4j.Logger;
@@ -334,8 +335,13 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
                 moduleBuilder.setType(type, actualPath);
             } else {
                 if ("union".equals(typeName)) {
-                    moduleBuilder.addUnionType(actualPath, namespace, revision,
+                    List<String> typePath = new ArrayList<String>(actualPath);
+                    typePath.add(typeName);
+
+                    SchemaPath p = createActualSchemaPath(typePath, namespace, revision, yangModelPrefix);
+                    UnionTypeBuilder unionBuilder = moduleBuilder.addUnionType(actualPath, namespace, revision,
                             line);
+                    unionBuilder.setPath(p);
                 } else if ("identityref".equals(typeName)) {
                     SchemaPath path = createActualSchemaPath(actualPath,
                             namespace, revision, yangModelPrefix);
@@ -344,7 +350,8 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
                             line);
                 } else {
                     List<String> typePath = new ArrayList<String>(actualPath);
-                    typePath.remove(0);
+                    typePath.add(typeName);
+
                     type = parseTypeBody(typeName, typeBody, typePath,
                             namespace, revision, yangModelPrefix);
                     moduleBuilder.setType(type, actualPath);

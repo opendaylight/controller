@@ -8,6 +8,7 @@
 package org.opendaylight.controller.yang.parser.util;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,12 +17,45 @@ import org.opendaylight.controller.yang.model.api.ModuleImport;
 import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.BinaryTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.BooleanTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.DecimalTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.EmptyTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
+import org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
+import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
+import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
+import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.UnionTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
+import org.opendaylight.controller.yang.model.util.BinaryType;
+import org.opendaylight.controller.yang.model.util.BitsType;
+import org.opendaylight.controller.yang.model.util.BooleanType;
+import org.opendaylight.controller.yang.model.util.Decimal64;
+import org.opendaylight.controller.yang.model.util.EmptyType;
+import org.opendaylight.controller.yang.model.util.EnumerationType;
+import org.opendaylight.controller.yang.model.util.IdentityrefType;
+import org.opendaylight.controller.yang.model.util.InstanceIdentifier;
+import org.opendaylight.controller.yang.model.util.Int16;
+import org.opendaylight.controller.yang.model.util.Int32;
+import org.opendaylight.controller.yang.model.util.Int64;
+import org.opendaylight.controller.yang.model.util.Int8;
+import org.opendaylight.controller.yang.model.util.Leafref;
+import org.opendaylight.controller.yang.model.util.StringType;
+import org.opendaylight.controller.yang.model.util.UnionType;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.ChildNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.TypeAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.AnyXmlBuilder;
@@ -102,27 +136,168 @@ public final class ParserUtils {
             final ChildNodeBuilder target) {
         for (DataSchemaNodeBuilder builder : augment.getChildNodes()) {
             builder.setAugmenting(true);
-            correctPath(augment, target.getPath());
+            correctAugmentChildPath(augment, target.getPath());
             target.addChildNode(builder);
         }
     }
 
-    private static void correctPath(final ChildNodeBuilder node,
+    private static void correctAugmentChildPath(final ChildNodeBuilder node,
             final SchemaPath parentSchemaPath) {
         for (DataSchemaNodeBuilder builder : node.getChildNodes()) {
 
             // add correct path
-            SchemaPath targetNodeSchemaPath = parentSchemaPath;
             List<QName> targetNodePath = new ArrayList<QName>(
-                    targetNodeSchemaPath.getPath());
+                    parentSchemaPath.getPath());
             targetNodePath.add(builder.getQName());
             builder.setPath(new SchemaPath(targetNodePath, true));
 
             if (builder instanceof ChildNodeBuilder) {
                 ChildNodeBuilder cnb = (ChildNodeBuilder) builder;
-                correctPath(cnb, builder.getPath());
+                correctAugmentChildPath(cnb, builder.getPath());
+            }
+
+            // if child can contains type, correct path for this type too
+            if(builder instanceof TypeAwareBuilder) {
+                TypeAwareBuilder nodeBuilder = (TypeAwareBuilder)builder;
+                QName nodeBuilderQName = nodeBuilder.getQName();
+                TypeDefinition<?> nodeBuilderType = nodeBuilder.getType();
+                if(nodeBuilderType != null) {
+                    TypeDefinition<?> newType = createCorrectTypeDefinition(parentSchemaPath, nodeBuilderQName, nodeBuilderType);
+                    nodeBuilder.setType(newType);
+                } else {
+                    TypeDefinitionBuilder nodeBuilderTypedef = nodeBuilder.getTypedef();
+                    SchemaPath newSchemaPath = createNewSchemaPath(nodeBuilderTypedef.getPath(), nodeBuilderQName, nodeBuilderTypedef.getQName());
+                    nodeBuilderTypedef.setPath(newSchemaPath);
+                }
             }
         }
+    }
+
+    private static TypeDefinition<?> createCorrectTypeDefinition(SchemaPath parentSchemaPath, QName nodeQName, TypeDefinition<?> nodeType) {
+        TypeDefinition<?> result = null;
+        SchemaPath newSchemaPath = null;
+        if(nodeType != null) {
+            if(nodeType instanceof BinaryTypeDefinition) {
+                BinaryTypeDefinition binType = (BinaryTypeDefinition)nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, binType.getQName());
+                List<Byte> bytes = (List<Byte>)binType.getDefaultValue();
+                result = new BinaryType(newSchemaPath, bytes, binType.getLengthConstraints(), binType.getUnits());
+            } else if(nodeType instanceof BitsTypeDefinition) {
+                BitsTypeDefinition bitsType = (BitsTypeDefinition)nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, nodeType.getQName());
+                result = new BitsType(newSchemaPath, bitsType.getBits(), bitsType.getUnits());
+            } else if(nodeType instanceof BooleanTypeDefinition) {
+                BooleanTypeDefinition booleanType = (BooleanTypeDefinition)nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, booleanType.getQName());
+                result = new BooleanType(newSchemaPath, (Boolean)booleanType.getDefaultValue(), booleanType.getUnits());
+            } else if(nodeType instanceof DecimalTypeDefinition) {
+                DecimalTypeDefinition decimalType = (DecimalTypeDefinition)nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, decimalType.getQName());
+                BigDecimal defaultValue = (BigDecimal)decimalType.getDefaultValue();
+                result = new Decimal64(newSchemaPath, decimalType.getUnits(), defaultValue, decimalType.getRangeStatements(), decimalType.getFractionDigits());
+            } else if(nodeType instanceof EmptyTypeDefinition) {
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, nodeType.getQName());
+                result = new EmptyType(newSchemaPath);
+            } else if(nodeType instanceof EnumTypeDefinition) {
+                EnumTypeDefinition enumType = (EnumTypeDefinition)nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, enumType.getQName());
+                result = new EnumerationType(newSchemaPath, (EnumPair)enumType.getDefaultValue(), enumType.getValues(), enumType.getUnits());
+            } else if(nodeType instanceof IdentityrefTypeDefinition) {
+                IdentityrefTypeDefinition idrefType = (IdentityrefTypeDefinition)nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, idrefType.getQName());
+                result = new IdentityrefType(idrefType.getIdentity(), newSchemaPath);
+            } else if(nodeType instanceof InstanceIdentifierTypeDefinition) {
+                InstanceIdentifierTypeDefinition instIdType = (InstanceIdentifierTypeDefinition)nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, instIdType.getQName());
+                return new InstanceIdentifier(newSchemaPath, instIdType.getPathStatement(), instIdType.requireInstance());
+            } else if(nodeType instanceof StringTypeDefinition) {
+                result = copyStringType(parentSchemaPath, nodeQName, (StringTypeDefinition)nodeType);
+            } else if(nodeType instanceof IntegerTypeDefinition) {
+                result = copyIntType(parentSchemaPath, nodeQName, (IntegerTypeDefinition)nodeType);
+            } else if(nodeType instanceof UnsignedIntegerTypeDefinition) {
+                result = copyUIntType(parentSchemaPath, nodeQName, (UnsignedIntegerTypeDefinition)nodeType);
+            } else if(nodeType instanceof LeafrefTypeDefinition) {
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, nodeType.getQName());
+                result = new Leafref(newSchemaPath, ((LeafrefTypeDefinition)nodeType).getPathStatement());
+            } else if(nodeType instanceof UnionTypeDefinition) {
+                UnionTypeDefinition unionType = (UnionTypeDefinition)nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, unionType.getQName());
+                return new UnionType(newSchemaPath, unionType.getTypes());
+            }
+        }
+        return result;
+    }
+
+    private static TypeDefinition<?> copyStringType(SchemaPath schemaPath, QName nodeQName, StringTypeDefinition nodeType) {
+        List<QName> path = schemaPath.getPath();
+        List<QName> newPath = new ArrayList<QName>(path);
+        newPath.add(nodeQName);
+        newPath.add(nodeType.getQName());
+        SchemaPath newSchemaPath = new SchemaPath(newPath, schemaPath.isAbsolute());
+
+        String newDefault = nodeType.getDefaultValue().toString();
+        String newUnits = nodeType.getUnits();
+        List<LengthConstraint> lengths = nodeType.getLengthStatements();
+        List<PatternConstraint> patterns = nodeType.getPatterns();
+
+        return new StringType(newSchemaPath, newDefault, lengths, patterns, newUnits);
+    }
+
+    private static TypeDefinition<?> copyIntType(SchemaPath schemaPath, QName nodeQName, IntegerTypeDefinition type) {
+        QName typeQName = type.getQName();
+        SchemaPath newSchemaPath = createNewSchemaPath(schemaPath, nodeQName, typeQName);
+
+        String localName = typeQName.getLocalName();
+        List<RangeConstraint> ranges = type.getRangeStatements();
+        String units = type.getUnits();
+
+        if("int8".equals(localName)) {
+            Byte defaultValue = (Byte)type.getDefaultValue();
+            return new Int8(newSchemaPath, ranges, units, defaultValue);
+        } else if("int16".equals(localName)) {
+            Short defaultValue = (Short)type.getDefaultValue();
+            return new Int16(newSchemaPath, ranges, units, defaultValue);
+        } else if("int32".equals(localName)) {
+            Integer defaultValue = (Integer)type.getDefaultValue();
+            return new Int32(newSchemaPath, ranges, units, defaultValue);
+        } else if("int64".equals(localName)) {
+            Long defaultValue = (Long)type.getDefaultValue();
+            return new Int64(newSchemaPath, ranges, units, defaultValue);
+        } else {
+            return null;
+        }
+    }
+
+    private static TypeDefinition<?> copyUIntType(SchemaPath schemaPath, QName nodeQName, UnsignedIntegerTypeDefinition type) {
+        QName typeQName = type.getQName();
+        SchemaPath newSchemaPath = createNewSchemaPath(schemaPath, nodeQName, typeQName);
+
+        String localName = typeQName.getLocalName();
+        List<RangeConstraint> ranges = type.getRangeStatements();
+        String units = type.getUnits();
+
+        if("uint8".equals(localName)) {
+            Byte defaultValue = (Byte)type.getDefaultValue();
+            return new Int8(newSchemaPath, ranges, units, defaultValue);
+        } else if("uint16".equals(localName)) {
+            Short defaultValue = (Short)type.getDefaultValue();
+            return new Int16(newSchemaPath, ranges, units, defaultValue);
+        } else if("uint32".equals(localName)) {
+            Integer defaultValue = (Integer)type.getDefaultValue();
+            return new Int32(newSchemaPath, ranges, units, defaultValue);
+        } else if("uint64".equals(localName)) {
+            Long defaultValue = (Long)type.getDefaultValue();
+            return new Int64(newSchemaPath, ranges, units, defaultValue);
+        } else {
+            return null;
+        }
+    }
+
+    private static SchemaPath createNewSchemaPath(SchemaPath schemaPath, QName currentQName, QName qname) {
+        List<QName> newPath = new ArrayList<QName>(schemaPath.getPath());
+        newPath.add(currentQName);
+        newPath.add(qname);
+        return new SchemaPath(newPath, schemaPath.isAbsolute());
     }
 
     public static void refineLeaf(LeafSchemaNodeBuilder leaf,

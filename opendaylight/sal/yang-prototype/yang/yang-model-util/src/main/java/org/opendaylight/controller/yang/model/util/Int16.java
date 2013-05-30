@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
@@ -22,12 +21,11 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  *
  * @see AbstractSignedInteger
  */
-public class Int16 extends AbstractSignedInteger {
+public final class Int16 extends AbstractSignedInteger {
 
     private static final QName name = BaseTypes.constructQName("int16");
     private Short defaultValue = null;
-    private static final String description =
-            "int16  represents integer values between -32768 and 32767, inclusively.";
+    private static final String description = "int16  represents integer values between -32768 and 32767, inclusively.";
     private final IntegerTypeDefinition baseType;
 
     private Int16() {
@@ -35,17 +33,16 @@ public class Int16 extends AbstractSignedInteger {
         this.baseType = this;
     }
 
-    public Int16(final List<String> actualPath, final URI namespace,
-            final Date revision) {
-        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Int16(final SchemaPath path) {
+        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
         this.baseType = new Int16();
 
     }
 
-    public Int16(final List<String> actualPath, final URI namespace,
-            final Date revision, final List<RangeConstraint> rangeStatements,
-            final String units, final Short defaultValue) {
-        super(actualPath, namespace, revision, name, description, rangeStatements, units);
+    public Int16(final SchemaPath path,
+            final List<RangeConstraint> rangeStatements, final String units,
+            final Short defaultValue) {
+        super(path, name, description, rangeStatements, units);
         this.defaultValue = defaultValue;
         this.baseType = new Int16();
     }

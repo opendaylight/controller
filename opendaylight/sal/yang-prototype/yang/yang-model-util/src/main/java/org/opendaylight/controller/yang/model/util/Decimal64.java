@@ -8,10 +8,8 @@
 package org.opendaylight.controller.yang.model.util;
 
 import java.math.BigDecimal;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -27,7 +25,7 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  *
  * @see DecimalTypeDefinition
  */
-public class Decimal64 implements DecimalTypeDefinition {
+public final class Decimal64 implements DecimalTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("decimal64");
     private final SchemaPath path;
@@ -73,8 +71,7 @@ public class Decimal64 implements DecimalTypeDefinition {
         this.baseType = this;
     }
 
-    public Decimal64(final List<String> actualPath, final URI namespace,
-            final Date revision, final Integer fractionDigits) {
+    public Decimal64(final SchemaPath path, final Integer fractionDigits) {
         super();
         if (!((fractionDigits.intValue() > 1) && (fractionDigits.intValue() <= 18))) {
             throw new IllegalArgumentException(
@@ -82,7 +79,7 @@ public class Decimal64 implements DecimalTypeDefinition {
         }
         this.fractionDigits = fractionDigits;
         rangeStatements = defaultRangeStatements();
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.baseType = new Decimal64(fractionDigits);
     }
 
@@ -109,8 +106,7 @@ public class Decimal64 implements DecimalTypeDefinition {
      *            integer between 1 and 18 inclusively
      * @exception IllegalArgumentException
      */
-    public Decimal64(final List<String> actualPath, final URI namespace,
-            final Date revision, final List<RangeConstraint> rangeStatements,
+    public Decimal64(final SchemaPath path, final List<RangeConstraint> rangeStatements,
             Integer fractionDigits) {
         super();
         if (!((fractionDigits.intValue() > 1) && (fractionDigits.intValue() <= 18))) {
@@ -124,7 +120,7 @@ public class Decimal64 implements DecimalTypeDefinition {
                     .unmodifiableList(rangeStatements);
         }
         this.fractionDigits = fractionDigits;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.baseType = new Decimal64(fractionDigits);
     }
 
@@ -153,8 +149,7 @@ public class Decimal64 implements DecimalTypeDefinition {
      * @param fractionDigits
      *            integer between 1 and 18 inclusively
      */
-    public Decimal64(final List<String> actualPath, final URI namespace,
-            final Date revision, final String units,
+    public Decimal64(final SchemaPath path, final String units,
             final BigDecimal defaultValue,
             final List<RangeConstraint> rangeStatements,
             final Integer fractionDigits) {
@@ -174,7 +169,7 @@ public class Decimal64 implements DecimalTypeDefinition {
         this.units = units;
         this.defaultValue = defaultValue;
         this.fractionDigits = fractionDigits;
-        this.path = BaseTypes.schemaPath(name);
+        this.path = path;
         this.baseType = new Decimal64(fractionDigits);
     }
 

@@ -9,7 +9,10 @@ package org.opendaylight.controller.yang.parser.impl;
 
 import static org.junit.Assert.*;
 
+import java.io.FileNotFoundException;
 import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -32,6 +35,7 @@ import org.opendaylight.controller.yang.model.api.Deviation.Deviate;
 import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.FeatureDefinition;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
+import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
@@ -52,6 +56,7 @@ import org.opendaylight.controller.yang.model.util.Decimal64;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.Int16;
 import org.opendaylight.controller.yang.model.util.Int32;
+import org.opendaylight.controller.yang.model.util.Leafref;
 import org.opendaylight.controller.yang.model.util.StringType;
 import org.opendaylight.controller.yang.model.util.Uint32;
 import org.opendaylight.controller.yang.model.util.UnionType;
@@ -60,7 +65,7 @@ public class YangParserTest {
     private Set<Module> modules;
 
     @Before
-    public void init() {
+    public void init() throws FileNotFoundException {
         modules = TestUtils.loadModules("src/test/resources/model");
         assertEquals(3, modules.size());
     }
@@ -167,8 +172,8 @@ public class YangParserTest {
         assertNull(constraints.getWhenCondition());
         assertEquals(0, constraints.getMustConstraints().size());
         assertFalse(constraints.isMandatory());
-        assertEquals(1, (int)constraints.getMinElements());
-        assertEquals(11, (int)constraints.getMaxElements());
+        assertEquals(1, (int) constraints.getMinElements());
+        assertEquals(11, (int) constraints.getMaxElements());
         // test AugmentationTarget args
         Set<AugmentationSchema> availableAugmentations = ifEntry
                 .getAvailableAugmentations();
@@ -564,14 +569,14 @@ public class YangParserTest {
             SchemaNode value = entry.getValue();
             if (value instanceof LeafSchemaNode) {
                 refineLeaf = (LeafSchemaNode) value;
-            } else if(value instanceof ContainerSchemaNode) {
+            } else if (value instanceof ContainerSchemaNode) {
                 refineContainer = (ContainerSchemaNode) value;
-            } else if(value instanceof ListSchemaNode) {
-                refineList = (ListSchemaNode)value;
-            } else if(value instanceof GroupingDefinition) {
-                refineGrouping = (GroupingDefinition)value;
-            } else if(value instanceof TypeDefinition<?>) {
-                typedef = (TypeDefinition<?>)value;
+            } else if (value instanceof ListSchemaNode) {
+                refineList = (ListSchemaNode) value;
+            } else if (value instanceof GroupingDefinition) {
+                refineGrouping = (GroupingDefinition) value;
+            } else if (value instanceof TypeDefinition<?>) {
+                typedef = (TypeDefinition<?>) value;
             }
         }
 
@@ -610,19 +615,25 @@ public class YangParserTest {
 
         // list addresses
         assertNotNull(refineList);
-        assertEquals("description of addresses defined by refine", refineList.getDescription());
-        assertEquals("addresses reference added by refine", refineList.getReference());
+        assertEquals("description of addresses defined by refine",
+                refineList.getDescription());
+        assertEquals("addresses reference added by refine",
+                refineList.getReference());
         assertFalse(refineList.isConfiguration());
-        assertEquals(2, (int)refineList.getConstraints().getMinElements());
-        assertEquals(12, (int)refineList.getConstraints().getMaxElements());
+        assertEquals(2, (int) refineList.getConstraints().getMinElements());
+        assertEquals(12, (int) refineList.getConstraints().getMaxElements());
 
         // grouping target-inner
         assertNotNull(refineGrouping);
-        Set<DataSchemaNode> refineGroupingChildren = refineGrouping.getChildNodes();
+        Set<DataSchemaNode> refineGroupingChildren = refineGrouping
+                .getChildNodes();
         assertEquals(1, refineGroupingChildren.size());
-        LeafSchemaNode refineGroupingLeaf = (LeafSchemaNode)refineGroupingChildren.iterator().next();
-        assertEquals("inner-grouping-id", refineGroupingLeaf.getQName().getLocalName());
-        assertEquals("new target-inner grouping description", refineGrouping.getDescription());
+        LeafSchemaNode refineGroupingLeaf = (LeafSchemaNode) refineGroupingChildren
+                .iterator().next();
+        assertEquals("inner-grouping-id", refineGroupingLeaf.getQName()
+                .getLocalName());
+        assertEquals("new target-inner grouping description",
+                refineGrouping.getDescription());
 
         // typedef group-type
         assertNotNull(typedef);
@@ -759,6 +770,45 @@ public class YangParserTest {
         GroupingDefinition grouping = groupings.iterator().next();
         Set<DataSchemaNode> children = grouping.getChildNodes();
         assertEquals(5, children.size());
+    }
+
+    @Test
+    public void testAugmentNodesTypesSchemaPath() throws Exception {
+        final DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Module testModule = TestUtils.findModule(modules, "types1");
+        Set<AugmentationSchema> augments = testModule.getAugmentations();
+        assertEquals(1, augments.size());
+        AugmentationSchema augment = augments.iterator().next();
+
+        LeafSchemaNode ifcId = (LeafSchemaNode) augment
+                .getDataChildByName("interface-id");
+        Leafref ifcIdType = (Leafref) ifcId.getType();
+        SchemaPath ifcIdTypeSchemaPath = ifcIdType.getPath();
+        List<QName> ifcIdTypePath = ifcIdTypeSchemaPath.getPath();
+        QName q0 = new QName(new URI("urn:simple.types.data.demo"),
+                simpleDateFormat.parse("2013-02-27"), "data", "interfaces");
+        QName q1 = new QName(new URI("urn:simple.types.data.demo"),
+                simpleDateFormat.parse("2013-02-27"), "data", "ifEntry");
+        QName q2 = new QName(new URI("urn:simple.container.demo.test"),
+                simpleDateFormat.parse("2013-02-27"), "data", "augment-holder");
+        QName q3 = new QName(new URI("urn:simple.container.demo"),
+                simpleDateFormat.parse("2013-02-27"), "data", "interface-id");
+        assertEquals(q0, ifcIdTypePath.get(0));
+        assertEquals(q1, ifcIdTypePath.get(1));
+        assertEquals(q2, ifcIdTypePath.get(2));
+        assertEquals(q3, ifcIdTypePath.get(3));
+
+        LeafListSchemaNode higherLayer = (LeafListSchemaNode) augment
+                .getDataChildByName("higher-layer-if");
+        Leafref higherLayerType = (Leafref) higherLayer.getType();
+        SchemaPath higherLayerTypeSchemaPath = higherLayerType.getPath();
+        List<QName> higherLayerTypePath = higherLayerTypeSchemaPath.getPath();
+        assertEquals(q0, higherLayerTypePath.get(0));
+        assertEquals(q1, higherLayerTypePath.get(1));
+        assertEquals(q2, higherLayerTypePath.get(2));
+        q3 = new QName(new URI("urn:simple.container.demo"),
+                simpleDateFormat.parse("2013-02-27"), "data", "higher-layer-if");
+        assertEquals(q3, higherLayerTypePath.get(3));
     }
 
 }
