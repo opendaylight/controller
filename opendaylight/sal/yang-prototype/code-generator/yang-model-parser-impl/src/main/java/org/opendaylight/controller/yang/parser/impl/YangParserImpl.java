@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
@@ -81,35 +81,80 @@ import org.opendaylight.controller.yang.validator.YangModelBasicValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 public final class YangParserImpl implements YangModelParser {
 
     private static final Logger logger = LoggerFactory
             .getLogger(YangParserImpl.class);
 
     @Override
-    public Set<Module> parseYangModels(final List<File> yangFiles) {
+    public Map<File, Module> parseYangModelsMapped(List<File> yangFiles) {
         if (yangFiles != null) {
-            final List<InputStream> inputStreams = new ArrayList<InputStream>();
+            final Map<InputStream, File> inputStreams = Maps.newHashMap();
 
             for (final File yangFile : yangFiles) {
                 try {
-                    inputStreams.add(new FileInputStream(yangFile));
+                    inputStreams.put(new FileInputStream(yangFile), yangFile);
                 } catch (FileNotFoundException e) {
                     logger.warn("Exception while reading yang file: "
                             + yangFile.getName(), e);
                 }
             }
-            final Map<String, TreeMap<Date, ModuleBuilder>> modules = resolveModuleBuilders(inputStreams);
-            return build(modules);
+
+            Map<ModuleBuilder, InputStream> builderToStreamMap = Maps
+                    .newHashMap();
+
+            final Map<String, TreeMap<Date, ModuleBuilder>> modules = resolveModuleBuilders(
+                    Lists.newArrayList(inputStreams.keySet()),
+                    builderToStreamMap);
+            // return new LinkedHashSet<Module>(build(modules).values());
+
+            Map<File, Module> retVal = Maps.newLinkedHashMap();
+            Map<ModuleBuilder, Module> builderToModuleMap = build(modules);
+
+            for (Entry<ModuleBuilder, Module> builderToModule : builderToModuleMap
+                    .entrySet()) {
+                retVal.put(inputStreams.get(builderToStreamMap
+                        .get(builderToModule.getKey())), builderToModule
+                        .getValue());
+            }
+
+            return retVal;
         }
-        return Collections.emptySet();
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Set<Module> parseYangModels(final List<File> yangFiles) {
+        return Sets.newLinkedHashSet(parseYangModelsMapped(yangFiles).values());
     }
 
     @Override
     public Set<Module> parseYangModelsFromStreams(
             final List<InputStream> yangModelStreams) {
-        final Map<String, TreeMap<Date, ModuleBuilder>> modules = resolveModuleBuilders(yangModelStreams);
-        return build(modules);
+        return Sets.newHashSet(parseYangModelsFromStreamsMapped(
+                yangModelStreams).values());
+    }
+
+    @Override
+    public Map<InputStream, Module> parseYangModelsFromStreamsMapped(
+            final List<InputStream> yangModelStreams) {
+        Map<ModuleBuilder, InputStream> builderToStreamMap = Maps.newHashMap();
+
+        final Map<String, TreeMap<Date, ModuleBuilder>> modules = resolveModuleBuilders(
+                yangModelStreams, builderToStreamMap);
+        Map<InputStream, Module> retVal = Maps.newLinkedHashMap();
+        Map<ModuleBuilder, Module> builderToModuleMap = build(modules);
+
+        for (Entry<ModuleBuilder, Module> builderToModule : builderToModuleMap
+                .entrySet()) {
+            retVal.put(builderToStreamMap.get(builderToModule.getKey()),
+                    builderToModule.getValue());
+        }
+        return retVal;
     }
 
     @Override
@@ -117,13 +162,11 @@ public final class YangParserImpl implements YangModelParser {
         return new SchemaContextImpl(modules);
     }
 
-    private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
-            final List<InputStream> yangFileStreams) {
-        // Linked Hash Map MUST be used because Linked Hash Map preserves ORDER
-        // of items stored in map.
-        final Map<String, TreeMap<Date, ModuleBuilder>> modules = new LinkedHashMap<String, TreeMap<Date, ModuleBuilder>>();
+    private ModuleBuilder[] parseModuleBuilders(List<InputStream> inputStreams,
+            Map<ModuleBuilder, InputStream> streamToBuilderMap) {
+
         final ParseTreeWalker walker = new ParseTreeWalker();
-        final List<ParseTree> trees = parseStreams(yangFileStreams);
+        final List<ParseTree> trees = parseStreams(inputStreams);
         final ModuleBuilder[] builders = new ModuleBuilder[trees.size()];
 
         // validate yang
@@ -133,8 +176,25 @@ public final class YangParserImpl implements YangModelParser {
         for (int i = 0; i < trees.size(); i++) {
             yangModelParser = new YangParserListenerImpl();
             walker.walk(yangModelParser, trees.get(i));
-            builders[i] = yangModelParser.getModuleBuilder();
+            ModuleBuilder moduleBuilder = yangModelParser.getModuleBuilder();
+
+            // We expect the order of trees and streams has to be the same
+            streamToBuilderMap.put(moduleBuilder, inputStreams.get(i));
+            builders[i] = moduleBuilder;
         }
+        return builders;
+    }
+
+    private Map<String, TreeMap<Date, ModuleBuilder>> resolveModuleBuilders(
+            final List<InputStream> yangFileStreams,
+            Map<ModuleBuilder, InputStream> streamToBuilderMap) {
+
+        final ModuleBuilder[] builders = parseModuleBuilders(yangFileStreams,
+                streamToBuilderMap);
+
+        // Linked Hash Map MUST be used because Linked Hash Map preserves ORDER
+        // of items stored in map.
+        final LinkedHashMap<String, TreeMap<Date, ModuleBuilder>> modules = new LinkedHashMap<String, TreeMap<Date, ModuleBuilder>>();
 
         // module dependency graph sorted
         List<ModuleBuilder> sorted = ModuleDependencySort.sort(builders);
@@ -178,7 +238,7 @@ public final class YangParserImpl implements YangModelParser {
         return result;
     }
 
-    private Set<Module> build(
+    private Map<ModuleBuilder, Module> build(
             final Map<String, TreeMap<Date, ModuleBuilder>> modules) {
         // fix unresolved nodes
         for (Map.Entry<String, TreeMap<Date, ModuleBuilder>> entry : modules
@@ -192,10 +252,10 @@ public final class YangParserImpl implements YangModelParser {
         resolveAugments(modules);
 
         // build
-        // LinkedHashSet MUST be used otherwise the Set will not maintain
+        // LinkedHashMap MUST be used otherwise the values will not maintain
         // order!
-        // http://docs.oracle.com/javase/6/docs/api/java/util/LinkedHashSet.html
-        final Set<Module> result = new LinkedHashSet<Module>();
+        // http://docs.oracle.com/javase/6/docs/api/java/util/LinkedHashMap.html
+        final Map<ModuleBuilder, Module> result = new LinkedHashMap<ModuleBuilder, Module>();
         for (Map.Entry<String, TreeMap<Date, ModuleBuilder>> entry : modules
                 .entrySet()) {
             final Map<Date, Module> modulesByRevision = new HashMap<Date, Module>();
@@ -204,7 +264,7 @@ public final class YangParserImpl implements YangModelParser {
                 final ModuleBuilder moduleBuilder = childEntry.getValue();
                 final Module module = moduleBuilder.build();
                 modulesByRevision.put(childEntry.getKey(), module);
-                result.add(module);
+                result.put(moduleBuilder, module);
             }
         }
         return result;
@@ -739,7 +799,7 @@ public final class YangParserImpl implements YangModelParser {
                     if (currentQName.getLocalName().equals(
                             lastAugmentPathElement.getLocalName())) {
 
-                        if(currentParent instanceof ChoiceBuilder) {
+                        if (currentParent instanceof ChoiceBuilder) {
                             ParserUtils.fillAugmentTarget(augmentBuilder,
                                     (ChoiceBuilder) currentParent);
                         } else {
