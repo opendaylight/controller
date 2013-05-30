@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -54,7 +55,7 @@ final class TestUtils {
         for(String path : pathToYangFile) {
             input.add(TestUtils.class.getResourceAsStream(path));
         }
-        Set<Module> modules = parser.parseYangModelsFromStreams(input);
+        Set<Module> modules = new HashSet<Module>(parser.parseYangModelsFromStreams(input).values());
         for(InputStream stream : input) {
             stream.close();
         }
@@ -65,7 +66,7 @@ final class TestUtils {
         YangModelParser parser = new YangParserImpl();
         InputStream stream = TestUtils.class.getResourceAsStream(pathToYangFile);
         List<InputStream> input = Collections.singletonList(stream);
-        Set<Module> modules = parser.parseYangModelsFromStreams(input);
+        Set<Module> modules = new HashSet<Module>(parser.parseYangModelsFromStreams(input).values());
         stream.close();
         return modules.iterator().next();
     }
