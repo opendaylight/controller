@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///eY\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-05-30T21:45:03Z",
+      "side": 1,
+      "message": "PortConverter is needed because OF port number coding represents both physical and special ports like local and normal. Here NodeTable is representing only an openflow switch table identified by a byte value. There is no overload of the table id to identify a logical table, AFAIK, but if this could be the case in future, then I am fine with it.",
+      "parentUuid": "AAAAEn///e8\u003d",
+      "revId": "a59931716923715efe608ca6b89cd148da737686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///fg\u003d",
         "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
         "patchSetId": 1
