@@ -9,6 +9,7 @@ package org.opendaylight.controller.yang.parser.impl;
 
 import static org.junit.Assert.*;
 
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class TypesResolutionTest {
     private Set<Module> testedModules;
 
     @Before
-    public void init() {
+    public void init() throws FileNotFoundException {
         testedModules = TestUtils.loadModules("src/test/resources/types");
     }
 

@@ -7,10 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -67,13 +65,12 @@ public abstract class AbstractSignedInteger implements IntegerTypeDefinition {
      * @param maxRange
      * @param units
      */
-    public AbstractSignedInteger(final List<String> actualPath,
-            final URI namespace, final Date revision, final QName name,
+    public AbstractSignedInteger(final SchemaPath path, final QName name,
             final String description, final Number minRange,
             final Number maxRange, final String units) {
         this.name = name;
         this.description = description;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.units = units;
         this.rangeStatements = new ArrayList<RangeConstraint>();
         final String rangeDescription = "Integer values between " + minRange
@@ -89,13 +86,12 @@ public abstract class AbstractSignedInteger implements IntegerTypeDefinition {
      * @param rangeStatements
      * @param units
      */
-    public AbstractSignedInteger(final List<String> actualPath,
-            final URI namespace, final Date revision, final QName name,
+    public AbstractSignedInteger(final SchemaPath path, final QName name,
             final String description,
             final List<RangeConstraint> rangeStatements, final String units) {
         this.name = name;
         this.description = description;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.units = units;
         this.rangeStatements = rangeStatements;
     }

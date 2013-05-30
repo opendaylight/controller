@@ -7,9 +7,7 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -23,7 +21,7 @@ import org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition
  *
  * @see IdentityrefTypeDefinition
  */
-public class IdentityrefType implements IdentityrefTypeDefinition {
+public final class IdentityrefType implements IdentityrefTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("identityref");
     private final SchemaPath path;
@@ -44,13 +42,6 @@ public class IdentityrefType implements IdentityrefTypeDefinition {
     public IdentityrefType(QName identity, SchemaPath schemaPath) {
         this.identity = identity;
         this.path = schemaPath;
-        this.baseType = new IdentityrefType(identity);
-    }
-
-    public IdentityrefType(final List<String> actualPath,
-            final URI namespace, final Date revision, final QName identity) {
-        this.identity = identity;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
         this.baseType = new IdentityrefType(identity);
     }
 

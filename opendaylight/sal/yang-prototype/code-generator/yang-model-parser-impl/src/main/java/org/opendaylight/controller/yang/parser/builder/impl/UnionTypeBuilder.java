@@ -7,10 +7,8 @@
  */
 package org.opendaylight.controller.yang.parser.builder.impl;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -38,23 +36,15 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
     private final int line;
     private final List<TypeDefinition<?>> types;
     private final List<TypeDefinitionBuilder> typedefs;
-    private final UnionType instance;
+    private UnionType instance;
     private boolean built;
 
-    private final List<String> actualPath;
-    private final URI namespace;
-    private final Date revision;
+    private SchemaPath path;
 
-    public UnionTypeBuilder(final List<String> actualPath, final URI namespace,
-            final Date revision, final int line) {
+    public UnionTypeBuilder(final int line) {
         this.line = line;
         types = new ArrayList<TypeDefinition<?>>();
         typedefs = new ArrayList<TypeDefinitionBuilder>();
-        instance = new UnionType(actualPath, namespace, revision, types);
-
-        this.actualPath = actualPath;
-        this.namespace = namespace;
-        this.revision = revision;
     }
 
     @Override
@@ -95,6 +85,7 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
         if (built) {
             return instance;
         } else {
+            instance = new UnionType(path, types);
             for (TypeDefinitionBuilder tdb : typedefs) {
                 types.add(tdb.build());
             }
@@ -105,7 +96,7 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setPath(final SchemaPath schemaPath) {
-        throw new YangParseException(line, "Can not set path to " + NAME);
+        this.path = schemaPath;
     }
 
     @Override
@@ -219,18 +210,6 @@ public class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
     @Override
     public void setUnits(String units) {
         throw new YangParseException(line, "Can not set units to " + NAME);
-    }
-
-    public List<String> getActualPath() {
-        return actualPath;
-    }
-
-    public URI getNamespace() {
-        return namespace;
-    }
-
-    public Date getRevision() {
-        return revision;
     }
 
     @Override

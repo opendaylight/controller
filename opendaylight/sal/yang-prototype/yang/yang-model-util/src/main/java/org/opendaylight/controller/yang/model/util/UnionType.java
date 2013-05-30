@@ -1,15 +1,13 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -19,7 +17,7 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.UnionTypeDefinition;
 
-public class UnionType implements UnionTypeDefinition {
+public final class UnionType implements UnionTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("union");
     private final SchemaPath path;
@@ -29,20 +27,21 @@ public class UnionType implements UnionTypeDefinition {
     private final List<TypeDefinition<?>> types;
 
     private UnionType(List<TypeDefinition<?>> types) {
-        if(types == null) {
-            throw new NullPointerException("When the type is 'union', the 'type' statement MUST be present.");
+        if (types == null) {
+            throw new NullPointerException(
+                    "When the type is 'union', the 'type' statement MUST be present.");
         }
         path = BaseTypes.schemaPath(name);
         this.types = types;
         this.baseType = this;
     }
 
-    public UnionType(final List<String> actualPath, final URI namespace,
-            final Date revision, List<TypeDefinition<?>> types) {
-        if(types == null) {
-            throw new NullPointerException("When the type is 'union', the 'type' statement MUST be present.");
+    public UnionType(final SchemaPath path, List<TypeDefinition<?>> types) {
+        if (types == null) {
+            throw new NullPointerException(
+                    "When the type is 'union', the 'type' statement MUST be present.");
         }
-        path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.types = types;
         this.baseType = new UnionType(types);
     }
@@ -135,8 +134,8 @@ public class UnionType implements UnionTypeDefinition {
         builder.append("UnionType [name=");
         builder.append(name);
         builder.append(", types=[");
-        for(TypeDefinition<?> td : types) {
-            builder.append(", "+ td.getQName().getLocalName());
+        for (TypeDefinition<?> td : types) {
+            builder.append(", " + td.getQName().getLocalName());
         }
         builder.append("]");
         builder.append("]");

@@ -7,11 +7,10 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
@@ -22,7 +21,7 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  * {@link Long}.
  *
  */
-public class Int64 extends AbstractSignedInteger {
+public final class Int64 extends AbstractSignedInteger {
 
     private static final QName name = BaseTypes.constructQName("int64");
     private Long defaultValue = null;
@@ -35,23 +34,20 @@ public class Int64 extends AbstractSignedInteger {
         this.baseType = this;
     }
 
-    public Int64(final List<String> actualPath, final URI namespace,
-            final Date revision) {
-        super(actualPath, namespace, revision, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
+    public Int64(final SchemaPath path) {
+        super(path, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
         this.baseType = new Int64();
     }
 
-    public Int64(final List<String> actualPath, final URI namespace,
-            final Date revision, final Long defaultValue) {
-        super(actualPath, namespace, revision, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
+    public Int64(final SchemaPath path, final Long defaultValue) {
+        super(path, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
         this.baseType = new Int64();
         this.defaultValue = defaultValue;
     }
 
-    public Int64(final List<String> actualPath, final URI namespace,
-            final Date revision, final List<RangeConstraint> rangeStatements,
+    public Int64(final SchemaPath path, final List<RangeConstraint> rangeStatements,
             final String units, final Long defaultValue) {
-        super(actualPath, namespace, revision, name, description, rangeStatements, units);
+        super(path, name, description, rangeStatements, units);
         this.baseType = new Int64();
         this.defaultValue = defaultValue;
     }

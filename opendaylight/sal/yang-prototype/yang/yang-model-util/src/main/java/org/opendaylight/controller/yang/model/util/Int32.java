@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
@@ -24,12 +23,11 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  * @see AbstractSignedInteger
  *
  */
-public class Int32 extends AbstractSignedInteger {
+public final class Int32 extends AbstractSignedInteger {
 
     private static final QName name = BaseTypes.constructQName("int32");
     private Integer defaultValue = null;
-    private static final String description =
-            "int32  represents integer values between -2147483648 and 2147483647, inclusively.";
+    private static final String description = "int32  represents integer values between -2147483648 and 2147483647, inclusively.";
     private final IntegerTypeDefinition baseType;
 
     private Int32() {
@@ -37,23 +35,21 @@ public class Int32 extends AbstractSignedInteger {
         this.baseType = this;
     }
 
-    public Int32(final List<String> actualPath, final URI namespace,
-            final Date revision) {
-        super(actualPath, namespace, revision, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
+    public Int32(final SchemaPath path) {
+        super(path, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
         this.baseType = new Int32();
     }
 
-    public Int32(final List<String> actualPath, final URI namespace,
-            final Date revision, final Integer defaultValue) {
-        super(actualPath, namespace, revision, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
+    public Int32(final SchemaPath path, final Integer defaultValue) {
+        super(path, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
         this.baseType = new Int32();
         this.defaultValue = defaultValue;
     }
 
-    public Int32(final List<String> actualPath, final URI namespace,
-            final Date revision, final List<RangeConstraint> rangeStatements,
-            final String units, final Integer defaultValue) {
-        super(actualPath, namespace, revision, name, description, rangeStatements, units);
+    public Int32(final SchemaPath path,
+            final List<RangeConstraint> rangeStatements, final String units,
+            final Integer defaultValue) {
+        super(path, name, description, rangeStatements, units);
         this.baseType = new Int32();
         this.defaultValue = defaultValue;
     }
