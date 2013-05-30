@@ -20,7 +20,7 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public class AnyXmlBuilder implements DataSchemaNodeBuilder {
+public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
     private boolean built;
     private final int line;
     private final QName qname;

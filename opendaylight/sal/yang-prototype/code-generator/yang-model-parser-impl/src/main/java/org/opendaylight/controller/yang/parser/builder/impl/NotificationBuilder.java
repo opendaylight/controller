@@ -33,9 +33,9 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBu
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 
-public class NotificationBuilder extends AbstractChildNodeBuilder implements
-        TypeDefinitionAwareBuilder, SchemaNodeBuilder {
-    private boolean built;
+public final class NotificationBuilder extends AbstractChildNodeBuilder
+        implements TypeDefinitionAwareBuilder, SchemaNodeBuilder {
+    private boolean isBuilt;
     private final NotificationDefinitionImpl instance;
     private final int line;
     private SchemaPath schemaPath;
@@ -51,7 +51,7 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
 
     @Override
     public SchemaNode build() {
-        if(!built) {
+        if (!isBuilt) {
             instance.setPath(schemaPath);
 
             // CHILD NODES
@@ -89,7 +89,7 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
-            built = true;
+            isBuilt = true;
         }
 
         return instance;
@@ -140,7 +140,7 @@ public class NotificationBuilder extends AbstractChildNodeBuilder implements
         addedUnknownNodes.add(unknownNode);
     }
 
-    private class NotificationDefinitionImpl implements NotificationDefinition {
+    private final class NotificationDefinitionImpl implements NotificationDefinition {
         private final QName qname;
         private SchemaPath path;
         private String description;

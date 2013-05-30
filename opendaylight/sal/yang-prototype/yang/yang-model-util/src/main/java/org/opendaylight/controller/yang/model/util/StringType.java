@@ -7,10 +7,8 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -26,9 +24,9 @@ import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
  *
  * @see StringTypeDefinition
  */
-public class StringType implements StringTypeDefinition {
+public final class StringType implements StringTypeDefinition {
 
-    private final QName name = BaseTypes.constructQName("string");;
+    private final QName name = BaseTypes.constructQName("string");
     private final SchemaPath path;
     private String defaultValue = "";
     private final String description = "";
@@ -51,10 +49,9 @@ public class StringType implements StringTypeDefinition {
     /**
      * Default Constructor.
      */
-    public StringType(final List<String> actualPath,
-            final URI namespace, final Date revision) {
+    public StringType(final SchemaPath path) {
         super();
-        path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
         constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
         lengthStatements = Collections.unmodifiableList(constraints);
@@ -70,11 +67,10 @@ public class StringType implements StringTypeDefinition {
      * @param lengthStatements
      * @param patterns
      */
-    public StringType(final List<String> actualPath,
-            final URI namespace, final Date revision, final List<LengthConstraint> lengthStatements,
+    public StringType(final SchemaPath path, final List<LengthConstraint> lengthStatements,
             final List<PatternConstraint> patterns) {
         super();
-        path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         if(lengthStatements == null || lengthStatements.size() == 0) {
             final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
             constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
@@ -94,12 +90,11 @@ public class StringType implements StringTypeDefinition {
      * @param patterns
      * @param units
      */
-    public StringType(final List<String> actualPath,
-            final URI namespace, final Date revision, final String defaultValue,
+    public StringType(final SchemaPath path, final String defaultValue,
             final List<LengthConstraint> lengthStatements,
             final List<PatternConstraint> patterns, final String units) {
         super();
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.defaultValue = defaultValue;
         if(lengthStatements == null || lengthStatements.size() == 0) {
             final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();

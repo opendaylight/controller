@@ -25,7 +25,7 @@ import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuil
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public class TypedefBuilder extends AbstractTypeAwareBuilder implements
+public final class TypedefBuilder extends AbstractTypeAwareBuilder implements
         TypeDefinitionBuilder {
     private final int line;
     private final QName qname;

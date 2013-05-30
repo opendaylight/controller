@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
+import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
 /**
@@ -14,6 +15,8 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
  * [typedef, type, leaf, leaf-list, deviate]
  */
 public interface TypeAwareBuilder extends Builder {
+
+    QName getQName();
 
     TypeDefinition<?> getType();
 

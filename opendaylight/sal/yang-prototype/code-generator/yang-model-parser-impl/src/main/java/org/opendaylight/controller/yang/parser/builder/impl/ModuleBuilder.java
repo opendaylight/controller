@@ -594,19 +594,19 @@ public class ModuleBuilder implements Builder {
         parent.setType(type);
     }
 
-    public void addUnionType(final List<String> actualPath,
+    public UnionTypeBuilder addUnionType(final List<String> actualPath,
             final URI namespace, final Date revision, final int line) {
         List<String> pathToUnion = new ArrayList<String>(actualPath);
         TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
                 .get(pathToUnion);
-        UnionTypeBuilder union = new UnionTypeBuilder(pathToUnion, namespace,
-                revision, line);
+        UnionTypeBuilder union = new UnionTypeBuilder(line);
         parent.setType(union);
 
         List<String> path = new ArrayList<String>(pathToUnion);
         path.add("union");
 
         moduleNodes.put(path, union);
+        return union;
     }
 
     public void addIdentityrefType(final String baseString,
@@ -669,7 +669,7 @@ public class ModuleBuilder implements Builder {
         return builder;
     }
 
-    private class ModuleImpl implements Module {
+    private final class ModuleImpl implements Module {
         private URI namespace;
         private final String name;
         private Date revision;

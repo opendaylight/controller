@@ -35,10 +35,10 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBu
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 
-public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
+public final class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         implements TypeDefinitionAwareBuilder, AugmentationTargetBuilder,
         DataSchemaNodeBuilder {
-    private boolean built;
+    private boolean isBuilt;
     private final ContainerSchemaNodeImpl instance;
     private final int line;
     private final ConstraintsBuilder constraints;
@@ -64,7 +64,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
 
     @Override
     public ContainerSchemaNode build() {
-        if(!built) {
+        if (!isBuilt) {
             instance.setPath(schemaPath);
             instance.setDescription(description);
             instance.setReference(reference);
@@ -103,7 +103,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
 
             // AUGMENTATIONS
             final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
-            for(AugmentationSchemaBuilder builder : addedAugmentations) {
+            for (AugmentationSchemaBuilder builder : addedAugmentations) {
                 augmentations.add(builder.build());
             }
             instance.setAvailableAugmentations(augmentations);
@@ -118,7 +118,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
             instance.setConstraints(constraints.build());
             instance.setAvailableAugmentations(augmentations);
 
-            built = true;
+            isBuilt = true;
         }
         return instance;
     }
@@ -179,7 +179,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
 
     @Override
     public void setStatus(Status status) {
-        if(status != null) {
+        if (status != null) {
             this.status = status;
         }
     }
@@ -233,7 +233,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         addedUnknownNodes.add(unknownNode);
     }
 
-    private class ContainerSchemaNodeImpl implements ContainerSchemaNode {
+    private final class ContainerSchemaNodeImpl implements ContainerSchemaNode {
         private final QName qname;
         private SchemaPath path;
         private String description;
@@ -292,7 +292,7 @@ public class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         }
 
         private void setStatus(Status status) {
-            if(status != null) {
+            if (status != null) {
                 this.status = status;
             }
         }

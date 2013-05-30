@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -23,7 +21,7 @@ import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
  *
  * @see BitsTypeDefinition
  */
-public class BitsType implements BitsTypeDefinition {
+public final class BitsType implements BitsTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("bits");
     private final SchemaPath path;
@@ -47,11 +45,10 @@ public class BitsType implements BitsTypeDefinition {
         this.baseType = this;
     }
 
-    public BitsType(final List<String> actualPath, final URI namespace,
-            final Date revision) {
+    public BitsType(final SchemaPath path) {
         super();
         this.bits = Collections.emptyList();
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.baseType = new BitsType();
     }
 
@@ -64,12 +61,11 @@ public class BitsType implements BitsTypeDefinition {
      * @param bits
      *            The bits assigned for Bits Type
      */
-    public BitsType(final List<String> actualPath, final URI namespace,
-            final Date revision, final List<Bit> bits) {
+    public BitsType(final SchemaPath path, final List<Bit> bits) {
         super();
         this.bits = Collections.unmodifiableList(bits);
         this.units = "";
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.baseType = new BitsType();
     }
 
@@ -83,12 +79,11 @@ public class BitsType implements BitsTypeDefinition {
      * @param units
      *            units for bits type
      */
-    public BitsType(final List<String> actualPath, final URI namespace,
-            final Date revision, List<Bit> bits, String units) {
+    public BitsType(final SchemaPath path, List<Bit> bits, String units) {
         super();
         this.bits = Collections.unmodifiableList(bits);
         this.units = units;
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.baseType = new BitsType();
     }
 

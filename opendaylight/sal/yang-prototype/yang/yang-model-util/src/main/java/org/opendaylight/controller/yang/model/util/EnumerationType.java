@@ -7,9 +7,7 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -20,10 +18,10 @@ import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
 
 /**
  * The <code>default</code> implementation of Enumertaion Type Definition interface.
- * 
+ *
  * @see EnumTypeDefinition
  */
-public class EnumerationType implements EnumTypeDefinition {
+public final class EnumerationType implements EnumTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("enumeration");
     private final SchemaPath path;
@@ -34,29 +32,27 @@ public class EnumerationType implements EnumTypeDefinition {
     private final List<EnumPair> enums;
     private String units = "";
     private final EnumTypeDefinition baseType;
-    
+
     private EnumerationType(final List<EnumPair> enums) {
         this.path = BaseTypes.schemaPath(name);
         this.enums = Collections.unmodifiableList(enums);
         this.defaultEnum = null;
         baseType = this;
     }
-    
-    public EnumerationType(final List<String> actualPath, final URI namespace,
-            final Date revision, final List<EnumPair> enums) {
+
+    public EnumerationType(final SchemaPath path, final List<EnumPair> enums) {
         super();
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.enums = Collections.unmodifiableList(enums);
         this.defaultEnum = null;
         baseType = new EnumerationType(enums);
     }
 
-    public EnumerationType(final List<String> actualPath, final URI namespace,
-            final Date revision, final EnumTypeDefinition baseType, final EnumPair defaultEnum,
+    public EnumerationType(final SchemaPath path, final EnumPair defaultEnum,
             final List<EnumPair> enums, final String units) {
         super();
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
-        this.baseType = baseType;
+        this.path = path;
+        baseType = new EnumerationType(enums);
         this.defaultEnum = defaultEnum;
         this.enums = Collections.unmodifiableList(enums);
         this.units = units;
@@ -64,7 +60,7 @@ public class EnumerationType implements EnumTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
@@ -74,7 +70,7 @@ public class EnumerationType implements EnumTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getUnits()
      */
     @Override
@@ -84,7 +80,7 @@ public class EnumerationType implements EnumTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
      */
     @Override
@@ -94,7 +90,7 @@ public class EnumerationType implements EnumTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getQName()
      */
     @Override
@@ -104,7 +100,7 @@ public class EnumerationType implements EnumTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getPath()
      */
     @Override
@@ -114,7 +110,7 @@ public class EnumerationType implements EnumTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
     @Override
@@ -124,7 +120,7 @@ public class EnumerationType implements EnumTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getReference()
      */
     @Override
@@ -134,7 +130,7 @@ public class EnumerationType implements EnumTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.api.SchemaNode#getStatus()
      */
     @Override
@@ -144,7 +140,7 @@ public class EnumerationType implements EnumTypeDefinition {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.base.type.api.EnumTypeDefinition#getValues()
      */
     @Override

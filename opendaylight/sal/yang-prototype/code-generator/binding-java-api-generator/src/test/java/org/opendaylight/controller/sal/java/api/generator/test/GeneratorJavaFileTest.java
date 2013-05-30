@@ -24,6 +24,7 @@ import javax.tools.ToolProvider;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTypeBuilderImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
@@ -94,6 +95,7 @@ public class GeneratorJavaFileTest {
         assertTrue(filesList.contains("Type3.java"));
     }
 
+    @Ignore
     @Test
     public void compilationTest() throws Exception {
         final YangParserImpl parser = new YangParserImpl();

@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -18,7 +16,7 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.EmptyTypeDefinition;
 
-public class EmptyType implements EmptyTypeDefinition {
+public final class EmptyType implements EmptyTypeDefinition {
 
     private final QName name = BaseTypes.constructQName("empty");
     private final SchemaPath path;
@@ -31,9 +29,8 @@ public class EmptyType implements EmptyTypeDefinition {
         this.baseType = this;
     }
 
-    public EmptyType(final List<String> actualPath,
-            final URI namespace, final Date revision) {
-        path = BaseTypes.schemaPath(actualPath, namespace, revision);
+    public EmptyType(final SchemaPath path) {
+        this.path = path;
         this.baseType = new EmptyType();
     }
 

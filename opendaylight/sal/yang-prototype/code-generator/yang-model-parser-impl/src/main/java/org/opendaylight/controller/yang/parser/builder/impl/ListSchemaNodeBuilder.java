@@ -35,10 +35,10 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBu
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 
-public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
-        DataSchemaNodeBuilder, AugmentationTargetBuilder,
+public final class ListSchemaNodeBuilder extends AbstractChildNodeBuilder
+        implements DataSchemaNodeBuilder, AugmentationTargetBuilder,
         TypeDefinitionAwareBuilder {
-    private boolean built;
+    private boolean isBuilt;
     private final ListSchemaNodeImpl instance;
     private final int line;
     // SchemaNode args
@@ -69,7 +69,7 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
 
     @Override
     public ListSchemaNode build() {
-        if(!built) {
+        if (!isBuilt) {
             instance.setKeyDefinition(keyDefinition);
             instance.setPath(schemaPath);
             instance.setDescription(description);
@@ -124,7 +124,7 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
             instance.setConstraints(constraints.build());
             instance.setAvailableAugmentations(augmentations);
 
-            built = true;
+            isBuilt = true;
         }
         return instance;
     }
@@ -249,7 +249,7 @@ public class ListSchemaNodeBuilder extends AbstractChildNodeBuilder implements
         addedUnknownNodes.add(unknownNode);
     }
 
-    private class ListSchemaNodeImpl implements ListSchemaNode {
+    private final class ListSchemaNodeImpl implements ListSchemaNode {
         private final QName qname;
         private SchemaPath path;
         private String description;

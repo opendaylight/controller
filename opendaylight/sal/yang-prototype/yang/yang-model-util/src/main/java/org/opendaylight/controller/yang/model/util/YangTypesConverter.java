@@ -8,14 +8,17 @@
 package org.opendaylight.controller.yang.model.util;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
-public class YangTypesConverter {
+public final class YangTypesConverter {
     private static final Set<String> baseYangTypes = new HashSet<String>();
 
     static {
@@ -49,39 +52,48 @@ public class YangTypesConverter {
             String typeName) {
         TypeDefinition<?> type = null;
 
+        SchemaPath path = createSchemaPath(actualPath, namespace, revision);
         if (typeName.startsWith("int")) {
             if (typeName.equals("int8")) {
-                type = new Int8(actualPath, namespace, revision);
+                type = new Int8(path);
             } else if (typeName.equals("int16")) {
-                type = new Int16(actualPath, namespace, revision);
+                type = new Int16(path);
             } else if (typeName.equals("int32")) {
-                type = new Int32(actualPath, namespace, revision);
+                type = new Int32(path);
             } else if (typeName.equals("int64")) {
-                type = new Int64(actualPath, namespace, revision);
+                type = new Int64(path);
             }
         } else if (typeName.startsWith("uint")) {
             if (typeName.equals("uint8")) {
-                type = new Uint8(actualPath, namespace, revision);
+                type = new Uint8(path);
             } else if (typeName.equals("uint16")) {
-                type = new Uint16(actualPath, namespace, revision);
+                type = new Uint16(path);
             } else if (typeName.equals("uint32")) {
-                type = new Uint32(actualPath, namespace, revision);
+                type = new Uint32(path);
             } else if (typeName.equals("uint64")) {
-                type = new Uint64(actualPath, namespace, revision);
+                type = new Uint64(path);
             }
         } else if ("string".equals(typeName)) {
-            type = new StringType(actualPath, namespace, revision);
+            type = new StringType(path);
         } else if("binary".equals(typeName)) {
-            type = new BinaryType(actualPath, namespace, revision);
+            type = new BinaryType(path);
         } else if("boolean".equals(typeName)) {
-            type = new BooleanType(actualPath, namespace, revision);
+            type = new BooleanType(path);
         } else if("empty".equals(typeName)) {
-            type = new EmptyType(actualPath, namespace, revision);
+            type = new EmptyType(path);
         } else if("instance-identifier".equals(typeName)) {
-            type = new InstanceIdentifier(actualPath, namespace, revision, null, true);
+            type = new InstanceIdentifier(path, null, true);
         }
 
         return type;
+    }
+
+    private static SchemaPath createSchemaPath(List<String> actualPath, URI namespace, Date revision) {
+        List<QName> path = new ArrayList<QName>();
+        for(String element : actualPath) {
+            path.add(new QName(namespace, revision, element));
+        }
+        return new SchemaPath(path, true);
     }
 
 }

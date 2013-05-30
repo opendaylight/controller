@@ -17,7 +17,7 @@ import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
 
-public class ConstraintsBuilder implements Builder {
+public final class ConstraintsBuilder implements Builder {
     private final ConstraintDefinitionImpl instance;
     private final int line;
     private final Set<MustDefinition> mustDefinitions;
@@ -93,7 +93,7 @@ public class ConstraintsBuilder implements Builder {
         this.mandatory = mandatory;
     }
 
-    private static class ConstraintDefinitionImpl implements
+    private final class ConstraintDefinitionImpl implements
             ConstraintDefinition {
         private RevisionAwareXPath whenCondition;
         private Set<MustDefinition> mustConstraints;

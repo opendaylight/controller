@@ -14,7 +14,7 @@ import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public class DeviationBuilder implements Builder {
+public final class DeviationBuilder implements Builder {
     private final DeviationImpl instance;
     private final int line;
 
@@ -54,7 +54,7 @@ public class DeviationBuilder implements Builder {
         instance.setReference(reference);
     }
 
-    private class DeviationImpl implements Deviation {
+    private final class DeviationImpl implements Deviation {
         private final SchemaPath targetPath;
         private Deviate deviate;
         private String reference;

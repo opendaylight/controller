@@ -171,7 +171,7 @@ public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
         return augmentations;
     }
 
-    private class ChoiceCaseNodeImpl implements ChoiceCaseNode {
+    private final class ChoiceCaseNodeImpl implements ChoiceCaseNode {
         private final QName qname;
         private SchemaPath path;
         private String description;
@@ -265,6 +265,10 @@ public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
             }
         }
 
+        /**
+         * Always returns an empty set, because case node can not contains type
+         * definitions.
+         */
         @Override
         public Set<TypeDefinition<?>> getTypeDefinitions() {
             return Collections.emptySet();

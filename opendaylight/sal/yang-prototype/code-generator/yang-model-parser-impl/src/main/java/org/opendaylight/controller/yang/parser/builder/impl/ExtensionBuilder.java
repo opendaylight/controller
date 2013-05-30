@@ -18,7 +18,8 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 
-public class ExtensionBuilder implements SchemaNodeBuilder {
+public final class ExtensionBuilder implements SchemaNodeBuilder {
+    private boolean isBuilt;
     private final ExtensionDefinitionImpl instance;
     private final int line;
     private final QName qname;
@@ -34,14 +35,18 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
 
     @Override
     public ExtensionDefinition build() {
-        instance.setPath(schemaPath);
+        if(!isBuilt) {
+            instance.setPath(schemaPath);
 
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> extensions = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder e : addedExtensions) {
-            extensions.add(e.build());
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> extensions = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder e : addedExtensions) {
+                extensions.add(e.build());
+            }
+            instance.setUnknownSchemaNodes(extensions);
+
+            isBuilt = true;
         }
-        instance.setUnknownSchemaNodes(extensions);
 
         return instance;
     }
@@ -98,7 +103,7 @@ public class ExtensionBuilder implements SchemaNodeBuilder {
         addedUnknownNodes.add(unknownNode);
     }
 
-    private class ExtensionDefinitionImpl implements ExtensionDefinition {
+    private final class ExtensionDefinitionImpl implements ExtensionDefinition {
         private final QName qname;
         private String argument;
         private SchemaPath schemaPath;

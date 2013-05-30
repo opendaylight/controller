@@ -82,27 +82,27 @@ module types2 {
     }
 
     typedef my-union {
-    	type union {
-    		type int16 {
-    			range "1..100";
-    		}
-    		type int32;
-    	}
+        type union {
+            type int16 {
+                range "1..100";
+            }
+            type int32;
+        }
     }
 
     typedef my-union-ext {
-    	type my-union;
+        type my-union;
     }
 
     typedef nested-union1 {
-    	type nested-union2;
+        type nested-union2;
     }
 
     typedef nested-union2 {
-    	type union {
-    		type my-union-ext;
-    		type string;
-    	}
+        type union {
+            type my-union-ext;
+            type string;
+        }
     }
 
     leaf if-name {

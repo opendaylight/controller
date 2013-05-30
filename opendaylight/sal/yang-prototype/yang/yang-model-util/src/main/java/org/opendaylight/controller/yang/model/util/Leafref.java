@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
@@ -25,7 +23,7 @@ import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
  *
  * @see LeafrefTypeDefinition
  */
-public class Leafref implements LeafrefTypeDefinition {
+public final class Leafref implements LeafrefTypeDefinition {
     private static final QName name = BaseTypes.constructQName("leafref");
     private static final String description = "The leafref type is used to reference a "
             + "particular leaf instance in the data tree.";
@@ -41,21 +39,11 @@ public class Leafref implements LeafrefTypeDefinition {
         this.baseType = this;
     }
 
-    public Leafref(final List<String> actualPath, final URI namespace,
-            final Date revision, final RevisionAwareXPath xpath) {
+    public Leafref(final SchemaPath path, final RevisionAwareXPath xpath) {
         super();
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
+        this.path = path;
         this.xpath = xpath;
         baseType = new Leafref(xpath);
-    }
-
-    public Leafref(final List<String> actualPath, final URI namespace,
-            final Date revision, final LeafrefTypeDefinition baseType,
-            final RevisionAwareXPath xpath) {
-        super();
-        this.path = BaseTypes.schemaPath(actualPath, namespace, revision);
-        this.xpath = xpath;
-        this.baseType = baseType;
     }
 
     /*

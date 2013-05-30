@@ -31,7 +31,7 @@ import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder {
+public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder {
     private boolean built;
     private final AugmentationSchemaImpl instance;
     private final int line;

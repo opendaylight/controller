@@ -22,9 +22,9 @@ import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuil
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 
-public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
+public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
         implements SchemaNodeBuilder, DataSchemaNodeBuilder {
-    private boolean built;
+    private boolean isBuilt;
     private final LeafListSchemaNodeImpl instance;
     private final int line;
     // SchemaNode args
@@ -50,7 +50,7 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
 
     @Override
     public LeafListSchemaNode build() {
-        if (!built) {
+        if (!isBuilt) {
             instance.setConstraints(constraints.build());
             instance.setPath(schemaPath);
             instance.setDescription(description);
@@ -73,7 +73,7 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
-            built = true;
+            isBuilt = true;
         }
         return instance;
     }
@@ -166,7 +166,7 @@ public class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
         addedUnknownNodes.add(unknownNode);
     }
 
-    private class LeafListSchemaNodeImpl implements LeafListSchemaNode {
+    private final class LeafListSchemaNodeImpl implements LeafListSchemaNode {
         private final QName qname;
         private SchemaPath path;
         private String description;

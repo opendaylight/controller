@@ -28,8 +28,8 @@ import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 
-public class GroupingBuilderImpl implements GroupingBuilder {
-    private boolean built;
+public final class GroupingBuilderImpl implements GroupingBuilder {
+    private boolean isBuilt;
     private final GroupingDefinitionImpl instance;
     private final int line;
     private final QName qname;
@@ -51,7 +51,7 @@ public class GroupingBuilderImpl implements GroupingBuilder {
 
     @Override
     public GroupingDefinition build() {
-        if (!built) {
+        if (!isBuilt) {
             instance.setPath(schemaPath);
             instance.setDescription(description);
             instance.setReference(reference);
@@ -92,7 +92,7 @@ public class GroupingBuilderImpl implements GroupingBuilder {
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
-            built = true;
+            isBuilt = true;
         }
 
         return instance;
@@ -210,7 +210,7 @@ public class GroupingBuilderImpl implements GroupingBuilder {
         addedUnknownNodes.add(unknownNode);
     }
 
-    private static class GroupingDefinitionImpl implements GroupingDefinition {
+    private final class GroupingDefinitionImpl implements GroupingDefinition {
         private final QName qname;
         private SchemaPath path;
         private String description;

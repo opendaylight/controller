@@ -18,7 +18,8 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 
-public class FeatureBuilder implements SchemaNodeBuilder {
+public final class FeatureBuilder implements SchemaNodeBuilder {
+    private boolean isBuilt;
     private final FeatureDefinitionImpl instance;
     private final int line;
     private final QName qname;
@@ -33,15 +34,18 @@ public class FeatureBuilder implements SchemaNodeBuilder {
 
     @Override
     public FeatureDefinitionImpl build() {
-        instance.setPath(schemaPath);
+        if(!isBuilt) {
+            instance.setPath(schemaPath);
 
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
+            instance.setUnknownSchemaNodes(unknownNodes);
+
+            isBuilt = true;
         }
-        instance.setUnknownSchemaNodes(unknownNodes);
-
         return instance;
     }
 
@@ -85,7 +89,7 @@ public class FeatureBuilder implements SchemaNodeBuilder {
         addedUnknownNodes.add(unknownNode);
     }
 
-    private class FeatureDefinitionImpl implements FeatureDefinition {
+    private final class FeatureDefinitionImpl implements FeatureDefinition {
         private final QName qname;
         private SchemaPath path;
         private String description;
