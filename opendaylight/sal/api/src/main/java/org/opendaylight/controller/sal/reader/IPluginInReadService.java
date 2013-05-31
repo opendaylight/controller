@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 
 /**
@@ -64,9 +65,24 @@ public interface IPluginInReadService {
             boolean cached);
 
     /**
+     * Returns the table statistics for the node
+     * @param node
+     * @return
+     */
+    public NodeTableStatistics readNodeTable(NodeTable table, boolean cached);
+
+    /**
+     * Returns all the table statistics for the node
+     * @param node
+     * @return
+     */
+    public List<NodeTableStatistics> readAllNodeTable(Node node, boolean cached);
+
+    /**
      * Returns the averaged transmit rate for the specified node connector
      * @param connector
      * @return tx rate [bps]
      */
     public long getTransmitRate(NodeConnector connector);
+
 }

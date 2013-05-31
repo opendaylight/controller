@@ -36,6 +36,8 @@ import org.opendaylight.controller.sal.action.SwPath;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeQueue;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
@@ -43,7 +45,8 @@ import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
-
+import org.opendaylight.controller.sal.reader.NodeQueueStatistics;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 /**
  * Stub Implementation for IPluginInReadService used by SAL
  * 
@@ -233,4 +236,33 @@ public class ReadService implements IPluginInReadService {
         return 100;
     }
 
+    @Override
+    public NodeTableStatistics readNodeTable(NodeTable table, boolean b) {
+        NodeTableStatistics stats = new NodeTableStatistics();
+        stats.setNodeTable(table);
+        stats.setActiveCount(4);
+        stats.setLookupCount(4);
+        stats.setMatchedCount(4);
+
+        return stats;
+    }
+
+    @Override
+    public List<NodeTableStatistics> readAllNodeTable(Node node, boolean cached) {
+        NodeTableStatistics stats = new NodeTableStatistics();
+        try {
+            NodeTable nt = new NodeTable(NodeTable.NodeTableIDType.OPENFLOW, Byte.valueOf("10"), node);
+            stats.setNodeTable(nt);
+        } catch (ConstructionException e) {
+            // couldn't create nodetable.
+        }
+
+        stats.setActiveCount(4);
+        stats.setLookupCount(4);
+        stats.setMatchedCount(4);
+
+        List<NodeTableStatistics> result = new ArrayList<NodeTableStatistics>();
+        result.add(stats);
+        return result;
+    }
 }

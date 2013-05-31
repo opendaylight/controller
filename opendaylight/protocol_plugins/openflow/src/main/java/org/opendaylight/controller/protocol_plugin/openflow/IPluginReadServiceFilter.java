@@ -13,10 +13,12 @@ import java.util.List;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 
 /**
  * Interface to serve the hardware information requests coming from SAL
@@ -75,6 +77,24 @@ public interface IPluginReadServiceFilter {
      * @return
      */
     public List<NodeConnectorStatistics> readAllNodeConnector(String container,
+            Node node, boolean cached);
+
+    /**
+     * Returns the table statistics of the node as specified by the given container
+     * @param node
+     * @param cached
+     * @return
+     */
+    public NodeTableStatistics readNodeTable(String container,
+            NodeTable nodeTable, boolean cached);
+
+    /**
+     * Returns the table statistics of all the tables for the specified node
+     *
+     * @param node
+     * @return
+     */
+    public List<NodeTableStatistics> readAllNodeTable(String containerName,
             Node node, boolean cached);
 
     /**
