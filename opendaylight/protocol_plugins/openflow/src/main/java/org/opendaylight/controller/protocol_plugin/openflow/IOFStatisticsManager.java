@@ -22,9 +22,9 @@ public interface IOFStatisticsManager {
     /**
      * Return all the statistics for all the flows present on the specified switch
      *
-	 * @param switchId the openflow datapath id
-	 * @return	the list of openflow statistics
-	 */
+     * @param switchId the openflow datapath id
+     * @return	the list of openflow statistics
+     */
     List<OFStatistics> getOFFlowStatistics(Long switchId);
 
     /**
@@ -39,7 +39,7 @@ public interface IOFStatisticsManager {
     /**
      * Return the description statistics for the specified switch.
      *
-	 * @param switchId the openflow datapath id
+     * @param switchId the openflow datapath id
      * @return the list of openflow statistics
      */
     List<OFStatistics> getOFDescStatistics(Long switchId);
@@ -47,7 +47,7 @@ public interface IOFStatisticsManager {
     /**
      * Returns the statistics for all the ports on the specified switch
      *
-	 * @param switchId the openflow datapath id
+     * @param switchId the openflow datapath id
      * @return the list of openflow statistics
      */
     List<OFStatistics> getOFPortStatistics(Long switchId);
@@ -55,7 +55,7 @@ public interface IOFStatisticsManager {
     /**
      * Returns the statistics for the specified switch port
      *
-	 * @param switchId the openflow datapath id
+     * @param switchId the openflow datapath id
      * @param portId the openflow switch port id
      * @return the list of openflow statistics
      */
@@ -64,7 +64,7 @@ public interface IOFStatisticsManager {
     /**
      * Returns the number of flows installed on the switch
      *
-	 * @param switchId the openflow datapath id
+     * @param switchId the openflow datapath id
      * @return the number of flows installed on the switch
      */
     int getFlowsNumber(long switchId);
@@ -79,10 +79,10 @@ public interface IOFStatisticsManager {
      * @param target the target object. For flow statistics it is the OFMatch.
      * 				 For port statistics, it is the port id. If null the query
      * 				 will be performed for all the targets for the specified
-     * 				 statistics type. 
-     * 				 
+     * 				 statistics type.
+     * 
      * @param timeout the timeout in milliseconds the system will wait for a response
-     * 		  from the switch, before declaring failure 
+     * 		  from the switch, before declaring failure
      * @return the list of openflow statistics
      */
     List<OFStatistics> queryStatistics(Long switchId,
@@ -96,5 +96,22 @@ public interface IOFStatisticsManager {
      * @return the median transmit rate in bits per second
      */
     long getTransmitRate(Long switchId, Short port);
+
+    /**
+     * Returns the statistics for the specified switch table
+     *
+     * @param switchId the openflow datapath id
+     * @param tableId the openflow switch table id
+     * @return the list of openflow statistics
+     */
+    List<OFStatistics> getOFTableStatistics(Long switchId, Byte tableId);
+
+    /**
+     * Returns all the table statistics for the node specified
+     *
+     * @param switchId the openflow datapath id
+     * @return the list of openflow statistics
+     */
+    List<OFStatistics> getOFTableStatistics(Long switchId);
 
 }

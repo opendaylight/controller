@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 public class TableStatisticsConverter {
     private static final Logger log = LoggerFactory
             .getLogger(TableStatisticsConverter.class);
-    
-    private long switchId;
+
+    private final long switchId;
     private List<OFStatistics> ofStatsList;
     private List<NodeTableStatistics> ntStatsList;
 
@@ -44,13 +44,13 @@ public class TableStatisticsConverter {
             Node node = NodeCreator.createOFNode(switchId);
             for (OFStatistics ofStat : this.ofStatsList) {
                 ofTableStat = (OFTableStatistics) ofStat;
-                NodeTableStatistics NTStat = new NodeTableStatistics();
-                NTStat.setNodeTable(TableConverter.toNodeTable(
-                		ofTableStat.getTableId(), node));
-                NTStat.setActiveCount(ofTableStat.getActiveCount());
-                NTStat.setLookupCount(ofTableStat.getLookupCount());
-                NTStat.setMatchedCount(ofTableStat.getMatchedCount());
-                this.ntStatsList.add(NTStat);
+                NodeTableStatistics ntStat = new NodeTableStatistics();
+                ntStat.setNodeTable(TableConverter.toNodeTable(
+                        ofTableStat.getTableId(), node));
+                ntStat.setActiveCount(ofTableStat.getActiveCount());
+                ntStat.setLookupCount(ofTableStat.getLookupCount());
+                ntStat.setMatchedCount(ofTableStat.getMatchedCount());
+                this.ntStatsList.add(ntStat);
             }
         }
         log.trace("OFStatistics: {} NodeTableStatistics: {}", ofStatsList,
