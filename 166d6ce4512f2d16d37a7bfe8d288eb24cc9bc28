@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///Z0\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/AllTableStatistics.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T23:39:56Z",
+      "side": 1,
+      "message": "Please correct the copyright to reflect the actual copyright owner :)",
+      "revId": "166d6ce4512f2d16d37a7bfe8d288eb24cc9bc28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Zw\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/TableStatistics.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T23:39:56Z",
+      "side": 1,
+      "message": "Please change the copyright to reflect the actual copyright owner :)",
+      "revId": "166d6ce4512f2d16d37a7bfe8d288eb24cc9bc28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Zs\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/TableStatistics.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T23:39:56Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "revId": "166d6ce4512f2d16d37a7bfe8d288eb24cc9bc28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Zo\u003d",
+        "filename": "opendaylight/northbound/statistics/src/test/java/org/opendaylight/controller/statistics/northbound/StatisticsNorthboundTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T23:39:56Z",
+      "side": 1,
+      "message": "Please correct the copyright to reflect the actual copyright holder.",
+      "revId": "166d6ce4512f2d16d37a7bfe8d288eb24cc9bc28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Zk\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T23:39:56Z",
+      "side": 1,
+      "message": "Please correct the copyright to reflect the actual copyright holder.",
+      "revId": "166d6ce4512f2d16d37a7bfe8d288eb24cc9bc28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Zg\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableStatisticsConverter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T23:39:56Z",
+      "side": 1,
+      "message": "Please fix the copyright to reflect the actual copyright holder.",
+      "revId": "166d6ce4512f2d16d37a7bfe8d288eb24cc9bc28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
