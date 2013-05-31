@@ -1,10 +1,10 @@
 package org.opendaylight.controller.protocol_plugins.stub.internal;
 
-import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.utils.INodeFactory;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.core.Node;
 
-public class StubNodeFactory implements INodeFactory
+public class StubNodeConnectorFactory implements INodeConnectorFactory
     {
       void init() {
       }
@@ -35,14 +35,15 @@ public class StubNodeFactory implements INodeFactory
       void stop() {
       }
       
-      public Node fromString(String nodeType, String nodeId){
-          if(nodeType.equals("STUB"))
-              try{
-                  return new Node("STUB", Integer.parseInt(nodeId));
-              } catch(ConstructionException e)
-              {
+      public NodeConnector fromStringNoNode(String typeStr, String IDStr,
+              Node n){
+          if(typeStr.equals("STUB")){
+              try {
+                  return new NodeConnector(typeStr, Integer.parseInt(IDStr), n);
+              } catch (Exception ex) {
                   return null;
               }
+          }
           return null;
       }
 }
