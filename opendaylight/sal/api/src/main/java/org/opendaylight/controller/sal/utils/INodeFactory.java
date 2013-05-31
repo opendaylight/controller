@@ -24,4 +24,6 @@ public interface INodeFactory {
      *
      */
     public Node fromString(String nodeType, String nodeId);
+    
+    public Object getNodeIDFromString(String nodeType, String nodeId);
 }

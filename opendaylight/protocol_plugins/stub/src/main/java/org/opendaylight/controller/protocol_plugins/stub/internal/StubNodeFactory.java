@@ -45,4 +45,10 @@ public class StubNodeFactory implements INodeFactory
               }
           return null;
       }
+      
+      public Integer getNodeIDFromString(String nodeType, String nodeId){
+          if(nodeType.equals("STUB"))
+              return Integer.parseInt(nodeId);
+          return null;
+      }
 }
