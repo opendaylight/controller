@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///cQ\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Node.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-05-31T14:54:02Z",
+      "side": 1,
+      "message": "Kalvin, this is not correct, this conversion should be done outside of the SAL api.",
+      "revId": "2cef5cb8a8e03951477cf90879a8c7f51f645b30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
