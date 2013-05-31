@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
+import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
@@ -44,11 +45,11 @@ import org.slf4j.LoggerFactory;
  * container of the network. Each instance gets container specific inventory
  * events from InventoryServiceShim. It interacts with SAL to pass inventory
  * data to the upper application.
- * 
- * 
+ *
+ *
  */
 public class InventoryService implements IInventoryShimInternalListener,
-        IPluginInInventoryService {
+        IPluginInInventoryService, IInventoryProvider {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryService.class);
     private Set<IPluginOutInventoryService> pluginOutInventoryServices = Collections
@@ -71,7 +72,7 @@ public class InventoryService implements IInventoryShimInternalListener,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     @SuppressWarnings("rawtypes")
     void init(Component c) {
@@ -92,7 +93,7 @@ public class InventoryService implements IInventoryShimInternalListener,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         logger.trace("DESTROY called!");
@@ -101,7 +102,7 @@ public class InventoryService implements IInventoryShimInternalListener,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     void start() {
         logger.trace("START called!");
@@ -111,7 +112,7 @@ public class InventoryService implements IInventoryShimInternalListener,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     void stop() {
         logger.trace("STOP called!");
@@ -299,7 +300,7 @@ public class InventoryService implements IInventoryShimInternalListener,
             }
         }
     }
-    
+
     private void updateNode(Node node, Set<Property> properties) {
         logger.trace("{} updated, props: {}", node, properties);
         if (nodeProps == null || !nodeProps.containsKey(node) ||
@@ -315,7 +316,7 @@ public class InventoryService implements IInventoryShimInternalListener,
             Property currentProperty = propertyMap.get(name);
             if (!property.equals(currentProperty)) {
                 propertyMap.put(name, property);
-                newProperties.add(property);                
+                newProperties.add(property);
             }
         }
 

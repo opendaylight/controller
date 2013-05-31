@@ -14,7 +14,9 @@ import java.util.Hashtable;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.protocol_plugin.openflow.IDataPacketListen;
 import org.opendaylight.controller.protocol_plugin.openflow.IDataPacketMux;
+import org.opendaylight.controller.protocol_plugin.openflow.IDiscoveryListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IFlowProgrammerNotifier;
+import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
@@ -28,7 +30,6 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Contro
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.discovery.IDiscoveryService;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
@@ -44,8 +45,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Openflow protocol plugin Activator
- * 
- * 
+ *
+ *
  */
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -54,7 +55,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function called when the activator starts just after some initializations
      * are done by the ComponentActivatorAbstractBase.
-     * 
+     *
      */
     public void init() {
     }
@@ -62,7 +63,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function called when the activator stops just before the cleanup done by
      * ComponentActivatorAbstractBase
-     * 
+     *
      */
     public void destroy() {
     }
@@ -70,8 +71,8 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function that is used to communicate to dependency manager the list of
      * known implementations for services inside a container
-     * 
-     * 
+     *
+     *
      * @return An array containing all the CLASS objects that will be
      *         instantiated in order to get an fully working implementation
      *         Object
@@ -86,7 +87,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function that is called when configuration of the dependencies is
      * required.
-     * 
+     *
      * @param c
      *            dependency manager Component object, used for configuring the
      *            dependencies exported and imported
@@ -121,8 +122,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             // export the service
             c.setInterface(
                     new String[] { IPluginInInventoryService.class.getName(),
-                            IInventoryShimInternalListener.class.getName() },
-                    null);
+                            IInventoryShimInternalListener.class.getName(),
+                            IInventoryProvider.class.getName() }, null);
 
             // Now lets add a service dependency to make sure the
             // provider of service exists
@@ -193,8 +194,8 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function that is used to communicate to dependency manager the list of
      * known implementations for services that are container independent.
-     * 
-     * 
+     *
+     *
      * @return An array containing all the CLASS objects that will be
      *         instantiated in order to get an fully working implementation
      *         Object
@@ -210,7 +211,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function that is called when configuration of the dependencies is
      * required.
-     * 
+     *
      * @param c
      *            dependency manager Component object, used for configuring the
      *            dependencies exported and imported
@@ -299,16 +300,16 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setRequired(true));
             c.add(createContainerServiceDependency(
                     GlobalConstants.DEFAULT.toString())
-                    .setService(IPluginInInventoryService.class)
-                    .setCallbacks("setPluginInInventoryService",
-                            "unsetPluginInInventoryService").setRequired(true));
+                    .setService(IInventoryProvider.class)
+                    .setCallbacks("setInventoryProvider",
+                    "unsetInventoryProvider").setRequired(true));
             c.add(createServiceDependency().setService(IDataPacketMux.class)
                     .setCallbacks("setIDataPacketMux", "unsetIDataPacketMux")
                     .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(IDiscoveryService.class)
-                    .setCallbacks("setDiscoveryService",
-                            "unsetDiscoveryService").setRequired(true));
+                    .setService(IDiscoveryListener.class)
+                    .setCallbacks("setDiscoveryListener",
+                            "unsetDiscoveryListener").setRequired(true));
         }
 
         // DataPacket mux/demux services, which is teh actual engine
@@ -355,7 +356,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         }
 
         if (imp.equals(TopologyServiceShim.class)) {
-            c.setInterface(new String[] { IDiscoveryService.class.getName(),
+            c.setInterface(new String[] { IDiscoveryListener.class.getName(),
                     IContainerListener.class.getName(),
                     IRefreshInternalProvider.class.getName(),
                     IInventoryShimExternalListener.class.getName() }, null);

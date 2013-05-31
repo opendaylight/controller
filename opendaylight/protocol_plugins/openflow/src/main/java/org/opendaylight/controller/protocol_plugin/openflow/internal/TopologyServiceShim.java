@@ -25,6 +25,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.controller.protocol_plugin.openflow.IDiscoveryListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
 import org.opendaylight.controller.protocol_plugin.openflow.IRefreshInternalProvider;
@@ -44,7 +45,6 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.discovery.IDiscoveryService;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 
@@ -53,7 +53,7 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
  * OpenFlow core to various listeners. The notifications are filtered based on
  * container configurations.
  */
-public class TopologyServiceShim implements IDiscoveryService,
+public class TopologyServiceShim implements IDiscoveryListener,
         IContainerListener, CommandProvider, IRefreshInternalProvider,
         IInventoryShimExternalListener {
     protected static final Logger logger = LoggerFactory
@@ -124,7 +124,7 @@ public class TopologyServiceShim implements IDiscoveryService,
                         teuMap.put(entry.container, teuList);
                         notifyListeners = true;
                     }
-                    
+
                     if (notifyListeners) {
                         for (String container : teuMap.keySet()) {
                             // notify the listener
@@ -203,7 +203,7 @@ public class TopologyServiceShim implements IDiscoveryService,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init() {
         logger.trace("Init called");
@@ -313,7 +313,7 @@ public class TopologyServiceShim implements IDiscoveryService,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         logger.trace("DESTROY called!");
@@ -324,7 +324,7 @@ public class TopologyServiceShim implements IDiscoveryService,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     void start() {
         logger.trace("START called!");
@@ -338,7 +338,7 @@ public class TopologyServiceShim implements IDiscoveryService,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     void stop() {
         logger.trace("STOP called!");
@@ -431,7 +431,7 @@ public class TopologyServiceShim implements IDiscoveryService,
     /**
      * Update local cache and return true if it needs to notify upper layer
      * Topology listeners.
-     * 
+     *
      * @param container
      *            The network container
      * @param edge
@@ -493,14 +493,14 @@ public class TopologyServiceShim implements IDiscoveryService,
                     "notifyLocalEdgeMap: {} for Edge {} in container {}",
                     new Object[] { type.getName(), edge, container });
         }
-        
+
         return rv;
     }
 
     private void notifyEdge(String container, Edge edge, UpdateType type,
             Set<Property> props) {
         boolean notifyListeners;
-        
+
         // Update local cache
         notifyListeners = updateLocalEdgeMap(container, edge, type, props);
 
@@ -508,7 +508,7 @@ public class TopologyServiceShim implements IDiscoveryService,
         if (notifyListeners) {
             notifyQ.add(new NotifyEntry(container, new TopoEdgeUpdate(edge, props,
                     type)));
-            logger.debug("notifyEdge: {} Edge {} in container {}", 
+            logger.debug("notifyEdge: {} Edge {} in container {}",
                     new Object[] { type.getName(), edge, container });
         }
     }
@@ -712,11 +712,11 @@ public class TopologyServiceShim implements IDiscoveryService,
      * pushes the updates to ALL the applications that have registered as
      * listeners for this service. SAL has no way of knowing which application
      * requested for the refresh.
-     * 
+     *
      * As an example of this case, is stopping and starting the Topology
      * Manager. When the topology Manager is stopped, and restarted, it will no
      * longer have the latest topology. Hence, a request is sent here.
-     * 
+     *
      * @param containerName
      * @return void
      */
@@ -731,7 +731,7 @@ public class TopologyServiceShim implements IDiscoveryService,
      * Reading the current topology database, the method will replay all the
      * edge updates for the ITopologyServiceShimListener instance in the given
      * container, which will in turn publish them toward SAL.
-     * 
+     *
      * @param containerName
      */
     private void TopologyBulkUpdate(String containerName) {

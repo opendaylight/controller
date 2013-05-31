@@ -9,9 +9,12 @@
 
 package org.opendaylight.controller.sal.implementation.internal;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -31,8 +34,8 @@ import org.slf4j.LoggerFactory;
 public class Inventory implements IPluginOutInventoryService, IInventoryService {
     protected static final Logger logger = LoggerFactory
             .getLogger(Inventory.class);
-    private IListenInventoryUpdates updateService = null;
-    private IPluginInInventoryService pluginService = null;
+    private List<IListenInventoryUpdates> updateService = new CopyOnWriteArrayList<IListenInventoryUpdates>();
+    private List<IPluginInInventoryService> pluginService = new CopyOnWriteArrayList<IPluginInInventoryService>();
 
     /**
      * Function called by the dependency manager when all the required
@@ -80,55 +83,80 @@ public class Inventory implements IPluginOutInventoryService, IInventoryService 
 
     public void setPluginService(IPluginInInventoryService service) {
         logger.trace("Got plugin service set request {}", service);
-        this.pluginService = service;
+        this.pluginService.add(service);
     }
 
     public void unsetPluginService(IPluginInInventoryService service) {
         logger.trace("Got plugin service UNset request");
-        this.pluginService = null;
+        this.pluginService.remove(service);
     }
 
     public void setUpdateService(IListenInventoryUpdates service) {
         logger.trace("Got update service set request {}", service);
-        this.updateService = service;
+        this.updateService.add(service);
     }
 
     public void unsetUpdateService(IListenInventoryUpdates service) {
         logger.trace("Got a service UNset request");
-        this.updateService = null;
+        this.updateService.remove(service);
     }
 
     @Override
     public void updateNode(Node node, UpdateType type, Set<Property> props) {
+        if (type == null) {
+            logger.trace("Input type is null");
+            return;
+        }
+
         logger.trace("{} {}", node, type);
-        if (updateService != null) {
-            updateService.updateNode(node, type, props);
+
+        for (IListenInventoryUpdates s : this.updateService) {
+            s.updateNode(node, type, props);
         }
     }
 
     @Override
     public void updateNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Set<Property> props) {
+        if (type == null) {
+            logger.trace("Input type is null");
+            return;
+        }
+
         logger.trace("{} {}", nodeConnector, type);
 
-        if ((updateService != null) && (type != null)) {
-            updateService.updateNodeConnector(nodeConnector, type, props);
+        for (IListenInventoryUpdates s : this.updateService) {
+            s.updateNodeConnector(nodeConnector, type, props);
         }
     }
 
     @Override
     public ConcurrentMap<Node, Map<String, Property>> getNodeProps() {
-        if (pluginService != null)
-            return pluginService.getNodeProps();
-        else
-            return null;
+        ConcurrentMap<Node, Map<String, Property>> nodeProps =
+            new ConcurrentHashMap<Node, Map<String, Property>>(), rv;
+
+        for (IPluginInInventoryService s : this.pluginService) {
+            rv = s.getNodeProps();
+            if (rv != null) {
+                nodeProps.putAll(rv);
+            }
+        }
+
+        return nodeProps;
     }
 
     @Override
     public ConcurrentMap<NodeConnector, Map<String, Property>> getNodeConnectorProps() {
-        if (pluginService != null)
-            return pluginService.getNodeConnectorProps(true);
-        else
-            return null;
+        ConcurrentMap<NodeConnector, Map<String, Property>> ncProps =
+            new ConcurrentHashMap<NodeConnector, Map<String, Property>>(), rv;
+
+        for (IPluginInInventoryService s : this.pluginService) {
+            rv = s.getNodeConnectorProps(true);
+            if (rv != null) {
+                ncProps.putAll(rv);
+            }
+        }
+
+        return ncProps;
     }
 }
