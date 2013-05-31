@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///eQ\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/StatisticsNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 472
+      },
+      "writtenOn": "2013-05-31T00:37:38Z",
+      "side": 1,
+      "message": "I\u0027ve removed tableId from the signature. Not required here, since list of stats is provided from here for ports and flows. Same applies for Table. I\u0027ve modified this method and added another one to get all table stats for all nodes.",
+      "parentUuid": "AAAAEn///eg\u003d",
+      "revId": "5b1a1e39f2b6f450dc47bc6ad78ba9b2248f765e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///gQ\u003d",
         "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/OFStatisticsManager.java",
         "patchSetId": 1
