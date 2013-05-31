@@ -29,9 +29,16 @@ import java.util.Arrays;
 import org.apache.commons.codec.binary.Base64;
 
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONTokener;
 
+import org.opendaylight.controller.hosttracker.IfIptoHost;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.usermanager.IUserManager;
 
 @RunWith(PaxExam.class)
@@ -42,6 +49,7 @@ public class NorthboundIntegrationTest {
     @Inject
     private BundleContext bc;
     private IUserManager users = null;
+    private IInventoryListener invtoryListener = null;
 
     private String stateToString(int state) {
         switch (state) {
@@ -86,6 +94,14 @@ public class NorthboundIntegrationTest {
         // If UserManager is null, cannot login to run tests.
         assertNotNull(this.users);
 
+        r = bc.getServiceReference(IfIptoHost.class.getName());
+        if (r != null) {
+            this.invtoryListener = (IInventoryListener)bc.getService(r);
+        }
+
+        // If inventoryListener is null, cannot run hosttracker tests.
+        assertNotNull(this.invtoryListener);
+        
     }
 
     // static variable to pass response code from getJsonResult()
@@ -153,7 +169,8 @@ public class NorthboundIntegrationTest {
             String result = getJsonResult(baseURL + "flowstats");
             JSONTokener jt = new JSONTokener(result);
             JSONObject json = new JSONObject(jt);
-            JSONObject flowStatistics = json.getJSONObject("flowStatistics");
+            JSONObject flowStatistics = 
+                    getJsonInstance (json, "flowStatistics", 0xCAFE); 
             JSONObject node = flowStatistics.getJSONObject("node");
             // test that node was returned properly
             Assert.assertTrue(node.getInt("@id") == 0xCAFE);
@@ -172,7 +189,8 @@ public class NorthboundIntegrationTest {
             result = getJsonResult(baseURL + "portstats");
             jt = new JSONTokener(result);
             json = new JSONObject(jt);
-            JSONObject portStatistics = json.getJSONObject("portStatistics");
+            JSONObject portStatistics = 
+                    getJsonInstance (json, "portStatistics", 0xCAFE); 
             JSONObject node2 = portStatistics.getJSONObject("node");
             // test that node was returned properly
             Assert.assertTrue(node2.getInt("@id") == 0xCAFE);
@@ -332,6 +350,276 @@ public class NorthboundIntegrationTest {
             Assert.assertTrue(false);
         }
     }
+
+    // method to extract a JSONObject with specified node ID from a JSONObject
+    //   that may contain an array of JSONObjects
+    // This is specifically written for  statistics manager northbound REST interface
+    // array_name should be either "flowStatistics" or "portStatistics"
+    private JSONObject getJsonInstance (JSONObject json, String array_name, Integer nodeId) throws JSONException
+    {
+        JSONObject result = null;
+        if (json.get(array_name) instanceof JSONArray){
+            JSONArray json_array = json.getJSONArray(array_name);
+            for (int i = 0; i < json_array.length(); i++) {
+                result = json_array.getJSONObject(i);
+                Integer nid = result.getJSONObject("node").getInt("@id");
+                if ( nid.equals(nodeId) )  break;
+            }
+        }
+        else {
+            result = json.getJSONObject(array_name);
+            Integer nid = result.getJSONObject("node").getInt("@id");
+            if ( ! nid.equals(nodeId) )  result = null;
+        }
+        return result;
+    }
+    
+
+    // a class to construct query parameter for HTTP request
+    private class QueryParameter {
+        StringBuilder queryString = null;
+        
+        // constructor
+        QueryParameter (String key, String value) {
+            queryString = new StringBuilder();
+            queryString.append("?").append(key).append("=").append(value);
+        }
+        
+        // method to add more query parameter
+        QueryParameter add (String key, String value){
+            this.queryString.append("&").append(key).append("=").append(value);
+            return this;
+        }
+        
+        // method to get the query parameter string
+        String getString (){
+            return this.queryString.toString();
+        }
+
+    }
+    
+    
+    @Test
+    public void testHostTracker() {
+
+        System.out.println("Starting HostTracker JAXB client.");
+
+        // setup 2 host models for @POST method
+        // 1st host
+        String networkAddress_1 = "192.168.0.8";
+        String dataLayerAddress_1 = "11:22:33:44:55:66";
+        String nodeType_1 = "STUB";
+        Integer nodeId_1 = 3366;
+        String nodeConnectorType_1 = "STUB";
+        Integer nodeConnectorId_1 = 12;
+        String vlan_1 = "4";
+        
+        
+        // 2nd host
+        String networkAddress_2 = "10.1.1.1";
+        String dataLayerAddress_2 = "1A:2B:3C:4D:5E:6F";
+        String nodeType_2 = "STUB";
+        Integer nodeId_2 = 4477;
+        String nodeConnectorType_2 = "STUB";
+        Integer nodeConnectorId_2 = 34;
+        String vlan_2 = "0";
+        
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/host/default";
+
+        // test POST method: addHost()
+        try {
+            String queryParameter = 
+                    new QueryParameter("dataLayerAddress", dataLayerAddress_1)
+                    .add("nodeType", nodeType_1)
+                    .add("nodeId", nodeId_1.toString())
+                    .add("nodeConnectorType", nodeConnectorType_1)
+                    .add("nodeConnectorId", nodeConnectorId_1.toString())
+                    .add("vlan", vlan_1)
+                    .getString();
+
+            String result = getJsonResult(baseURL +"/" + networkAddress_1 + queryParameter, "POST");
+            Assert.assertTrue (httpResponseCode.intValue() == (Integer) 201);
+            
+            // vlan is not passed through query parameter but should be defaulted to "0"
+            queryParameter = 
+                    new QueryParameter("dataLayerAddress", dataLayerAddress_2)
+                    .add("nodeType", nodeType_2)
+                    .add("nodeId", nodeId_2.toString())
+                    .add("nodeConnectorType", nodeConnectorType_2)
+                    .add("nodeConnectorId", nodeConnectorId_2.toString())
+                    .getString();
+
+            result = getJsonResult(baseURL +"/" + networkAddress_2 + queryParameter, "POST");
+            Assert.assertTrue (httpResponseCode.intValue() == (Integer) 201);
+        } catch (Exception e) {
+            // Got an unexpected exception
+            Assert.assertTrue(false);
+        }
+        
+        // define variables for decoding returned strings
+        String networkAddress;
+        JSONObject host_jo, dl_jo, nc_jo, node_jo;
+        
+        // the two hosts should be in inactive host DB
+        // test GET method: getInactiveHosts()
+        try {
+            String result = getJsonResult(baseURL +"/inactive", "GET");
+            Assert.assertTrue (httpResponseCode.intValue() == (Integer) 200);
+            
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+            // there should be at least two hosts in the DB
+            Assert.assertTrue (json.get("host") instanceof JSONArray);
+            JSONArray ja = json.getJSONArray("host");
+            Integer count = ja.length();
+            Assert.assertTrue (count == 2);
+            
+            for ( int i = 0; i < count; i++) {
+                host_jo = ja.getJSONObject(i);
+                dl_jo = host_jo.getJSONObject("dataLayerAddress");
+                nc_jo = host_jo.getJSONObject("nodeConnector");
+                node_jo = nc_jo.getJSONObject("node");
+                
+                networkAddress = host_jo.getString("networkAddress");
+                if (networkAddress.equalsIgnoreCase(networkAddress_1)) {
+                    Assert.assertTrue (dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_1));
+                    Assert.assertTrue (nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_1));
+                    Assert.assertTrue (Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
+                    Assert.assertTrue (node_jo.getString("@type").equalsIgnoreCase(nodeType_1));
+                    Assert.assertTrue (Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
+                    Assert.assertTrue (host_jo.getString("vlan").equalsIgnoreCase(vlan_1));
+                }
+                else if (networkAddress.equalsIgnoreCase(networkAddress_2)) {
+                    Assert.assertTrue (dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_2));
+                    Assert.assertTrue (nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_2));
+                    Assert.assertTrue (Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_2);
+                    Assert.assertTrue (node_jo.getString("@type").equalsIgnoreCase(nodeType_2));
+                    Assert.assertTrue (Integer.parseInt(node_jo.getString("@id")) == nodeId_2);
+                    Assert.assertTrue (host_jo.getString("vlan").equalsIgnoreCase(vlan_2));
+                }
+                else {
+                    Assert.assertTrue(false);
+                }
+            }
+        } catch (Exception e) {
+            // Got an unexpected exception
+            Assert.assertTrue(false);
+        }
+        
+        // test GET method: getActiveHosts() - no host expected
+        try {
+            String result = getJsonResult(baseURL, "GET");
+            Assert.assertTrue (httpResponseCode.intValue() == (Integer) 200);
+            
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+            Assert.assertFalse(hostInJson(json, networkAddress_1));
+            Assert.assertFalse(hostInJson(json, networkAddress_2));
+        } catch (Exception e) {
+            // Got an unexpected exception
+            Assert.assertTrue(false);
+        }
+        
+        // put the 1st host into active host DB
+        Node nd;
+        NodeConnector ndc;
+        try {
+            nd = new Node(nodeType_1, nodeId_1);
+            ndc = new NodeConnector(nodeConnectorType_1, nodeConnectorId_1, nd);
+            this.invtoryListener.notifyNodeConnector(ndc,
+                    UpdateType.ADDED, null);
+        }catch(ConstructionException e){
+            ndc = null;
+            nd = null;
+        }
+        
+        // verify the host shows up in active host DB
+        try {
+            String result = getJsonResult(baseURL, "GET");
+            Assert.assertTrue (httpResponseCode.intValue() == (Integer) 200);
+            
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+ 
+            Assert.assertTrue(hostInJson(json, networkAddress_1));
+        } catch (Exception e) {
+            // Got an unexpected exception
+            Assert.assertTrue(false);
+        }
+        
+        
+        // test GET method for getHostDetails()
+        try {
+            String result = getJsonResult(baseURL+"/"+networkAddress_1, "GET");
+            Assert.assertTrue (httpResponseCode.intValue() == (Integer) 200);
+            
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+
+            Assert.assertFalse(json.length() == 0);
+            
+            dl_jo = json.getJSONObject("dataLayerAddress");
+            nc_jo = json.getJSONObject("nodeConnector");
+            node_jo = nc_jo.getJSONObject("node");
+            
+            Assert.assertTrue (json.getString("networkAddress").equalsIgnoreCase(networkAddress_1));
+            Assert.assertTrue (dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_1));
+            Assert.assertTrue (nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_1));
+            Assert.assertTrue (Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
+            Assert.assertTrue (node_jo.getString("@type").equalsIgnoreCase(nodeType_1));
+            Assert.assertTrue (Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
+            Assert.assertTrue (json.getString("vlan").equalsIgnoreCase(vlan_1));
+        } catch (Exception e) {
+            // Got an unexpected exception
+            Assert.assertTrue(false);
+        }
+        
+        // test DELETE method for deleteFlow()
+        try {
+            String result = getJsonResult(baseURL+"/"+networkAddress_1, "DELETE");
+            Assert.assertTrue (httpResponseCode.intValue() == (Integer) 200);
+            
+        } catch (Exception e) {
+            // Got an unexpected exception
+            Assert.assertTrue(false);
+        }
+        
+        // verify host_1 removed from active host DB
+        // test GET method: getActiveHosts() - no host expected
+        try {
+            String result = getJsonResult(baseURL, "GET");
+            Assert.assertTrue (httpResponseCode.intValue() == (Integer) 200);
+            
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+            
+            Assert.assertFalse(hostInJson(json, networkAddress_1));
+        } catch (Exception e) {
+            // Got an unexpected exception
+            Assert.assertTrue(false);
+        }
+        }
+        
+        private Boolean hostInJson (JSONObject json, String hostIp) throws JSONException  {
+       // input JSONObject may be empty
+        if ( json.length() == 0 ) {
+            return false;
+        }
+        if (json.get("host") instanceof JSONArray){
+            JSONArray ja = json.getJSONArray("host");
+            for (int i = 0; i < ja.length(); i++) {
+                String na = ja.getJSONObject(i).getString("networkAddress");
+                if (na.equalsIgnoreCase(hostIp))
+                    return true;
+                }
+            return false;
+        } 
+        else {
+            String na = json.getJSONObject("host").getString("networkAddress");
+            return (na.equalsIgnoreCase(hostIp)) ? true : false;
+        }
+    }
+
 
     // Configure the OSGi container
     @Configuration

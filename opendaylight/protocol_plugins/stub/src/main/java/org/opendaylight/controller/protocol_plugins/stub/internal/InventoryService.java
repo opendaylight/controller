@@ -115,6 +115,21 @@ public class InventoryService implements IPluginInInventoryService {
         }       
      
         nodeProps.put(node, propMap);
+        
+        try{
+            node = new Node("STUB", 3366);
+        }catch(ConstructionException e){
+            node = null;
+        }       
+        nodeProps.put(node, propMap);
+        
+        try{
+            node = new Node("STUB", 4477);
+        }catch(ConstructionException e){
+            node = null;
+        }       
+        nodeProps.put(node, propMap);
+        
         return nodeProps;
     }
 
@@ -146,7 +161,26 @@ public class InventoryService implements IPluginInInventoryService {
             node = null;
         }
         nodeConnectorProps.put(nc, ncPropMap);
-        return nodeConnectorProps;
+
+        try{
+            node = new Node("STUB", 3366);
+            nc = new NodeConnector("STUB", 12, node);
+         } catch(ConstructionException e){
+            nc = null;
+            node = null;
+         }
+         nodeConnectorProps.put(nc, ncPropMap);
+
+         try{
+            node = new Node("STUB", 4477);
+            nc = new NodeConnector("STUB", 34, node);
+         }catch(ConstructionException e){
+            nc = null;
+            node = null;
+         }
+         nodeConnectorProps.put(nc, ncPropMap);
+
+         return nodeConnectorProps;
     }
 
 
