@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///bU\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/AllTableStatistics.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace :)",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///bQ\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/TableStatistics.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///bM\u003d",
+        "filename": "opendaylight/northbound/statistics/src/test/java/org/opendaylight/controller/statistics/northbound/StatisticsNorthboundTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///bI\u003d",
+        "filename": "opendaylight/northbound/statistics/src/test/java/org/opendaylight/controller/statistics/northbound/StatisticsNorthboundTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///bE\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/IOFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove tabs.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///bA\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/IOFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///a8\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/IOFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove tabs.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///a4\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeTable.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///a0\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/reader/IReadService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///aw\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/reader/IReadService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///as\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/reader/IReadService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///ao\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/reader/IReadService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///ak\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/reader/NodeTableStatistics.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///ag\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/reader/NodeTableStatistics.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///ac\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/utils/NodeTableCreator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///aY\u003d",
+        "filename": "opendaylight/sal/api/src/test/java/org/opendaylight/controller/sal/core/NodeTableTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-05-31T22:02:53Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "f69bc9794ee2704736f5c9182296fd5b9b21c6c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
