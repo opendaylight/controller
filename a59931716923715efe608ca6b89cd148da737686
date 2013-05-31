@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///eE\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 472
+      },
+      "writtenOn": "2013-05-31T00:37:55Z",
+      "side": 1,
+      "message": "I wasn\u0027t sure so kept it. I can remove it if this is planning too much into the future :)",
+      "parentUuid": "AAAAEn///eY\u003d",
+      "revId": "a59931716923715efe608ca6b89cd148da737686",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///fg\u003d",
         "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
         "patchSetId": 1
