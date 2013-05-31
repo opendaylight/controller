@@ -20,11 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 
 /**
  * Container Instance of IPluginInReadService implementation class
@@ -145,5 +147,25 @@ public class ReadService implements IPluginInReadService {
             return 0;
         }
         return filter.getTransmitRate(containerName, connector);
+    }
+
+    @Override
+    public NodeTableStatistics readNodeTable(NodeTable table, boolean cached) {
+        if (!table.getNode().getType()
+                .equals(NodeIDType.OPENFLOW)) {
+            logger.error("Invalid node type");
+            return null;
+        }
+        return filter.readNodeTable(containerName, table, cached);
+    }
+
+    @Override
+    public List<NodeTableStatistics> readAllNodeTable(Node node, boolean cached) {
+        if (!node.getType().equals(NodeIDType.OPENFLOW)) {
+            logger.error("Invalid node type");
+            return null;
+        }
+
+        return filter.readAllNodeTable(containerName, node, cached);
     }
 }

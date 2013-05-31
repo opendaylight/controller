@@ -31,6 +31,7 @@ import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
@@ -113,9 +114,9 @@ public class StatisticsNorthbound {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(AllFlowStatistics.class)
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 404, condition = "The containerName is not found"),
-            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+        @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public AllFlowStatistics getFlowStatistics(
             @PathParam("containerName") String containerName) {
         if (!NorthboundUtils.isAuthorized(
@@ -168,9 +169,9 @@ public class StatisticsNorthbound {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(FlowStatistics.class)
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 404, condition = "The containerName is not found"),
-            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+        @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public FlowStatistics getFlowStatistics(
             @PathParam("containerName") String containerName,
             @PathParam("nodeType") String nodeType,
@@ -216,9 +217,9 @@ public class StatisticsNorthbound {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(AllPortStatistics.class)
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 404, condition = "The containerName is not found"),
-            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+        @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public AllPortStatistics getPortStatistics(
             @PathParam("containerName") String containerName) {
 
@@ -270,9 +271,9 @@ public class StatisticsNorthbound {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(PortStatistics.class)
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 404, condition = "The containerName is not found"),
-            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+        @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public PortStatistics getPortStatistics(
             @PathParam("containerName") String containerName,
             @PathParam("nodeType") String nodeType,
@@ -302,6 +303,108 @@ public class StatisticsNorthbound {
         Node node = handleNodeAvailability(containerName, nodeType, nodeId);
         return new PortStatistics(node,
                 statisticsManager.getNodeConnectorStatistics(node));
+    }
+
+    /**
+     * Returns a list of all the Table Statistics on all Nodes.
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * 
+     * @return Returns a list of all the Table Statistics in a given Node.
+     */
+    @Path("/{containerName}/tablestats")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @TypeHint(TableStatistics.class)
+    @StatusCodes({
+        @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public AllTableStatistics getTableStatistics(
+            @PathParam("containerName") String containerName) {
+
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
+        handleDefaultDisabled(containerName);
+
+        IStatisticsManager statisticsManager = getStatisticsService(containerName);
+        if (statisticsManager == null) {
+            throw new ServiceUnavailableException("Statistics "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
+                .getInstance(ISwitchManager.class, containerName, this);
+        if (switchManager == null) {
+            throw new ServiceUnavailableException("Switch manager "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        List<TableStatistics> statistics = new ArrayList<TableStatistics>();
+        for (Node node : switchManager.getNodes()) {
+            List<NodeTableStatistics> stat = statisticsManager
+                    .getNodeTableStatistics(node);
+            TableStatistics tableStat = new TableStatistics(node, stat);
+            statistics.add(tableStat);
+        }
+        return new AllTableStatistics(statistics);
+    }
+
+    /**
+     * Returns a list of all the Table Statistics on all Nodes.
+     * 
+     * @param containerName
+     *            Name of the Container. The Container name for the base
+     *            controller is "default".
+     * @param nodeType
+     *            Node Type as specifid by Node class
+     * @param Node
+     *            Identifier
+     * @return Returns a list of all the Table Statistics in a given Node.
+     */
+    @Path("/{containerName}/tablestats/{nodeType}/{nodeId}")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @TypeHint(TableStatistics.class)
+    @StatusCodes({
+        @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public TableStatistics getTableStatistics(
+            @PathParam("containerName") String containerName,
+            @PathParam("nodeType") String nodeType,
+            @PathParam("nodeId") String nodeId) {
+
+        if (!NorthboundUtils.isAuthorized(
+                getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                    "User is not authorized to perform this operation on container "
+                            + containerName);
+        }
+        handleDefaultDisabled(containerName);
+
+        IStatisticsManager statisticsManager = getStatisticsService(containerName);
+        if (statisticsManager == null) {
+            throw new ServiceUnavailableException("Statistics "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
+                .getInstance(ISwitchManager.class, containerName, this);
+        if (switchManager == null) {
+            throw new ServiceUnavailableException("Switch manager "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        Node node = handleNodeAvailability(containerName, nodeType, nodeId);
+        return new TableStatistics(node,
+                statisticsManager.getNodeTableStatistics(node));
     }
 
     private void handleDefaultDisabled(String containerName) {

@@ -54,6 +54,7 @@ import org.openflow.protocol.statistics.OFPortStatisticsRequest;
 import org.openflow.protocol.statistics.OFQueueStatisticsRequest;
 import org.openflow.protocol.statistics.OFStatistics;
 import org.openflow.protocol.statistics.OFStatisticsType;
+import org.openflow.protocol.statistics.OFTableStatistics;
 import org.openflow.protocol.statistics.OFVendorStatistics;
 import org.openflow.util.HexString;
 import org.osgi.framework.BundleContext;
@@ -74,16 +75,19 @@ public class OFStatisticsManager implements IOFStatisticsManager,
     private static final long flowStatsPeriod = 10000;
     private static final long descriptionStatsPeriod = 60000;
     private static final long portStatsPeriod = 5000;
+    private static final long tableStatsPeriod = 10000;
     private static final long tickPeriod = 1000;
     private static short statisticsTickNumber = (short) (flowStatsPeriod / tickPeriod);
     private static short descriptionTickNumber = (short) (descriptionStatsPeriod / tickPeriod);
     private static short portTickNumber = (short) (portStatsPeriod / tickPeriod);
+    private static short tableTickNumber = (short) (tableStatsPeriod / tickPeriod);
     private static short factoredSamples = (short) 2;
     private static short counter = 1;
     private IController controller = null;
     private ConcurrentMap<Long, List<OFStatistics>> flowStatistics;
     private ConcurrentMap<Long, List<OFStatistics>> descStatistics;
     private ConcurrentMap<Long, List<OFStatistics>> portStatistics;
+    private ConcurrentMap<Long, List<OFStatistics>> tableStatistics;
     private List<OFStatistics> dummyList;
     private ConcurrentMap<Long, StatisticsTicks> statisticsTimerTicks;
     protected BlockingQueue<StatsRequest> pendingStatsRequests;
@@ -164,6 +168,7 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         flowStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
         descStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
         portStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
+        tableStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
         dummyList = new ArrayList<OFStatistics>(1);
         statisticsTimerTicks = new ConcurrentHashMap<Long, StatisticsTicks>(
                 initialSize);
@@ -283,6 +288,7 @@ public class OFStatisticsManager implements IOFStatisticsManager,
             type = t;
         }
 
+        @Override
         public String toString() {
             return "SReq = {switchId=" + switchId + ", type=" + type + "}";
         }
@@ -339,6 +345,7 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         private short flowStatisticsTicks;
         private short descriptionTicks;
         private short portStatisticsTicks;
+        private short tableStatisticsTicks;
 
         public StatisticsTicks(boolean scattered) {
             if (scattered) {
@@ -350,10 +357,12 @@ public class OFStatisticsManager implements IOFStatisticsManager,
                         % statisticsTickNumber);
                 descriptionTicks = (short) (1 + counter % descriptionTickNumber);
                 portStatisticsTicks = (short) (1 + counter % portTickNumber);
+                tableStatisticsTicks = (short) (1 + counter % tableTickNumber);
             } else {
                 flowStatisticsTicks = statisticsTickNumber;
                 descriptionTicks = descriptionTickNumber;
                 portStatisticsTicks = portTickNumber;
+                tableStatisticsTicks = tableTickNumber;
             }
         }
 
@@ -387,9 +396,20 @@ public class OFStatisticsManager implements IOFStatisticsManager,
             return false;
         }
 
+        public boolean decrementTableTicksIsZero() {
+            // Please ensure no code is inserted between the if check and the
+            // descriptionTicks reset
+            if(--tableStatisticsTicks == 0) {
+                tableStatisticsTicks = tableTickNumber;
+                return true;
+            }
+            return false;
+        }
+
+        @Override
         public String toString() {
             return "{fT=" + flowStatisticsTicks + ",dT=" + descriptionTicks
-                    + ",pT=" + portStatisticsTicks + "}";
+                    + ",pT=" + portStatisticsTicks + ",tT=" + tableStatisticsTicks + "}";
         }
     }
 
@@ -438,6 +458,16 @@ public class OFStatisticsManager implements IOFStatisticsManager,
                     printInfoMessage("Port", request);
                 }
             }
+
+            if(clock.decrementTableTicksIsZero() == true) {
+                request = new StatsRequest(switchId, OFStatisticsType.TABLE);
+                // If a request for this switch is already in the queue, skip to
+                // add this new request
+                if (!pendingStatsRequests.contains(request)
+                        && false == pendingStatsRequests.offer(request)) {
+                    printInfoMessage("Table", request);
+                }
+            }
         }
     }
 
@@ -454,6 +484,8 @@ public class OFStatisticsManager implements IOFStatisticsManager,
                 OFStatisticsType.DESC));
         pendingStatsRequests.remove(new StatsRequest(switchId,
                 OFStatisticsType.PORT));
+        pendingStatsRequests.remove(new StatsRequest(switchId,
+                OFStatisticsType.TABLE));
         // Take care of the TX rate databases
         switchPortStatsUpdated.remove(switchId);
         txRates.remove(switchId);
@@ -491,6 +523,9 @@ public class OFStatisticsManager implements IOFStatisticsManager,
                 // Wake up the thread which maintains the TX byte counters for
                 // each port
                 switchPortStatsUpdated.offer(switchId);
+            } else if (statType == OFStatisticsType.TABLE) {
+                // Overwrite cache
+                tableStatistics.put(switchId, values);
             }
         }
     }
@@ -591,6 +626,20 @@ public class OFStatisticsManager implements IOFStatisticsManager,
             } else if (statsType == OFStatisticsType.DESC) {
                 type = "DESC";
             } else if (statsType == OFStatisticsType.TABLE) {
+                if(target != null){
+                    if (!(target instanceof Byte)) {
+                        // Malformed request
+                        log.warn("Invalid table id for table stats request: {}",
+                                target.getClass());
+                        return null;
+                    }
+                    byte targetTable = (Byte) target;
+                    OFTableStatistics specificReq = new OFTableStatistics();
+                    specificReq.setTableId(targetTable);
+                    req.setStatistics(Collections
+                            .singletonList((OFStatistics) specificReq));
+                    requestLength += specificReq.getLength();
+                }
                 type = "TABLE";
             }
             req.setLengthU(requestLength);
@@ -792,6 +841,31 @@ public class OFStatisticsManager implements IOFStatisticsManager,
     }
 
     @Override
+    public List<OFStatistics> getOFTableStatistics(Long switchId) {
+        if (!tableStatistics.containsKey(switchId)) {
+            return this.dummyList;
+        }
+
+        return tableStatistics.get(switchId);
+    }
+
+    @Override
+    public List<OFStatistics> getOFTableStatistics(Long switchId, Byte tableId) {
+        if (!tableStatistics.containsKey(switchId)) {
+            return this.dummyList;
+        }
+
+        List<OFStatistics> list = new ArrayList<OFStatistics>(1);
+        for (OFStatistics stats : tableStatistics.get(switchId)) {
+            if (((OFTableStatistics) stats).getTableId() == tableId) {
+                list.add(stats);
+                break;
+            }
+        }
+        return list;
+    }
+
+    @Override
     public int getFlowsNumber(long switchId) {
         return this.flowStatistics.get(switchId).size();
     }
@@ -938,6 +1012,7 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         ci.println("Flow Stats Period: " + statisticsTickNumber + " s");
         ci.println("Desc Stats Period: " + descriptionTickNumber + " s");
         ci.println("Port Stats Period: " + portTickNumber + " s");
+        ci.println("Table Stats Period: " + tableTickNumber + " s");
     }
 
     public void _resetSwitchCapability(CommandInterpreter ci) {
@@ -1008,6 +1083,7 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         String flowStatsInterv = ci.nextArgument();
         String portStatsInterv = ci.nextArgument();
         String descStatsInterv = ci.nextArgument();
+        String tableStatsInterv = ci.nextArgument();
 
         if (flowStatsInterv == null || portStatsInterv == null
                 || descStatsInterv == null) {
@@ -1016,27 +1092,30 @@ public class OFStatisticsManager implements IOFStatisticsManager,
                     + portTickNumber + "s dP=" + descriptionTickNumber + "s");
             return;
         }
-        Short fP, pP, dP;
+        Short fP, pP, dP, tP;
         try {
             fP = Short.parseShort(flowStatsInterv);
             pP = Short.parseShort(portStatsInterv);
             dP = Short.parseShort(descStatsInterv);
+            tP = Short.parseShort(tableStatsInterv);
         } catch (Exception e) {
             ci.println("Invalid format values: " + e.getMessage());
             return;
         }
 
-        if (pP <= 1 || fP <= 1 || dP <= 1) {
-            ci.println("Invalid values. fP, pP, dP have to be greater than 1.");
+        if (pP <= 1 || fP <= 1 || dP <= 1 || tP <= 1) {
+            ci.println("Invalid values. fP, pP, dP, tP have to be greater than 1.");
             return;
         }
 
         statisticsTickNumber = fP;
         portTickNumber = pP;
         descriptionTickNumber = dP;
+        tableTickNumber = tP;
 
         ci.println("New Values: fP=" + statisticsTickNumber + "s pP="
-                + portTickNumber + "s dP=" + descriptionTickNumber + "s");
+                + portTickNumber + "s dP=" + descriptionTickNumber + "s tP="
+                + tableTickNumber + "s");
     }
 
     /**
@@ -1047,7 +1126,8 @@ public class OFStatisticsManager implements IOFStatisticsManager,
         String fsStr = System.getProperty("of.flowStatsPollInterval");
         String psStr = System.getProperty("of.portStatsPollInterval");
         String dsStr = System.getProperty("of.descStatsPollInterval");
-        Short fs, ps, ds;
+        String tsStr = System.getProperty("of.tableStatsPollInterval");
+        Short fs, ps, ds, ts;
 
         if (fsStr != null) {
             try {
@@ -1074,6 +1154,16 @@ public class OFStatisticsManager implements IOFStatisticsManager,
                 ds = Short.parseShort(dsStr);
                 if (ds > 0) {
                     descriptionTickNumber = ds;
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (tsStr != null) {
+            try{
+                ts = Short.parseShort(tsStr);
+                if (ts > 0) {
+                    tableTickNumber = ts;
                 }
             } catch (Exception e) {
             }

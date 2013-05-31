@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 public class TableStatisticsConverter {
     private static final Logger log = LoggerFactory
             .getLogger(TableStatisticsConverter.class);
-    
-    private long switchId;
+
+    private final long switchId;
     private List<OFStatistics> ofStatsList;
     private List<NodeTableStatistics> ntStatsList;
 
@@ -46,7 +46,7 @@ public class TableStatisticsConverter {
                 ofTableStat = (OFTableStatistics) ofStat;
                 NodeTableStatistics NTStat = new NodeTableStatistics();
                 NTStat.setNodeTable(TableConverter.toNodeTable(
-                		ofTableStat.getTableId(), node));
+                        ofTableStat.getTableId(), node));
                 NTStat.setActiveCount(ofTableStat.getActiveCount());
                 NTStat.setLookupCount(ofTableStat.getLookupCount());
                 NTStat.setMatchedCount(ofTableStat.getMatchedCount());

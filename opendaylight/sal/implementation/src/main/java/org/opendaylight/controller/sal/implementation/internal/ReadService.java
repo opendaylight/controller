@@ -25,6 +25,7 @@ import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.PopVlan;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
@@ -35,10 +36,12 @@ import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.IReadService;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.opendaylight.controller.sal.utils.NodeTableCreator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -265,6 +268,45 @@ public class ReadService implements IReadService, CommandProvider {
     }
 
     @Override
+    public List<NodeTableStatistics> readNodeTable(Node node) {
+        if (pluginReader != null) {
+            if (this.pluginReader.get(node.getType()) != null) {
+                return this.pluginReader.get(node.getType())
+                        .readAllNodeTable(node, true);
+            }
+        }
+        logger.warn("Plugin unavailable");
+        return null;
+    }
+
+
+    @Override
+    public NodeTableStatistics nonCachedReadNodeTable(NodeTable table) {
+        Node node = table.getNode();
+        if (pluginReader != null && node != null) {
+            if (this.pluginReader.get(node.getType()) != null) {
+                return this.pluginReader.get(node.getType())
+                        .readNodeTable(table, false);
+            }
+        }
+        logger.warn("Plugin unavailable");
+        return null;
+    }
+
+    @Override
+    public NodeTableStatistics readNodeTable(NodeTable table) {
+        Node node = table.getNode();
+        if (pluginReader != null && node != null) {
+            if (this.pluginReader.get(node.getType()) != null) {
+                return this.pluginReader.get(node.getType())
+                        .readNodeTable(table, true);
+            }
+        }
+        logger.warn("Plugin unavailable");
+        return null;
+    }
+
+    @Override
     public List<NodeConnectorStatistics> nonCachedReadNodeConnectors(Node node) {
         if (pluginReader != null) {
             if (this.pluginReader.get(node.getType()) != null) {
@@ -422,6 +464,34 @@ public class ReadService implements IReadService, CommandProvider {
         } else {
             ci.println("null");
         }
+    }
+
+    public void _readtable(CommandInterpreter ci) {
+        String nodeId = ci.nextArgument();
+        String tableId = ci.nextArgument();
+        String cacheReq = ci.nextArgument();
+        boolean cached;
+        if (nodeId == null) {
+            ci.print("Node id not specified");
+            return;
+        }
+        if (tableId == null) {
+            ci.print("Table id not specified");
+            return;
+        }
+        cached = (cacheReq == null) ? true : cacheReq.equals("true");
+        NodeTable nodeTable = null;
+        Node node = NodeCreator.createOFNode(Long.parseLong(nodeId));
+        nodeTable = NodeTableCreator.createNodeTable(Byte
+                .valueOf(tableId), node);
+        NodeTableStatistics stats = (cached) ? this
+                .readNodeTable(nodeTable) : this
+                .nonCachedReadNodeTable(nodeTable);
+                if (stats != null) {
+                    ci.println(stats.toString());
+                } else {
+                    ci.println("null");
+                }
     }
 
     public void _readdescr(CommandInterpreter ci) {

@@ -5,6 +5,7 @@ package org.opendaylight.controller.sal.core;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -12,10 +13,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 /**
  * @author adityavaja
@@ -25,46 +22,22 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 @XmlAccessorType(XmlAccessType.NONE)
 public class NodeTable implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     public static final Short SPECIALNODETABLEID = (short) 0;
-    
+
     /**
      * Enum-like static class created with the purpose of identifing
      * multiple type of nodes in the SDN network. The type is
      * necessary to figure out to later on correctly use the
-     * nodeID. Using a static class instead of an Enum so we can add
+     * nodeTableID. Using a static class instead of an Enum so we can add
      * dynamically new types without changing anything in the
      * surround.
      */
     public static final class NodeTableIDType {
-        private static final
-        ConcurrentHashMap<String, ImmutablePair<Class<? extends Object>, String>> compatibleType =
-            new ConcurrentHashMap<String, ImmutablePair<Class<? extends Object>, String>>();
+        private static final ConcurrentHashMap<String, Class<? extends Object>> compatibleType =
+                new ConcurrentHashMap<String, Class<? extends Object>>();
         /**
-         * Represents the OFPP_CONTROLLER reserved port to forward a 
-         * packet to the controller, this is to send data packets 
-         * to the controller from the data plane triggering 
-         * a packet_in event.
-         */
-        public static String CONTROLLER = "CTRL";
-        /**
-         * Represents the OFPP_ALL reserved OF port 
-         * to forward to ALL the ports in the system ,
-         * should be used for flooding like mechanism to
-         * be used cautiously to avoid excessive flooding.
-         */
-        public static String ALL = "ALL";
-        /**
-         * Represents the OFPP_LOCAL reserved OF port
-         * to access the local networking stack of the node
-         * of which the packet is destined. Typically used for
-         * inband OF communications channel.
-         */
-        public static String SWSTACK = "SW";
-        /**
-         * Describes OFPP_Normal reserved port destination that invokes 
-         * the traditional native L2/L3 HW normal forwarding functionality 
-         * if supported on the forwarding element.
+         * These are in compliance with the compatibility types in 'Node'
          */
         public static String OPENFLOW = "OF";
         public static String PCEP = "PE";
@@ -73,15 +46,12 @@ public class NodeTable implements Serializable {
 
         // Pre-populated types, just here for convenience and ease of
         // unit-testing, but certainly those could live also outside.
+        // Currently we allow these 4. It can be changed later.
         static {
-			 compatibleType.put(OPENFLOW,
-					 new ImmutablePair(Short.class, Node.NodeIDType.OPENFLOW));
-			 compatibleType.put(PCEP,
-					 new ImmutablePair(Integer.class, Node.NodeIDType.PCEP));
-			 compatibleType.put(ONEPK,
-					 new ImmutablePair(String.class, Node.NodeIDType.ONEPK));
-			 compatibleType.put(PRODUCTION,
-					 new ImmutablePair(String.class, Node.NodeIDType.PRODUCTION));
+            compatibleType.put(OPENFLOW, Byte.class);
+            compatibleType.put(PCEP, UUID.class);
+            compatibleType.put(ONEPK, String.class);
+            compatibleType.put(PRODUCTION, String.class);
         }
 
         /**
@@ -95,56 +65,32 @@ public class NodeTable implements Serializable {
          * for the NodeTableID
          */
         public static Class<?> getClassType(String type) {
-            if (compatibleType.get(type) == null) {
-                return null;
-            }
-            return compatibleType.get(type).getLeft();
+            return compatibleType.get(type);
         }
-        
-        /**
-         * Return the NodeIDType compatible with this NodeTable,
-         * in fact you cannot attach for example a PCEP NodeTable
-         * to an OpenFlow Node.
-         *
-         * @param type, the type of the NodeTable for which we
-         * want to retrieve the compatible class to be used as ID.
-         *
-         * @return The ID of the compatible Node
-         */
-        public static String getCompatibleNode(String type) {
-            if (compatibleType.get(type) == null) {
-                return null;
-            }
-            return compatibleType.get(type).getRight();
-        }        
 
         /**
-         * Returns all the registered nodeIDTypes currently available
+         * Returns all the registered nodeTableIDTypes currently available
          *
-         * @return The current registered NodeIDTypes
+         * @return The current registered NodeTableIDTypes
          */
         public static Set<String> values() {
             return compatibleType.keySet();
         }
 
         /**
-         * Register a new ID for which Node can be created
+         * Register a new ID for which NodeTable can be created
          *
          * @param type, the new type being registered
          * @param compatibleID, the type of class to be accepted as ID
-         * @param compatibleNode, the type of Node with which this
-         * NodeTable is compatible
          *
          * @return true if registered, false otherwise
          */
         public static boolean registerIDType(String type,
-                                             Class<? extends Object> compatibleID,
-                                             String compatibleNode) {
+                Class<? extends Object> compatibleID) {
             if (compatibleType.get(type) != null) {
                 return false;
             }  else {
-                compatibleType.put(type,
-                		new ImmutablePair(compatibleID, compatibleNode));
+                compatibleType.put(type, compatibleID);
                 return true;
             }
         }
@@ -159,7 +105,7 @@ public class NodeTable implements Serializable {
             compatibleType.remove(type);
         }
     }
-    
+
     // Elements that constitute the NodeTable
     private Object nodeTableID;
     private String nodeTableType;
@@ -177,11 +123,12 @@ public class NodeTable implements Serializable {
         this.nodeTableID = null;
         this.nodeTableType = null;
         this.nodeTableNode = null;
-    }    
-    
-	public NodeTable(String nodeTableType, Object id, Node node) throws ConstructionException {
-		
-        if (node.getType().equals(nodeTableType) && id != null) {
+    }
+
+    public NodeTable(String nodeTableType, Object id, Node node) throws ConstructionException {
+        if (NodeTableIDType.getClassType(nodeTableType) != null &&
+                NodeTableIDType.getClassType(nodeTableType).isInstance(id) &&
+                node.getType().equals(nodeTableType)) {
             this.nodeTableType = nodeTableType;
             this.nodeTableID = id;
             this.nodeTableNode = node;
@@ -191,8 +138,8 @@ public class NodeTable implements Serializable {
                     + NodeTableIDType.getClassType(nodeTableType)
                     + " or Node type incompatible:" + node.getType());
         }
-	}
-	
+    }
+
     /**
      * Copy constructor for NodeTable
      *
@@ -210,70 +157,70 @@ public class NodeTable implements Serializable {
             this.nodeTableNode = new Node(src.getNode());
         } else {
             throw
-                new ConstructionException("Null incoming object to copy from");
+            new ConstructionException("Null incoming object to copy from");
         }
     }
-    
+
     /**
-	 * @return the nodeTableID
-	 */
-	public Object getID() {
-		return this.nodeTableID;
-	}
+     * @return the nodeTableID
+     */
+    public Object getID() {
+        return this.nodeTableID;
+    }
 
-	/**
-	 * @return the nodeTableType
-	 */
-	public String getType() {
-		return this.nodeTableType;
-	}
+    /**
+     * @return the nodeTableType
+     */
+    public String getType() {
+        return this.nodeTableType;
+    }
 
-	/**
-	 * @param type the nodeTableType to set
-	 * 
+    /**
+     * @param type the nodeTableType to set
+     * 
      * Private setter for nodeConnectorType to be called by JAXB not by anyone
      * else, NodeConnector is immutable
-	 */
-	private void setType(String type) {
-		this.nodeTableType = type;
-		if (this.nodeTableIDString != null) {
+     */
+    private void setType(String type) {
+        this.nodeTableType = type;
+        if (this.nodeTableIDString != null) {
             this.fillmeFromString(type, this.nodeTableIDString);
         }
-	}
+    }
 
-	/**
-	 * @return the nodeTableNode
-	 */
-	public Node getNode() {
-		return this.nodeTableNode;
-	}
+    /**
+     * @return the nodeTableNode
+     */
+    public Node getNode() {
+        return this.nodeTableNode;
+    }
 
-	/**
-	 * @param nodeTableNode the nodeTableNode to set
-	 */
-	public void setNodeTableNode(Node nodeTableNode) {
-		this.nodeTableNode = nodeTableNode;
-	}
+    /**
+     * @param nodeTableNode the nodeTableNode to set
+     */
+    public void setNodeTableNode(Node nodeTableNode) {
+        this.nodeTableNode = nodeTableNode;
+    }
 
-	/**
-	 * @return the nodeTableIDString
-	 */
-	@XmlAttribute(name = "id")
-	public String getNodeTableIDString() {
-		return this.nodeTableIDString.toString();
-	}
+    /**
+     * @return the nodeTableIDString
+     */
+    @XmlAttribute(name = "id")
+    public String getNodeTableIDString() {
+        return this.nodeTableIDString.toString();
+    }
 
-	/**
-	 * @param nodeTableIDString the nodeTableIDString to set
-	 */
-	@SuppressWarnings("unused")
-	private void setNodeTableIDString(String IDStr) {
-		this.nodeTableIDString = IDStr;
-		if (this.nodeTableType != null) {
+    /**
+     * @param nodeTableIDString the nodeTableIDString to set
+     */
+    @SuppressWarnings("unused")
+    private void setNodeTableIDString(String IDStr) {
+        this.nodeTableIDString = IDStr;
+        if (this.nodeTableType != null) {
             this.fillmeFromString(this.nodeTableType, IDStr);
         }
-	}
-	
+    }
+
     /**
      * fill the current object from the string parameters passed, will
      * be only used by JAXB
@@ -293,29 +240,49 @@ public class NodeTable implements Serializable {
         this.nodeTableType = typeStr;
         this.nodeTableID = (byte) Byte.parseByte(IDStr);
     }
-    
+
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(64489, 4961)
-            .append(nodeTableType)
-            .append(nodeTableID)
-            .append(nodeTableNode)
-            .hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((nodeTableID == null) ? 0 : nodeTableID.hashCode());
+        result = prime
+                * result
+                + ((nodeTableNode == null) ? 0 : nodeTableNode
+                        .hashCode());
+        result = prime
+                * result
+                + ((nodeTableType == null) ? 0 : nodeTableType
+                        .hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) {
+        if (this == obj)
+            return true;
+        if (obj == null)
             return false;
-        }
-        NodeTable rhs = (NodeTable)obj;
-        return new EqualsBuilder()
-            .append(this.getType(), rhs.getType())
-            .append(this.getID(), rhs.getID())
-            .append(this.getNode(), rhs.getNode())
-            .isEquals();
+        if (getClass() != obj.getClass())
+            return false;
+        NodeTable other = (NodeTable) obj;
+        if (nodeTableID == null) {
+            if (other.nodeTableID != null)
+                return false;
+        } else if (!nodeTableID.equals(other.nodeTableID))
+            return false;
+        if (nodeTableNode == null) {
+            if (other.nodeTableNode != null)
+                return false;
+        } else if (!nodeTableNode.equals(other.nodeTableNode))
+            return false;
+        if (nodeTableType == null) {
+            if (other.nodeTableType != null)
+                return false;
+        } else if (!nodeTableType.equals(other.nodeTableType))
+            return false;
+        return true;
     }
 
     @Override
@@ -323,9 +290,9 @@ public class NodeTable implements Serializable {
         return this.getNodeTableIdAsString() + "@" + this.nodeTableNode;
     }
 
-	public String getNodeTableIdAsString() {
-		return this.nodeTableType.toString() + "|"
-                        + this.nodeTableID.toString();
-	}
+    public String getNodeTableIdAsString() {
+        return this.nodeTableType.toString() + "|"
+                + this.nodeTableID.toString();
+    }
 
 }

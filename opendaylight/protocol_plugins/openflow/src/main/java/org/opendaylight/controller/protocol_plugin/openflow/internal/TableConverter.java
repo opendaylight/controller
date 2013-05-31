@@ -15,15 +15,15 @@ import org.slf4j.LoggerFactory;
  */
 public class TableConverter {
     private static final Logger log = LoggerFactory
-            .getLogger(PortConverter.class);
-    
-	public static NodeTable toNodeTable(byte tableId, Node node) {
-        log.trace("Openflow table ID", tableId);
+            .getLogger(TableConverter.class);
+
+    public static NodeTable toNodeTable(byte tableId, Node node) {
+        log.trace("Openflow table ID", Byte.toString(tableId));
         return NodeTableCreator.createNodeTable(tableId, node);
-	}
-	
-	public static byte toOFTable(NodeTable salTable) {
+    }
+
+    public static byte toOFTable(NodeTable salTable) {
         log.trace("SAL Table", salTable);
         return (Byte) salTable.getID();
-	}
+    }
 }

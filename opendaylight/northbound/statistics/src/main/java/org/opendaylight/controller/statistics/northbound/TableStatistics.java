@@ -23,14 +23,14 @@ public class TableStatistics {
     @XmlElement
     private Node node;
     @XmlElement(name="tableStat")
-    private NodeTableStatistics tableStats;
+    private List<NodeTableStatistics> tableStats;
 
     // To satisfy JAXB
     @SuppressWarnings("unused")
-	private TableStatistics() {
+    private TableStatistics() {
     }
 
-    public TableStatistics(Node node, NodeTableStatistics tableStats) {
+    public TableStatistics(Node node, List<NodeTableStatistics> tableStats) {
         super();
         this.node = node;
         this.tableStats = tableStats;
@@ -44,11 +44,11 @@ public class TableStatistics {
         this.node = node;
     }
 
-    public NodeTableStatistics getTableStats() {
+    public List<NodeTableStatistics> getTableStats() {
         return tableStats;
     }
 
-    public void setTableStats(NodeTableStatistics tableStats) {
+    public void setTableStats(List<NodeTableStatistics> tableStats) {
         this.tableStats = tableStats;
     }
 

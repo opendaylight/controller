@@ -19,21 +19,21 @@ import org.opendaylight.controller.sal.core.NodeTable;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class NodeTableStatistics {
-	@XmlElement
+    @XmlElement
     private NodeTable nodeTable;
-	@XmlElement
+    @XmlElement
     private String name;
-	@XmlElement
+    @XmlElement
     private int activeCount;
-	@XmlElement
+    @XmlElement
     private long lookupCount;
-	@XmlElement
+    @XmlElement
     private long matchedCount;
 
-	
-	//To Satisfy JAXB
+
+    //To Satisfy JAXB
     public NodeTableStatistics() {
-    	
+
     }
 
     /**
@@ -105,7 +105,7 @@ public class NodeTableStatistics {
     public void setMatchedCount(long matchedCount) {
         this.matchedCount = matchedCount;
     }
-    
+
     @Override
     public String toString() {
         return "NodeTableStats[tableId = " + nodeTable

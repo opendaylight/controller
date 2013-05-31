@@ -5,11 +5,8 @@ package org.opendaylight.controller.sal.utils;
 
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeTable;
-import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.core.NodeTable.NodeTableIDType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +16,8 @@ import org.slf4j.LoggerFactory;
  */
 public class NodeTableCreator {
     protected static final Logger logger = LoggerFactory
-    .getLogger(NodeTableCreator.class);
-    
+            .getLogger(NodeTableCreator.class);
+
     /**
      * Generic NodeTable creator
      * The nodeTable type is OPENFLOW only for the time being
@@ -29,22 +26,22 @@ public class NodeTableCreator {
      * @param node
      * @return
      */
-	public static NodeTable createNodeTable(byte tableId, Node node) {
+    public static NodeTable createNodeTable(byte tableId, Node node) {
         try {
             return new NodeTable(NodeTableIDType.OPENFLOW, tableId, node);
         } catch (ConstructionException e1) {
             logger.error("",e1);
             return null;
         }
-	}
+    }
 
-	public static NodeTable createOFNodeTable(byte tableId, Node node) {
+    public static NodeTable createOFNodeTable(byte tableId, Node node) {
         try {
             return new NodeTable(NodeTableIDType.OPENFLOW, tableId, node);
         } catch (ConstructionException e1) {
             logger.error("",e1);
             return null;
         }
-	}
+    }
 
 }

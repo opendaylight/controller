@@ -8,21 +8,21 @@ import org.opendaylight.controller.sal.utils.NodeTableCreator;
 
 public class NodeTableStatisticsTest {
 
-	@Test
-	public void testNodeTableStatisticsMethods() {
-		NodeTable nt = NodeTableCreator.createNodeTable((byte) 2, NodeCreator.createOFNode((long)20));
-		NodeTableStatistics ntStats = new NodeTableStatistics();
-		
-		ntStats.setNodeTable(nt);
-		ntStats.setActiveCount(100);
-		ntStats.setLookupCount(200);
-		ntStats.setMatchedCount(500);
-		ntStats.setName("Test");
-		
-		Assert.assertTrue(ntStats.getNodeTable().equals(nt));
-		Assert.assertTrue(ntStats.getActiveCount() == 100);
-		Assert.assertTrue(ntStats.getLookupCount() == 200);
-		Assert.assertTrue(ntStats.getMatchedCount() == 500);
-		Assert.assertTrue(ntStats.getName().equals("Test"));
-	}
+    @Test
+    public void testNodeTableStatisticsMethods() {
+        NodeTable nt = NodeTableCreator.createNodeTable(Byte.valueOf("2") , NodeCreator.createOFNode((long)20));
+        NodeTableStatistics ntStats = new NodeTableStatistics();
+
+        ntStats.setNodeTable(nt);
+        ntStats.setActiveCount(100);
+        ntStats.setLookupCount(200);
+        ntStats.setMatchedCount(500);
+        ntStats.setName("Test");
+
+        Assert.assertTrue(ntStats.getNodeTable().equals(nt));
+        Assert.assertTrue(ntStats.getActiveCount() == 100);
+        Assert.assertTrue(ntStats.getLookupCount() == 200);
+        Assert.assertTrue(ntStats.getMatchedCount() == 500);
+        Assert.assertTrue(ntStats.getName().equals("Test"));
+    }
 }
