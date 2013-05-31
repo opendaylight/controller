@@ -8,6 +8,7 @@
 package org.opendaylight.controller.yang.parser.impl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -29,11 +30,14 @@ final class TestUtils {
     private TestUtils() {
     }
 
-    public static Set<Module> loadModules(String resourceDirectory) {
+    public static Set<Module> loadModules(String resourceDirectory) throws FileNotFoundException {
         YangModelParser parser = new YangParserImpl();
         final File testDir = new File(resourceDirectory);
         final String[] fileList = testDir.list();
         final List<File> testFiles = new ArrayList<File>();
+        if(fileList == null) {
+            throw new FileNotFoundException(resourceDirectory);
+        }
         for (int i = 0; i < fileList.length; i++) {
             String fileName = fileList[i];
             testFiles.add(new File(testDir, fileName));

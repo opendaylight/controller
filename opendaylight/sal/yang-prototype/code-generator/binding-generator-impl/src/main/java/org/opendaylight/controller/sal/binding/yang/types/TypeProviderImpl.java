@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.yang.types;
 
-import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findDataSchemaNode;
-import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findDataSchemaNodeForRelativeXPath;
-import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.resolveModuleFromSchemaPath;
+import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,7 +63,7 @@ public class TypeProviderImpl implements TypeProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.type.provider.TypeProvider#
      * javaTypeForYangType(java.lang.String)
      */
@@ -95,8 +93,8 @@ public class TypeProviderImpl implements TypeProvider {
                     returnType = resolveEnumFromTypeDefinition(enumTypeDef,
                             typedefName);
                 } else {
-                    final Module module = resolveModuleFromSchemaPath(schemaContext, typeDefinition
-                                    .getPath());
+
+                    final Module module = resolveModuleFromTypePath(schemaContext, typeDefinition);
 
                     if (module != null) {
                         final Map<String, GeneratedTransferObject> genTOs = genTypeDefsContextMap
@@ -167,11 +165,11 @@ public class TypeProviderImpl implements TypeProvider {
                 if (strXPath.matches(".*//[.* | .*//].*")) {
                     returnType = Types.typeForClass(Object.class);
                 } else {
-                    final Module module = resolveModuleFromSchemaPath(schemaContext, leafrefType.getPath());
+                    final Module module = resolveModuleFromTypePath(schemaContext, leafrefType);
                     if (module != null) {
                         final DataSchemaNode dataNode;
                         if (xpath.isAbsolute()) {
-                            dataNode = findDataSchemaNode(schemaContext, 
+                            dataNode = findDataSchemaNode(schemaContext,
                                     module, xpath);
                         } else {
                             dataNode = findDataSchemaNodeForRelativeXPath(schemaContext, module,
@@ -229,7 +227,8 @@ public class TypeProviderImpl implements TypeProvider {
             final String enumerationName = BindingGeneratorUtil
                     .parseToClassName(enumName);
 
-            Module module = resolveModuleFromSchemaPath(schemaContext, enumTypeDef.getPath());
+            Module module = resolveModuleFromTypePath(schemaContext, enumTypeDef);
+
             final String basePackageName = BindingGeneratorUtil
                     .moduleNamespaceToPackageName(module);
             final String packageName = BindingGeneratorUtil

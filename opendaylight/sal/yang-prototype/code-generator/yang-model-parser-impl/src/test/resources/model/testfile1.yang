@@ -31,9 +31,9 @@ module types1 {
     }
 
     leaf leaf-with-length {
-    	type data:my-string-type {
-    		length "7..max";
-    	}
+        type data:my-string-type {
+            length "7..max";
+        }
     }
 
     leaf test-int-leaf {
@@ -55,7 +55,7 @@ module types1 {
     }
 
     leaf union-leaf {
-    	type data:my-union-ext;
+        type data:my-union-ext;
     }
 
     deviation /data:system/data:user {
@@ -66,7 +66,7 @@ module types1 {
     }
 
     leaf nested-union-leaf {
-    	type data:nested-union1;
+        type data:nested-union1;
     }
 
     leaf custom-union-leaf {
@@ -112,6 +112,16 @@ module types1 {
         when "if:ifType='ds0'";
         leaf ds0ChannelNumber {
             type string;
+        }
+        leaf interface-id {
+            type leafref {
+                path "/if:interfaces/if:interface/if:name";
+            }
+        }
+        leaf-list higher-layer-if {
+            type leafref {
+                path "/if:interfaces/if:interface/if:higher-layer-if";
+            }
         }
     }
 

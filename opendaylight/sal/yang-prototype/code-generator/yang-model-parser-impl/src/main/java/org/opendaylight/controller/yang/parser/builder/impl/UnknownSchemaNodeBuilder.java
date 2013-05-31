@@ -17,7 +17,8 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 
-public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
+public final class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
+    private boolean isBuilt;
     private final UnknownSchemaNodeImpl instance;
     private final int line;
     private final QName qname;
@@ -34,16 +35,21 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
 
     @Override
     public UnknownSchemaNode build() {
-        instance.setPath(schemaPath);
-        instance.setNodeType(nodeType);
-        instance.setNodeParameter(nodeParameter);
+        if(!isBuilt) {
+            instance.setPath(schemaPath);
+            instance.setNodeType(nodeType);
+            instance.setNodeParameter(nodeParameter);
 
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
+            instance.setUnknownSchemaNodes(unknownNodes);
+
+            isBuilt = true;
         }
-        instance.setUnknownSchemaNodes(unknownNodes);
+
         return instance;
     }
 
@@ -103,7 +109,7 @@ public class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
         this.nodeParameter = nodeParameter;
     }
 
-    private static class UnknownSchemaNodeImpl implements UnknownSchemaNode {
+    private final class UnknownSchemaNodeImpl implements UnknownSchemaNode {
         private final QName qname;
         private SchemaPath path;
         private String description;

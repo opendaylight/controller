@@ -26,7 +26,7 @@ import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.RefineHolder;
 
 public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
-    private boolean built;
+    private boolean isBuilt;
     private final UsesNodeImpl instance;
     private final int line;
     private final String groupingPathStr;
@@ -45,7 +45,7 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
 
     @Override
     public UsesNode build() {
-        if (!built) {
+        if (!isBuilt) {
             instance.setAugmenting(augmenting);
 
             // AUGMENTATIONS
@@ -63,7 +63,7 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
             }
             instance.setRefines(refineNodes);
 
-            built = true;
+            isBuilt = true;
         }
         return instance;
     }

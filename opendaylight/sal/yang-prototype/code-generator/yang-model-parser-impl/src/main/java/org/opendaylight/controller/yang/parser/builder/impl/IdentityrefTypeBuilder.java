@@ -28,8 +28,8 @@ import org.opendaylight.controller.yang.parser.util.YangParseException;
  * When build is called, types in builder form will be built and add to resolved
  * types.
  */
-public class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements
-        TypeDefinitionBuilder {
+public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder
+        implements TypeDefinitionBuilder {
     private static final String NAME = "identityref";
 
     private final int line;

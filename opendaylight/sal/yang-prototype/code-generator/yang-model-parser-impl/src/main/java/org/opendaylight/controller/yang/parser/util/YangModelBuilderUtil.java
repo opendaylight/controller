@@ -1008,60 +1008,51 @@ public final class YangModelBuilderUtil {
         List<EnumTypeDefinition.EnumPair> enumConstants = getEnumConstants(
                 typeBody, actualPath, namespace, revision, prefix);
 
+        SchemaPath schemaPath = createActualSchemaPath(actualPath, namespace,
+                revision, prefix);
+
         if ("decimal64".equals(typeName)) {
-            type = new Decimal64(actualPath, namespace, revision,
-                    fractionDigits);
+            type = new Decimal64(schemaPath, fractionDigits);
         } else if (typeName.startsWith("int")) {
             if ("int8".equals(typeName)) {
-                type = new Int8(actualPath, namespace, revision,
-                        rangeStatements, null, null);
+                type = new Int8(schemaPath, rangeStatements, null, null);
             } else if ("int16".equals(typeName)) {
-                type = new Int16(actualPath, namespace, revision,
-                        rangeStatements, null, null);
+                type = new Int16(schemaPath, rangeStatements, null, null);
             } else if ("int32".equals(typeName)) {
-                type = new Int32(actualPath, namespace, revision,
-                        rangeStatements, null, null);
+                type = new Int32(schemaPath, rangeStatements, null, null);
             } else if ("int64".equals(typeName)) {
-                type = new Int64(actualPath, namespace, revision,
-                        rangeStatements, null, null);
+                type = new Int64(schemaPath, rangeStatements, null, null);
             }
         } else if (typeName.startsWith("uint")) {
             if ("uint8".equals(typeName)) {
-                type = new Uint8(actualPath, namespace, revision,
-                        rangeStatements, null, null);
+                type = new Uint8(schemaPath, rangeStatements, null, null);
             } else if ("uint16".equals(typeName)) {
-                type = new Uint16(actualPath, namespace, revision,
-                        rangeStatements, null, null);
+                type = new Uint16(schemaPath, rangeStatements, null, null);
             } else if ("uint32".equals(typeName)) {
-                type = new Uint32(actualPath, namespace, revision,
-                        rangeStatements, null, null);
+                type = new Uint32(schemaPath, rangeStatements, null, null);
             } else if ("uint64".equals(typeName)) {
-                type = new Uint64(actualPath, namespace, revision,
-                        rangeStatements, null, null);
+                type = new Uint64(schemaPath, rangeStatements, null, null);
             }
         } else if ("enumeration".equals(typeName)) {
-            type = new EnumerationType(actualPath, namespace, revision,
-                    enumConstants);
+            type = new EnumerationType(schemaPath, enumConstants);
         } else if ("string".equals(typeName)) {
-            type = new StringType(actualPath, namespace, revision,
-                    lengthStatements, patternStatements);
+            type = new StringType(schemaPath, lengthStatements,
+                    patternStatements);
         } else if ("bits".equals(typeName)) {
-            type = new BitsType(actualPath, namespace, revision, getBits(
-                    typeBody, actualPath, namespace, revision, prefix));
+            type = new BitsType(schemaPath, getBits(typeBody, actualPath,
+                    namespace, revision, prefix));
         } else if ("leafref".equals(typeName)) {
             final String path = parseLeafrefPath(typeBody);
             final boolean absolute = path.startsWith("/");
             RevisionAwareXPath xpath = new RevisionAwareXPathImpl(path,
                     absolute);
-            type = new Leafref(actualPath, namespace, revision, xpath);
+            type = new Leafref(schemaPath, xpath);
         } else if ("binary".equals(typeName)) {
             List<Byte> bytes = Collections.emptyList();
-            type = new BinaryType(actualPath, namespace, revision, bytes,
-                    lengthStatements, null);
+            type = new BinaryType(schemaPath, bytes, lengthStatements, null);
         } else if ("instance-identifier".equals(typeName)) {
             boolean requireInstance = isRequireInstance(typeBody);
-            type = new InstanceIdentifier(actualPath, namespace, revision,
-                    null, requireInstance);
+            type = new InstanceIdentifier(schemaPath, null, requireInstance);
         }
         return type;
     }

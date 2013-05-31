@@ -42,14 +42,14 @@ module types3 {
 
     container network {
         mnt:mountpoint point {
-	        mnt:target-ref target;
+            mnt:target-ref target;
         }
         
-	    description "network-description";
-	    reference "network-reference";
-	    status obsolete;
-	    config true;
-	    presence "some presence text";
+        description "network-description";
+        reference "network-reference";
+        status obsolete;
+        config true;
+        presence "some presence text";
     }
 
     feature local-storage {

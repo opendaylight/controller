@@ -30,8 +30,8 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
-        AugmentationTargetBuilder {
+public final class ChoiceBuilder implements DataSchemaNodeBuilder,
+        ChildNodeBuilder, AugmentationTargetBuilder {
     private boolean built;
     private final ChoiceNodeImpl instance;
     private final int line;
@@ -252,7 +252,7 @@ public class ChoiceBuilder implements DataSchemaNodeBuilder, ChildNodeBuilder,
         return new HashSet<DataSchemaNodeBuilder>(cases);
     }
 
-    private class ChoiceNodeImpl implements ChoiceNode {
+    private final class ChoiceNodeImpl implements ChoiceNode {
         private final QName qname;
         private SchemaPath path;
         private String description;

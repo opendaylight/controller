@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
 
@@ -21,7 +20,7 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  * counterpart of Yang uint32 built-in type is {@link Integer}.
  *
  */
-public class Uint16 extends AbstractUnsignedInteger {
+public final class Uint16 extends AbstractUnsignedInteger {
 
     private static final QName name = BaseTypes.constructQName("uint16");
     private Integer defaultValue = null;
@@ -33,23 +32,20 @@ public class Uint16 extends AbstractUnsignedInteger {
         this.baseType = this;
     }
 
-    public Uint16(final List<String> actualPath,
-            final URI namespace, final Date revision) {
-        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint16(final SchemaPath path) {
+        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
         this.baseType = new Uint16();
     }
 
-    public Uint16(final List<String> actualPath,
-            final URI namespace, final Date revision, final Integer defaultValue) {
-        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint16(final SchemaPath path, final Integer defaultValue) {
+        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
         this.baseType = new Uint16();
         this.defaultValue = defaultValue;
     }
 
-    public Uint16(final List<String> actualPath,
-            final URI namespace, final Date revision, final List<RangeConstraint> rangeStatements,
+    public Uint16(final SchemaPath path, final List<RangeConstraint> rangeStatements,
             final String units, final Integer defaultValue) {
-        super(actualPath, namespace, revision, name, description, rangeStatements, units);
+        super(path, name, description, rangeStatements, units);
         this.baseType = new Uint16();
         this.defaultValue = defaultValue;
     }

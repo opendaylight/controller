@@ -26,9 +26,9 @@ import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 
-public class RpcDefinitionBuilder implements SchemaNodeBuilder,
+public final class RpcDefinitionBuilder implements SchemaNodeBuilder,
         TypeDefinitionAwareBuilder {
-    private boolean built;
+    private boolean isBuilt;
     private final RpcDefinitionImpl instance;
     private final int line;
     private final QName qname;
@@ -47,7 +47,7 @@ public class RpcDefinitionBuilder implements SchemaNodeBuilder,
 
     @Override
     public RpcDefinition build() {
-        if(!built) {
+        if (!isBuilt) {
             final ContainerSchemaNode input = inputBuilder.build();
             final ContainerSchemaNode output = outputBuilder.build();
             instance.setInput(input);
@@ -76,7 +76,7 @@ public class RpcDefinitionBuilder implements SchemaNodeBuilder,
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
-            built = true;
+            isBuilt = true;
         }
         return instance;
     }
@@ -158,7 +158,7 @@ public class RpcDefinitionBuilder implements SchemaNodeBuilder,
         return true;
     }
 
-    private class RpcDefinitionImpl implements RpcDefinition {
+    private final class RpcDefinitionImpl implements RpcDefinition {
         private final QName qname;
         private SchemaPath path;
         private String description;

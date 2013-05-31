@@ -7,11 +7,10 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
-import java.net.URI;
-import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
 
@@ -23,7 +22,7 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  *
  * @see AbstractUnsignedInteger
  */
-public class Uint8 extends AbstractUnsignedInteger {
+public final class Uint8 extends AbstractUnsignedInteger {
 
     private static final QName name = BaseTypes.constructQName("uint8");
     private Short defaultValue = null;
@@ -36,23 +35,20 @@ public class Uint8 extends AbstractUnsignedInteger {
         this.baseType = this;
     }
 
-    public Uint8(final List<String> actualPath,
-            final URI namespace, final Date revision) {
-        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint8(final SchemaPath path) {
+        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
         this.baseType = new Uint8();
     }
 
-    public Uint8(final List<String> actualPath,
-            final URI namespace, final Date revision, final Short defaultValue) {
-        super(actualPath, namespace, revision, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+    public Uint8(final SchemaPath path, final Short defaultValue) {
+        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
         this.baseType = new Uint8();
         this.defaultValue = defaultValue;
     }
 
-    public Uint8(final List<String> actualPath,
-            final URI namespace, final Date revision, final List<RangeConstraint> rangeStatements,
+    public Uint8(final SchemaPath path, final List<RangeConstraint> rangeStatements,
             final String units, final Short defaultValue) {
-        super(actualPath, namespace, revision, name, description, rangeStatements, units);
+        super(path, name, description, rangeStatements, units);
         this.baseType = new Uint8();
         this.defaultValue = defaultValue;
     }
