@@ -25,6 +25,7 @@ import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.PopVlan;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
@@ -35,10 +36,12 @@ import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.IReadService;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.opendaylight.controller.sal.utils.NodeTableCreator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -110,7 +113,7 @@ public class ReadService implements IReadService, CommandProvider {
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
             logger.trace("Prop key:({}) value:({})", entry.getKey(),
-            		entry.getValue());
+                    entry.getValue());
         }
 
         Object value = props.get("protocolPluginType");
@@ -137,7 +140,7 @@ public class ReadService implements IReadService, CommandProvider {
         for (Object e : props.entrySet()) {
             Map.Entry entry = (Map.Entry) e;
             logger.trace("Prop key:({}) value:({})", entry.getKey(),
-                    	entry.getValue());
+                    entry.getValue());
         }
 
         Object value = props.get("protocoloPluginType");
@@ -158,7 +161,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readFlow(node, flow, true);
+                        .readFlow(node, flow, true);
             }
         }
         logger.warn("Plugin unavailable");
@@ -170,7 +173,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readFlow(node, flow, false);
+                        .readFlow(node, flow, false);
             }
         }
         logger.warn("Plugin unavailable");
@@ -182,7 +185,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readAllFlow(node, true);
+                        .readAllFlow(node, true);
             }
         }
         logger.warn("Plugin unavailable");
@@ -194,7 +197,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readAllFlow(node, false);
+                        .readAllFlow(node, false);
             }
         }
         logger.warn("Plugin unavailable");
@@ -206,7 +209,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readDescription(node, true);
+                        .readDescription(node, true);
             }
         }
         logger.warn("Plugin unavailable");
@@ -218,7 +221,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readDescription(node, false);
+                        .readDescription(node, false);
             }
         }
         logger.warn("Plugin unavailable");
@@ -231,7 +234,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null && node != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readNodeConnector(connector, true);
+                        .readNodeConnector(connector, true);
             }
         }
         logger.warn("Plugin unavailable");
@@ -245,7 +248,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null && node != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readNodeConnector(connector, false);
+                        .readNodeConnector(connector, false);
             }
         }
         logger.warn("Plugin unavailable");
@@ -257,7 +260,46 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readAllNodeConnector(node, true);
+                        .readAllNodeConnector(node, true);
+            }
+        }
+        logger.warn("Plugin unavailable");
+        return null;
+    }
+
+    @Override
+    public List<NodeTableStatistics> readNodeTable(Node node) {
+        if (pluginReader != null) {
+            if (this.pluginReader.get(node.getType()) != null) {
+                return this.pluginReader.get(node.getType())
+                        .readAllNodeTable(node, true);
+            }
+        }
+        logger.warn("Plugin unavailable");
+        return null;
+    }
+
+
+    @Override
+    public NodeTableStatistics nonCachedReadNodeTable(NodeTable table) {
+        Node node = table.getNode();
+        if (pluginReader != null && node != null) {
+            if (this.pluginReader.get(node.getType()) != null) {
+                return this.pluginReader.get(node.getType())
+                        .readNodeTable(table, false);
+            }
+        }
+        logger.warn("Plugin unavailable");
+        return null;
+    }
+
+    @Override
+    public NodeTableStatistics readNodeTable(NodeTable table) {
+        Node node = table.getNode();
+        if (pluginReader != null && node != null) {
+            if (this.pluginReader.get(node.getType()) != null) {
+                return this.pluginReader.get(node.getType())
+                        .readNodeTable(table, true);
             }
         }
         logger.warn("Plugin unavailable");
@@ -269,7 +311,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .readAllNodeConnector(node, false);
+                        .readAllNodeConnector(node, false);
             }
         }
         logger.warn("Plugin unavailable");
@@ -282,7 +324,7 @@ public class ReadService implements IReadService, CommandProvider {
         if (pluginReader != null && node != null) {
             if (this.pluginReader.get(node.getType()) != null) {
                 return this.pluginReader.get(node.getType())
-                    .getTransmitRate(connector);
+                        .getTransmitRate(connector);
             }
         }
         logger.warn("Plugin unavailable");
@@ -303,15 +345,15 @@ public class ReadService implements IReadService, CommandProvider {
         StringBuffer help = new StringBuffer();
         help.append("---SAL Reader testing commands---\n");
         help
-                .append("\t readflows <sid> <cached>  - Read all the (cached) flows from the openflow switch <sid>\n");
+        .append("\t readflows <sid> <cached>  - Read all the (cached) flows from the openflow switch <sid>\n");
         help
-                .append("\t readflow  <sid> <cached>  - Read the (cached) sample flow from the openflow switch <sid>\n");
+        .append("\t readflow  <sid> <cached>  - Read the (cached) sample flow from the openflow switch <sid>\n");
         help
-                .append("\t readdesc  <sid> <cached>  - Read the (cached) description from openflow switch <sid>\n");
+        .append("\t readdesc  <sid> <cached>  - Read the (cached) description from openflow switch <sid>\n");
         help
-                .append("\t           cached=true/false. If false or not specified, the protocol plugin cached info\n");
+        .append("\t           cached=true/false. If false or not specified, the protocol plugin cached info\n");
         help
-                .append("\t           is returned. If true, the info is directly retrieved from the switch\n");
+        .append("\t           is returned. If true, the info is directly retrieved from the switch\n");
         return help.toString();
     }
 
@@ -389,11 +431,11 @@ public class ReadService implements IReadService, CommandProvider {
         List<NodeConnectorStatistics> list = (cached) ? this
                 .readNodeConnectors(node) : this
                 .nonCachedReadNodeConnectors(node);
-        if (list != null) {
-            ci.println(list.toString());
-        } else {
-            ci.println("null");
-        }
+                if (list != null) {
+                    ci.println(list.toString());
+                } else {
+                    ci.println("null");
+                }
     }
 
     public void _readport(CommandInterpreter ci) {
@@ -417,11 +459,39 @@ public class ReadService implements IReadService, CommandProvider {
         NodeConnectorStatistics stats = (cached) ? this
                 .readNodeConnector(nodeConnector) : this
                 .nonCachedReadNodeConnector(nodeConnector);
-        if (stats != null) {
-            ci.println(stats.toString());
-        } else {
-            ci.println("null");
+                if (stats != null) {
+                    ci.println(stats.toString());
+                } else {
+                    ci.println("null");
+                }
+    }
+
+    public void _readtable(CommandInterpreter ci) {
+        String nodeId = ci.nextArgument();
+        String tableId = ci.nextArgument();
+        String cacheReq = ci.nextArgument();
+        boolean cached;
+        if (nodeId == null) {
+            ci.print("Node id not specified");
+            return;
         }
+        if (tableId == null) {
+            ci.print("Table id not specified");
+            return;
+        }
+        cached = (cacheReq == null) ? true : cacheReq.equals("true");
+        NodeTable nodeTable = null;
+        Node node = NodeCreator.createOFNode(Long.parseLong(nodeId));
+        nodeTable = NodeTableCreator.createNodeTable(Byte
+                .valueOf(tableId), node);
+        NodeTableStatistics stats = (cached) ? this
+                .readNodeTable(nodeTable) : this
+                .nonCachedReadNodeTable(nodeTable);
+                if (stats != null) {
+                    ci.println(stats.toString());
+                } else {
+                    ci.println("null");
+                }
     }
 
     public void _readdescr(CommandInterpreter ci) {
