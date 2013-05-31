@@ -1041,13 +1041,11 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
 
     @Override
     public List<FlowEntry> getFlowEntriesForGroup(String policyName) {
-        List<FlowEntry> list = null;
+        List<FlowEntry> list = new ArrayList<FlowEntry>();
         if (this.groupFlows != null && this.groupFlows.containsKey(policyName)) {
-            list = new ArrayList<FlowEntry>();
             for (FlowEntryInstall entries : groupFlows.get(policyName)) {
                 list.add(entries.getOriginal());
             }
-            return new ArrayList<FlowEntry>();
         }
         return list;
     }
