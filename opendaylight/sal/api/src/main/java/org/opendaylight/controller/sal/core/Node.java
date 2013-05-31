@@ -228,8 +228,13 @@ public class Node implements Serializable {
         } else if (typeStr.equals(NodeIDType.PRODUCTION)) {
             this.nodeID = IDStr;
         } else {
-            // We need to lookup via OSGi service registry for an
-            // handler for this
+            //Use plugin's method to get appropriate conversion from IDStr to nodeID
+            INodeFactory f = (INodeFactory) ServiceHelper
+                    .getGlobalInstance(INodeFactory.class, new Node(), "(protocolName="+typeStr+")");
+            if(f!=null){
+                Node n = f.fromString(typeStr, IDStr);
+                this.nodeID = n.nodeID;
+            }
         }
     }
 
