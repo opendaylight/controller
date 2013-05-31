@@ -228,8 +228,16 @@ public class Node implements Serializable {
         } else if (typeStr.equals(NodeIDType.PRODUCTION)) {
             this.nodeID = IDStr;
         } else {
-            // We need to lookup via OSGi service registry for an
-            // handler for this
+            // need to convert idStr to correct type for nodeID
+            Class c = NodeIDType.getClassType(this.nodeType);
+            if(c!=null){
+                if (c == Integer.class)
+                    this.nodeID = Integer.parseInt(IDStr);
+                else if (c == Long.class)
+                    this.nodeID = Long.parseLong(IDStr);
+                else if (c == String.class)
+                    this.nodeID = IDStr;
+            }
         }
     }
 
