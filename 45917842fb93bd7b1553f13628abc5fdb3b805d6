@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///Yk\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/AllTableStatistics.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-01T15:02:14Z",
+      "side": 1,
+      "message": "Being a community effort, in this project we are following a general approach to not add @author tag in any of the source-files. Anyone interested in it can refer to the Commit logs. Hence it would be awesome if this can be removed.",
+      "revId": "45917842fb93bd7b1553f13628abc5fdb3b805d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Yg\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/TableStatistics.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-01T15:02:14Z",
+      "side": 1,
+      "message": "Being a community effort, in this project we are following a general approach to not add @author tag in any of the source-files. Anyone interested in it can refer to the Commit logs. It would be awesome if this can be removed.",
+      "revId": "45917842fb93bd7b1553f13628abc5fdb3b805d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Yc\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableConverter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-01T15:02:14Z",
+      "side": 1,
+      "message": "Being a community effort, in this project we are following a general approach to not add @author tag in any of the source-files. Anyone interested in it can refer to the Commit logs. It would be awesome if this can be removed.",
+      "revId": "45917842fb93bd7b1553f13628abc5fdb3b805d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///YY\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/TableStatisticsConverter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-01T15:02:14Z",
+      "side": 1,
+      "message": "Being a community effort, in this project we are following a general approach to not add @author tag in any of the source-files. Anyone interested in it can refer to the Commit logs. It would be awesome if this can be removed.",
+      "revId": "45917842fb93bd7b1553f13628abc5fdb3b805d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///YU\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeTable.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-01T15:02:14Z",
+      "side": 1,
+      "message": "Being a community effort, in this project we are following a general approach to not add @author tag in any of the source-files. Anyone interested in it can refer to the Commit logs. It would be awesome if this can be removed.",
+      "revId": "45917842fb93bd7b1553f13628abc5fdb3b805d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///YQ\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/utils/NodeTableCreator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-01T15:02:14Z",
+      "side": 1,
+      "message": "Being a community effort, in this project we are following a general approach to not add @author tag in any of the source-files. Anyone interested in it can refer to the Commit logs. It would be awesome if this can be removed.",
+      "revId": "45917842fb93bd7b1553f13628abc5fdb3b805d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
