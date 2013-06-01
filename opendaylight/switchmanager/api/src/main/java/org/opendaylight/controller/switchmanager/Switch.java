@@ -99,14 +99,16 @@ public class Switch implements Serializable {
     }
 
     private byte[] deriveMacAddress() {
-        long dpid = (Long) this.node.getID();
-        byte[] mac = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        byte[] mac = null;
+        if (this.node.getType().equals(Node.NodeIDType.OPENFLOW)) {
+            long dpid = (Long) this.node.getID();
+            mac = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-        for (short i = 0; i < 6; i++) {
-            mac[5 - i] = (byte) dpid;
-            dpid >>= 8;
+            for (short i = 0; i < 6; i++) {
+                mac[5 - i] = (byte) dpid;
+                dpid >>= 8;
+            }
         }
-
         return mac;
     }
 
