@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///YI\u003d",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Switch.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-01T15:26:43Z",
+      "side": 1,
+      "message": "switchmanager being a network service functional module above SAL, it is preferred not to check for Node types and add specific logic based on that. \nI understand that deriveMacAddress is an existing function that this fix enhances, but I have a concern with the presence of the function itself.\n\nIf this is an openflow specific requirement, the better approach would be to let the openflow plugin handle it and add mac-address as a node property. This way switchmanager need not add openflow or other plugin specific handling at this layer.",
+      "revId": "42faec5cf7ce5079fa6001fceb39bded764b4026",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///YE\u003d",
+        "filename": "opendaylight/web/devices/src/main/java/org/opendaylight/controller/devices/web/Devices.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-01T15:26:43Z",
+      "side": 1,
+      "message": "Again, Is it possible togeneralize it ?\nAt the minimum, If a nodeconnector has its id (port-id in OF) and its name different, then we need this portList Map to maintain if not we can use intfList.\nA better approach would be to even avoid this specific map that holds OF specific id (short) as the key \u0026 make it generic so that any nodeconnector can make use of it.",
+      "revId": "42faec5cf7ce5079fa6001fceb39bded764b4026",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
