@@ -28,7 +28,7 @@ public class Switch implements Serializable {
     private static final long serialVersionUID = 1L;
     private byte[] dataLayerAddress;
     private Set<NodeConnector> nodeConnectors;
-    private List<NodeConnector> spanPorts;
+    private final List<NodeConnector> spanPorts;
     private Node node;
 
     /*
@@ -44,7 +44,7 @@ public class Switch implements Serializable {
         this.node = node;
         this.nodeConnectors = new HashSet<NodeConnector>();
         this.spanPorts = new ArrayList<NodeConnector>(2);
-        this.dataLayerAddress = deriveMacAddress();
+        this.dataLayerAddress = null;
     }
 
     /**
@@ -98,18 +98,6 @@ public class Switch implements Serializable {
         this.node = node;
     }
 
-    private byte[] deriveMacAddress() {
-        long dpid = (Long) this.node.getID();
-        byte[] mac = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-        for (short i = 0; i < 6; i++) {
-            mac[5 - i] = (byte) dpid;
-            dpid >>= 8;
-        }
-
-        return mac;
-    }
-
     public void addSpanPorts(List<NodeConnector> portList) {
         for (NodeConnector port : portList) {
             spanPorts.add(port);
@@ -137,30 +125,40 @@ public class Switch implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Switch other = (Switch) obj;
-        if (!Arrays.equals(dataLayerAddress, other.dataLayerAddress))
+        if (!Arrays.equals(dataLayerAddress, other.dataLayerAddress)) {
             return false;
+        }
         if (node == null) {
-            if (other.node != null)
+            if (other.node != null) {
                 return false;
-        } else if (!node.equals(other.node))
+            }
+        } else if (!node.equals(other.node)) {
             return false;
+        }
         if (nodeConnectors == null) {
-            if (other.nodeConnectors != null)
+            if (other.nodeConnectors != null) {
                 return false;
-        } else if (!nodeConnectors.equals(other.nodeConnectors))
+            }
+        } else if (!nodeConnectors.equals(other.nodeConnectors)) {
             return false;
+        }
         if (spanPorts == null) {
-            if (other.spanPorts != null)
+            if (other.spanPorts != null) {
                 return false;
-        } else if (!spanPorts.equals(other.spanPorts))
+            }
+        } else if (!spanPorts.equals(other.spanPorts)) {
             return false;
+        }
         return true;
     }
 

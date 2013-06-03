@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -19,86 +18,75 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
- * The class contains the controller MAC address and node MAC address.
- *
- *
+ * The class contains MAC address property.
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class MacAddress extends Property {
+public class MacAddress extends Property implements Cloneable {
     private static final long serialVersionUID = 1L;
-    @XmlElement
-    private byte[] controllerMacAddress;
-    @XmlElement
-    private byte[] nodeMacAddress;
-    public static final String MacPropName = "macAddress";
+    @XmlElement(name="macAddress")
+    private final byte[] address;
+    public static final String name = "macAddress";
 
     /*
      * Private constructor used for JAXB mapping
      */
     private MacAddress() {
-        super(MacPropName);
-        this.controllerMacAddress = null;
-        this.nodeMacAddress = null;
-    }
-
-	/**
-	 * Constructor to create DatalinkAddress property which contains the
-	 * controller MAC address and node MAC address. The property will be
-	 * attached to a {@link org.opendaylight.controller.sal.core.Node}.
-	 * 
-	 * @param controllerMacAddress Data Link Address for the controller
-	 * @param nodeMacAddress Data Link Address for the node
-	 * 
-	 * @return the constructed object
-	 */
-    public MacAddress(byte[] controllerMacAddress, byte[] nodeMacAddress) {
-        super(MacPropName);
-    	
-        this.controllerMacAddress = controllerMacAddress;
-        this.nodeMacAddress = nodeMacAddress;
+        super(name);
+        this.address = null;
     }
 
     /**
-     * @return the controller MAC address
+     * Constructor to create DatalinkAddress property which contains the MAC
+     * address. The property will be attached to a
+     * {@link org.opendaylight.controller.sal.core.Node}.
+     *
+     *
+     * @param nodeMacAddress
+     *            Data Link Address for the node
+     *
+     * @return the constructed object
      */
-    public byte[] getControllerMacAddress() {
-        return this.controllerMacAddress;
+    public MacAddress(byte[] nodeMacAddress) {
+        super(name);
+        this.address = nodeMacAddress.clone();
     }
 
     /**
      * @return the node MAC address
      */
-    public byte[] getNodeMacAddress() {
-        return this.nodeMacAddress;
+    public byte[] getMacAddress() {
+        return this.address.clone();
     }
 
+    @Override
     public MacAddress clone() {
-    	return new MacAddress(this.controllerMacAddress, this.nodeMacAddress);
+        return new MacAddress(this.address);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Arrays.hashCode(controllerMacAddress);
-        result = prime * result + Arrays.hashCode(nodeMacAddress);
+        result = prime * result + Arrays.hashCode(address);
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         MacAddress other = (MacAddress) obj;
-        if (!Arrays.equals(controllerMacAddress, other.controllerMacAddress))
+        if (!Arrays.equals(address, other.address)) {
             return false;
-        if (!Arrays.equals(nodeMacAddress, other.nodeMacAddress))
-            return false;
+        }
         return true;
     }
 

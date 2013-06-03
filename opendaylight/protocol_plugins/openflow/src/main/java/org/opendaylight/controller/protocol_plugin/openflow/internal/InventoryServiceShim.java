@@ -31,6 +31,7 @@ import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.IContainerListener;
+import org.opendaylight.controller.sal.core.MacAddress;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -51,17 +52,17 @@ import org.slf4j.LoggerFactory;
  * The class describes a shim layer that bridges inventory events from Openflow
  * core to various listeners. The notifications are filtered based on container
  * configurations.
- * 
- * 
+ *
+ *
  */
 public class InventoryServiceShim implements IContainerListener,
         IMessageListener, ISwitchStateListener, IStatisticsListener {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryServiceShim.class);
     private IController controller = null;
-    private ConcurrentMap<String, IInventoryShimInternalListener> inventoryShimInternalListeners = new ConcurrentHashMap<String, IInventoryShimInternalListener>();
-    private List<IInventoryShimExternalListener> inventoryShimExternalListeners = new CopyOnWriteArrayList<IInventoryShimExternalListener>();
-    private ConcurrentMap<NodeConnector, List<String>> containerMap = new ConcurrentHashMap<NodeConnector, List<String>>();
+    private final ConcurrentMap<String, IInventoryShimInternalListener> inventoryShimInternalListeners = new ConcurrentHashMap<String, IInventoryShimInternalListener>();
+    private final List<IInventoryShimExternalListener> inventoryShimExternalListeners = new CopyOnWriteArrayList<IInventoryShimExternalListener>();
+    private final ConcurrentMap<NodeConnector, List<String>> containerMap = new ConcurrentHashMap<NodeConnector, List<String>>();
 
     void setController(IController s) {
         this.controller = s;
@@ -133,7 +134,7 @@ public class InventoryServiceShim implements IContainerListener,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init() {
         this.controller.addMessageListener(OFType.PORT_STATUS, this);
@@ -152,7 +153,7 @@ public class InventoryServiceShim implements IContainerListener,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         this.controller.removeMessageListener(OFType.PACKET_IN, this);
@@ -202,8 +203,9 @@ public class InventoryServiceShim implements IContainerListener,
 
     @Override
     public void switchAdded(ISwitch sw) {
-        if (sw == null)
+        if (sw == null) {
             return;
+        }
 
         // Add all the nodeConnectors of this switch
         Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper
@@ -219,8 +221,9 @@ public class InventoryServiceShim implements IContainerListener,
 
     @Override
     public void switchDeleted(ISwitch sw) {
-        if (sw == null)
+        if (sw == null) {
             return;
+        }
 
         removeNode(sw);
     }
@@ -389,6 +392,7 @@ public class InventoryServiceShim implements IContainerListener,
         Long connectedSinceTime = (connectedSince == null) ? 0 : connectedSince
                 .getTime();
         props.add(new TimeStamp(connectedSinceTime, "connectedSince"));
+        props.add(new MacAddress(deriveMacAddress(sid)));
 
         byte tables = sw.getTables();
         Tables t = new Tables(tables);
@@ -410,6 +414,7 @@ public class InventoryServiceShim implements IContainerListener,
         if (b != null) {
             props.add(b);
         }
+
         // Notify all internal and external listeners
         notifyInventoryShimListener(node, type, props);
     }
@@ -447,15 +452,24 @@ public class InventoryServiceShim implements IContainerListener,
             logger.error("{}", e.getMessage());
             return;
         }
-        
+
         Set<Property> properties = new HashSet<Property>(1);
         Description desc = new Description(
                 descriptionStats.getDatapathDescription());
         properties.add(desc);
-        
+
         // Notify all internal and external listeners
         notifyInventoryShimListener(node, UpdateType.CHANGED, properties);
-    }  
+    }
 
-   
+    private byte[] deriveMacAddress(long dpid) {
+        byte[] mac = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+        for (short i = 0; i < 6; i++) {
+            mac[5 - i] = (byte) dpid;
+            dpid >>= 8;
+        }
+
+        return mac;
+    }
 }

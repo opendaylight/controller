@@ -39,7 +39,6 @@ import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailab
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
-import org.opendaylight.controller.sal.core.MacAddress;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
@@ -51,7 +50,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 /**
  * The class provides Northbound REST APIs to access the nodes, node connectors
  * and their properties.
- * 
+ *
  */
 
 @Path("/")
@@ -102,9 +101,9 @@ public class SwitchNorthbound {
     }
 
     /**
-     * 
+     *
      * Retrieve a list of all the nodes and their properties in the network
-     * 
+     *
      * @param containerName
      *            The container for which we want to retrieve the list
      * @return A list of Pair each pair represents a
@@ -129,7 +128,7 @@ public class SwitchNorthbound {
                             + containerName);
         }
 
-        ISwitchManager switchManager = (ISwitchManager) getIfSwitchManagerService(containerName);
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
             throw new ServiceUnavailableException("Switch Manager "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -141,17 +140,12 @@ public class SwitchNorthbound {
             return null;
         }
 
-        byte[] controllerMac = switchManager.getControllerMAC();
         for (Node node : nodes) {
             Map<String, Property> propMap = switchManager.getNodeProps(node);
             if (propMap == null) {
                 continue;
             }
             Set<Property> props = new HashSet<Property>(propMap.values());
-
-            byte[] nodeMac = switchManager.getNodeMAC(node);
-            Property macAddr = new MacAddress(controllerMac, nodeMac);
-            props.add(macAddr);
 
             NodeProperties nodeProps = new NodeProperties(node, props);
             res.add(nodeProps);
@@ -162,7 +156,7 @@ public class SwitchNorthbound {
 
     /**
      * Add a Name/Tier property to a node
-     * 
+     *
      * @param containerName
      *            Name of the Container
      * @param nodeType
@@ -204,7 +198,7 @@ public class SwitchNorthbound {
         }
         handleDefaultDisabled(containerName);
 
-        ISwitchManager switchManager = (ISwitchManager) getIfSwitchManagerService(containerName);
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
             throw new ServiceUnavailableException("Switch Manager "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -225,7 +219,7 @@ public class SwitchNorthbound {
 
     /**
      * Delete a property of a node
-     * 
+     *
      * @param containerName
      *            Name of the Container
      * @param nodeType
@@ -261,7 +255,7 @@ public class SwitchNorthbound {
         }
         handleDefaultDisabled(containerName);
 
-        ISwitchManager switchManager = (ISwitchManager) getIfSwitchManagerService(containerName);
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
             throw new ServiceUnavailableException("Switch Manager "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -278,10 +272,10 @@ public class SwitchNorthbound {
     }
 
     /**
-     * 
+     *
      * Retrieve a list of all the node connectors and their properties in a
      * given node
-     * 
+     *
      * @param containerName
      *            The container for which we want to retrieve the list
      * @param nodeType
@@ -315,7 +309,7 @@ public class SwitchNorthbound {
                             + containerName);
         }
 
-        ISwitchManager switchManager = (ISwitchManager) getIfSwitchManagerService(containerName);
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
             throw new ServiceUnavailableException("Switch Manager "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -347,7 +341,7 @@ public class SwitchNorthbound {
 
     /**
      * Add a Name/Bandwidth property to a node connector
-     * 
+     *
      * @param containerName
      *            Name of the Container
      * @param nodeType
@@ -396,7 +390,7 @@ public class SwitchNorthbound {
 
         handleDefaultDisabled(containerName);
 
-        ISwitchManager switchManager = (ISwitchManager) getIfSwitchManagerService(containerName);
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
             throw new ServiceUnavailableException("Switch Manager "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -425,7 +419,7 @@ public class SwitchNorthbound {
 
     /**
      * Delete a property of a node connector
-     * 
+     *
      * @param containerName
      *            Name of the Container
      * @param nodeType
@@ -469,7 +463,7 @@ public class SwitchNorthbound {
 
         handleDefaultDisabled(containerName);
 
-        ISwitchManager switchManager = (ISwitchManager) getIfSwitchManagerService(containerName);
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
             throw new ServiceUnavailableException("Switch Manager "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -492,7 +486,7 @@ public class SwitchNorthbound {
 
     /*    *//**
      * Retrieve a list of Span ports that were configured previously.
-     * 
+     *
      * @param containerName
      *            Name of the Container
      * @return list of
@@ -501,17 +495,17 @@ public class SwitchNorthbound {
      */
     /*
      * @Path("/span-config/{containerName}")
-     * 
+     *
      * @GET
-     * 
+     *
      * @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-     * 
+     *
      * @StatusCodes( {
-     * 
+     *
      * @ResponseCode(code = 200, condition = "Operation successful"),
-     * 
+     *
      * @ResponseCode(code = 404, condition = "The containerName is not found"),
-     * 
+     *
      * @ResponseCode(code = 503, condition =
      * "One or more of Controller Services are unavailable") }) public
      * List<SpanConfig> getSpanConfigList(@PathParam("containerName") String
@@ -519,11 +513,11 @@ public class SwitchNorthbound {
      * getIfSwitchManagerService(containerName); if (switchManager == null) {
      * throw new ServiceUnavailableException("Switch Manager " +
      * RestMessages.SERVICEUNAVAILABLE.toString()); }
-     * 
+     *
      * return switchManager.getSpanConfigList(); }
      *//**
      * Add a span configuration
-     * 
+     *
      * @param containerName
      *            Name of the Container
      * @param config
@@ -533,34 +527,34 @@ public class SwitchNorthbound {
      */
     /*
      * @Path("/span-config/{containerName}")
-     * 
+     *
      * @PUT
-     * 
+     *
      * @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-     * 
+     *
      * @StatusCodes( {
-     * 
+     *
      * @ResponseCode(code = 200, condition = "Operation successful"),
-     * 
+     *
      * @ResponseCode(code = 404, condition = "The containerName is not found"),
-     * 
+     *
      * @ResponseCode(code = 503, condition =
      * "One or more of Controller Services are unavailable") }) public Response
      * addSpanConfig(@PathParam("containerName") String containerName,
-     * 
+     *
      * @TypeHint(SubnetConfig.class) JAXBElement<SpanConfig> config) {
      * ISwitchManager switchManager = (ISwitchManager)
      * getIfSwitchManagerService(containerName); if (switchManager == null) {
      * throw new ServiceUnavailableException("Switch Manager " +
      * RestMessages.SERVICEUNAVAILABLE.toString()); }
-     * 
+     *
      * String ret = switchManager.addSpanConfig(config.getValue()); if
      * (ret.equals(ReturnString.SUCCESS.toString())) { return
      * Response.status(Response.Status.CREATED).build(); } throw new
      * InternalServerErrorException(ret); }
      *//**
      * Delete a span configuration
-     * 
+     *
      * @param containerName
      *            Name of the Container
      * @param config
@@ -570,27 +564,27 @@ public class SwitchNorthbound {
      */
     /*
      * @Path("/span-config/{containerName}")
-     * 
+     *
      * @DELETE
-     * 
+     *
      * @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-     * 
+     *
      * @StatusCodes( {
-     * 
+     *
      * @ResponseCode(code = 200, condition = "Operation successful"),
-     * 
+     *
      * @ResponseCode(code = 404, condition = "The containerName is not found"),
-     * 
+     *
      * @ResponseCode(code = 503, condition =
      * "One or more of Controller Services are unavailable") }) public Response
      * deleteSpanConfig(@PathParam("containerName") String containerName,
-     * 
+     *
      * @TypeHint(SubnetConfig.class) JAXBElement<SpanConfig> config) {
      * ISwitchManager switchManager = (ISwitchManager)
      * getIfSwitchManagerService(containerName); if (switchManager == null) {
      * throw new ServiceUnavailableException("Switch Manager " +
      * RestMessages.SERVICEUNAVAILABLE.toString()); }
-     * 
+     *
      * String ret = switchManager.removeSpanConfig(config.getValue()); if
      * (ret.equals(ReturnString.SUCCESS.toString())) { return
      * Response.ok().build(); } throw new ResourceNotFoundException(ret); }
@@ -598,7 +592,7 @@ public class SwitchNorthbound {
 
     /**
      * Save the current switch configurations
-     * 
+     *
      * @param containerName
      *            Name of the Container
      * @return Response as dictated by the HTTP Response Status code
@@ -619,7 +613,7 @@ public class SwitchNorthbound {
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
-        ISwitchManager switchManager = (ISwitchManager) getIfSwitchManagerService(containerName);
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
             throw new ServiceUnavailableException("Switch Manager "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
