@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -249,11 +247,27 @@ public class ARP extends Packet {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + ((fieldValues == null) ? 0 : fieldValues.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ARP other = (ARP) obj;
+        if (fieldValues == null) {
+            if (other.fieldValues != null)
+                return false;
+        } else if (!fieldValues.equals(other.fieldValues))
+            return false;
+        return true;
     }
 }
