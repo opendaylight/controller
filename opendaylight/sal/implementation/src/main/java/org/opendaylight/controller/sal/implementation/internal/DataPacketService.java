@@ -28,8 +28,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.match.Match;
@@ -109,24 +107,35 @@ public class DataPacketService implements IPluginOutDataPacketService,
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (obj == this) {
+            if (this == obj)
                 return true;
-            }
-            if (obj.getClass() != getClass()) {
+            if (obj == null)
                 return false;
-            }
-            DataPacketListener rhs = (DataPacketListener) obj;
-            return new EqualsBuilder().append(this.listenerName,
-                    rhs.listenerName).isEquals();
+            if (getClass() != obj.getClass())
+                return false;
+            DataPacketListener other = (DataPacketListener) obj;
+            if (!getOuterType().equals(other.getOuterType()))
+                return false;
+            if (listenerName == null) {
+                if (other.listenerName != null)
+                    return false;
+            } else if (!listenerName.equals(other.listenerName))
+                return false;
+            return true;
         }
 
         @Override
         public int hashCode() {
-            return new HashCodeBuilder(13, 31).append(listenerName)
-                    .toHashCode();
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getOuterType().hashCode();
+            result = prime * result
+                    + ((listenerName == null) ? 0 : listenerName.hashCode());
+            return result;
+        }
+
+        private DataPacketService getOuterType() {
+            return DataPacketService.this;
         }
     }
 
