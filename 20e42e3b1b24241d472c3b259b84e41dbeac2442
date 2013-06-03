@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///Vw\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/vendorextension/v6extension/V6Match.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1016,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-03T23:43:16Z",
+      "side": 1,
+      "message": "Instead of Arrays.toString() I think HexEncode.HexEncode.bytesToHexStringFormat() would be more appropriate here as it would print the MAC in the colon separate byte format.",
+      "revId": "20e42e3b1b24241d472c3b259b84e41dbeac2442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Vs\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/vendorextension/v6extension/V6Match.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1018,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-03T23:43:16Z",
+      "side": 1,
+      "message": "Same comment",
+      "revId": "20e42e3b1b24241d472c3b259b84e41dbeac2442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Vo\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/MacAddress.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-03T23:43:16Z",
+      "side": 1,
+      "message": "same comment here",
+      "revId": "20e42e3b1b24241d472c3b259b84e41dbeac2442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Vk\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/address/EthernetAddress.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-03T23:43:16Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "20e42e3b1b24241d472c3b259b84e41dbeac2442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Vg\u003d",
+        "filename": "opendaylight/switchmanager/api/src/main/java/org/opendaylight/controller/switchmanager/Switch.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-03T23:43:16Z",
+      "side": 1,
+      "message": "same comment here",
+      "revId": "20e42e3b1b24241d472c3b259b84e41dbeac2442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
