@@ -77,7 +77,7 @@ public abstract class Packet {
     /**
      * This method deserializes the data bits obtained from the wire into the
      * respective header and payload which are of type Packet
-     * 
+     *
      * @param byte[] data - data from wire to deserialize
      * @param int bitOffset bit position where packet header starts in data
      *        array
@@ -151,7 +151,7 @@ public abstract class Packet {
     /**
      * This method serializes the header and payload from the respective
      * packet class, into a single stream of bytes to be sent on the wire
-     * 
+     *
      * @return The byte array representing the serialized Packet
      * @throws PacketException
      */
@@ -206,7 +206,7 @@ public abstract class Packet {
      * byte stream which cannot be done or cannot be done efficiently during the
      * normal Packet.serialize() path. An example is the checksum computation
      * for IPv4
-     * 
+     *
      * @param byte[] - serialized bytes
      * @throws PacketException
      */
@@ -221,7 +221,7 @@ public abstract class Packet {
      * of checksum varies based on the protocol, this method is overridden.
      * Currently only IPv4 and ICMP do checksum computation and validation. TCP
      * and UDP need to implement these if required.
-     * 
+     *
      * @param byte[] data The byte stream representing the Ethernet frame
      * @param int startBitOffset The bit offset from where the byte array corresponding to this Packet starts in the frame
      * @throws PacketException
@@ -233,7 +233,7 @@ public abstract class Packet {
 
     /**
      * Gets the header length in bits
-     * 
+     *
      * @return int the header length in bits
      */
     public int getHeaderSize() {
@@ -256,7 +256,7 @@ public abstract class Packet {
      * This method fetches the start bit offset for header field specified by
      * 'fieldname'. The offset is present in the hdrFieldCoordMap of the
      * respective packet class
-     * 
+     *
      * @param String
      *            fieldName
      * @return Integer - startOffset of the requested field
@@ -269,7 +269,7 @@ public abstract class Packet {
      * This method fetches the number of bits for header field specified by
      * 'fieldname'. The numBits are present in the hdrFieldCoordMap of the
      * respective packet class
-     * 
+     *
      * @param String
      *            fieldName
      * @return Integer - number of bits of the requested field
@@ -297,7 +297,7 @@ public abstract class Packet {
     /**
      * Returns the raw payload carried by this packet in case payload was not
      * parsed. Caller can call this function in case the getPaylod() returns null.
-     * 
+     *
      * @return The raw payload if not parsable as an array of bytes, null otherwise
      */
     public byte[] getRawPayload() {
@@ -306,7 +306,7 @@ public abstract class Packet {
 
     /**
      * Set a raw payload in the packet class
-     * 
+     *
      * @param payload The raw payload as byte array
      */
     public void setRawPayload(byte[] payload) {
@@ -319,8 +319,8 @@ public abstract class Packet {
      * packet received from wire is not equal to the checksum read from the
      * stream. For the Packet class which do not have a checksum field, this
      * function will always return false.
-     * 
-     * 
+     *
+     *
      * @return true if the deserialized packet's recomputed checksum is not
      *         equal to the packet carried checksum
      */
@@ -331,36 +331,62 @@ public abstract class Packet {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = super.hashCode();
+        int result = 1;
+        result = prime * result + (corrupted ? 1231 : 1237);
+        result = prime
+                * result
+                + ((hdrFieldCoordMap == null) ? 0 : hdrFieldCoordMap.hashCode());
         result = prime * result
-                + ((this.hdrFieldsMap == null) ? 0 : hdrFieldsMap.hashCode());
+                + ((hdrFieldsMap == null) ? 0 : hdrFieldsMap.hashCode());
+        result = prime * result + ((parent == null) ? 0 : parent.hashCode());
+        result = prime * result + ((payload == null) ? 0 : payload.hashCode());
+        result = prime * result
+                + ((payloadClass == null) ? 0 : payloadClass.hashCode());
+        result = prime * result + Arrays.hashCode(rawPayload);
+        result = prime * result + (writeAccess ? 1231 : 1237);
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null)
             return false;
-        }
+        if (getClass() != obj.getClass())
+            return false;
         Packet other = (Packet) obj;
-        if (hdrFieldsMap == other.hdrFieldsMap) {
-            return true;
-        }
-        if (hdrFieldsMap == null || other.hdrFieldsMap == null) {
+        if (corrupted != other.corrupted)
             return false;
-        }
-        if (hdrFieldsMap != null && other.hdrFieldsMap != null) {
-            for (String field : hdrFieldsMap.keySet()) {
-                if (!Arrays.equals(hdrFieldsMap.get(field), other.hdrFieldsMap.get(field))) {
-                    return false;
-                }
-            }
-        } else {
+        if (hdrFieldCoordMap == null) {
+            if (other.hdrFieldCoordMap != null)
+                return false;
+        } else if (!hdrFieldCoordMap.equals(other.hdrFieldCoordMap))
             return false;
-        }
+        if (hdrFieldsMap == null) {
+            if (other.hdrFieldsMap != null)
+                return false;
+        } else if (!hdrFieldsMap.equals(other.hdrFieldsMap))
+            return false;
+        if (parent == null) {
+            if (other.parent != null)
+                return false;
+        } else if (!parent.equals(other.parent))
+            return false;
+        if (payload == null) {
+            if (other.payload != null)
+                return false;
+        } else if (!payload.equals(other.payload))
+            return false;
+        if (payloadClass == null) {
+            if (other.payloadClass != null)
+                return false;
+        } else if (!payloadClass.equals(other.payloadClass))
+            return false;
+        if (!Arrays.equals(rawPayload, other.rawPayload))
+            return false;
+        if (writeAccess != other.writeAccess)
+            return false;
         return true;
     }
 
