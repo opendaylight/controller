@@ -15,8 +15,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
+import org.opendaylight.controller.sal.utils.HexEncode;
 /**
  * The class contains MAC address property.
  */
@@ -92,6 +91,7 @@ public class MacAddress extends Property implements Cloneable {
 
     @Override
     public String toString() {
-        return "MacAddress[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "MacAddress [address=" +
+            HexEncode.bytesToHexStringFormat(address) + "]";
     }
 }

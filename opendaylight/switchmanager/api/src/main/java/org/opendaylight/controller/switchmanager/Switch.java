@@ -16,9 +16,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.HexEncode;
 
 /**
  * The class describes switch related information including L2 address, ports,
@@ -164,6 +164,8 @@ public class Switch implements Serializable {
 
     @Override
     public String toString() {
-        return "Switch[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "Switch [dataLayerAddress=" + HexEncode.bytesToHexStringFormat(dataLayerAddress)
+                + ", nodeConnectors=" + nodeConnectors + ", spanPorts="
+                + spanPorts + ", node=" + node + "]";
     }
 }
