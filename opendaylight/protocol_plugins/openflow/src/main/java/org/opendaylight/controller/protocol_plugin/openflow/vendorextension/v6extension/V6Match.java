@@ -9,32 +9,30 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.openflow.protocol.OFMatch;
-import org.openflow.util.U16;
-import org.openflow.util.U8;
-
 import java.net.Inet6Address;
-import org.opendaylight.controller.sal.utils.HexEncode;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
+import org.opendaylight.controller.sal.utils.HexEncode;
+import org.openflow.protocol.OFMatch;
+import org.openflow.util.U16;
+import org.openflow.util.U8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This Class forms the vendor specific IPv6 Flow Match messages as well as
  * processes the vendor specific IPv6 Stats Reply message.
- * 
- * For message creation, it parses the user entered IPv6 match fields, creates 
- * a sub-message for each field which are later used to form the complete 
- * message.  
- * 
+ *
+ * For message creation, it parses the user entered IPv6 match fields, creates
+ * a sub-message for each field which are later used to form the complete
+ * message.
+ *
  * For message processing, it parses the incoming message and reads each field
  * of the message and stores in appropriate field of V6Match object.
- *  
+ *
  *
  */
 public class V6Match extends OFMatch implements Cloneable {
@@ -472,7 +470,7 @@ public class V6Match extends OFMatch implements Cloneable {
 
     /**
      * Sets this (V6Match) object's member variables based on a comma-separated key=value pair similar to OFMatch's fromString.
-     * 
+     *
      * @param match a key=value comma separated string.
      */
     @Override
@@ -1013,7 +1011,31 @@ public class V6Match extends OFMatch implements Cloneable {
 
     @Override
     public String toString() {
-        return "V6Match[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "V6Match [nwSrc=" + nwSrc + ", nwDst=" + nwDst
+                + ", inputPortMask=" + inputPortMask + ", dataLayerSourceMask="
+                + HexEncode.bytesToHexStringFormat(dataLayerSourceMask)
+                + ", dataLayerDestinationMask="
+                + HexEncode.bytesToHexStringFormat(dataLayerDestinationMask)
+                + ", dataLayerVirtualLanMask=" + dataLayerVirtualLanMask
+                + ", dataLayerVirtualLanPriorityCodePointMask="
+                + dataLayerVirtualLanPriorityCodePointMask
+                + ", dataLayerTypeMask=" + dataLayerTypeMask
+                + ", networkTypeOfServiceMask=" + networkTypeOfServiceMask
+                + ", networkProtocolMask=" + networkProtocolMask
+                + ", networkSourceMask=" + networkSourceMask
+                + ", networkDestinationMask=" + networkDestinationMask
+                + ", transportSourceMask=" + transportSourceMask
+                + ", transportDestinationMask=" + transportDestinationMask
+                + ", srcIPv6SubnetMaskbits=" + srcIPv6SubnetMaskbits
+                + ", dstIPv6SubnetMaskbits=" + dstIPv6SubnetMaskbits
+                + ", inputPortState=" + inputPortState + ", dlSourceState="
+                + dlSourceState + ", dlDestState=" + dlDestState
+                + ", dlVlanState=" + dlVlanState + ", ethTypeState="
+                + ethTypeState + ", nwTosState=" + nwTosState
+                + ", nwProtoState=" + nwProtoState + ", nwSrcState="
+                + nwSrcState + ", nwDstState=" + nwDstState + ", tpSrcState="
+                + tpSrcState + ", tpDstState=" + tpDstState + ", match_len="
+                + match_len + ", pad_size=" + pad_size + "]";
     }
 
     /**

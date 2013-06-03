@@ -13,7 +13,6 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.openflow.protocol.OFPacketOut;
 import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFVendor;
@@ -24,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is used to create IPv6 Vendor Extension messages. Specfically, It
  * defines the methods used in creation of Vendor specific IPv6 Flow Mod message.
- * 
+ *
  *
  */
 public class V6FlowMod extends OFVendor implements Cloneable {
@@ -49,7 +48,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     private static int IPV6_EXT_MIN_HDR_LEN = 36;
 
     /**
-     * Constructor for the V6FlowMod class. Initializes OFVendor (parent class) 
+     * Constructor for the V6FlowMod class. Initializes OFVendor (parent class)
      * fields by calling the parent class' constructor.
      */
     public V6FlowMod() {
@@ -129,7 +128,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     private int getIPv6ExtensionFlowModAddSubType() {
         return IPV6EXT_ADD_FLOW_MSG_TYPE;
     }
-    
+
     /**
      * Returns the minimum header size for V6Flow Message type
      * @return		minimum header size
@@ -138,7 +137,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     public int getV6FlowModMinHdrSize() {
         return IPV6_EXT_MIN_HDR_LEN;
     }
-    
+
     /**
      * Sets the Vendor type in OFVendor message
      */
@@ -146,7 +145,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     public void setVendor() {
         super.setVendor(V6StatsRequest.NICIRA_VENDOR_ID);
     }
-    
+
     /**
      * Get flags
      * @return
@@ -162,12 +161,12 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     public void setFlags(short flags) {
         this.flags = flags;
     }
-    
+
     /**
      * This method forms the Vendor extension IPv6 Flow Mod message.It uses the
-     * fields in V6FlowMod class, and writes the data according to vendor 
+     * fields in V6FlowMod class, and writes the data according to vendor
      * extension format. The fields include flow properties (cookie, timeout,
-     * priority, etc), flow match, and action list. It also takes care of 
+     * priority, etc), flow match, and action list. It also takes care of
      * required padding.
      */
 
@@ -209,7 +208,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Forms the clone of V6FlowMod Object. If Object is returned
-     * successfully, then returns the cloned object. Throws an 
+     * successfully, then returns the cloned object. Throws an
      * exception if cloning is not supported.
      */
     @Override
@@ -229,12 +228,15 @@ public class V6FlowMod extends OFVendor implements Cloneable {
         }
     }
 
-    /**
-     * Prints the contents of V6FlowMod in a string format.
-     */
     @Override
     public String toString() {
-        return "V6FlowMod[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "V6FlowMod [match=" + match + ", cookie=" + cookie
+                + ", command=" + command + ", idleTimeout=" + idleTimeout
+                + ", hardTimeout=" + hardTimeout + ", priority=" + priority
+                + ", bufferId=" + bufferId + ", outPort=" + outPort
+                + ", flags=" + flags + ", actions=" + actions + ", match_len="
+                + match_len + ", actions_len=" + actions_len + ", pad_size="
+                + pad_size + "]";
     }
 
 }

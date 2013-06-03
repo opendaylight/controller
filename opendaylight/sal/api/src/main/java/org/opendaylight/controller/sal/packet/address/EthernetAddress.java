@@ -17,7 +17,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.utils.HexEncode;
 
@@ -117,7 +116,7 @@ public class EthernetAddress extends DataLinkAddress {
 
     @Override
     public String toString() {
-        return "EthernetAddress[" + ReflectionToStringBuilder.toString(this)
+        return "EthernetAddress [macAddress=" + HexEncode.bytesToHexStringFormat(macAddress)
                 + "]";
     }
 
