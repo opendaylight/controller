@@ -41,6 +41,7 @@ import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.Description;
+import org.opendaylight.controller.sal.core.MacAddress;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -51,6 +52,7 @@ import org.opendaylight.controller.sal.core.Tier;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IInventoryService;
 import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
+import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
@@ -81,16 +83,16 @@ import org.slf4j.LoggerFactory;
  * are maintained in the default container only.
  */
 public class SwitchManagerImpl implements ISwitchManager,
-        IConfigurationContainerAware, IObjectReader,
-        ICacheUpdateAware<Long, String>, IListenInventoryUpdates,
-        CommandProvider {
+IConfigurationContainerAware, IObjectReader,
+ICacheUpdateAware<Long, String>, IListenInventoryUpdates,
+CommandProvider {
     private static Logger log = LoggerFactory
             .getLogger(SwitchManagerImpl.class);
     private static String ROOT = GlobalConstants.STARTUPHOME.toString();
     private static final String SAVE = "Save";
     private String subnetFileName = null, spanFileName = null,
             switchConfigFileName = null;
-    private List<NodeConnector> spanNodeConnectors = new CopyOnWriteArrayList<NodeConnector>();
+    private final List<NodeConnector> spanNodeConnectors = new CopyOnWriteArrayList<NodeConnector>();
     private ConcurrentMap<InetAddress, Subnet> subnets; // set of Subnets keyed by the InetAddress
     private ConcurrentMap<String, SubnetConfig> subnetsConfigList;
     private ConcurrentMap<Integer, SpanConfig> spanConfigList;
@@ -100,11 +102,11 @@ public class SwitchManagerImpl implements ISwitchManager,
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in global container only
     private ConcurrentMap<Node, Map<String, NodeConnector>> nodeConnectorNames;
     private IInventoryService inventoryService;
-    private Set<ISwitchManagerAware> switchManagerAware = Collections
+    private final Set<ISwitchManagerAware> switchManagerAware = Collections
             .synchronizedSet(new HashSet<ISwitchManagerAware>());
-    private Set<IInventoryListener> inventoryListeners = Collections
+    private final Set<IInventoryListener> inventoryListeners = Collections
             .synchronizedSet(new HashSet<IInventoryListener>());
-    private Set<ISpanAware> spanAware = Collections
+    private final Set<ISpanAware> spanAware = Collections
             .synchronizedSet(new HashSet<ISpanAware>());
     private byte[] MAC;
     private static boolean hostRefresh = true;
@@ -116,14 +118,15 @@ public class SwitchManagerImpl implements ISwitchManager,
     public enum ReasonCode {
         SUCCESS("Success"), FAILURE("Failure"), INVALID_CONF(
                 "Invalid Configuration"), EXIST("Entry Already Exist"), CONFLICT(
-                "Configuration Conflict with Existing Entry");
+                        "Configuration Conflict with Existing Entry");
 
-        private String name;
+        private final String name;
 
         private ReasonCode(String name) {
             this.name = name;
         }
 
+        @Override
         public String toString() {
             return name;
         }
@@ -184,12 +187,15 @@ public class SwitchManagerImpl implements ISwitchManager,
          * Read startup and build database if we have not already gotten the
          * configurations synced from another node
          */
-        if (subnetsConfigList.isEmpty())
+        if (subnetsConfigList.isEmpty()) {
             loadSubnetConfiguration();
-        if (spanConfigList.isEmpty())
+        }
+        if (spanConfigList.isEmpty()) {
             loadSpanConfiguration();
-        if (nodeConfigList.isEmpty())
+        }
+        if (nodeConfigList.isEmpty()) {
             loadSwitchConfiguration();
+        }
 
         MAC = getHardwareMAC();
     }
@@ -314,12 +320,13 @@ public class SwitchManagerImpl implements ISwitchManager,
         clusterContainerService.destroyCache("switchmanager.configSaveEvent");
         clusterContainerService.destroyCache("switchmanager.nodeProps");
         clusterContainerService
-                .destroyCache("switchmanager.nodeConnectorProps");
+        .destroyCache("switchmanager.nodeConnectorProps");
         clusterContainerService
-                .destroyCache("switchmanager.nodeConnectorNames");
+        .destroyCache("switchmanager.nodeConnectorNames");
         nonClusterObjectCreate();
     }
 
+    @Override
     public List<SubnetConfig> getSubnetsConfigList() {
         return new ArrayList<SubnetConfig>(subnetsConfigList.values());
     }
@@ -344,6 +351,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         return new ArrayList<SwitchConfig>(nodeConfigList.values());
     }
 
+    @Override
     public SwitchConfig getSwitchConfig(String switchId) {
         return nodeConfigList.get(switchId);
     }
@@ -351,7 +359,11 @@ public class SwitchManagerImpl implements ISwitchManager,
     public Switch getSwitchByNode(Node node) {
         Switch sw = new Switch(node);
         sw.setNode(node);
-
+        MacAddress mac = (MacAddress) this.getNodeProp(node,
+                MacAddress.name);
+        if (mac != null) {
+            sw.setDataLayerAddress(mac.getMacAddress());
+        }
         Set<NodeConnector> ncSet = getPhysicalNodeConnectors(node);
         sw.setNodeConnectors(ncSet);
 
@@ -366,6 +378,7 @@ public class SwitchManagerImpl implements ISwitchManager,
         return sw;
     }
 
+    @Override
     public List<Switch> getNetworkDevices() {
         Set<Node> nodeSet = getNodes();
         List<Switch> swList = new ArrayList<Switch>();
@@ -400,8 +413,9 @@ public class SwitchManagerImpl implements ISwitchManager,
             }
             subnets.put(conf.getIPnum(), subnet);
         } else { // This is the deletion of the whole subnet
-            if (subnet == null)
+            if (subnet == null) {
                 return;
+            }
             subnets.remove(conf.getIPnum());
         }
     }
@@ -454,6 +468,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     /**
      * Adds Subnet configured in GUI or API3
      */
+    @Override
     public Status addSubnet(SubnetConfig conf) {
         return this.addRemoveSubnet(conf, true);
     }
@@ -908,8 +923,9 @@ public class SwitchManagerImpl implements ISwitchManager,
     public void setNodeProp(Node node, Property prop) {
         /* Get a copy of the property map */
         Map<String, Property> propMap = getNodeProps(node);
-        if (propMap == null)
+        if (propMap == null) {
             return;
+        }
 
         propMap.put(prop.getName(), prop);
         this.nodeProps.put(node, propMap);
@@ -933,16 +949,18 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     @Override
     public Set<NodeConnector> getUpNodeConnectors(Node node) {
-        if (nodeConnectorProps == null)
+        if (nodeConnectorProps == null) {
             return null;
+        }
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
         for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
             if (!nodeConnector.getNode().equals(node)) {
                 continue;
             }
-            if (isNodeConnectorEnabled(nodeConnector))
+            if (isNodeConnectorEnabled(nodeConnector)) {
                 nodeConnectorSet.add(nodeConnector);
+            }
         }
 
         return nodeConnectorSet;
@@ -950,8 +968,9 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     @Override
     public Set<NodeConnector> getNodeConnectors(Node node) {
-        if (nodeConnectorProps == null)
+        if (nodeConnectorProps == null) {
             return null;
+        }
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
         for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
@@ -966,8 +985,9 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     @Override
     public Set<NodeConnector> getPhysicalNodeConnectors(Node node) {
-        if (nodeConnectorProps == null)
+        if (nodeConnectorProps == null) {
             return null;
+        }
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
         for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
@@ -1049,12 +1069,14 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     @Override
     public NodeConnector getNodeConnector(Node node, String nodeConnectorName) {
-        if (nodeConnectorNames == null)
+        if (nodeConnectorNames == null) {
             return null;
+        }
 
         Map<String, NodeConnector> map = nodeConnectorNames.get(node);
-        if (map == null)
+        if (map == null) {
             return null;
+        }
 
         return map.get(nodeConnectorName);
     }
@@ -1393,8 +1415,9 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     @Override
     public Boolean isNodeConnectorEnabled(NodeConnector nodeConnector) {
-        if (nodeConnector == null)
+        if (nodeConnector == null) {
             return false;
+        }
 
         Config config = (Config) getNodeConnectorProp(nodeConnector,
                 Config.ConfigPropName);
@@ -1419,7 +1442,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     public void _pns(CommandInterpreter ci) {
-        ci.println("           Node                       Type             Name             Tier");
+        ci.println("           Node               Type           MAC            Name      Tier");
         if (nodeProps == null) {
             return;
         }
@@ -1432,9 +1455,12 @@ public class SwitchManagerImpl implements ISwitchManager,
                     Description.propertyName));
             Tier tier = ((Tier) getNodeProp(node, Tier.TierPropName));
             String nodeName = (desc == null) ? "" : desc.getValue();
+            MacAddress mac = (MacAddress) getNodeProp(node,
+                    MacAddress.name);
             int tierNum = (tier == null) ? 0 : tier.getValue();
-            ci.println(node + "            " + node.getType() + "            "
-                    + nodeName + "            " + tierNum);
+            ci.println(node + "     " + node.getType() + "     "
+                    + HexEncode.bytesToHexStringFormat(mac.getMacAddress())
+                    + "     " + nodeName + "     " + tierNum  );
         }
         ci.println("Total number of Nodes: " + nodeSet.size());
     }
@@ -1586,17 +1612,19 @@ public class SwitchManagerImpl implements ISwitchManager,
             ci.println("expecting on/off/?");
             return;
         }
-        if (mode.toLowerCase().equals("on"))
+        if (mode.toLowerCase().equals("on")) {
             hostRefresh = true;
-        else if (mode.toLowerCase().equals("off"))
+        } else if (mode.toLowerCase().equals("off")) {
             hostRefresh = false;
-        else if (mode.equals("?")) {
-            if (hostRefresh)
+        } else if (mode.equals("?")) {
+            if (hostRefresh) {
                 ci.println("host refresh is ON");
-            else
+            } else {
                 ci.println("host refresh is OFF");
-        } else
+            }
+        } else {
             ci.println("expecting on/off/?");
+        }
         return;
     }
 
@@ -1617,17 +1645,8 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     @Override
     public byte[] getNodeMAC(Node node) {
-        if (node.getType().equals(Node.NodeIDType.OPENFLOW)) {
-            byte[] gmac = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            long dpid = (Long) node.getID();
-
-            for (short i = 0; i < 6; i++) {
-                gmac[5 - i] = (byte) dpid;
-                dpid >>= 8;
-            }
-            return gmac;
-        }
-        return null;
+        MacAddress mac = (MacAddress) nodeProps.get(MacAddress.name);
+        return (mac != null) ? mac.getMacAddress() : null;
     }
 
     @Override

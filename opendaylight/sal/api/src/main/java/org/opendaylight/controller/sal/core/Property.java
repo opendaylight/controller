@@ -35,9 +35,9 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 		AdvertisedBandwidth.class, Buffers.class, Capabilities.class,
 		MacAddress.class, PeerBandwidth.class, SupportedBandwidth.class,
 		Tables.class })
-abstract public class Property implements Serializable {
+abstract public class Property implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
-    private String name;
+    private final String name;
 
     /**
      * Private constructor used for JAXB mapping
@@ -61,7 +61,8 @@ abstract public class Property implements Serializable {
      *
      * @return A clone of this Property
      */
-    abstract public Property clone();
+    @Override
+    public abstract Property clone();
 
     @Override
     public int hashCode() {
@@ -73,18 +74,23 @@ abstract public class Property implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Property other = (Property) obj;
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
+        }
         return true;
     }
 
