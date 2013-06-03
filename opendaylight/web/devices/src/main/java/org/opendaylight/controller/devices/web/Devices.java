@@ -36,7 +36,6 @@ import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Tier;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
@@ -118,6 +117,7 @@ public class Devices implements IDaylightWeb {
                         .getNodeConnectors();
                 if (nodeConnectorSet != null && nodeConnectorSet.size() > 0) {
                     Map<Short, String> portList = new HashMap<Short, String>();
+                    List<String> intfList = new ArrayList<String>();
                     for (NodeConnector nodeConnector : nodeConnectorSet) {
                         String nodeConnectorNumberToStr = nodeConnector.getID()
                                 .toString();
@@ -142,17 +142,29 @@ public class Devices implements IDaylightWeb {
                             }
                         }
 
-                        portList.put(
-                                Short.parseShort(nodeConnectorNumberToStr),
-                                nodeConnectorName);
+                        Class<?> idClass = nodeConnector.getID().getClass();
+                        if (idClass.equals(Short.class)) {
+                            portList.put(
+                                    Short.parseShort(nodeConnectorNumberToStr),
+                                    nodeConnectorName);
+                        } else {
+                            intfList.add(nodeConnectorName);
+                        }
                     }
 
-                    Map<Short, String> sortedPortList = new TreeMap<Short, String>(
-                            portList);
+                    if (portList.size() > 0) {
+                        Map<Short, String> sortedPortList = new TreeMap<Short, String>(
+                                portList);
 
-                    for (Entry<Short, String> e : sortedPortList.entrySet()) {
-                        sb1.append(e.getValue());
-                        sb1.append("<br>");
+                        for (Entry<Short, String> e : sortedPortList.entrySet()) {
+                            sb1.append(e.getValue());
+                            sb1.append("<br>");
+                        }
+                    } else if (intfList.size() > 0) {
+                        for (String intf : intfList) {
+                            sb1.append(intf);
+                            sb1.append("<br>");
+                        }
                     }
                 }
                 nodeDatum.put("ports", sb1.toString());
@@ -624,7 +636,7 @@ public class Devices implements IDaylightWeb {
 
     /**
      * Is the operation permitted for the given level
-     * 
+     *
      * @param level
      */
     private boolean authorize(UserLevel level, HttpServletRequest request) {
@@ -657,10 +669,10 @@ public class Devices implements IDaylightWeb {
          * IUserManager userManager = (IUserManager) ServiceHelper
          * .getGlobalInstance(IUserManager.class, this); if (userManager ==
          * null) { return "User Manager is not available"; }
-         * 
+         *
          * String username = request.getUserPrincipal().getName();
-         * 
-         * 
+         *
+         *
          * model.addAttribute("username", username); model.addAttribute("role",
          * userManager.getUserLevel(username).toNumber());
          */

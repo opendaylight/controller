@@ -54,7 +54,6 @@ import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
@@ -870,25 +869,10 @@ public class SwitchManagerImpl implements ISwitchManager,
     }
 
     /*
-     * test utility function which assumes all nodes are OF nodes
-     */
-    private Node getNode(Long id) {
-        Set<Node> nodes = getNodes();
-        if (nodes != null) {
-            for (Node node : nodes) {
-                if (id.equals((Long) node.getID())) {
-                    return node;
-                }
-            }
-        }
-        return null;
-    }
-
-    /*
      * Returns a copy of a list of properties for a given node
-     * 
+     *
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.opendaylight.controller.switchmanager.ISwitchManager#getNodeProps
      * (org.opendaylight.controller.sal.core.Node)
@@ -954,9 +938,9 @@ public class SwitchManagerImpl implements ISwitchManager,
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
         for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
-            if (((Long) nodeConnector.getNode().getID()).longValue() != (Long) node
-                    .getID())
+            if (!nodeConnector.getNode().equals(node)) {
                 continue;
+            }
             if (isNodeConnectorEnabled(nodeConnector))
                 nodeConnectorSet.add(nodeConnector);
         }
@@ -971,9 +955,9 @@ public class SwitchManagerImpl implements ISwitchManager,
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
         for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
-            if (((Long) nodeConnector.getNode().getID()).longValue() != (Long) node
-                    .getID())
+            if (!nodeConnector.getNode().equals(node)) {
                 continue;
+            }
             nodeConnectorSet.add(nodeConnector);
         }
 
@@ -995,24 +979,6 @@ public class SwitchManagerImpl implements ISwitchManager,
         }
 
         return nodeConnectorSet;
-    }
-
-    /*
-     * testing utility function which assumes we are dealing with OF Node
-     * nodeconnectors only
-     */
-    @SuppressWarnings("unused")
-    private Set<Long> getEnabledNodeConnectorIds(Node node) {
-        Set<Long> ids = new HashSet<Long>();
-        Set<NodeConnector> nodeConnectors = getUpNodeConnectors(node);
-
-        if (nodeConnectors != null) {
-            for (NodeConnector nodeConnector : nodeConnectors) {
-                ids.add((Long) nodeConnector.getID());
-            }
-        }
-
-        return ids;
     }
 
     @Override
@@ -1095,7 +1061,7 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     /**
      * Adds a node connector and its property if any
-     * 
+     *
      * @param nodeConnector
      *            {@link org.opendaylight.controller.sal.core.NodeConnector}
      * @param propName
@@ -1139,7 +1105,7 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     /**
      * Removes one property of a node connector
-     * 
+     *
      * @param nodeConnector
      *            {@link org.opendaylight.controller.sal.core.NodeConnector}
      * @param propName
@@ -1177,7 +1143,7 @@ public class SwitchManagerImpl implements ISwitchManager,
 
     /**
      * Removes all the properties of a node connector
-     * 
+     *
      * @param nodeConnector
      *            {@link org.opendaylight.controller.sal.core.NodeConnector}
      * @return success or failed reason
@@ -1204,7 +1170,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init(Component c) {
         Dictionary<?, ?> props = c.getServiceProperties();
@@ -1225,7 +1191,7 @@ public class SwitchManagerImpl implements ISwitchManager,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         shutDown();
@@ -1234,7 +1200,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     void start() {
         // OSGI console
@@ -1253,7 +1219,7 @@ public class SwitchManagerImpl implements ISwitchManager,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     void stop() {
     }
@@ -1756,7 +1722,7 @@ public class SwitchManagerImpl implements ISwitchManager,
     /**
      * Creates a Name/Tier/Bandwidth Property object based on given property
      * name and value. Other property types are not supported yet.
-     * 
+     *
      * @param propName
      *            Name of the Property
      * @param propValue
