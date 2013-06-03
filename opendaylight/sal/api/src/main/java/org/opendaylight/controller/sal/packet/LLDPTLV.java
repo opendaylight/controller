@@ -10,13 +10,11 @@ package org.opendaylight.controller.sal.packet;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -144,12 +142,28 @@ public class LLDPTLV extends Packet {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + ((fieldValues == null) ? 0 : fieldValues.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        LLDPTLV other = (LLDPTLV) obj;
+        if (fieldValues == null) {
+            if (other.fieldValues != null)
+                return false;
+        } else if (!fieldValues.equals(other.fieldValues))
+            return false;
+        return true;
     }
 
     @Override
@@ -164,7 +178,7 @@ public class LLDPTLV extends Packet {
 
     /**
      * Returns the size in bits of the whole TLV
-     * 
+     *
      * @return int - size in bits of full TLV
      */
     public int getTLVSize() {
@@ -176,7 +190,7 @@ public class LLDPTLV extends Packet {
     /**
      * Creates the ChassisID TLV value including the subtype and ChassisID
      * string
-     * 
+     *
      * @param nodeId
      *            node identifier string
      * @return the ChassisID TLV value in byte array
@@ -204,7 +218,7 @@ public class LLDPTLV extends Packet {
 
     /**
      * Creates the PortID TLV value including the subtype and PortID string
-     * 
+     *
      * @param portId
      *            port identifier string
      * @return the PortID TLV value in byte array
@@ -221,7 +235,7 @@ public class LLDPTLV extends Packet {
 
     /**
      * Creates the custom TLV value including OUI, subtype and custom string
-     * 
+     *
      * @param portId
      *            port identifier string
      * @return the custom TLV value in byte array
@@ -241,7 +255,7 @@ public class LLDPTLV extends Packet {
 
     /**
      * Retrieves the string from TLV value and returns it in HexString format
-     * 
+     *
      * @param tlvValue
      *            the TLV value
      * @param tlvLen
@@ -257,7 +271,7 @@ public class LLDPTLV extends Packet {
 
     /**
      * Retrieves the string from TLV value
-     * 
+     *
      * @param tlvValue
      *            the TLV value
      * @param tlvLen
@@ -274,7 +288,7 @@ public class LLDPTLV extends Packet {
     /**
      * Retrieves the custom string from the Custom TLV value which includes OUI,
      * subtype and custom string
-     * 
+     *
      * @param customTlvValue
      *            the custom TLV value
      * @param customTlvLen
