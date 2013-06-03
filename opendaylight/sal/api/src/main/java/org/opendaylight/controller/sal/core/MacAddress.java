@@ -16,8 +16,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 /**
  * The class contains the controller MAC address and node MAC address.
  *
@@ -46,15 +44,15 @@ public class MacAddress extends Property {
 	 * Constructor to create DatalinkAddress property which contains the
 	 * controller MAC address and node MAC address. The property will be
 	 * attached to a {@link org.opendaylight.controller.sal.core.Node}.
-	 * 
+	 *
 	 * @param controllerMacAddress Data Link Address for the controller
 	 * @param nodeMacAddress Data Link Address for the node
-	 * 
+	 *
 	 * @return the constructed object
 	 */
     public MacAddress(byte[] controllerMacAddress, byte[] nodeMacAddress) {
         super(MacPropName);
-    	
+
         this.controllerMacAddress = controllerMacAddress;
         this.nodeMacAddress = nodeMacAddress;
     }
@@ -104,6 +102,8 @@ public class MacAddress extends Property {
 
     @Override
     public String toString() {
-        return "MacAddress[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "MacAddress [controllerMacAddress="
+                + Arrays.toString(controllerMacAddress) + ", nodeMacAddress="
+                + Arrays.toString(nodeMacAddress) + "]";
     }
 }

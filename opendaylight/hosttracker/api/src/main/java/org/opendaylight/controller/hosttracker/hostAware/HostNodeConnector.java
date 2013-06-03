@@ -19,7 +19,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Host;
 import org.opendaylight.controller.sal.core.Node;
@@ -187,13 +186,10 @@ public class HostNodeConnector extends Host {
         return !Arrays.equals(emptyArray, macaddr);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
-        return "HostNodeConnector[" + ReflectionToStringBuilder.toString(this)
-                + "]";
+        return "HostNodeConnector [nodeConnector=" + nodeConnector + ", vlan="
+                + vlan + ", staticHost=" + staticHost + "]";
     }
 
     public boolean isV4Host() {

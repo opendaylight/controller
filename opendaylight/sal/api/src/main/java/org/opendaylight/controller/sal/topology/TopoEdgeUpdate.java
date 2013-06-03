@@ -10,7 +10,6 @@ package org.opendaylight.controller.sal.topology;
 
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
@@ -54,8 +53,8 @@ public class TopoEdgeUpdate {
 
     @Override
     public String toString() {
-        return "TopoEdgeUpdate[" + ReflectionToStringBuilder.toString(this)
-                + "]";
+        return "TopoEdgeUpdate [edge=" + edge + ", props=" + props + ", type="
+                + type + "]";
     }
 
     @Override

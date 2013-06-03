@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 
@@ -166,6 +165,8 @@ public class Switch implements Serializable {
 
     @Override
     public String toString() {
-        return "Switch[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "Switch [dataLayerAddress=" + Arrays.toString(dataLayerAddress)
+                + ", nodeConnectors=" + nodeConnectors + ", spanPorts="
+                + spanPorts + ", node=" + node + "]";
     }
 }
