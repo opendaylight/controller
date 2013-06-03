@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///XE\u003d",
+        "filename": "opendaylight/switchmanager/implementation/src/test/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-03T16:56:55Z",
+      "side": 1,
+      "message": "Will run the formatter on this existing file and resubmit",
+      "revId": "8481176d3fa3fcc004f642ea865b7be3593bdfc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
