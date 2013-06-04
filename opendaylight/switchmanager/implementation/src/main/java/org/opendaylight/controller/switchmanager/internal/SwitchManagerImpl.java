@@ -1646,7 +1646,8 @@ CommandProvider {
 
     @Override
     public byte[] getNodeMAC(Node node) {
-        MacAddress mac = (MacAddress) nodeProps.get(MacAddress.name);
+        MacAddress mac = (MacAddress) this.getNodeProp(node,
+                MacAddress.name);
         return (mac != null) ? mac.getMacAddress() : null;
     }
 

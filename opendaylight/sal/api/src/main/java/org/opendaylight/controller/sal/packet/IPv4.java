@@ -542,10 +542,12 @@ public class IPv4 extends Packet {
          * Deriving the Total Length here
          */
         int payloadLength = 0;
-        try {
-            payloadLength = payload.serialize().length;
-        } catch (PacketException e) {
-            logger.error("", e);
+        if (payload != null) {
+	        try {
+	            payloadLength = payload.serialize().length;
+	        } catch (PacketException e) {
+	            logger.error("", e);
+	        }
         }
 
         this.setTotalLength((short) (this.getHeaderLen() + payloadLength));
