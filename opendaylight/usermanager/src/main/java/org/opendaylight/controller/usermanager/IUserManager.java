@@ -228,7 +228,7 @@ public interface IUserManager extends UserDetailsService {
     public String getAccessDate(String user);
 
     /**
-     * Returns the user level for the passed user name. It checks the roles
+     * Returns the highest user level for the passed user name. It checks the roles
      * assigned to this user and checks against the well known Controller user
      * roles to determines the highest user level associated with the user
      * 
@@ -238,6 +238,18 @@ public interface IUserManager extends UserDetailsService {
      *         the highest user level for this user
      */
     public UserLevel getUserLevel(String userName);
+
+    /**
+     * Returns the list of user level for the passed user name. It checks the roles
+     * assigned to this user and checks against the well known Controller user
+     * roles to determines the corresponding list of user level associated with the user
+     * 
+     * @param userName
+     *            the user name
+     * @return
+     *          the list of user level for this user
+     */
+    public List<UserLevel> getUserLevels(String userName);
 
     /**
      * Returns the Security Context
