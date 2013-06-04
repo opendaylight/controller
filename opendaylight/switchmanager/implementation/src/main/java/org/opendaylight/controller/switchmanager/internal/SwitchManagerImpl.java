@@ -1457,10 +1457,11 @@ CommandProvider {
             String nodeName = (desc == null) ? "" : desc.getValue();
             MacAddress mac = (MacAddress) getNodeProp(node,
                     MacAddress.name);
+            String macAddr = (mac == null) ? "" : HexEncode
+                    .bytesToHexStringFormat(mac.getMacAddress());
             int tierNum = (tier == null) ? 0 : tier.getValue();
-            ci.println(node + "     " + node.getType() + "     "
-                    + HexEncode.bytesToHexStringFormat(mac.getMacAddress())
-                    + "     " + nodeName + "     " + tierNum  );
+            ci.println(node + "     " + node.getType() + "     " + macAddr
+                    + "     " + nodeName + "     " + tierNum);
         }
         ci.println("Total number of Nodes: " + nodeSet.size());
     }
