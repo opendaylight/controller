@@ -26,7 +26,7 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
-import org.opendaylight.controller.yang.parser.builder.api.AbstractChildNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractDataNodeContainerBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
@@ -35,7 +35,7 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBu
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 
-public final class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
+public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerBuilder
         implements TypeDefinitionAwareBuilder, AugmentationTargetBuilder,
         DataSchemaNodeBuilder {
     private boolean isBuilt;
@@ -128,7 +128,8 @@ public final class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
         return line;
     }
 
-    public Set<TypeDefinitionBuilder> getTypedefs() {
+    @Override
+    public Set<TypeDefinitionBuilder> getTypeDefinitions() {
         return addedTypedefs;
     }
 
@@ -231,6 +232,11 @@ public final class ContainerSchemaNodeBuilder extends AbstractChildNodeBuilder
     @Override
     public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
+    }
+
+    @Override
+    public String toString() {
+        return "container " + getQName().getLocalName();
     }
 
     private final class ContainerSchemaNodeImpl implements ContainerSchemaNode {

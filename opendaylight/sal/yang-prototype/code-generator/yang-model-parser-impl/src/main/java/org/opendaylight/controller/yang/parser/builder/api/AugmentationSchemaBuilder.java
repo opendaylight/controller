@@ -16,7 +16,7 @@ import org.opendaylight.controller.yang.model.api.Status;
 /**
  * Interface for builders of 'augment' statement.
  */
-public interface AugmentationSchemaBuilder extends ChildNodeBuilder {
+public interface AugmentationSchemaBuilder extends DataNodeContainerBuilder {
 
     String getWhenCondition();
 

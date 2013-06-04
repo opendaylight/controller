@@ -23,15 +23,9 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.ChildNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
-import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public final class ChoiceBuilder implements DataSchemaNodeBuilder,
-        ChildNodeBuilder, AugmentationTargetBuilder {
+public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationTargetBuilder {
     private boolean built;
     private final ChoiceNodeImpl instance;
     private final int line;
@@ -46,9 +40,6 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder,
     private boolean augmenting;
     private boolean configuration;
     private final ConstraintsBuilder constraints;
-    // DataNodeContainer args
-    private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
-    private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
     // AugmentationTarget args
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
     // ChoiceNode args
@@ -109,7 +100,6 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder,
         return cases;
     }
 
-    @Override
     public void addChildNode(DataSchemaNodeBuilder childNode) {
         if (!(childNode instanceof ChoiceCaseBuilder)) {
             ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(
@@ -124,31 +114,6 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder,
     @Override
     public QName getQName() {
         return qname;
-    }
-
-    /**
-     * Choice can not contains grouping statements, so this method always
-     * returns an empty set.
-     *
-     * @return empty set
-     */
-    public Set<GroupingBuilder> getGroupings() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public void addGrouping(GroupingBuilder groupingBuilder) {
-        throw new YangParseException(line,
-                "Can not add grouping to 'choice' node.");
-    }
-
-    public Set<TypeDefinitionBuilder> getTypedefs() {
-        return addedTypedefs;
-    }
-
-    @Override
-    public void addTypedef(final TypeDefinitionBuilder type) {
-        addedTypedefs.add(type);
     }
 
     public SchemaPath getPath() {
@@ -212,15 +177,6 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder,
         return constraints;
     }
 
-    public Set<UsesNodeBuilder> getUsesNodes() {
-        return addedUsesNodes;
-    }
-
-    @Override
-    public void addUsesNode(UsesNodeBuilder usesNodeBuilder) {
-        addedUsesNodes.add(usesNodeBuilder);
-    }
-
     public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
         return addedUnknownNodes;
     }
@@ -247,10 +203,6 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder,
         this.defaultCase = defaultCase;
     }
 
-    @Override
-    public Set<DataSchemaNodeBuilder> getChildNodes() {
-        return new HashSet<DataSchemaNodeBuilder>(cases);
-    }
 
     private final class ChoiceNodeImpl implements ChoiceNode {
         private final QName qname;

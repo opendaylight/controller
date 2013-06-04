@@ -76,7 +76,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
-    public void setType(final TypeDefinitionBuilder tdb) {
+    public void setTypedef(final TypeDefinitionBuilder tdb) {
         typedefs.add(tdb);
     }
 
@@ -125,7 +125,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public SchemaPath getPath() {
-        return null;
+        return path;
     }
 
     @Override

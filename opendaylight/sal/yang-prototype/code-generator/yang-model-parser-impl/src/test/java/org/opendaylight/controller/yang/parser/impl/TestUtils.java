@@ -9,11 +9,14 @@ package org.opendaylight.controller.yang.parser.impl;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -43,6 +46,28 @@ final class TestUtils {
             testFiles.add(new File(testDir, fileName));
         }
         return parser.parseYangModels(testFiles);
+    }
+
+    public static Set<Module> loadModules(String... pathToYangFile) throws IOException {
+        YangModelParser parser = new YangParserImpl();
+        List<InputStream> input = new ArrayList<InputStream>();
+        for(String path : pathToYangFile) {
+            input.add(TestUtils.class.getResourceAsStream(path));
+        }
+        Set<Module> modules = parser.parseYangModelsFromStreams(input);
+        for(InputStream stream : input) {
+            stream.close();
+        }
+        return modules;
+    }
+
+    public static Module loadModule(String pathToYangFile) throws IOException {
+        YangModelParser parser = new YangParserImpl();
+        InputStream stream = TestUtils.class.getResourceAsStream(pathToYangFile);
+        List<InputStream> input = Collections.singletonList(stream);
+        Set<Module> modules = parser.parseYangModelsFromStreams(input);
+        stream.close();
+        return modules.iterator().next();
     }
 
     public static Module findModule(Set<Module> modules, String moduleName) {

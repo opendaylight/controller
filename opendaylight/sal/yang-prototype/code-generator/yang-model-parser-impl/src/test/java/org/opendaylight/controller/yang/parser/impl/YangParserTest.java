@@ -601,11 +601,7 @@ public class YangParserTest {
         assertNotNull(refineContainer);
         Set<MustDefinition> mustConstraints = refineContainer.getConstraints()
                 .getMustConstraints();
-        assertEquals(1, mustConstraints.size());
-        MustDefinition must = mustConstraints.iterator().next();
-        assertEquals("must-condition", must.toString());
-        assertEquals("An error message test", must.getErrorMessage());
-        assertEquals(("An error app tag test"), must.getErrorAppTag());
+        assertTrue(mustConstraints.isEmpty());
         assertEquals("description of port defined by refine",
                 refineContainer.getDescription());
         assertEquals("port reference added by refine",

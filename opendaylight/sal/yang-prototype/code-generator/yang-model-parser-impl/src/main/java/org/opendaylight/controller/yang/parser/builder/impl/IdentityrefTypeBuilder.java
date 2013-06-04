@@ -78,7 +78,7 @@ public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder
     }
 
     @Override
-    public void setType(final TypeDefinitionBuilder tdb) {
+    public void setTypedef(final TypeDefinitionBuilder tdb) {
         throw new YangParseException(line, "Can not set type to " + NAME);
     }
 

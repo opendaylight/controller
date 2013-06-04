@@ -16,9 +16,11 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
  * Interface for all yang data-node containers [augment, case, container,
  * grouping, list, module, notification].
  */
-public interface ChildNodeBuilder extends Builder {
+public interface DataNodeContainerBuilder extends Builder {
 
     QName getQName();
+
+    Set<DataSchemaNodeBuilder> getChildNodes();
 
     void addChildNode(DataSchemaNodeBuilder childNode);
 
@@ -26,9 +28,9 @@ public interface ChildNodeBuilder extends Builder {
 
     void addUsesNode(UsesNodeBuilder usesBuilder);
 
-    void addTypedef(TypeDefinitionBuilder typedefBuilder);
+    Set<TypeDefinitionBuilder> getTypeDefinitions();
 
-    Set<DataSchemaNodeBuilder> getChildNodes();
+    void addTypedef(TypeDefinitionBuilder typedefBuilder);
 
     SchemaPath getPath();
 

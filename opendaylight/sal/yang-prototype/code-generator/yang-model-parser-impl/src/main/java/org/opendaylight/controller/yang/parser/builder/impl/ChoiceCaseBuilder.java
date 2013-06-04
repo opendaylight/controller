@@ -19,13 +19,13 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
-import org.opendaylight.controller.yang.parser.builder.api.AbstractChildNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractDataNodeContainerBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
+public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder implements
         DataSchemaNodeBuilder {
     private final ChoiceCaseNodeImpl instance;
     private final int line;
@@ -148,6 +148,11 @@ public final class ChoiceCaseBuilder extends AbstractChildNodeBuilder implements
     @Override
     public void addUsesNode(UsesNodeBuilder usesNodeBuilder) {
         addedUsesNodes.add(usesNodeBuilder);
+    }
+
+    @Override
+    public Set<TypeDefinitionBuilder> getTypeDefinitions() {
+        return Collections.emptySet();
     }
 
     @Override

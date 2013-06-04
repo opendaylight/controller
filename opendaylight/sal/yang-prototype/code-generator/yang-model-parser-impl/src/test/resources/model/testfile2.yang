@@ -205,10 +205,6 @@ module types2 {
                     }
                 }
                 refine port {
-                    must "must-condition" {
-                        error-message "An error message test";
-                        error-app-tag "An error app tag test";
-                    }
                     description "description of port defined by refine";
                     reference "port reference added by refine";
                     config false;

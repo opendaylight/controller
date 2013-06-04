@@ -1,0 +1,19 @@
+module test3 {
+    yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+
+    import test0 {
+        prefix "data";
+    }
+    
+    augment "/data:unknown" {
+        when "if:ifType='ds0'";
+        leaf interface-id {
+            type leafref {
+                path "/if:interfaces/if:interface/if:name";
+            }
+        }
+    }
+
+}

@@ -152,6 +152,11 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
     }
 
     @Override
+    public Set<TypeDefinitionBuilder> getTypeDefinitions() {
+        return Collections.emptySet();
+    }
+
+    @Override
     public void addTypedef(TypeDefinitionBuilder type) {
         throw new YangParseException(line,
                 "Augmentation can not contains type definitions");
