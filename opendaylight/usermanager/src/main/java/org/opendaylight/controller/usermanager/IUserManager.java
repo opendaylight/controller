@@ -28,7 +28,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Returns the list of roles associated to the passed user name
-     * 
+     *
      * @param userName
      * @return the role associated to the user name
      */
@@ -37,7 +37,7 @@ public interface IUserManager extends UserDetailsService {
     /**
      * Authenticate user with AAA server and return authentication and
      * authorization info
-     * 
+     *
      * @param username
      *            the username
      * @param password
@@ -49,7 +49,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Add/remove AAA server
-     * 
+     *
      * @param configObject
      *            {@link org.opendaylight.controller.usermanager.internal.ServerConfig}
      *            Server Configuration
@@ -60,7 +60,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Remove AAA server
-     * 
+     *
      * @param configObject
      *            refer to
      *            {@link org.opendaylight.controller.usermanager.internal.ServerConfig}
@@ -72,7 +72,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Add a local user
-     * 
+     *
      * @param configObject
      *            {@link org.opendaylight.controller.usermanager.internal.UserConfig}
      *            User Configuration
@@ -83,7 +83,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Remove a local user
-     * 
+     *
      * @param configObject
      *            {@link org.opendaylight.controller.usermanager.internal.UserConfig}
      *            UserConfig
@@ -94,7 +94,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Remove a local user
-     * 
+     *
      * @param userName
      *            the user name
      * @return {@link org.opendaylight.controller.sal.utils.Status}
@@ -105,7 +105,7 @@ public interface IUserManager extends UserDetailsService {
     /**
      * Add the authorization information for a user that gets authenticated
      * remotely
-     * 
+     *
      * @param AAAconf
      *            {@link org.opendaylight.controller.usermanager.internal.AuthorizationConfig}
      *            Authorization Resources
@@ -117,7 +117,7 @@ public interface IUserManager extends UserDetailsService {
     /**
      * Remove the authorization information for a user that gets authenticated
      * remotely
-     * 
+     *
      * @param AAAconf
      *            {@link org.opendaylight.controller.usermanager.internal.AuthorizationConfig}
      *            Authorization Resource
@@ -128,7 +128,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Return the list of authorization resources
-     * 
+     *
      * @return {@link org.opendaylight.controller.usermanager.internal.AuthorizationConfig}
      *         List of Authorization Resource
      */
@@ -136,14 +136,14 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Returns a list of AAA Providers.
-     * 
+     *
      * @return Set of provider names.
      */
     public Set<String> getAAAProviderNames();
 
     /**
      * Change the current password for a locally configured user
-     * 
+     *
      * @param user
      *            the username
      * @param curPasssword
@@ -158,7 +158,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Return a list of AAA servers currently configured
-     * 
+     *
      * @return {@link org.opendaylight.controller.usermanager.internal.ServerConfig}
      *         List of ServerConfig
      */
@@ -166,7 +166,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Return a list of local users
-     * 
+     *
      * @return {@link org.opendaylight.controller.usermanager.internal.UserConfig}
      *         List of UserConfig
      */
@@ -174,7 +174,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Save the local users to disk
-     * 
+     *
      * @return {@link org.opendaylight.controller.sal.utils.Status}
      *         status of this action
      */
@@ -182,7 +182,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Save the AAA server configurations to disk
-     * 
+     *
      * @return {@link org.opendaylight.controller.sal.utils.Status}
      *         status of this action
      */
@@ -190,7 +190,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Save the Authorization configurations to disk
-     * 
+     *
      * @return {@link org.opendaylight.controller.sal.utils.Status}
      *         status code
      */
@@ -198,7 +198,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Remove user profile when user logs out
-     * 
+     *
      * @param username
      *            the user name
      */
@@ -206,7 +206,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Remove user profile when user times out
-     * 
+     *
      * @param username
      *            the user name
      */
@@ -214,24 +214,24 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Get the list of users currently logged in
-     * 
+     *
      * @return the list of users along with their administrative roles
      */
     public Map<String, List<String>> getUserLoggedIn();
 
     /**
      * Get date and time user was successfully authenticated
-     * 
+     *
      * @param user
      * @return Date in String format
      */
     public String getAccessDate(String user);
 
     /**
-     * Returns the user level for the passed user name. It checks the roles
+     * Returns the highest user level for the passed user name. It checks the roles
      * assigned to this user and checks against the well known Controller user
      * roles to determines the highest user level associated with the user
-     * 
+     *
      * @param userName
      *            the user name
      * @return {@link org.opendaylight.controller.sal.authorization.UserLevel}
@@ -240,8 +240,20 @@ public interface IUserManager extends UserDetailsService {
     public UserLevel getUserLevel(String userName);
 
     /**
+     * Returns the list of user level for the passed user name. It checks the roles
+     * assigned to this user and checks against the well known Controller user
+     * roles to determines the corresponding list of user level associated with the user
+     *
+     * @param userName
+     *            the user name
+     * @return
+     *          the list of user level for this user
+     */
+    public List<UserLevel> getUserLevels(String userName);
+
+    /**
      * Returns the Security Context
-     * 
+     *
      * @returns {@link org.springframework.security.web.context.SecurityContextRepository}
      *          Security Context
      */
@@ -249,7 +261,7 @@ public interface IUserManager extends UserDetailsService {
 
     /**
      * Returns the Session Manager Interface Handler
-     * 
+     *
      * @return {@link org.opendaylight.controller.usermanager.ISessionManager}
      *         session manager interface handler
      */
@@ -257,7 +269,7 @@ public interface IUserManager extends UserDetailsService {
 
     /* non-Javadoc
      * Returns the password for a given user
-     * 
+     *
      * @param username
      *            the user name
      * @return password for the username
