@@ -31,8 +31,9 @@ public class ControllerCustomRealm  extends RealmBase {
                 .getGlobalInstance(IUserManager.class, this);
         if (userManager != null) {
             return userManager.getPassword(username);
-        } else
+        } else {
             throw new RuntimeException("User Manager reference is null");
+        }
     }
 
     @Override
@@ -40,14 +41,14 @@ public class ControllerCustomRealm  extends RealmBase {
         IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);
         if (userManager != null) {
-            final List<String> levels = new ArrayList<String>(); 
-            UserLevel level = userManager.getUserLevel(username);
-            if (level == null) level = UserLevel.NOUSER;
-            levels.add(level.toString());
-            return new GenericPrincipal(username, "", levels);
-        } else
+            List<String> controllerRoles = new ArrayList<String>();
+            for (UserLevel level : userManager.getUserLevels(username)) {
+                controllerRoles.add(level.toString());
+            }
+            return new GenericPrincipal(username, "", controllerRoles);
+        } else {
             throw new RuntimeException("User Manager reference is null");
-
+        }
     }
 
     @Override
@@ -66,8 +67,9 @@ public class ControllerCustomRealm  extends RealmBase {
                 logger.error("Authentication failed for user " + username);
                 return null;
             }
-        } else
+        } else {
             throw new RuntimeException("User Manager reference is null");
+        }
     }
 
 }

@@ -83,11 +83,11 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     private ConcurrentMap<String, UserConfig> localUserConfigList;
     private ConcurrentMap<String, ServerConfig> remoteServerConfigList;
     // local authorization info for remotely authenticated users
-    private ConcurrentMap<String, AuthorizationConfig> authorizationConfList; 
+    private ConcurrentMap<String, AuthorizationConfig> authorizationConfList;
     private ConcurrentMap<String, AuthenticatedUser> activeUsers;
     private ConcurrentMap<String, IAAAProvider> authProviders;
     private ConcurrentMap<Long, String> localUserListSaveConfigEvent,
-            remoteServerSaveConfigEvent, authorizationSaveConfigEvent;
+    remoteServerSaveConfigEvent, authorizationSaveConfigEvent;
     private IClusterGlobalServices clusterGlobalService = null;
     private SecurityContextRepository securityContextRepo = new UserSecurityContextRepository();
     private IContainerAuthorization containerAuthorizationClient;
@@ -115,6 +115,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         return authProviders.get(name);
     }
 
+    @Override
     public Set<String> getAAAProviderNames() {
         return authProviders.keySet();
     }
@@ -272,13 +273,13 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                 } else if (rcResponse.getStatus() == AuthResultEnum.AUTH_REJECT) {
                     logger.info(
                             "Remote Authentication Rejected User: \"{}\", from Server: {}, Reason:{}",
-                            new Object[] {userName, aaaServer.getAddress(),
-                            rcResponse.getStatus().toString()});
+                            new Object[] { userName, aaaServer.getAddress(),
+                                    rcResponse.getStatus().toString() });
                 } else {
                     logger.info(
                             "Remote Authentication Failed for User: \"{}\", from Server: {}, Reason:{}",
-                            new Object[] {userName, aaaServer.getAddress(),
-                            rcResponse.getStatus().toString()});
+                            new Object[] { userName, aaaServer.getAddress(),
+                                    rcResponse.getStatus().toString() });
                 }
             }
         }
@@ -363,7 +364,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         putUserInActiveList(userName, result);
         if (authorized) {
             logger.info("User \"{}\" authorized for the following role(s): {}",
-                        userName, result.getUserRoles());
+                    userName, result.getUserRoles());
         } else {
             logger.info("User \"{}\" Not Authorized for any role ", userName);
         }
@@ -390,6 +391,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         activeUsers.remove(user);
     }
 
+    @Override
     public Status saveLocalUserList() {
         // Publish the save config event to the cluster nodes
         localUserListSaveConfigEvent.put(new Date().getTime(), SAVE);
@@ -402,6 +404,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                 localUserConfigList), usersFileName);
     }
 
+    @Override
     public Status saveAAAServerList() {
         // Publish the save config event to the cluster nodes
         remoteServerSaveConfigEvent.put(new Date().getTime(), SAVE);
@@ -414,6 +417,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                 remoteServerConfigList), serversFileName);
     }
 
+    @Override
     public Status saveAuthorizationList() {
         // Publish the save config event to the cluster nodes
         authorizationSaveConfigEvent.put(new Date().getTime(), SAVE);
@@ -628,7 +632,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             return status;
         }
         // Trigger cluster update
-        localUserConfigList.put(user, targetConfigEntry); 
+        localUserConfigList.put(user, targetConfigEntry);
 
         logger.info("Password changed for User \"{}\"", user);
 
@@ -703,7 +707,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         String userName = ci.nextArgument();
         String password = ci.nextArgument();
         String role = ci.nextArgument();
-        
+
         List<String> roles = new ArrayList<String>();
         while (role != null) {
             if (!role.trim().isEmpty()) {
@@ -734,7 +738,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         if (target == null) {
             ci.println("User not found");
             return;
-        }       
+        }
         ci.println(this.removeLocalUser(target));
     }
 
@@ -815,7 +819,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init() {
     }
@@ -824,7 +828,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
     }
@@ -832,7 +836,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     void start() {
         authProviders = new ConcurrentHashMap<String, IAAAProvider>();
@@ -855,7 +859,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     void stop() {
     }
@@ -919,6 +923,58 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         return UserLevel.NOUSER;
     }
 
+
+    @Override
+    public List<UserLevel> getUserLevels(String username) {
+        // Returns the controller well-know user levels for the passed user
+        List<String> rolesNames = null;
+        List<UserLevel> levels = new ArrayList<UserLevel>();
+
+        if (activeUsers.containsKey(username)) {
+            List<String> roles = activeUsers.get(username).getUserRoles();
+            rolesNames = (roles == null || roles.isEmpty()) ? null : roles;
+        } else if (localUserConfigList.containsKey(username)) {
+            UserConfig config = localUserConfigList.get(username);
+            rolesNames = (config == null) ? null : config.getRoles();
+        }
+
+        if (rolesNames == null) {
+            return levels;
+        }
+
+        // Check against the well known controller roles first
+        if (rolesNames.contains(UserLevel.SYSTEMADMIN.toString())) {
+            levels.add(UserLevel.SYSTEMADMIN);
+        }
+        if (rolesNames.contains(UserLevel.NETWORKADMIN.toString())) {
+            levels.add(UserLevel.NETWORKADMIN);
+        }
+        if (rolesNames.contains(UserLevel.NETWORKOPERATOR.toString())) {
+            levels.add(UserLevel.NETWORKOPERATOR);
+        }
+        // Check if container user now
+        if (containerAuthorizationClient != null) {
+            for (String roleName : rolesNames) {
+                if (containerAuthorizationClient.isApplicationRole(roleName)) {
+                    levels.add(UserLevel.CONTAINERUSER);
+                    break;
+                }
+            }
+        }
+        // Finally check if application user
+        if (applicationAuthorizationClients != null) {
+            for (String roleName : rolesNames) {
+                for (IResourceAuthorization client : this.applicationAuthorizationClients) {
+                    if (client.isApplicationRole(roleName)) {
+                        levels.add(UserLevel.APPUSER);
+                        break;
+                    }
+                }
+            }
+        }
+        return levels;
+    }
+
     @Override
     public Status saveConfiguration() {
         boolean success = true;
@@ -958,8 +1014,9 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                     .getPassword(), enabled, accountNonExpired,
                     credentialsNonExpired, accountNonLocked,
                     user.getGrantedAuthorities(getUserLevel(username)));
-        } else
+        } else {
             throw new UsernameNotFoundException("User not found " + username);
+        }
     }
 
     @Override
@@ -1011,9 +1068,10 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                             .getName())));
             return authentication;
 
-        } else
+        } else {
             throw new BadCredentialsException(
                     "Username or credentials did not match");
+        }
 
     }
 
@@ -1057,6 +1115,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         this.sessionMgr = sessionMgr;
     }
 
+    @Override
     public String getPassword(String username) {
         return localUserConfigList.get(username).getPassword();
     }
