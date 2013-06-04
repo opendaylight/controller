@@ -136,7 +136,7 @@ public class TopologyManagerImpl implements ITopologyManager,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init(Component c) {
         String containerName = null;
@@ -204,7 +204,7 @@ public class TopologyManagerImpl implements ITopologyManager,
     /**
      * Function called after the topology manager has registered the service in
      * OSGi service registry.
-     * 
+     *
      */
     void started() {
         // SollicitRefresh MUST be called here else if called at init
@@ -217,7 +217,7 @@ public class TopologyManagerImpl implements ITopologyManager,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         if (this.clusterContainerService == null) {
@@ -257,7 +257,7 @@ public class TopologyManagerImpl implements ITopologyManager,
         // Publish the save config event to the cluster nodes
         /**
          * Get the CLUSTERING SERVICES WORKING BEFORE TRYING THIS
-         * 
+         *
          * configSaveEvent.put(new Date().getTime(), SAVE);
          */
         return saveConfigInternal();
@@ -327,7 +327,7 @@ public class TopologyManagerImpl implements ITopologyManager,
 
     /**
      * This method returns true if the edge is an ISL link.
-     * 
+     *
      * @param e
      *            The edge
      * @return true if it is an ISL link
@@ -338,7 +338,7 @@ public class TopologyManagerImpl implements ITopologyManager,
 
     /**
      * This method returns true if the edge is a production link.
-     * 
+     *
      * @param e
      *            The edge
      * @return true if it is a production link
@@ -353,7 +353,7 @@ public class TopologyManagerImpl implements ITopologyManager,
     /**
      * The Map returned is a copy of the current topology hence if the topology
      * changes the copy doesn't
-     * 
+     *
      * @return A Map representing the current topology expressed as edges of the
      *         network
      */
@@ -699,13 +699,16 @@ public class TopologyManagerImpl implements ITopologyManager,
 
         Edge linkTuple = getLinkTuple(link);
         if (linkTuple != null) {
-            try {
-                linkTuple = getReverseLinkTuple(link);
+            if (!isProductionLink(linkTuple)) {
+                edgeUpdate(linkTuple, UpdateType.ADDED, new HashSet<Property>());
+            }
+
+            linkTuple = getReverseLinkTuple(link);
+            if (linkTuple != null) {
                 link.setStatus(TopologyUserLinkConfig.STATUS.SUCCESS);
-            } catch (Exception e) {
-                return new Status(StatusCode.INTERNALERROR,
-                        "Exception while adding custom link : "
-                                + e.getMessage());
+                if (!isProductionLink(linkTuple)) {
+                    edgeUpdate(linkTuple, UpdateType.ADDED, new HashSet<Property>());
+                }
             }
         }
         return new Status(StatusCode.SUCCESS, null);
@@ -723,20 +726,13 @@ public class TopologyManagerImpl implements ITopologyManager,
         Edge linkTuple = getLinkTuple(link);
         userLinks.remove(linkName);
         if (linkTuple != null) {
-            try {
-                // oneTopology.deleteUserConfiguredLink(linkTuple);
-            } catch (Exception e) {
-                log.warn(
-                        "Harmless : Exception while Deleting User Configured link {} {}",
-                        link, e.toString());
+            if (!isProductionLink(linkTuple)) {
+                edgeUpdate(linkTuple, UpdateType.REMOVED, null);
             }
+
             linkTuple = getReverseLinkTuple(link);
-            try {
-                // oneTopology.deleteUserConfiguredLink(linkTuple);
-            } catch (Exception e) {
-                log.warn(
-                        "Harmless : Exception while Deleting User Configured Reverse link {} {}",
-                        link, e.toString());
+            if ((linkTuple != null) && !isProductionLink(linkTuple)) {
+                edgeUpdate(linkTuple, UpdateType.REMOVED, null);
             }
         }
         return new Status(StatusCode.SUCCESS, null);
@@ -753,14 +749,14 @@ public class TopologyManagerImpl implements ITopologyManager,
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---Topology Manager---\n");
-        help.append("\t addTopo name <NodeIDType> <src-sw-id> <NodeConnectorIDType> <port-number> <NodeIDType> <dst-sw-id> <NodeConnectorIDType> <port-number>\n");
-        help.append("\t delTopo name\n");
-        help.append("\t printTopo\n");
+        help.append("\t addUserLink <name> <node connector string> <node connector string>\n");
+        help.append("\t deleteUserLink <name>\n");
+        help.append("\t printUserLink\n");
         help.append("\t printNodeEdges\n");
         return help.toString();
     }
 
-    public void _printTopo(CommandInterpreter ci) {
+    public void _printUserLink(CommandInterpreter ci) {
         for (String name : this.userLinks.keySet()) {
             TopologyUserLinkConfig linkConfig = userLinks.get(name);
             ci.println("Name : " + name);
@@ -770,67 +766,52 @@ public class TopologyManagerImpl implements ITopologyManager,
         }
     }
 
-    public void _addTopo(CommandInterpreter ci) {
+    public void _addUserLink(CommandInterpreter ci) {
         String name = ci.nextArgument();
         if ((name == null)) {
             ci.println("Please enter a valid Name");
             return;
         }
 
-        String srcNodeIDType = ci.nextArgument();
-        if (srcNodeIDType == null) {
-            ci.println("Null source node ID Type. Example: OF or PR");
+        String ncStr1 = ci.nextArgument();
+        if (ncStr1 == null) {
+            ci.println("Please enter two node connector strings");
+            return;
+        }
+        String ncStr2 = ci.nextArgument();
+        if (ncStr2 == null) {
+            ci.println("Please enter second node connector string");
             return;
         }
 
-        String dpid = ci.nextArgument();
-        if (dpid == null) {
-            ci.println("Null source node id");
+        NodeConnector nc1 = NodeConnector.fromString(ncStr1);
+        if (nc1 == null) {
+            ci.println("Invalid input node connector 1 string: " + ncStr1);
+            return;
+        }
+        NodeConnector nc2 = NodeConnector.fromString(ncStr2);
+        if (nc2 == null) {
+            ci.println("Invalid input node connector 2 string: " + ncStr2);
             return;
         }
 
-        String srcNodeConnectorIDType = ci.nextArgument();
-        if (srcNodeConnectorIDType == null) {
-            ci.println("Null source node connector ID Type. Example: OF or PR");
-            return;
-        }
+        String nodeType1 = nc1.getNode().getType().toString();
+        String nid1 = nc1.getNode().getID().toString();
+        String ncType1 = nc1.getType().toString();
+        String ncid1 = nc1.getID().toString();
 
-        String port = ci.nextArgument();
-        if (port == null) {
-            ci.println("Null source port number");
-            return;
-        }
+        String nodeType2 = nc2.getNode().getType().toString();
+        String nid2 = nc2.getNode().getID().toString();
+        String ncType2 = nc2.getType().toString();
+        String ncid2 = nc2.getID().toString();
 
-        String dstNodeIDType = ci.nextArgument();
-        if (dstNodeIDType == null) {
-            ci.println("Null destination node ID Type. Example: OF or PR");
-            return;
-        }
-
-        String ddpid = ci.nextArgument();
-        if (ddpid == null) {
-            ci.println("Null destination node ID");
-            return;
-        }
-
-        String dstNodeConnectorIDType = ci.nextArgument();
-        if (dstNodeConnectorIDType == null) {
-            ci.println("Null destination node connector ID Type. Example: OF or PR");
-            return;
-        }
-
-        String dport = ci.nextArgument();
-        if (dport == null) {
-            ci.println("Null destination port number");
-            return;
-        }
         TopologyUserLinkConfig config = new TopologyUserLinkConfig(name,
-                srcNodeIDType, dpid, srcNodeConnectorIDType, port,
-                dstNodeIDType, ddpid, dstNodeConnectorIDType, dport);
+                nodeType1, nid1, ncType1, ncid1, nodeType2, nid2, ncType2,
+                ncid2);
         ci.println(this.addUserLink(config));
     }
 
-    public void _delTopo(CommandInterpreter ci) {
+    public void _deleteUserLink(CommandInterpreter ci) {
         String name = ci.nextArgument();
         if ((name == null)) {
             ci.println("Please enter a valid Name");
