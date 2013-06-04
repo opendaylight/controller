@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -7,14 +6,17 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.concepts.tranform;
+package org.opendaylight.controller.concepts.transform;
 
-public interface Acceptor<I> {
+import java.util.Collection;
+/**
+ * 
+ * @author Tony Tkacik
+ *
+ * @param <I>
+ * @param <P>
+ */
+public interface AggregateTransformer<I,P> extends Transformer<I,P> {
 
-    /**
-     * 
-     * @param input
-     * @return true if input is accepted.
-     */
-    boolean isAcceptable(I input);
+    Collection<P> transformAll(Collection<? extends I> inputs);
 }
