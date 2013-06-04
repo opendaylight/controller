@@ -279,6 +279,19 @@
           <configFile>${project.parent.relativePath}/sun_coding_style.xml</configFile>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.14.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -330,6 +343,19 @@
                   <action>
                     <ignore/>
                   </action>
+                </pluginExecution>
+                <pluginExecution>
+                	<pluginExecutionFilter>
+                		<groupId>org.ops4j.pax.exam</groupId>
+                		<artifactId>maven-paxexam-plugin</artifactId>
+                		<versionRange>[1.2.4,)</versionRange>
+                		<goals>
+                			<goal>generate-depends-file</goal>
+                		</goals>
+                	</pluginExecutionFilter>
+                	<action>
+                		<ignore></ignore>
+                	</action>
                 </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>

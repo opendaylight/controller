@@ -43,9 +43,9 @@ import org.opendaylight.controller.usermanager.IUserManager;
 
 
 @RunWith(PaxExam.class)
-public class NorthboundIntegrationTest {
+public class NorthboundIT {
     private Logger log = LoggerFactory
-            .getLogger(NorthboundIntegrationTest.class);
+            .getLogger(NorthboundIT.class);
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
