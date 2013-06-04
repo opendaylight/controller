@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -8,7 +7,6 @@
  */
 
 package org.opendaylight.controller.hosttracker.internal;
-
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -60,19 +58,19 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
-public class HostTrackerIntegrationTest {
+public class HostTrackerIT {
     private Logger log = LoggerFactory
-            .getLogger(HostTrackerIntegrationTest.class);
+            .getLogger(HostTrackerIT.class);
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
-    
+
     private IfIptoHost hosttracker = null;
     private ISwitchManagerAware switchManagerAware = null;
     private IInventoryListener invtoryListener = null;
     private IfHostListener hostListener = null;
     private ITopologyManagerAware topologyManagerAware = null;
-    
+
     // Configure the OSGi container
     @Configuration
     public Option[] config() {
@@ -101,55 +99,58 @@ public class HostTrackerIntegrationTest {
                 mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell",
                         "0.8.0.v201110170705"),
                 // List logger bundles
-                mavenBundle("org.slf4j", "slf4j-api", "1.7.2"),
-                mavenBundle("org.slf4j", "log4j-over-slf4j", "1.7.2"),
-                mavenBundle("ch.qos.logback", "logback-core", "1.0.9"),
-                mavenBundle("ch.qos.logback", "logback-classic", "1.0.9"),
-                
-                // List all the bundles on which the test case depends
-                mavenBundle("org.opendaylight.controller", "sal",
-                        "0.5.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "sal.implementation",
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
+                mavenBundle("org.slf4j", "log4j-over-slf4j")
+                        .versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-core")
+                        .versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-classic")
+                        .versionAsInProject(),
 
-               // needed by statisticsmanager
-               mavenBundle("org.opendaylight.controller", "containermanager",
-                        "0.4.0-SNAPSHOT"),
-               mavenBundle("org.opendaylight.controller", "containermanager.implementation",
-                       "0.4.0-SNAPSHOT"),
-               
-               mavenBundle("org.opendaylight.controller",
-                        "clustering.services", "0.4.0-SNAPSHOT"),
-               mavenBundle("org.opendaylight.controller",
-                        "clustering.stub", "0.4.0-SNAPSHOT"),
+                // List all the bundles on which the test case depends
+                mavenBundle("org.opendaylight.controller", "sal")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal.implementation")
+                        .versionAsInProject(),
+
+                // needed by statisticsmanager
+                mavenBundle("org.opendaylight.controller", "containermanager")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "containermanager.implementation").versionAsInProject(),
+
+                mavenBundle("org.opendaylight.controller",
+                        "clustering.services").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "clustering.stub")
+                        .versionAsInProject(),
 
                 // needed by forwardingrulesmanager
-                mavenBundle("org.opendaylight.controller", "switchmanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "switchmanager.implementation",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration",
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "switchmanager")
+                        .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "configuration.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "hosttracker",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "hosttracker.implementation",
-                        "0.4.0-SNAPSHOT"),
+                        "switchmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "configuration.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "hosttracker")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "hosttracker.implementation").versionAsInProject(),
 
                 // needed by hosttracker
-                mavenBundle("org.opendaylight.controller", "topologymanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "arphandler",
-                        "0.4.0-SNAPSHOT"),
-
+                mavenBundle("org.opendaylight.controller", "topologymanager")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "arphandler")
+                        .versionAsInProject(),
 
                 mavenBundle("org.jboss.spec.javax.transaction",
-                        "jboss-transaction-api_1.1_spec", "1.0.1.Final"),
-                mavenBundle("org.apache.commons", "commons-lang3", "3.1"),
+                        "jboss-transaction-api_1.1_spec").versionAsInProject(),
+                mavenBundle("org.apache.commons", "commons-lang3")
+                        .versionAsInProject(),
                 mavenBundle("org.apache.felix",
-                        "org.apache.felix.dependencymanager", "3.1.0"),
-                junitBundles());
+                        "org.apache.felix.dependencymanager")
+                        .versionAsInProject(), junitBundles());
     }
 
     private String stateToString(int state) {
@@ -188,52 +189,54 @@ public class HostTrackerIntegrationTest {
         // Assert if true, if false we are good to go!
         assertFalse(debugit);
 
-         // Now lets create a hosttracker for testing purpose
-         ServiceReference s = bc
-             .getServiceReference(IfIptoHost.class.getName());
-         if (s != null) {
-                 this.hosttracker = (IfIptoHost)bc.getService(s);
-                 this.switchManagerAware = (ISwitchManagerAware) this.hosttracker;
-                 this.invtoryListener = (IInventoryListener) this.hosttracker;
-                 this.hostListener = (IfHostListener) this.hosttracker;
-                 this.topologyManagerAware = (ITopologyManagerAware) this.hosttracker;
-         }
+        // Now lets create a hosttracker for testing purpose
+        ServiceReference s = bc.getServiceReference(IfIptoHost.class.getName());
+        if (s != null) {
+            this.hosttracker = (IfIptoHost) bc.getService(s);
+            this.switchManagerAware = (ISwitchManagerAware) this.hosttracker;
+            this.invtoryListener = (IInventoryListener) this.hosttracker;
+            this.hostListener = (IfHostListener) this.hosttracker;
+            this.topologyManagerAware = (ITopologyManagerAware) this.hosttracker;
+        }
 
-         // If StatisticsManager is null, cannot run tests.
-         assertNotNull(this.hosttracker);
+        // If StatisticsManager is null, cannot run tests.
+        assertNotNull(this.hosttracker);
     }
-    
-    
+
     @Test
     public void testStaticHost() throws UnknownHostException {
         String ip;
-        
+
         assertNotNull(this.hosttracker);
-        
+
         // create one node and two node connectors
         Node node1 = NodeCreator.createOFNode(1L);
-        NodeConnector nc1_1 = NodeConnectorCreator.createOFNodeConnector((short) 1, node1);
-        NodeConnector nc1_2 = NodeConnectorCreator.createOFNodeConnector((short) 2, node1);
-        
-        // test addStaticHost(), store into inactive host DB 
-        Status st = this.hosttracker.addStaticHost("192.168.0.8", "11:22:33:44:55:66",
-                nc1_1, "0");
+        NodeConnector nc1_1 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 1, node1);
+        NodeConnector nc1_2 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 2, node1);
+
+        // test addStaticHost(), store into inactive host DB
+        Status st = this.hosttracker.addStaticHost("192.168.0.8",
+                "11:22:33:44:55:66", nc1_1, "0");
         Assert.assertTrue(st.isSuccess());
-        st = this.hosttracker.addStaticHost("192.168.0.13", "11:22:33:44:55:77",
-                nc1_2, "0");
+        st = this.hosttracker.addStaticHost("192.168.0.13",
+                "11:22:33:44:55:77", nc1_2, "0");
         Assert.assertTrue(st.isSuccess());
-        
+
         // check inactive DB
-        Iterator<HostNodeConnector> hnci = this.hosttracker.getInactiveStaticHosts().iterator();
+        Iterator<HostNodeConnector> hnci = this.hosttracker
+                .getInactiveStaticHosts().iterator();
         while (hnci.hasNext()) {
             ip = hnci.next().getNetworkAddressAsString();
-            Assert.assertTrue(ip.equals("192.168.0.8") || ip.equals("192.168.0.13"));
+            Assert.assertTrue(ip.equals("192.168.0.8")
+                    || ip.equals("192.168.0.13"));
         }
-        
+
         // check active host DB
         hnci = this.hosttracker.getActiveStaticHosts().iterator();
         Assert.assertFalse(hnci.hasNext());
-        
+
         // test removeStaticHost()
         st = this.hosttracker.removeStaticHost("192.168.0.8");
         Assert.assertTrue(st.isSuccess());
@@ -243,45 +246,44 @@ public class HostTrackerIntegrationTest {
             ip = hnci.next().getNetworkAddressAsString();
             Assert.assertTrue(ip.equals("192.168.0.13"));
         }
-    }               
-            
+    }
 
-    
     @Test
     public void testNotifyNodeConnector() throws UnknownHostException {
         String ip;
-        
+
         assertNotNull(this.invtoryListener);
 
         // create one node and two node connectors
         Node node1 = NodeCreator.createOFNode(1L);
-        NodeConnector nc1_1 = NodeConnectorCreator.createOFNodeConnector((short) 1, node1);
-        NodeConnector nc1_2 = NodeConnectorCreator.createOFNodeConnector((short) 2, node1);
-        
+        NodeConnector nc1_1 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 1, node1);
+        NodeConnector nc1_2 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 2, node1);
+
         // test addStaticHost(), put into inactive host DB if not verifiable
-        Status st = this.hosttracker.addStaticHost("192.168.0.8", "11:22:33:44:55:66",
-                nc1_1, "0");
-        st = this.hosttracker.addStaticHost("192.168.0.13", "11:22:33:44:55:77",
-                nc1_2, "0");
-        
-        this.invtoryListener.notifyNodeConnector(nc1_1,
-                UpdateType.ADDED, null);
+        Status st = this.hosttracker.addStaticHost("192.168.0.8",
+                "11:22:33:44:55:66", nc1_1, "0");
+        st = this.hosttracker.addStaticHost("192.168.0.13",
+                "11:22:33:44:55:77", nc1_2, "0");
+
+        this.invtoryListener.notifyNodeConnector(nc1_1, UpdateType.ADDED, null);
 
         // check all host list
-        Iterator<HostNodeConnector> hnci = this.hosttracker
-                .getAllHosts().iterator();
+        Iterator<HostNodeConnector> hnci = this.hosttracker.getAllHosts()
+                .iterator();
         while (hnci.hasNext()) {
             ip = hnci.next().getNetworkAddressAsString();
             Assert.assertTrue(ip.equals("192.168.0.8"));
         }
-        
+
         // check active host DB
         hnci = this.hosttracker.getActiveStaticHosts().iterator();
         while (hnci.hasNext()) {
             ip = hnci.next().getNetworkAddressAsString();
             Assert.assertTrue(ip.equals("192.168.0.8"));
         }
-        
+
         // check inactive host DB
         hnci = this.hosttracker.getInactiveStaticHosts().iterator();
         while (hnci.hasNext()) {
@@ -289,35 +291,34 @@ public class HostTrackerIntegrationTest {
             Assert.assertTrue(ip.equals("192.168.0.13"));
         }
     }
-    
-    
-    
+
     @Test
     public void testHostFind() throws UnknownHostException {
-        
+
         assertNotNull(this.invtoryListener);
 
         // create one node and two node connectors
         Node node1 = NodeCreator.createOFNode(1L);
-        NodeConnector nc1_1 = NodeConnectorCreator.createOFNodeConnector((short) 1, node1);
-        NodeConnector nc1_2 = NodeConnectorCreator.createOFNodeConnector((short) 2, node1);
-        
+        NodeConnector nc1_1 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 1, node1);
+        NodeConnector nc1_2 = NodeConnectorCreator.createOFNodeConnector(
+                (short) 2, node1);
+
         // test addStaticHost(), put into inactive host DB if not verifiable
-        Status st = this.hosttracker.addStaticHost(
-                "192.168.0.8", "11:22:33:44:55:66", nc1_1, "0");
-        st = this.hosttracker.addStaticHost(
-                "192.168.0.13", "11:22:33:44:55:77", nc1_2, "0");
-        
-        HostNodeConnector hnc_1 = this.hosttracker
-                .hostFind(InetAddress.getByName("192.168.0.8"));
+        Status st = this.hosttracker.addStaticHost("192.168.0.8",
+                "11:22:33:44:55:66", nc1_1, "0");
+        st = this.hosttracker.addStaticHost("192.168.0.13",
+                "11:22:33:44:55:77", nc1_2, "0");
+
+        HostNodeConnector hnc_1 = this.hosttracker.hostFind(InetAddress
+                .getByName("192.168.0.8"));
         assertNull(hnc_1);
-        
-        this.invtoryListener.notifyNodeConnector(nc1_1,
-                UpdateType.ADDED, null);
+
+        this.invtoryListener.notifyNodeConnector(nc1_1, UpdateType.ADDED, null);
 
         hnc_1 = this.hosttracker.hostFind(InetAddress.getByName("192.168.0.8"));
         assertNotNull(hnc_1);
-        
+
     }
-    
+
 }

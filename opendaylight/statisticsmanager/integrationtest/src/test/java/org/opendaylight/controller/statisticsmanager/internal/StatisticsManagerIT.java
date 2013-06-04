@@ -40,9 +40,9 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.util.PathUtils;
 
 @RunWith(PaxExam.class)
-public class StatisticsManagerIntegrationTest {
+public class StatisticsManagerIT {
     private Logger log = LoggerFactory
-            .getLogger(StatisticsManagerIntegrationTest.class);
+            .getLogger(StatisticsManagerIT.class);
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
@@ -77,55 +77,60 @@ public class StatisticsManagerIntegrationTest {
                 mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell",
                         "0.8.0.v201110170705"),
                 // List logger bundles
-                mavenBundle("org.slf4j", "slf4j-api", "1.7.2"),
-                mavenBundle("org.slf4j", "log4j-over-slf4j", "1.7.2"),
-                mavenBundle("ch.qos.logback", "logback-core", "1.0.9"),
-                mavenBundle("ch.qos.logback", "logback-classic", "1.0.9"),
+                mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
+                mavenBundle("org.slf4j", "log4j-over-slf4j")
+                        .versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-core")
+                        .versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-classic")
+                        .versionAsInProject(),
                 // List all the bundles on which the test case depends
-                mavenBundle("org.opendaylight.controller", "sal",
-                        "0.5.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "sal")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal.implementation")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager")
+                        .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "sal.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "statisticsmanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "statisticsmanager.implementation",
-                                "0.4.0-SNAPSHOT"),
+                        "statisticsmanager.implementation")
+                        .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "protocol_plugins.stub", "0.4.0-SNAPSHOT"),
+                        "protocol_plugins.stub").versionAsInProject(),
                 // needed by statisticsmanager
-                mavenBundle("org.opendaylight.controller", "containermanager",
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "containermanager")
+                        .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "containermanager.implementation", "0.4.0-SNAPSHOT"),
+                        "containermanager.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "forwardingrulesmanager", "0.4.0-SNAPSHOT"),
+                        "forwardingrulesmanager").versionAsInProject(),
 
                 mavenBundle("org.opendaylight.controller",
-                        "clustering.services", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "clustering.stub", "0.4.0-SNAPSHOT"),
+                        "clustering.services").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "clustering.stub")
+                        .versionAsInProject(),
 
                 // needed by forwardingrulesmanager
-                mavenBundle("org.opendaylight.controller", "switchmanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration",
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "switchmanager")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration")
+                        .versionAsInProject(),
 
                 mavenBundle("org.opendaylight.controller",
-                        "configuration.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "hosttracker",
-                        "0.4.0-SNAPSHOT"),
+                        "configuration.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "hosttracker")
+                        .versionAsInProject(),
 
                 // needed by hosttracker
-                mavenBundle("org.opendaylight.controller", "topologymanager",
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "topologymanager")
+                        .versionAsInProject(),
 
                 mavenBundle("org.jboss.spec.javax.transaction",
-                        "jboss-transaction-api_1.1_spec", "1.0.1.Final"),
-                mavenBundle("org.apache.commons", "commons-lang3", "3.1"),
+                        "jboss-transaction-api_1.1_spec").versionAsInProject(),
+                mavenBundle("org.apache.commons", "commons-lang3")
+                        .versionAsInProject(),
                 mavenBundle("org.apache.felix",
-                        "org.apache.felix.dependencymanager", "3.1.0"),
-                junitBundles());
+                        "org.apache.felix.dependencymanager")
+                        .versionAsInProject(), junitBundles());
     }
 
     private String stateToString(int state) {
@@ -188,17 +193,19 @@ public class StatisticsManagerIntegrationTest {
 
             Match match = new Match();
             try {
-                match.setField(MatchType.NW_DST, InetAddress.getByName("1.1.1.1"));
+                match.setField(MatchType.NW_DST,
+                        InetAddress.getByName("1.1.1.1"));
             } catch (UnknownHostException e) {
                 fail("Couldn't create match");
             }
             Assert.assertTrue(match.equals(fn.getFlow().getMatch()));
-            Assert.assertTrue(fn.getFlow().getActions().get(0).equals(new Drop()));
+            Assert.assertTrue(fn.getFlow().getActions().get(0)
+                    .equals(new Drop()));
         } catch (ConstructionException e) {
             // Got an unexpected exception
             Assert.assertTrue(false);
         }
-       
+
     }
 
     @Test
@@ -217,14 +224,14 @@ public class StatisticsManagerIntegrationTest {
         actions.add(action);
         flow.setActions(actions);
 
-        try{
+        try {
             Node node = new Node("STUB", 0xCAFE);
             FlowEntry fe = new FlowEntry("g1", "f1", flow, node);
             List<FlowEntry> list = new ArrayList<FlowEntry>();
             list.add(fe);
             FlowEntry fe2 = new FlowEntry("g1", "f2", flow, node);
             list.add(fe2);
-    
+
             Map<Node, List<FlowOnNode>> result = this.manager
                     .getFlowStatisticsForFlowList(null);
             Assert.assertTrue(result.isEmpty());
@@ -237,7 +244,7 @@ public class StatisticsManagerIntegrationTest {
             Assert.assertTrue(fn.getTableId() == (byte) 0x1);
             Assert.assertTrue(fn.getPacketCount() == 200);
             Assert.assertTrue(fn.getFlow().equals(flow));
-        }catch(ConstructionException e){
+        } catch (ConstructionException e) {
             Assert.assertTrue(false);
         }
 
@@ -245,9 +252,9 @@ public class StatisticsManagerIntegrationTest {
 
     @Test
     public void testGetFlowsNumber() {
-        try{
+        try {
             Node node = new Node("STUB", 0xCAFE);
-            Assert.assertTrue(this.manager.getFlowsNumber(node) == 21);
+            Assert.assertTrue(this.manager.getFlowsNumber(node) == 1);
         }catch(ConstructionException e){
             Assert.assertTrue(false);
         }
@@ -255,7 +262,7 @@ public class StatisticsManagerIntegrationTest {
 
     @Test
     public void testGetNodeDescription() {
-        try{
+        try {
             Node node = new Node("STUB", 0xCAFE);
             NodeDescription desc = this.manager.getNodeDescription(node);
             Assert.assertTrue(desc.getDescription().equals(
@@ -264,7 +271,7 @@ public class StatisticsManagerIntegrationTest {
             Assert.assertTrue(desc.getSoftware().equals("stub software"));
             Assert.assertTrue(desc.getSerialNumber().equals("123"));
             Assert.assertTrue(desc.getManufacturer().equals("opendaylight"));
-        }catch(ConstructionException e){
+        } catch (ConstructionException e) {
             Assert.assertTrue(false);
         }
 
@@ -272,7 +279,7 @@ public class StatisticsManagerIntegrationTest {
 
     @Test
     public void testGetNodeConnectorStatistics() {
-        try{
+        try {
             Node node = new Node("STUB", 0xCAFE);
             List<NodeConnectorStatistics> stats = this.manager
                     .getNodeConnectorStatistics(node);
@@ -289,7 +296,7 @@ public class StatisticsManagerIntegrationTest {
             Assert.assertTrue(ns.getTransmitDropCount() == 50);
             Assert.assertTrue(ns.getTransmitErrorCount() == 10);
             Assert.assertTrue(ns.getTransmitPacketCount() == 500);
-    
+
             NodeConnector nc = ns.getNodeConnector();
             NodeConnectorStatistics ns2 = this.manager
                     .getNodeConnectorStatistics(nc);
@@ -305,8 +312,8 @@ public class StatisticsManagerIntegrationTest {
             Assert.assertTrue(ns2.getTransmitDropCount() == 50);
             Assert.assertTrue(ns2.getTransmitErrorCount() == 10);
             Assert.assertTrue(ns2.getTransmitPacketCount() == 500);
-        
-        }catch(ConstructionException e){
+
+        } catch (ConstructionException e) {
             Assert.assertTrue(false);
         }
     }
