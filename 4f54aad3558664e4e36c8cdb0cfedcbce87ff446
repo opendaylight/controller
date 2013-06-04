@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///Us\u003d",
+        "filename": "opendaylight/topologymanager/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-04T11:14:08Z",
+      "side": 1,
+      "message": "This method name is misleading. Consider a different name for this method ?\nThis is NOT a comment on this current change, but a general placeholder comment to be addressed later.",
+      "revId": "4f54aad3558664e4e36c8cdb0cfedcbce87ff446",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Uo\u003d",
+        "filename": "opendaylight/topologymanager/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 798,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-04T11:14:08Z",
+      "side": 1,
+      "message": "TopologyUserlinkConfig should be modified to to carry just the NodeConnectorString rather than its individual components.\n\nThis is not a comment on this current change, but a general placeholder comment to be addressed later.",
+      "revId": "4f54aad3558664e4e36c8cdb0cfedcbce87ff446",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
