@@ -26,11 +26,13 @@
             javax.transaction,
             org.eclipse.osgi.framework.console,
             ch.qos.logback.classic,
-            org.opendaylight.controller.clustering.services
+            org.opendaylight.controller.clustering.services,
+            org.opendaylight.controller.sal.core,
+            org.apache.felix.dm
           </Import-Package>
-          <Service-Component>
-            OSGI-INF/component.xml
-          </Service-Component>
+          <Bundle-Activator>
+            org.opendaylight.controller.clustering.test.internal.Activator
+          </Bundle-Activator>
         </instructions>
         <manifestLocation>${project.basedir}/META-INF</manifestLocation>
       </configuration>
@@ -41,6 +43,11 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
