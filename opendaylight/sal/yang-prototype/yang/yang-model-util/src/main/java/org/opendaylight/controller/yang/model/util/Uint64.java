@@ -8,11 +8,9 @@
 package org.opendaylight.controller.yang.model.util;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
-import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
 
 /**
@@ -23,35 +21,14 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  *
  */
 public final class Uint64 extends AbstractUnsignedInteger {
-
     private static final QName name = BaseTypes.constructQName("uint64");
-
-    private BigInteger defaultValue = null;
+    private final BigInteger defaultValue = null;
     private static final String description = "uint64 represents integer values between 0 and 18446744073709551615, inclusively.";
     private final UnsignedIntegerTypeDefinition baseType;
 
-    private Uint64() {
-        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = this;
-    }
-
     public Uint64(final SchemaPath path) {
         super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = new Uint64();
-    }
-
-    public Uint64(final SchemaPath path, final BigInteger defaultValue) {
-        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = new Uint64();
-        this.defaultValue = defaultValue;
-    }
-
-    public Uint64(final SchemaPath path,
-            final List<RangeConstraint> rangeStatements, final String units,
-            final BigInteger defaultValue) {
-        super(path, name, description, rangeStatements, units);
-        this.baseType = new Uint64();
-        this.defaultValue = defaultValue;
+        this.baseType = this;
     }
 
     /*

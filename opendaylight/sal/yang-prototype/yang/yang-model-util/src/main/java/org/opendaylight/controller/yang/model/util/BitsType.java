@@ -22,7 +22,6 @@ import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
  * @see BitsTypeDefinition
  */
 public final class BitsType implements BitsTypeDefinition {
-
     private final QName name = BaseTypes.constructQName("bits");
     private final SchemaPath path;
     private final String description = "The bits built-in type represents a bit set.  "
@@ -32,24 +31,17 @@ public final class BitsType implements BitsTypeDefinition {
     private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.7";
     private final BitsTypeDefinition baseType;
     private final List<Bit> bits;
-    private String units = "";
+    private final String units = "";
 
     /**
      * Default constructor. <br>
      * Instantiates Bits type as empty bits list.
      */
-    private BitsType() {
-        super();
-        this.bits = Collections.emptyList();
-        this.path = BaseTypes.schemaPath(name);
-        this.baseType = this;
-    }
-
     public BitsType(final SchemaPath path) {
         super();
         this.bits = Collections.emptyList();
         this.path = path;
-        this.baseType = new BitsType();
+        this.baseType = this;
     }
 
     /**
@@ -64,27 +56,8 @@ public final class BitsType implements BitsTypeDefinition {
     public BitsType(final SchemaPath path, final List<Bit> bits) {
         super();
         this.bits = Collections.unmodifiableList(bits);
-        this.units = "";
         this.path = path;
-        this.baseType = new BitsType();
-    }
-
-    /**
-     * Constructor with explicit definition of bits assigned to BitsType and
-     * Units. <br>
-     * The default value of Bits Type is List of bits.
-     *
-     * @param bits
-     *            The bits assigned for Bits Type
-     * @param units
-     *            units for bits type
-     */
-    public BitsType(final SchemaPath path, List<Bit> bits, String units) {
-        super();
-        this.bits = Collections.unmodifiableList(bits);
-        this.units = units;
-        this.path = path;
-        this.baseType = new BitsType();
+        this.baseType = this;
     }
 
     /*

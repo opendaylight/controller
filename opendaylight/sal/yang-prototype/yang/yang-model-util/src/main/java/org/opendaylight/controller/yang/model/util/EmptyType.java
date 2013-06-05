@@ -17,21 +17,15 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.EmptyTypeDefinition;
 
 public final class EmptyType implements EmptyTypeDefinition {
-
     private final QName name = BaseTypes.constructQName("empty");
     private final SchemaPath path;
     private final String description = "The empty built-in type represents a leaf that does not have any value, it conveys information by its presence or absence.";
     private final String reference = "https://tools.ietf.org/html/rfc6020#page-131";
     private final EmptyTypeDefinition baseType;
 
-    private EmptyType() {
-        path = BaseTypes.schemaPath(name);
-        this.baseType = this;
-    }
-
     public EmptyType(final SchemaPath path) {
         this.path = path;
-        this.baseType = new EmptyType();
+        this.baseType = this;
     }
 
     @Override

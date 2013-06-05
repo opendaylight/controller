@@ -26,11 +26,10 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  * @see DecimalTypeDefinition
  */
 public final class Decimal64 implements DecimalTypeDefinition {
-
     private final QName name = BaseTypes.constructQName("decimal64");
     private final SchemaPath path;
-    private String units = "";
-    private BigDecimal defaultValue = null;
+    private final String units = "";
+    private final BigDecimal defaultValue = null;
 
     private final String description = "The decimal64 type represents a subset of the real numbers, which can "
             + "be represented by decimal numerals. The value space of decimal64 is the set of numbers that can "
@@ -54,25 +53,14 @@ public final class Decimal64 implements DecimalTypeDefinition {
      * If the fraction digits are not defined inner the definition boundaries
      * the constructor will throw {@link IllegalArgumentException}
      *
+     * @param path
      * @param fractionDigits
      *            integer between 1 and 18 inclusively
      *
      * @see DecimalTypeDefinition
      * @exception IllegalArgumentException
      */
-    private Decimal64(final Integer fractionDigits) {
-        if (!((fractionDigits.intValue() > 1) && (fractionDigits.intValue() <= 18))) {
-            throw new IllegalArgumentException(
-                    "The fraction digits outside of boundaries. Fraction digits MUST be integer between 1 and 18 inclusively");
-        }
-        this.fractionDigits = fractionDigits;
-        this.rangeStatements = defaultRangeStatements();
-        this.path = BaseTypes.schemaPath(name);
-        this.baseType = this;
-    }
-
     public Decimal64(final SchemaPath path, final Integer fractionDigits) {
-        super();
         if (!((fractionDigits.intValue() > 1) && (fractionDigits.intValue() <= 18))) {
             throw new IllegalArgumentException(
                     "The fraction digits outside of boundaries. Fraction digits MUST be integer between 1 and 18 inclusively");
@@ -80,97 +68,7 @@ public final class Decimal64 implements DecimalTypeDefinition {
         this.fractionDigits = fractionDigits;
         rangeStatements = defaultRangeStatements();
         this.path = path;
-        this.baseType = new Decimal64(fractionDigits);
-    }
-
-    /**
-     * Decimal64 Type Constructor. <br>
-     *
-     * If parameter <code>Range Statements</code> is <code>null</code> or
-     * defined as <code>empty List</code> the constructor automatically assigns
-     * the boundaries as min and max value defined for Decimal64 in <a
-     * href="https://tools.ietf.org/html/rfc6020#section-9.3">[RFC-6020] The
-     * decimal64 Built-In Type</a> <br>
-     * <br>
-     * The fractions digits MUST be defined as integer between 1 and 18
-     * inclusively as defined interface {@link DecimalTypeDefinition} <br>
-     * If the fraction digits are not defined inner the definition boundaries
-     * the constructor will throw {@link IllegalArgumentException}
-     *
-     * @param actualPath
-     * @param namespace
-     * @param revision
-     * @param rangeStatements
-     *            Range Constraint Statements
-     * @param fractionDigits
-     *            integer between 1 and 18 inclusively
-     * @exception IllegalArgumentException
-     */
-    public Decimal64(final SchemaPath path, final List<RangeConstraint> rangeStatements,
-            Integer fractionDigits) {
-        super();
-        if (!((fractionDigits.intValue() > 1) && (fractionDigits.intValue() <= 18))) {
-            throw new IllegalArgumentException(
-                    "The fraction digits outside of boundaries. Fraction digits MUST be integer between 1 and 18 inclusively");
-        }
-        if (rangeStatements == null || rangeStatements.isEmpty()) {
-            this.rangeStatements = defaultRangeStatements();
-        } else {
-            this.rangeStatements = Collections
-                    .unmodifiableList(rangeStatements);
-        }
-        this.fractionDigits = fractionDigits;
-        this.path = path;
-        this.baseType = new Decimal64(fractionDigits);
-    }
-
-    /**
-     * Decimal64 Type Constructor. <br>
-     * If parameter <code>Range Statements</code> is <code>null</code> or
-     * defined as <code>empty List</code> the constructor automatically assigns
-     * the boundaries as min and max value defined for Decimal64 in <a
-     * href="https://tools.ietf.org/html/rfc6020#section-9.3">[RFC-6020] The
-     * decimal64 Built-In Type</a> <br>
-     * <br>
-     * The fractions digits MUST be defined as integer between 1 and 18
-     * inclusively as defined interface {@link DecimalTypeDefinition} <br>
-     * If the fraction digits are not defined inner the definition boundaries
-     * the constructor will throw {@link IllegalArgumentException}
-     *
-     * @param actualPath
-     * @param namespace
-     * @param revision
-     * @param units
-     *            units associated with the type
-     * @param defaultValue
-     *            Default Value for type
-     * @param rangeStatements
-     *            Range Constraint Statements
-     * @param fractionDigits
-     *            integer between 1 and 18 inclusively
-     */
-    public Decimal64(final SchemaPath path, final String units,
-            final BigDecimal defaultValue,
-            final List<RangeConstraint> rangeStatements,
-            final Integer fractionDigits) {
-        super();
-        if (!((fractionDigits.intValue() > 1) && (fractionDigits.intValue() <= 18))) {
-            throw new IllegalArgumentException(
-                    "The fraction digits outside of boundaries. Fraction digits MUST be integer between 1 and 18 inclusively");
-        }
-
-        if (rangeStatements == null || rangeStatements.isEmpty()) {
-            this.rangeStatements = defaultRangeStatements();
-
-        } else {
-            this.rangeStatements = Collections
-                    .unmodifiableList(rangeStatements);
-        }
-        this.units = units;
-        this.defaultValue = defaultValue;
-        this.fractionDigits = fractionDigits;
-        this.path = path;
-        this.baseType = new Decimal64(fractionDigits);
+        this.baseType = this;
     }
 
     /**

@@ -356,10 +356,7 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
                             getIdentityrefBase(typeBody), actualPath, path,
                             line);
                 } else {
-                    List<String> typePath = new ArrayList<String>(actualPath);
-                    typePath.add(typeName);
-
-                    type = parseTypeBody(typeName, typeBody, typePath,
+                    type = parseTypeBody(typeName, typeBody, actualPath,
                             namespace, revision, yangModelPrefix);
                     moduleBuilder.setType(type, actualPath);
                 }
