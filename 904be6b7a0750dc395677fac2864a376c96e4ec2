@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///OY\u003d",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-06-05T21:43:12Z",
+      "side": 1,
+      "message": "Will fix in separate commit later - which will be for POM clean-up. Do not want to rebase this commit (and all chained commits) because of spaces. :)",
+      "revId": "904be6b7a0750dc395677fac2864a376c96e4ec2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
