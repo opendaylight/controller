@@ -17,10 +17,10 @@ import java.util.TreeSet;
 /**
  * Composite transformer which aggregates multiple implementation and selects
  * the one which accepts the input.
- * 
- * 
+ *
+ *
  * @author Tony Tkacik
- * 
+ *
  * @param <I>
  *            Input class for transformation
  * @param <P>
@@ -35,7 +35,7 @@ public class CompositeConditionalTransformer<I, P> implements
         @Override
         public int compare(TransformerWithPriority<I, P> o1,
                 TransformerWithPriority<I, P> o2) {
-            return Integer.compare(o1.priority, o2.priority);
+            return Integer.valueOf(o1.priority).compareTo(Integer.valueOf(o2.priority));
         }
 
     };
@@ -106,13 +106,13 @@ public class CompositeConditionalTransformer<I, P> implements
             SimpleConditionalTransformer<I, P> {
         final int priority;
         final SimpleConditionalTransformer<I, P> transformer;
-    
+
         public TransformerWithPriority(
                 SimpleConditionalTransformer<I, P> transformer, int priority) {
             this.priority = priority;
             this.transformer = transformer;
         }
-    
+
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -121,7 +121,7 @@ public class CompositeConditionalTransformer<I, P> implements
                     + ((transformer == null) ? 0 : transformer.hashCode());
             return result;
         }
-    
+
         @Override
         public boolean equals(Object obj) {
             if (this == obj)
@@ -138,20 +138,20 @@ public class CompositeConditionalTransformer<I, P> implements
                 return false;
             return true;
         }
-    
+
         @Override
         public boolean isAcceptable(I input) {
             return transformer.isAcceptable(input);
         }
-    
+
         @Override
         public P transform(I input) {
             return transformer.transform(input);
         }
-        
-    
-    
-    
-    
+
+
+
+
+
     }
 }
