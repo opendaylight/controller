@@ -124,5 +124,17 @@ module types1 {
             }
         }
     }
-
+    
+    container mycont {
+        container innercont {
+            typedef mytype {
+                type string;
+            }
+        
+            leaf myleaf {
+                type mytype;
+            }
+        }
+    }
+    
 }

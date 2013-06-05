@@ -34,7 +34,7 @@ public abstract class AbstractTypeAwareBuilder implements TypeAwareBuilder {
     }
 
     @Override
-    public void setType(TypeDefinitionBuilder typedef) {
+    public void setTypedef(TypeDefinitionBuilder typedef) {
         this.typedef = typedef;
         this.type = null;
     }

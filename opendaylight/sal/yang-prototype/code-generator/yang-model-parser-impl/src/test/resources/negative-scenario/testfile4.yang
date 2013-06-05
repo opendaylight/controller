@@ -1,0 +1,26 @@
+module test4 {
+    yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+
+    grouping tree {
+        leaf-list node {
+            type string;
+        }
+        container holder {
+        
+        }
+    }
+
+    container schema {
+        uses tree {
+            refine node {
+                presence "true";
+            }
+            refine holder {
+                default "one";
+            }
+        }
+    }
+
+}

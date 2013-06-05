@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +35,7 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
-import org.opendaylight.controller.yang.parser.builder.api.ChildNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.DataNodeContainerBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
@@ -62,29 +63,28 @@ public class ModuleBuilder implements Builder {
     private final Set<ModuleImport> imports = new HashSet<ModuleImport>();
 
     /**
-     * All nodes, that can contain other nodes
-     */
-    private final Map<List<String>, Builder> moduleNodes = new HashMap<List<String>, Builder>();
-
-    /**
      * Holds all child (DataSchemaNode) nodes: anyxml, choice, case, container,
      * list, leaf, leaf-list.
      */
-    private final Map<List<String>, DataSchemaNodeBuilder> addedChilds = new HashMap<List<String>, DataSchemaNodeBuilder>();
+    private final Map<List<String>, DataSchemaNodeBuilder> childNodes = new HashMap<List<String>, DataSchemaNodeBuilder>();
 
     private final Map<List<String>, GroupingBuilder> addedGroupings = new HashMap<List<String>, GroupingBuilder>();
     private final List<AugmentationSchemaBuilder> addedAugments = new ArrayList<AugmentationSchemaBuilder>();
     private final Map<List<String>, UsesNodeBuilder> addedUsesNodes = new HashMap<List<String>, UsesNodeBuilder>();
+    //private final Map<List<String>, RefineHolder> addedRefines = new HashMap<List<String>, RefineHolder>();
     private final Map<List<String>, RpcDefinitionBuilder> addedRpcs = new HashMap<List<String>, RpcDefinitionBuilder>();
     private final Set<NotificationBuilder> addedNotifications = new HashSet<NotificationBuilder>();
     private final Set<IdentitySchemaNodeBuilder> addedIdentities = new HashSet<IdentitySchemaNodeBuilder>();
     private final Map<List<String>, FeatureBuilder> addedFeatures = new HashMap<List<String>, FeatureBuilder>();
-    private final Map<String, DeviationBuilder> addedDeviations = new HashMap<String, DeviationBuilder>();
+    private final Map<List<String>, DeviationBuilder> addedDeviations = new HashMap<List<String>, DeviationBuilder>();
     private final Map<List<String>, TypeDefinitionBuilder> addedTypedefs = new HashMap<List<String>, TypeDefinitionBuilder>();
+    private final Map<List<String>, UnionTypeBuilder> addedUnionTypes = new HashMap<List<String>, UnionTypeBuilder>();
     private final List<ExtensionBuilder> addedExtensions = new ArrayList<ExtensionBuilder>();
     private final Set<UnknownSchemaNodeBuilder> addedUnknownNodes = new HashSet<UnknownSchemaNodeBuilder>();
 
     private final Map<List<String>, TypeAwareBuilder> dirtyNodes = new HashMap<List<String>, TypeAwareBuilder>();
+
+    private final LinkedList<Builder> actualPath = new LinkedList<Builder>();
 
     public ModuleBuilder(final String name) {
         this.name = name;
@@ -106,8 +106,8 @@ public class ModuleBuilder implements Builder {
         instance.setTypeDefinitions(typedefs);
 
         // CHILD NODES
-        final Map<QName, DataSchemaNode> childNodes = buildModuleChildNodes(addedChilds);
-        instance.setChildNodes(childNodes);
+        final Map<QName, DataSchemaNode> children = buildModuleChildNodes(childNodes);
+        instance.setChildNodes(children);
 
         // GROUPINGS
         final Set<GroupingDefinition> groupings = buildModuleGroupings(addedGroupings);
@@ -141,7 +141,7 @@ public class ModuleBuilder implements Builder {
 
         // DEVIATIONS
         final Set<Deviation> deviations = new HashSet<Deviation>();
-        for (Map.Entry<String, DeviationBuilder> entry : addedDeviations
+        for (Map.Entry<List<String>, DeviationBuilder> entry : addedDeviations
                 .entrySet()) {
             deviations.add(entry.getValue().build());
         }
@@ -169,45 +169,61 @@ public class ModuleBuilder implements Builder {
         return 0;
     }
 
-    public Builder getNode(final List<String> path) {
-        return moduleNodes.get(path);
+    public void enterNode(final Builder node) {
+        actualPath.push(node);
+    }
+
+    public void exitNode() {
+        actualPath.pop();
+    }
+
+    public Builder getModuleNode(final List<String> path) {
+        return childNodes.get(path);
+    }
+
+    public GroupingBuilder getGrouping(final List<String> path) {
+        return addedGroupings.get(path);
+    }
+
+    public Builder getModuleTypedef(final List<String> path) {
+        return addedTypedefs.get(path);
     }
 
     public Set<DataSchemaNodeBuilder> getChildNodes() {
-        final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
-        for (Map.Entry<List<String>, DataSchemaNodeBuilder> entry : addedChilds
+        final Set<DataSchemaNodeBuilder> children = new HashSet<DataSchemaNodeBuilder>();
+        for (Map.Entry<List<String>, DataSchemaNodeBuilder> entry : childNodes
                 .entrySet()) {
-            List<String> path = entry.getKey();
-            DataSchemaNodeBuilder child = entry.getValue();
+            final List<String> path = entry.getKey();
+            final DataSchemaNodeBuilder child = entry.getValue();
             if (path.size() == 2) {
-                childNodes.add(child);
+                children.add(child);
             }
         }
-        return childNodes;
+        return children;
     }
 
     public Map<List<String>, TypeAwareBuilder> getDirtyNodes() {
         return dirtyNodes;
     }
 
-    public List<AugmentationSchemaBuilder> getAddedAugments() {
+    public List<AugmentationSchemaBuilder> getAugments() {
         return addedAugments;
     }
 
-    public Set<IdentitySchemaNodeBuilder> getAddedIdentities() {
+    public Set<IdentitySchemaNodeBuilder> getIdentities() {
         return addedIdentities;
     }
 
-    public Map<List<String>, UsesNodeBuilder> getAddedUsesNodes() {
+    public Map<List<String>, UsesNodeBuilder> getUsesNodes() {
         return addedUsesNodes;
     }
 
-    public Set<UnknownSchemaNodeBuilder> getAddedUnknownNodes() {
+    public Set<UnknownSchemaNodeBuilder> getUnknownNodes() {
         return addedUnknownNodes;
     }
 
     public Set<TypeDefinitionBuilder> getModuleTypedefs() {
-        Set<TypeDefinitionBuilder> typedefs = new HashSet<TypeDefinitionBuilder>();
+        final Set<TypeDefinitionBuilder> typedefs = new HashSet<TypeDefinitionBuilder>();
         for (Map.Entry<List<String>, TypeDefinitionBuilder> entry : addedTypedefs
                 .entrySet()) {
             if (entry.getKey().size() == 2) {
@@ -247,8 +263,8 @@ public class ModuleBuilder implements Builder {
 
     public void addDirtyNode(final List<String> path) {
         final List<String> dirtyNodePath = new ArrayList<String>(path);
-        final TypeAwareBuilder nodeBuilder = (TypeAwareBuilder) moduleNodes
-                .get(dirtyNodePath);
+        final TypeAwareBuilder nodeBuilder = (TypeAwareBuilder) actualPath
+                .getFirst();
         dirtyNodes.put(dirtyNodePath, nodeBuilder);
     }
 
@@ -303,18 +319,10 @@ public class ModuleBuilder implements Builder {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
         final ContainerSchemaNodeBuilder containerBuilder = new ContainerSchemaNodeBuilder(
                 containerName, line);
-        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
-                .get(pathToNode);
-        if (parent != null) {
-            if (parent instanceof AugmentationSchemaBuilder) {
-                containerBuilder.setAugmenting(true);
-            }
-            parent.addChildNode(containerBuilder);
-        }
+        updateParent(containerBuilder, line, "container");
 
         pathToNode.add(containerName.getLocalName());
-        moduleNodes.put(pathToNode, containerBuilder);
-        addedChilds.put(pathToNode, containerBuilder);
+        childNodes.put(pathToNode, containerBuilder);
 
         return containerBuilder;
     }
@@ -324,18 +332,10 @@ public class ModuleBuilder implements Builder {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
         final ListSchemaNodeBuilder listBuilder = new ListSchemaNodeBuilder(
                 listName, line);
-        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
-                .get(pathToNode);
-        if (parent != null) {
-            if (parent instanceof AugmentationSchemaBuilder) {
-                listBuilder.setAugmenting(true);
-            }
-            parent.addChildNode(listBuilder);
-        }
+        updateParent(listBuilder, line, "list");
 
         pathToNode.add(listName.getLocalName());
-        moduleNodes.put(pathToNode, listBuilder);
-        addedChilds.put(pathToNode, listBuilder);
+        childNodes.put(pathToNode, listBuilder);
 
         return listBuilder;
     }
@@ -345,39 +345,23 @@ public class ModuleBuilder implements Builder {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
         final LeafSchemaNodeBuilder leafBuilder = new LeafSchemaNodeBuilder(
                 leafName, line);
-        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
-                .get(pathToNode);
-        if (parent != null) {
-            if (parent instanceof AugmentationSchemaBuilder) {
-                leafBuilder.setAugmenting(true);
-            }
-            parent.addChildNode(leafBuilder);
-        }
+        updateParent(leafBuilder, line, "leaf");
 
         pathToNode.add(leafName.getLocalName());
-        addedChilds.put(pathToNode, leafBuilder);
-        moduleNodes.put(pathToNode, leafBuilder);
+        childNodes.put(pathToNode, leafBuilder);
 
         return leafBuilder;
     }
 
-    public LeafListSchemaNodeBuilder addLeafListNode(final QName leafListName,
+    public LeafListSchemaNodeBuilder addLeafListNode(final QName qname,
             final List<String> parentPath, final int line) {
         final List<String> pathToNode = new ArrayList<String>(parentPath);
         final LeafListSchemaNodeBuilder leafListBuilder = new LeafListSchemaNodeBuilder(
-                leafListName, line);
-        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
-                .get(pathToNode);
-        if (parent != null) {
-            if (parent instanceof AugmentationSchemaBuilder) {
-                leafListBuilder.setAugmenting(true);
-            }
-            parent.addChildNode(leafListBuilder);
-        }
+                qname, line);
+        updateParent(leafListBuilder, line, "leaf-list");
 
-        pathToNode.add(leafListName.getLocalName());
-        addedChilds.put(pathToNode, leafListBuilder);
-        moduleNodes.put(pathToNode, leafListBuilder);
+        pathToNode.add(qname.getLocalName());
+        childNodes.put(pathToNode, leafListBuilder);
 
         return leafListBuilder;
     }
@@ -386,15 +370,18 @@ public class ModuleBuilder implements Builder {
             final List<String> parentPath, final int line) {
         final List<String> pathToGroup = new ArrayList<String>(parentPath);
         final GroupingBuilder builder = new GroupingBuilderImpl(qname, line);
-        final ChildNodeBuilder parentNodeBuilder = (ChildNodeBuilder) moduleNodes
-                .get(pathToGroup);
-        if (parentNodeBuilder != null) {
-            parentNodeBuilder.addGrouping(builder);
+
+        if (!(actualPath.isEmpty())) {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof DataNodeContainerBuilder) {
+                ((DataNodeContainerBuilder) parent).addGrouping(builder);
+            } else {
+                throw new YangParseException(name, line,
+                        "Unresolved parent of grouping " + qname.getLocalName());
+            }
         }
 
-        pathToGroup.add("grouping");
         pathToGroup.add(qname.getLocalName());
-        moduleNodes.put(pathToGroup, builder);
         addedGroupings.put(pathToGroup, builder);
 
         return builder;
@@ -407,13 +394,17 @@ public class ModuleBuilder implements Builder {
                 name, line);
 
         // augment can only be in 'module' or 'uses' statement
-        final UsesNodeBuilder parent = addedUsesNodes.get(pathToAugment);
-        if (parent != null) {
-            parent.addAugment(builder);
+        if (!(actualPath.isEmpty())) {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof UsesNodeBuilder) {
+                ((UsesNodeBuilder) parent).addAugment(builder);
+            } else {
+                throw new YangParseException(this.name, line,
+                        "Unresolved parent of augment " + name);
+            }
         }
 
         pathToAugment.add(name);
-        moduleNodes.put(pathToAugment, builder);
         addedAugments.add(builder);
 
         return builder;
@@ -424,34 +415,53 @@ public class ModuleBuilder implements Builder {
         final List<String> pathToUses = new ArrayList<String>(parentPath);
         final UsesNodeBuilder usesBuilder = new UsesNodeBuilderImpl(
                 groupingPathStr, line);
-        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
-                .get(pathToUses);
-        if (parent != null) {
-            parent.addUsesNode(usesBuilder);
+
+        if (!(actualPath.isEmpty())) {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof DataNodeContainerBuilder) {
+                if (parent instanceof AugmentationSchemaBuilder) {
+                    usesBuilder.setAugmenting(true);
+                }
+                ((DataNodeContainerBuilder) parent).addUsesNode(usesBuilder);
+            } else {
+                throw new YangParseException(name, line,
+                        "Unresolved parent of uses " + groupingPathStr);
+            }
         }
 
         pathToUses.add(groupingPathStr);
         addedUsesNodes.put(pathToUses, usesBuilder);
-        moduleNodes.put(pathToUses, usesBuilder);
         return usesBuilder;
     }
 
     public void addRefine(final RefineHolder refine,
             final List<String> parentPath) {
         final List<String> path = new ArrayList<String>(parentPath);
-        final Builder parent = moduleNodes.get(path);
-        if (!(parent instanceof UsesNodeBuilder)) {
-            throw new YangParseException("Failed to parse refine "
-                    + refine.getName());
+
+        if (actualPath.isEmpty()) {
+            throw new YangParseException(name, refine.getLine(),
+                    "refine can be defined only in uses statement");
+        } else {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof UsesNodeBuilder) {
+                ((UsesNodeBuilder) parent).addRefine(refine);
+            } else {
+                throw new YangParseException(name, refine.getLine(),
+                        "refine can be defined only in uses statement");
+            }
         }
-        UsesNodeBuilder usesBuilder = (UsesNodeBuilder) parent;
-        usesBuilder.addRefine(refine);
+
         path.add(refine.getName());
-        moduleNodes.put(path, refine);
     }
 
     public RpcDefinitionBuilder addRpc(final QName qname,
             final List<String> parentPath, final int line) {
+
+        if (!(actualPath.isEmpty())) {
+            throw new YangParseException(name, line,
+                    "rpc can be defined only in module or submodule");
+        }
+
         final List<String> pathToRpc = new ArrayList<String>(parentPath);
         final RpcDefinitionBuilder rpcBuilder = new RpcDefinitionBuilder(qname,
                 line);
@@ -459,37 +469,51 @@ public class ModuleBuilder implements Builder {
         pathToRpc.add(qname.getLocalName());
         addedRpcs.put(pathToRpc, rpcBuilder);
 
-        final QName inputQName = new QName(qname.getNamespace(),
-                qname.getRevision(), qname.getPrefix(), "input");
+        return rpcBuilder;
+    }
+
+    public ContainerSchemaNodeBuilder addRpcInput(final QName inputQName,
+            final int line) {
+        final Builder parent = actualPath.getFirst();
+        if (!(parent instanceof RpcDefinitionBuilder)) {
+            throw new YangParseException(name, line,
+                    "input can be defined only in rpc statement");
+        }
+        final RpcDefinitionBuilder rpc = (RpcDefinitionBuilder) parent;
+
         final ContainerSchemaNodeBuilder inputBuilder = new ContainerSchemaNodeBuilder(
                 inputQName, line);
-        final List<String> pathToInput = new ArrayList<String>(pathToRpc);
-        pathToInput.add("input");
-        moduleNodes.put(pathToInput, inputBuilder);
-        rpcBuilder.setInput(inputBuilder);
+        rpc.setInput(inputBuilder);
+        return inputBuilder;
+    }
 
-        final QName outputQName = new QName(qname.getNamespace(),
-                qname.getRevision(), qname.getPrefix(), "output");
+    public ContainerSchemaNodeBuilder addRpcOutput(final QName outputQName,
+            final int line) {
+        final Builder parent = actualPath.getFirst();
+        if (!(parent instanceof RpcDefinitionBuilder)) {
+            throw new YangParseException(name, line,
+                    "output can be defined only in rpc statement");
+        }
+        final RpcDefinitionBuilder rpc = (RpcDefinitionBuilder) parent;
+
         final ContainerSchemaNodeBuilder outputBuilder = new ContainerSchemaNodeBuilder(
                 outputQName, line);
-        final List<String> pathToOutput = new ArrayList<String>(pathToRpc);
-        pathToOutput.add("output");
-        moduleNodes.put(pathToOutput, outputBuilder);
-        rpcBuilder.setOutput(outputBuilder);
-
-        return rpcBuilder;
+        rpc.setOutput(outputBuilder);
+        return outputBuilder;
     }
 
     public NotificationBuilder addNotification(final QName notificationName,
             final List<String> parentPath, final int line) {
-        final List<String> pathToNotification = new ArrayList<String>(
-                parentPath);
+        if (!(actualPath.isEmpty())) {
+            throw new YangParseException(name, line,
+                    "notification can be defined only in module or submodule");
+        }
 
-        NotificationBuilder builder = new NotificationBuilder(notificationName,
-                line);
+        final NotificationBuilder builder = new NotificationBuilder(
+                notificationName, line);
 
-        pathToNotification.add(notificationName.getLocalName());
-        moduleNodes.put(pathToNotification, builder);
+        final List<String> notificationPath = new ArrayList<String>(parentPath);
+        notificationPath.add(notificationName.getLocalName());
         addedNotifications.add(builder);
 
         return builder;
@@ -497,174 +521,237 @@ public class ModuleBuilder implements Builder {
 
     public FeatureBuilder addFeature(final QName featureName,
             final List<String> parentPath, final int line) {
-        List<String> pathToFeature = new ArrayList<String>(parentPath);
+        if (!(actualPath.isEmpty())) {
+            throw new YangParseException(name, line,
+                    "feature can be defined only in module or submodule");
+        }
+
+        final List<String> pathToFeature = new ArrayList<String>(parentPath);
         pathToFeature.add(featureName.getLocalName());
 
-        FeatureBuilder builder = new FeatureBuilder(featureName, line);
+        final FeatureBuilder builder = new FeatureBuilder(featureName, line);
         addedFeatures.put(pathToFeature, builder);
         return builder;
     }
 
     public ChoiceBuilder addChoice(final QName choiceName,
             final List<String> parentPath, final int line) {
-        List<String> pathToChoice = new ArrayList<String>(parentPath);
-        ChoiceBuilder builder = new ChoiceBuilder(choiceName, line);
+        final List<String> pathToChoice = new ArrayList<String>(parentPath);
+        final ChoiceBuilder builder = new ChoiceBuilder(choiceName, line);
 
-        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
-                .get(pathToChoice);
-        if (parent != null) {
-            if (parent instanceof AugmentationSchemaBuilder) {
-                builder.setAugmenting(true);
+        if (!(actualPath.isEmpty())) {
+            Builder parent = actualPath.getFirst();
+            if (parent instanceof DataNodeContainerBuilder) {
+                if (parent instanceof AugmentationSchemaBuilder) {
+                    builder.setAugmenting(true);
+                }
+                ((DataNodeContainerBuilder) parent).addChildNode(builder);
+            } else {
+                throw new YangParseException(name, line,
+                        "Unresolved parent of choice "
+                                + choiceName.getLocalName());
             }
-            parent.addChildNode(builder);
         }
 
         pathToChoice.add(choiceName.getLocalName());
-        addedChilds.put(pathToChoice, builder);
-        moduleNodes.put(pathToChoice, builder);
+        childNodes.put(pathToChoice, builder);
 
         return builder;
     }
 
     public ChoiceCaseBuilder addCase(final QName caseName,
             final List<String> parentPath, final int line) {
-        List<String> pathToCase = new ArrayList<String>(parentPath);
-        ChoiceCaseBuilder builder = new ChoiceCaseBuilder(caseName, line);
+        final List<String> pathToCase = new ArrayList<String>(parentPath);
+        final ChoiceCaseBuilder builder = new ChoiceCaseBuilder(caseName, line);
 
-        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
-                .get(pathToCase);
-        if (parent != null) {
-            if (parent instanceof AugmentationSchemaBuilder) {
+        if (actualPath.isEmpty()) {
+            throw new YangParseException(name, line, "'case' parent not found");
+        } else {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof ChoiceBuilder) {
+                ((ChoiceBuilder) parent).addChildNode(builder);
+            } else if (parent instanceof AugmentationSchemaBuilder) {
                 builder.setAugmenting(true);
+                ((AugmentationSchemaBuilder) parent).addChildNode(builder);
+            } else {
+                throw new YangParseException(name, line,
+                        "Unresolved parent of 'case' "
+                                + caseName.getLocalName());
             }
-            parent.addChildNode(builder);
         }
 
         pathToCase.add(caseName.getLocalName());
-        moduleNodes.put(pathToCase, builder);
+        childNodes.put(pathToCase, builder);
 
         return builder;
     }
 
     public AnyXmlBuilder addAnyXml(final QName anyXmlName,
             final List<String> parentPath, final int line) {
-        List<String> pathToAnyXml = new ArrayList<String>(parentPath);
-        AnyXmlBuilder builder = new AnyXmlBuilder(anyXmlName, line);
-
-        final ChildNodeBuilder parent = (ChildNodeBuilder) moduleNodes
-                .get(pathToAnyXml);
-        if (parent != null) {
-            if (parent instanceof AugmentationSchemaBuilder) {
-                throw new YangParseException(
-                        "An anyxml node cannot be augmented.");
-            }
-            parent.addChildNode(builder);
-        }
+        final List<String> pathToAnyXml = new ArrayList<String>(parentPath);
+        final AnyXmlBuilder builder = new AnyXmlBuilder(anyXmlName, line);
+        updateParent(builder, line, "anyxml");
 
         pathToAnyXml.add(anyXmlName.getLocalName());
-        addedChilds.put(pathToAnyXml, builder);
-        moduleNodes.put(pathToAnyXml, builder);
+        childNodes.put(pathToAnyXml, builder);
 
         return builder;
     }
 
-    public TypedefBuilder addTypedef(final QName typeDefName,
+    public TypeDefinitionBuilderImpl addTypedef(final QName typeDefName,
             final List<String> parentPath, final int line) {
-        List<String> pathToType = new ArrayList<String>(parentPath);
-        TypedefBuilder builder = new TypedefBuilder(typeDefName, line);
-        TypeDefinitionAwareBuilder parent = (TypeDefinitionAwareBuilder) moduleNodes
-                .get(pathToType);
-        if (parent != null) {
-            parent.addTypedef(builder);
+        final List<String> pathToType = new ArrayList<String>(parentPath);
+        final TypeDefinitionBuilderImpl builder = new TypeDefinitionBuilderImpl(
+                typeDefName, line);
+
+        if (!(actualPath.isEmpty())) {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof TypeDefinitionAwareBuilder) {
+                ((TypeDefinitionAwareBuilder) parent).addTypedef(builder);
+            } else {
+                throw new YangParseException(name, line,
+                        "Unresolved parent of typedef "
+                                + typeDefName.getLocalName());
+            }
         }
+
         pathToType.add(typeDefName.getLocalName());
         addedTypedefs.put(pathToType, builder);
-        moduleNodes.put(pathToType, builder);
         return builder;
     }
 
-    public void setType(TypeDefinition<?> type, List<String> parentPath) {
-        TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
-                .get(parentPath);
-        if (parent == null) {
-            throw new YangParseException("Failed to set type '"
-                    + type.getQName().getLocalName()
-                    + "'. Parent node not found.");
+    public void setType(final TypeDefinition<?> type,
+            final List<String> parentPath) {
+
+        if (!(actualPath.isEmpty())) {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof TypeAwareBuilder) {
+                ((TypeAwareBuilder) parent).setType(type);
+            } else {
+                throw new YangParseException("Failed to set type '"
+                        + type.getQName().getLocalName()
+                        + "'. Unknown parent node: " + parent);
+            }
         }
-        parent.setType(type);
     }
 
-    public UnionTypeBuilder addUnionType(final List<String> actualPath,
+    public UnionTypeBuilder addUnionType(final List<String> currentPath,
             final URI namespace, final Date revision, final int line) {
-        List<String> pathToUnion = new ArrayList<String>(actualPath);
-        TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
-                .get(pathToUnion);
-        UnionTypeBuilder union = new UnionTypeBuilder(line);
-        parent.setType(union);
+        final List<String> pathToUnion = new ArrayList<String>(currentPath);
+        final UnionTypeBuilder union = new UnionTypeBuilder(line);
 
-        List<String> path = new ArrayList<String>(pathToUnion);
-        path.add("union");
+        if (actualPath.isEmpty()) {
+            throw new YangParseException(line, "union error");
+        } else {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof TypeAwareBuilder) {
 
-        moduleNodes.put(path, union);
-        return union;
+                ((TypeAwareBuilder) parent).setTypedef(union);
+
+                final List<String> path = new ArrayList<String>(pathToUnion);
+                path.add("union");
+
+                addedUnionTypes.put(path, union);
+                return union;
+            } else {
+                throw new YangParseException(name, line,
+                        "Unresolved parent of union type.");
+            }
+        }
     }
 
     public void addIdentityrefType(final String baseString,
             final List<String> parentPath, final SchemaPath schemaPath,
             final int line) {
-        List<String> pathToIdentityref = new ArrayList<String>(parentPath);
-        TypeAwareBuilder parent = (TypeAwareBuilder) moduleNodes
-                .get(pathToIdentityref);
-        IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(
+        final List<String> pathToIdentityref = new ArrayList<String>(parentPath);
+        final IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(
                 baseString, schemaPath, line);
-        parent.setType(identityref);
-        dirtyNodes.put(pathToIdentityref, parent);
+
+        if (actualPath.isEmpty()) {
+            throw new YangParseException(line, "identityref error");
+        } else {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof TypeAwareBuilder) {
+                final TypeAwareBuilder typeParent = (TypeAwareBuilder) parent;
+                typeParent.setTypedef(identityref);
+                dirtyNodes.put(pathToIdentityref, typeParent);
+            } else {
+                throw new YangParseException(name, line,
+                        "Unresolved parent of identityref type.");
+            }
+        }
     }
 
     public DeviationBuilder addDeviation(final String targetPath,
             final List<String> parentPath, final int line) {
+        if (!(actualPath.isEmpty())) {
+            throw new YangParseException(name, line,
+                    "deviation can be defined only in module or submodule");
+        }
+
         final List<String> pathToDeviation = new ArrayList<String>(parentPath);
         pathToDeviation.add(targetPath);
-        DeviationBuilder builder = new DeviationBuilder(targetPath, line);
-        addedDeviations.put(targetPath, builder);
-        moduleNodes.put(pathToDeviation, builder);
+        final DeviationBuilder builder = new DeviationBuilder(targetPath, line);
+        addedDeviations.put(pathToDeviation, builder);
         return builder;
     }
 
     public IdentitySchemaNodeBuilder addIdentity(final QName qname,
             final List<String> parentPath, final int line) {
+        if (!(actualPath.isEmpty())) {
+            throw new YangParseException(name, line,
+                    "identity can be defined only in module or submodule");
+        }
+
         final List<String> pathToIdentity = new ArrayList<String>(parentPath);
         final IdentitySchemaNodeBuilder builder = new IdentitySchemaNodeBuilder(
                 qname, line);
         pathToIdentity.add(qname.getLocalName());
-        moduleNodes.put(pathToIdentity, builder);
         addedIdentities.add(builder);
         return builder;
     }
 
-    public void addConfiguration(boolean configuration, List<String> parentPath) {
-        Builder builder = moduleNodes.get(parentPath);
-        // current api did not support adding config to deviate
-        if (!(builder instanceof DeviationBuilder)) {
-            if(builder instanceof RefineHolder) {
-                ((RefineHolder)builder).setConfig(configuration);
+    public void addConfiguration(final boolean configuration,
+            final List<String> parentPath, final int line) {
+        if (actualPath.isEmpty()) {
+            throw new YangParseException(name, line,
+                    "Parent node of config statement not found.");
+        } else {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof DataSchemaNodeBuilder) {
+                ((DataSchemaNodeBuilder) parent)
+                        .setConfiguration(configuration);
+            } else if (parent instanceof RefineHolder) {
+                ((RefineHolder) parent).setConfig(configuration);
+            } else if (parent instanceof DeviationBuilder) {
+                // skip: set config to deviation (deviate stmt) not supported by
+                // current api
+                return;
             } else {
-                ((DataSchemaNodeBuilder)builder).setConfiguration(configuration);
+                throw new YangParseException(name, line,
+                        "Unresolved parent of config statement.");
             }
         }
     }
 
     public UnknownSchemaNodeBuilder addUnknownSchemaNode(final QName qname,
             final List<String> parentPath, final int line) {
-        final List<String> pathToUnknown = new ArrayList<String>(parentPath);
         final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(
                 qname, line);
-        final Builder parent = moduleNodes.get(pathToUnknown);
-        if (parent instanceof RefineHolder) {
-            ((RefineHolder) parent).addUnknownSchemaNode(builder);
-        } else if (parent instanceof SchemaNodeBuilder) {
-            ((SchemaNodeBuilder) parent).addUnknownSchemaNode(builder);
+
+        if (!(actualPath.isEmpty())) {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof SchemaNodeBuilder) {
+                ((SchemaNodeBuilder) parent).addUnknownSchemaNode(builder);
+            } else if (parent instanceof RefineHolder) {
+                ((RefineHolder) parent).addUnknownSchemaNode(builder);
+            } else {
+                throw new YangParseException(name, line,
+                        "Unresolved parent of unknown node '"
+                                + qname.getLocalName() + "'");
+            }
         }
+
         addedUnknownNodes.add(builder);
         return builder;
     }
@@ -1006,6 +1093,26 @@ public class ModuleBuilder implements Builder {
         }
     }
 
+    private void updateParent(DataSchemaNodeBuilder nodeBuilder, int line,
+            String nodeTypeName) {
+        if (!(actualPath.isEmpty())) {
+            final Builder parent = actualPath.getFirst();
+            if (parent instanceof DataNodeContainerBuilder) {
+                if (parent instanceof AugmentationSchemaBuilder) {
+                    nodeBuilder.setAugmenting(true);
+                }
+                ((DataNodeContainerBuilder) parent)
+                        .addChildNode(nodeBuilder);
+            } else if (parent instanceof ChoiceBuilder) {
+                ((ChoiceBuilder) parent).addChildNode(nodeBuilder);
+            } else {
+                throw new YangParseException(name, line,
+                        "Unresolved parent of " + nodeTypeName + " "
+                                + nodeBuilder.getQName().getLocalName());
+            }
+        }
+    }
+
     private ModuleImport createModuleImport(final String moduleName,
             final Date revision, final String prefix) {
         ModuleImport moduleImport = new ModuleImport() {
@@ -1119,7 +1226,7 @@ public class ModuleBuilder implements Builder {
         final Set<GroupingDefinition> groupings = new HashSet<GroupingDefinition>();
         for (Map.Entry<List<String>, GroupingBuilder> entry : addedGroupings
                 .entrySet()) {
-            if (entry.getKey().size() == 3) {
+            if (entry.getKey().size() == 2) {
                 groupings.add(entry.getValue().build());
             }
         }

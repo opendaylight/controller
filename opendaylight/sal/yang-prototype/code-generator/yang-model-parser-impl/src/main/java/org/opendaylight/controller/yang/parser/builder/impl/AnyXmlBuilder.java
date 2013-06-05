@@ -18,7 +18,6 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
-import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
     private boolean built;
@@ -33,6 +32,7 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
     private String reference;
     private Status status = Status.CURRENT;
     private boolean configuration;
+    private boolean augmenting;
 
     public AnyXmlBuilder(final QName qname, final int line) {
         this.qname = qname;
@@ -50,6 +50,7 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
             instance.setReference(reference);
             instance.setStatus(status);
             instance.setConfiguration(configuration);
+            instance.setAugmenting(augmenting);
 
             // UNKNOWN NODES
             final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
@@ -127,8 +128,7 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
 
     @Override
     public void setAugmenting(final boolean augmenting) {
-        throw new YangParseException(line,
-                "An anyxml node cannot be augmented.");
+        this.augmenting = augmenting;
     }
 
     public boolean isConfiguration() {
@@ -148,6 +148,7 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
         private Status status = Status.CURRENT;
         private boolean configuration;
         private ConstraintDefinition constraintsDef;
+        private boolean augmenting;
         private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
         private AnyXmlSchemaNodeImpl(final QName qname) {
@@ -199,7 +200,11 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
 
         @Override
         public boolean isAugmenting() {
-            return false;
+            return augmenting;
+        }
+
+        private void setAugmenting(boolean augmenting) {
+            this.augmenting = augmenting;
         }
 
         @Override

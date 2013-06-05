@@ -177,6 +177,11 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder
         this.unitsStr = unitsStr;
     }
 
+    @Override
+    public String toString() {
+        return "leaf " + qname.getLocalName();
+    }
+
     private final class LeafSchemaNodeImpl implements LeafSchemaNode {
         private final QName qname;
         private SchemaPath path;

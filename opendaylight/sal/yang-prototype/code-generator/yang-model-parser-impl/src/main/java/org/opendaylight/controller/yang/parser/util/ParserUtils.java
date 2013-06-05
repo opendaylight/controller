@@ -51,7 +51,7 @@ import org.opendaylight.controller.yang.model.util.StringType;
 import org.opendaylight.controller.yang.model.util.UnionType;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
-import org.opendaylight.controller.yang.parser.builder.api.ChildNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.DataNodeContainerBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
@@ -68,7 +68,7 @@ import org.opendaylight.controller.yang.parser.builder.impl.LeafListSchemaNodeBu
 import org.opendaylight.controller.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ListSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ModuleBuilder;
-import org.opendaylight.controller.yang.parser.builder.impl.TypedefBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.TypeDefinitionBuilderImpl;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.UsesNodeBuilderImpl;
 
@@ -133,7 +133,7 @@ public final class ParserUtils {
      */
     public static void fillAugmentTarget(
             final AugmentationSchemaBuilder augment,
-            final ChildNodeBuilder target) {
+            final DataNodeContainerBuilder target) {
         for (DataSchemaNodeBuilder builder : augment.getChildNodes()) {
             builder.setAugmenting(true);
             correctAugmentChildPath(augment, target.getPath());
@@ -141,7 +141,17 @@ public final class ParserUtils {
         }
     }
 
-    private static void correctAugmentChildPath(final ChildNodeBuilder node,
+    public static void fillAugmentTarget(
+            final AugmentationSchemaBuilder augment,
+            final ChoiceBuilder target) {
+        for (DataSchemaNodeBuilder builder : augment.getChildNodes()) {
+            builder.setAugmenting(true);
+            correctAugmentChildPath(augment, target.getPath());
+            target.addChildNode(builder);
+        }
+    }
+
+    private static void correctAugmentChildPath(final DataNodeContainerBuilder node,
             final SchemaPath parentSchemaPath) {
         for (DataSchemaNodeBuilder builder : node.getChildNodes()) {
 
@@ -151,149 +161,189 @@ public final class ParserUtils {
             targetNodePath.add(builder.getQName());
             builder.setPath(new SchemaPath(targetNodePath, true));
 
-            if (builder instanceof ChildNodeBuilder) {
-                ChildNodeBuilder cnb = (ChildNodeBuilder) builder;
+            if (builder instanceof DataNodeContainerBuilder) {
+                DataNodeContainerBuilder cnb = (DataNodeContainerBuilder) builder;
                 correctAugmentChildPath(cnb, builder.getPath());
             }
 
             // if child can contains type, correct path for this type too
-            if(builder instanceof TypeAwareBuilder) {
-                TypeAwareBuilder nodeBuilder = (TypeAwareBuilder)builder;
+            if (builder instanceof TypeAwareBuilder) {
+                TypeAwareBuilder nodeBuilder = (TypeAwareBuilder) builder;
                 QName nodeBuilderQName = nodeBuilder.getQName();
                 TypeDefinition<?> nodeBuilderType = nodeBuilder.getType();
-                if(nodeBuilderType != null) {
-                    TypeDefinition<?> newType = createCorrectTypeDefinition(parentSchemaPath, nodeBuilderQName, nodeBuilderType);
+                if (nodeBuilderType != null) {
+                    TypeDefinition<?> newType = createCorrectTypeDefinition(
+                            parentSchemaPath, nodeBuilderQName, nodeBuilderType);
                     nodeBuilder.setType(newType);
                 } else {
-                    TypeDefinitionBuilder nodeBuilderTypedef = nodeBuilder.getTypedef();
-                    SchemaPath newSchemaPath = createNewSchemaPath(nodeBuilderTypedef.getPath(), nodeBuilderQName, nodeBuilderTypedef.getQName());
+                    TypeDefinitionBuilder nodeBuilderTypedef = nodeBuilder
+                            .getTypedef();
+                    SchemaPath newSchemaPath = createNewSchemaPath(
+                            nodeBuilderTypedef.getPath(), nodeBuilderQName,
+                            nodeBuilderTypedef.getQName());
                     nodeBuilderTypedef.setPath(newSchemaPath);
                 }
             }
         }
     }
 
-    private static TypeDefinition<?> createCorrectTypeDefinition(SchemaPath parentSchemaPath, QName nodeQName, TypeDefinition<?> nodeType) {
+    private static TypeDefinition<?> createCorrectTypeDefinition(
+            SchemaPath parentSchemaPath, QName nodeQName,
+            TypeDefinition<?> nodeType) {
         TypeDefinition<?> result = null;
         SchemaPath newSchemaPath = null;
-        if(nodeType != null) {
-            if(nodeType instanceof BinaryTypeDefinition) {
-                BinaryTypeDefinition binType = (BinaryTypeDefinition)nodeType;
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, binType.getQName());
-                List<Byte> bytes = (List<Byte>)binType.getDefaultValue();
-                result = new BinaryType(newSchemaPath, bytes, binType.getLengthConstraints(), binType.getUnits());
-            } else if(nodeType instanceof BitsTypeDefinition) {
-                BitsTypeDefinition bitsType = (BitsTypeDefinition)nodeType;
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, nodeType.getQName());
-                result = new BitsType(newSchemaPath, bitsType.getBits(), bitsType.getUnits());
-            } else if(nodeType instanceof BooleanTypeDefinition) {
-                BooleanTypeDefinition booleanType = (BooleanTypeDefinition)nodeType;
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, booleanType.getQName());
-                result = new BooleanType(newSchemaPath, (Boolean)booleanType.getDefaultValue(), booleanType.getUnits());
-            } else if(nodeType instanceof DecimalTypeDefinition) {
-                DecimalTypeDefinition decimalType = (DecimalTypeDefinition)nodeType;
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, decimalType.getQName());
-                BigDecimal defaultValue = (BigDecimal)decimalType.getDefaultValue();
-                result = new Decimal64(newSchemaPath, decimalType.getUnits(), defaultValue, decimalType.getRangeStatements(), decimalType.getFractionDigits());
-            } else if(nodeType instanceof EmptyTypeDefinition) {
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, nodeType.getQName());
+        if (nodeType != null) {
+            if (nodeType instanceof BinaryTypeDefinition) {
+                BinaryTypeDefinition binType = (BinaryTypeDefinition) nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, binType.getQName());
+                List<Byte> bytes = (List<Byte>) binType.getDefaultValue();
+                result = new BinaryType(newSchemaPath, bytes,
+                        binType.getLengthConstraints(), binType.getUnits());
+            } else if (nodeType instanceof BitsTypeDefinition) {
+                BitsTypeDefinition bitsType = (BitsTypeDefinition) nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, nodeType.getQName());
+                result = new BitsType(newSchemaPath, bitsType.getBits(),
+                        bitsType.getUnits());
+            } else if (nodeType instanceof BooleanTypeDefinition) {
+                BooleanTypeDefinition booleanType = (BooleanTypeDefinition) nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, booleanType.getQName());
+                result = new BooleanType(newSchemaPath,
+                        (Boolean) booleanType.getDefaultValue(),
+                        booleanType.getUnits());
+            } else if (nodeType instanceof DecimalTypeDefinition) {
+                DecimalTypeDefinition decimalType = (DecimalTypeDefinition) nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, decimalType.getQName());
+                BigDecimal defaultValue = (BigDecimal) decimalType
+                        .getDefaultValue();
+                result = new Decimal64(newSchemaPath, decimalType.getUnits(),
+                        defaultValue, decimalType.getRangeStatements(),
+                        decimalType.getFractionDigits());
+            } else if (nodeType instanceof EmptyTypeDefinition) {
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, nodeType.getQName());
                 result = new EmptyType(newSchemaPath);
-            } else if(nodeType instanceof EnumTypeDefinition) {
-                EnumTypeDefinition enumType = (EnumTypeDefinition)nodeType;
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, enumType.getQName());
-                result = new EnumerationType(newSchemaPath, (EnumPair)enumType.getDefaultValue(), enumType.getValues(), enumType.getUnits());
-            } else if(nodeType instanceof IdentityrefTypeDefinition) {
-                IdentityrefTypeDefinition idrefType = (IdentityrefTypeDefinition)nodeType;
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, idrefType.getQName());
-                result = new IdentityrefType(idrefType.getIdentity(), newSchemaPath);
-            } else if(nodeType instanceof InstanceIdentifierTypeDefinition) {
-                InstanceIdentifierTypeDefinition instIdType = (InstanceIdentifierTypeDefinition)nodeType;
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, instIdType.getQName());
-                return new InstanceIdentifier(newSchemaPath, instIdType.getPathStatement(), instIdType.requireInstance());
-            } else if(nodeType instanceof StringTypeDefinition) {
-                result = copyStringType(parentSchemaPath, nodeQName, (StringTypeDefinition)nodeType);
-            } else if(nodeType instanceof IntegerTypeDefinition) {
-                result = copyIntType(parentSchemaPath, nodeQName, (IntegerTypeDefinition)nodeType);
-            } else if(nodeType instanceof UnsignedIntegerTypeDefinition) {
-                result = copyUIntType(parentSchemaPath, nodeQName, (UnsignedIntegerTypeDefinition)nodeType);
-            } else if(nodeType instanceof LeafrefTypeDefinition) {
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, nodeType.getQName());
-                result = new Leafref(newSchemaPath, ((LeafrefTypeDefinition)nodeType).getPathStatement());
-            } else if(nodeType instanceof UnionTypeDefinition) {
-                UnionTypeDefinition unionType = (UnionTypeDefinition)nodeType;
-                newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, unionType.getQName());
+            } else if (nodeType instanceof EnumTypeDefinition) {
+                EnumTypeDefinition enumType = (EnumTypeDefinition) nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, enumType.getQName());
+                result = new EnumerationType(newSchemaPath,
+                        (EnumPair) enumType.getDefaultValue(),
+                        enumType.getValues(), enumType.getUnits());
+            } else if (nodeType instanceof IdentityrefTypeDefinition) {
+                IdentityrefTypeDefinition idrefType = (IdentityrefTypeDefinition) nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, idrefType.getQName());
+                result = new IdentityrefType(idrefType.getIdentity(),
+                        newSchemaPath);
+            } else if (nodeType instanceof InstanceIdentifierTypeDefinition) {
+                InstanceIdentifierTypeDefinition instIdType = (InstanceIdentifierTypeDefinition) nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, instIdType.getQName());
+                return new InstanceIdentifier(newSchemaPath,
+                        instIdType.getPathStatement(),
+                        instIdType.requireInstance());
+            } else if (nodeType instanceof StringTypeDefinition) {
+                result = copyStringType(parentSchemaPath, nodeQName,
+                        (StringTypeDefinition) nodeType);
+            } else if (nodeType instanceof IntegerTypeDefinition) {
+                result = copyIntType(parentSchemaPath, nodeQName,
+                        (IntegerTypeDefinition) nodeType);
+            } else if (nodeType instanceof UnsignedIntegerTypeDefinition) {
+                result = copyUIntType(parentSchemaPath, nodeQName,
+                        (UnsignedIntegerTypeDefinition) nodeType);
+            } else if (nodeType instanceof LeafrefTypeDefinition) {
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, nodeType.getQName());
+                result = new Leafref(newSchemaPath,
+                        ((LeafrefTypeDefinition) nodeType).getPathStatement());
+            } else if (nodeType instanceof UnionTypeDefinition) {
+                UnionTypeDefinition unionType = (UnionTypeDefinition) nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, unionType.getQName());
                 return new UnionType(newSchemaPath, unionType.getTypes());
             }
         }
         return result;
     }
 
-    private static TypeDefinition<?> copyStringType(SchemaPath schemaPath, QName nodeQName, StringTypeDefinition nodeType) {
+    private static TypeDefinition<?> copyStringType(SchemaPath schemaPath,
+            QName nodeQName, StringTypeDefinition nodeType) {
         List<QName> path = schemaPath.getPath();
         List<QName> newPath = new ArrayList<QName>(path);
         newPath.add(nodeQName);
         newPath.add(nodeType.getQName());
-        SchemaPath newSchemaPath = new SchemaPath(newPath, schemaPath.isAbsolute());
+        SchemaPath newSchemaPath = new SchemaPath(newPath,
+                schemaPath.isAbsolute());
 
         String newDefault = nodeType.getDefaultValue().toString();
         String newUnits = nodeType.getUnits();
         List<LengthConstraint> lengths = nodeType.getLengthStatements();
         List<PatternConstraint> patterns = nodeType.getPatterns();
 
-        return new StringType(newSchemaPath, newDefault, lengths, patterns, newUnits);
+        return new StringType(newSchemaPath, newDefault, lengths, patterns,
+                newUnits);
     }
 
-    private static TypeDefinition<?> copyIntType(SchemaPath schemaPath, QName nodeQName, IntegerTypeDefinition type) {
+    private static TypeDefinition<?> copyIntType(SchemaPath schemaPath,
+            QName nodeQName, IntegerTypeDefinition type) {
         QName typeQName = type.getQName();
-        SchemaPath newSchemaPath = createNewSchemaPath(schemaPath, nodeQName, typeQName);
+        SchemaPath newSchemaPath = createNewSchemaPath(schemaPath, nodeQName,
+                typeQName);
 
         String localName = typeQName.getLocalName();
         List<RangeConstraint> ranges = type.getRangeStatements();
         String units = type.getUnits();
 
-        if("int8".equals(localName)) {
-            Byte defaultValue = (Byte)type.getDefaultValue();
+        if ("int8".equals(localName)) {
+            Byte defaultValue = (Byte) type.getDefaultValue();
             return new Int8(newSchemaPath, ranges, units, defaultValue);
-        } else if("int16".equals(localName)) {
-            Short defaultValue = (Short)type.getDefaultValue();
+        } else if ("int16".equals(localName)) {
+            Short defaultValue = (Short) type.getDefaultValue();
             return new Int16(newSchemaPath, ranges, units, defaultValue);
-        } else if("int32".equals(localName)) {
-            Integer defaultValue = (Integer)type.getDefaultValue();
+        } else if ("int32".equals(localName)) {
+            Integer defaultValue = (Integer) type.getDefaultValue();
             return new Int32(newSchemaPath, ranges, units, defaultValue);
-        } else if("int64".equals(localName)) {
-            Long defaultValue = (Long)type.getDefaultValue();
+        } else if ("int64".equals(localName)) {
+            Long defaultValue = (Long) type.getDefaultValue();
             return new Int64(newSchemaPath, ranges, units, defaultValue);
         } else {
             return null;
         }
     }
 
-    private static TypeDefinition<?> copyUIntType(SchemaPath schemaPath, QName nodeQName, UnsignedIntegerTypeDefinition type) {
+    private static TypeDefinition<?> copyUIntType(SchemaPath schemaPath,
+            QName nodeQName, UnsignedIntegerTypeDefinition type) {
         QName typeQName = type.getQName();
-        SchemaPath newSchemaPath = createNewSchemaPath(schemaPath, nodeQName, typeQName);
+        SchemaPath newSchemaPath = createNewSchemaPath(schemaPath, nodeQName,
+                typeQName);
 
         String localName = typeQName.getLocalName();
         List<RangeConstraint> ranges = type.getRangeStatements();
         String units = type.getUnits();
 
-        if("uint8".equals(localName)) {
-            Byte defaultValue = (Byte)type.getDefaultValue();
+        if ("uint8".equals(localName)) {
+            Byte defaultValue = (Byte) type.getDefaultValue();
             return new Int8(newSchemaPath, ranges, units, defaultValue);
-        } else if("uint16".equals(localName)) {
-            Short defaultValue = (Short)type.getDefaultValue();
+        } else if ("uint16".equals(localName)) {
+            Short defaultValue = (Short) type.getDefaultValue();
             return new Int16(newSchemaPath, ranges, units, defaultValue);
-        } else if("uint32".equals(localName)) {
-            Integer defaultValue = (Integer)type.getDefaultValue();
+        } else if ("uint32".equals(localName)) {
+            Integer defaultValue = (Integer) type.getDefaultValue();
             return new Int32(newSchemaPath, ranges, units, defaultValue);
-        } else if("uint64".equals(localName)) {
-            Long defaultValue = (Long)type.getDefaultValue();
+        } else if ("uint64".equals(localName)) {
+            Long defaultValue = (Long) type.getDefaultValue();
             return new Int64(newSchemaPath, ranges, units, defaultValue);
         } else {
             return null;
         }
     }
 
-    private static SchemaPath createNewSchemaPath(SchemaPath schemaPath, QName currentQName, QName qname) {
+    private static SchemaPath createNewSchemaPath(SchemaPath schemaPath,
+            QName currentQName, QName qname) {
         List<QName> newPath = new ArrayList<QName>(schemaPath.getPath());
         newPath.add(currentQName);
         newPath.add(qname);
@@ -426,6 +476,92 @@ public final class ParserUtils {
         }
     }
 
+    public static void checkRefine(SchemaNodeBuilder node, RefineHolder refine) {
+        String name = node.getQName().getLocalName();
+        int line = refine.getLine();
+
+        String defaultStr = refine.getDefaultStr();
+        Boolean mandatory = refine.isMandatory();
+        Boolean presence = refine.isPresence();
+        MustDefinition must = refine.getMust();
+        Integer min = refine.getMinElements();
+        Integer max = refine.getMaxElements();
+
+        if (node instanceof AnyXmlBuilder) {
+            checkRefineDefault(node, defaultStr, line);
+            checkRefinePresence(node, presence, line);
+            checkRefineMinMax(name, line, min, max);
+        } else if (node instanceof ChoiceBuilder) {
+            checkRefinePresence(node, presence, line);
+            checkRefineMust(node, must, line);
+            checkRefineMinMax(name, line, min, max);
+        } else if (node instanceof ContainerSchemaNodeBuilder) {
+            checkRefineDefault(node, defaultStr, line);
+            checkRefineMandatory(node, mandatory, line);
+            checkRefineMust(node, must, line);
+            checkRefineMinMax(name, line, min, max);
+        } else if (node instanceof LeafSchemaNodeBuilder) {
+            checkRefinePresence(node, presence, line);
+            checkRefineMinMax(name, line, min, max);
+        } else if (node instanceof LeafListSchemaNodeBuilder
+                || node instanceof ListSchemaNodeBuilder) {
+            checkRefineDefault(node, defaultStr, line);
+            checkRefinePresence(node, presence, line);
+            checkRefineMandatory(node, mandatory, line);
+        } else if (node instanceof GroupingBuilder
+                || node instanceof TypeDefinitionBuilder
+                || node instanceof UsesNodeBuilder) {
+            checkRefineDefault(node, defaultStr, line);
+            checkRefinePresence(node, presence, line);
+            checkRefineMandatory(node, mandatory, line);
+            checkRefineMust(node, must, line);
+            checkRefineMinMax(name, line, min, max);
+        }
+    }
+
+    private static void checkRefineDefault(SchemaNodeBuilder node,
+            String defaultStr, int line) {
+        if (defaultStr != null) {
+            throw new YangParseException(line, "Can not refine 'default' for '"
+                    + node.getQName().getLocalName() + "'.");
+        }
+    }
+
+    private static void checkRefineMandatory(SchemaNodeBuilder node,
+            Boolean mandatory, int line) {
+        if (mandatory != null) {
+            throw new YangParseException(line,
+                    "Can not refine 'mandatory' for '"
+                            + node.getQName().getLocalName() + "'.");
+        }
+    }
+
+    private static void checkRefinePresence(SchemaNodeBuilder node,
+            Boolean presence, int line) {
+        if (presence != null) {
+            throw new YangParseException(line,
+                    "Can not refine 'presence' for '"
+                            + node.getQName().getLocalName() + "'.");
+        }
+    }
+
+    private static void checkRefineMust(SchemaNodeBuilder node,
+            MustDefinition must, int line) {
+        if (must != null) {
+            throw new YangParseException(line, "Can not refine 'must' for '"
+                    + node.getQName().getLocalName() + "'.");
+        }
+    }
+
+    private static void checkRefineMinMax(String refineTargetName,
+            int refineLine, Integer min, Integer max) {
+        if (min != null || max != null) {
+            throw new YangParseException(refineLine,
+                    "Can not refine 'min-elements' or 'max-elements' for '"
+                            + refineTargetName + "'.");
+        }
+    }
+
     /**
      * Perform refine operation of following parameters:
      * <ul>
@@ -490,7 +626,7 @@ public final class ParserUtils {
         final TypeDefinition<?> type = old.getType();
 
         if (type == null) {
-            copy.setType(old.getTypedef());
+            copy.setTypedef(old.getTypedef());
         } else {
             copy.setType(type);
         }
@@ -524,7 +660,7 @@ public final class ParserUtils {
         for (GroupingBuilder grouping : old.getGroupings()) {
             copy.addGrouping(grouping);
         }
-        for (TypeDefinitionBuilder typedef : old.getTypedefs()) {
+        for (TypeDefinitionBuilder typedef : old.getTypeDefinitions()) {
             copy.addTypedef(typedef);
         }
         for (AugmentationSchemaBuilder augment : old.getAugmentations()) {
@@ -557,7 +693,7 @@ public final class ParserUtils {
         for (GroupingBuilder grouping : old.getGroupings()) {
             copy.addGrouping(grouping);
         }
-        for (TypeDefinitionBuilder typedef : old.getTypedefs()) {
+        for (TypeDefinitionBuilder typedef : old.getTypeDefinitions()) {
             copy.addTypedef(typedef);
         }
         for (AugmentationSchemaBuilder augment : old.getAugmentations()) {
@@ -583,7 +719,7 @@ public final class ParserUtils {
         copyConstraints(old, copy);
         final TypeDefinition<?> type = old.getType();
         if (type == null) {
-            copy.setType(old.getTypedef());
+            copy.setTypedef(old.getTypedef());
         } else {
             copy.setType(type);
         }
@@ -609,12 +745,6 @@ public final class ParserUtils {
         }
         for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
             copy.addUnknownSchemaNode(unknown);
-        }
-        for (TypeDefinitionBuilder typedef : old.getTypedefs()) {
-            copy.addTypedef(typedef);
-        }
-        for (UsesNodeBuilder use : old.getUsesNodes()) {
-            copy.addUsesNode(use);
         }
         copy.setDefaultCase(old.getDefaultCase());
         copy.setDescription(old.getDescription());
@@ -650,7 +780,7 @@ public final class ParserUtils {
         for (GroupingBuilder grouping : old.getGroupings()) {
             copy.addGrouping(grouping);
         }
-        for (TypeDefinitionBuilder typedef : old.getTypedefs()) {
+        for (TypeDefinitionBuilder typedef : old.getTypeDefinitions()) {
             copy.addTypedef(typedef);
         }
         for (UsesNodeBuilder use : old.getUses()) {
@@ -665,9 +795,10 @@ public final class ParserUtils {
         return copy;
     }
 
-    public static TypedefBuilder copyTypedefBuilder(TypedefBuilder old) {
-        final TypedefBuilder copy = new TypedefBuilder(old.getQName(),
-                old.getLine());
+    public static TypeDefinitionBuilderImpl copyTypedefBuilder(
+            TypeDefinitionBuilderImpl old) {
+        final TypeDefinitionBuilderImpl copy = new TypeDefinitionBuilderImpl(
+                old.getQName(), old.getLine());
         copy.setPath(old.getPath());
         copy.setDefaultValue(old.getDefaultValue());
         copy.setUnits(old.getUnits());
@@ -681,8 +812,8 @@ public final class ParserUtils {
         copy.setFractionDigits(old.getFractionDigits());
 
         TypeDefinition<?> type = old.getType();
-        if(type == null) {
-            copy.setType(old.getTypedef());
+        if (type == null) {
+            copy.setTypedef(old.getTypedef());
         } else {
             copy.setType(old.getType());
         }

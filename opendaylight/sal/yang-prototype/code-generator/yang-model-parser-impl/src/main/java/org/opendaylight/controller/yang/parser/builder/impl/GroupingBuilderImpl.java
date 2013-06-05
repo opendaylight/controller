@@ -109,7 +109,7 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
     }
 
     @Override
-    public Set<TypeDefinitionBuilder> getTypedefs() {
+    public Set<TypeDefinitionBuilder> getTypeDefinitions() {
         return addedTypedefs;
     }
 

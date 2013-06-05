@@ -94,9 +94,17 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder,
         this.outputBuilder = outputBuilder;
     }
 
+    public Set<TypeDefinitionBuilder> getTypeDefinitions() {
+        return addedTypedefs;
+    }
+
     @Override
     public void addTypedef(final TypeDefinitionBuilder type) {
         addedTypedefs.add(type);
+    }
+
+    public void addGrouping(GroupingBuilder grouping) {
+        addedGroupings.add(grouping);
     }
 
     @Override

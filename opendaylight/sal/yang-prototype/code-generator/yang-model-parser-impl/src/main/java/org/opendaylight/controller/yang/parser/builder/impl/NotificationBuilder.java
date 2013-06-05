@@ -25,7 +25,7 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
-import org.opendaylight.controller.yang.parser.builder.api.AbstractChildNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractDataNodeContainerBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
@@ -33,7 +33,7 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBu
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 
-public final class NotificationBuilder extends AbstractChildNodeBuilder
+public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
         implements TypeDefinitionAwareBuilder, SchemaNodeBuilder {
     private boolean isBuilt;
     private final NotificationDefinitionImpl instance;
@@ -101,6 +101,11 @@ public final class NotificationBuilder extends AbstractChildNodeBuilder
     }
 
     @Override
+    public Set<TypeDefinitionBuilder> getTypeDefinitions() {
+        return addedTypedefs;
+    }
+
+    @Override
     public void addTypedef(final TypeDefinitionBuilder type) {
         addedTypedefs.add(type);
     }
@@ -138,6 +143,11 @@ public final class NotificationBuilder extends AbstractChildNodeBuilder
     @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
+    }
+
+    @Override
+    public String toString() {
+        return "notification " + getQName().getLocalName();
     }
 
     private final class NotificationDefinitionImpl implements NotificationDefinition {

@@ -17,7 +17,7 @@ import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBui
 /**
  * Interface for builders of 'grouping' statement.
  */
-public interface GroupingBuilder extends ChildNodeBuilder, SchemaNodeBuilder,
+public interface GroupingBuilder extends DataNodeContainerBuilder, SchemaNodeBuilder,
         TypeDefinitionAwareBuilder {
 
     String getDescription();
@@ -33,8 +33,6 @@ public interface GroupingBuilder extends ChildNodeBuilder, SchemaNodeBuilder,
     List<UnknownSchemaNodeBuilder> getUnknownNodes();
 
     Set<GroupingBuilder> getGroupings();
-
-    Set<TypeDefinitionBuilder> getTypedefs();
 
     Set<UsesNodeBuilder> getUses();
 

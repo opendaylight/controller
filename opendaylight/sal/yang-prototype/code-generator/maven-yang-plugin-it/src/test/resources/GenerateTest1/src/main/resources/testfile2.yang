@@ -152,10 +152,7 @@ module types2 {
                     default "1.2.3.4";
                 }
                 refine port {
-                    must "must-condition" {
-                        error-message "An error message test";
-                        error-app-tag "An error app tag test";
-                    }
+                    description "new port description updated by refine";
                 }
             }
         }

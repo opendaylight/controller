@@ -12,13 +12,13 @@ import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
 
-public abstract class AbstractChildNodeBuilder implements ChildNodeBuilder {
+public abstract class AbstractDataNodeContainerBuilder implements DataNodeContainerBuilder {
 
     private final QName qname;
     protected final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
     protected final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
 
-    protected AbstractChildNodeBuilder(QName qname) {
+    protected AbstractDataNodeContainerBuilder(QName qname) {
         this.qname = qname;
     }
 
