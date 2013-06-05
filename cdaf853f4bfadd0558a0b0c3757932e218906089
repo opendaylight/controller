@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn///Rc\u003d",
+        "filename": "opendaylight/distribution/opendaylight/opendaylight-osgi-launcher.launch",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-06-05T09:17:36Z",
+      "side": 1,
+      "message": "Nope it was not intentional, Eclipse did it, let me fix it.",
+      "parentUuid": "AAAAEn///T8\u003d",
+      "revId": "cdaf853f4bfadd0558a0b0c3757932e218906089",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///T4\u003d",
         "filename": "opendaylight/distribution/opendaylight/opendaylight.target",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-06-04T16:45:26Z",
       "side": 1,
       "message": "I think it would be ideal to keep the https prefix, if it is an SSL cryto chain problem can you have Andrew look at it and give him a reproducible way to test the problem?",
+      "revId": "cdaf853f4bfadd0558a0b0c3757932e218906089",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///RY\u003d",
+        "filename": "opendaylight/distribution/opendaylight/opendaylight.target",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-06-05T09:17:36Z",
+      "side": 1,
+      "message": "The problem is well understood, Jenkins uses a certificate signed by StartCom Ltd. which is not included as trusted root CA by default in some distributions on Oracle JDK for example, as well in some other settings. We actually run in this problem already on the Nexus Sonatype setup for nexus.opendaylight.org this is when we decided to switch to use HTTP for the nexus repository.\nAlternative and appropriate approach would be to import explicitly the StartCom Ltd. root certificate on the system where a developer is working on, but this usually is a bit more complicate and given we don\u0027t gain much from switching to use HTTPS just thought to  revert to the simplest method.",
+      "parentUuid": "AAAAEn///T4\u003d",
       "revId": "cdaf853f4bfadd0558a0b0c3757932e218906089",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
