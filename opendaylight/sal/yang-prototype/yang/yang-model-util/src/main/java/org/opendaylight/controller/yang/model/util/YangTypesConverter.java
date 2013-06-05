@@ -52,25 +52,25 @@ public final class YangTypesConverter {
             String typeName) {
         TypeDefinition<?> type = null;
 
-        SchemaPath path = createSchemaPath(actualPath, namespace, revision);
+        SchemaPath path = createSchemaPath(actualPath, namespace, revision, typeName);
         if (typeName.startsWith("int")) {
-            if (typeName.equals("int8")) {
+            if ("int8".equals(typeName)) {
                 type = new Int8(path);
-            } else if (typeName.equals("int16")) {
+            } else if ("int16".equals(typeName)) {
                 type = new Int16(path);
-            } else if (typeName.equals("int32")) {
+            } else if ("int32".equals(typeName)) {
                 type = new Int32(path);
-            } else if (typeName.equals("int64")) {
+            } else if ("int64".equals(typeName)) {
                 type = new Int64(path);
             }
         } else if (typeName.startsWith("uint")) {
-            if (typeName.equals("uint8")) {
+            if ("uint8".equals(typeName)) {
                 type = new Uint8(path);
-            } else if (typeName.equals("uint16")) {
+            } else if ("uint16".equals(typeName)) {
                 type = new Uint16(path);
-            } else if (typeName.equals("uint32")) {
+            } else if ("uint32".equals(typeName)) {
                 type = new Uint32(path);
-            } else if (typeName.equals("uint64")) {
+            } else if ("uint64".equals(typeName)) {
                 type = new Uint64(path);
             }
         } else if ("string".equals(typeName)) {
@@ -88,11 +88,18 @@ public final class YangTypesConverter {
         return type;
     }
 
-    private static SchemaPath createSchemaPath(List<String> actualPath, URI namespace, Date revision) {
+    private static SchemaPath createSchemaPath(List<String> actualPath, URI namespace, Date revision, String typeName) {
+        List<String> correctPath = new ArrayList<String>(actualPath);
+        // remove module name
+        correctPath.remove(0);
+
         List<QName> path = new ArrayList<QName>();
-        for(String element : actualPath) {
+        for(String element : correctPath) {
             path.add(new QName(namespace, revision, element));
         }
+        // add type qname
+        QName typeQName = new QName(BaseTypes.BaseTypesNamespace, typeName);
+        path.add(typeQName);
         return new SchemaPath(path, true);
     }
 

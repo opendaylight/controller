@@ -31,7 +31,6 @@ import org.opendaylight.controller.yang.model.util.EnumerationType;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.IdentityrefType;
 import org.opendaylight.controller.yang.model.util.InstanceIdentifier;
-import org.opendaylight.controller.yang.model.util.StringType;
 import org.opendaylight.controller.yang.model.util.UnionType;
 
 public class TypesResolutionTest {
@@ -123,7 +122,7 @@ public class TypesResolutionTest {
         List<TypeDefinition<?>> unionTypes = baseType.getTypes();
 
         ExtendedType ipv4 = (ExtendedType) unionTypes.get(0);
-        StringType ipv4Base = (StringType) ipv4.getBaseType();
+        ExtendedType ipv4Base = (ExtendedType) ipv4.getBaseType();
         String expectedPattern = "(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}"
                 + "([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])"
                 + "(%[\\p{N}\\p{L}]+)?";
@@ -131,7 +130,7 @@ public class TypesResolutionTest {
                 .getRegularExpression());
 
         ExtendedType ipv6 = (ExtendedType) unionTypes.get(1);
-        StringType ipv6Base = (StringType) ipv6.getBaseType();
+        ExtendedType ipv6Base = (ExtendedType) ipv6.getBaseType();
         List<PatternConstraint> ipv6Patterns = ipv6Base.getPatterns();
         expectedPattern = "((:|[0-9a-fA-F]{0,4}):)([0-9a-fA-F]{0,4}:){0,5}"
                 + "((([0-9a-fA-F]{0,4}:)?(:|[0-9a-fA-F]{0,4}))|"
@@ -152,7 +151,7 @@ public class TypesResolutionTest {
         Module tested = TestUtils.findModule(testedModules, "ietf-inet-types");
         Set<TypeDefinition<?>> typedefs = tested.getTypeDefinitions();
         TypeDefinition<?> type = TestUtils.findTypedef(typedefs, "domain-name");
-        StringType baseType = (StringType) type.getBaseType();
+        ExtendedType baseType = (ExtendedType) type.getBaseType();
         List<PatternConstraint> patterns = baseType.getPatterns();
         assertEquals(1, patterns.size());
         String expectedPattern = "((([a-zA-Z0-9_]([a-zA-Z0-9\\-_]){0,61})?[a-zA-Z0-9]\\.)*"
@@ -160,9 +159,9 @@ public class TypesResolutionTest {
                 + "|\\.";
         assertEquals(expectedPattern, patterns.get(0).getRegularExpression());
 
-        List<LengthConstraint> lengths = baseType.getLengthStatements();
+        List<LengthConstraint> lengths = baseType.getLengths();
         assertEquals(1, lengths.size());
-        LengthConstraint length = baseType.getLengthStatements().get(0);
+        LengthConstraint length = baseType.getLengths().get(0);
         assertEquals(1L, length.getMin());
         assertEquals(253L, length.getMax());
     }
@@ -173,8 +172,9 @@ public class TypesResolutionTest {
                 .findModule(testedModules, "custom-types-test");
         LeafSchemaNode leaf = (LeafSchemaNode) tested
                 .getDataChildByName("inst-id-leaf1");
-        InstanceIdentifier leafType = (InstanceIdentifier) leaf.getType();
-        assertFalse(leafType.requireInstance());
+        ExtendedType leafType = (ExtendedType) leaf.getType();
+        InstanceIdentifier leafTypeBase = (InstanceIdentifier)leafType.getBaseType();
+        assertFalse(leafTypeBase.requireInstance());
     }
 
     @Test

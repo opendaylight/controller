@@ -8,7 +8,6 @@
 package org.opendaylight.controller.yang.parser.util;
 
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +27,6 @@ import org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition
 import org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
-import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
-import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.UnionTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
@@ -198,30 +194,22 @@ public final class ParserUtils {
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, binType.getQName());
                 List<Byte> bytes = (List<Byte>) binType.getDefaultValue();
-                result = new BinaryType(newSchemaPath, bytes,
-                        binType.getLengthConstraints(), binType.getUnits());
+                result = new BinaryType(newSchemaPath, bytes);
             } else if (nodeType instanceof BitsTypeDefinition) {
                 BitsTypeDefinition bitsType = (BitsTypeDefinition) nodeType;
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, nodeType.getQName());
-                result = new BitsType(newSchemaPath, bitsType.getBits(),
-                        bitsType.getUnits());
+                result = new BitsType(newSchemaPath, bitsType.getBits());
             } else if (nodeType instanceof BooleanTypeDefinition) {
                 BooleanTypeDefinition booleanType = (BooleanTypeDefinition) nodeType;
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, booleanType.getQName());
-                result = new BooleanType(newSchemaPath,
-                        (Boolean) booleanType.getDefaultValue(),
-                        booleanType.getUnits());
+                result = new BooleanType(newSchemaPath);
             } else if (nodeType instanceof DecimalTypeDefinition) {
                 DecimalTypeDefinition decimalType = (DecimalTypeDefinition) nodeType;
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, decimalType.getQName());
-                BigDecimal defaultValue = (BigDecimal) decimalType
-                        .getDefaultValue();
-                result = new Decimal64(newSchemaPath, decimalType.getUnits(),
-                        defaultValue, decimalType.getRangeStatements(),
-                        decimalType.getFractionDigits());
+                result = new Decimal64(newSchemaPath, decimalType.getFractionDigits());
             } else if (nodeType instanceof EmptyTypeDefinition) {
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, nodeType.getQName());
@@ -232,7 +220,7 @@ public final class ParserUtils {
                         nodeQName, enumType.getQName());
                 result = new EnumerationType(newSchemaPath,
                         (EnumPair) enumType.getDefaultValue(),
-                        enumType.getValues(), enumType.getUnits());
+                        enumType.getValues());
             } else if (nodeType instanceof IdentityrefTypeDefinition) {
                 IdentityrefTypeDefinition idrefType = (IdentityrefTypeDefinition) nodeType;
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
@@ -247,13 +235,13 @@ public final class ParserUtils {
                         instIdType.getPathStatement(),
                         instIdType.requireInstance());
             } else if (nodeType instanceof StringTypeDefinition) {
-                result = copyStringType(parentSchemaPath, nodeQName,
+                result = createNewStringType(parentSchemaPath, nodeQName,
                         (StringTypeDefinition) nodeType);
             } else if (nodeType instanceof IntegerTypeDefinition) {
-                result = copyIntType(parentSchemaPath, nodeQName,
+                result = createNewIntType(parentSchemaPath, nodeQName,
                         (IntegerTypeDefinition) nodeType);
             } else if (nodeType instanceof UnsignedIntegerTypeDefinition) {
-                result = copyUIntType(parentSchemaPath, nodeQName,
+                result = createNewUintType(parentSchemaPath, nodeQName,
                         (UnsignedIntegerTypeDefinition) nodeType);
             } else if (nodeType instanceof LeafrefTypeDefinition) {
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
@@ -270,7 +258,7 @@ public final class ParserUtils {
         return result;
     }
 
-    private static TypeDefinition<?> copyStringType(SchemaPath schemaPath,
+    private static TypeDefinition<?> createNewStringType(SchemaPath schemaPath,
             QName nodeQName, StringTypeDefinition nodeType) {
         List<QName> path = schemaPath.getPath();
         List<QName> newPath = new ArrayList<QName>(path);
@@ -279,64 +267,44 @@ public final class ParserUtils {
         SchemaPath newSchemaPath = new SchemaPath(newPath,
                 schemaPath.isAbsolute());
 
-        String newDefault = nodeType.getDefaultValue().toString();
-        String newUnits = nodeType.getUnits();
-        List<LengthConstraint> lengths = nodeType.getLengthStatements();
-        List<PatternConstraint> patterns = nodeType.getPatterns();
-
-        return new StringType(newSchemaPath, newDefault, lengths, patterns,
-                newUnits);
+        return new StringType(newSchemaPath);
     }
 
-    private static TypeDefinition<?> copyIntType(SchemaPath schemaPath,
+    private static TypeDefinition<?> createNewIntType(SchemaPath schemaPath,
             QName nodeQName, IntegerTypeDefinition type) {
         QName typeQName = type.getQName();
         SchemaPath newSchemaPath = createNewSchemaPath(schemaPath, nodeQName,
                 typeQName);
-
         String localName = typeQName.getLocalName();
-        List<RangeConstraint> ranges = type.getRangeStatements();
-        String units = type.getUnits();
 
         if ("int8".equals(localName)) {
-            Byte defaultValue = (Byte) type.getDefaultValue();
-            return new Int8(newSchemaPath, ranges, units, defaultValue);
+            return new Int8(newSchemaPath);
         } else if ("int16".equals(localName)) {
-            Short defaultValue = (Short) type.getDefaultValue();
-            return new Int16(newSchemaPath, ranges, units, defaultValue);
+            return new Int16(newSchemaPath);
         } else if ("int32".equals(localName)) {
-            Integer defaultValue = (Integer) type.getDefaultValue();
-            return new Int32(newSchemaPath, ranges, units, defaultValue);
+            return new Int32(newSchemaPath);
         } else if ("int64".equals(localName)) {
-            Long defaultValue = (Long) type.getDefaultValue();
-            return new Int64(newSchemaPath, ranges, units, defaultValue);
+            return new Int64(newSchemaPath);
         } else {
             return null;
         }
     }
 
-    private static TypeDefinition<?> copyUIntType(SchemaPath schemaPath,
+    private static TypeDefinition<?> createNewUintType(SchemaPath schemaPath,
             QName nodeQName, UnsignedIntegerTypeDefinition type) {
         QName typeQName = type.getQName();
         SchemaPath newSchemaPath = createNewSchemaPath(schemaPath, nodeQName,
                 typeQName);
-
         String localName = typeQName.getLocalName();
-        List<RangeConstraint> ranges = type.getRangeStatements();
-        String units = type.getUnits();
 
         if ("uint8".equals(localName)) {
-            Byte defaultValue = (Byte) type.getDefaultValue();
-            return new Int8(newSchemaPath, ranges, units, defaultValue);
+            return new Int8(newSchemaPath);
         } else if ("uint16".equals(localName)) {
-            Short defaultValue = (Short) type.getDefaultValue();
-            return new Int16(newSchemaPath, ranges, units, defaultValue);
+            return new Int16(newSchemaPath);
         } else if ("uint32".equals(localName)) {
-            Integer defaultValue = (Integer) type.getDefaultValue();
-            return new Int32(newSchemaPath, ranges, units, defaultValue);
+            return new Int32(newSchemaPath);
         } else if ("uint64".equals(localName)) {
-            Long defaultValue = (Long) type.getDefaultValue();
-            return new Int64(newSchemaPath, ranges, units, defaultValue);
+            return new Int64(newSchemaPath);
         } else {
             return null;
         }

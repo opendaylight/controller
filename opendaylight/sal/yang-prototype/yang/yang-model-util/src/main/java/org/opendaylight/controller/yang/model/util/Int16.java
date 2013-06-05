@@ -7,12 +7,9 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.util.List;
-
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
 /**
  * Implementation of Yang int16 built-in type. <br>
@@ -22,29 +19,15 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  * @see AbstractSignedInteger
  */
 public final class Int16 extends AbstractSignedInteger {
-
     private static final QName name = BaseTypes.constructQName("int16");
-    private Short defaultValue = null;
+    private final Short defaultValue = null;
     private static final String description = "int16  represents integer values between -32768 and 32767, inclusively.";
     private final IntegerTypeDefinition baseType;
 
-    private Int16() {
-        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = this;
-    }
-
     public Int16(final SchemaPath path) {
         super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = new Int16();
+        this.baseType = this;
 
-    }
-
-    public Int16(final SchemaPath path,
-            final List<RangeConstraint> rangeStatements, final String units,
-            final Short defaultValue) {
-        super(path, name, description, rangeStatements, units);
-        this.defaultValue = defaultValue;
-        this.baseType = new Int16();
     }
 
     @Override
