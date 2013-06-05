@@ -7,12 +7,9 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
-import java.util.List;
-
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
 /**
  * Implementation of Yang int64 built-in type. <br>
@@ -22,34 +19,15 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  *
  */
 public final class Int64 extends AbstractSignedInteger {
-
     private static final QName name = BaseTypes.constructQName("int64");
-    private Long defaultValue = null;
+    private final Long defaultValue = null;
     private static final String description =
             "int64  represents integer values between -9223372036854775808 and 9223372036854775807, inclusively.";
     private final IntegerTypeDefinition baseType;
 
-    private Int64() {
-        super(name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
-        this.baseType = this;
-    }
-
     public Int64(final SchemaPath path) {
         super(path, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
-        this.baseType = new Int64();
-    }
-
-    public Int64(final SchemaPath path, final Long defaultValue) {
-        super(path, name, description, Integer.MIN_VALUE, Integer.MAX_VALUE, "");
-        this.baseType = new Int64();
-        this.defaultValue = defaultValue;
-    }
-
-    public Int64(final SchemaPath path, final List<RangeConstraint> rangeStatements,
-            final String units, final Long defaultValue) {
-        super(path, name, description, rangeStatements, units);
-        this.baseType = new Int64();
-        this.defaultValue = defaultValue;
+        this.baseType = this;
     }
 
     /*

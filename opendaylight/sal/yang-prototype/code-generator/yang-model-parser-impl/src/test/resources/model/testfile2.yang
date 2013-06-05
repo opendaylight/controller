@@ -114,6 +114,12 @@ module types2 {
     leaf name {
         type string;
     }
+    
+    leaf count {
+        type int8 {
+            range "1..10";
+        }
+    }
      
     leaf nested-type-leaf {
         type my-type1;

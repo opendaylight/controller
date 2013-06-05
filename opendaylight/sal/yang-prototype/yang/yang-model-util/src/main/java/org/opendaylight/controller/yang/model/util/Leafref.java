@@ -33,17 +33,10 @@ public final class Leafref implements LeafrefTypeDefinition {
     private final String units = "";
     private final LeafrefTypeDefinition baseType;
 
-    private Leafref(final RevisionAwareXPath xpath) {
-        this.xpath = xpath;
-        this.path = BaseTypes.schemaPath(name);
-        this.baseType = this;
-    }
-
     public Leafref(final SchemaPath path, final RevisionAwareXPath xpath) {
-        super();
         this.path = path;
         this.xpath = xpath;
-        baseType = new Leafref(xpath);
+        baseType = this;
     }
 
     /*

@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,12 +57,15 @@ import org.opendaylight.controller.yang.model.util.Decimal64;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.Int16;
 import org.opendaylight.controller.yang.model.util.Int32;
+import org.opendaylight.controller.yang.model.util.Int8;
 import org.opendaylight.controller.yang.model.util.Leafref;
 import org.opendaylight.controller.yang.model.util.StringType;
 import org.opendaylight.controller.yang.model.util.Uint32;
 import org.opendaylight.controller.yang.model.util.UnionType;
 
 public class YangParserTest {
+    private final DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
     private Set<Module> modules;
 
     @Before
@@ -196,6 +200,55 @@ public class YangParserTest {
         LeafSchemaNode ifMtu = (LeafSchemaNode) ifEntry
                 .getDataChildByName("ifMtu");
         assertTrue(ifMtu.getType() instanceof Int32);
+    }
+
+    @Test
+    public void testParseLeaf() throws ParseException {
+        Module test = TestUtils.findModule(modules, "types2");
+
+        // leaf if-name
+        LeafSchemaNode ifName = (LeafSchemaNode) test
+                .getDataChildByName("if-name");
+        Leafref ifNameType = (Leafref)ifName.getType();
+        QName qname = ifNameType.getQName();
+
+        URI baseYangTypeNS = URI.create("urn:ietf:params:xml:ns:yang:1");
+        assertEquals(baseYangTypeNS, qname.getNamespace());
+        assertNull(qname.getRevision());
+        assertEquals("", qname.getPrefix());
+        assertEquals("leafref", qname.getLocalName());
+
+        // leaf name
+        LeafSchemaNode name = (LeafSchemaNode) test
+                .getDataChildByName("name");
+        StringType nameType = (StringType)name.getType();
+        QName nameQName = nameType.getQName();
+
+        assertEquals(baseYangTypeNS, nameQName.getNamespace());
+        assertNull(nameQName.getRevision());
+        assertEquals("", nameQName.getPrefix());
+        assertEquals("string", nameQName.getLocalName());
+
+        // leaf count
+        LeafSchemaNode count = (LeafSchemaNode) test
+                .getDataChildByName("count");
+        ExtendedType countType = (ExtendedType)count.getType();
+        QName countTypeQName = countType.getQName();
+
+        URI expectedNS = URI.create("urn:simple.types.data.demo");
+        Date expectedDate = simpleDateFormat.parse("2013-02-27");
+        assertEquals(expectedNS, countTypeQName.getNamespace());
+        assertEquals(expectedDate, countTypeQName.getRevision());
+        assertEquals("t2", countTypeQName.getPrefix());
+        assertEquals("int8", countTypeQName.getLocalName());
+
+        Int8 countTypeBase = (Int8)countType.getBaseType();
+        QName countTypeBaseQName = countTypeBase.getQName();
+
+        assertEquals(baseYangTypeNS, countTypeBaseQName.getNamespace());
+        assertNull(countTypeBaseQName.getRevision());
+        assertEquals("", countTypeBaseQName.getPrefix());
+        assertEquals("int8", countTypeBaseQName.getLocalName());
     }
 
     @Test
@@ -371,8 +424,14 @@ public class YangParserTest {
         ExtendedType baseType = (ExtendedType) testleafType.getBaseType();
         assertEquals("my-base-int32-type", baseType.getQName().getLocalName());
 
-        Int32 int32base = (Int32) baseType.getBaseType();
-        List<RangeConstraint> ranges = int32base.getRangeStatements();
+        ExtendedType int32Type = (ExtendedType) baseType.getBaseType();
+        Int32 int32TypeBase = (Int32)int32Type.getBaseType();
+        QName qname = int32TypeBase.getQName();
+        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"), qname.getNamespace());
+        assertNull(qname.getRevision());
+        assertEquals("", qname.getPrefix());
+        assertEquals("int32", qname.getLocalName());
+        List<RangeConstraint> ranges = int32Type.getRanges();
         assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
         assertEquals(2L, range.getMin());
@@ -419,14 +478,14 @@ public class YangParserTest {
         UnionType unionBase = (UnionType) baseType.getBaseType();
 
         List<TypeDefinition<?>> unionTypes = unionBase.getTypes();
-        Int16 unionType1 = (Int16) unionTypes.get(0);
-        List<RangeConstraint> ranges = unionType1.getRangeStatements();
+        ExtendedType unionType1 = (ExtendedType) unionTypes.get(0);
+        List<RangeConstraint> ranges = unionType1.getRanges();
         assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
         assertEquals(1L, range.getMin());
         assertEquals(100L, range.getMax());
 
-        assertTrue(unionTypes.get(0) instanceof Int16);
+        assertTrue(unionType1.getBaseType() instanceof Int16);
         assertTrue(unionTypes.get(1) instanceof Int32);
     }
 
@@ -458,11 +517,12 @@ public class YangParserTest {
                 .getBaseType();
         List<TypeDefinition<?>> extendedTargetTypes = extendedTargetUnion
                 .getTypes();
-        assertTrue(extendedTargetTypes.get(0) instanceof Int16);
+        assertTrue(extendedTargetTypes.get(0).getBaseType() instanceof Int16);
         assertTrue(extendedTargetTypes.get(1) instanceof Int32);
 
-        Int16 int16 = (Int16) extendedTargetTypes.get(0);
-        List<RangeConstraint> ranges = int16.getRangeStatements();
+        ExtendedType int16 = (ExtendedType) extendedTargetTypes.get(0);
+        assertTrue(int16.getBaseType() instanceof Int16);
+        List<RangeConstraint> ranges = int16.getRanges();
         assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
         assertEquals(1L, range.getMin());
@@ -536,10 +596,10 @@ public class YangParserTest {
         UnionType myUnionBase = (UnionType) myUnion.getBaseType();
         List<TypeDefinition<?>> myUnionBaseTypes = myUnionBase.getTypes();
         assertEquals(2, myUnionBaseTypes.size());
-        assertTrue(myUnionBaseTypes.get(0) instanceof Int16);
+        assertTrue(myUnionBaseTypes.get(0).getBaseType() instanceof Int16);
         assertTrue(myUnionBaseTypes.get(1) instanceof Int32);
-        Int16 int16 = (Int16) myUnionBaseTypes.get(0);
-        List<RangeConstraint> ranges = int16.getRangeStatements();
+        ExtendedType int16 = (ExtendedType) myUnionBaseTypes.get(0);
+        List<RangeConstraint> ranges = int16.getRanges();
         assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
         assertEquals(1L, range.getMin());
@@ -770,7 +830,6 @@ public class YangParserTest {
 
     @Test
     public void testAugmentNodesTypesSchemaPath() throws Exception {
-        final DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Module testModule = TestUtils.findModule(modules, "types1");
         Set<AugmentationSchema> augments = testModule.getAugmentations();
         assertEquals(1, augments.size());

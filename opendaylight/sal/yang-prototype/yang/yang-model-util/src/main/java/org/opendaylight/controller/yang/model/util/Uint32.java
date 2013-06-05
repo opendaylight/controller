@@ -7,11 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.util.List;
-
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
-import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
 
 /**
@@ -21,33 +18,14 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  *
  */
 public final class Uint32 extends AbstractUnsignedInteger {
-
     private static final QName name = BaseTypes.constructQName("uint32");
-    private Long defaultValue = null;
+    private final Long defaultValue = null;
     private static final String description = "uint32 represents integer values between 0 and 4294967295, inclusively.";
     private final UnsignedIntegerTypeDefinition baseType;
 
-    private Uint32() {
-        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = this;
-    }
-
     public Uint32(final SchemaPath path) {
         super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = new Uint32();
-    }
-
-    public Uint32(final SchemaPath path, final Long defaultValue) {
-        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = new Uint32();
-        this.defaultValue = defaultValue;
-    }
-
-    public Uint32(final SchemaPath path, final List<RangeConstraint> rangeStatements,
-            final String units, final Long defaultValue) {
-        super(path, name, description, rangeStatements, units);
-        this.baseType = new Uint32();
-        this.defaultValue = defaultValue;
+        this.baseType = this;
     }
 
     /*

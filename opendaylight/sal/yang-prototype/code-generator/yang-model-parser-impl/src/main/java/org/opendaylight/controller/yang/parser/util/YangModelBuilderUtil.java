@@ -84,10 +84,12 @@ import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.util.BaseConstraints;
+import org.opendaylight.controller.yang.model.util.BaseTypes;
 import org.opendaylight.controller.yang.model.util.BinaryType;
 import org.opendaylight.controller.yang.model.util.BitsType;
 import org.opendaylight.controller.yang.model.util.Decimal64;
 import org.opendaylight.controller.yang.model.util.EnumerationType;
+import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.InstanceIdentifier;
 import org.opendaylight.controller.yang.model.util.Int16;
 import org.opendaylight.controller.yang.model.util.Int32;
@@ -999,7 +1001,7 @@ public final class YangModelBuilderUtil {
             final Type_body_stmtsContext typeBody,
             final List<String> actualPath, final URI namespace,
             final Date revision, final String prefix) {
-        TypeDefinition<?> type = null;
+        TypeDefinition<?> baseType = null;
 
         List<RangeConstraint> rangeStatements = getRangeConstraints(typeBody);
         Integer fractionDigits = getFractionDigits(typeBody);
@@ -1008,53 +1010,113 @@ public final class YangModelBuilderUtil {
         List<EnumTypeDefinition.EnumPair> enumConstants = getEnumConstants(
                 typeBody, actualPath, namespace, revision, prefix);
 
-        SchemaPath schemaPath = createActualSchemaPath(actualPath, namespace,
-                revision, prefix);
+        SchemaPath baseTypePath = createTypeSchemaPath(actualPath,
+                namespace, revision, prefix, typeName, true);
 
         if ("decimal64".equals(typeName)) {
-            type = new Decimal64(schemaPath, fractionDigits);
+            if (rangeStatements.isEmpty()) {
+                return new Decimal64(baseTypePath, fractionDigits);
+            }
+            baseType = new Decimal64(baseTypePath, fractionDigits);
         } else if (typeName.startsWith("int")) {
             if ("int8".equals(typeName)) {
-                type = new Int8(schemaPath, rangeStatements, null, null);
+                baseType = new Int8(baseTypePath);
             } else if ("int16".equals(typeName)) {
-                type = new Int16(schemaPath, rangeStatements, null, null);
+                baseType = new Int16(baseTypePath);
             } else if ("int32".equals(typeName)) {
-                type = new Int32(schemaPath, rangeStatements, null, null);
+                baseType = new Int32(baseTypePath);
             } else if ("int64".equals(typeName)) {
-                type = new Int64(schemaPath, rangeStatements, null, null);
+                baseType = new Int64(baseTypePath);
             }
         } else if (typeName.startsWith("uint")) {
             if ("uint8".equals(typeName)) {
-                type = new Uint8(schemaPath, rangeStatements, null, null);
+                baseType = new Uint8(baseTypePath);
             } else if ("uint16".equals(typeName)) {
-                type = new Uint16(schemaPath, rangeStatements, null, null);
+                baseType = new Uint16(baseTypePath);
             } else if ("uint32".equals(typeName)) {
-                type = new Uint32(schemaPath, rangeStatements, null, null);
+                baseType = new Uint32(baseTypePath);
             } else if ("uint64".equals(typeName)) {
-                type = new Uint64(schemaPath, rangeStatements, null, null);
+                baseType = new Uint64(baseTypePath);
             }
         } else if ("enumeration".equals(typeName)) {
-            type = new EnumerationType(schemaPath, enumConstants);
+            return new EnumerationType(baseTypePath, enumConstants);
         } else if ("string".equals(typeName)) {
-            type = new StringType(schemaPath, lengthStatements,
-                    patternStatements);
+            baseType = new StringType(baseTypePath);
         } else if ("bits".equals(typeName)) {
-            type = new BitsType(schemaPath, getBits(typeBody, actualPath,
-                    namespace, revision, prefix));
+            return new BitsType(baseTypePath, getBits(typeBody,
+                    actualPath, namespace, revision, prefix));
         } else if ("leafref".equals(typeName)) {
             final String path = parseLeafrefPath(typeBody);
             final boolean absolute = path.startsWith("/");
             RevisionAwareXPath xpath = new RevisionAwareXPathImpl(path,
                     absolute);
-            type = new Leafref(schemaPath, xpath);
+            return new Leafref(baseTypePath, xpath);
         } else if ("binary".equals(typeName)) {
-            List<Byte> bytes = Collections.emptyList();
-            type = new BinaryType(schemaPath, bytes, lengthStatements, null);
+            baseType = new BinaryType(baseTypePath);
         } else if ("instance-identifier".equals(typeName)) {
             boolean requireInstance = isRequireInstance(typeBody);
-            type = new InstanceIdentifier(schemaPath, null, requireInstance);
+            baseType = new InstanceIdentifier(baseTypePath, null,
+                    requireInstance);
         }
-        return type;
+
+        TypeDefinition<?> result = null;
+        QName qname = new QName(namespace, revision, prefix, typeName);
+        ExtendedType.Builder typeBuilder = null;
+
+        SchemaPath schemaPath = createTypeSchemaPath(actualPath, namespace,
+                revision, prefix, typeName, false);
+        typeBuilder = new ExtendedType.Builder(qname, baseType, "", "",
+                schemaPath);
+
+        typeBuilder.ranges(rangeStatements);
+        typeBuilder.lengths(lengthStatements);
+        typeBuilder.patterns(patternStatements);
+        typeBuilder.fractionDigits(fractionDigits);
+
+        result = typeBuilder.build();
+        return result;
+    }
+
+    /**
+     * Create SchemaPath object from given path list with namespace, revision
+     * and prefix based on given values.
+     *
+     * @param actualPath
+     *            current position in model
+     * @param namespace
+     * @param revision
+     * @param prefix
+     * @param typeName
+     * @param isBaseYangType
+     *            if this is base yang type
+     * @param isFinalType
+     *            if this is base yang type without restrictions
+     * @return SchemaPath object.
+     */
+    private static SchemaPath createTypeSchemaPath(
+            final List<String> actualPath, final URI namespace,
+            final Date revision, final String prefix, final String typeName,
+            final boolean isBaseYangType) {
+        List<String> typePath = new ArrayList<String>(actualPath);
+        if (!isBaseYangType) {
+            typePath.add(typeName);
+        }
+
+        final List<QName> path = new ArrayList<QName>();
+        QName qname;
+        // start from index 1 -> module name omited
+        for (int i = 1; i < typePath.size(); i++) {
+            qname = new QName(namespace, revision, prefix, typePath.get(i));
+            path.add(qname);
+        }
+        QName typeQName;
+        if (isBaseYangType) {
+            typeQName = new QName(BaseTypes.BaseTypesNamespace, typeName);
+        } else {
+            typeQName = new QName(namespace, revision, prefix, typeName);
+        }
+        path.add(typeQName);
+        return new SchemaPath(path, true);
     }
 
     /**
