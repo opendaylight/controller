@@ -140,12 +140,12 @@ public class HostTracker implements IfIptoHost, IfHostListener,
      * wasn't created for this host in the controller. This would cause
      * arphandler not to know where to send the ARP 2. The host facing port is
      * down 3. The IP host doesn't exist or is not responding to ARP requests
-     * 
+     *
      * Conditions 1 and 2 above can be recovered if ARP is sent when the
      * relevant L3 interface is added or the port facing host comes up. Whenever
      * L3 interface is added or host facing port comes up, ARP will be sent to
      * hosts in this list.
-     * 
+     *
      * We can't recover from condition 3 above
      */
     private ArrayList<ARPPending> failedARPReqList = new ArrayList<HostTracker.ARPPending>();
@@ -591,10 +591,10 @@ public class HostTracker implements IfIptoHost, IfHostListener,
      * When a new Host is learnt by the hosttracker module, it places the
      * directly connected Node in Tier-1 & using this function, updates the Tier
      * value for all other Nodes in the network hierarchy.
-     * 
+     *
      * This is a recursive function and it takes care of updating the Tier value
      * for all the connected and eligible Nodes.
-     * 
+     *
      * @param n
      *            Node that represents one of the Vertex in the Topology Graph.
      * @param currentTier
@@ -643,7 +643,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
      * Internal convenience routine to check the eligibility of a Switch for a
      * Tier update. Any Node with Tier=0 or a Tier value that is greater than
      * the new Tier Value is eligible for the update.
-     * 
+     *
      * @param n
      *            Node for which the Tier update eligibility is checked
      * @param tier
@@ -717,7 +717,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
      * that returns the Network Hierarchy for a given Host. This API is
      * typically used by applications like Hadoop for Rack Awareness
      * functionality.
-     * 
+     *
      * @param hostAddress
      *            IP-Address of the host/node.
      * @return Network Hierarchies represented by an Array of Array (of
@@ -742,7 +742,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
      * is used as the network for Hadoop Demos & in order to give a meaningful
      * rack-awareness switch names, the DPID is organized in ASCII Characters
      * and retrieved as string.
-     * 
+     *
      * @param dpid
      *            Switch DataPath Id
      * @return Ascii String represented by the DPID.
@@ -765,7 +765,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
 
     /**
      * A convenient recursive routine to obtain the Hierarchy of Switches.
-     * 
+     *
      * @param node
      *            Current Node in the Recursive routine.
      * @param currHierarchy
@@ -1009,7 +1009,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
     /**
      * Inform the controller IP to MAC binding of a host and its connectivity to
      * an openflow switch in terms of Node, port, and VLAN.
-     * 
+     *
      * @param networkAddr
      *            IP address of the host
      * @param dataLayer
@@ -1020,7 +1020,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
      *            Port of the switch to which host is connected
      * @param vlan
      *            Vlan of which this host is member of
-     * 
+     *
      * @return Status The status object as described in {@code Status}
      *         indicating the result of this action.
      */
@@ -1067,7 +1067,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
     /**
      * Update the controller IP to MAC binding of a host and its connectivity to
      * an openflow switch in terms of switch id, switch port, and VLAN.
-     * 
+     *
      * @param networkAddr
      *            IP address of the host
      * @param dataLayer
@@ -1078,7 +1078,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
      *            Port of the switch to which host is connected
      * @param vlan
      *            Vlan of which this host is member of
-     * 
+     *
      * @return boolean true if the host was added successfully, false otherwise
      */
     public boolean updateHostReq(InetAddress networkAddr,
@@ -1107,10 +1107,10 @@ public class HostTracker implements IfIptoHost, IfHostListener,
     /**
      * Remove from the controller IP to MAC binding of a host and its
      * connectivity to an openflow switch
-     * 
+     *
      * @param networkAddr
      *            IP address of the host
-     * 
+     *
      * @return boolean true if the host was removed successfully, false
      *         otherwise
      */
@@ -1160,17 +1160,12 @@ public class HostTracker implements IfIptoHost, IfHostListener,
 
         switch (type) {
         case REMOVED:
-            long sid = (Long) node.getID();
-            if (logger.isDebugEnabled()) {
-              logger.debug("Received removedSwitch for sw id {}",
-                      HexEncode.longToHexString(sid));
-            }
+            logger.debug("Received removed node {}", node);
             for (Entry<InetAddress, HostNodeConnector> entry : hostsDB
                     .entrySet()) {
                 HostNodeConnector host = entry.getValue();
-                if (host.getnodeconnectornodeId() == sid) {
-                    logger.debug("Switch: {} is down, remove from Hosts_DB",
-                            sid);
+                if (host.getnodeconnectorNode().equals(node)) {
+                    logger.debug("Node: {} is down, remove from Hosts_DB", node);
                     removeKnownHost(entry.getKey());
                     notifyHostLearnedOrRemoved(host, false);
                 }
@@ -1311,7 +1306,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init(Component c) {
         Dictionary<?, ?> props = c.getServiceProperties();
@@ -1329,7 +1324,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         destroyCache();
@@ -1338,7 +1333,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     void start() {
     }
@@ -1347,7 +1342,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     void stop() {
     }
