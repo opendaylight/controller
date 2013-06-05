@@ -46,6 +46,7 @@
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.topology,
+              org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.hosttracker,
               org.opendaylight.controller.topologymanager,
               org.opendaylight.controller.sal.packet.address,
