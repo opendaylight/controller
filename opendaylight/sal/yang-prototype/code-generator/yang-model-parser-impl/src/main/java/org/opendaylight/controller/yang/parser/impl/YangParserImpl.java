@@ -49,6 +49,7 @@ import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.IdentityrefType;
 import org.opendaylight.controller.yang.model.util.UnknownType;
+import org.opendaylight.controller.yang.model.util.YangTypesConverter;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
@@ -552,11 +553,16 @@ public final class YangParserImpl implements YangModelParser {
             constraints.addPatterns(patterns);
             fractionDigits = ext.getFractionDigits();
             constraints.setFractionDigits(fractionDigits);
-            return findConstraints(
-                    findTypeDefinitionBuilder(nodeToResolve.getPath(), builder,
-                            ext.getQName().getLocalName(), builder.getName(),
-                            nodeToResolve.getLine()), constraints, modules,
-                    builder);
+            if(YangTypesConverter.isBaseYangType(ext.getBaseType().getQName().getLocalName())) {
+                mergeConstraints(ext.getBaseType(), constraints);
+                return constraints;
+            } else {
+                return findConstraints(
+                        findTypeDefinitionBuilder(nodeToResolve.getPath(), builder,
+                                ext.getQName().getLocalName(), builder.getName(),
+                                nodeToResolve.getLine()), constraints, modules,
+                        builder);
+            }
         } else if (referencedType instanceof UnknownType) {
             final UnknownType unknown = (UnknownType) referencedType;
             ranges = unknown.getRangeStatements();

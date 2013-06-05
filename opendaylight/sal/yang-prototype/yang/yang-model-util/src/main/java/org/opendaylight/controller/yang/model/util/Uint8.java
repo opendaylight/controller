@@ -7,11 +7,8 @@
   */
 package org.opendaylight.controller.yang.model.util;
 
-import java.util.List;
-
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
-import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
 
 /**
@@ -25,32 +22,14 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
 public final class Uint8 extends AbstractUnsignedInteger {
 
     private static final QName name = BaseTypes.constructQName("uint8");
-    private Short defaultValue = null;
+    private final Short defaultValue = null;
     private static final String description =
             "uint8  represents integer values between 0 and 255, inclusively.";
     private final UnsignedIntegerTypeDefinition baseType;
 
-    private Uint8() {
-        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = this;
-    }
-
     public Uint8(final SchemaPath path) {
         super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = new Uint8();
-    }
-
-    public Uint8(final SchemaPath path, final Short defaultValue) {
-        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = new Uint8();
-        this.defaultValue = defaultValue;
-    }
-
-    public Uint8(final SchemaPath path, final List<RangeConstraint> rangeStatements,
-            final String units, final Short defaultValue) {
-        super(path, name, description, rangeStatements, units);
-        this.baseType = new Uint8();
-        this.defaultValue = defaultValue;
+        this.baseType = this;
     }
 
     /*

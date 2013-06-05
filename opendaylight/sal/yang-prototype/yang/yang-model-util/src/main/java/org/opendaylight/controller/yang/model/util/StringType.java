@@ -25,26 +25,15 @@ import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
  * @see StringTypeDefinition
  */
 public final class StringType implements StringTypeDefinition {
-
     private final QName name = BaseTypes.constructQName("string");
     private final SchemaPath path;
-    private String defaultValue = "";
+    private final String defaultValue = "";
     private final String description = "";
     private final String reference = "";
     private final List<LengthConstraint> lengthStatements;
     private final List<PatternConstraint> patterns;
-    private String units = "";
+    private final String units = "";
     private final StringTypeDefinition baseType;
-
-    private StringType() {
-        super();
-        path = BaseTypes.schemaPath(name);
-        final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
-        constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
-        lengthStatements = Collections.unmodifiableList(constraints);
-        patterns = Collections.emptyList();
-        baseType = this;
-    }
 
     /**
      * Default Constructor.
@@ -56,56 +45,7 @@ public final class StringType implements StringTypeDefinition {
         constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
         lengthStatements = Collections.unmodifiableList(constraints);
         patterns = Collections.emptyList();
-        baseType = new StringType();
-    }
-
-    /**
-     *
-     * @param actualPath
-     * @param namespace
-     * @param revision
-     * @param lengthStatements
-     * @param patterns
-     */
-    public StringType(final SchemaPath path, final List<LengthConstraint> lengthStatements,
-            final List<PatternConstraint> patterns) {
-        super();
-        this.path = path;
-        if(lengthStatements == null || lengthStatements.size() == 0) {
-            final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
-            constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
-            this.lengthStatements = Collections.unmodifiableList(constraints);
-        } else {
-            this.lengthStatements = Collections.unmodifiableList(lengthStatements);
-        }
-        this.patterns = Collections.unmodifiableList(patterns);
-        baseType = new StringType();
-    }
-
-    /**
-     *
-     *
-     * @param defaultValue
-     * @param lengthStatements
-     * @param patterns
-     * @param units
-     */
-    public StringType(final SchemaPath path, final String defaultValue,
-            final List<LengthConstraint> lengthStatements,
-            final List<PatternConstraint> patterns, final String units) {
-        super();
-        this.path = path;
-        this.defaultValue = defaultValue;
-        if(lengthStatements == null || lengthStatements.size() == 0) {
-            final List<LengthConstraint> constraints = new ArrayList<LengthConstraint>();
-            constraints.add(BaseConstraints.lengthConstraint(0, Long.MAX_VALUE, "", ""));
-            this.lengthStatements = Collections.unmodifiableList(constraints);
-        } else {
-            this.lengthStatements = Collections.unmodifiableList(lengthStatements);
-        }
-        this.patterns = Collections.unmodifiableList(patterns);
-        this.units = units;
-        this.baseType = new StringType();
+        baseType = this;
     }
 
     /*

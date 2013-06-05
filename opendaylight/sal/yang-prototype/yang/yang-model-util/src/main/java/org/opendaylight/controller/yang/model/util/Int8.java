@@ -7,12 +7,9 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.util.List;
-
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 
 /**
  * Implementation of Yang int8 built-in type. <br>
@@ -22,34 +19,14 @@ import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
  * @see AbstractSignedInteger
  */
 public final class Int8 extends AbstractSignedInteger {
-
     private static final QName name = BaseTypes.constructQName("int8");
-    private Byte defaultValue = null;
+    private final Byte defaultValue = null;
     private static final String description = "represents integer values between -128 and 127, inclusively.";
     private final IntegerTypeDefinition baseType;
 
-    private Int8() {
-        super(name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
-        this.baseType = this;
-    }
-
     public Int8(final SchemaPath path) {
         super(path, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
-        this.baseType = new Int8();
-    }
-
-    public Int8(final SchemaPath path, final Byte defaultValue) {
-        super(path, name, description, Byte.MIN_VALUE, Byte.MAX_VALUE, "");
-        this.baseType = new Int8();
-        this.defaultValue = defaultValue;
-    }
-
-    public Int8(final SchemaPath path,
-            final List<RangeConstraint> rangeStatements, final String units,
-            final Byte defaultValue) {
-        super(path, name, description, rangeStatements, units);
-        this.baseType = new Int8();
-        this.defaultValue = defaultValue;
+        this.baseType = this;
     }
 
     /*
