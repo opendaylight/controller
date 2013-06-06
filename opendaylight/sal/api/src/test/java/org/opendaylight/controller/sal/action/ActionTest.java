@@ -156,7 +156,7 @@ public class ActionTest {
         try {
             ip = InetAddress.getByName("2001:420:281:1003:f2de:f1ff:fe71:728d");
         } catch (UnknownHostException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         action = new SetNwSrc(ip);
         Assert.assertTrue(action.isValid());
@@ -172,7 +172,7 @@ public class ActionTest {
 
         action = new SetNwTos(0x40);
         Assert.assertFalse(action.isValid());
-        
+
         action = new SetNwTos(0xff1);
         Assert.assertFalse(action.isValid());
 
@@ -204,6 +204,29 @@ public class ActionTest {
 
         action = new SetTpDst(65536);
         Assert.assertFalse(action.isValid());
+    }
+
+    @Test
+    public void testNextHopActionCreation() {
+        SetNextHop action = null;
+
+        InetAddress ip = null;
+        try {
+            ip = InetAddress.getByName("171.71.9.52");
+        } catch (UnknownHostException e) {
+            logger.error("", e);
+        }
+
+        action = new SetNextHop(ip);
+        Assert.assertTrue(action.getAddress().equals(ip));
+
+        try {
+            ip = InetAddress.getByName("2001:420:281:1003:f2de:f1ff:fe71:728d");
+        } catch (UnknownHostException e) {
+            logger.error("", e);
+        }
+        action = new SetNextHop(ip);
+        Assert.assertTrue(action.getAddress().equals(ip));
     }
 
     @Test

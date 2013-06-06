@@ -340,21 +340,6 @@ public class frmTest {
     }
 
     @Test
-    public void testFlowConfigNextHopValidity() throws UnknownHostException {
-        FlowConfig fc = new FlowConfig();
-        Assert.assertFalse(fc.isOutputNextHopValid(null));
-        Assert.assertFalse(fc.isOutputNextHopValid("abc"));
-        Assert.assertFalse(fc.isOutputNextHopValid("1.1.1"));
-        Assert.assertFalse(fc.isOutputNextHopValid("1.1.1.1/49"));
-
-        Assert.assertTrue(fc.isOutputNextHopValid("1.1.1.1"));
-        Assert.assertTrue(fc.isOutputNextHopValid("1.1.1.1/32"));
-        Assert.assertTrue(fc
-                .isOutputNextHopValid("2001:420:281:1004:407a:57f4:4d15:c355"));
-
-    }
-
-    @Test
     public void testFlowConfigEqualities() throws UnknownHostException {
         FlowConfig fc = new FlowConfig();
         FlowConfig fc2 = new FlowConfig();

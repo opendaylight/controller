@@ -33,6 +33,7 @@ import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.PopVlan;
 import org.opendaylight.controller.sal.action.SetDlDst;
 import org.opendaylight.controller.sal.action.SetDlSrc;
+import org.opendaylight.controller.sal.action.SetNextHop;
 import org.opendaylight.controller.sal.action.SetNwDst;
 import org.opendaylight.controller.sal.action.SetNwSrc;
 import org.opendaylight.controller.sal.action.SetNwTos;
@@ -123,27 +124,6 @@ public class FlowConfig implements Serializable {
     private enum EtherIPType {
         ANY, V4, V6;
     };
-
-    private enum SetNextHopType {
-        CISCO_EXTENSION("Cisco NextHop Extension"), RESOLVE_L2RW(
-                "Resolve L2 Rewrite");
-
-        private SetNextHopType(String name) {
-            this.name = name;
-        }
-
-        private String name;
-
-        public String toString() {
-            return name;
-        }
-
-        public boolean equals(String type) {
-            if (type.trim().equalsIgnoreCase(name))
-                return true;
-            return false;
-        }
-    }
 
     public FlowConfig() {
     }
@@ -473,163 +453,160 @@ public class FlowConfig implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         FlowConfig other = (FlowConfig) obj;
         if (actions == null) {
-            if (other.actions != null)
+            if (other.actions != null) {
                 return false;
-        } else if (!actions.equals(other.actions))
-            return false;
-        if (cookie == null) {
-            if (other.cookie != null)
-                return false;
-        } else if (!cookie.equals(other.cookie))
-            return false;
-        if (dlDst == null) {
-            if (other.dlDst != null)
-                return false;
-        } else if (!dlDst.equals(other.dlDst))
-            return false;
-        if (dlSrc == null) {
-            if (other.dlSrc != null)
-                return false;
-        } else if (!dlSrc.equals(other.dlSrc))
-            return false;
-        if (dynamic != other.dynamic)
-            return false;
-        if (etherType == null) {
-            if (other.etherType != null)
-                return false;
-        } else if (!etherType.equals(other.etherType))
-            return false;
-        if (ingressPort == null) {
-            if (other.ingressPort != null)
-                return false;
-        } else if (!ingressPort.equals(other.ingressPort))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (nwDst == null) {
-            if (other.nwDst != null)
-                return false;
-        } else if (!nwDst.equals(other.nwDst))
-            return false;
-        if (nwSrc == null) {
-            if (other.nwSrc != null)
-                return false;
-        } else if (!nwSrc.equals(other.nwSrc))
-            return false;
-        if (portGroup == null) {
-            if (other.portGroup != null)
-                return false;
-        } else if (!portGroup.equals(other.portGroup))
-            return false;
-        if (priority == null) {
-            if (other.priority != null)
-                return false;
-        } else if (!priority.equals(other.priority))
-            return false;
-        if (protocol == null) {
-            if (other.protocol != null)
-                return false;
-        } else if (!protocol.equals(other.protocol))
-            return false;
-        if (node == null) {
-            if (other.node != null)
-                return false;
-        } else if (!node.equals(other.node))
-            return false;
-        if (tosBits == null) {
-            if (other.tosBits != null)
-                return false;
-        } else if (!tosBits.equals(other.tosBits))
-            return false;
-        if (tpDst == null) {
-            if (other.tpDst != null)
-                return false;
-        } else if (!tpDst.equals(other.tpDst))
-            return false;
-        if (tpSrc == null) {
-            if (other.tpSrc != null)
-                return false;
-        } else if (!tpSrc.equals(other.tpSrc))
-            return false;
-        if (vlanId == null) {
-            if (other.vlanId != null)
-                return false;
-        } else if (!vlanId.equals(other.vlanId))
-            return false;
-        if (vlanPriority == null) {
-            if (other.vlanPriority != null)
-                return false;
-        } else if (!vlanPriority.equals(other.vlanPriority))
-            return false;
-        if (idleTimeout == null) {
-            if (other.idleTimeout != null)
-                return false;
-        } else if (!idleTimeout.equals(other.idleTimeout))
-            return false;
-        if (hardTimeout == null) {
-            if (other.hardTimeout != null)
-                return false;
-        } else if (!hardTimeout.equals(other.hardTimeout))
-            return false;
-        return true;
-    }
-
-    public InetAddress getNextHopAddressForL2RWAction() {
-        if (actions != null) {
-            Matcher sstr;
-            for (String actiongrp : actions) {
-                sstr = Pattern.compile("SET_NEXT_HOP=(.*)").matcher(actiongrp);
-                if (sstr.matches()) {
-                    SetNextHopType setNHType = SetNextHopType.CISCO_EXTENSION;
-                    String nextHopInfo = sstr.group(1);
-                    String values[] = nextHopInfo.split("//");
-                    String address = values[0].trim();
-                    String type = null;
-                    if (values.length > 1) {
-                        type = values[1].trim();
-                    }
-
-                    if (type != null) {
-                        for (SetNextHopType nh : SetNextHopType.values()) {
-                            if (nh.equals(type))
-                                setNHType = nh;
-                        }
-                    }
-
-                    log.debug("Get Nexthop address = {} Type = {}", address,
-                            setNHType.toString());
-                    if (setNHType == SetNextHopType.RESOLVE_L2RW) {
-                        try {
-                            return InetAddress.getByName(address);
-                        } catch (Exception e) {
-                            log.debug(
-                                    "Exception during nextHopAddress resolution : ",
-                                    e);
-                        }
-                    }
-                }
             }
+        } else if (!actions.equals(other.actions)) {
+            return false;
         }
-        return null;
-    }
-
-    public String getNextHopL2RWUsageError() {
-        return "Could not resolve NextHop IP Address for the selected Switch.<br>"
-                + "Please Check the following configurations.<br>"
-                + "1. Is the NextHop IP address directly connected to the Selected Switch<br>"
-                + "2. If appropriate Subnet Configurations are done in the Switch Manager<br>"
-                + "3. If the Nexthop IP-Address is Correct";
+        if (cookie == null) {
+            if (other.cookie != null) {
+                return false;
+            }
+        } else if (!cookie.equals(other.cookie)) {
+            return false;
+        }
+        if (dlDst == null) {
+            if (other.dlDst != null) {
+                return false;
+            }
+        } else if (!dlDst.equals(other.dlDst)) {
+            return false;
+        }
+        if (dlSrc == null) {
+            if (other.dlSrc != null) {
+                return false;
+            }
+        } else if (!dlSrc.equals(other.dlSrc)) {
+            return false;
+        }
+        if (dynamic != other.dynamic) {
+            return false;
+        }
+        if (etherType == null) {
+            if (other.etherType != null) {
+                return false;
+            }
+        } else if (!etherType.equals(other.etherType)) {
+            return false;
+        }
+        if (ingressPort == null) {
+            if (other.ingressPort != null) {
+                return false;
+            }
+        } else if (!ingressPort.equals(other.ingressPort)) {
+            return false;
+        }
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (nwDst == null) {
+            if (other.nwDst != null) {
+                return false;
+            }
+        } else if (!nwDst.equals(other.nwDst)) {
+            return false;
+        }
+        if (nwSrc == null) {
+            if (other.nwSrc != null) {
+                return false;
+            }
+        } else if (!nwSrc.equals(other.nwSrc)) {
+            return false;
+        }
+        if (portGroup == null) {
+            if (other.portGroup != null) {
+                return false;
+            }
+        } else if (!portGroup.equals(other.portGroup)) {
+            return false;
+        }
+        if (priority == null) {
+            if (other.priority != null) {
+                return false;
+            }
+        } else if (!priority.equals(other.priority)) {
+            return false;
+        }
+        if (protocol == null) {
+            if (other.protocol != null) {
+                return false;
+            }
+        } else if (!protocol.equals(other.protocol)) {
+            return false;
+        }
+        if (node == null) {
+            if (other.node != null) {
+                return false;
+            }
+        } else if (!node.equals(other.node)) {
+            return false;
+        }
+        if (tosBits == null) {
+            if (other.tosBits != null) {
+                return false;
+            }
+        } else if (!tosBits.equals(other.tosBits)) {
+            return false;
+        }
+        if (tpDst == null) {
+            if (other.tpDst != null) {
+                return false;
+            }
+        } else if (!tpDst.equals(other.tpDst)) {
+            return false;
+        }
+        if (tpSrc == null) {
+            if (other.tpSrc != null) {
+                return false;
+            }
+        } else if (!tpSrc.equals(other.tpSrc)) {
+            return false;
+        }
+        if (vlanId == null) {
+            if (other.vlanId != null) {
+                return false;
+            }
+        } else if (!vlanId.equals(other.vlanId)) {
+            return false;
+        }
+        if (vlanPriority == null) {
+            if (other.vlanPriority != null) {
+                return false;
+            }
+        } else if (!vlanPriority.equals(other.vlanPriority)) {
+            return false;
+        }
+        if (idleTimeout == null) {
+            if (other.idleTimeout != null) {
+                return false;
+            }
+        } else if (!idleTimeout.equals(other.idleTimeout)) {
+            return false;
+        }
+        if (hardTimeout == null) {
+            if (other.hardTimeout != null) {
+                return false;
+            }
+        } else if (!hardTimeout.equals(other.hardTimeout)) {
+            return false;
+        }
+        return true;
     }
 
     public boolean isL2AddressValid(String mac) {
@@ -772,8 +749,9 @@ public class FlowConfig implements Serializable {
             }
 
             // make sure it's a valid number
-            if (cookie != null)
+            if (cookie != null) {
                 Long.decode(cookie);
+            }
 
             if (ingressPort != null) {
                 Short port = Short.decode(ingressPort);
@@ -812,10 +790,11 @@ public class FlowConfig implements Serializable {
                             "Ethernet type %s is not valid", etherType));
                     return false;
                 } else {
-                    if (type == 0x800)
+                    if (type == 0x800) {
                         etype = EtherIPType.V4;
-                    else if (type == 0x86dd)
+                    } else if (type == 0x86dd) {
                         etype = EtherIPType.V6;
+                    }
                 }
             }
 
@@ -1084,13 +1063,10 @@ public class FlowConfig implements Serializable {
                             ActionType.SET_NEXT_HOP.toString() + "=(.*)")
                             .matcher(actiongrp);
                     if (sstr.matches()) {
-                        String nextHopInfo = sstr.group(1);
-                        String values[] = nextHopInfo.split("//");
-                        String address = values[0].trim();
-
-                        if ((address == null) || !isOutputNextHopValid(address)) {
+                        if (!NetUtils.isIPAddressValid(sstr.group(1))) {
                             resultStr.append(String.format(
-                                    "next hop %s is not valid", sstr.group(1)));
+                                    "IP destination address %s is not valid",
+                                    sstr.group(1)));
                             return false;
                         }
                         continue;
@@ -1198,17 +1174,6 @@ public class FlowConfig implements Serializable {
         return flow;
     }
 
-    public boolean isOutputNextHopValid(String onh) {
-        if (onh == null) {
-            return false;
-        }
-        /*
-         * For now, only takes IPv4 or IPv6 address
-         */
-        return (NetUtils.isIPv4AddressValid(onh) || NetUtils
-                .isIPv6AddressValid(onh));
-    }
-
     public boolean isByNameAndNodeIdEqual(FlowConfig that) {
         return (this.name.equals(that.name) && this.node.equals(that.node));
     }
@@ -1219,14 +1184,6 @@ public class FlowConfig implements Serializable {
 
     public boolean onNode(Node node) {
         return this.node.equals(node);
-    }
-
-    public static List<String> getSupportedNextHopTypes() {
-        List<String> s = new ArrayList<String>();
-        for (SetNextHopType nh : SetNextHopType.values()) {
-            s.add(nh.toString());
-        }
-        return s;
     }
 
     public void toggleStatus() {
@@ -1393,7 +1350,8 @@ public class FlowConfig implements Serializable {
                         ActionType.SET_NEXT_HOP.toString() + "=(.*)").matcher(
                         actiongrp);
                 if (sstr.matches()) {
-                    log.warn("We do not handle next hop action yet....");
+                    actionList.add(new SetNextHop(NetUtils.parseInetAddress(sstr
+                            .group(1))));
                     continue;
                 }
             }
