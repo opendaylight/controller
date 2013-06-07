@@ -27,13 +27,13 @@ import org.opendaylight.controller.sal.core.UpdateType;
 
 /**
  * Methods that are invoked from Protocol Plugin toward SAL
- * 
+ *
  */
 public interface IPluginOutTopologyService {
 
     /**
      * Called to update on Edge in the topology graph
-     * 
+     *
      * @param topoedgeupdateList
      *            List of topoedgeupdates Each topoedgeupdate includes edge, its
      *            Properties ( BandWidth and/or Latency etc) and update type.
@@ -43,7 +43,7 @@ public interface IPluginOutTopologyService {
     /**
      * Called when an Edge utilization is above the safety threshold configured
      * on the controller
-     * 
+     *
      * @param edge
      */
     public void edgeOverUtilized(Edge edge);
@@ -51,7 +51,7 @@ public interface IPluginOutTopologyService {
     /**
      * Called when the Edge utilization is back to normal, below the safety
      * threshold level configured on the controller
-     * 
+     *
      * @param edge
      */
     public void edgeUtilBackToNormal(Edge edge);

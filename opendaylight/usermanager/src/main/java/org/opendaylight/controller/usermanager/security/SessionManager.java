@@ -83,7 +83,7 @@ public class SessionManager implements ISessionManager {
                 while (sessIterator.hasNext()) {
                     HttpSession session = sessIterator.next();
                     if (session != null && sessionId != null && session.getId() != null && !session.getId().equals(sessionId)) {
-                        sessionsList.add(session);                                
+                        sessionsList.add(session);
                         sessIterator.remove();
                     }
                     else {

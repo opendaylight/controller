@@ -27,14 +27,14 @@ import org.slf4j.LoggerFactory;
 /**
  * This Class forms the vendor specific IPv6 Flow Match messages as well as
  * processes the vendor specific IPv6 Stats Reply message.
- * 
- * For message creation, it parses the user entered IPv6 match fields, creates 
- * a sub-message for each field which are later used to form the complete 
- * message.  
- * 
+ *
+ * For message creation, it parses the user entered IPv6 match fields, creates
+ * a sub-message for each field which are later used to form the complete
+ * message.
+ *
  * For message processing, it parses the incoming message and reads each field
  * of the message and stores in appropriate field of V6Match object.
- *  
+ *
  *
  */
 public class V6Match extends OFMatch implements Cloneable {
@@ -472,7 +472,7 @@ public class V6Match extends OFMatch implements Cloneable {
 
     /**
      * Sets this (V6Match) object's member variables based on a comma-separated key=value pair similar to OFMatch's fromString.
-     * 
+     *
      * @param match a key=value comma separated string.
      */
     @Override

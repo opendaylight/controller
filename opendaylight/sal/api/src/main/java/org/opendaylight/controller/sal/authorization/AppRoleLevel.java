@@ -43,13 +43,13 @@ public enum AppRoleLevel implements Serializable {
     public String toStringPretty() {
         return this.prettyLevel;
     }
-    
+
     public static AppRoleLevel fromString(String levelString) {
-    	for (AppRoleLevel level : AppRoleLevel.values()) {
-    		if (level.toString().equals(levelString)) {
-    			return level;
-    		}
-    	}
-    	return null;    		
+        for (AppRoleLevel level : AppRoleLevel.values()) {
+                if (level.toString().equals(levelString)) {
+                        return level;
+                }
+        }
+        return null;
     }
-} 
+}

@@ -127,7 +127,7 @@ public class ContainerFlow implements Serializable {
     /**
      * Returns whether the specified match is allowed
      *
-     * @param match	the match to test
+     * @param match the match to test
      * @return true if the match is allowed, false otherwise
      */
     public boolean allowsMatch(Match target) {

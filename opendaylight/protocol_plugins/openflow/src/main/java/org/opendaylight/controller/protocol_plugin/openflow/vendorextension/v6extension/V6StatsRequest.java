@@ -16,9 +16,9 @@ import org.openflow.protocol.statistics.OFVendorStatistics;
 
 
 /**
- * This Class creates the OpenFlow Vendor Extension IPv6 Flow Stats Request 
+ * This Class creates the OpenFlow Vendor Extension IPv6 Flow Stats Request
  * messages and also reads the Reply of a stats request message.
- * 
+ *
  */
 
 public class V6StatsRequest extends OFVendorStatistics {

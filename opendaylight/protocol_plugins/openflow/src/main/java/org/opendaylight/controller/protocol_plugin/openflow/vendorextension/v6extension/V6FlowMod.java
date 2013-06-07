@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is used to create IPv6 Vendor Extension messages. Specfically, It
  * defines the methods used in creation of Vendor specific IPv6 Flow Mod message.
- * 
+ *
  *
  */
 public class V6FlowMod extends OFVendor implements Cloneable {
@@ -49,7 +49,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     private static int IPV6_EXT_MIN_HDR_LEN = 36;
 
     /**
-     * Constructor for the V6FlowMod class. Initializes OFVendor (parent class) 
+     * Constructor for the V6FlowMod class. Initializes OFVendor (parent class)
      * fields by calling the parent class' constructor.
      */
     public V6FlowMod() {
@@ -58,7 +58,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * This method sets the match fields of V6FlowMod object
-     * @param match		V6Match object for this V6FlowMod message
+     * @param match     V6Match object for this V6FlowMod message
      */
     public void setMatch(V6Match match) {
         this.match = match;
@@ -66,7 +66,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Sets the list of actions V6FlowMod message
-     * @param actions 	a list of ordered OFAction objects
+     * @param actions   a list of ordered OFAction objects
      */
     public void setActions(List<OFAction> actions) {
         this.actions = actions;
@@ -74,7 +74,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Sets the priority field of V6FlowMod message
-     * @param priority 	Priority of the message
+     * @param priority  Priority of the message
      */
     public void setPriority(short priority) {
         this.priority = priority;
@@ -82,7 +82,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Sets the cookie field of V6FlowMod message
-     * @param cookie 	Cookie of the message
+     * @param cookie    Cookie of the message
      */
     public void setCookie(long cookie) {
         this.cookie = cookie;
@@ -90,7 +90,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Sets the command field of V6FlowMod message
-     * @param command 	Command type of the message (ADD or DELETE)
+     * @param command   Command type of the message (ADD or DELETE)
      */
     public V6FlowMod setCommand(short command) {
         this.command = command;
@@ -99,7 +99,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Sets the outPort field of V6FlowMod message
-     * @param outPort 	outPort of the message
+     * @param outPort   outPort of the message
      */
     public V6FlowMod setOutPort(OFPort port) {
         this.outPort = port.getValue();
@@ -108,7 +108,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Sets the idle_timeout of V6FlowMod message
-     * @param idleTimeout	idle timeout for this message
+     * @param idleTimeout   idle timeout for this message
      */
     public void setIdleTimeout(short idleTimeout) {
         this.idleTimeout = idleTimeout;
@@ -116,7 +116,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Sets the hardTimeout field of V6FlowMod message
-     * @param hardTimeout 	hard timeout of the message
+     * @param hardTimeout       hard timeout of the message
      */
     public void setHardTimeout(short hardTimeout) {
         this.hardTimeout = hardTimeout;
@@ -124,21 +124,21 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Returns the Flow Mod message subtype for V6FlowMod message
-     * @return			message subtype
+     * @return          message subtype
      */
     private int getIPv6ExtensionFlowModAddSubType() {
         return IPV6EXT_ADD_FLOW_MSG_TYPE;
     }
-    
+
     /**
      * Returns the minimum header size for V6Flow Message type
-     * @return		minimum header size
+     * @return      minimum header size
      */
 
     public int getV6FlowModMinHdrSize() {
         return IPV6_EXT_MIN_HDR_LEN;
     }
-    
+
     /**
      * Sets the Vendor type in OFVendor message
      */
@@ -146,7 +146,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     public void setVendor() {
         super.setVendor(V6StatsRequest.NICIRA_VENDOR_ID);
     }
-    
+
     /**
      * Get flags
      * @return
@@ -162,12 +162,12 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     public void setFlags(short flags) {
         this.flags = flags;
     }
-    
+
     /**
      * This method forms the Vendor extension IPv6 Flow Mod message.It uses the
-     * fields in V6FlowMod class, and writes the data according to vendor 
+     * fields in V6FlowMod class, and writes the data according to vendor
      * extension format. The fields include flow properties (cookie, timeout,
-     * priority, etc), flow match, and action list. It also takes care of 
+     * priority, etc), flow match, and action list. It also takes care of
      * required padding.
      */
 
@@ -209,7 +209,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Forms the clone of V6FlowMod Object. If Object is returned
-     * successfully, then returns the cloned object. Throws an 
+     * successfully, then returns the cloned object. Throws an
      * exception if cloning is not supported.
      */
     @Override

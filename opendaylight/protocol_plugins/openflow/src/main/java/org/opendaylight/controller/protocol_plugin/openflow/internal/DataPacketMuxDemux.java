@@ -131,7 +131,7 @@ public class DataPacketMuxDemux implements IContainerListener,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init() {
         this.controller.addMessageListener(OFType.PACKET_IN, this);
@@ -141,7 +141,7 @@ public class DataPacketMuxDemux implements IContainerListener,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         this.controller.removeMessageListener(OFType.PACKET_IN, this);

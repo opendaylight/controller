@@ -71,7 +71,7 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
 
     /**
      * Bring up secure channel using SSL Engine
-     * 
+     *
      * @param socket
      *            TCP socket channel
      * @throws Exception
@@ -143,7 +143,7 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
     /**
      * Sends the OF message out over the socket channel. The message is
      * encrypted by SSL Engine.
-     * 
+     *
      * @param msg
      *            OF message to be sent
      * @throws Exception
@@ -196,7 +196,7 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
 
     /**
      * Resumes sending the remaining messages in the outgoing buffer
-     * 
+     *
      * @throws Exception
      */
     @Override
@@ -234,7 +234,7 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
     /**
      * Reads the incoming network data from the socket, decryptes them and then
      * retrieves the OF messages.
-     * 
+     *
      * @return list of OF messages
      * @throws Exception
      */
