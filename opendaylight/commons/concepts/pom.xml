@@ -28,6 +28,15 @@
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <configuration>
+          <failsOnError>true</failsOnError>
+          <configLocation>${project.parent.parent.basedir}/space_and_tabs_checks.xml</configLocation>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <dependencies>

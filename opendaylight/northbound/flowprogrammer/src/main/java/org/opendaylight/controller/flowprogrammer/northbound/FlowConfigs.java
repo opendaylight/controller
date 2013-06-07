@@ -21,22 +21,22 @@ import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class FlowConfigs {
-	@XmlElement
-	List<FlowConfig> flowConfig;
-	//To satisfy JAXB
-	private FlowConfigs() {
-		
-	}
-	
-	public FlowConfigs(List<FlowConfig> flowConfig) {
-		this.flowConfig = flowConfig;
-	}
+        @XmlElement
+        List<FlowConfig> flowConfig;
+        //To satisfy JAXB
+        private FlowConfigs() {
 
-	public List<FlowConfig> getFlowConfig() {
-		return flowConfig;
-	}
+        }
 
-	public void setFlowConfig(List<FlowConfig> flowConfig) {
-		this.flowConfig = flowConfig;
-	}
+        public FlowConfigs(List<FlowConfig> flowConfig) {
+                this.flowConfig = flowConfig;
+        }
+
+        public List<FlowConfig> getFlowConfig() {
+                return flowConfig;
+        }
+
+        public void setFlowConfig(List<FlowConfig> flowConfig) {
+                this.flowConfig = flowConfig;
+        }
 }

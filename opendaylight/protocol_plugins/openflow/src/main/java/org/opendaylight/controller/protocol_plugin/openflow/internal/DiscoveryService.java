@@ -933,20 +933,20 @@ public class DiscoveryService implements IInventoryShimExternalListener,
         help.append("\t pcc                             - Print CC info\n");
         help.append("\t psize                           - Print sizes of all the lists\n");
         help.append("\t ptm                             - Print timeout info\n");
-        help.append("\t ecc          	                - Enable CC\n");
-        help.append("\t dcc          	                - Disable CC\n");
+        help.append("\t ecc                             - Enable CC\n");
+        help.append("\t dcc                             - Disable CC\n");
         help.append("\t scc [multiple]                  - Set/show CC multiple and interval\n");
-        help.append("\t sports [ports] 	                - Set/show max ports per batch\n");
+        help.append("\t sports [ports]                  - Set/show max ports per batch\n");
         help.append("\t spause [ticks]                  - Set/show pause period\n");
-        help.append("\t sdi [ticks]    	                - Set/show discovery interval in ticks\n");
+        help.append("\t sdi [ticks]                     - Set/show discovery interval in ticks\n");
         help.append("\t stm [ticks]                     - Set/show per timeout ticks\n");
-        help.append("\t sretry [count] 	                - Set/show num of retries\n");
-        help.append("\t addsw <swid> 	                - Add a switch\n");
-        help.append("\t remsw <swid> 	                - Remove a switch\n");
+        help.append("\t sretry [count]                  - Set/show num of retries\n");
+        help.append("\t addsw <swid>                    - Add a switch\n");
+        help.append("\t remsw <swid>                    - Remove a switch\n");
         help.append("\t page                            - Print aging info\n");
         help.append("\t sage                            - Set/Show aging time limit\n");
-        help.append("\t eage          	                - Enable aging\n");
-        help.append("\t dage          	                - Disable aging\n");
+        help.append("\t eage                            - Enable aging\n");
+        help.append("\t dage                            - Disable aging\n");
         help.append("\t pthrot                          - Print throttling\n");
         help.append("\t ethrot                          - Enable throttling\n");
         help.append("\t dthrot                          - Disable throttling\n");
@@ -1048,7 +1048,7 @@ public class DiscoveryService implements IInventoryShimExternalListener,
             }
         }
         ci.println("\n");
-        ci.println("              NodeConnector                 				Edge ");
+        ci.println("              NodeConnector                                                 Edge ");
         Set<NodeConnector> keySet = prodMap.keySet();
         if (keySet == null) {
             return;

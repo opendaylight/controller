@@ -24,7 +24,7 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class SetDlType extends Action {
-	@XmlElement
+        @XmlElement
     private int dlType;
 
     /* Dummy constructor for JAXB */

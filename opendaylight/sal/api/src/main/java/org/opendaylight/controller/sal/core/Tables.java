@@ -21,15 +21,15 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 public class Tables extends Property {
-	private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
     @XmlElement
     private byte tablesValue;
-    
+
     public static final String TablesPropName = "tables";
     /**
      * Construct a Tables property
      *
-     * @param tables the Tables 
+     * @param tables the Tables
      * @return Constructed object
      */
     public Tables(byte tables) {
@@ -52,7 +52,7 @@ public class Tables extends Property {
     public byte getValue() {
         return this.tablesValue;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;

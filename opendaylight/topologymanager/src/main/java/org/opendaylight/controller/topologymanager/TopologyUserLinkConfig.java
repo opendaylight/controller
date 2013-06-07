@@ -127,7 +127,7 @@ public class TopologyUserLinkConfig implements Serializable {
             return false;
         }
 
-        if (!isValidNodeConnector(srcNodeConnector) || 
+        if (!isValidNodeConnector(srcNodeConnector) ||
                 !isValidNodeConnector(dstNodeConnector)) {
             logger.warn("Invalid NodeConnector");
             return false;

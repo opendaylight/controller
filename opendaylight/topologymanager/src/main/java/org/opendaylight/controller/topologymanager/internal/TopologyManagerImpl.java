@@ -608,7 +608,7 @@ CommandProvider {
         if (srcNodeConnector == null || dstNodeConnector == null) return null;
         try {
             linkTuple = new Edge(srcNodeConnector, dstNodeConnector);
-        } catch (Exception e) {            
+        } catch (Exception e) {
         }
         return linkTuple;
     }

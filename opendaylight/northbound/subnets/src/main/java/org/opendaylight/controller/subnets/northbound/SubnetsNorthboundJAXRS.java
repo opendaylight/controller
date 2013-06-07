@@ -55,10 +55,10 @@ public class SubnetsNorthboundJAXRS {
 
     /**
      * List all the subnets in a given container
-     * 
+     *
      * @param containerName
      *            container in which we want to query the subnets
-     * 
+     *
      * @return a List of SubnetConfig
      */
     @Path("/{containerName}")
@@ -86,12 +86,12 @@ public class SubnetsNorthboundJAXRS {
 
     /**
      * List the configuration of a subnet in a given container
-     * 
+     *
      * @param containerName
      *            container in which we want to query the subnet
      * @param subnetName
      *            of the subnet being queried
-     * 
+     *
      * @return a SubnetConfig
      */
     @Path("/{containerName}/{subnetName}")
@@ -129,7 +129,7 @@ public class SubnetsNorthboundJAXRS {
 
     /**
      * Add/Update a subnet to a container
-     * 
+     *
      * @param containerName
      *            container in which we want to add/update the subnet
      * @param subnetName
@@ -137,7 +137,7 @@ public class SubnetsNorthboundJAXRS {
      * @param subnet
      *            pair default gateway IP/mask that identify the subnet being
      *            added modified
-     * 
+     *
      */
     @Path("/{containerName}/{subnetName}")
     @POST
@@ -183,12 +183,12 @@ public class SubnetsNorthboundJAXRS {
 
     /**
      * Delete a subnet from a container
-     * 
+     *
      * @param containerName
      *            container in which we want to delete the subnet by name
      * @param subnetName
      *            of the subnet to be remove.
-     * 
+     *
      */
     @Path("/{containerName}/{subnetName}")
     @DELETE
@@ -225,56 +225,56 @@ public class SubnetsNorthboundJAXRS {
     }
 
     /*
-     * 
+     *
      * Add or remove switch ports to a subnet POST subnets/green/sw
-     * 
+     *
      * @param model
-     * 
+     *
      * @param containerName
-     * 
+     *
      * @param name
-     * 
+     *
      * @param subnet: the subnet name name
-     * 
+     *
      * @param switchports: datapath ID/port list =>
      * xx:xx:xx:xx:xx:xx:xx:xx/a,b,c-m,r-t,y
-     * 
+     *
      * @return
-     * 
+     *
      * @RequestMapping(value = "/{containerName}/{name}", method =
      * RequestMethod.POST)
-     * 
+     *
      * public View addSwitchports(Map<String, Object> model,
-     * 
+     *
      * @PathVariable(value = "containerName") String containerName,
-     * 
+     *
      * @PathVariable(value = "name") String name,
-     * 
+     *
      * @RequestParam(value = "nodeports") String nodePorts,
-     * 
+     *
      * @RequestParam(value = "action") String action) {
-     * 
+     *
      * checkDefaultDisabled(containerName); ISwitchManager switchManager = null;
      * try { BundleContext bCtx = FrameworkUtil.getBundle(this.getClass())
      * .getBundleContext();
-     * 
+     *
      * ServiceReference[] services = bCtx.getServiceReferences(
      * ISwitchManager.class.getName(), "(containerName=" + containerName + ")");
-     * 
+     *
      * if (services != null) { switchManager = (ISwitchManager)
      * bCtx.getService(services[0]); logger.debug("Switch manager reference is:"
      * + switchManager); } } catch (Exception e) {
      * logger.error("Switch Manager reference is NULL"); }
-     * 
+     *
      * checkContainerExists(switchManager);
-     * 
+     *
      * String ret; if (action.equals("add")) { ret =
      * switchManager.addPortsToSubnet(name, nodePorts); } else if
      * (action.equals("remove")) { ret =
      * switchManager.removePortsFromSubnet(name, nodePorts); } else { throw new
      * UnsupportedMediaTypeException(RestMessages.UNKNOWNACTION .toString() +
      * ": " + action); }
-     * 
+     *
      * return returnViewOrThrowConflicEx(model, ret); }
      */
 }

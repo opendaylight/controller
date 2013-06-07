@@ -25,20 +25,20 @@ public interface IResourceAuthorization {
     /**
      * Create a Role name for the application
      *
-     * @param role	the role name
-     * @param userLevel	the user level in the application context
-	 * @return the status of the request
-	 */
+     * @param role  the role name
+     * @param userLevel the user level in the application context
+         * @return the status of the request
+         */
     public Status createRole(String role, AppRoleLevel userLevel);
 
     /**
      * Remove a Role
-     * 
+     *
      * @param role the role name
      * @return the status of the request
      */
     public Status removeRole(String role);
-    
+
     /**
      * Return the list of roles configured for the application
      *
@@ -53,7 +53,7 @@ public interface IResourceAuthorization {
      *
      * @param roleName the role name to query
      * @return the application level of the given role in the application context as specified by {@link AppRoleLevel}
-     * 			if the role is not part of this application's roles, <code>NOUSER<code> is returned
+     *                  if the role is not part of this application's roles, <code>NOUSER<code> is returned
      */
     public AppRoleLevel getApplicationRoleLevel(String roleName);
 
@@ -61,7 +61,7 @@ public interface IResourceAuthorization {
      * Returns whether the specified role is part of this application's roles
      *
      * @param roleName the role name to test
-     * @return	true if the role belongs to this application, false otherwise
+     * @return  true if the role belongs to this application, false otherwise
      */
     public boolean isApplicationRole(String roleName);
 
@@ -110,16 +110,16 @@ public interface IResourceAuthorization {
      * @return the status of the request
      */
     public Status assignResourceGroupToRole(String groupName, String role);
-    
+
     /**
      * Unassign the passed resource group from the specified role
-     * 
+     *
      * @param group
      * @param role
      * @return the status of the request
      */
     public Status unassignResourceGroupFromRole(String group, String role);
-    
+
     /**
      * Returns the list of resource groups the given Role is authorized to use
      * The returning object expresses the resource group name and the access

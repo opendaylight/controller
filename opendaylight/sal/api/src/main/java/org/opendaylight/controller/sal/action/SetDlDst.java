@@ -45,12 +45,12 @@ public class SetDlDst extends Action {
     public byte[] getDlAddress() {
         return address.clone();
     }
-    
+
     @XmlElement(name = "address")
     public String getDlAddressString() {
         return HexEncode.bytesToHexString(address);
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

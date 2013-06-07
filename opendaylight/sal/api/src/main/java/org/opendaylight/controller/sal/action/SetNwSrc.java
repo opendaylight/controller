@@ -38,7 +38,7 @@ public class SetNwSrc extends Action {
     /**
      * Returns the network address this action will set
      *
-     * @return	InetAddress
+     * @return  InetAddress
      */
     public InetAddress getAddress() {
         return address;
@@ -46,7 +46,7 @@ public class SetNwSrc extends Action {
 
     @XmlElement (name="address")
     public String getAddressAsString() {
-    	return address.getHostAddress();
+        return address.getHostAddress();
     }
 
     @Override

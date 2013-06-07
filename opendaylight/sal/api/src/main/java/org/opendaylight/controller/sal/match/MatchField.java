@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents the generic matching field
- * 
+ *
  */
 
 @XmlRootElement
@@ -42,7 +42,7 @@ public class MatchField implements Cloneable, Serializable {
 
     /**
      * Mask based match constructor
-     * 
+     *
      * @param type
      * @param value
      * @param mask
@@ -59,7 +59,7 @@ public class MatchField implements Cloneable, Serializable {
 
     /**
      * Full match constructor
-     * 
+     *
      * @param type
      * @param value
      */
@@ -73,7 +73,7 @@ public class MatchField implements Cloneable, Serializable {
 
     /**
      * Returns the value set for this match field
-     * 
+     *
      * @return
      */
     public Object getValue() {
@@ -87,7 +87,7 @@ public class MatchField implements Cloneable, Serializable {
 
     /**
      * Returns the type field this match field object is for
-     * 
+     *
      * @return
      */
     public MatchType getType() {
@@ -102,7 +102,7 @@ public class MatchField implements Cloneable, Serializable {
     /**
      * Returns the mask value set for this field match A null mask means this is
      * a full match
-     * 
+     *
      * @return
      */
     public Object getMask() {
@@ -116,7 +116,7 @@ public class MatchField implements Cloneable, Serializable {
 
     /**
      * Returns the bitmask set for this field match
-     * 
+     *
      * @return
      */
     public long getBitMask() {
@@ -125,7 +125,7 @@ public class MatchField implements Cloneable, Serializable {
 
     /**
      * Returns whether the field match configuration is valid or not
-     * 
+     *
      * @return
      */
     public boolean isValid() {

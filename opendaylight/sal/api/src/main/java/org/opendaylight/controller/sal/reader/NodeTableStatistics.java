@@ -17,7 +17,7 @@ import org.opendaylight.controller.sal.core.NodeTable;
 /**
  * @author Aditya Prakash Vaja <aditya.vaja@bigswitch.com>
  * Represents the Table statistics for the node
- * 
+ *
  */
 
 @XmlRootElement

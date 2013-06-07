@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class SetNwTos extends Action {
-	@XmlElement
+        @XmlElement
     private int tos;
 
     /* Dummy constructor for JAXB */

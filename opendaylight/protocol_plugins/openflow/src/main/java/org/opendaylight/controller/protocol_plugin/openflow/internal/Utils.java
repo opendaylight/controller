@@ -33,7 +33,7 @@ public abstract class Utils {
             er.readFrom(bb);
             return er.toString();
         }
-        
+
         // Handle OF1.0 errors here
         OFErrorType et = OFErrorType.values()[0xffff & error.getErrorType()];
         String errorStr = "Error : " + et.toString();

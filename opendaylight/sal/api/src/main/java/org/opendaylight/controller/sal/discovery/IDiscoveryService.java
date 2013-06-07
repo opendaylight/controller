@@ -23,11 +23,11 @@ public interface IDiscoveryService {
     /**
      * The methods is called when an edge is added/deleted/changed
      *
-     * @param edge	 		{@link org.opendaylight.controller.sal.core.Edge} being updated
-     * @param type   		{@link org.opendaylight.controller.sal.core.UpdateType}
-     * @param props   		set of {@link org.opendaylight.controller.sal.core.Property} like
-     * 						{@link org.opendaylight.controller.sal.core.Bandwidth} and/or
-     * 						{@link org.opendaylight.controller.sal.core.Latency} etc.
+     * @param edge                      {@link org.opendaylight.controller.sal.core.Edge} being updated
+     * @param type              {@link org.opendaylight.controller.sal.core.UpdateType}
+     * @param props             set of {@link org.opendaylight.controller.sal.core.Property} like
+     *                                          {@link org.opendaylight.controller.sal.core.Bandwidth} and/or
+     *                                          {@link org.opendaylight.controller.sal.core.Latency} etc.
      */
     public void notifyEdge(Edge edge, UpdateType type, Set<Property> props);
 }

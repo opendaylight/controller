@@ -17,73 +17,73 @@ package org.opendaylight.controller.samples.loadbalancer.entities;
  * e.g TCP traffic from two different ports from the same host to a given VIP will be considered
  * as two different clients by this service. Similarly, traffic using two different protocols
  * (TCP, UDP) from the same host will be considered as two different clients.
- * 
+ *
  */
 public class Client {
-    
+
     /*
      * IP address of the client (source address)
      */
     private String ip;
-    
+
     /*
      * Network protocol of the traffic sent by client
      */
     private String protocol;
-    
+
     /*
      * Port used to send network traffic (source port)
      */
     private short port;
-    
+
     public Client(String ip, String protocol, short port){
         this.ip = ip;
         this.protocol = protocol;
         this.port = port;
     }
-    
+
     /**
      * @return the client IP
      */
     public String getIp() {
         return ip;
     }
-    
+
     /**
      * @param ip the IP to set
      */
     public void setIp(String ip) {
         this.ip = ip;
     }
-    
+
     /**
      * @return the client network protocol
      */
     public String getProtocol() {
         return protocol;
     }
-    
+
     /**
      * @param protocol the protocol to set
      */
     public void setProtocol(String protocol) {
         this.protocol = protocol;
     }
-    
+
     /**
      * @return the client port
      */
     public short getPort() {
         return port;
     }
-    
+
     /**
      * @param port the port to set
      */
     public void setPort(short port) {
         this.port = port;
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -96,7 +96,7 @@ public class Client {
         result = prime * result+ ((protocol == null) ? 0 : protocol.hashCode());
         return result;
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
@@ -131,7 +131,7 @@ public class Client {
         }
         return true;
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
