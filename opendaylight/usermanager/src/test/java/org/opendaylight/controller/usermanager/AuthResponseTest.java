@@ -10,5 +10,5 @@
 package org.opendaylight.controller.usermanager;
 
 public class AuthResponseTest{
-	
+
 }

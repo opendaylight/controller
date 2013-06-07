@@ -113,6 +113,6 @@ public class TopologyTest {
         assertEquals(2, getEdgePropList.size());
 
     }
-	
+
 
 }

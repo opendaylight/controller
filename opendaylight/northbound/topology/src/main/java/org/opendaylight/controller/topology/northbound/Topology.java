@@ -19,22 +19,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class Topology {
-	@XmlElement
-	List<EdgeProperties> edgeProperties;
-	//To satisfy JAXB
-	private Topology() {
-		
-	}
-	
-	public Topology(List<EdgeProperties> edgeProperties) {
-		this.edgeProperties = edgeProperties;
-	}
+        @XmlElement
+        List<EdgeProperties> edgeProperties;
+        //To satisfy JAXB
+        private Topology() {
 
-	public List<EdgeProperties> getEdgeProperties() {
-		return edgeProperties;
-	}
+        }
 
-	public void setEdgeProperties(List<EdgeProperties> edgeProperties) {
-		this.edgeProperties = edgeProperties;
-	}
+        public Topology(List<EdgeProperties> edgeProperties) {
+                this.edgeProperties = edgeProperties;
+        }
+
+        public List<EdgeProperties> getEdgeProperties() {
+                return edgeProperties;
+        }
+
+        public void setEdgeProperties(List<EdgeProperties> edgeProperties) {
+                this.edgeProperties = edgeProperties;
+        }
 }

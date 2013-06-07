@@ -18,7 +18,7 @@ public interface IAAAProvider {
     /**
      * Authenticate user with AAA server and return authentication and
      * authorization info using the Provider's mechanism
-     * 
+     *
      * @param userName
      *            the username
      * @param password
@@ -35,7 +35,7 @@ public interface IAAAProvider {
 
     /**
      * Returns the Name of the Provider
-     * 
+     *
      * @return Name of the AAA provider
      */
     public String getName();

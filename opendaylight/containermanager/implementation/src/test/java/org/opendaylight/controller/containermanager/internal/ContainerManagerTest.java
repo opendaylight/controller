@@ -18,21 +18,21 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 
 public class ContainerManagerTest {
 
-	@Test
-	public void test() {
-		ContainerManager cm = new ContainerManager();
-		
-		cm.init();
-		
-		ArrayList<String> names = (ArrayList<String>) cm.getContainerNames();
-		assertEquals(1, names.size());
-		assertEquals(GlobalConstants.DEFAULT.toString(), names.get(0));
-		
-		assertFalse(cm.hasNonDefaultContainer());
-		assertNull(cm.saveContainerConfig());
-		
-		cm.destroy();
+        @Test
+        public void test() {
+                ContainerManager cm = new ContainerManager();
 
-	}
+                cm.init();
+
+                ArrayList<String> names = (ArrayList<String>) cm.getContainerNames();
+                assertEquals(1, names.size());
+                assertEquals(GlobalConstants.DEFAULT.toString(), names.get(0));
+
+                assertFalse(cm.hasNonDefaultContainer());
+                assertNull(cm.saveContainerConfig());
+
+                cm.destroy();
+
+        }
 
 }

@@ -45,7 +45,7 @@ import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
 
 /**
  * Topology Northbound REST API
- * 
+ *
  * <br>
  * <br>
  * Authentication scheme : <b>HTTP Basic</b><br>
@@ -74,12 +74,12 @@ public class TopologyNorthboundJAXRS {
     }
 
     /**
-     * 
+     *
      * Retrieve the Topology
-     * 
+     *
      * @param containerName
      *            The container for which we want to retrieve the topology
-     * 
+     *
      * @return A List of EdgeProps each EdgeProp represent an Edge of the grap
      *         with the corresponding properties attached to it.
      */
@@ -119,10 +119,10 @@ public class TopologyNorthboundJAXRS {
 
     /**
      * Retrieve the user configured links
-     * 
+     *
      * @param containerName
      *            The container for which we want to retrieve the user links
-     * 
+     *
      * @return A List of user configured links
      */
     @Path("/{containerName}/userLink")
@@ -159,7 +159,7 @@ public class TopologyNorthboundJAXRS {
 
     /**
      * Add an User Link
-     * 
+     *
      * @param containerName
      *            Name of the Container. The base Container is "default".
      * @param TopologyUserLinkConfig
@@ -202,7 +202,7 @@ public class TopologyNorthboundJAXRS {
 
     /**
      * Delete an User Link
-     * 
+     *
      * @param containerName
      *            Name of the Container. The base Container is "default".
      * @param name

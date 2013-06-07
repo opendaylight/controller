@@ -20,7 +20,7 @@ import org.opendaylight.controller.samples.loadbalancer.policies.RoundRobinLBPol
 import junit.framework.TestCase;
 
 /**
- * 
+ *
  * Class to unit test the load balancing policies.
  *
  */
@@ -30,7 +30,7 @@ public class LoadBalancerTest extends TestCase {
         ConfigManager cm = null;
         cm = new ConfigManager();
         Assert.assertFalse(cm== null);
-        
+
         Pool pool = cm.createPool("TestPool","roundrobin");
         VIP vip = cm.createVIP("TestVIP","10.0.0.9","TCP",(short)5550,"TestPool");
         PoolMember host1 = new PoolMember("host1","10.0.0.1","TestPool");
@@ -40,7 +40,7 @@ public class LoadBalancerTest extends TestCase {
         PoolMember host5 = new PoolMember("host5","10.0.0.5","TestPool");
         PoolMember host6 = new PoolMember("host6","10.0.0.6","TestPool");
         PoolMember host7 = new PoolMember("host7","10.0.0.7","TestPool");
-        
+
         pool.addMember(host1);
         pool.addMember(host2);
         pool.addMember(host3);
@@ -49,20 +49,20 @@ public class LoadBalancerTest extends TestCase {
         pool.addMember(host6);
         pool.addMember(host7);
         pool.addVIP(vip);
-        
+
         Assert.assertTrue(cm.getAllPoolMembers("TestPool").size() == pool.getAllMembers().size());
-        
+
         RoundRobinLBPolicy rrp = new RoundRobinLBPolicy(cm);
-        
+
         Client c1 = new Client("10.0.0.1","TCP",(short)5000);
         Assert.assertTrue(rrp.getPoolMemberForClient(c1, vip).equals(host1.getIp()));
-        
+
         c1 = new Client("10.0.0.1","TCP",(short)5001);
         Assert.assertTrue(rrp.getPoolMemberForClient(c1, vip).equals(host2.getIp()));
-        
+
         c1 = new Client("10.0.0.1","TCP",(short)5002);
         Assert.assertTrue(rrp.getPoolMemberForClient(c1, vip).equals(host3.getIp()));
-        
+
         c1 = new Client("10.0.0.1","TCP",(short)5003);
         Assert.assertTrue(rrp.getPoolMemberForClient(c1, vip).equals(host4.getIp()));
     }

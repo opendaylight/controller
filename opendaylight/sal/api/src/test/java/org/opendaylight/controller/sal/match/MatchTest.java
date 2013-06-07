@@ -313,13 +313,13 @@ public class MatchTest {
         InetAddress ipMask2 = null;
         short ethertype = EtherTypes.IPv4.shortValue();
         short ethertype2 = EtherTypes.IPv4.shortValue();
-       
+
         /*
          * Create a SAL Flow aFlow
          */
         Match match1 = new Match();
         Match match2 = new Match();
-        
+
         match1.setField(MatchType.DL_TYPE, ethertype);
         match1.setField(MatchType.NW_SRC, srcIP, ipMask);
 
@@ -327,7 +327,7 @@ public class MatchTest {
         match2.setField(MatchType.NW_SRC, srcIP2, ipMask2);
 
         Assert.assertTrue(match1.equals(match2));
-        
+
         ipMask2 = InetAddress.getByName("255.255.255.255");
         match2.setField(MatchType.NW_SRC, srcIP2, ipMask2);
 
@@ -337,7 +337,7 @@ public class MatchTest {
         ipMask2 = InetAddress.getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
         ethertype = EtherTypes.IPv6.shortValue();
         ethertype2 = EtherTypes.IPv6.shortValue();
- 
+
         match1.setField(MatchType.DL_TYPE, ethertype);
         match1.setField(MatchType.NW_SRC, srcIP, ipMask);
 
@@ -346,7 +346,7 @@ public class MatchTest {
 
         Assert.assertTrue(match1.equals(match2));
     }
-    
+
     @Test
     public void testCloning() throws Exception {
         Node node = NodeCreator.createOFNode(7l);

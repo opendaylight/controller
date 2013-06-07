@@ -13,16 +13,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class StaticRoutingImplementationTest {
-	
-	@Test
-	public void isIPv4AddressValidTest() {
-		StaticRoutingImplementation staticRouteImpl = new StaticRoutingImplementation();
-        Assert.assertTrue(staticRouteImpl.isIPv4AddressValid("192.168.100.0/24"));		
-        Assert.assertFalse(staticRouteImpl.isIPv4AddressValid("192.168.100.0/36"));		
-        Assert.assertFalse(staticRouteImpl.isIPv4AddressValid("192.168.300.0/32"));		
-	}
+
+        @Test
+        public void isIPv4AddressValidTest() {
+                StaticRoutingImplementation staticRouteImpl = new StaticRoutingImplementation();
+        Assert.assertTrue(staticRouteImpl.isIPv4AddressValid("192.168.100.0/24"));
+        Assert.assertFalse(staticRouteImpl.isIPv4AddressValid("192.168.100.0/36"));
+        Assert.assertFalse(staticRouteImpl.isIPv4AddressValid("192.168.300.0/32"));
+        }
 }
-
-
-
-

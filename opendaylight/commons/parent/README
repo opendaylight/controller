@@ -1,0 +1,10 @@
+This contains a dummy parent project. The use case of this is for
+example the maven-checkstyle plugin call in commons/opendaylight in
+there the plugin references the spaces_tabs_checks.xml from the
+parent, it works well for all the childs of commons/opendaylight
+artifact but when trying to deploy that one itself it breaks because
+the plugin section will still refer to the parent when there is no
+parent.
+This fake parents allow to still set a parent for the
+commons/opendaylight even if pretty much empty or limited to the bare
+minimum and yet allow the commons/opendaylight to reference a parent.

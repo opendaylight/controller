@@ -75,7 +75,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init() {
         logger.debug("INIT called!");
@@ -85,7 +85,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         // Clear previous registration to avoid they are left hanging
@@ -96,7 +96,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     void start() {
         logger.debug("START called!");
@@ -108,7 +108,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     void stop() {
         logger.debug("STOP called!");
@@ -305,7 +305,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         }
         ci.println(this.addFlow(node, getSampleFlow(node)));
     }
-    
+
     public void _modifyflow(CommandInterpreter ci) throws UnknownHostException {
         Node node = null;
         String nodeId = ci.nextArgument();
@@ -494,7 +494,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     /**
      * This Request ID generator starts with 1. Each aysnc message is
      * associated with an unique Request ID (!= 0).
-     * 
+     *
      * @return Request ID
      */
     private long getNextRid() {

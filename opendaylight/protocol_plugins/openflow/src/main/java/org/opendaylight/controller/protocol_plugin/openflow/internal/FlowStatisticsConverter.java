@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Converts an openflow list of flow statistics in a SAL list of FlowOnNode
  * objects
- * 
- * 
- * 
+ *
+ *
+ *
  */
 public class FlowStatisticsConverter {
     private static final Logger log = LoggerFactory

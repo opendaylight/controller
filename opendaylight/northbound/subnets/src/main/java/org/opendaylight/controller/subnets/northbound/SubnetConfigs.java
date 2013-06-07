@@ -21,22 +21,22 @@ import org.opendaylight.controller.switchmanager.SubnetConfig;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class SubnetConfigs {
-	@XmlElement
-	List<SubnetConfig> subnetConfig;
-	//To satisfy JAXB
-	private SubnetConfigs() {
-		
-	}
-	
-	public SubnetConfigs(List<SubnetConfig> subnetConfig) {
-		this.subnetConfig = subnetConfig;
-	}
+        @XmlElement
+        List<SubnetConfig> subnetConfig;
+        //To satisfy JAXB
+        private SubnetConfigs() {
 
-	public List<SubnetConfig> getSubnetConfig() {
-		return subnetConfig;
-	}
+        }
 
-	public void setSubnetConfig(List<SubnetConfig> subnetConfig) {
-		this.subnetConfig = subnetConfig;
-	}
+        public SubnetConfigs(List<SubnetConfig> subnetConfig) {
+                this.subnetConfig = subnetConfig;
+        }
+
+        public List<SubnetConfig> getSubnetConfig() {
+                return subnetConfig;
+        }
+
+        public void setSubnetConfig(List<SubnetConfig> subnetConfig) {
+                this.subnetConfig = subnetConfig;
+        }
 }

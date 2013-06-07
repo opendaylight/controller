@@ -19,22 +19,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class AllPortStatistics {
-	@XmlElement
-	List<PortStatistics> portStatistics;
-	//To satisfy JAXB
-	private AllPortStatistics() {
-	}
-	
-	public AllPortStatistics(List<PortStatistics> portStatistics) {
-		this.portStatistics = portStatistics;
-	}
+        @XmlElement
+        List<PortStatistics> portStatistics;
+        //To satisfy JAXB
+        private AllPortStatistics() {
+        }
 
-	public List<PortStatistics> getPortStatistics() {
-		return portStatistics;
-	}
+        public AllPortStatistics(List<PortStatistics> portStatistics) {
+                this.portStatistics = portStatistics;
+        }
 
-	public void setPortStatistics(List<PortStatistics> portStatistics) {
-		this.portStatistics = portStatistics;
-	}
+        public List<PortStatistics> getPortStatistics() {
+                return portStatistics;
+        }
+
+        public void setPortStatistics(List<PortStatistics> portStatistics) {
+                this.portStatistics = portStatistics;
+        }
 
 }

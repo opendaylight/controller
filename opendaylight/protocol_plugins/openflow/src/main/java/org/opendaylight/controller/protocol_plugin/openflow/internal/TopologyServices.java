@@ -32,7 +32,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     @SuppressWarnings("unchecked")
     void init(Component c) {
@@ -46,7 +46,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         logger.trace("DESTROY called!");
@@ -55,7 +55,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     void start() {
         logger.trace("START called!");
@@ -65,7 +65,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     void stop() {
         logger.trace("STOP called!");
@@ -73,7 +73,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
 
     /**
      * Retrieve SAL service IPluginOutTopologyService
-     * 
+     *
      * @param s
      *            Called by Dependency Manager as soon as the SAL service is
      *            available
@@ -85,7 +85,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
 
     /**
      * called when SAL service IPluginOutTopologyService is no longer available
-     * 
+     *
      * @param s
      *            Called by Dependency Manager as soon as the SAL service is
      *            unavailable
@@ -99,7 +99,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
 
     /**
      * Retrieve OF protocol_plugin service IRefreshInternalProvider
-     * 
+     *
      * @param s
      *            Called by Dependency Manager as soon as the SAL service is
      *            available
@@ -112,7 +112,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
     /**
      * called when OF protocol_plugin service IRefreshInternalProvider is no
      * longer available
-     * 
+     *
      * @param s
      *            Called by Dependency Manager as soon as the SAL service is
      *            unavailable

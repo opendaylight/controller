@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved. 
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,7 +23,7 @@ public class Status {
      * for internal API2 function calls. This constructor allows to specify,
      * beside the Status Code, a custom human readable description to add more
      * information about the status.
-     * 
+     *
      * @param errorCode
      *            The status code. If passed as null, code will be stored as
      *            {@code StatusCode.UNDEFINED}
@@ -42,7 +42,7 @@ public class Status {
      * Generates an instance of the Status class based on the passed StatusCode
      * only. The description field of the Status object will be inferred by the
      * status code.
-     * 
+     *
      * @param errorCode
      *            The status code. If passed as null, code will be stored as
      *            {@code StatusCode.UNDEFINED}
@@ -59,7 +59,7 @@ public class Status {
      * asynchronous call. It is supposed to be created by the underlying
      * infrastructure only when it was successful in allocating the asynchronous
      * request id, hence caller should expect StatusCode to be successful.
-     * 
+     *
      * @param errorCode
      *            The status code. If passed as null, code will be stored as
      *            {@code StatusCode.UNDEFINED}
@@ -76,7 +76,7 @@ public class Status {
 
     /**
      * Returns the status code
-     * 
+     *
      * @return the {@code StatusCode} representing the status code
      */
     public StatusCode getCode() {
@@ -85,7 +85,7 @@ public class Status {
 
     /**
      * Returns a human readable description of the failure if any
-     * 
+     *
      * @return a string representing the reason of failure
      */
     public String getDescription() {
@@ -94,7 +94,7 @@ public class Status {
 
     /**
      * Tells whether the status is successful
-     * 
+     *
      * @return true if the Status code is {@code StatusCode.SUCCESS}
      */
     public boolean isSuccess() {
@@ -105,7 +105,7 @@ public class Status {
      * Return the request id assigned by underlying infrastructure in case of
      * asynchronous request. In case of synchronous requests, the returned id
      * is expected to be 0
-     * 
+     *
      * @return The request id assigned for this asynchronous request
      */
     public long getRequestId() {

@@ -26,7 +26,7 @@ public interface IfHostListener {
      * of coming up a new Host. For the hosts which it has already
      * learned, it refreshes them.
      *
-     * @param host		Host info encapsulated in HostNodeConnector class
+     * @param host      Host info encapsulated in HostNodeConnector class
      */
     public void hostListener(HostNodeConnector host);
 }
