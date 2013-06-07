@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -8,7 +7,6 @@
  */
 
 package org.opendaylight.controller.switchmanager.internal;
-
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -67,9 +65,8 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
-public class SwitchmanagerIntegrationTest {
-    private Logger log = LoggerFactory
-            .getLogger(SwitchmanagerIntegrationTest.class);
+public class SwitchManagerIT {
+    private Logger log = LoggerFactory.getLogger(SwitchManagerIT.class);
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
@@ -103,39 +100,43 @@ public class SwitchmanagerIntegrationTest {
                 mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell",
                         "0.8.0.v201110170705"),
                 // List logger bundles
-                mavenBundle("org.slf4j", "slf4j-api", "1.7.2"),
-                mavenBundle("org.slf4j", "log4j-over-slf4j", "1.7.2"),
-                mavenBundle("ch.qos.logback", "logback-core", "1.0.9"),
-                mavenBundle("ch.qos.logback", "logback-classic", "1.0.9"),
+                mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
+                mavenBundle("org.slf4j", "log4j-over-slf4j")
+                        .versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-core")
+                        .versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-classic")
+                        .versionAsInProject(),
 
-                mavenBundle("org.opendaylight.controller", "switchmanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "switchmanager.implementation",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "sal",
-                        "0.5.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "sal.implementation",
-                        "0.4.0-SNAPSHOT"),
-               mavenBundle("org.opendaylight.controller", "containermanager",
-                        "0.4.0-SNAPSHOT"),
-               mavenBundle("org.opendaylight.controller", "containermanager.implementation",
-                       "0.4.0-SNAPSHOT"),
-               mavenBundle("org.opendaylight.controller", "clustering.services",
-                       "0.4.0-SNAPSHOT"),
-               mavenBundle("org.opendaylight.controller", "clustering.stub",
-                       "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration.implementation", 
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "switchmanager")
+                        .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "protocol_plugins.stub", "0.4.0-SNAPSHOT"),
+                        "switchmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal.implementation")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "containermanager")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "containermanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "clustering.services").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "clustering.stub")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "configuration.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "protocol_plugins.stub").versionAsInProject(),
                 mavenBundle("org.jboss.spec.javax.transaction",
-                        "jboss-transaction-api_1.1_spec", "1.0.1.Final"),
-                mavenBundle("org.apache.commons", "commons-lang3", "3.1"),
+                        "jboss-transaction-api_1.1_spec").versionAsInProject(),
+                mavenBundle("org.apache.commons", "commons-lang3")
+                        .versionAsInProject(),
                 mavenBundle("org.apache.felix",
-                        "org.apache.felix.dependencymanager", "3.1.0"),
-                junitBundles());
+                        "org.apache.felix.dependencymanager")
+                        .versionAsInProject(), junitBundles());
     }
 
     private String stateToString(int state) {
@@ -174,45 +175,42 @@ public class SwitchmanagerIntegrationTest {
         // Assert if true, if false we are good to go!
         assertFalse(debugit);
 
-         // Now lets create a hosttracker for testing purpose
-         ServiceReference s = bc
-             .getServiceReference(ISwitchManager.class.getName());
-         if (s != null) {
-                 this.switchManager = (ISwitchManager)bc.getService(s);
-         }
+        // Now lets create a hosttracker for testing purpose
+        ServiceReference s = bc.getServiceReference(ISwitchManager.class
+                .getName());
+        if (s != null) {
+            this.switchManager = (ISwitchManager) bc.getService(s);
+        }
 
-         // If StatisticsManager is null, cannot run tests.
-         assertNotNull(this.switchManager);
+        // If StatisticsManager is null, cannot run tests.
+        assertNotNull(this.switchManager);
     }
-
 
     @Test
     public void testNodeProp() throws UnknownHostException {
         assertNotNull(this.switchManager);
 
         Node node;
-        try{
+        try {
             node = new Node("STUB", new Integer(0xCAFE));
-        }catch(ConstructionException e){
-            //test failed if node cannot be created.
+        } catch (ConstructionException e) {
+            // test failed if node cannot be created.
             node = null;
             Assert.assertTrue(false);
         }
         Map<String, Property> propMap = this.switchManager.getNodeProps(node);
         Assert.assertFalse(propMap.isEmpty());
 
-        Assert.assertTrue(this.switchManager.getNodeProp
-                (node, Capabilities.CapabilitiesPropName)
-                .equals(new Capabilities((int)3)));
-        Assert.assertTrue(this.switchManager.getNodeProp
-                (node, Actions.ActionsPropName)
-                .equals(new Actions((int)2)));
-        Assert.assertTrue(this.switchManager.getNodeProp
-                (node, Buffers.BuffersPropName)
-                .equals(new Buffers((int)1)));
-        Assert.assertTrue(this.switchManager.getNodeProp
-                (node, TimeStamp.TimeStampPropName)
-                .equals(new TimeStamp(100000L, "connectedSince")));
+        Assert.assertTrue(this.switchManager.getNodeProp(node,
+                Capabilities.CapabilitiesPropName).equals(
+                new Capabilities((int) 3)));
+        Assert.assertTrue(this.switchManager.getNodeProp(node,
+                Actions.ActionsPropName).equals(new Actions((int) 2)));
+        Assert.assertTrue(this.switchManager.getNodeProp(node,
+                Buffers.BuffersPropName).equals(new Buffers((int) 1)));
+        Assert.assertTrue(this.switchManager.getNodeProp(node,
+                TimeStamp.TimeStampPropName).equals(
+                new TimeStamp(100000L, "connectedSince")));
     }
 
     @Test
@@ -223,24 +221,23 @@ public class SwitchmanagerIntegrationTest {
         try {
             node = new Node("STUB", 0xCAFE);
             nc = new NodeConnector("STUB", 0xCAFE, node);
-        }
-        catch(ConstructionException e){
+        } catch (ConstructionException e) {
             node = null;
             nc = null;
             Assert.assertTrue(false);
         }
-        Map<String, Property> propMap = this.switchManager.getNodeConnectorProps(nc);
+        Map<String, Property> propMap = this.switchManager
+                .getNodeConnectorProps(nc);
         Assert.assertFalse(propMap.isEmpty());
 
-        Assert.assertTrue(this.switchManager.getNodeConnectorProp
-                (nc, Capabilities.CapabilitiesPropName)
-                .equals(new Capabilities
-                        (CapabilitiesType.FLOW_STATS_CAPABILITY.getValue())));
-        Assert.assertTrue(this.switchManager.getNodeConnectorProp
-                (nc, Bandwidth.BandwidthPropName)
-                .equals(new Bandwidth (Bandwidth.BW1Gbps)));
-        Assert.assertTrue(this.switchManager.getNodeConnectorProp
-                (nc, State.StatePropName)
-                .equals(new State (State.EDGE_UP)));
+        Assert.assertTrue(this.switchManager.getNodeConnectorProp(nc,
+                Capabilities.CapabilitiesPropName).equals(
+                new Capabilities(CapabilitiesType.FLOW_STATS_CAPABILITY
+                        .getValue())));
+        Assert.assertTrue(this.switchManager.getNodeConnectorProp(nc,
+                Bandwidth.BandwidthPropName).equals(
+                new Bandwidth(Bandwidth.BW1Gbps)));
+        Assert.assertTrue(this.switchManager.getNodeConnectorProp(nc,
+                State.StatePropName).equals(new State(State.EDGE_UP)));
     }
 }

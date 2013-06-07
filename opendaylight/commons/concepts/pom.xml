@@ -21,15 +21,6 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
-              org.slf4j,
-              org.osgi.framework,
-              org.apache.commons.lang3.builder,
-              org.apache.felix.dm,
-              org.apache.commons.lang3.tuple,
-              javax.xml.bind.annotation,
-              javax.xml.bind.annotation.adapters
-            </Import-Package>
             <Export-Package>
               org.opendaylight.controller.concepts.transform
             </Export-Package>

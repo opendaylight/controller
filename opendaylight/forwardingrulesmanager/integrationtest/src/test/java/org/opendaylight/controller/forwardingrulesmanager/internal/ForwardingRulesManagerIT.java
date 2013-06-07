@@ -41,8 +41,8 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.util.PathUtils;
 
 @RunWith(PaxExam.class)
-public class FRMIntegrationTest {
-    private Logger log = LoggerFactory.getLogger(FRMIntegrationTest.class);
+public class ForwardingRulesManagerIT {
+    private Logger log = LoggerFactory.getLogger(ForwardingRulesManagerIT.class);
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
@@ -77,59 +77,63 @@ public class FRMIntegrationTest {
                 mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell",
                         "0.8.0.v201110170705"),
                 // List logger bundles
-                mavenBundle("org.slf4j", "slf4j-api", "1.7.2"),
-                mavenBundle("org.slf4j", "log4j-over-slf4j", "1.7.2"),
-                mavenBundle("ch.qos.logback", "logback-core", "1.0.9"),
-                mavenBundle("ch.qos.logback", "logback-classic", "1.0.9"),
+                mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
+                mavenBundle("org.slf4j", "log4j-over-slf4j")
+                        .versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-core")
+                        .versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-classic")
+                        .versionAsInProject(),
                 // List all the bundles on which the test case depends
-                mavenBundle("org.opendaylight.controller", "sal",
-                        "0.5.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "sal.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "sal")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal.implementation")
+                        .versionAsInProject(),
 
                 mavenBundle("org.opendaylight.controller",
-                        "protocol_plugins.stub", "0.4.0-SNAPSHOT"),
-               
-                mavenBundle("org.opendaylight.controller", "containermanager",
-                        "0.4.0-SNAPSHOT"),
+                        "protocol_plugins.stub").versionAsInProject(),
+
+                mavenBundle("org.opendaylight.controller", "containermanager")
+                        .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "containermanager.implementation", "0.4.0-SNAPSHOT"),
+                        "containermanager.implementation").versionAsInProject(),
 
                 mavenBundle("org.opendaylight.controller",
-                        "forwardingrulesmanager", "0.4.0-SNAPSHOT"),
+                        "forwardingrulesmanager").versionAsInProject(),
 
                 mavenBundle("org.opendaylight.controller",
-                        "forwardingrulesmanager.implementation",
-                        "0.4.0-SNAPSHOT"),
+                        "forwardingrulesmanager.implementation")
+                        .versionAsInProject(),
 
                 mavenBundle("org.opendaylight.controller",
-                        "clustering.services", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "clustering.stub",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "switchmanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "switchmanager.implementation",
-                                "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration",
-                        "0.4.0-SNAPSHOT"),
+                        "clustering.services").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "clustering.stub")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "switchmanager")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "switchmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration")
+                        .versionAsInProject(),
 
                 mavenBundle("org.opendaylight.controller",
-                        "configuration.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "hosttracker",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "hosttracker.implementation",
-                                "0.4.0-SNAPSHOT"),
+                        "configuration.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "hosttracker")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "hosttracker.implementation").versionAsInProject(),
 
                 // needed by hosttracker
-                mavenBundle("org.opendaylight.controller", "topologymanager",
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "topologymanager")
+                        .versionAsInProject(),
 
                 mavenBundle("org.jboss.spec.javax.transaction",
-                        "jboss-transaction-api_1.1_spec", "1.0.1.Final"),
-                mavenBundle("org.apache.commons", "commons-lang3", "3.1"),
+                        "jboss-transaction-api_1.1_spec").versionAsInProject(),
+                mavenBundle("org.apache.commons", "commons-lang3")
+                        .versionAsInProject(),
                 mavenBundle("org.apache.felix",
-                        "org.apache.felix.dependencymanager", "3.1.0"),
-                junitBundles());
+                        "org.apache.felix.dependencymanager")
+                        .versionAsInProject(), junitBundles());
     }
 
     private String stateToString(int state) {

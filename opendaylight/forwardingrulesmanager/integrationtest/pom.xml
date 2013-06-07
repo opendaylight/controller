@@ -5,9 +5,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <artifactId>commons.integrationtest</artifactId>
+    <version>0.5.0-SNAPSHOT</version>
+    <relativePath>../../commons/integrationtest</relativePath>
   </parent>
 
   <artifactId>forwardingrulesmanager.integrationtest</artifactId>
@@ -57,7 +57,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.4.0-SNAPSHOT</version>
+      <version>0.5.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

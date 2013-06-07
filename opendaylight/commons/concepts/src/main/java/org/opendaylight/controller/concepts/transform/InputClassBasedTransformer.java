@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.concepts.tranform;
+package org.opendaylight.controller.concepts.transform;
 
 /**
  * Input class based transformer
