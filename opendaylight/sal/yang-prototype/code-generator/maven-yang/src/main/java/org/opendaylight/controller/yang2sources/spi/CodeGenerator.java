@@ -10,8 +10,10 @@ package org.opendaylight.controller.yang2sources.spi;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.maven.plugin.logging.Log;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 
@@ -29,11 +31,18 @@ public interface CodeGenerator {
      * @param outputBaseDir
      *            expected output directory for generated sources configured by
      *            user
-     * @param yangModules
+     * @param currentModules
      *            yang modules parsed from yangFilesRootDir
+     * @param log
+     *            maven logger
      * @return collection of files that were generated from schema context
      * @throws IOException
      */
     Collection<File> generateSources(SchemaContext context, File outputBaseDir,
-            Set<Module> yangModules) throws IOException;
+            Set<Module> currentModules, File projectBaseDir)
+            throws IOException;
+
+    void setLog(Log log);
+
+    void setAdditionalConfig(Map<String, String> additionalConfiguration);
 }

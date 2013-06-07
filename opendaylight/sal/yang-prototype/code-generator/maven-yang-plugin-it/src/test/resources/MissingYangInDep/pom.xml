@@ -2,10 +2,10 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-        <groupId>org.opendaylight.controller</groupId>
-        <version>0.5.1-SNAPSHOT</version>
+    <groupId>org.opendaylight.controller</groupId>
+    <version>0.5.1-SNAPSHOT</version>
+    <artifactId>generator-test2</artifactId>
 
-    <artifactId>test</artifactId>
 
     <build>
         <plugins>
@@ -19,7 +19,18 @@
                             <goal>generate-sources</goal>
                         </goals>
                         <configuration>
-                            <yangFilesRootDir>../files</yangFilesRootDir>
+                            <yangFilesRootDir>${project.basedir}/yang</yangFilesRootDir>
+                            <inspectDependencies>true</inspectDependencies>
+                            <codeGenerators>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>
+                                        outDir/
+                                    </outputBaseDir>
+                                </generator>
+                            </codeGenerators>
                             <resourceProviders>
                                 <provider>
                                     <resourceProviderClass>
