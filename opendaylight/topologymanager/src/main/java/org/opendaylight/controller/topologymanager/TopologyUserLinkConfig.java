@@ -94,10 +94,10 @@ public class TopologyUserLinkConfig implements Serializable {
         status = STATUS.LINKDOWN.toString();
     }
 
-	public TopologyUserLinkConfig(String name, String srcNodeIDType,
-			String srcSwitchId, String srcNodeConnectorIDType, String srcPort,
-			String dstNodeIDType, String dstSwitchId,
-			String dstNodeConnectorIDType, String dstPort) {
+        public TopologyUserLinkConfig(String name, String srcNodeIDType,
+                        String srcSwitchId, String srcNodeConnectorIDType, String srcPort,
+                        String dstNodeIDType, String dstSwitchId,
+                        String dstNodeConnectorIDType, String dstPort) {
         super();
         this.name = name;
         this.srcNodeIDType = srcNodeIDType;
@@ -111,38 +111,38 @@ public class TopologyUserLinkConfig implements Serializable {
     }
 
     public String getSrcNodeIDType() {
-		return srcNodeIDType;
-	}
+                return srcNodeIDType;
+        }
 
-	public void setSrcNodeIDType(String srcNodeIDType) {
-		this.srcNodeIDType = srcNodeIDType;
-	}
+        public void setSrcNodeIDType(String srcNodeIDType) {
+                this.srcNodeIDType = srcNodeIDType;
+        }
 
-	public String getSrcNodeConnectorIDType() {
-		return srcNodeConnectorIDType;
-	}
+        public String getSrcNodeConnectorIDType() {
+                return srcNodeConnectorIDType;
+        }
 
-	public void setSrcNodeConnectorIDType(String srcNodeConnectorIDType) {
-		this.srcNodeConnectorIDType = srcNodeConnectorIDType;
-	}
+        public void setSrcNodeConnectorIDType(String srcNodeConnectorIDType) {
+                this.srcNodeConnectorIDType = srcNodeConnectorIDType;
+        }
 
-	public String getDstNodeIDType() {
-		return dstNodeIDType;
-	}
+        public String getDstNodeIDType() {
+                return dstNodeIDType;
+        }
 
-	public void setDstNodeIDType(String dstNodeIDType) {
-		this.dstNodeIDType = dstNodeIDType;
-	}
+        public void setDstNodeIDType(String dstNodeIDType) {
+                this.dstNodeIDType = dstNodeIDType;
+        }
 
-	public String getDstNodeConnectorIDType() {
-		return dstNodeConnectorIDType;
-	}
+        public String getDstNodeConnectorIDType() {
+                return dstNodeConnectorIDType;
+        }
 
-	public void setDstNodeConnectorIDType(String dstNodeConnectorIDType) {
-		this.dstNodeConnectorIDType = dstNodeConnectorIDType;
-	}
+        public void setDstNodeConnectorIDType(String dstNodeConnectorIDType) {
+                this.dstNodeConnectorIDType = dstNodeConnectorIDType;
+        }
 
-	public String getName() {
+        public String getName() {
         return name;
     }
 
@@ -206,24 +206,24 @@ public class TopologyUserLinkConfig implements Serializable {
     private boolean isValidSwitchId(String switchId, String typeStr) {
         if (typeStr.equals(NodeIDType.OPENFLOW)) {
             return isValidSwitchId(switchId);
-        } else if (typeStr.equals(NodeIDType.ONEPK) || 
-        		   typeStr.equals(NodeIDType.PCEP) || 
-        		   typeStr.equals(NodeIDType.PRODUCTION)) {
+        } else if (typeStr.equals(NodeIDType.ONEPK) ||
+                           typeStr.equals(NodeIDType.PCEP) ||
+                           typeStr.equals(NodeIDType.PRODUCTION)) {
             return true;
         } else {
-			logger.warn("Invalid node id type {}", typeStr);
-        	return false;
+                        logger.warn("Invalid node id type {}", typeStr);
+                return false;
         }
     }
 
     private boolean isValidPortId(String portId, String nodeConnectorType) {
-		if (NodeConnectorIDType.getClassType(nodeConnectorType) == null) {
-			logger.warn("Invalid node connector id type {}", nodeConnectorType);
-			return false; 
-		}
-		
-		return true;
-	}
+                if (NodeConnectorIDType.getClassType(nodeConnectorType) == null) {
+                        logger.warn("Invalid node connector id type {}", nodeConnectorType);
+                        return false;
+                }
+
+                return true;
+        }
 
     private long getSwitchIDLong(String switchId) {
         int radix = 16;
@@ -245,26 +245,26 @@ public class TopologyUserLinkConfig implements Serializable {
     }
 
     public boolean isValid() {
-		if (name == null || srcSwitchId == null || dstSwitchId == null
-				|| srcPort == null || dstPort == null || srcNodeIDType == null
-				|| dstNodeIDType == null || srcNodeConnectorIDType == null
-				|| dstNodeConnectorIDType == null) {
+                if (name == null || srcSwitchId == null || dstSwitchId == null
+                                || srcPort == null || dstPort == null || srcNodeIDType == null
+                                || dstNodeIDType == null || srcNodeConnectorIDType == null
+                                || dstNodeConnectorIDType == null) {
             return false;
-		}
-		
-		if (!isValidSwitchId(srcSwitchId, srcNodeIDType) || 
-			!isValidSwitchId(dstSwitchId, dstNodeIDType)) {
-			logger.warn("Invalid switch id");
-			return false;
-		}
-		
-		if (!isValidPortId(srcPort, srcNodeConnectorIDType) || 
-			!isValidPortId(dstPort, dstNodeConnectorIDType)) {
-			logger.warn("Invalid port id");
-			return false;
-		}
-			
-		return true;
+                }
+
+                if (!isValidSwitchId(srcSwitchId, srcNodeIDType) ||
+                        !isValidSwitchId(dstSwitchId, dstNodeIDType)) {
+                        logger.warn("Invalid switch id");
+                        return false;
+                }
+
+                if (!isValidPortId(srcPort, srcNodeConnectorIDType) ||
+                        !isValidPortId(dstPort, dstNodeConnectorIDType)) {
+                        logger.warn("Invalid port id");
+                        return false;
+                }
+
+                return true;
     }
 
     public boolean isSrcPortByName() {
@@ -295,13 +295,13 @@ public class TopologyUserLinkConfig implements Serializable {
 
     @Override
     public String toString() {
-		return "ITopologyUserLinkConfig [status=" + status + ", name=" + name
-				+ ", srcNodeIDType=" + srcNodeIDType + ", srcSwitchId="
-				+ srcSwitchId + ", srcNodeConnectorIDType="
-				+ srcNodeConnectorIDType + ", srcPort=" + srcPort
-				+ ", dstNodeIDType=" + dstNodeIDType + ", dstId="
-				+ dstSwitchId + ", dstNodeConnectorIDType="
-				+ dstNodeConnectorIDType + ", dstPort=" + dstPort + "]";
+                return "ITopologyUserLinkConfig [status=" + status + ", name=" + name
+                                + ", srcNodeIDType=" + srcNodeIDType + ", srcSwitchId="
+                                + srcSwitchId + ", srcNodeConnectorIDType="
+                                + srcNodeConnectorIDType + ", srcPort=" + srcPort
+                                + ", dstNodeIDType=" + dstNodeIDType + ", dstId="
+                                + dstSwitchId + ", dstNodeConnectorIDType="
+                                + dstNodeConnectorIDType + ", dstPort=" + dstPort + "]";
     }
 
     @Override

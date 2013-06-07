@@ -403,7 +403,7 @@ public class NorthboundIT {
             fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"nwSrc\":\"1.1.1.1\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
             result = getJsonResult(baseURL + "STUB/51966/test2", "POST", fc);
             Assert.assertTrue(httpResponseCode == 201);
-            
+
             // check that request returns both flows given node.
             result = getJsonResult(baseURL + "STUB/51966/", "GET");
             jt = new JSONTokener(result);

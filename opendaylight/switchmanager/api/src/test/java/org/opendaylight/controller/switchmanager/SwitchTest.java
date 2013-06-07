@@ -119,23 +119,23 @@ public class SwitchTest {
         Assert.assertTrue(sw.getSpanPorts().isEmpty());
 
     }
-    
+
     @Test
     public void testSwitchConfig(){
         SwitchConfig sc = new SwitchConfig(null, null, null, null);
         SwitchConfig sc2 = new SwitchConfig(null, null, null, null);
         Assert.assertTrue(sc.equals(sc2));
-        
+
         Assert.assertNull(sc.getMode());
         Assert.assertNull(sc.getNodeId());
         Assert.assertNull(sc.getTier());
         Assert.assertNull(sc.getNodeDescription());
-        
+
         SwitchConfig sc3 = new SwitchConfig("123", "name", "tier", "mode");
         SwitchConfig sc4 = new SwitchConfig("123", "name", "tier", "mode");
         Assert.assertFalse(sc.equals(sc3));
         Assert.assertTrue(sc3.equals(sc4));
-        
+
         Assert.assertTrue(sc3.getNodeId().equals("123"));
         Assert.assertTrue(sc3.getNodeDescription().equals("name"));
         Assert.assertTrue(sc3.getTier().equals("tier"));

@@ -22,11 +22,11 @@ import org.opendaylight.controller.sal.utils.Status;
 
 public class ConfigurationAwareTest implements
 IConfigurationAware {
-	
-	@Override
-	public Status saveConfiguration() {
-		return null;
-	}
+
+        @Override
+        public Status saveConfiguration() {
+                return null;
+        }
 
 
 }

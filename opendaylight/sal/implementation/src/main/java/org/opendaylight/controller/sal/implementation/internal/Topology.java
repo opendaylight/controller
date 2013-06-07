@@ -60,7 +60,7 @@ public class Topology implements IPluginOutTopologyService, ITopologyService {
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init() {
     }
@@ -69,7 +69,7 @@ public class Topology implements IPluginOutTopologyService, ITopologyService {
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
         // Make sure to clear all the data structure we use to track

@@ -59,29 +59,29 @@ public class PacketTest {
         Assert.assertTrue(sMAC[5] == -97);
 
         Assert.assertTrue(etherType == 0x806);
-        
+
         ARP arpPacket = (ARP) eth.getPayload();
-        
+
         Assert.assertTrue(arpPacket.getHardwareType() == (byte)0x1);
         Assert.assertTrue(arpPacket.getProtocolType() == 2048);
         Assert.assertTrue(arpPacket.getHardwareAddressLength() == (byte)0x6);
         Assert.assertTrue(arpPacket.getProtocolAddressLength() == (byte)0x4);
         Assert.assertTrue(arpPacket.getOpCode() == 1);
-        
-        byte[] senderHwAddress = arpPacket.getSenderHardwareAddress();
-        byte[] senderProtocolAddress = arpPacket.getSenderProtocolAddress(); 
-        
-        byte[] targetHwAddress = arpPacket.getTargetHardwareAddress();
-        byte[] targetProtocolAddress = arpPacket.getTargetProtocolAddress(); 
 
-        
+        byte[] senderHwAddress = arpPacket.getSenderHardwareAddress();
+        byte[] senderProtocolAddress = arpPacket.getSenderProtocolAddress();
+
+        byte[] targetHwAddress = arpPacket.getTargetHardwareAddress();
+        byte[] targetProtocolAddress = arpPacket.getTargetProtocolAddress();
+
+
         Assert.assertTrue(senderHwAddress[0] == (byte)0xA6);
         Assert.assertTrue(senderHwAddress[1] == (byte)0xEC);
         Assert.assertTrue(senderHwAddress[2] == (byte)0x9C);
         Assert.assertTrue(senderHwAddress[3] == (byte)0xAE);
         Assert.assertTrue(senderHwAddress[4] == (byte)0xB2);
         Assert.assertTrue(senderHwAddress[5] == (byte)0x9F);
-        
+
         Assert.assertTrue(senderProtocolAddress[0] == (byte)0x9);
         Assert.assertTrue(senderProtocolAddress[1] == (byte)0x9);
         Assert.assertTrue(senderProtocolAddress[2] == (byte)0x9);
@@ -102,7 +102,7 @@ public class PacketTest {
         Assert.assertTrue(targetProtocolAddress[0] == (byte)0x9);
         Assert.assertTrue(targetProtocolAddress[1] == (byte)0x9);
         Assert.assertTrue(targetProtocolAddress[2] == (byte)0x9);
-        Assert.assertTrue(targetProtocolAddress[3] == (byte)0xFE);      
+        Assert.assertTrue(targetProtocolAddress[3] == (byte)0xFE);
     }
 
     @Test

@@ -23,13 +23,13 @@ import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.samples.loadbalancer.IConfigManager;
 
 /**
- * Main application activator class for registering the dependencies and 
+ * Main application activator class for registering the dependencies and
  * initialising the load balancer application.
  *
  */
 
 public class Activator extends ComponentActivatorAbstractBase {
-    
+
     /*
      * Logger instance
      */
@@ -86,13 +86,13 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("salListenerName", "loadbalancer");
 
             c.setInterface(new String[] { IListenDataPacket.class.getName(),
-            		IConfigManager.class.getName()}, props);
+                        IConfigManager.class.getName()}, props);
 
             c.add(createContainerServiceDependency(containerName).setService(
                     IDataPacketService.class).setCallbacks(
                     "setDataPacketService", "unsetDataPacketService")
                     .setRequired(true));
-            
+
             c.add(createContainerServiceDependency(containerName).setService(
                     IRouting.class).setCallbacks("setRouting", "unsetRouting")
                     .setRequired(false));

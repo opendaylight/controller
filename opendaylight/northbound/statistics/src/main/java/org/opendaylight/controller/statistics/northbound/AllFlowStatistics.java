@@ -19,22 +19,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class AllFlowStatistics {
-	@XmlElement
-	List<FlowStatistics> flowStatistics;
-	//To satisfy JAXB
-	private AllFlowStatistics() {
-	}
-	
-	public AllFlowStatistics(List<FlowStatistics> flowStatistics) {
-		this.flowStatistics = flowStatistics;
-	}
+        @XmlElement
+        List<FlowStatistics> flowStatistics;
+        //To satisfy JAXB
+        private AllFlowStatistics() {
+        }
 
-	public List<FlowStatistics> getFlowStatistics() {
-		return flowStatistics;
-	}
+        public AllFlowStatistics(List<FlowStatistics> flowStatistics) {
+                this.flowStatistics = flowStatistics;
+        }
 
-	public void setFlowStatistics(List<FlowStatistics> flowStatistics) {
-		this.flowStatistics = flowStatistics;
-	}
+        public List<FlowStatistics> getFlowStatistics() {
+                return flowStatistics;
+        }
+
+        public void setFlowStatistics(List<FlowStatistics> flowStatistics) {
+                this.flowStatistics = flowStatistics;
+        }
 
 }

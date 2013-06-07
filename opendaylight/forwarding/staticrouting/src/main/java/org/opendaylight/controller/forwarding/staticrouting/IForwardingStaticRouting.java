@@ -12,14 +12,14 @@ package org.opendaylight.controller.forwarding.staticrouting;
 import java.net.InetAddress;
 import java.util.concurrent.ConcurrentMap;
 /**
- * 
+ *
  * This interface provides APIs to configure and manage static routes.
  *
  */
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
- * 
+ *
  * This Interface provides APIs to manage and query the static routes
  *
  */

@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class SetTpSrc extends Action {
-	@XmlElement
+        @XmlElement
     private int port;
 
     /* Dummy constructor for JAXB */
