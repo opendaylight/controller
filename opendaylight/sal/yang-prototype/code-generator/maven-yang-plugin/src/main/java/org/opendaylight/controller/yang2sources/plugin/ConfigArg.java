@@ -42,7 +42,10 @@ public abstract class ConfigArg {
     public static final class CodeGeneratorArg extends ConfigArg {
         private static final String CODE_GEN_DEFAULT_DIR = "target"
                 + File.separator + "generated-sources";
+        private static final String CODE_GEN_DEFAULT_RESOURCE_DIR = "target"
+                + File.separator + "generated-resources";
         private String codeGeneratorClass;
+        private File resourceBaseDir = new File(CODE_GEN_DEFAULT_RESOURCE_DIR);
 
         private Map<String, String> additionalConfiguration = Maps.newHashMap();
 
@@ -59,6 +62,13 @@ public abstract class ConfigArg {
             this.codeGeneratorClass = codeGeneratorClass;
         }
 
+        public CodeGeneratorArg(String codeGeneratorClass,
+                String outputBaseDir, String resourceBaseDir) {
+            super(outputBaseDir);
+            this.codeGeneratorClass = codeGeneratorClass;
+            this.resourceBaseDir = new File(resourceBaseDir);
+        }
+
         @Override
         public void check() {
             Preconditions.checkNotNull(codeGeneratorClass,
@@ -67,6 +77,14 @@ public abstract class ConfigArg {
 
         public String getCodeGeneratorClass() {
             return codeGeneratorClass;
+        }
+
+        public File getResourceBaseDir(MavenProject project) {
+            if (resourceBaseDir.isAbsolute()) {
+                return resourceBaseDir;
+            } else {
+                return new File(project.getBasedir(), resourceBaseDir.getPath());
+            }
         }
 
         public Map<String, String> getAdditionalConfiguration() {

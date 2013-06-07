@@ -9,19 +9,15 @@ package org.opendaylight.controller.yang2sources.plugin;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -33,46 +29,51 @@ import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
 import org.opendaylight.controller.yang2sources.plugin.ConfigArg.CodeGeneratorArg;
-import org.opendaylight.controller.yang2sources.plugin.Util.NamedFileInputStream;
+import org.opendaylight.controller.yang2sources.plugin.Util.ContextHolder;
+import org.opendaylight.controller.yang2sources.plugin.Util.YangsInZipsResult;
 import org.opendaylight.controller.yang2sources.spi.CodeGenerator;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 
 class YangToSourcesProcessor {
-    private static final String LOG_PREFIX = "yang-to-sources:";
-    private static final String META_INF_YANG_STRING = "META-INF"
-            + File.separator + "yang";
-    private static final File META_INF_YANG_DIR = new File(META_INF_YANG_STRING);
+    static final String LOG_PREFIX = "yang-to-sources:";
+    static final String META_INF_YANG_STRING = "META-INF" + File.separator
+            + "yang";
+    static final File META_INF_YANG_DIR = new File(META_INF_YANG_STRING);
 
     private final Log log;
     private final File yangFilesRootDir;
     private final List<CodeGeneratorArg> codeGenerators;
     private final MavenProject project;
     private final boolean inspectDependencies;
+    private YangProvider yangProvider;
+
+    @VisibleForTesting
+    YangToSourcesProcessor(Log log, File yangFilesRootDir,
+            List<CodeGeneratorArg> codeGenerators, MavenProject project,
+            boolean inspectDependencies, YangProvider yangProvider) {
+        this.log = Util.checkNotNull(log, "log");
+        this.yangFilesRootDir = Util.checkNotNull(yangFilesRootDir,
+                "yangFilesRootDir");
+        this.codeGenerators = Collections.unmodifiableList(Util.checkNotNull(
+                codeGenerators, "codeGenerators"));
+        this.project = Util.checkNotNull(project, "project");
+        this.inspectDependencies = inspectDependencies;
+        this.yangProvider = yangProvider;
+    }
 
     YangToSourcesProcessor(Log log, File yangFilesRootDir,
             List<CodeGeneratorArg> codeGenerators, MavenProject project,
             boolean inspectDependencies) {
-        this.log = checkNotNull(log, "log");
-        this.yangFilesRootDir = checkNotNull(yangFilesRootDir,
-                "yangFilesRootDir");
-        this.codeGenerators = Collections.unmodifiableList(checkNotNull(
-                codeGenerators, "codeGenerators"));
-        this.project = checkNotNull(project, "project");
-        this.inspectDependencies = inspectDependencies;
-    }
-
-    private static <T> T checkNotNull(T obj, String paramName) {
-        if (obj == null)
-            throw new NullPointerException("Parameter '" + paramName
-                    + "' is null");
-        return obj;
+        this(log, yangFilesRootDir, codeGenerators, project,
+                inspectDependencies, new YangProvider());
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         ContextHolder context = processYang();
         generateSources(context);
-        addYangsToMETA_INF();
+        yangProvider.addYangsToMETA_INF(log, project, yangFilesRootDir);
     }
 
     private ContextHolder processYang() throws MojoExecutionException {
@@ -88,7 +89,8 @@ class YangToSourcesProcessor {
             Set<Module> projectYangModules;
             try {
                 if (inspectDependencies) {
-                    YangsInZipsResult dependentYangResult = findYangFilesInDependenciesAsStream();
+                    YangsInZipsResult dependentYangResult = Util
+                            .findYangFilesInDependenciesAsStream(log, project);
                     Closeable dependentYangResult1 = dependentYangResult;
                     closeables.add(dependentYangResult1);
                     all.addAll(dependentYangResult.yangStreams);
@@ -124,20 +126,38 @@ class YangToSourcesProcessor {
         }
     }
 
-    private void addYangsToMETA_INF() throws MojoFailureException {
-        Resource res = new Resource();
+    static class YangProvider {
 
-        File targetYangDir = new File(project.getBasedir(), "target"
-                + File.separator + "yang");
-        res.setDirectory(targetYangDir.getPath());
+        private static final String yangResourceDir = "target" + File.separator
+                + "yang";
 
-        res.setTargetPath(META_INF_YANG_DIR.getPath());
-        try {
-            FileUtils.copyDirectory(yangFilesRootDir, targetYangDir);
-        } catch (IOException e) {
-            throw new MojoFailureException(e.getMessage(), e);
+        void addYangsToMETA_INF(Log log, MavenProject project,
+                File yangFilesRootDir) throws MojoFailureException {
+            File targetYangDir = new File(project.getBasedir(), yangResourceDir);
+
+            try {
+                FileUtils.copyDirectory(yangFilesRootDir, targetYangDir);
+            } catch (IOException e) {
+                String message = "Unable to copy yang files into resource folder";
+                log.warn(message, e);
+                throw new MojoFailureException(message, e);
+            }
+
+            setResource(targetYangDir, META_INF_YANG_DIR.getPath(), project);
+
+            log.debug(Util.message(
+                    "Yang files from: %s marked as resources: %s", LOG_PREFIX,
+                    yangFilesRootDir, META_INF_YANG_DIR.getPath()));
         }
-        project.addResource(res);
+
+        private static void setResource(File targetYangDir, String targetPath,
+                MavenProject project) {
+            Resource res = new Resource();
+            res.setDirectory(targetYangDir.getPath());
+            if (targetPath != null)
+                res.setTargetPath(targetPath);
+            project.addResource(res);
+        }
     }
 
     /**
@@ -192,122 +212,29 @@ class YangToSourcesProcessor {
 
         log.info(Util.message("Sources will be generated to %s", LOG_PREFIX,
                 outputDir));
-        log.info(Util.message("Project root dir is %s", LOG_PREFIX,
+        log.debug(Util.message("Project root dir is %s", LOG_PREFIX,
                 project.getBasedir()));
-        log.info(Util.message(
+        log.debug(Util.message(
                 "Additional configuration picked up for : %s: %s", LOG_PREFIX,
                 codeGeneratorCfg.getCodeGeneratorClass(),
                 codeGeneratorCfg.getAdditionalConfiguration()));
+
         project.addCompileSourceRoot(outputDir.getAbsolutePath());
         g.setLog(log);
         g.setAdditionalConfig(codeGeneratorCfg.getAdditionalConfiguration());
+        File resourceBaseDir = codeGeneratorCfg.getResourceBaseDir(project);
+
+        YangProvider.setResource(resourceBaseDir, null, project);
+        g.setResourceBaseDir(resourceBaseDir);
+        log.debug(Util.message(
+                "Folder: %s marked as resources for generator: %s", LOG_PREFIX,
+                resourceBaseDir, codeGeneratorCfg.getCodeGeneratorClass()));
+
         Collection<File> generated = g.generateSources(context.getContext(),
-                outputDir, context.getYangModules(), project.getBasedir());
+                outputDir, context.getYangModules());
+
         log.info(Util.message("Sources generated by %s: %s", LOG_PREFIX,
                 codeGeneratorCfg.getCodeGeneratorClass(), generated));
     }
 
-    private class YangsInZipsResult implements Closeable {
-        private final List<InputStream> yangStreams;
-        private final List<Closeable> zipInputStreams;
-
-        private YangsInZipsResult(List<InputStream> yangStreams,
-                List<Closeable> zipInputStreams) {
-            this.yangStreams = yangStreams;
-            this.zipInputStreams = zipInputStreams;
-        }
-
-        @Override
-        public void close() throws IOException {
-            for (InputStream is : yangStreams) {
-                is.close();
-            }
-            for (Closeable is : zipInputStreams) {
-                is.close();
-            }
-        }
-    }
-
-    private YangsInZipsResult findYangFilesInDependenciesAsStream()
-            throws MojoFailureException {
-        List<InputStream> yangsFromDependencies = new ArrayList<>();
-        List<Closeable> zips = new ArrayList<>();
-        try {
-            List<File> filesOnCp = Util.getClassPath(project);
-            log.info(Util.message(
-                    "Searching for yang files in following dependencies: %s",
-                    LOG_PREFIX, filesOnCp));
-
-            for (File file : filesOnCp) {
-                List<String> foundFilesForReporting = new ArrayList<>();
-                // is it jar file or directory?
-                if (file.isDirectory()) {
-                    File yangDir = new File(file, META_INF_YANG_STRING);
-                    if (yangDir.exists() && yangDir.isDirectory()) {
-                        File[] yangFiles = yangDir
-                                .listFiles(new FilenameFilter() {
-                                    @Override
-                                    public boolean accept(File dir, String name) {
-                                        return name.endsWith(".yang")
-                                                && new File(dir, name).isFile();
-                                    }
-                                });
-                        for (File yangFile : yangFiles) {
-                            yangsFromDependencies.add(new NamedFileInputStream(
-                                    yangFile));
-                        }
-                    }
-
-                } else {
-                    ZipFile zip = new ZipFile(file);
-                    zips.add(zip);
-
-                    Enumeration<? extends ZipEntry> entries = zip.entries();
-                    while (entries.hasMoreElements()) {
-                        ZipEntry entry = entries.nextElement();
-                        String entryName = entry.getName();
-
-                        if (entryName.startsWith(META_INF_YANG_STRING)) {
-                            if (entry.isDirectory() == false
-                                    && entryName.endsWith(".yang")) {
-                                foundFilesForReporting.add(entryName);
-                                // This will be closed after all strams are
-                                // parsed.
-                                InputStream entryStream = zip
-                                        .getInputStream(entry);
-                                yangsFromDependencies.add(entryStream);
-                            }
-                        }
-                    }
-                }
-                if (foundFilesForReporting.size() > 0) {
-                    log.info(Util.message("Found %d yang files in %s: %s",
-                            LOG_PREFIX, foundFilesForReporting.size(), file,
-                            foundFilesForReporting));
-                }
-
-            }
-        } catch (Exception e) {
-            throw new MojoFailureException(e.getMessage(), e);
-        }
-        return new YangsInZipsResult(yangsFromDependencies, zips);
-    }
-
-    private class ContextHolder {
-        private final SchemaContext context;
-        private final Set<Module> yangModules;
-
-        private ContextHolder(SchemaContext context, Set<Module> yangModules) {
-            this.context = context;
-            this.yangModules = yangModules;
-        }
-
-        public SchemaContext getContext() {
-            return context;
-        }
-
-        public Set<Module> getYangModules() {
-            return yangModules;
-        }
-    }
 }
