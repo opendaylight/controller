@@ -1255,18 +1255,12 @@ public class HostTracker implements IfIptoHost, IfHostListener,
     }
 
     private void handleNodeConnectorStatusDown(NodeConnector nodeConnector) {
-        long sid = (Long) nodeConnector.getNode().getID();
-        short port = (Short) nodeConnector.getID();
-
         logger.debug("handleNodeConnectorStatusDown {}", nodeConnector);
 
         for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
             HostNodeConnector host = entry.getValue();
-            if ((host.getnodeconnectornodeId() == sid)
-                    && (host.getnodeconnectorportId() == port)) {
-                logger.debug(
-                        "Switch: {}, Port: {} is down, remove from Hosts_DB",
-                        sid, port);
+            if (host.getnodeConnector().equals(nodeConnector)) {
+                logger.debug(" NodeConnector: {} is down, remove from Hosts_DB", nodeConnector);
                 removeKnownHost(entry.getKey());
                 notifyHostLearnedOrRemoved(host, false);
             }
