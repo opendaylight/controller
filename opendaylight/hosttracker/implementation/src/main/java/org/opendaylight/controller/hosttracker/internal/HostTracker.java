@@ -1160,17 +1160,14 @@ public class HostTracker implements IfIptoHost, IfHostListener,
 
         switch (type) {
         case REMOVED:
-            long sid = (Long) node.getID();
             if (logger.isDebugEnabled()) {
-              logger.debug("Received removedSwitch for sw id {}",
-                      HexEncode.longToHexString(sid));
+              logger.debug("Received removedSwitch for sw id {}", node);
             }
             for (Entry<InetAddress, HostNodeConnector> entry : hostsDB
                     .entrySet()) {
                 HostNodeConnector host = entry.getValue();
-                if (host.getnodeconnectornodeId() == sid) {
-                    logger.debug("Switch: {} is down, remove from Hosts_DB",
-                            sid);
+                if (host.getnodeConnector().getNode().equals(node)) {
+                    logger.debug("Switch: {} is down, remove from Hosts_DB", node);
                     removeKnownHost(entry.getKey());
                     notifyHostLearnedOrRemoved(host, false);
                 }
@@ -1260,18 +1257,12 @@ public class HostTracker implements IfIptoHost, IfHostListener,
     }
 
     private void handleNodeConnectorStatusDown(NodeConnector nodeConnector) {
-        long sid = (Long) nodeConnector.getNode().getID();
-        short port = (Short) nodeConnector.getID();
-
         logger.debug("handleNodeConnectorStatusDown {}", nodeConnector);
 
         for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
             HostNodeConnector host = entry.getValue();
-            if ((host.getnodeconnectornodeId() == sid)
-                    && (host.getnodeconnectorportId() == port)) {
-                logger.debug(
-                        "Switch: {}, Port: {} is down, remove from Hosts_DB",
-                        sid, port);
+            if (host.getnodeConnector().equals(nodeConnector)) {
+                logger.debug("NodeConnector: {} is down, remove from Hosts_DB", nodeConnector);
                 removeKnownHost(entry.getKey());
                 notifyHostLearnedOrRemoved(host, false);
             }
