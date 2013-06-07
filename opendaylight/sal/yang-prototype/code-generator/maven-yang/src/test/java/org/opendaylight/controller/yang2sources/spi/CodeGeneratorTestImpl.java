@@ -13,27 +13,55 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 
 public class CodeGeneratorTestImpl implements CodeGenerator {
 
+    private Log log;
+
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir, Set<Module> currentModuleBuilders,
-            File projectMainDir) {
-        // no-op
+            File outputBaseDir, Set<Module> currentModuleBuilders) {
+        if (log != null) {
+            log.debug(getClass().getCanonicalName()
+                    + " generateSources:context: " + context);
+            log.debug(getClass().getCanonicalName()
+                    + " generateSources:outputBaseDir: " + outputBaseDir);
+            log.debug(getClass().getCanonicalName()
+                    + " generateSources:currentModuleBuilders: "
+                    + currentModuleBuilders);
+
+        }
         return null;
     }
 
     @Override
     public void setLog(Log log) {
-        // no-op
+        this.log = log;
     }
 
     @Override
     public void setAdditionalConfig(Map<String, String> additionalConfiguration) {
-        // no-op
+        if (log != null)
+            log.debug(getClass().getCanonicalName() + " additionalConfig: "
+                    + additionalConfiguration);
+    }
+
+
+    @Override
+    public void setResourceBaseDir(File resourceBaseDir) {
+        if (log != null)
+            log.debug(getClass().getCanonicalName() + " resourceBaseDir: "
+                    + resourceBaseDir);
+    }
+
+    @Override
+    public void setMavenProject(MavenProject project) {
+        if (log != null)
+            log.debug(getClass().getCanonicalName() + " maven project: "
+                    + project);
     }
 
 }

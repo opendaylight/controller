@@ -64,41 +64,58 @@ public final class YangToSourcesMojo extends AbstractMojo {
     @Parameter(property = "inspectDependencies", required = true, readonly = true)
     private boolean inspectDependencies;
 
+    private YangToSourcesProcessor yangToSourcesProcessor;
+
     public YangToSourcesMojo() {
 
     }
 
     @VisibleForTesting
-    YangToSourcesMojo(CodeGeneratorArg[] codeGeneratorArgs,
-            String yangFilesRootDir) {
-        this.codeGenerators = codeGeneratorArgs;
-        this.yangFilesRootDir = yangFilesRootDir;
+    YangToSourcesMojo(YangToSourcesProcessor processor) {
+        this.yangToSourcesProcessor = processor;
     }
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (yangToSourcesProcessor == null) {
+            List<CodeGeneratorArg> codeGeneratorArgs = processCodeGenerators(codeGenerators);
+
+            // defaults to ${basedir}/src/main/yang
+            File yangFilesRootFile = processYangFilesRootDir(yangFilesRootDir,
+                    project.getBasedir());
+
+            yangToSourcesProcessor = new YangToSourcesProcessor(getLog(),
+                    yangFilesRootFile, codeGeneratorArgs, project,
+                    inspectDependencies);
+        }
+        yangToSourcesProcessor.execute();
+    }
+
+    private static List<CodeGeneratorArg> processCodeGenerators(
+            CodeGeneratorArg[] codeGenerators) {
         List<CodeGeneratorArg> codeGeneratorArgs;
         if (codeGenerators == null) {
             codeGeneratorArgs = Collections.emptyList();
         } else {
             codeGeneratorArgs = Arrays.asList(codeGenerators);
         }
+        return codeGeneratorArgs;
+    }
 
-        // defaults to ${basedir}/src/main/yang
+    private static File processYangFilesRootDir(String yangFilesRootDir,
+            File baseDir) {
         File yangFilesRootFile;
         if (yangFilesRootDir == null) {
-            yangFilesRootFile = new File(project.getBasedir(), "src"
-                    + File.separator + "main" + File.separator + "yang");
+            yangFilesRootFile = new File(baseDir, "src" + File.separator
+                    + "main" + File.separator + "yang");
         } else {
             File file = new File(yangFilesRootDir);
             if (file.isAbsolute()) {
                 yangFilesRootFile = file;
             } else {
-                yangFilesRootFile = new File(project.getBasedir(),
-                        file.getPath());
+                yangFilesRootFile = new File(baseDir, file.getPath());
             }
         }
-        new YangToSourcesProcessor(getLog(), yangFilesRootFile,
-                codeGeneratorArgs, project, inspectDependencies).execute();
+        return yangFilesRootFile;
     }
 }

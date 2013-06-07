@@ -37,6 +37,7 @@
                                         <nm1>abcd=a.b.c.d</nm1>
                                         <nm2>abcd2=a.b.c.d.2</nm2>
                                     </additionalConfiguration>
+                                    <resourceBaseDir>/target/resourcesGenerated</resourceBaseDir>
                                 </generator>
                                 <generator>
                                     <codeGeneratorClass>
