@@ -7,19 +7,20 @@
  */
 package org.opendaylight.controller.yang2sources.plugin;
 
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collection;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 public class UtilTest {
 
     @Test
     public void testCache() throws FileNotFoundException {
-        String yang = new File(getClass().getResource("/mock.yang").getFile())
+        String yang = new File(getClass().getResource("/yang/mock.yang")
+                .getFile())
                 .getParent();
         Collection<File> files = Util.listFiles(new File(yang));
         Collection<File> files2 = Util.listFiles(new File(yang));
