@@ -45,8 +45,10 @@ public class YangToSourcesPluginTest {
     @Test
     public void testAdditionalConfiguration() throws VerificationException {
         Verifier v = setUp("AdditionalConfig/", false);
-        v.verifyTextInLog("[INFO] yang-to-sources: Additional configuration picked up for : org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl: {nm1=abcd=a.b.c.d, nm2=abcd2=a.b.c.d.2}");
-        v.verifyTextInLog("[INFO] yang-to-sources: Additional configuration picked up for : org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl: {c1=config}");
+        v.verifyTextInLog("[DEBUG] yang-to-sources: Additional configuration picked up for : org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl: {nm1=abcd=a.b.c.d, nm2=abcd2=a.b.c.d.2}");
+        v.verifyTextInLog("[DEBUG] yang-to-sources: Additional configuration picked up for : org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl: {c1=config}");
+        v.verifyTextInLog("../files marked as resources: META-INF/yang");
+        v.verifyTextInLog("target/generated-resources marked as resources for generator: org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl");
     }
 
     @Test
@@ -106,6 +108,7 @@ public class YangToSourcesPluginTest {
                 + project).getAbsolutePath());
         if (ignoreF)
             verifier.addCliOption("-fn");
+        verifier.setMavenDebug(true);
         verifier.executeGoal("generate-sources");
         return verifier;
     }

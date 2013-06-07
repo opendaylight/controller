@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.yang2sources.plugin;
 
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.Is.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.doReturn;
+import static org.junit.matchers.JUnitMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +21,6 @@ import java.util.Set;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -53,7 +53,6 @@ public class GenerateSourcesTest {
         mojo.project = project;
     }
 
-    @Ignore
     @Test
     public void test() throws Exception {
         mojo.execute();
@@ -61,6 +60,9 @@ public class GenerateSourcesTest {
         assertThat(GeneratorMock.outputDir, is(outDir));
         assertNotNull(GeneratorMock.log);
         assertTrue(GeneratorMock.additionalCfg.isEmpty());
+        assertThat(GeneratorMock.resourceBaseDir.toString(),
+                containsString("target" + File.separator
+                        + "generated-resources"));
     }
 
     public static class GeneratorMock implements CodeGenerator {
@@ -69,11 +71,12 @@ public class GenerateSourcesTest {
         private static File outputDir;
         private static Log log;
         private static Map<String, String> additionalCfg;
+        private static File resourceBaseDir;
 
         @Override
         public Collection<File> generateSources(SchemaContext context,
-                File outputBaseDir, Set<Module> currentModules,
-                File projectBaseDir) throws IOException {
+                File outputBaseDir, Set<Module> currentModules)
+                throws IOException {
             called++;
             outputDir = outputBaseDir;
             return Lists.newArrayList();
@@ -81,13 +84,19 @@ public class GenerateSourcesTest {
 
         @Override
         public void setLog(Log log) {
-            this.log = log;
+            GeneratorMock.log = log;
         }
 
         @Override
         public void setAdditionalConfig(
                 Map<String, String> additionalConfiguration) {
-            this.additionalCfg = additionalConfiguration;
+            GeneratorMock.additionalCfg = additionalConfiguration;
+        }
+
+        @Override
+        public void setResourceBaseDir(File resourceBaseDir) {
+            GeneratorMock.resourceBaseDir = resourceBaseDir;
+
         }
     }
 
