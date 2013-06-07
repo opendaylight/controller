@@ -39,10 +39,11 @@ public interface CodeGenerator {
      * @throws IOException
      */
     Collection<File> generateSources(SchemaContext context, File outputBaseDir,
-            Set<Module> currentModules, File projectBaseDir)
-            throws IOException;
+            Set<Module> currentModules) throws IOException;
 
     void setLog(Log log);
 
     void setAdditionalConfig(Map<String, String> additionalConfiguration);
+
+    void setResourceBaseDir(File resourceBaseDir);
 }

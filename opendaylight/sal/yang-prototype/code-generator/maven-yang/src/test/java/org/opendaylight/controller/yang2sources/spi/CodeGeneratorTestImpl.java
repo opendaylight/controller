@@ -20,8 +20,7 @@ public class CodeGeneratorTestImpl implements CodeGenerator {
 
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir, Set<Module> currentModuleBuilders,
-            File projectMainDir) {
+            File outputBaseDir, Set<Module> currentModuleBuilders) {
         // no-op
         return null;
     }
@@ -33,6 +32,11 @@ public class CodeGeneratorTestImpl implements CodeGenerator {
 
     @Override
     public void setAdditionalConfig(Map<String, String> additionalConfiguration) {
+        // no-op
+    }
+
+    @Override
+    public void setResourceBaseDir(File resourceBaseDir) {
         // no-op
     }
 
