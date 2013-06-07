@@ -1699,7 +1699,7 @@ CommandProvider {
         List<NodeConnector> ncLists = new ArrayList<NodeConnector>();
 
         for (NodeConnector nodeConnector : nodeConncetors) {
-            if (!spanNodeConnectors.contains(nodeConnector)) {
+            if (spanNodeConnectors.contains(nodeConnector)) {
                 ncLists.add(nodeConnector);
             }
         }
