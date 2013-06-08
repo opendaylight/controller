@@ -51,7 +51,7 @@ public class FlowEntry implements Cloneable, Serializable {
 
     /**
      * Return the actual Flow contained in this entry
-     * 
+     *
      * @return the flow
      */
     public Flow getFlow() {
@@ -147,12 +147,12 @@ public class FlowEntry implements Cloneable, Serializable {
 
     /**
      * Merges the current Flow with the passed Container Flow
-     * 
+     *
      * Note: Container Flow merging is not an injective function. Be m1 and m2
      * two different matches, and be f() the flow merge function, such that y1 =
      * f(m1) and y2 = f(m2) are the two merged matches, we may have: y1 = y2
-     * 
-     * 
+     *
+     *
      * @param containerFlow
      * @return this merged FlowEntry
      */

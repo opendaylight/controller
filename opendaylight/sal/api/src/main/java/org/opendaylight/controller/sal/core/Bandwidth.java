@@ -66,7 +66,7 @@ public class Bandwidth extends Property {
         super(BandwidthPropName);
         this.bandwidthValue = (long) bandwidth;
     }
-    
+
     public Bandwidth(String name) {
         super(name);
     }

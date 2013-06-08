@@ -10,7 +10,7 @@ package org.opendaylight.controller.concepts.transform;
 
 /**
  * Factory which produces product based on input object
- * 
+ *
  * @author Tony Tkacik
  *
  * @param <I> Input
@@ -19,7 +19,7 @@ package org.opendaylight.controller.concepts.transform;
 public interface Transformer<I,P> {
     /**
      * Transforms input into instance of product.
-     * 
+     *
      * @param input Input which drives transformation
      * @return Instance of product which was created from supplied input.
      */

@@ -13,8 +13,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * The class represents Admin Config status
- * 
- * 
+ *
+ *
  */
 @XmlRootElement
 @SuppressWarnings("serial")

@@ -107,7 +107,7 @@ public class Controller implements IController, CommandProvider {
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     public void init() {
         logger.debug("Initializing!");
@@ -122,7 +122,7 @@ public class Controller implements IController, CommandProvider {
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     public void start() {
         logger.debug("Starting!");
@@ -145,7 +145,7 @@ public class Controller implements IController, CommandProvider {
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     public void stop() {
         for (Iterator<Entry<Long, ISwitch>> it = switches.entrySet().iterator(); it
@@ -166,7 +166,7 @@ public class Controller implements IController, CommandProvider {
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     public void destroy() {
     }
@@ -224,7 +224,7 @@ public class Controller implements IController, CommandProvider {
                     instanceName);
             switchHandler.start();
             if (sc.isConnected()) {
-                logger.info("Switch:{} is connected to the Controller", 
+                logger.info("Switch:{} is connected to the Controller",
                         sc.socket().getRemoteSocketAddress()
                         .toString().split("/")[1]);
             }

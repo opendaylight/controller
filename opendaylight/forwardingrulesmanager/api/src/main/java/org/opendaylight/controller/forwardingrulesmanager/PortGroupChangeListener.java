@@ -15,14 +15,14 @@ import org.opendaylight.controller.sal.core.Node;
 /**
  * PortGroupChangeListener listens to the PortGroup updates provided by the
  * PortGroupProvider.
- * 
- * 
+ *
+ *
  */
 public interface PortGroupChangeListener {
     /**
      * This method is invoked by PortGroupProvider whenever it detects a change
      * in PortGroup membership for a given PortGroupConfig.
-     * 
+     *
      * @param config
      *            Port Group Configuration
      * @param portGroupData

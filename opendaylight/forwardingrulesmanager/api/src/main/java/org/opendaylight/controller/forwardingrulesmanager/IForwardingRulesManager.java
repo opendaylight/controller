@@ -18,7 +18,7 @@ import org.opendaylight.controller.sal.utils.Status;
 /**
  * Interface that describes methods for installing or removing forwarding rules
  * and to access to the flows database.
- * 
+ *
  */
 public interface IForwardingRulesManager {
 
@@ -27,7 +27,7 @@ public interface IForwardingRulesManager {
      * SDN protocol plugin to install the flow on the network node. Based on the
      * result of this operation FRM will update its database accordingly and
      * will return the proper {@code Status} code.
-     * 
+     *
      * @param flow
      *            the flow entry to install
      * @return the {@code Status} object indicating the result of this action.
@@ -39,7 +39,7 @@ public interface IForwardingRulesManager {
      * protocol plugin to uninstall the flow from the network node. Based on the
      * result of this operation FRM will update its database accordingly and
      * will return the proper {@code Status} code.
-     * 
+     *
      * @param flow
      *            the flow entry to uninstall
      * @return the {@code Status} object indicating the result of this action
@@ -53,7 +53,7 @@ public interface IForwardingRulesManager {
      * modify message depending on the SDN protocol specifications If the
      * current flow is equal to the new one it will be a no op and success code
      * is returned.
-     * 
+     *
      * @param current
      *            the current flow entry to modify
      * @param newone
@@ -72,8 +72,8 @@ public interface IForwardingRulesManager {
      * it, it will request plugin to add the new flow. If the passed entry is
      * not valid an error code is returned. If the existing flow is equal to the
      * passed one it will be a no op and success code is returned.
-     * 
-     * 
+     *
+     *
      * @param newone
      *            the new flow entry to install
      * @return the {@code Status} object indicating the result of this action
@@ -86,7 +86,7 @@ public interface IForwardingRulesManager {
      * SDN protocol plugin to install the flow on the network node. As immediate
      * result of this asynchronous call, FRM will update its flow database as if
      * the flow was successfully installed.
-     * 
+     *
      * @param flow
      *            the flow entry to install
      * @return the status of this request containing the request id associated
@@ -100,7 +100,7 @@ public interface IForwardingRulesManager {
      * SDN protocol plugin to uninstall the flow from the network node. As
      * immediate result of this asynchronous call, FRM will update its flow
      * database as if the flow was successfully installed.
-     * 
+     *
      * @param flow
      *            the flow entry to uninstall
      * @return the status of this request containing the unique id associated to
@@ -115,7 +115,7 @@ public interface IForwardingRulesManager {
      * this message to the network node. It could be a delete + add or a single
      * modify message depending on the SDN protocol specifications. If the
      * current flow is equal to the new one it will be a no op.
-     * 
+     *
      * @param current
      *            the current flow entry to modify
      * @param newone
@@ -136,7 +136,7 @@ public interface IForwardingRulesManager {
      * it, it will request plugin to add the new flow. If the passed entry is
      * not valid a zero request id is returned. If the existing flow is equal to
      * the passed one it will be a no op.
-     * 
+     *
      * @param newone
      *            the new flow entry to install
      * @return the unique id associated to this request. In case of not
@@ -154,7 +154,7 @@ public interface IForwardingRulesManager {
      * blocked until the solicitation response is received from the network node
      * or receive timeout. Otherwise, it is a non-blocking call and does not
      * guarantee the node will respond in any given time.
-     * 
+     *
      * @param node
      *            The network node to solicit a response
      * @param blocking
@@ -166,7 +166,7 @@ public interface IForwardingRulesManager {
 
     /**
      * Check whether the passed flow entry conflicts with the Container flows
-     * 
+     *
      * @param flow
      *            the flow entry to test
      * @return true if conflicts, false otherwise
@@ -176,7 +176,7 @@ public interface IForwardingRulesManager {
     /**
      * Returns the list of Flow entries across network nodes which are part of
      * the same flow group, policy
-     * 
+     *
      * @param group
      *            the group name
      * @return the list of flow entries belonging to the specified group
@@ -186,7 +186,7 @@ public interface IForwardingRulesManager {
     /**
      * Add a list of output port to the flow with the specified name on the
      * specified network node
-     * 
+     *
      * @param node
      *            the network node
      * @param flowName
@@ -200,7 +200,7 @@ public interface IForwardingRulesManager {
     /**
      * Remove a list of output port from the flow with the specified name on the
      * specified network node
-     * 
+     *
      * @param node
      *            the network node
      * @param flowName
@@ -214,7 +214,7 @@ public interface IForwardingRulesManager {
     /**
      * Replace the current output port in the specified flow with the specified
      * one
-     * 
+     *
      * @param node
      *            the network node
      * @param groupName
@@ -229,7 +229,7 @@ public interface IForwardingRulesManager {
 
     /**
      * Returns the output port configured on the specified flow
-     * 
+     *
      * @param node
      *            the network node
      * @param flowName
@@ -242,14 +242,14 @@ public interface IForwardingRulesManager {
      * Returns all the troubleshooting information that applications have set
      * along with the policy they have configured through forwarding rules
      * manger.
-     * 
+     *
      * @return the collection of troubleshooting objects
      */
     public Map<String, Object> getTSPolicyData();
 
     /**
      * Set the troubleshooting information for the policy
-     * 
+     *
      * @param policyname
      *            the flow group name
      * @param o
@@ -262,7 +262,7 @@ public interface IForwardingRulesManager {
     /**
      * Returns the troubleshooting information that was set for the specified
      * policy
-     * 
+     *
      * @param groupName
      *            the flows group name
      * @return the troubleshooting info object
@@ -272,7 +272,7 @@ public interface IForwardingRulesManager {
     /**
      * Returns the specifications of all the flows configured for all the
      * switches on the current container
-     * 
+     *
      * @return the list of flow configurations present in the database
      */
     public List<FlowConfig> getStaticFlows();
@@ -280,7 +280,7 @@ public interface IForwardingRulesManager {
     /**
      * Returns the specifications of all the flows configured for the given
      * switch on the current container
-     * 
+     *
      * @param node
      *            the network node identifier
      * @return the list of {@code FlowConfig} objects
@@ -290,7 +290,7 @@ public interface IForwardingRulesManager {
     /**
      * Returns the specification of the flow configured for the given network
      * node on the current container
-     * 
+     *
      * @param name
      *            the flow name
      * @param n
@@ -302,7 +302,7 @@ public interface IForwardingRulesManager {
     /**
      * Returns the list of names of flows configured for the given Network node
      * on the current container
-     * 
+     *
      * @param node
      *            the network node identifier
      * @return the list of flow names
@@ -311,14 +311,14 @@ public interface IForwardingRulesManager {
 
     /**
      * Returns the list of Node(s) for which a static flow has been configured
-     * 
+     *
      * @return the list of network nodes
      */
     public List<Node> getListNodeWithConfiguredFlows();
 
     /**
      * Save the flow configured so far to file
-     * 
+     *
      * @return the {@code Status} object indicating the result of this action.
      */
     public Status saveConfig();
@@ -326,7 +326,7 @@ public interface IForwardingRulesManager {
     /**
      * Add a flow specified by the {@code FlowConfig} object on the current
      * container
-     * 
+     *
      * @param config
      *            the {@code FlowConfig} object representing the static flow
      * @param restore
@@ -339,7 +339,7 @@ public interface IForwardingRulesManager {
     /**
      * Remove a flow specified by the {@code FlowConfig} object on the current
      * container
-     * 
+     *
      * @param config
      *            the {@code FlowConfig} object representing the static flow
      * @return the {@code Status} object indicating the result of this action
@@ -350,7 +350,7 @@ public interface IForwardingRulesManager {
      * Replace the flow identified by the {@code FlowConfig.name} name for the
      * {@code FlowConfig.node} network node with the new flow specified by
      * {@code FlowConfig} object
-     * 
+     *
      * @param config
      *            the {@code FlowConfig} object
      * @returnthe {@code Status} object indicating the result of this action
@@ -359,7 +359,7 @@ public interface IForwardingRulesManager {
 
     /**
      * Remove the flow specified by name on the passed network node
-     * 
+     *
      * @param name
      *            for the static flow
      * @param node
@@ -372,7 +372,7 @@ public interface IForwardingRulesManager {
      * Toggle the installation status of the specified configured flow If the
      * flow configuration status is active, this call will change the flow
      * status to inactive and vice-versa
-     * 
+     *
      * @param configObject
      *            the {@code FlowConfig} object
      * @return the {@code Status} object indicating the result of this action
@@ -383,7 +383,7 @@ public interface IForwardingRulesManager {
      * Toggle the installation status of the specified configured flow If the
      * flow configuration status is active, this call will change the flow
      * status to inactive and vice-versa
-     * 
+     *
      * @param name
      *            for the static flow
      * @param node

@@ -49,7 +49,7 @@ public class UserConfig implements Serializable {
         this.roles = (roles == null) ? new ArrayList<String>()
                 : new ArrayList<String>(roles);
     }
-    
+
     public String getUser() {
         return user;
     }
@@ -161,24 +161,24 @@ public class UserConfig implements Serializable {
             return new Status(StatusCode.BADREQUEST,
                     "Current password is incorrect");
         }
-        
+
         // Create a new object with the proposed modifications
         UserConfig proposed = new UserConfig();
         proposed.user = this.user;
         proposed.password = (newPassword != null)? newPassword : this.password;
         proposed.roles = (newRoles != null)? newRoles : this.roles;
-        
+
         // Validate it
         Status status = proposed.validate();
         if (!status.isSuccess()) {
             return status;
         }
-        
+
         // Accept the modifications
         this.user = proposed.user;
         this.password = proposed.password;
         this.roles = new ArrayList<String>(proposed.roles);
-        
+
         return status;
     }
 
@@ -192,7 +192,7 @@ public class UserConfig implements Serializable {
         }
         return locResponse;
     }
-    
+
     protected String getRolesString() {
         StringBuffer buffer = new StringBuffer();
         if (!roles.isEmpty()) {

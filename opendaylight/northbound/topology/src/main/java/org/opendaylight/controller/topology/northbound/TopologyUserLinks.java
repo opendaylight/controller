@@ -22,23 +22,23 @@ import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class TopologyUserLinks {
-	@XmlElement
-	List<TopologyUserLinkConfig> userLinks;
-	
-	//To satisfy JAXB
-	private TopologyUserLinks() {
-		
-	}
-	
-	public List<TopologyUserLinkConfig> getUserLinks() {
-		return userLinks;
-	}
+        @XmlElement
+        List<TopologyUserLinkConfig> userLinks;
 
-	public void setUserLinks(List<TopologyUserLinkConfig> userLinks) {
-		this.userLinks = userLinks;
-	}
+        //To satisfy JAXB
+        private TopologyUserLinks() {
 
-	public TopologyUserLinks(List<TopologyUserLinkConfig> userLinks) {
-		this.userLinks = new ArrayList<TopologyUserLinkConfig>(userLinks);
-	}
+        }
+
+        public List<TopologyUserLinkConfig> getUserLinks() {
+                return userLinks;
+        }
+
+        public void setUserLinks(List<TopologyUserLinkConfig> userLinks) {
+                this.userLinks = userLinks;
+        }
+
+        public TopologyUserLinks(List<TopologyUserLinkConfig> userLinks) {
+                this.userLinks = new ArrayList<TopologyUserLinkConfig>(userLinks);
+        }
 }

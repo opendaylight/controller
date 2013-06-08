@@ -23,13 +23,13 @@ import org.opendaylight.controller.sal.utils.Status;
 public class ConfigurationContainerAwareTest implements
          IConfigurationContainerAware {
 
-	
-	
-	
-	@Override
-	public Status saveConfiguration() {
-		return null;
-	}
-	
-	
+
+
+
+        @Override
+        public Status saveConfiguration() {
+                return null;
+        }
+
+
 }

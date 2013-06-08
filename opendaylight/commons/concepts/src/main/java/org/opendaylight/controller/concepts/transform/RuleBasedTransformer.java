@@ -12,15 +12,15 @@ import java.util.Set;
 
 /**
  * Transformer with set of acceptance rules
- * 
+ *
  * The transformer provides a set of {@link Acceptor}s, which could be used to
  * verify if the input will produce result using the transformer.
- * 
+ *
  * The transormer is able to produce result if ANY of associated
  * {@link Acceptor}s accepted result.
- * 
+ *
  * @author Tony Tkacik
- * 
+ *
  * @param <I>
  *            Input class for transformation
  * @param <P>
@@ -31,10 +31,10 @@ public interface RuleBasedTransformer<I, P> extends Transformer<I, P> {
     /**
      * Set of {@link Acceptor}, which could be used to verify if the input is
      * usable by transformer.
-     * 
+     *
      * The transformer is able to produce result if ANY of associated
      * {@link Acceptor}s accepted result.
-     * 
+     *
      * @return Set of input acceptance rules associated to this transformer.
      */
     Set<Acceptor<I>> getRules();

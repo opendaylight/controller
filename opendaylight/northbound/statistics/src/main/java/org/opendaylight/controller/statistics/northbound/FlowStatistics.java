@@ -27,7 +27,7 @@ public class FlowStatistics {
 
     // To satisfy JAXB
     @SuppressWarnings("unused")
-	private FlowStatistics() {
+        private FlowStatistics() {
     }
 
     public FlowStatistics(Node node, List<FlowOnNode> flowStat) {

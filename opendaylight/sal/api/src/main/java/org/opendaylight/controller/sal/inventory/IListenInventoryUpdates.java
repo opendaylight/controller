@@ -24,22 +24,22 @@ public interface IListenInventoryUpdates {
     /**
      * This method is called when some properties of a node are added/deleted/changed.
      *
-     * @param node	 		{@link org.opendaylight.controller.sal.core.Node} being updated
-     * @param type   		{@link org.opendaylight.controller.sal.core.UpdateType}
-     * @param props   		set of {@link org.opendaylight.controller.sal.core.Property} such as
-     * 						{@link org.opendaylight.controller.sal.core.Description} and/or
-     * 						{@link org.opendaylight.controller.sal.core.Tier} etc.
+     * @param node                      {@link org.opendaylight.controller.sal.core.Node} being updated
+     * @param type              {@link org.opendaylight.controller.sal.core.UpdateType}
+     * @param props             set of {@link org.opendaylight.controller.sal.core.Property} such as
+     *                                          {@link org.opendaylight.controller.sal.core.Description} and/or
+     *                                          {@link org.opendaylight.controller.sal.core.Tier} etc.
      */
     public void updateNode(Node node, UpdateType type, Set<Property> props);
 
     /**
      * This method is called when some properties of a node connector are added/deleted/changed.
      *
-     * @param nodeConnector	{@link org.opendaylight.controller.sal.core.NodeConnector} being updated
-     * @param type   		{@link org.opendaylight.controller.sal.core.UpdateType}
-     * @param props   		set of {@link org.opendaylight.controller.sal.core.Property} such as
-     * 						{@link org.opendaylight.controller.sal.core.Description} and/or
-     * 						{@link org.opendaylight.controller.sal.core.State} etc.
+     * @param nodeConnector {@link org.opendaylight.controller.sal.core.NodeConnector} being updated
+     * @param type              {@link org.opendaylight.controller.sal.core.UpdateType}
+     * @param props             set of {@link org.opendaylight.controller.sal.core.Property} such as
+     *                                          {@link org.opendaylight.controller.sal.core.Description} and/or
+     *                                          {@link org.opendaylight.controller.sal.core.State} etc.
      */
     public void updateNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Set<Property> props);
