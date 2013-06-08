@@ -22,33 +22,33 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Actions extends Property {
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
     @XmlElement
     private int actionsValue;
-
-    public enum ActionType {
-        OUTPUT_PORT_ACTION(1<<0),
-        VLAN_VID_ACTION(1<<1),
-        VLAN_PCP_ACTION(1<<2),
-        VLAN_STRIP_ACTION(1<<3),
-        DLSRC_ACTION(1<<4),
-        DLDST_ACTION(1<<5),
-        NWSRC_ACTION(1<<6),
-        NWDST_ACTION(1<<7),
-        NWTOS_ACTION(1<<8),
-        TPTSRC_ACTION(1<<9),
-        TPTDST_ACTION(1<<10),
-        ENQUEUE_ACTION(1<<11),
-        VENDOR_ACTION(0xffff);
-        private final int at;
-        ActionType(int val) {
-                this.at = val;
-        }
-        public int getValue() {
-                return at;
-        }
+    
+    public enum ActionType { 
+    	OUTPUT_PORT_ACTION(1<<0),
+    	VLAN_VID_ACTION(1<<1),
+    	VLAN_PCP_ACTION(1<<2),
+    	VLAN_STRIP_ACTION(1<<3),
+    	DLSRC_ACTION(1<<4),
+    	DLDST_ACTION(1<<5),
+    	NWSRC_ACTION(1<<6),
+    	NWDST_ACTION(1<<7),
+    	NWTOS_ACTION(1<<8),
+    	TPTSRC_ACTION(1<<9),
+    	TPTDST_ACTION(1<<10),
+    	ENQUEUE_ACTION(1<<11),
+    	VENDOR_ACTION(0xffff);
+    	private final int at;
+    	ActionType(int val) {
+    		this.at = val;
+    	}
+    	public int getValue() {
+    		return at;
+    	}
     }
-
+    
     public static final String ActionsPropName = "actions";
     /**
      * Construct a actions property
@@ -72,12 +72,12 @@ public class Actions extends Property {
     public Actions clone() {
         return new Actions(this.actionsValue);
     }
-
+    
     public int getValue() {
-        return this.actionsValue;
+    	return this.actionsValue;
     }
-
-
+    
+    
     @Override
     public int hashCode() {
         final int prime = 31;

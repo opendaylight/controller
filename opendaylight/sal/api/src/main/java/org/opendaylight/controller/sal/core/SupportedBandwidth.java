@@ -22,24 +22,24 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 public class SupportedBandwidth extends Bandwidth {
-        private static final long serialVersionUID = 1L;
-        public static final String SupportedBandwidthPropName = "supportedBandwidth";
-
-        public SupportedBandwidth(long value) {
-                super(SupportedBandwidthPropName);
-                this.bandwidthValue = value;
-        }
-
-        /*
+	private static final long serialVersionUID = 1L;
+	public static final String SupportedBandwidthPropName = "supportedBandwidth";
+	
+	public SupportedBandwidth(long value) {
+		super(SupportedBandwidthPropName);
+		this.bandwidthValue = value;
+	}
+	
+	/*
      * Private constructor used for JAXB mapping
      */
     private SupportedBandwidth() {
-        super(SupportedBandwidthPropName);
-                this.bandwidthValue = 0;
+    	super(SupportedBandwidthPropName);
+		this.bandwidthValue = 0;
     }
-
-        public SupportedBandwidth clone() {
-                return new SupportedBandwidth(this.bandwidthValue);
+	
+	public SupportedBandwidth clone() {
+		return new SupportedBandwidth(this.bandwidthValue);  
     }
 
     @Override

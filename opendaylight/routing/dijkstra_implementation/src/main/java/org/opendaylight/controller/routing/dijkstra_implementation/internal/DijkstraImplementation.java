@@ -381,7 +381,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void init() {
@@ -401,7 +401,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     *
+     * 
      */
     void destroy() {
         log.debug("Routing destroy() is called");
@@ -410,7 +410,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     *
+     * 
      */
     void start() {
         log.debug("Routing start() is called");
@@ -437,7 +437,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     *
+     * 
      */
     public void stop() {
         log.debug("Routing stop() is called");

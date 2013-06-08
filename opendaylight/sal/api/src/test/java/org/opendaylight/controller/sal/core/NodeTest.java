@@ -396,7 +396,7 @@ public class NodeTest {
     public void testExtensibleNode() {
         // Add a new ID type
         Assert.assertTrue(Node.NodeIDType.registerIDType("FOO", Integer.class));
-
+        
         // Trying to re-register the node must fail
         Assert.assertFalse(Node.NodeIDType.registerIDType("FOO",
                                                           Integer.class));
@@ -408,7 +408,7 @@ public class NodeTest {
             // Got an unexpected exception
             Assert.assertTrue(false);
         }
-
+        
         // Now unregister the type and make sure the node doesn't get
         // created
         Node.NodeIDType.unRegisterIDType("FOO");

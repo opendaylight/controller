@@ -44,7 +44,7 @@ public interface ISwitchManager {
     /**
      * Remove a subnet configuration
      *
-     * @param  configObject refer to {@link Open Declaration org.opendaylight.controller.switchmanager.SubnetConfig}
+     * @param  configObject	refer to {@link Open Declaration org.opendaylight.controller.switchmanager.SubnetConfig}
      * @return "Success" or failure reason
      */
     public Status removeSubnet(SubnetConfig configObject);
@@ -53,14 +53,14 @@ public interface ISwitchManager {
      * Remove a subnet configuration given the name
      *
      * @param   name      subnet name
-     * @return  "Success" or failure reason
+     * @return	"Success" or failure reason
      */
     public Status removeSubnet(String name);
 
     /**
      * Return a list of all known devices in the system
      *
-     * @return  returns a list of {@link org.opendaylight.controller.switchmanager.Switch}
+     * @return	returns a list of {@link org.opendaylight.controller.switchmanager.Switch}
      */
     public List<Switch> getNetworkDevices();
 
@@ -82,8 +82,8 @@ public interface ISwitchManager {
     /**
      * Return a subnet configuration given the network address
      *
-     * @param networkAddress    the ip address in long format
-     * @return                                  the {@link org.opendaylight.controller.switchmanager.Subnet}
+     * @param networkAddress 	the ip address in long format
+     * @return 					the {@link org.opendaylight.controller.switchmanager.Subnet}
      */
     public Subnet getSubnetByNetworkAddress(InetAddress networkAddress);
 
@@ -98,7 +98,7 @@ public interface ISwitchManager {
      * Add a span port configuration
      *
      * @param SpanConfig refer to {@link Open Declaration org.opendaylight.controller.switchmanager.SpanConfig}
-     * @return              status code
+     * @return				status code
      */
     public Status addSpanConfig(SpanConfig configObject);
 
@@ -106,7 +106,7 @@ public interface ISwitchManager {
      * Remove a span port configuration
      *
      * @param SpanConfig refer to {@link Open Declaration org.opendaylight.controller.switchmanager.SpanConfig}
-     * @return              status code
+     * @return				status code
      */
     public Status removeSpanConfig(SpanConfig cfgObject);
 
@@ -152,8 +152,8 @@ public interface ISwitchManager {
     /**
      * Remove node connectors from a subnet
      *
-     * @param name              the subnet config name
-     * @param nodeConnectors    nodePorts string specified by {@link Open Declaration org.opendaylight.controller.switchmanager.SubnetConfig}
+     * @param name				the subnet config name
+     * @param nodeConnectors 	nodePorts string specified by {@link Open Declaration org.opendaylight.controller.switchmanager.SubnetConfig}
      * @return "Success" or failure reason
      */
     public Status removePortsFromSubnet(String name, String nodeConnectors);
@@ -170,16 +170,16 @@ public interface ISwitchManager {
      *
      * @param node {@link org.opendaylight.controller.sal.core.Node}
      * @return map of {@link org.opendaylight.controller.sal.core.Property} such as
-     *             {@link org.opendaylight.controller.sal.core.Description} and/or
-     *             {@link org.opendaylight.controller.sal.core.Tier} etc.
+     *   	   {@link org.opendaylight.controller.sal.core.Description} and/or
+     * 		   {@link org.opendaylight.controller.sal.core.Tier} etc.
      */
     public Map<String, Property> getNodeProps(Node node);
 
     /**
      * Return a specific property of a node given the property name
      *
-     * @param node              {@link org.opendaylight.controller.sal.core.Node}
-     * @param propName  the property name specified by {@link org.opendaylight.controller.sal.core.Property} and its extended classes
+     * @param node 		{@link org.opendaylight.controller.sal.core.Node}
+     * @param propName 	the property name specified by {@link org.opendaylight.controller.sal.core.Property} and its extended classes
      * @return {@link org.opendaylight.controller.sal.core.Property}
      */
     public Property getNodeProp(Node node, String propName);
@@ -187,23 +187,23 @@ public interface ISwitchManager {
     /**
      * Set a specific property of a node
      *
-     * @param node              {@link org.opendaylight.controller.sal.core.Node}
-     * @param prop              {@link org.opendaylight.controller.sal.core.Property}
+     * @param node 		{@link org.opendaylight.controller.sal.core.Node}
+     * @param prop 		{@link org.opendaylight.controller.sal.core.Property}
      */
     public void setNodeProp(Node node, Property prop);
 
     /**
      * Remove a property of a node
-     *
-     * @param nc                {@link org.opendaylight.controller.sal.core.Node}
-     * @param propName  the property name specified by {@link org.opendaylight.controller.sal.core.Property} and its extended classes
+     * 
+     * @param nc 		{@link org.opendaylight.controller.sal.core.Node}
+     * @param propName 	the property name specified by {@link org.opendaylight.controller.sal.core.Property} and its extended classes
      * @return success or failed reason
      */
     public Status removeNodeProp(Node node, String propName);
 
     /**
      * Remove all the properties of a node
-     *
+     * 
      * @param node {@link org.opendaylight.controller.sal.core.Node}
      * @return success or failed reason
      */
@@ -238,8 +238,8 @@ public interface ISwitchManager {
      *
      * @param nodeConnector {@link org.opendaylight.controller.sal.core.NodeConnector}
      * @return map of {@link org.opendaylight.controller.sal.core.Property} such as
-     *             {@link org.opendaylight.controller.sal.core.Description} and/or
-     *             {@link org.opendaylight.controller.sal.core.State} etc.
+     * 		   {@link org.opendaylight.controller.sal.core.Description} and/or
+     * 		   {@link org.opendaylight.controller.sal.core.State} etc.
      */
     public Map<String, Property> getNodeConnectorProps(
             NodeConnector nodeConnector);
@@ -266,7 +266,7 @@ public interface ISwitchManager {
 
     /**
      * Remove a property of a node connector
-     *
+     * 
      * @param nc {@link org.opendaylight.controller.sal.core.NodeConnector}
      * @param propName property name specified by {@link org.opendaylight.controller.sal.core.Property} and its extended classes
      * @return success or failed reason
@@ -275,7 +275,7 @@ public interface ISwitchManager {
 
     /**
      * Remove all the properties of a node connector
-     *
+     * 
      * @param nodeConnector {@link org.opendaylight.controller.sal.core.NodeConnector}
      * @return success or failed reason
      */
@@ -284,7 +284,7 @@ public interface ISwitchManager {
     /**
      * Return the node connector given its name
      *
-     * @param node                              {@link org.opendaylight.controller.sal.core.Node}
+     * @param node 				{@link org.opendaylight.controller.sal.core.Node}
      * @param nodeConnectorName node connector identifier specified by {@link org.opendaylight.controller.sal.core.NodeConnector}
      * @return {@link org.opendaylight.controller.sal.core.NodeConnector}
      */
@@ -309,7 +309,7 @@ public interface ISwitchManager {
 
     /**
      * Return controller MAC address
-         *
+	 *
      * @return MAC address in byte array
      */
     public byte[] getControllerMAC();
@@ -317,7 +317,7 @@ public interface ISwitchManager {
     /**
      * Return MAC address for a given node
      *
-     * @param node  {@link org.opendaylight.controller.sal.core.Node}
+     * @param node	{@link org.opendaylight.controller.sal.core.Node}
      * @return MAC address in byte array
      */
     public byte[] getNodeMAC(Node node);
@@ -338,22 +338,22 @@ public interface ISwitchManager {
      */
     public int getHostRetryCount();
 
-        /**
-         * Create a Name/Tier/Bandwidth Property object based on given property
-         * name and value. Other property types are not supported yet.
-         *
+	/**
+	 * Create a Name/Tier/Bandwidth Property object based on given property
+	 * name and value. Other property types are not supported yet.
+	 * 
      * @param propName Name of the Property specified by {@link org.opendaylight.controller.sal.core.Property} and its extended classes
      * @param propValue Value of the Property specified by {@link org.opendaylight.controller.sal.core.Property} and its extended classes
-         * @return {@link org.opendaylight.controller.sal.core.Property}
-         */
+	 * @return {@link org.opendaylight.controller.sal.core.Property}
+	 */
     public Property createProperty(String propName, String propValue);
-
+    
     /**
-     * Returns the description for the specified node. It is either the one
+     * Returns the description for the specified node. It is either the one 
      * configured by user or the description advertised by the node.
-     *
+     * 
      * @param node the network node identifier
-     * @return the description of the specified node. If no description is
+     * @return the description of the specified node. If no description is 
      * configured and the network node does not provide its description,
      * an empty string is returned.
      */

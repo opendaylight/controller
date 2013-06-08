@@ -8,6 +8,6 @@ import org.openflow.protocol.statistics.OFDescriptionStatistics;
  * is updated with new one.
  */
 public interface IStatisticsListener {
-        public void descriptionRefreshed(Long switchId,
-                                        OFDescriptionStatistics description);
+	public void descriptionRefreshed(Long switchId,
+					OFDescriptionStatistics description);
 }

@@ -39,8 +39,8 @@ import org.slf4j.LoggerFactory;
 public class Flow implements Cloneable, Serializable {
     protected static final Logger logger = LoggerFactory
     .getLogger(Flow.class);
-        private static final long serialVersionUID = 1L;
-        @XmlElement
+	private static final long serialVersionUID = 1L;
+	@XmlElement
     private Match match;
     @XmlElement
     private List<Action> actions;

@@ -223,7 +223,7 @@ public class LLDP extends Packet {
 
     /**
      * Returns the size of LLDP packet in bytes
-     *
+     * 
      * @return int - LLDP Packet size in bytes
      */
     private int getLLDPPacketLength() {

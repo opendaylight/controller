@@ -22,13 +22,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class SetVlanId extends Action {
-        @XmlElement
+	@XmlElement
     private int vlanId;
 
-        private SetVlanId() {
-
-        }
-
+	private SetVlanId() {
+		
+	}
+	
     public SetVlanId(int vlanId) {
         type = ActionType.SET_VLAN_ID;
         this.vlanId = vlanId;

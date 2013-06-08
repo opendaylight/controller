@@ -13,8 +13,8 @@ import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.springframework.security.core.GrantedAuthority;
 
 public class ODLUserLevel implements GrantedAuthority {
-        private static final long serialVersionUID = 1L;
-        UserLevel userLevel;
+	private static final long serialVersionUID = 1L;
+	UserLevel userLevel;
 
     public ODLUserLevel(UserLevel userLevel) {
         this.userLevel = userLevel;

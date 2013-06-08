@@ -19,7 +19,7 @@ import java.math.BigInteger;
 public class HexEncode {
     /**
      * This method converts byte array into String format without ":" inserted.
-     *
+     * 
      * @param bytes
      *            The byte array to convert to string
      * @return The hexadecimal representation of the byte array. If bytes is

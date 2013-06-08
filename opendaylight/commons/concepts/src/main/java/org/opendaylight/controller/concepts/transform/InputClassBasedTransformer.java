@@ -10,15 +10,15 @@ package org.opendaylight.controller.concepts.transform;
 
 /**
  * Input class based transformer
- *
+ * 
  * {@link Transformer} which accepts / transforms only specific classes of
  * input, and is useful if the selection of transformer should be based on the
  * class of the input and there is one-to-one mapping between input class and
  * transformer.
- *
- *
+ * 
+ * 
  * @author Tony Tkacik
- *
+ * 
  * @param <S>
  *            Common supertype of input
  * @param <I>
@@ -31,7 +31,7 @@ public interface InputClassBasedTransformer<S, I extends S, P> extends
 
     /**
      * Returns an {@link Class} of input which is acceptable for transformation.
-     *
+     * 
      * @return {@link Class} of input which is acceptable for transformation.
      */
     Class<? extends S> getInputClass();

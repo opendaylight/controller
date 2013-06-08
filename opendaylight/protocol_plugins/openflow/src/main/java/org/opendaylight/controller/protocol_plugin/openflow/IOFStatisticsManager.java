@@ -80,7 +80,7 @@ public interface IOFStatisticsManager {
      *                                  For port statistics, it is the port id. If null the query
      *                                  will be performed for all the targets for the specified
      *                                  statistics type.
-     *
+     * 
      * @param timeout the timeout in milliseconds the system will wait for a response
      *                  from the switch, before declaring failure
      * @return the list of openflow statistics

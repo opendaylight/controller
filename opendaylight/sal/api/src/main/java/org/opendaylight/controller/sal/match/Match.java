@@ -38,8 +38,8 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class Match implements Cloneable, Serializable {
-        private static final long serialVersionUID = 1L;
-        private static final Map<MatchType, MatchType> reversableMatches;
+	private static final long serialVersionUID = 1L;
+	private static final Map<MatchType, MatchType> reversableMatches;
     static {
         Map<MatchType, MatchType> map = new HashMap<MatchType, MatchType>();
         map.put(MatchType.DL_SRC, MatchType.DL_DST);
@@ -67,9 +67,9 @@ public class Match implements Cloneable, Serializable {
      * Generic setter for frame/packet/message's header fields against which to match
      * Note: For MAC addresses, please pass the cloned value to this function
      *
-     * @param type      packet's header field type
-     * @param value     field's value to assign to the match
-     * @param mask      field's bitmask to apply to the match (has to be of the same class type of value)
+     * @param type		packet's header field type
+     * @param value 	field's value to assign to the match
+     * @param mask		field's bitmask to apply to the match (has to be of the same class type of value)
      */
     public void setField(MatchType type, Object value, Object mask) {
         MatchField field = new MatchField(type, value, mask);
@@ -83,8 +83,8 @@ public class Match implements Cloneable, Serializable {
      * Generic setter for frame/packet/message's header fields against which to match
      * Note: For MAC addresses, please pass the cloned value to this function
      *
-     * @param type      packet's header field type
-     * @param value     field's value to assign to the match
+     * @param type		packet's header field type
+     * @param value 	field's value to assign to the match
      */
     public void setField(MatchType type, Object value) {
         MatchField field = new MatchField(type, value);
@@ -117,7 +117,7 @@ public class Match implements Cloneable, Serializable {
     /**
      * Generic getter for fields against which the match is programmed
      *
-     * @param type  frame/packet/message's header field type
+     * @param type	frame/packet/message's header field type
      * @return
      */
     public MatchField getField(MatchType type) {
@@ -137,7 +137,7 @@ public class Match implements Cloneable, Serializable {
     /**
      * Returns the list of MatchType fields the match is set for
      *
-     * @return List of individual MatchType fields.
+     * @return List of individual MatchType fields. 
      */
     public List<MatchType> getMatchesList() {
         return new ArrayList<MatchType>(fields.keySet());
@@ -146,13 +146,13 @@ public class Match implements Cloneable, Serializable {
     /**
      * Returns the list of MatchFields the match is set for
      *
-     * @return List of individual MatchField values.
+     * @return List of individual MatchField values. 
      */
     @XmlElement(name="matchField")
     public List<MatchField> getMatchFields() {
-        return new ArrayList<MatchField>(fields.values());
+    	return new ArrayList<MatchField>(fields.values());
     }
-
+    
     /**
      * Returns whether this match is for an IPv6 flow
      */

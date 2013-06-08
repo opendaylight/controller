@@ -18,47 +18,47 @@ import javax.xml.bind.annotation.XmlRootElement;
  * 1. IP address of the VIP exposed by the application
  * 2. Protocol of the network traffic (TCP/UDP)
  * 3. Port to which incoming traffic is destined
- *
- * User is allowed to create mutliple VIPs with the same IP, but all such VIPs (with the same IP)
+ * 
+ * User is allowed to create mutliple VIPs with the same IP, but all such VIPs (with the same IP) 
  * should differ at least in the protocol or port or both.
- *
+ * 
  * NOTE: Each VIP should have a unique name.
  */
 @XmlRootElement(name="vip")
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class VIP {
-
+    
     /*
      * Unique name of the VIP
      */
     @XmlElement
     private String name;
-
+    
     /*
-     * Virtual IP address of the VIP
+     * Virtual IP address of the VIP 
      */
     @XmlElement
     private String ip;
-
+    
     /*
-     *  Network traffic protocol
+     *	Network traffic protocol 
      */
     @XmlElement
     private String protocol;
-
+    
     /*
      * Port where network traffic is destined (destination port)
      */
     @XmlElement
     private short port;
-
+    
     /*
      * Name of the pool attached to the VIP for load balancing its traffic
      */
     @XmlElement(name="poolname")
     private String poolName;
-
+    
     /*
      * Status (Active/inactive)
      */
@@ -70,7 +70,7 @@ public class VIP {
      */
     @SuppressWarnings("unused")
     private VIP() {}
-
+    
     public VIP(String name,
                 String ip,
                 String protocol,
@@ -82,61 +82,61 @@ public class VIP {
         this.port = port;
         this.poolName = poolName;
     }
-
+    
     public String getName() {
         return name;
     }
-
+    
     public void setName(String name) {
         this.name = name;
     }
-
+    
     public String getIp() {
         return ip;
     }
-
+    
     public void setIp(String ip) {
         this.ip = ip;
     }
-
+    
     public String getProtocol() {
         return protocol;
     }
-
+    
     public void setProtocol(String protocol) {
         this.protocol = protocol;
     }
-
+    
     public short getPort() {
         return port;
     }
-
+    
     public void setPort(short port) {
         this.port = port;
     }
-
+    
     public String getPoolName() {
         return poolName;
     }
-
+    
     public void setPoolName(String poolName) {
         this.poolName = poolName;
     }
-
+    
     /**
      * @return the status
      */
     public String getStatus() {
         return status;
     }
-
+    
     /**
      * @param status the status to set
      */
     public void setStatus(String status) {
         this.status = status;
     }
-
+    
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -150,7 +150,7 @@ public class VIP {
                 + ((protocol == null) ? 0 : protocol.hashCode());
         return result;
     }
-
+    
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
@@ -158,7 +158,7 @@ public class VIP {
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-
+            
         }
         if (obj == null) {
             return false;
@@ -166,7 +166,7 @@ public class VIP {
         if (!(obj instanceof VIP)) {
             return false;
         }
-
+        
         VIP other = (VIP) obj;
         if (ip == null) {
             if (other.ip != null) {
@@ -187,7 +187,7 @@ public class VIP {
         }
         return true;
     }
-
+    
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */

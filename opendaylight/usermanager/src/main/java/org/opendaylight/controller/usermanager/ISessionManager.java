@@ -11,14 +11,14 @@ package org.opendaylight.controller.usermanager;
 import javax.servlet.http.HttpSessionListener;
 
 /**
- *
+ * 
  * This interface defines method(s) to invalidate a session.
  */
 public interface ISessionManager extends HttpSessionListener {
 
     /**
      * Invalidates the session for a given user and a session Id
-     *
+     * 
      * @param username
      *            the username
      * @param sessionId

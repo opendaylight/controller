@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * stub protocol plugin Activator
- *
- *
+ * 
+ * 
  */
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -38,7 +38,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function called when the activator starts just after some initializations
      * are done by the ComponentActivatorAbstractBase.
-     *
+     * 
      */
     public void init() {
         Node.NodeIDType.registerIDType("STUB", Integer.class);
@@ -48,7 +48,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function called when the activator stops just before the cleanup done by
      * ComponentActivatorAbstractBase
-     *
+     * 
      */
     public void destroy() {
         Node.NodeIDType.unRegisterIDType("STUB");
@@ -58,8 +58,8 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function that is used to communicate to dependency manager the list of
      * known implementations for services inside a container
-     *
-     *
+     * 
+     * 
      * @return An array containing all the CLASS objects that will be
      *         instantiated in order to get an fully working implementation
      *         Object
@@ -72,7 +72,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function that is called when configuration of the dependencies is
      * required.
-     *
+     * 
      * @param c
      *            dependency manager Component object, used for configuring the
      *            dependencies exported and imported
@@ -103,12 +103,12 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(IPluginInInventoryService.class.getName(), props);
         }
     }
-
+    
     public Object[] getGlobalImplementations() {
         Object[] res = { FlowProgrammerService.class, StubNodeFactory.class, StubNodeConnectorFactory.class };
         return res;
     }
-
+    
     public void configureGlobalInstance(Component c, Object imp){
         if (imp.equals(FlowProgrammerService.class)) {
             // export the service to be used by SAL
@@ -136,6 +136,6 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("protocolName", "STUB");
             c.setInterface(INodeConnectorFactory.class.getName(), props);
         }
-
+        
     }
 }

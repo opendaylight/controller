@@ -25,37 +25,37 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class NodeConnectorStatistics {
-        @XmlElement
+	@XmlElement
     private NodeConnector nodeConnector;
-        @XmlElement
+	@XmlElement
     private long receivePackets;
-        @XmlElement
+	@XmlElement
     private long transmitPackets;
-        @XmlElement
+	@XmlElement
     private long receiveBytes;
-        @XmlElement
+	@XmlElement
     private long transmitBytes;
-        @XmlElement
+	@XmlElement
     private long receiveDrops;
-        @XmlElement
+	@XmlElement
     private long transmitDrops;
-        @XmlElement
+	@XmlElement
     private long receiveErrors;
-        @XmlElement
+	@XmlElement
     private long transmitErrors;
-        @XmlElement
+	@XmlElement
     private long receiveFrameError;
-        @XmlElement
+	@XmlElement
     private long receiveOverRunError;
-        @XmlElement
+	@XmlElement
     private long receiveCrcError;
-        @XmlElement
+	@XmlElement
     private long collisionCount;
 
-        //To Satisfy JAXB
-        public NodeConnectorStatistics() {
-
-        }
+	//To Satisfy JAXB
+	public NodeConnectorStatistics() {
+		
+	}
     /**
      * Set the node connector
      * @param port

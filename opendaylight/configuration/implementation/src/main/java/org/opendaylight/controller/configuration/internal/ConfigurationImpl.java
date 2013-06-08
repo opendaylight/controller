@@ -41,11 +41,11 @@ public class ConfigurationImpl implements IConfigurationService {
     private Set<IConfigurationAware> configurationAwareList = (Set<IConfigurationAware>) Collections
             .synchronizedSet(new HashSet<IConfigurationAware>());
 
-
+    
     public int getConfigurationAwareListSize() {
-        return this.configurationAwareList.size();
+    	return this.configurationAwareList.size();
     }
-
+    
     public void addConfigurationAware(IConfigurationAware configurationAware) {
         if (!this.configurationAwareList.contains(configurationAware)) {
             this.configurationAwareList.add(configurationAware);
@@ -81,18 +81,18 @@ public class ConfigurationImpl implements IConfigurationService {
     public Status saveConfigurations() {
         boolean success = true;
         for (IConfigurationAware configurationAware : configurationAwareList) {
-                Status status = configurationAware.saveConfiguration();
+        	Status status = configurationAware.saveConfiguration();
             if (!status.isSuccess()) {
-                success = false;
-                logger.info("Failed to save config for {}",
-                                configurationAware.getClass().getName());
+            	success = false;
+            	logger.info("Failed to save config for {}",
+            			configurationAware.getClass().getName());
             }
         }
         if (success) {
             return new Status(StatusCode.SUCCESS, null);
         } else {
             return new Status(StatusCode.INTERNALERROR,
-                        "Failed to Save All Configurations");
+            		"Failed to Save All Configurations");
         }
     }
 

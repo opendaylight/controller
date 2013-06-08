@@ -100,7 +100,7 @@ public class FlowConverter {
     /**
      * Returns the match in OF 1.0 (OFMatch) form or OF 1.0 + IPv6 extensions
      * form (V6Match)
-     *
+     * 
      * @return
      */
     public OFMatch getOFMatch() {
@@ -262,7 +262,7 @@ public class FlowConverter {
 
     /**
      * Returns the list of actions in OF 1.0 form
-     *
+     * 
      * @return
      */
     public List<OFAction> getOFActions() {
@@ -424,7 +424,7 @@ public class FlowConverter {
     /**
      * Utility to convert a SAL flow to an OF 1.0 (OFFlowMod) or to an OF 1.0 +
      * IPv6 extension (V6FlowMod) Flow modifier Message
-     *
+     * 
      * @param sw
      * @param command
      * @param port

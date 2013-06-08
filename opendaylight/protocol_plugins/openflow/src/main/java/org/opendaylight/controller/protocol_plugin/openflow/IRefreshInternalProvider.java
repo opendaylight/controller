@@ -10,10 +10,10 @@
 package org.opendaylight.controller.protocol_plugin.openflow;
 
 /**
- * @file        IRefreshInternalProvider.java
+ * @file   	IRefreshInternalProvider.java
  *
- * @brief       Topology refresh notifications requested by application
- *                      to be fetched from the plugin
+ * @brief  	Topology refresh notifications requested by application
+ * 			to be fetched from the plugin
  *
  * For example, an application that has been started late, will want to
  * be up to date with the latest topology.  Hence, it requests for a

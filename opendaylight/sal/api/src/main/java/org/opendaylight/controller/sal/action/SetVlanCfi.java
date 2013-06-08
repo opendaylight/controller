@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class SetVlanCfi extends Action {
-        @XmlElement
+	@XmlElement
     private int cfi;
 
     /* Dummy constructor for JAXB */

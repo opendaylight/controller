@@ -284,9 +284,9 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     /**
      * Returns whether the passed NodeConnector belongs to the container
      *
-     * @param container container name
-     * @param p     node connector to test
-     * @return          true if belongs false otherwise
+     * @param container	container name
+     * @param p		node connector to test
+     * @return 		true if belongs false otherwise
      */
     public boolean containerOwnsNodeConnector(String container, NodeConnector p) {
         // All node connectors belong to the default container
@@ -300,9 +300,9 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     /**
      * Returns whether the passed NodeConnector belongs to the container
      *
-     * @param container container name
-     * @param table     node table to test
-     * @return          true if belongs false otherwise
+     * @param container	container name
+     * @param table		node table to test
+     * @return 		true if belongs false otherwise
      */
     public boolean containerOwnsNodeTable(String container, NodeTable table) {
         // All node table belong to the default container

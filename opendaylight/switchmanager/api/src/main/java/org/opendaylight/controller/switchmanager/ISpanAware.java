@@ -22,9 +22,9 @@ public interface ISpanAware {
     /**
      * This method is called when list of ports in a node are added/deleted as span ports.
      *
-     * @param node      {@link org.opendaylight.controller.sal.core.Node} being updated
-     * @param portList  list of span {@link org.opendaylight.controller.sal.core.NodeConnector}
-     * @param add       true if add; false if delete.
+     * @param node		{@link org.opendaylight.controller.sal.core.Node} being updated
+     * @param portList	list of span {@link org.opendaylight.controller.sal.core.NodeConnector}
+     * @param add		true if add; false if delete.
      */
     public void spanUpdate(Node node, List<NodeConnector> portList, boolean add);
 }

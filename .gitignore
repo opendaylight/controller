@@ -12,4 +12,3 @@ target
 .project
 .settings
 MANIFEST.MF
-opendaylight/northbound/integrationtest/logs/*

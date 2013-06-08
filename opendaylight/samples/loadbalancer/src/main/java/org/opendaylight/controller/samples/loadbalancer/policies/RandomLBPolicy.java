@@ -24,31 +24,31 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class RandomLBPolicy implements ILoadBalancingPolicy {
-
+    
     /*
      * Instance logger
      */
     private static final Logger rLogger = LoggerFactory.getLogger(RandomLBPolicy.class);
-
+    
     /*
-     * Reference to the configuration manager. This reference is passed from load balancer
+     * Reference to the configuration manager. This reference is passed from load balancer 
      * class.
      */
     private ConfigManager cmgr;
-
+    
     /*
      * Mapping between the client and the pool member that serves all traffic for that client.
      */
     private HashMap<Client, PoolMember> clientMemberMap;
-
+    
     /*
      * Random generator
      */
     Random randomGenerator = null;
-
+    
     @SuppressWarnings("unused")
     private RandomLBPolicy(){}
-
+    
     public RandomLBPolicy(ConfigManager cmgr){
         this.cmgr = cmgr;
         this.clientMemberMap = new HashMap<Client, PoolMember>();
@@ -56,13 +56,13 @@ public class RandomLBPolicy implements ILoadBalancingPolicy {
     }
     @Override
     public String getPoolMemberForClient(Client source, VIP dest){
-
+        
         rLogger.info("Received traffic from client : {} for VIP : {} ",source, dest);
-
+        
         syncWithLoadBalancerData();
-
+        
         PoolMember pm= null;
-
+        
         if(this.clientMemberMap.containsKey(source)){
             pm= this.clientMemberMap.get(source);
             rLogger.info("Client {} had sent traffic before,new traffic will be routed to the same pool member {}",source,pm);
@@ -76,7 +76,7 @@ public class RandomLBPolicy implements ILoadBalancingPolicy {
         }
         return pm.getIp();
     }
-
+    
     /*
      * This method does the clean up. Whenever a new client packet arrives with a given VIP,
      * this method checks the current configuration to see if any pool members have been deleted and
@@ -84,25 +84,25 @@ public class RandomLBPolicy implements ILoadBalancingPolicy {
      */
     private void syncWithLoadBalancerData(){
         rLogger.debug("[Client - PoolMember] table before cleanup : {}",this.clientMemberMap.toString());
-
+        
         ArrayList<Client> removeClient = new ArrayList<Client>();
-
+        
         if(this.clientMemberMap.size() != 0){
             for(Client client : this.clientMemberMap.keySet()){
-
+                
                 if(!this.cmgr.memberExists(this.clientMemberMap.get(client).getName(),
                                                 this.clientMemberMap.get(client).getPoolName())){
                     removeClient.add(client);
                 }
             }
         }
-
+        
         for(Client client : removeClient){
             this.clientMemberMap.remove(client);
-
+            
             rLogger.debug("Removed client : {} ",client);
         }
         rLogger.debug("[Client - PoolMember] table after cleanup : {}",this.clientMemberMap.toString());
     }
-
+    
 }

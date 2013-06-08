@@ -19,54 +19,54 @@ import org.openflow.protocol.OFStatisticsRequest;
 
 /**
  * This interface defines an abstraction of an Open Flow Switch.
- *
+ * 
  */
 public interface ISwitch {
     /**
      * Gets a unique XID.
-     *
+     * 
      * @return XID
      */
     public int getNextXid();
 
     /**
      * Returns the Switch's ID.
-     *
+     * 
      * @return the Switch's ID
      */
     public Long getId();
 
     /**
      * Returns the Switch's table numbers supported by datapath
-     *
+     * 
      * @return the tables
      */
     public Byte getTables();
 
     /**
      * Returns the Switch's bitmap of supported ofp_action_type
-     *
+     * 
      * @return the actions
      */
     public Integer getActions();
 
     /**
      * Returns the Switch's bitmap of supported ofp_capabilities
-     *
+     * 
      * @return the capabilities
      */
     public Integer getCapabilities();
 
     /**
      * Returns the Switch's buffering capacity in Number of Pkts
-     *
+     * 
      * @return the buffers
      */
     public Integer getBuffers();
 
     /**
      * Returns the Date when the switch was connected.
-     *
+     * 
      * @return Date The date when the switch was connected
      */
     public Date getConnectedDate();
@@ -77,7 +77,7 @@ public interface ISwitch {
      * should be used for non-critical messages such as statistics request,
      * discovery packets, etc. An unique XID is generated automatically and
      * inserted into the message.
-     *
+     * 
      * @param msg
      *            The OF message to be sent
      * @return The XID used
@@ -89,7 +89,7 @@ public interface ISwitch {
      * priority. It will be served after high priority messages. The method
      * should be used for non-critical messages such as statistics request,
      * discovery packets, etc. The specified XID is inserted into the message.
-     *
+     * 
      * @param msg
      *            The OF message to be Sent
      * @param xid
@@ -104,7 +104,7 @@ public interface ISwitch {
      * method should be used for critical messages such as hello, echo reply
      * etc. An unique XID is generated automatically and inserted into the
      * message.
-     *
+     * 
      * @param msg
      *            The OF message to be sent
      * @return The XID used
@@ -116,7 +116,7 @@ public interface ISwitch {
      * priority. It will be served first before normal priority messages. The
      * method should be used for critical messages such as hello, echo reply
      * etc. The specified XID is inserted into the message.
-     *
+     * 
      * @param msg
      *            The OF message to be sent
      * @return The XID used
@@ -126,7 +126,7 @@ public interface ISwitch {
     /**
      * Sends the OF message followed by a Barrier Request with a unique XID
      * which is automatically generated, and waits for a result from the switch.
-     *
+     * 
      * @param msg
      *            The message to be sent
      * @return An Object which has one of the followings instances/values:
@@ -141,21 +141,21 @@ public interface ISwitch {
 
     /**
      * Returns a map containing all OFPhysicalPorts of this switch.
-     *
+     * 
      * @return The Map of OFPhysicalPort
      */
     public Map<Short, OFPhysicalPort> getPhysicalPorts();
 
     /**
      * Returns a Set containing all port IDs of this switch.
-     *
+     * 
      * @return The Set of port ID
      */
     public Set<Short> getPorts();
 
     /**
      * Returns OFPhysicalPort of the specified portNumber of this switch.
-     *
+     * 
      * @param portNumber
      *            The port ID
      * @return OFPhysicalPort for the specified PortNumber
@@ -164,7 +164,7 @@ public interface ISwitch {
 
     /**
      * Returns the bandwidth of the specified portNumber of this switch.
-     *
+     * 
      * @param portNumber
      *            the port ID
      * @return bandwidth
@@ -173,7 +173,7 @@ public interface ISwitch {
 
     /**
      * Returns True if the port is enabled,
-     *
+     * 
      * @param portNumber
      * @return True if the port is enabled
      */
@@ -181,7 +181,7 @@ public interface ISwitch {
 
     /**
      * Returns True if the port is enabled.
-     *
+     * 
      * @param port
      * @return True if the port is enabled
      */
@@ -189,7 +189,7 @@ public interface ISwitch {
 
     /**
      * Returns a list containing all enabled ports of this switch.
-     *
+     * 
      * @return: List containing all enabled ports of this switch
      */
     public List<OFPhysicalPort> getEnabledPorts();
@@ -197,7 +197,7 @@ public interface ISwitch {
     /**
      * Sends OFStatisticsRequest with a unique XID generated automatically and
      * waits for a result from the switch.
-     *
+     * 
      * @param req
      *            the OF Statistic Request to be sent
      * @return Object has one of the following instances/values::
@@ -211,7 +211,7 @@ public interface ISwitch {
     /**
      * Returns true if the switch has reached the operational state (has sent
      * FEATURE_REPLY to the controller).
-     *
+     * 
      * @return true if the switch is operational
      */
     public boolean isOperational();

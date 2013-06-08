@@ -354,7 +354,7 @@ abstract public class ComponentActivatorAbstractBase implements
                     }
                 }
             }
-
+            
             // Register with OSGi the provider for the service IContainerAware
             context.registerService(
                     IContainerAware.class.getName(), this, null);

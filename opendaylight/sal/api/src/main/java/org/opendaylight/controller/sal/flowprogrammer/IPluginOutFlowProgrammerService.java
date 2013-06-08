@@ -20,7 +20,7 @@ public interface IPluginOutFlowProgrammerService {
      * Inform SAL that the flow on the specified node has been removed Consumer
      * has to expect this notification only for flows which were installed with
      * an idle or hard timeout specified.
-     *
+     * 
      * @param node
      *            the network node on which the flow got removed
      * @param flow
@@ -33,7 +33,7 @@ public interface IPluginOutFlowProgrammerService {
      * Inform SAL that an error message has been received from a switch
      * regarding a flow message previously sent to the switch. A Request ID
      * associated with the offending message is also returned.
-     *
+     * 
      * @param node
      *            the network node on which the error reported
      * @param rid

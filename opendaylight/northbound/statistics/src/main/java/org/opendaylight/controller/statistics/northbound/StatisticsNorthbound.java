@@ -40,7 +40,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 /**
  * Northbound APIs that returns various Statistics exposed by the Southbound
  * plugins such as Openflow.
- *
+ * 
  * <br>
  * <br>
  * Authentication scheme : <b>HTTP Basic</b><br>
@@ -52,7 +52,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
  * trusted authority.<br>
  * More info :
  * http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
- *
+ * 
  */
 @Path("/")
 public class StatisticsNorthbound {
@@ -102,7 +102,7 @@ public class StatisticsNorthbound {
 
     /**
      * Returns a list of all Flow Statistics from all the Nodes.
-     *
+     * 
      * @param containerName
      *            Name of the Container. The Container name for the base
      *            controller is "default".
@@ -154,7 +154,7 @@ public class StatisticsNorthbound {
 
     /**
      * Returns a list of Flow Statistics for a given Node.
-     *
+     * 
      * @param containerName
      *            Name of the Container. The Container name for the base
      *            controller is "default".
@@ -204,7 +204,7 @@ public class StatisticsNorthbound {
     /**
      * Returns a list of all the Port Statistics across all the NodeConnectors
      * on all the Nodes.
-     *
+     * 
      * @param containerName
      *            Name of the Container. The Container name for the base
      *            controller is "default".
@@ -255,7 +255,7 @@ public class StatisticsNorthbound {
     /**
      * Returns a list of all the Port Statistics across all the NodeConnectors
      * in a given Node.
-     *
+     * 
      * @param containerName
      *            Name of the Container. The Container name for the base
      *            controller is "default".

@@ -26,7 +26,7 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class Output extends Action {
-        @XmlElement
+	@XmlElement
     private NodeConnector port;
 
     /* Dummy constructor for JAXB */

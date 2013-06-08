@@ -51,7 +51,7 @@ import org.opendaylight.controller.sal.utils.Status;
  * Authentication realm : <b>opendaylight</b><br>
  * Transport : <b>HTTP and HTTPS</b><br>
  * <br>
- * HTTPS Authentication is disabled by default. Administrator can enable it in tomcat-server.xml after adding
+ * HTTPS Authentication is disabled by default. Administrator can enable it in tomcat-server.xml after adding 
  * a proper keystore / SSL certificate from a trusted authority.<br>
  * More info : http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
  */
@@ -59,18 +59,18 @@ import org.opendaylight.controller.sal.utils.Status;
 public class StaticRoutingNorthbound {
 
 
-        private String username;
-
+	private String username;
+	
     @Context
     public void setSecurityContext(SecurityContext context) {
-        username = context.getUserPrincipal().getName();
+    	username = context.getUserPrincipal().getName();
     }
     protected String getUserName() {
         return username;
     }
+	
 
-
-
+	
     private List<StaticRoute> getStaticRoutesInternal(String containerName) {
 
         IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
@@ -109,9 +109,9 @@ public class StaticRoutingNorthbound {
     public StaticRoutes getStaticRoutes(
             @PathParam("containerName") String containerName) {
 
-        if(!NorthboundUtils.isAuthorized(getUserName(), containerName,
+        if(!NorthboundUtils.isAuthorized(getUserName(), containerName, 
                 Privilege.WRITE, this)){
-            throw new
+            throw new 
                 UnauthorizedException("User is not authorized to perform this operation on container "
                             + containerName);
         }
@@ -136,9 +136,9 @@ public class StaticRoutingNorthbound {
             @PathParam("containerName") String containerName,
             @PathParam("name") String name) {
 
-        if(!NorthboundUtils.isAuthorized(getUserName(), containerName,
+        if(!NorthboundUtils.isAuthorized(getUserName(), containerName, 
                 Privilege.WRITE, this)){
-            throw new
+            throw new 
                 UnauthorizedException("User is not authorized to perform this operation on container "
                             + containerName);
         }
@@ -174,10 +174,10 @@ public class StaticRoutingNorthbound {
             @PathParam(value = "name") String name,
             @TypeHint(StaticRoute.class) JAXBElement<StaticRoute> staticRouteData) {
 
-
-        if(!NorthboundUtils.isAuthorized(getUserName(), containerName,
+   
+        if(!NorthboundUtils.isAuthorized(getUserName(), containerName, 
                 Privilege.WRITE, this)){
-            throw new
+            throw new 
                 UnauthorizedException("User is not authorized to perform this operation on container "
                             + containerName);
         }
@@ -221,10 +221,10 @@ public class StaticRoutingNorthbound {
     public Response removeStaticRoute(
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "name") String name) {
-
-        if(!NorthboundUtils.isAuthorized(getUserName(), containerName,
+ 
+        if(!NorthboundUtils.isAuthorized(getUserName(), containerName, 
                 Privilege.WRITE, this)){
-            throw new
+            throw new 
                 UnauthorizedException("User is not authorized to perform this operation on container "
                             + containerName);
         }

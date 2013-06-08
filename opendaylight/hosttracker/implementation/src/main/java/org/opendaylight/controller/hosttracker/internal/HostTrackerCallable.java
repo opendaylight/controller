@@ -15,8 +15,8 @@ package org.opendaylight.controller.hosttracker.internal;
 
 /**
  * This Class provides methods to discover Host through a blocking call
- * mechanism. Applications can make use of these methods if they don't
- * find a host in HostTracker's database and want to discover the host
+ * mechanism. Applications can make use of these methods if they don't 
+ * find a host in HostTracker's database and want to discover the host  
  * in the same thread without being called by a callback function.
  */
 import java.net.InetAddress;

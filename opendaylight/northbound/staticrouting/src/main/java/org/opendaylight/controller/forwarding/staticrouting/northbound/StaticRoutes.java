@@ -21,22 +21,22 @@ import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class StaticRoutes {
-        @XmlElement
-        List<StaticRoute> staticRoute;
-        //To satisfy JAXB
-        private StaticRoutes() {
+	@XmlElement
+	List<StaticRoute> staticRoute;
+	//To satisfy JAXB
+	private StaticRoutes() {
+		
+	}
+	
+	public StaticRoutes(List<StaticRoute> staticRoute) {
+		this.staticRoute = staticRoute;
+	}
 
-        }
+	public List<StaticRoute> getFlowConfig() {
+		return staticRoute;
+	}
 
-        public StaticRoutes(List<StaticRoute> staticRoute) {
-                this.staticRoute = staticRoute;
-        }
-
-        public List<StaticRoute> getFlowConfig() {
-                return staticRoute;
-        }
-
-        public void setFlowConfig(List<StaticRoute> staticRoute) {
-                this.staticRoute = staticRoute;
-        }
+	public void setFlowConfig(List<StaticRoute> staticRoute) {
+		this.staticRoute = staticRoute;
+	}
 }

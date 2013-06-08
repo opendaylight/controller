@@ -19,9 +19,9 @@ import org.opendaylight.controller.sal.utils.NetUtils;
  * Represents the binding between the id, the value and mask type and the range
  * values of the elements type that can be matched on the network
  * frame/packet/message
- *
- *
- *
+ * 
+ * 
+ * 
  */
 public enum MatchType {
     IN_PORT("inPort", 1 << 0, NodeConnector.class, 1, 0),
@@ -73,7 +73,7 @@ public enum MatchType {
 
     /**
      * Perform the assignment type validation
-     *
+     * 
      * @param value
      * @param mask
      * @return
@@ -119,7 +119,7 @@ public enum MatchType {
 
     /**
      * Perform the value and mask range validation
-     *
+     * 
      * @param value
      * @param mask
      * @return
@@ -162,7 +162,7 @@ public enum MatchType {
 
     /**
      * Return the mask value in 64 bits bitmask form
-     *
+     * 
      * @param mask
      * @return
      */

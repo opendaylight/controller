@@ -11,14 +11,14 @@ package org.opendaylight.controller.forwardingrulesmanager;
 /**
  * The interface which describes the methods forwarding rules manager will call
  * for notifying the listeners of policy installation updates.
- *
+ * 
  */
 public interface IForwardingRulesManagerAware {
 
     /**
      * Inform the listeners that a troubleshooting information was added or
      * removed for the specified policy.
-     *
+     * 
      * @param policyName
      *            the policy affected
      * @param add
@@ -31,7 +31,7 @@ public interface IForwardingRulesManagerAware {
      * Inform listeners that the network node has notified us about a failure in
      * executing the controller generated asynchronous request identified by the
      * passed unique id.
-     *
+     * 
      * @param requestId
      *            the unique id associated with the request which failed to be
      *            executed on the network node

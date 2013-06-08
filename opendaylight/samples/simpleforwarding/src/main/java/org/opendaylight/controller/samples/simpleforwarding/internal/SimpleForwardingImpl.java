@@ -147,7 +147,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     }
 
     @SuppressWarnings("deprecation")
-        private void allocateCaches() {
+	private void allocateCaches() {
         if (this.clusterContainerService == null) {
             log.info("un-initialized clusterContainerService, can't create cache");
             return;
@@ -178,7 +178,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     }
 
     @SuppressWarnings("deprecation")
-        private void destroyCaches() {
+	private void destroyCaches() {
         if (this.clusterContainerService == null) {
             log.info("un-initialized clusterContainerService, can't destroy cache");
             return;
@@ -367,7 +367,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                 }
 
             } else {
-                log.debug("Adding policyMatch(DIP = {}) Action(outPort= {}) " +
+                log.debug("Adding policyMatch(DIP = {}) Action(outPort= {}) " + 
                         "to node {}", new Object[] {
                         host.getNetworkAddress().getHostAddress(), outPort,
                         currNode});
@@ -482,7 +482,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         updatePerHostRuleInSW(host, rootNode, rootNode, null, new HostNodePair(
                 host, rootNode), ports);
 
-        //      log.debug("Getting out at the end!");
+        //		log.debug("Getting out at the end!");
         return switchesToProgram;
     }
 
@@ -575,10 +575,10 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         // rest of the world
         // switchesToProgram.add(rootNode);
         //updatePerHostRuleInSW(host, rootNode,
-        //                                        rootNode, null,
-        //                                        new HostNodePair(host, rootNode),ports);
+        //					  rootNode, null,
+        //					  new HostNodePair(host, rootNode),ports);
 
-        //      log.debug("Getting out at the end!");
+        //		log.debug("Getting out at the end!");
         return switchesToProgram;
     }
 
@@ -617,7 +617,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                     Status poStatus = this.frm.installFlowEntry(po);
                     if (!poStatus.isSuccess()) {
                         log.error("Failed to install policy: "
-                                + po.getGroupName() + " ("
+                                + po.getGroupName() + " (" 
                                 + poStatus.getDescription() + ")");
 
                         retCode = RulesProgrammingReturnCode.FAILED_FEW_SWITCHES;
@@ -632,8 +632,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                               swId, host);
                     /* // Now dump every single rule */
                     /* for (HostNodePair dumpkey : this.rulesDB.keySet()) { */
-                    /*  po = this.rulesDB.get(dumpkey); */
-                    /*  log.debug("Dumping entry H{" + dumpkey.getHost() + "} S{" + dumpkey.getSwitchId() + "} = {" + (po == null ? "null policy" : po)); */
+                    /* 	po = this.rulesDB.get(dumpkey); */
+                    /* 	log.debug("Dumping entry H{" + dumpkey.getHost() + "} S{" + dumpkey.getSwitchId() + "} = {" + (po == null ? "null policy" : po)); */
                     /* } */
                 }
             }

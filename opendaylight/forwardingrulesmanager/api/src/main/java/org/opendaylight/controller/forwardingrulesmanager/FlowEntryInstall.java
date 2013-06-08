@@ -17,10 +17,10 @@ import org.opendaylight.controller.sal.core.Node;
  * install, the container flow with which that entry had to be merged and the
  * resultant merged flow entry, which is the one that was eventually installed
  * on the network node
- *
+ * 
  * Note: If the container flow is null, the install entry will be a clone of the
  * original entry
- *
+ * 
  */
 public class FlowEntryInstall {
     private FlowEntry original;
@@ -115,7 +115,7 @@ public class FlowEntryInstall {
     public void setRequestId(long rid) {
         this.requestId = rid;
     }
-
+    
     public long getRequestId() {
         return requestId;
     }

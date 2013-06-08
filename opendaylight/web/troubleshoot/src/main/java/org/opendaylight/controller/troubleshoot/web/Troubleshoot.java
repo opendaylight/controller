@@ -231,10 +231,10 @@ public class Troubleshoot implements IDaylightWeb {
         Match match = flow.getMatch();
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
-        String desc = (switchManager == null)?
-                        "" : switchManager.getNodeDescription(node);
-        desc = (desc.isEmpty() || desc.equalsIgnoreCase("none"))?
-                        node.toString(): desc;
+        String desc = (switchManager == null)? 
+        		"" : switchManager.getNodeDescription(node);
+        desc = (desc.isEmpty() || desc.equalsIgnoreCase("none"))? 
+        		node.toString(): desc;
         row.put("nodeName", desc);
         if (match.isPresent(MatchType.IN_PORT)) {
             row.put(MatchType.IN_PORT.id(), ((NodeConnector) flow.getMatch()
@@ -300,7 +300,7 @@ public class Troubleshoot implements IDaylightWeb {
             Short tpSrc = (Short) (flow.getMatch().getField(MatchType.TP_SRC)
                     .getValue());
             row.put(MatchType.TP_SRC.id(),
-                        String.valueOf(NetUtils.getUnsignedShort(tpSrc)));
+            		String.valueOf(NetUtils.getUnsignedShort(tpSrc)));
         } else {
             row.put(MatchType.TP_SRC.id(), "*");
         }
@@ -308,7 +308,7 @@ public class Troubleshoot implements IDaylightWeb {
             Short tpDst = (Short) (flow.getMatch().getField(MatchType.TP_DST)
                     .getValue());
             row.put(MatchType.TP_DST.id(),
-                        String.valueOf(NetUtils.getUnsignedShort(tpDst)));
+            		String.valueOf(NetUtils.getUnsignedShort(tpDst)));
         } else {
             row.put(MatchType.TP_DST.id(), "*");
         }

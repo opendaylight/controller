@@ -151,18 +151,18 @@ public class StaticRouteConfig implements Serializable {
     public Status isValid() {
         if ((name == null) || (name.trim().length() < 1)) {
             return new Status(StatusCode.BADREQUEST,
-                        "Invalid Static Route name");
+            		"Invalid Static Route name");
         }
         if (!isValidStaticRouteEntry()) {
             return new Status(StatusCode.BADREQUEST,
-                        "Invalid Static Route entry. Please use the " +
-                        "IPAddress/mask format. Default gateway " +
-                        "(0.0.0.0/0) is NOT supported.");
+            		"Invalid Static Route entry. Please use the " +
+            		"IPAddress/mask format. Default gateway " +
+            		"(0.0.0.0/0) is NOT supported.");
         }
         if (!isValidNextHop()) {
             return new Status(StatusCode.BADREQUEST,
-                        "Invalid NextHop IP Address configuration. " +
-                                        "Please use the X.X.X.X format.");
+            		"Invalid NextHop IP Address configuration. " +
+            				"Please use the X.X.X.X format.");
         }
 
         return new Status(StatusCode.SUCCESS, null);
