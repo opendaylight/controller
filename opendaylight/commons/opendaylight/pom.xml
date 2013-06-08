@@ -294,6 +294,7 @@
         <configuration>
           <failsOnError>true</failsOnError>
           <configLocation>${project.parent.relativePath}/space_and_tabs_checks.xml</configLocation>
+          <consoleOutput>true</consoleOutput>
         </configuration>
       </plugin>
       <plugin>
