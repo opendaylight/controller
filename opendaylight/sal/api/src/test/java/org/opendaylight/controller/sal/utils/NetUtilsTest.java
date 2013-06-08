@@ -273,7 +273,7 @@ public class NetUtilsTest {
                 .isIPv6AddressValid("fe80:::0:0:0:204:61ff:fe9d/-1")); //not valid both
 
     }
-
+    
     @Test
     public void testInetAddressConflict() throws UnknownHostException {
 

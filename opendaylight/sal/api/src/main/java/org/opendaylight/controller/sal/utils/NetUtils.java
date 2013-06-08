@@ -36,8 +36,8 @@ public abstract class NetUtils {
     /**
      * Converts a 4 bytes array into an integer number
      *
-     * @param ba    the 4 bytes long byte array
-     * @return      the integer number
+     * @param ba	the 4 bytes long byte array
+     * @return	    the integer number
      */
     public static int byteArray4ToInt(byte[] ba) {
         if (ba == null || ba.length != 4)
@@ -62,8 +62,8 @@ public abstract class NetUtils {
      * Converts an IP address passed as integer value into the
      * respective InetAddress object
      *
-     * @param address   the IP address in integer form
-     * @return          the IP address in InetAddress form
+     * @param address	the IP address in integer form
+     * @return			the IP address in InetAddress form
      */
     public static InetAddress getInetAddress(int address) {
         InetAddress ip = null;
@@ -80,8 +80,8 @@ public abstract class NetUtils {
      * The prefix bit mask indicates the contiguous leading bits that are NOT masked out.
      * Example: A prefix bit mask length of 8 will give an InetAddress Network Mask of 255.0.0.0
      *
-     * @param prefixMaskLength  integer representing the length of the prefix network mask
-     * @param isV6              boolean representing the IP version of the returned address
+     * @param prefixMaskLength	integer representing the length of the prefix network mask
+     * @param isV6				boolean representing the IP version of the returned address
      * @return
      */
     public static InetAddress getInetNetworkMask(int prefixMaskLength,
@@ -121,8 +121,8 @@ public abstract class NetUtils {
      * while ff.00.00.00 will return a subnet mask length of 24.
      * If the passed prefixMask object is null, 0 is returned
      *
-     * @param prefixMask    the prefix mask as byte array
-     * @return              the length of the prefix network mask
+     * @param prefixMask	the prefix mask as byte array
+     * @return				the length of the prefix network mask
      */
     public static int getSubnetMaskLength(byte[] prefixMask) {
         int maskLength = 0;
@@ -149,8 +149,8 @@ public abstract class NetUtils {
      * while ff.00.00.00 will return a subnet mask length of 24
      * If the passed prefixMask object is null, 0 is returned
      *
-     * @param prefixMask    the prefix mask as InetAddress
-     * @return              the length of the prefix network mask
+     * @param prefixMask	the prefix mask as InetAddress
+     * @return				the length of the prefix network mask
      */
     public static int getSubnetMaskLength(InetAddress prefixMask) {
         return (prefixMask == null) ? 0 : NetUtils
@@ -162,9 +162,9 @@ public abstract class NetUtils {
      * the equivalent subnet prefix IP address
      * Example: for ip = "172.28.30.254" and maskLen = 25 it will return "172.28.30.128"
      *
-     * @param ip        the IP address in InetAddress form
-     * @param maskLen   the length of the prefix network mask
-     * @return          the subnet prefix IP address in InetAddress form
+     * @param ip		the IP address in InetAddress form
+     * @param maskLen	the length of the prefix network mask
+     * @return			the subnet prefix IP address in InetAddress form
      */
     public static InetAddress getSubnetPrefix(InetAddress ip, int maskLen) {
         int bytes = maskLen / 8;
@@ -219,13 +219,13 @@ public abstract class NetUtils {
         if (isAny(testAddress) || isAny(filterAddress)) {
             return false;
         }
-
+        
         int testMaskLen = (testMask != null) ? NetUtils.getSubnetMaskLength(testMask.getAddress()) : 0;
         int filterMaskLen = (filterMask != null) ? NetUtils.getSubnetMaskLength(filterMask.getAddress()) : 0;
-
+        
         int testPrefixLen = (testAddress instanceof Inet6Address) ? (128 - testMaskLen) : (32 - testMaskLen);
         int filterPrefixLen = (filterAddress instanceof Inet6Address) ? (128 - filterMaskLen) : (32 - filterMaskLen);
-
+        
         // Mask length check. Test mask has to be more specific than filter one
         if (testPrefixLen < filterPrefixLen) {
             return true;
@@ -240,8 +240,8 @@ public abstract class NetUtils {
     /**
      * Returns true if the passed MAC address is all zero
      *
-     * @param mac   the byte array representing the MAC address
-     * @return      true if all MAC bytes are zero
+     * @param mac	the byte array representing the MAC address
+     * @return		true if all MAC bytes are zero
      */
     public static boolean isZeroMAC(byte[] mac) {
         for (short i = 0; i < 6; i++) {
@@ -255,8 +255,8 @@ public abstract class NetUtils {
     /**
      * Returns true if the passed InetAddress contains all zero
      *
-     * @param ip    the IP address to test
-     * @return      true if the address is all zero
+     * @param ip	the IP address to test
+     * @return		true if the address is all zero
      */
     public static boolean isAny(InetAddress ip) {
         for (byte b : ip.getAddress()) {
@@ -341,29 +341,29 @@ public abstract class NetUtils {
         }
         return true;
     }
-
+    
     /*
-     * Following utilities are useful when you need to
+     * Following utilities are useful when you need to 
      * compare or bit shift java primitive type variable
      * which are inerently signed
      */
     /**
      * Returns the unsigned value of the passed byte variable
-     *
-     * @param b the byte value
+     * 
+     * @param b	the byte value
      * @return the int variable containing the unsigned byte value
      */
     public static int getUnsignedByte(byte b) {
-                return (b > 0)? (int)b : ((int)b & 0x7F | 0x80);
-        }
-
+		return (b > 0)? (int)b : ((int)b & 0x7F | 0x80);
+	}
+	
     /**
      * Return the unsigned value of the passed short variable
-     *
+     * 
      * @param s the short value
      * @return the int variable containing the unsigned short value
      */
-        public static int getUnsignedShort(short s) {
-                return (s > 0)? (int)s : ((int)s & 0x7FFF | 0x8000);
-        }
+	public static int getUnsignedShort(short s) {
+		return (s > 0)? (int)s : ((int)s & 0x7FFF | 0x8000);
+	}
 }

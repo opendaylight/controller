@@ -25,28 +25,28 @@ import org.opendaylight.controller.samples.loadbalancer.entities.VIP;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class VIPs {
-
+    
     @XmlElement (name="vip")
     Set<VIP> loadBalancerVIPs;
-
+    
     public VIPs() {}
-
-
+    
+    
     public VIPs (Set<VIP> loadBalancerVIPs) {
         this.loadBalancerVIPs = loadBalancerVIPs;
     }
-
+    
     /**
      * @return the loadBalancerVIPs
      */
     public Set<VIP> getLoadBalancerVIPs() {
         return loadBalancerVIPs;
     }
-
+    
     /**
      * @param loadBalancerVIPs the loadBalancerVIPs to set
      */
-
+    
     public void setLoadBalancerVIPs(Set<VIP> loadBalancerVIPs) {
         this.loadBalancerVIPs = loadBalancerVIPs;
     }

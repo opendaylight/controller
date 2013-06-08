@@ -54,7 +54,7 @@ public class SetDlSrc extends Action {
     public String getDlAddressString() {
         return HexEncode.bytesToHexString(address);
     }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

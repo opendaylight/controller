@@ -110,7 +110,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
         this.controller.addMessageListener(OFType.FLOW_REMOVED, this);
@@ -122,7 +122,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     *
+     * 
      */
     void destroy() {
     }
@@ -130,7 +130,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     *
+     * 
      */
     void start() {
     }
@@ -139,7 +139,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     *
+     * 
      */
     void stop() {
     }
@@ -201,7 +201,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                      * will be inserted automatically to synchronize the
                      * progression.
                      */
-                    result = asyncMsgSend(node, sw, msg, rid);
+                    result = asyncMsgSend(node, sw, msg, rid);  
                 }
                 return getStatusInternal(result, action, rid);
             } else {
@@ -392,7 +392,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         if ((rid == null) || (rid == 0)) {
             return;
         }
-
+        
         /*
          * Notifies the caller that error has been reported for a previous flow
          * programming request
@@ -466,7 +466,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         return new Status(StatusCode.INTERNALERROR,
                 "Failed to send Barrier message.");
     }
-
+    
     @Override
     public Status asyncSendBarrierMessage(Node node) {
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
@@ -489,14 +489,14 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         return new Status(StatusCode.INTERNALERROR,
                 "Failed to send Barrier message.");
     }
-
+    
     /**
      * This method sends the message asynchronously until the number of messages
      * sent reaches a threshold. Then a Barrier message is sent automatically
      * for sync purpose. An unique Request ID associated with the message is
      * passed down by the caller. The Request ID will be returned to the caller
      * when an error message is received from the switch.
-     *
+     * 
      * @param node
      *            The node
      * @param msg
@@ -514,25 +514,25 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
         xid = sw.asyncSend(msg);
         addXid2Rid(swid, xid, rid);
-
+        
         Map<Integer, Long> swxid2rid = this.xid2rid.get(swid);
         if (swxid2rid == null) {
             return result;
         }
-
+        
         int size = swxid2rid.size();
         if (size % barrierMessagePriorCount == 0) {
             result = asyncSendBarrierMessage(node);
         }
-
+        
         return result;
     }
-
+    
     /**
      * A number of async messages are sent followed by a synchronous Barrier
      * message. This method returns the maximum async messages that can be sent
      * before the Barrier message.
-     *
+     * 
      * @return The max count of async messages sent prior to Barrier message
      */
     private int getBarrierMessagePriorCount() {
@@ -548,11 +548,11 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
         return rv;
     }
-
+    
     /**
      * This method returns the message Request ID previously assigned by the
      * caller for a given OF message xid
-     *
+     * 
      * @param swid
      *            The switch id
      * @param xid
@@ -576,14 +576,14 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     /**
      * This method returns a copy of outstanding xid to rid mappings.for a given
      * switch
-     *
+     * 
      * @param swid
      *            The switch id
      * @return a copy of xid2rid mappings
      */
     public Map<Integer, Long> getSwXid2Rid(long swid) {
         Map<Integer, Long> swxid2rid = this.xid2rid.get(swid);
-
+        
         if (swxid2rid != null) {
             return new HashMap<Integer, Long>(swxid2rid);
         } else {
@@ -593,7 +593,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     /**
      * Adds xid to rid mapping to the local DB
-     *
+     * 
      * @param swid
      *            The switch id
      * @param xid
@@ -611,7 +611,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     /**
      * When an Error message is received, this method will be invoked to remove
      * the offending xid from the local DB.
-     *
+     * 
      * @param swid
      *            The switch id
      * @param xid
@@ -626,7 +626,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     /**
      * Convert various result into Status
-     *
+     * 
      * @param result
      *            The returned result from previous action
      * @param action
@@ -652,11 +652,11 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                     "send", action, "Internal Error"));
         }
     }
-
+    
     /**
      * When a Barrier reply is received, this method will be invoked to clear
      * the local DB
-     *
+     * 
      * @param swid
      *            The switch id
      */
@@ -670,7 +670,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     @Override
     public void updateNode(Node node, UpdateType type, Set<Property> props) {
         long swid = (Long)node.getID();
-
+        
         switch (type) {
         case ADDED:
             Map<Integer, Long> swxid2rid = new HashMap<Integer, Long>();
@@ -712,7 +712,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             ci.println("Please enter a valid node id");
             return;
         }
-
+        
         long sid;
         try {
             sid = HexEncode.stringToLong(st);
@@ -720,7 +720,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             ci.println("Please enter a valid node id");
             return;
         }
-
+        
         Map<Integer, Long> swxid2rid = this.xid2rid.get(sid);
         if (swxid2rid == null) {
             ci.println("The node id entered does not exist");
@@ -728,7 +728,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         }
 
         ci.println("xid             rid");
-
+        
         Set<Integer> xidSet = swxid2rid.keySet();
         if (xidSet == null) {
             return;

@@ -40,7 +40,7 @@ public class FlowOnNode {
     /* Dummy constructor for JAXB */
     private FlowOnNode () {
     }
-
+    
     public FlowOnNode(Flow flow) {
         this.flow = flow;
     }

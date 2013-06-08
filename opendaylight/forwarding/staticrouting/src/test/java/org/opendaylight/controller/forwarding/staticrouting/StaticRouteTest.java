@@ -23,35 +23,35 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
 public class StaticRouteTest {
-
-        @Test
-        public void testStaticRouteGetSet() {
-                StaticRoute staticRoute = new StaticRoute();
-                InetAddress networkAddress = null;
-                InetAddress mask = null;
-                InetAddress nextHopAddress = null;
-                try {
-                        networkAddress = InetAddress.getByName("10.1.1.0");
-                        mask = InetAddress.getByName("255.255.255.0");
-                        nextHopAddress = InetAddress.getByName("200.0.0.1");
-
-                } catch (UnknownHostException e) {
-                        Assert.assertTrue(false);
-                }
-                staticRoute.setNetworkAddress(networkAddress);
-                Assert.assertEquals(networkAddress.getHostAddress(), staticRoute.getNetworkAddress().getHostAddress());
-                staticRoute.setMask(mask);
-                Assert.assertEquals(mask.getHostAddress(), staticRoute.getMask().getHostAddress());
-                staticRoute.setType(NextHopType.IPADDRESS);
-                Assert.assertEquals("nexthop-ip", staticRoute.getType().toString());
-                staticRoute.setNextHopAddress(nextHopAddress);
-                Assert.assertEquals(nextHopAddress.getHostAddress(), staticRoute.getNextHopAddress().getHostAddress());
-                Node node = NodeCreator.createOFNode(((long)10));
-                staticRoute.setNode(node);
-                Assert.assertEquals(node, staticRoute.getNode());
-                NodeConnector nc0 = NodeConnectorCreator.createOFNodeConnector((short)20, node);
-                staticRoute.setPort(nc0);
-                Assert.assertEquals(nc0, staticRoute.getPort());
+	
+	@Test
+	public void testStaticRouteGetSet() {
+		StaticRoute staticRoute = new StaticRoute();
+		InetAddress networkAddress = null;
+		InetAddress mask = null;
+		InetAddress nextHopAddress = null;
+		try {
+			networkAddress = InetAddress.getByName("10.1.1.0");
+			mask = InetAddress.getByName("255.255.255.0");
+			nextHopAddress = InetAddress.getByName("200.0.0.1");
+			
+		} catch (UnknownHostException e) {
+			Assert.assertTrue(false);
+		}
+		staticRoute.setNetworkAddress(networkAddress);
+		Assert.assertEquals(networkAddress.getHostAddress(), staticRoute.getNetworkAddress().getHostAddress());
+		staticRoute.setMask(mask);
+		Assert.assertEquals(mask.getHostAddress(), staticRoute.getMask().getHostAddress());
+		staticRoute.setType(NextHopType.IPADDRESS);
+		Assert.assertEquals("nexthop-ip", staticRoute.getType().toString());
+		staticRoute.setNextHopAddress(nextHopAddress);
+		Assert.assertEquals(nextHopAddress.getHostAddress(), staticRoute.getNextHopAddress().getHostAddress());
+		Node node = NodeCreator.createOFNode(((long)10));
+		staticRoute.setNode(node);
+		Assert.assertEquals(node, staticRoute.getNode());
+		NodeConnector nc0 = NodeConnectorCreator.createOFNodeConnector((short)20, node);
+		staticRoute.setPort(nc0);
+		Assert.assertEquals(nc0, staticRoute.getPort());
         InetAddress ip1 = null;
         HostNodeConnector h1 = null;
         try {
@@ -66,10 +66,10 @@ public class StaticRouteTest {
         }
         staticRoute.setHost(h1);
         Assert.assertEquals(h1, staticRoute.getHost());
-        }
-
-        @Test
-        public void testStaticRouteComparison() {
+	}
+	
+	@Test
+	public void testStaticRouteComparison() {
         StaticRouteConfig staticRouteConfig1 = new StaticRouteConfig("route1", "10.1.1.0/24", "100.1.1.1");
         StaticRouteConfig staticRouteConfig2 = new StaticRouteConfig("route2", "10.1.1.0/24", "100.2.1.1");
         StaticRouteConfig staticRouteConfig3 = new StaticRouteConfig("route3", "10.2.1.0/24", "100.3.1.1");
@@ -82,28 +82,28 @@ public class StaticRouteTest {
         Assert.assertTrue(staticRoute1.equals(staticRoute2));
         Assert.assertFalse(staticRoute1.equals(staticRoute3));
         Assert.assertFalse(staticRoute1.equals(staticRoute4));
-
+        
         Assert.assertTrue(staticRoute1.compareTo(staticRoute2) == 0 ? true : false);
         Assert.assertFalse(staticRoute1.compareTo(staticRoute3) == 0 ? true : false);
         Assert.assertTrue(staticRoute1.compareTo(staticRoute4) == 0 ? true : false);
-
-        }
-
-        @Test
-        public void testLongestPrefixMatch() {
+        		
+	}
+	
+	@Test
+	public void testLongestPrefixMatch() {
         StaticRouteConfig staticRouteConfig1 = new StaticRouteConfig("route1", "10.1.1.254/24", "100.1.1.1");
         StaticRoute staticRoute1 = new StaticRoute(staticRouteConfig1);
-                InetAddress ip1 = null;
-                InetAddress ip2 = null;
-                try {
-                        ip1 = InetAddress.getByName("10.1.0.2");
-                        ip2 = InetAddress.getByName("10.1.1.2");
-                } catch (UnknownHostException e) {
-                        Assert.assertTrue(false);
-                }
+		InetAddress ip1 = null;
+		InetAddress ip2 = null;
+		try {
+			ip1 = InetAddress.getByName("10.1.0.2");
+			ip2 = InetAddress.getByName("10.1.1.2");
+		} catch (UnknownHostException e) {
+			Assert.assertTrue(false);
+		}
         InetAddress rxdIp1 = staticRoute1.longestPrefixMatch(ip1);
         InetAddress rxdIp2 = staticRoute1.longestPrefixMatch(ip2);
-                Assert.assertEquals(null, rxdIp1);
-                Assert.assertEquals("10.1.1.0", rxdIp2.getHostAddress());
-        }
+		Assert.assertEquals(null, rxdIp1);
+		Assert.assertEquals("10.1.1.0", rxdIp2.getHostAddress());
+	}
 }

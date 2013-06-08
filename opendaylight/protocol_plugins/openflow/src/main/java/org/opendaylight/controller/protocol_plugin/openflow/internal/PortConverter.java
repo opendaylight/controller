@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract class which provides the utilities for converting the Openflow port
  * number to the equivalent NodeConnector and vice versa
- *
- *
- *
+ * 
+ * 
+ * 
  */
 public abstract class PortConverter {
     private static final Logger log = LoggerFactory

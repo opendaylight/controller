@@ -28,7 +28,7 @@ public class PortStatistics {
 
     // To satisfy JAXB
     @SuppressWarnings("unused")
-        private PortStatistics() {
+	private PortStatistics() {
     }
 
     public PortStatistics(Node node, List<NodeConnectorStatistics> portStats) {

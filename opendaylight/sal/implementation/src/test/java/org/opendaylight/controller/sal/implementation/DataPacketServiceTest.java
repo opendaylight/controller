@@ -20,14 +20,14 @@ import org.opendaylight.controller.sal.packet.RawPacket;
 
 public class DataPacketServiceTest {
 
-        @Test
-        public void DataPacketServiceDecodeTest() throws ConstructionException, InstantiationException, IllegalAccessException {
-
-                DataPacketService dService = new DataPacketService();
-                RawPacket rawPkt = null;
-
-                Assert.assertTrue(dService.decodeDataPacket(rawPkt) == null);
-
+	@Test
+	public void DataPacketServiceDecodeTest() throws ConstructionException, InstantiationException, IllegalAccessException {
+		
+		DataPacketService dService = new DataPacketService();
+		RawPacket rawPkt = null;
+		
+		Assert.assertTrue(dService.decodeDataPacket(rawPkt) == null);
+		
         byte[] data = { 10, 12, 14, 20, 55, 69, //DMAC
                 -90, -20, -100, -82, -78, -97, //SMAC
                 8, 6, //ethype
@@ -40,35 +40,35 @@ public class DataPacketServiceTest {
                 9, 9, 9, 1, // src proto
                 0, 0, 0, 0, 0, 0, // target hw addr
                 9, 9, 9, -2 }; // target proto
-
+        
         rawPkt = new RawPacket(data);
-
+        
         Packet decodedPkt = dService.decodeDataPacket(rawPkt);
         Class<? extends Packet> payloadClass = ARP.class;
         Assert.assertTrue(payloadClass == decodedPkt.getPayload().getClass());
-
+                
         ARP arpPacket = (ARP) decodedPkt.getPayload();
-
+        
         Assert.assertTrue(arpPacket.getHardwareType() == (byte)0x1);
         Assert.assertTrue(arpPacket.getProtocolType() == 2048);
         Assert.assertTrue(arpPacket.getHardwareAddressLength() == (byte)0x6);
         Assert.assertTrue(arpPacket.getProtocolAddressLength() == (byte)0x4);
         Assert.assertTrue(arpPacket.getOpCode() == 1);
-
+        
         byte[] senderHwAddress = arpPacket.getSenderHardwareAddress();
-        byte[] senderProtocolAddress = arpPacket.getSenderProtocolAddress();
-
+        byte[] senderProtocolAddress = arpPacket.getSenderProtocolAddress(); 
+        
         byte[] targetHwAddress = arpPacket.getTargetHardwareAddress();
-        byte[] targetProtocolAddress = arpPacket.getTargetProtocolAddress();
+        byte[] targetProtocolAddress = arpPacket.getTargetProtocolAddress(); 
 
-
+        
         Assert.assertTrue(senderHwAddress[0] == (byte)0xA6);
         Assert.assertTrue(senderHwAddress[1] == (byte)0xEC);
         Assert.assertTrue(senderHwAddress[2] == (byte)0x9C);
         Assert.assertTrue(senderHwAddress[3] == (byte)0xAE);
         Assert.assertTrue(senderHwAddress[4] == (byte)0xB2);
         Assert.assertTrue(senderHwAddress[5] == (byte)0x9F);
-
+        
         Assert.assertTrue(senderProtocolAddress[0] == (byte)0x9);
         Assert.assertTrue(senderProtocolAddress[1] == (byte)0x9);
         Assert.assertTrue(senderProtocolAddress[2] == (byte)0x9);
@@ -89,36 +89,36 @@ public class DataPacketServiceTest {
         Assert.assertTrue(targetProtocolAddress[0] == (byte)0x9);
         Assert.assertTrue(targetProtocolAddress[1] == (byte)0x9);
         Assert.assertTrue(targetProtocolAddress[2] == (byte)0x9);
-        Assert.assertTrue(targetProtocolAddress[3] == (byte)0xFE);
-        }
-
-        @Test
-        public void DataPacketServiceEncodeTest() throws ConstructionException, InstantiationException, IllegalAccessException {
-
-                DataPacketService dService = new DataPacketService();
-                Ethernet eth = new Ethernet();
+        Assert.assertTrue(targetProtocolAddress[3] == (byte)0xFE);      
+	}
+	
+	@Test
+	public void DataPacketServiceEncodeTest() throws ConstructionException, InstantiationException, IllegalAccessException {
+		
+		DataPacketService dService = new DataPacketService();
+		Ethernet eth = new Ethernet();
         ARP arp = new ARP();
 
-                byte[] data = null;
-                RawPacket rawPkt;
+		byte[] data = null;
+		RawPacket rawPkt;
 
 
         byte[] dMAC = { 10, 12, 14, 20, 55, 69 };
         byte[] sMAC = { 82, 97, 109, 117, 127, -50 };
         short etherType = 2054;
-
+        
         eth.setDestinationMACAddress(dMAC);
         eth.setSourceMACAddress(sMAC);
         eth.setEtherType(etherType);
-
+               
         arp.setHardwareType((short)1);
         arp.setProtocolType((short)2048);
         arp.setHardwareAddressLength((byte)0x6);
         arp.setProtocolAddressLength((byte)0x4);
         arp.setOpCode((byte)0x1);
-
+        
         byte[] senderHardwareAddress = {(byte)0xA6, (byte)0xEC, (byte)0x9C, (byte)0xAE,
-                                                                        (byte)0xB2, (byte)0x9F};
+        								(byte)0xB2, (byte)0x9F};
         byte[] senderProtocolAddress = {(byte)0x09, (byte)0x09, (byte)0x09, (byte)0x01};
         byte[] targetProtocolAddress = {(byte)0x09, (byte)0x09, (byte)0x09, (byte)0xFE};
         byte[] targetHardwareAddress = {(byte)0x0, (byte)0x0, (byte)0x0, (byte)0x0, (byte)0x0, (byte)0x0};
@@ -126,13 +126,13 @@ public class DataPacketServiceTest {
         arp.setSenderProtocolAddress(senderProtocolAddress);
         arp.setTargetHardwareAddress(targetHardwareAddress);
         arp.setTargetProtocolAddress(targetProtocolAddress);
-
+                
         arp.setParent(eth);
         eth.setPayload(arp);
-
+        
         rawPkt = dService.encodeDataPacket(eth);
         data = rawPkt.getPacketData();
-
+        
         Assert.assertTrue(data[0] == (byte)0x0A);//Destination MAC
         Assert.assertTrue(data[1] == (byte)0x0C);
         Assert.assertTrue(data[2] == (byte)0x0E);
@@ -174,7 +174,7 @@ public class DataPacketServiceTest {
         Assert.assertTrue(data[38] == (byte)0x09);//Target Protocol Address
         Assert.assertTrue(data[39] == (byte)0x09);
         Assert.assertTrue(data[40] == (byte)0x09);
-        Assert.assertTrue(data[41] == (byte)0xFE);
-        }
+        Assert.assertTrue(data[41] == (byte)0xFE);    
+	}
 
 }

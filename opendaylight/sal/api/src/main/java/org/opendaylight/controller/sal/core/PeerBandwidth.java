@@ -21,27 +21,27 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 public class PeerBandwidth extends Bandwidth {
-        private static final long serialVersionUID = 1L;
-
-        public static final String PeerBandwidthPropName = "peerBandwidth";
-
-        public PeerBandwidth(long value) {
-                super(PeerBandwidthPropName);
-                this.bandwidthValue = value;
-        }
-
-        /*
+	private static final long serialVersionUID = 1L;
+	
+	public static final String PeerBandwidthPropName = "peerBandwidth";
+	
+	public PeerBandwidth(long value) {
+		super(PeerBandwidthPropName);
+		this.bandwidthValue = value;
+	}
+	
+	/*
      * Private constructor used for JAXB mapping
      */
     private PeerBandwidth() {
-        super(PeerBandwidthPropName);
-                this.bandwidthValue = 0;
+    	super(PeerBandwidthPropName);
+		this.bandwidthValue = 0;
     }
 
-        public PeerBandwidth clone() {
-                return new PeerBandwidth(this.bandwidthValue);
+	public PeerBandwidth clone() {
+		return new PeerBandwidth(this.bandwidthValue);  
     }
-
+	
 
     @Override
     public String toString() {

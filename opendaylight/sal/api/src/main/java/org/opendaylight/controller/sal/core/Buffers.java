@@ -21,16 +21,16 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 public class Buffers extends Property {
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
     @XmlElement
     private int buffersValue;
-
+    
     public static final String BuffersPropName = "buffers";
-
+    
     /**
      * Construct a Buffers property
      *
-     * @param buffers the Buffers
+     * @param buffers the Buffers 
      * @return Constructed object
      */
     public Buffers(int buffers) {
@@ -53,7 +53,7 @@ public class Buffers extends Property {
     public int getValue() {
         return this.buffersValue;
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;

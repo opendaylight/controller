@@ -11,11 +11,11 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 public class DaylightWebUtil {
     private static String defaultName = GlobalConstants.DEFAULT.toString();
-
+    
     /**
      * Returns the container that this user is authorized to access. If the user is not authorized to the requested
      * container, then this method will return the default container.
-     *
+     * 
      * @param request - HttpServletRequest object to retrieve username
      * @param container - requested container
      * @param bundle - respective bundle
@@ -25,7 +25,7 @@ public class DaylightWebUtil {
         if (container == null) {
             return defaultName;
         }
-
+        
         String username = request.getUserPrincipal().getName();
         IContainerAuthorization containerAuthorization = (IContainerAuthorization)
                 ServiceHelper.getGlobalInstance(IContainerAuthorization.class, bundle);

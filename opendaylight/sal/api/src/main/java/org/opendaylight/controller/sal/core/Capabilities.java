@@ -21,28 +21,28 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 public class Capabilities extends Property {
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
     @XmlElement
     private int capabilitiesValue;
-
-    public enum CapabilitiesType {
-        FLOW_STATS_CAPABILITY(1<<0),
-        TABLE_STATS_CAPABILITY(1<<1),
-        PORT_STATS_CAPABILITY(1<<2),
-        STP_CAPABILITY(1<<3),
-        RSVD_CAPABILITY(1<<4),
-        IP_REASSEM_CAPABILITY(1<<5),
-        QUEUE_STATS_CAPABILITY(1<<6),
-        ARP_MATCH_IP_CAPABILITY(1<<7);
-        private final int ct;
-        CapabilitiesType(int val) {
-                this.ct = val;
-        }
-        public int getValue() {
-                return ct;
-        }
+    
+    public enum CapabilitiesType { 
+    	FLOW_STATS_CAPABILITY(1<<0),
+    	TABLE_STATS_CAPABILITY(1<<1),
+    	PORT_STATS_CAPABILITY(1<<2),
+    	STP_CAPABILITY(1<<3),
+    	RSVD_CAPABILITY(1<<4),
+    	IP_REASSEM_CAPABILITY(1<<5),
+    	QUEUE_STATS_CAPABILITY(1<<6),
+    	ARP_MATCH_IP_CAPABILITY(1<<7);
+    	private final int ct;
+    	CapabilitiesType(int val) {
+    		this.ct = val;
+    	}
+    	public int getValue() {
+    		return ct;
+    	}
     }
-
+   
     public static final String CapabilitiesPropName = "capabilities";
     /**
      * Construct a Capabilities property
@@ -68,9 +68,9 @@ public class Capabilities extends Property {
     }
 
     public int getValue() {
-        return this.capabilitiesValue;
+    	return this.capabilitiesValue;
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;

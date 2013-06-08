@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Converts an openflow list of port statistics in a SAL list of
  * NodeConnectorStatistics objects
- *
- *
- *
+ * 
+ * 
+ * 
  */
 public class PortStatisticsConverter {
     private static final Logger log = LoggerFactory

@@ -21,18 +21,18 @@ import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class Hosts {
-        @XmlElement (name="host")
-        Set<HostNodeConnector> hostNodeConnector;
-
-        public Hosts() {
-        }
-        public Hosts (Set<HostNodeConnector> hostNodeConnector) {
-                this.hostNodeConnector = hostNodeConnector;
-        }
-        public Set<HostNodeConnector> getHostNodeConnector() {
-                return hostNodeConnector;
-        }
-        public void setHostNodeConnector(Set<HostNodeConnector> hostNodeConnector) {
-                this.hostNodeConnector = hostNodeConnector;
-        }
+	@XmlElement (name="host")
+	Set<HostNodeConnector> hostNodeConnector;
+	
+	public Hosts() {
+	}
+	public Hosts (Set<HostNodeConnector> hostNodeConnector) {
+		this.hostNodeConnector = hostNodeConnector;
+	}
+	public Set<HostNodeConnector> getHostNodeConnector() {
+		return hostNodeConnector;
+	}
+	public void setHostNodeConnector(Set<HostNodeConnector> hostNodeConnector) {
+		this.hostNodeConnector = hostNodeConnector;
+	}
 }

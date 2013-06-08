@@ -40,7 +40,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function called when the activator starts just after some initializations
      * are done by the ComponentActivatorAbstractBase.
-     *
+     * 
      */
     public void init() {
 
@@ -49,7 +49,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function called when the activator stops just before the cleanup done by
      * ComponentActivatorAbstractBase
-     *
+     * 
      */
     public void destroy() {
 
@@ -58,8 +58,8 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function that is used to communicate to dependency manager the list of
      * known implementations for services inside a container
-     *
-     *
+     * 
+     * 
      * @return An array containing all the CLASS objects that will be
      *         instantiated in order to get an fully working implementation
      *         Object
@@ -72,7 +72,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function that is called when configuration of the dependencies is
      * required.
-     *
+     * 
      * @param c
      *            dependency manager Component object, used for configuring the
      *            dependencies exported and imported

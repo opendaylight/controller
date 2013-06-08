@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class SetTpDst extends Action {
-        @XmlElement
+	@XmlElement
     private int port;
 
     /* Dummy constructor for JAXB */

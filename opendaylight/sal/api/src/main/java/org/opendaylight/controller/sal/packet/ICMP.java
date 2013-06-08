@@ -68,7 +68,7 @@ public class ICMP extends Packet {
 
     /**
      * Sets the type for the current ICMP message
-     *
+     * 
      * @param type
      *            The ICMP message type
      * @return This ICMP object
@@ -81,7 +81,7 @@ public class ICMP extends Packet {
 
     /**
      * Sets the ICMP code (type subtype) for the current ICMP object instance
-     *
+     * 
      * @param code
      *            The ICMP message type subtype
      * @return This ICMP object
@@ -136,7 +136,7 @@ public class ICMP extends Packet {
 
     /**
      * Computes the ICMP checksum on the serialized ICMP message
-     *
+     * 
      * @param serialized
      *            The data stream
      * @param start

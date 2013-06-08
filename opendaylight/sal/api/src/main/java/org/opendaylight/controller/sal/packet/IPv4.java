@@ -378,9 +378,9 @@ public class IPv4 extends Packet {
      * @param checksum the checksum to set
      */
     /*public IPv4 setChecksum() {
-        short ipChecksum = computeChecksum();
+    	short ipChecksum = computeChecksum();
         byte[] checksum = BitBufferHelper.toByteArray(ipChecksum);
-        fieldValues.put(CHECKSUM, checksum);
+    	fieldValues.put(CHECKSUM, checksum);
         return this;
     }*/
 
@@ -444,7 +444,7 @@ public class IPv4 extends Packet {
     /**
      * Computes the IPv4 header checksum on the passed stream of bytes
      * representing the packet
-     *
+     * 
      * @param data
      *            The byte stream
      * @param offset

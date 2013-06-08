@@ -21,13 +21,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class SetVlanPcp extends Action {
-        @XmlElement
+	@XmlElement
     private int pcp;
 
-        private SetVlanPcp() {
-
-        }
-
+	private SetVlanPcp() {
+		
+	}
+	
     public SetVlanPcp(int pcp) {
         type = ActionType.SET_VLAN_PCP;
         this.pcp = pcp;

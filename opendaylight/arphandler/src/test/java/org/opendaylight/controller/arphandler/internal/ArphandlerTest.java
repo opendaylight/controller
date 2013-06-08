@@ -16,14 +16,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ArphandlerTest extends TestCase {
-
-        @Test
-        public void testArphandlerCreation() {
-
-                ArpHandler ah = null;
-                ah = new ArpHandler();
-                Assert.assertTrue(ah != null);
-
-        }
+	 
+	@Test
+	public void testArphandlerCreation() {
+			
+		ArpHandler ah = null;
+		ah = new ArpHandler();
+		Assert.assertTrue(ah != null);
+			
+	}
 
 }

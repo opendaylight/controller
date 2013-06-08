@@ -135,7 +135,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * Adds a flow entry onto the network node It runs various validity checks
      * and derive the final container flows merged entries that will be
      * attempted to be installed
-     *
+     * 
      * @param flowEntry
      *            the original flow entry application requested to add
      * @param async
@@ -144,7 +144,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      *          will contain the unique id assigned to this request
      */
     private Status addEntry(FlowEntry flowEntry, boolean async) {
-
+        
         // Sanity Check
         if (flowEntry == null || flowEntry.getNode() == null) {
             String msg = "Invalid FlowEntry";
@@ -209,7 +209,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                  * complication for now and assume we will always deal with
                  * one flow only per request
                  */
-                succeded = ret;
+                succeded = ret;   
             } else {
                 error = ret;
                 log.warn("Failed to install the entry: {}. The failure is: {}",
@@ -228,7 +228,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * flow entry is congruent with all the N container flows, then the output
      * install entry list will contain N entries. If the output list is empty,
      * it means the passed flow entry conflicts with all the container flows.
-     *
+     * 
      * @param cFlowList
      *            The list of container flows
      * @return the list of container flow merged entries good to be installed on
@@ -260,7 +260,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     /**
      * Modify a flow entry with a new one It runs various validity check and
      * derive the final container flows merged flow entries to work with
-     *
+     * 
      * @param currentFlowEntry
      * @param newFlowEntry
      * @param async
@@ -335,13 +335,13 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
          * This is only possible when the new entry and current entry have
          * different match. In this scenario the modification would ultimately
          * be handled as a remove and add operations in the protocol plugin.
-         *
+         * 
          * Also, if any of the new flow entries would clash with an existing
          * one, we cannot proceed with the modify operation, because it would
          * fail for some entries and leave stale entries on the network node.
          * Modify path can be taken only if it can be performed completely, for
          * all entries.
-         *
+         * 
          * So, for the above two cases, to simplify, let's decouple the modify
          * in: 1) remove current entries 2) install new entries
          */
@@ -384,7 +384,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
              * (and might be wrong) that the same container flows that were
              * satisfied by the current entries are the same that are satisfied
              * by the new entries. Let's take the risk for now.
-             *
+             * 
              * Note: modification has to be complete. If any entry modification
              * fails, we need to stop, restore the already modified entries, and
              * declare failure.
@@ -440,7 +440,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * This is the function that modifies the final container flows merged
      * entries on the network node and update the database. It expects that all
      * the validity checks are passed
-     *
+     * 
      * @param currentEntries
      * @param newEntries
      * @param async
@@ -451,7 +451,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     private Status modifyEntryInternal(FlowEntryInstall currentEntries,
             FlowEntryInstall newEntries, boolean async) {
         // Modify the flow on the network node
-        Status status = (async)?
+        Status status = (async)? 
                 programmer.modifyFlowAsync(currentEntries.getNode(),
                         currentEntries.getInstall().getFlow(), newEntries.getInstall()
                                 .getFlow()) :
@@ -481,7 +481,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     /**
      * Remove a flow entry. If the entry is not present in the software view
      * (entry or node not present), it return successfully
-     *
+     * 
      * @param flowEntry
      *          the flow entry to remove
      * @param async
@@ -554,7 +554,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * This is the function that removes the final container flows merged entry
      * from the network node and update the database. It expects that all the
      * validity checks are passed
-     *
+     * 
      * @param entry
      *            the flow entry to remove
      * @param async
@@ -572,7 +572,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                         .getInstall().getFlow()) :
                 programmer.removeFlow(entry.getNode(), entry
                         .getInstall().getFlow());
-
+ 
 
         if (!status.isSuccess()) {
             log.warn(
@@ -593,7 +593,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * on the network node and updates the database. It expects that all the
      * validity and conflict checks are passed. That means it does not check
      * whether this flow would conflict or overwrite an existing one.
-     *
+     * 
      * @param entry
      *            the flow entry to install
      * @param async
@@ -631,7 +631,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * means that if the function returns true, the passed flow entry is
      * congruent with at least one container flow, hence it is good to be
      * installed on this container.
-     *
+     * 
      * @param flowEntry
      * @return true if flow conflicts with all the container flows, false
      *         otherwise
@@ -837,7 +837,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         }
         return status;
     }
-
+    
     @Override
     public Status modifyFlowEntry(FlowEntry currentFlowEntry,
             FlowEntry newFlowEntry) {
@@ -908,13 +908,13 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         }
     }
 
-
+    
     /**
      * Try to find in the database if a Flow with the same Match and priority of
      * the passed one already exists for the specified network node. Flow,
      * priority and network node are all specified in the FlowEntry If found,
      * the respective FlowEntryInstall Object is returned
-     *
+     * 
      * @param flowEntry
      *            the FlowEntry to be tested against the ones installed
      * @param looseCheck
@@ -1409,9 +1409,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
          * multiple entry configuration (PortGroup) and hardware installation is
          * NOT done directly on this event. 3. The User prefers to retain the
          * configuration in Controller and skip hardware installation.
-         *
+         * 
          * Hence it is safe to update the StaticFlow DB at this point.
-         *
+         * 
          * Note : For the case of PortGrouping, it is essential to have this DB
          * populated before the PortGroupListeners can query for the DB
          * triggered using portGroupChanged event...
@@ -1924,7 +1924,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
 
     /**
      * Remove from the databases all the flows installed on the node
-     *
+     * 
      * @param node
      */
     private synchronized void cleanDatabaseForNode(Node node) {
@@ -2210,7 +2210,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
         frmAware = Collections
@@ -2245,7 +2245,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     *
+     * 
      */
     void destroy() {
         destroyCaches();
@@ -2254,7 +2254,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     *
+     * 
      */
     void start() {
         /*
@@ -2270,7 +2270,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     *
+     * 
      */
     void stop() {
     }
@@ -2541,8 +2541,8 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
         /*
          *  If this was for a flow install, remove the corresponding entry
          *  from the software view. If it was a Looking for the rid going through the
-         *  software database.
-         *  TODO: A more efficient rid <->  FlowEntryInstall mapping will
+         *  software database. 
+         *  TODO: A more efficient rid <->  FlowEntryInstall mapping will 
          *  have to be added in future
          */
         Set<FlowEntryInstall> entries = nodeFlows.get(node);
@@ -2559,7 +2559,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
                 this.updateLocalDatabase(target, false);
             }
         }
-
+        
         // Notify listeners
         if (frmAware != null) {
             synchronized (frmAware) {
@@ -2573,19 +2573,19 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager,
             }
         }
     }
-
+    
     @Override
     public Status solicitStatusResponse(Node node, boolean blocking) {
         Status rv = new Status(StatusCode.INTERNALERROR);
-
+        
         if (this.programmer != null) {
             if (blocking) {
                 rv = programmer.syncSendBarrierMessage(node);
             } else {
-                rv = programmer.asyncSendBarrierMessage(node);
+                rv = programmer.asyncSendBarrierMessage(node);                
             }
         }
-
+        
         return rv;
     }
 }

@@ -45,9 +45,9 @@ public class TopologyManagerImplTest {
      * NodeConnectorId> : <1:1>--><11:11>; <1:2>--><11:12>; <3:3>--><13:13>;
      * <3:4>--><13:14>; <5:5>--><15:15>; <5:6>--><15:16>; Method used by two
      * tests: testGetNodeEdges and testGetEdges
-     *
+     * 
      * @param topoManagerImpl
-     *
+     * 
      * @throws ConstructionException
      */
     public void setNodeEdges(TopologyManagerImpl topoManagerImpl)

@@ -26,7 +26,7 @@ public interface IHostFinder {
      * by query of an application to the HostTracker. The requested IP address
      * doesn't exist in the local database at this point.
      *
-     * @param networkAddress    IP Address encapsulated in InetAddress class
+     * @param networkAddress	IP Address encapsulated in InetAddress class
      *
      */
     public void find(InetAddress networkAddress);
@@ -35,7 +35,7 @@ public interface IHostFinder {
      * This method is called by HostTracker to see if a learned Host is still in the network.
      * Used mostly for ARP Aging.
      *
-     * @param host          The Host that needs to be probed
+     * @param host			The Host that needs to be probed
      */
     public void probe(HostNodeConnector host);
 }

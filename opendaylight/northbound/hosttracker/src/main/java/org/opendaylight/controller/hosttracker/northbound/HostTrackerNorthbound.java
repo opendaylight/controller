@@ -56,7 +56,7 @@ import org.opendaylight.controller.sal.authorization.Privilege;
  * Location is represented by Host node connector which is essentially a logical
  * entity that represents a Switch/Port. A host is represented by it's
  * IP-address and mac-address.
- *
+ * 
  * <br>
  * <br>
  * Authentication scheme : <b>HTTP Basic</b><br>
@@ -68,7 +68,7 @@ import org.opendaylight.controller.sal.authorization.Privilege;
  * trusted authority.<br>
  * More info :
  * http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
- *
+ * 
  */
 
 @Path("/")
@@ -120,7 +120,7 @@ public class HostTrackerNorthbound {
     /**
      * Returns a list of all Hosts : both configured via PUT API and dynamically
      * learnt on the network.
-     *
+     * 
      * @param containerName
      *            Name of the Container. The Container name for the base
      *            controller is "default".
@@ -135,7 +135,7 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Hosts getActiveHosts(@PathParam("containerName") String containerName) {
-
+ 
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException(
@@ -154,7 +154,7 @@ public class HostTrackerNorthbound {
     /**
      * Returns a list of Hosts that are statically configured and are connected
      * to a NodeConnector that is down.
-     *
+     * 
      * @param containerName
      *            Name of the Container. The Container name for the base
      *            controller is "default".
@@ -187,7 +187,7 @@ public class HostTrackerNorthbound {
 
     /**
      * Returns a host that matches the IP Address value passed as parameter.
-     *
+     * 
      * @param containerName
      *            Name of the Container. The Container name for the base
      *            controller is "default".
@@ -236,7 +236,7 @@ public class HostTrackerNorthbound {
 
     /**
      * Add a Static Host configuration
-     *
+     * 
      * @param containerName
      *            Name of the Container. The Container name for the base
      *            controller is "default".
@@ -320,7 +320,7 @@ public class HostTrackerNorthbound {
 
     /**
      * Delete a Static Host configuration
-     *
+     * 
      * @param containerName
      *            Name of the Container. The Container name for the base
      *            controller is "default".
@@ -342,7 +342,7 @@ public class HostTrackerNorthbound {
     public Response deleteFlow(
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "networkAddress") String networkAddress) {
-
+ 
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.WRITE, this)) {
             throw new UnauthorizedException(

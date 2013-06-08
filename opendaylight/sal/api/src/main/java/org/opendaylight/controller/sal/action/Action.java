@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlSeeAlso({Controller.class, Drop.class, Flood.class, FloodAll.class, HwPath.class, Loopback.class, Output.class,
-                         PopVlan.class, PushVlan.class, SetDlDst.class, SetDlSrc.class, SetDlType.class, SetNwDst.class, SetNwSrc.class,
-                         SetNwTos.class, SetTpDst.class, SetTpSrc.class, SetVlanCfi.class, SetVlanId.class, SetVlanPcp.class, SwPath.class})
+			 PopVlan.class, PushVlan.class, SetDlDst.class, SetDlSrc.class, SetDlType.class, SetNwDst.class, SetNwSrc.class,
+			 SetNwTos.class, SetTpDst.class, SetTpSrc.class, SetVlanCfi.class, SetVlanId.class, SetVlanPcp.class, SwPath.class})
 public abstract class Action {
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
     private static boolean debug = false; // Enable to find where in the code an invalid assignment is made
@@ -39,9 +39,9 @@ public abstract class Action {
 
     /*
     public Action (ActionType type, Object value) {
-        this.type = type;
-        this.value = value;
-        this.isValid = true;
+    	this.type = type;
+    	this.value = value;
+    	this.isValid = true;
     } */
 
     /**
@@ -112,7 +112,7 @@ public abstract class Action {
     /**
      * Returns whether the Action is valid or not
      *
-     * @return  boolean
+     * @return	boolean
      */
     public boolean isValid() {
         return isValid;

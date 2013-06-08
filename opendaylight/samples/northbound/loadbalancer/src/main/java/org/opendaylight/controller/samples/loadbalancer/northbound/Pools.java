@@ -19,29 +19,29 @@ import org.opendaylight.controller.samples.loadbalancer.entities.Pool;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 /**
- * JAX-RS resource for handling details of all the available pools
+ * JAX-RS resource for handling details of all the available pools 
  * in response to respective REST API requests.
  */
 
 public class Pools {
-
+    
     @XmlElement (name="pool")
     Set<Pool> loadBalancerPools;
-
+    
     public Pools() {
     }
-
+    
     public Pools (Set<Pool> loadBalancerPools) {
         this.loadBalancerPools = loadBalancerPools;
     }
-
+    
     /**
      * @return the loadBalancerPools
      */
     public Set<Pool> getLoadBalancerPools() {
         return loadBalancerPools;
     }
-
+    
     /**
      * @param loadBalancerPools the loadBalancerPools to set
      */

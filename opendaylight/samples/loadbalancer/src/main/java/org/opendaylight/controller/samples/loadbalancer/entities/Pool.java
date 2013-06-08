@@ -16,12 +16,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * This class represents the pool of hosts among which incoming traffic
- * will be load balanced. Each pool will load balance the traffic among its pool members
- * based on the loadbalancing policy set for the pool.
+ * will be load balanced. Each pool will load balance the traffic among its pool members 
+ * based on the loadbalancing policy set for the pool. 
  * Currently, the pool supports two load balancing policies:
  * 1. Round Robin Policy{@link org.opendaylight.controller.samples.loadbalancer.policies.RoundRobinLBPolicy}
  * 2. Random Policy {@link org.opendaylight.controller.samples.loadbalancer.policies.RandomLBPolicy}
- *
+ * 
  * NOTE: After creation of the pool, user can't update (change) its load balancing policy.
  * NOTE: Each Pool should have a unique name.
  */
@@ -29,124 +29,124 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="pool")
 @XmlAccessorType(XmlAccessType.NONE)
 public class Pool {
-
+    
     /*
      * Unique name of the pool
      */
     @XmlElement
     private String name;
-
+    
     /*
      * Associated load balancing policy
      */
     @XmlElement(name="lbmethod")
     private String lbMethod;
-
+    
     /*
      * Status of the pool (active/inactive)
      */
     @XmlElement
     private String status;
-
+    
     /*
      * List of all the VIPs using this pool for load balancing their traffic - more than
      * one VIP can be mapped to each pool.
      */
     @XmlElement
     private ArrayList<VIP> vips = new ArrayList<VIP>();
-
+    
     /*
      * List of all the pool members used for load balancing the traffic
      */
     @XmlElement
     private ArrayList<PoolMember> members = new ArrayList<PoolMember>();
-
+    
     /*
      * Private constructor used for JAXB mapping
      */
     @SuppressWarnings("unused")
     private Pool() {}
-
+    
     /**
      * Getter/ Setter methods
      */
-
+    
     public Pool(String name,
                     String lbMethod) {
         this.name = name;
         this.lbMethod = lbMethod;
     }
-
+    
     /**
      * @return the name
      */
     public String getName() {
         return name;
     }
-
+    
     /**
      * @param name the name to set
      */
     public void setName(String name) {
         this.name = name;
     }
-
+    
     /**
      * @return the lbMethod
      */
     public String getLbMethod() {
         return lbMethod;
     }
-
+    
     /**
      * @param lbMethod the lbMethod to set
      */
     public void setLbMethod(String lbMethod) {
         this.lbMethod = lbMethod;
     }
-
+    
     /**
      * @return the status
      */
     public String getStatus() {
         return status;
     }
-
+    
     /**
      * @param status the status to set
      */
     public void setStatus(String status) {
         this.status = status;
     }
-
+    
     /**
      * @return the vip
      */
     public ArrayList<VIP> getAllVip() {
         return vips;
     }
-
+    
     /**
      * @param vip the vip to set
      */
     public void setVips(ArrayList<VIP> vips) {
         this.vips = vips;
     }
-
+    
     /**
      * @return the members
      */
     public ArrayList<PoolMember> getAllMembers() {
         return members;
     }
-
+    
     /**
      * @param members the members to set
      */
     public void setMembers(ArrayList<PoolMember> members) {
         this.members = members;
     }
-
+    
     /**
      * Add new VIP to the VIP list
      * @param vip       new VIP to add
@@ -154,11 +154,11 @@ public class Pool {
     public void addVIP(VIP vip){
         this.vips.add(vip);
     }
-
+    
     /**
      * Remove VIP with given name from the VIP list of the pool
      * @param name      Name of the VIP
-     * @return  true     If VIP was using this pool and removed
+     * @return	true     If VIP was using this pool and removed
      *          false   IF VIP is not using this pool
      */
     public boolean removeVIP(String name){
@@ -170,25 +170,25 @@ public class Pool {
         }
         return false;
     }
-
+    
     /**
      * Check if the given pool member is part of this pool
      * @param pm        Search for this pool member
-     * @return  true     If pool member is attached to this pool
+     * @return	true     If pool member is attached to this pool
      *          false   else
      */
     public boolean poolMemberExists(PoolMember pm){
         return this.members.contains(pm);
     }
-
+    
     /**
      * Returns the pool member with the given name
      * @param name      Search for this pool member
-     * @return  PoolMember       If pool member is attached to this pool
+     * @return	PoolMember       If pool member is attached to this pool
      *          null            else
      */
     public PoolMember getMember(String name){
-
+        
         for(PoolMember pm: this.members){
             if(pm.getName().equals(name)){
                 return pm;
@@ -196,7 +196,7 @@ public class Pool {
         }
         return null;
     }
-
+    
     /**
      * Add new pool member to the pool
      * @param pm        Add this new pool
@@ -204,12 +204,12 @@ public class Pool {
     public void addMember(PoolMember pm){
         this.members.add(pm);
     }
-
+    
     /**
      * Remove pool member from the pool list
      * @param name Remove this pool member
-     * @return  true    If pool member was attached to this pool and successfully removed
-     *          false   If pool member is not attached to this pool
+     * @return	true	If pool member was attached to this pool and successfully removed
+     *          false	If pool member is not attached to this pool
      */
     public boolean removeMember(String name){
         for(PoolMember pm: this.members){
@@ -220,7 +220,7 @@ public class Pool {
         }
         return false;
     }
-
+    
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -232,7 +232,7 @@ public class Pool {
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
-
+    
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
@@ -264,7 +264,7 @@ public class Pool {
         }
         return true;
     }
-
+    
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */

@@ -51,9 +51,9 @@ public class ConfigurationContainerImpl implements
     }
 
     public int getConfigurationAwareListSize() {
-        return this.configurationAwareList.size();
+    	return this.configurationAwareList.size();
     }
-
+    
     public void removeConfigurationContainerAware(
             IConfigurationContainerAware configurationAware) {
         this.configurationAwareList.remove(configurationAware);
@@ -88,16 +88,16 @@ public class ConfigurationContainerImpl implements
 
             Status status = configurationAware.saveConfiguration();
             if (!status.isSuccess()) {
-                success = false;
-                logger.info("Failed to save config for {}",
-                                configurationAware.getClass().getSimpleName());
+            	success = false;
+            	logger.info("Failed to save config for {}",
+            			configurationAware.getClass().getSimpleName());
             }
         }
         if (success) {
             return new Status(StatusCode.SUCCESS, null);
         } else {
             return new Status(StatusCode.INTERNALERROR,
-                        "Failed to Save All Configurations");
+            		"Failed to Save All Configurations");
         }
     }
 

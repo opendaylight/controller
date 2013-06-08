@@ -31,7 +31,7 @@ public interface IStatisticsManager {
      * If the context is the default container, the returned statistics are for all the flows installed on the node,
      * regardless of the container they belong to
      *
-     * @param node  the network node
+     * @param node	the network node
      * @return the list of flows installed on the network node
      */
     List<FlowOnNode> getFlows(Node node);
@@ -40,7 +40,7 @@ public interface IStatisticsManager {
      * Returns the statistics for the flows specified in the list
      *
      * @param flows
-     * @return  the list of flows installed on the network node
+     * @return	the list of flows installed on the network node
      */
     Map<Node, List<FlowOnNode>> getFlowStatisticsForFlowList(
             List<FlowEntry> flows);

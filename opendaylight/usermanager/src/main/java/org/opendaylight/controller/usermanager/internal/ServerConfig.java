@@ -27,11 +27,11 @@ public class ServerConfig implements Serializable {
     }
 
     public ServerConfig(String ip, String secret, String protocol) {
-        this.ip = ip;
-        this.secret = secret;
-        this.protocol = protocol;
+    	this.ip = ip;
+    	this.secret = secret;
+    	this.protocol = protocol;
     }
-
+    
     public String getAddress() {
         return ip;
     }

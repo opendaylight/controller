@@ -28,7 +28,7 @@ public class DescStatisticsConverter {
 
     public DescStatisticsConverter(List<OFStatistics> statsList) {
         this.hwDesc = null;
-        this.ofDesc = (statsList == null || statsList.isEmpty())?
+        this.ofDesc = (statsList == null || statsList.isEmpty())? 
                 null : (OFDescriptionStatistics) statsList.get(0);
     }
 

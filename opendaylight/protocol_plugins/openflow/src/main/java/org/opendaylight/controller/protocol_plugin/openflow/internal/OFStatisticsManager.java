@@ -129,7 +129,7 @@ IInventoryShimExternalListener, CommandProvider {
 
         /**
          * Returns the average transmit rate in bps
-         *
+         * 
          * @return the average transmit rate [bps]
          */
         public long getAverageTxRate() {
@@ -162,7 +162,7 @@ IInventoryShimExternalListener, CommandProvider {
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
         flowStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
@@ -227,7 +227,7 @@ IInventoryShimExternalListener, CommandProvider {
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     *
+     * 
      */
     void destroy() {
     }
@@ -235,7 +235,7 @@ IInventoryShimExternalListener, CommandProvider {
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     *
+     * 
      */
     void start() {
         // Start managed timers
@@ -255,7 +255,7 @@ IInventoryShimExternalListener, CommandProvider {
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     *
+     * 
      */
     void stop() {
         // Stop managed timers
@@ -896,7 +896,7 @@ IInventoryShimExternalListener, CommandProvider {
     /**
      * Update the cached port rates for this switch with the latest retrieved
      * port transmit byte count
-     *
+     * 
      * @param switchId
      */
     private synchronized void updatePortsTxRate(long switchId) {

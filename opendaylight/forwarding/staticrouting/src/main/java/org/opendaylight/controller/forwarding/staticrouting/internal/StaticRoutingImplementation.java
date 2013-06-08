@@ -131,7 +131,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         }
     }
 
-
+    
     private Status saveConfig() {
         // Publish the save config event to the cluster nodes
         configSaveEvent.put(new Date().getTime(), SAVE);
@@ -154,7 +154,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     }
 
     @SuppressWarnings("deprecation")
-        private void allocateCaches() {
+	private void allocateCaches() {
         if (this.clusterContainerService == null) {
             log
                     .info("un-initialized clusterContainerService, can't create cache");
@@ -207,7 +207,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     }
 
     @SuppressWarnings("deprecation")
-        private void destroyCaches() {
+	private void destroyCaches() {
         if (this.clusterContainerService == null) {
             log
                     .info("un-initialized clusterContainerService, can't destroy cache");
@@ -390,16 +390,16 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
             return status;
         }
         if (staticRouteConfigs.get(config.getName()) != null) {
-                return new Status(StatusCode.CONFLICT,
-                                "A valid Static Route configuration with this name " +
-                                                "already exists. Please use a different name");
+        	return new Status(StatusCode.CONFLICT,
+        			"A valid Static Route configuration with this name " +
+        					"already exists. Please use a different name");
         }
         for (StaticRouteConfig s : staticRouteConfigs.values()) {
             if (s.equals(config)) {
-                return new Status(StatusCode.CONFLICT,
-                                "This conflicts with an existing Static Route " +
-                                        "Configuration. Please check the configuration " +
-                                                "and try again");
+            	return new Status(StatusCode.CONFLICT,
+            			"This conflicts with an existing Static Route " +
+            				"Configuration. Please check the configuration " +
+            					"and try again");
             }
         }
 
@@ -407,7 +407,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         StaticRoute sRoute = new StaticRoute(config);
         staticRoutes.put(config.getName(), sRoute);
         checkAndUpdateListeners(sRoute, true);
-        return status;
+        return status; 
     }
 
     public Status removeStaticRoute(String name) {
@@ -417,8 +417,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
             checkAndUpdateListeners(sRoute, false);
             return new Status(StatusCode.SUCCESS, null);
         }
-        return new Status(StatusCode.NOTFOUND,
-                        "Static Route with name " + name + " is not found");
+        return new Status(StatusCode.NOTFOUND, 
+        		"Static Route with name " + name + " is not found");
     }
 
     void setClusterContainerService(IClusterContainerServices s) {

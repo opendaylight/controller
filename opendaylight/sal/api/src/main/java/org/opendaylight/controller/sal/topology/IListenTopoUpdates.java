@@ -25,12 +25,12 @@ import org.opendaylight.controller.sal.core.Edge;
 
 /**
  * Topology notifications provided by SAL toward the application
- *
+ * 
  */
 public interface IListenTopoUpdates {
     /**
      * Called to update on Edge in the topology graph
-     *
+     * 
      * @param topoedgeupdateList
      *            List of topoedgeupdates Each topoedgeupdate includes edge, its
      *            Properties ( BandWidth and/or Latency etc) and update type.
@@ -40,7 +40,7 @@ public interface IListenTopoUpdates {
     /**
      * Called when an Edge utilization is above the safety threshold configured
      * on the controller
-     *
+     * 
      * @param edge
      *            The edge which bandwidth usage is above the safety level
      */
@@ -49,7 +49,7 @@ public interface IListenTopoUpdates {
     /**
      * Called when the Edge utilization is back to normal, below the safety
      * threshold level configured on the controller
-     *
+     * 
      * @param edge
      */
     public void edgeUtilBackToNormal(Edge edge);

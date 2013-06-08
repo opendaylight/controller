@@ -108,27 +108,27 @@ public class InventoryServiceHelper {
         if (bw != null) {
             props.add(bw);
         }
-
+        
         Bandwidth abw = InventoryServiceHelper.OFPortToBandWidth(port.getAdvertisedFeatures());
         if (abw != null) {
-                AdvertisedBandwidth a = new AdvertisedBandwidth(abw.getValue());
-                if (a != null) {
-                        props.add(a);
-                }
+        	AdvertisedBandwidth a = new AdvertisedBandwidth(abw.getValue());
+        	if (a != null) {
+        		props.add(a);
+        	}
         }
         Bandwidth sbw = InventoryServiceHelper.OFPortToBandWidth(port.getSupportedFeatures());
         if (sbw != null) {
-                SupportedBandwidth s = new SupportedBandwidth(sbw.getValue());
-                if (s != null) {
-                        props.add(s);
-                }
+        	SupportedBandwidth s = new SupportedBandwidth(sbw.getValue());
+        	if (s != null) {
+        		props.add(s);
+        	}
         }
         Bandwidth pbw = InventoryServiceHelper.OFPortToBandWidth(port.getPeerFeatures());
         if (pbw != null) {
-                PeerBandwidth p = new PeerBandwidth(pbw.getValue());
-                if (p != null) {
-                        props.add(p);
-                }
+        	PeerBandwidth p = new PeerBandwidth(pbw.getValue());
+        	if (p != null) {
+        		props.add(p);
+        	}
         }
         props.add(new Name(port.getName()));
         props.add(InventoryServiceHelper.OFPortToConfig(port.getConfig()));

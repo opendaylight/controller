@@ -15,11 +15,11 @@ import java.io.Serializable;
  * Describes the user role level in the controller space
  */
 public enum UserLevel implements Serializable {
-    SYSTEMADMIN(0, "System-Admin", "System Administrator"),     // can do everything
-    NETWORKADMIN(1, "Network-Admin", "Network Administrator"),  // can do everything but setting a system admin user profile
-    NETWORKOPERATOR(2, "Network-Operator", "Network Operator"), // can only see what is configured anywhere
-    CONTAINERUSER(4, "Container-User", "Container User"),       // container context user
-    APPUSER(5, "App-User", "Application User"),                                 // application context user
+    SYSTEMADMIN(0, "System-Admin", "System Administrator"), 	// can do everything
+    NETWORKADMIN(1, "Network-Admin", "Network Administrator"),	// can do everything but setting a system admin user profile
+    NETWORKOPERATOR(2, "Network-Operator", "Network Operator"),	// can only see what is configured anywhere
+    CONTAINERUSER(4, "Container-User", "Container User"),		// container context user
+    APPUSER(5, "App-User", "Application User"), 				// application context user
     NOUSER(255, "Not Authorized", "Not Authorized");
 
     private int userLevel;

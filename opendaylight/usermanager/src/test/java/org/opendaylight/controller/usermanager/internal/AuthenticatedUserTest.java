@@ -20,53 +20,53 @@ import org.springframework.security.core.GrantedAuthority;
 
 public class AuthenticatedUserTest {
 
-        static String[] roleArray;
-        static AuthenticatedUser user;
+	static String[] roleArray;
+	static AuthenticatedUser user;
 
-        @BeforeClass
-        public static void testSetup() {
-                roleArray = new String[] { UserLevel.NETWORKOPERATOR.toString(),
-                                UserLevel.APPUSER.toString() };
-        }
+	@BeforeClass
+	public static void testSetup() {
+		roleArray = new String[] { UserLevel.NETWORKOPERATOR.toString(),
+				UserLevel.APPUSER.toString() };
+	}
 
-        @Test
-        public void testAuthenticatedUser() {
-                user = new AuthenticatedUser("auser");
+	@Test
+	public void testAuthenticatedUser() {
+		user = new AuthenticatedUser("auser");
 
-                Assert.assertFalse(user.getAccessDate().isEmpty());
-                Assert.assertNull(user.getUserRoles());
-        }
+		Assert.assertFalse(user.getAccessDate().isEmpty());
+		Assert.assertNull(user.getUserRoles());
+	}
 
-        @Test
-        public void testSetUserRoleList() {
-                List<String> retrievedRoleList = null;
-                List<String> roleList = Arrays.asList(roleArray);
+	@Test
+	public void testSetUserRoleList() {
+		List<String> retrievedRoleList = null;
+		List<String> roleList = Arrays.asList(roleArray);
 
-                // list arg
-                user = new AuthenticatedUser("auser");
-                user.setRoleList(roleList);
-                retrievedRoleList = user.getUserRoles();
-                Assert.assertTrue(roleList.equals(retrievedRoleList));
+		// list arg
+		user = new AuthenticatedUser("auser");
+		user.setRoleList(roleList);
+		retrievedRoleList = user.getUserRoles();
+		Assert.assertTrue(roleList.equals(retrievedRoleList));
 
-                // array arg
-                user = new AuthenticatedUser("auser");
-                user.setRoleList(roleArray);
-                retrievedRoleList = user.getUserRoles();
-                for (int i = 0; i < roleArray.length; i++)
-                        Assert.assertTrue(roleArray[i].equals(retrievedRoleList.get(i)));
+		// array arg
+		user = new AuthenticatedUser("auser");
+		user.setRoleList(roleArray);
+		retrievedRoleList = user.getUserRoles();
+		for (int i = 0; i < roleArray.length; i++)
+			Assert.assertTrue(roleArray[i].equals(retrievedRoleList.get(i)));
 
-                // test addUserRole
-                user.addUserRole("AnotherRole");
-                Assert.assertTrue(user.getUserRoles().lastIndexOf("AnotherRole") != -1);
+		// test addUserRole
+		user.addUserRole("AnotherRole");
+		Assert.assertTrue(user.getUserRoles().lastIndexOf("AnotherRole") != -1);
 
-        }
+	}
 
-        @Test
-        public void testGetGrantedAuthorities() {
-                List<GrantedAuthority> gaList = user
-                                .getGrantedAuthorities(UserLevel.NETWORKOPERATOR);
-                Assert.assertTrue(gaList.get(0).getAuthority()
-                                .equals("ROLE_NETWORK-OPERATOR"));
-        }
+	@Test
+	public void testGetGrantedAuthorities() {
+		List<GrantedAuthority> gaList = user
+				.getGrantedAuthorities(UserLevel.NETWORKOPERATOR);
+		Assert.assertTrue(gaList.get(0).getAuthority()
+				.equals("ROLE_NETWORK-OPERATOR"));
+	}
 
 }
