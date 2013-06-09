@@ -205,7 +205,7 @@ public class SwitchNorthbound {
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
-        Node node = Node.fromString(nodeId);
+        Node node = Node.fromString(nodeType, nodeId);
 
         Property prop = switchManager.createProperty(propName, propValue);
         if (prop == null) {
@@ -262,8 +262,7 @@ public class SwitchNorthbound {
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
-        Node node = Node.fromString(nodeId);
-
+        Node node = Node.fromString(nodeType, nodeId);
         Status ret = switchManager.removeNodeProp(node, propertyName);
         if (ret.isSuccess()) {
             return Response.ok().build();
@@ -316,8 +315,7 @@ public class SwitchNorthbound {
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
-        Node node = Node.fromString(nodeId);
-
+        Node node = Node.fromString(nodeType, nodeId);
         List<NodeConnectorProperties> res = new ArrayList<NodeConnectorProperties>();
         Set<NodeConnector> ncs = switchManager.getNodeConnectors(node);
         if (ncs == null) {
@@ -397,12 +395,12 @@ public class SwitchNorthbound {
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
-        Node node = Node.fromString(nodeId);
+        Node node = Node.fromString(nodeType, nodeId);
 
         handleNodeConnectorAvailability(containerName, node, nodeConnectorType,
                 nodeConnectorId);
         NodeConnector nc = NodeConnector
-                .fromStringNoNode(nodeConnectorId, node);
+                .fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
 
         Property prop = switchManager.createProperty(propName, propValue);
         if (prop == null) {
@@ -470,13 +468,12 @@ public class SwitchNorthbound {
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
-        Node node = Node.fromString(nodeId);
+        Node node = Node.fromString(nodeType, nodeId);
 
         handleNodeConnectorAvailability(containerName, node, nodeConnectorType,
                 nodeConnectorId);
         NodeConnector nc = NodeConnector
-                .fromStringNoNode(nodeConnectorId, node);
-
+                .fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
         Status ret = switchManager.removeNodeConnectorProp(nc, propertyName);
         if (ret.isSuccess()) {
             return Response.ok().build();
