@@ -167,6 +167,314 @@ public class NorthboundIT {
         }
     }
 
+    private void testNodeProperties(JSONObject node, Integer nodeId,
+            String nodeType, Integer timestamp, String timestampName,
+            Integer actionsValue, Integer capabilitiesValue,
+            Integer tablesValue, Integer buffersValue) throws JSONException {
+
+        JSONObject nodeInfo = node.getJSONObject("node");
+        Assert.assertEquals(nodeId, (Integer) nodeInfo.getInt("@id"));
+        Assert.assertEquals(nodeType, nodeInfo.getString("@type"));
+
+        JSONObject properties = node.getJSONObject("properties");
+
+        if (timestamp == null || timestampName == null) {
+            Assert.assertFalse(properties.has("timeStamp"));
+        } else {
+            Assert.assertEquals(
+                    timestamp,
+                    (Integer) properties.getJSONObject("timeStamp").getInt(
+                            "timestamp"));
+            Assert.assertEquals(
+                    timestampName,
+                    properties.getJSONObject("timeStamp").getString(
+                            "timestampName"));
+        }
+        if (actionsValue == null) {
+            Assert.assertFalse(properties.has("actions"));
+        } else {
+            Assert.assertEquals(actionsValue, (Integer) properties
+                    .getJSONObject("actions").getInt("actionsValue"));
+        }
+        if (capabilitiesValue == null) {
+            Assert.assertFalse(properties.has("capabilities"));
+        } else {
+            Assert.assertEquals(capabilitiesValue, (Integer) properties
+                    .getJSONObject("capabilities").getInt("capabilitiesValue"));
+        }
+        if (tablesValue == null) {
+            Assert.assertFalse(properties.has("tables"));
+        } else {
+            Assert.assertEquals(tablesValue, (Integer) properties
+                    .getJSONObject("tables").getInt("tablesValue"));
+        }
+        if (buffersValue == null) {
+            Assert.assertFalse(properties.has("buffers"));
+        } else {
+            Assert.assertEquals(buffersValue, (Integer) properties
+                    .getJSONObject("buffers").getInt("buffersValue"));
+        }
+    }
+
+    private void testNodeConnectorProperties(
+            JSONObject nodeConnectorProperties, Integer ncId, String ncType,
+            Integer nodeId, String nodeType, Integer state,
+            Integer capabilities, Integer bandwidth) throws JSONException {
+
+        JSONObject nodeConnector = nodeConnectorProperties
+                .getJSONObject("nodeconnector");
+        JSONObject node = nodeConnector.getJSONObject("node");
+        JSONObject properties = nodeConnectorProperties
+                .getJSONObject("properties");
+
+        Assert.assertEquals(ncId, (Integer) nodeConnector.getInt("@id"));
+        Assert.assertEquals(ncType, nodeConnector.getString("@type"));
+        Assert.assertEquals(nodeId, (Integer) node.getInt("@id"));
+        Assert.assertEquals(nodeType, node.getString("@type"));
+        if (state == null) {
+            Assert.assertFalse(properties.has("state"));
+        } else {
+            Assert.assertEquals(
+                    state,
+                    (Integer) properties.getJSONObject("state").getInt(
+                            "stateValue"));
+        }
+        if (capabilities == null) {
+            Assert.assertFalse(properties.has("capabilities"));
+        } else {
+            Assert.assertEquals(capabilities, (Integer) properties
+                    .getJSONObject("capabilities").getInt("capabilitiesValue"));
+        }
+        if (bandwidth == null) {
+            Assert.assertFalse(properties.has("bandwidth"));
+        } else {
+            Assert.assertEquals(
+                    bandwidth,
+                    (Integer) properties.getJSONObject("bandwidth").getInt(
+                            "bandwidthValue"));
+        }
+
+    }
+
+    @Test
+    public void testSwitchManager() {
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/switch/default/";
+
+        // define Node/NodeConnector attributes for test
+        int nodeId_1 = 51966;
+        int nodeId_2 = 3366;
+        int nodeId_3 = 4477;
+        int nodeConnectorId_1 = 51966;
+        int nodeConnectorId_2 = 12;
+        int nodeConnectorId_3 = 34;
+        String nodeType = "STUB";
+        String ncType = "STUB";
+        int timestamp_1 = 100000;
+        String timestampName_1 = "connectedSince";
+        int actionsValue_1 = 2;
+        int capabilitiesValue_1 = 3;
+        int tablesValue_1 = 1;
+        int buffersValue_1 = 1;
+        int ncState = 1;
+        int ncCapabilities = 1;
+        int ncBandwidth = 1000000000;
+
+        // Test GET all nodes
+        try {
+            String result = getJsonResult(baseURL + "nodes");
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+
+            // Test for first node
+            JSONObject node = getJsonInstance(json, "nodeProperties", nodeId_1);
+            Assert.assertNotNull(node);
+            testNodeProperties(node, nodeId_1, nodeType, timestamp_1,
+                    timestampName_1, actionsValue_1, capabilitiesValue_1,
+                    tablesValue_1, buffersValue_1);
+
+            // Test 2nd node, properties of 2nd node same as first node
+            node = getJsonInstance(json, "nodeProperties", nodeId_2);
+            Assert.assertNotNull(node);
+            testNodeProperties(node, nodeId_2, nodeType, timestamp_1,
+                    timestampName_1, actionsValue_1, capabilitiesValue_1,
+                    tablesValue_1, buffersValue_1);
+
+            // Test 3rd node, properties of 3rd node same as first node
+            node = getJsonInstance(json, "nodeProperties", nodeId_3);
+            Assert.assertNotNull(node);
+            testNodeProperties(node, nodeId_3, nodeType, timestamp_1,
+                    timestampName_1, actionsValue_1, capabilitiesValue_1,
+                    tablesValue_1, buffersValue_1);
+
+        } catch (Exception e) {
+            Assert.assertTrue(false);
+        }
+
+        // Test GET nodeConnectors of a node
+        try {
+            //Test first node
+            String result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+            JSONObject nodeConnectorProperties = json
+                    .getJSONObject("nodeConnectorProperties");
+
+            testNodeConnectorProperties(nodeConnectorProperties,
+                    nodeConnectorId_1, ncType, nodeId_1, nodeType, ncState,
+                    ncCapabilities, ncBandwidth);
+
+            //Test second node
+            result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
+            jt = new JSONTokener(result);
+            json = new JSONObject(jt);
+            nodeConnectorProperties = json
+                    .getJSONObject("nodeConnectorProperties");
+
+            testNodeConnectorProperties(nodeConnectorProperties,
+                    nodeConnectorId_2, ncType, nodeId_2, nodeType, ncState,
+                    ncCapabilities, ncBandwidth);
+
+            //Test third node
+            result = getJsonResult(baseURL + "node/STUB/" + nodeId_3);
+            jt = new JSONTokener(result);
+            json = new JSONObject(jt);
+
+            nodeConnectorProperties = json
+                    .getJSONObject("nodeConnectorProperties");
+            testNodeConnectorProperties(nodeConnectorProperties,
+                    nodeConnectorId_3, ncType, nodeId_3, nodeType, ncState,
+                    ncCapabilities, ncBandwidth);
+
+        } catch (Exception e) {
+            Assert.assertTrue(false);
+        }
+
+        // Test delete node property
+        try {
+            // Delete timestamp property from node1
+            String result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
+                    + "/property/timeStamp", "DELETE");
+            Assert.assertEquals(200, httpResponseCode.intValue());
+
+            // Check node1
+            result = getJsonResult(baseURL + "nodes");
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+            JSONObject node = getJsonInstance(json, "nodeProperties", nodeId_1);
+            Assert.assertNotNull(node);
+            testNodeProperties(node, nodeId_1, nodeType, null, null,
+                    actionsValue_1, capabilitiesValue_1, tablesValue_1,
+                    buffersValue_1);
+
+            // Delete actions property from node2
+            result = getJsonResult(baseURL + "node/STUB/" + nodeId_2
+                    + "/property/actions", "DELETE");
+            Assert.assertEquals(200, httpResponseCode.intValue());
+
+            // Check node2
+            result = getJsonResult(baseURL + "nodes");
+            jt = new JSONTokener(result);
+            json = new JSONObject(jt);
+            node = getJsonInstance(json, "nodeProperties", nodeId_2);
+            Assert.assertNotNull(node);
+            testNodeProperties(node, nodeId_2, nodeType, timestamp_1,
+                    timestampName_1, null, capabilitiesValue_1, tablesValue_1,
+                    buffersValue_1);
+
+        } catch (Exception e) {
+            Assert.assertTrue(false);
+        }
+
+        // Test add property to node
+        try {
+            // Add Tier and Bandwidth property to node1
+            String result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
+                    + "/property/tier/1001", "PUT");
+            Assert.assertEquals(201, httpResponseCode.intValue());
+            result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
+                    + "/property/bandwidth/1002", "PUT");
+            Assert.assertEquals(201, httpResponseCode.intValue());
+
+            // Test for first node
+            result = getJsonResult(baseURL + "nodes");
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+            JSONObject node = getJsonInstance(json, "nodeProperties", nodeId_1);
+            Assert.assertNotNull(node);
+            Assert.assertEquals(1001, node.getJSONObject("properties")
+                    .getJSONObject("tier").getInt("tierValue"));
+            Assert.assertEquals(1002, node.getJSONObject("properties")
+                    .getJSONObject("bandwidth").getInt("bandwidthValue"));
+
+        } catch (Exception e) {
+            Assert.assertTrue(false);
+        }
+
+        // Test delete nodeConnector property
+        try {
+            // Delete state property of nodeconnector1
+            String result = getJsonResult(baseURL + "nodeconnector/STUB/"
+                    + nodeId_1 + "/STUB/" + nodeConnectorId_1
+                    + "/property/state", "DELETE");
+            Assert.assertEquals(200, httpResponseCode.intValue());
+
+            result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+            JSONObject nodeConnectorProperties = json
+                    .getJSONObject("nodeConnectorProperties");
+
+            testNodeConnectorProperties(nodeConnectorProperties,
+                    nodeConnectorId_1, ncType, nodeId_1, nodeType, null,
+                    ncCapabilities, ncBandwidth);
+
+            // Delete capabilities property of nodeconnector2
+            result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_2
+                    + "/STUB/" + nodeConnectorId_2 + "/property/capabilities",
+                    "DELETE");
+            Assert.assertEquals(200, httpResponseCode.intValue());
+
+            result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
+            jt = new JSONTokener(result);
+            json = new JSONObject(jt);
+            nodeConnectorProperties = json
+                    .getJSONObject("nodeConnectorProperties");
+
+            testNodeConnectorProperties(nodeConnectorProperties,
+                    nodeConnectorId_2, ncType, nodeId_2, nodeType, ncState,
+                    null, ncBandwidth);
+
+        } catch (Exception e) {
+            Assert.assertTrue(false);
+        }
+
+        // Test PUT nodeConnector property
+        try {
+            int newBandwidth = 1001;
+
+            // Add Name/Bandwidth property to nodeConnector1
+            String result = getJsonResult(baseURL + "nodeconnector/STUB/"
+                    + nodeId_1 + "/STUB/" + nodeConnectorId_1
+                    + "/property/bandwidth/" + newBandwidth, "PUT");
+            Assert.assertEquals(201, httpResponseCode.intValue());
+
+            result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
+            JSONTokener jt = new JSONTokener(result);
+            JSONObject json = new JSONObject(jt);
+            JSONObject nodeConnectorProperties = json
+                    .getJSONObject("nodeConnectorProperties");
+
+            // Check for new bandwidth value, state value removed from previous
+            // test
+            testNodeConnectorProperties(nodeConnectorProperties,
+                    nodeConnectorId_1, ncType, nodeId_1, nodeType, null,
+                    ncCapabilities, newBandwidth);
+
+        } catch (Exception e) {
+            Assert.assertTrue(false);
+        }
+    }
+
     @Test
     public void testStatistics() {
         String actionTypes[] = { "drop", "loopback", "flood", "floodAll",
