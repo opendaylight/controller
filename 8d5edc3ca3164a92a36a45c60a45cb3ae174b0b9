@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///Gg\u003d",
+        "filename": "opendaylight/northbound/integrationtest/src/test/java/org/opendaylight/controller/northbound/integrationtest/NorthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-06-10T15:24:23Z",
+      "side": 1,
+      "message": "Do not catch this exception, you are hiding the message of JSONException, which could provide additional failures for debuging test.",
+      "revId": "8d5edc3ca3164a92a36a45c60a45cb3ae174b0b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Gk\u003d",
+        "filename": "opendaylight/northbound/integrationtest/src/test/java/org/opendaylight/controller/northbound/integrationtest/NorthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-06-10T15:24:23Z",
+      "side": 1,
+      "message": "Do not catch this exception, you are hiding the message of JSONException, which could provide additional failures for debuging test.",
+      "revId": "8d5edc3ca3164a92a36a45c60a45cb3ae174b0b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Go\u003d",
+        "filename": "opendaylight/northbound/integrationtest/src/test/java/org/opendaylight/controller/northbound/integrationtest/NorthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-06-10T15:24:23Z",
+      "side": 1,
+      "message": "Do not catch this exception, you are hiding the message of JSONException, which could provide additional failures for debuging test.",
+      "revId": "8d5edc3ca3164a92a36a45c60a45cb3ae174b0b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Gs\u003d",
+        "filename": "opendaylight/northbound/integrationtest/src/test/java/org/opendaylight/controller/northbound/integrationtest/NorthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-06-10T15:24:23Z",
+      "side": 1,
+      "message": "Do not catch this exception, you are hiding the message of JSONException, which could provide additional failures for debuging test.",
+      "revId": "8d5edc3ca3164a92a36a45c60a45cb3ae174b0b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Gw\u003d",
+        "filename": "opendaylight/northbound/integrationtest/src/test/java/org/opendaylight/controller/northbound/integrationtest/NorthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-06-10T15:24:23Z",
+      "side": 1,
+      "message": "Do not catch this exception, you are hiding the message of JSONException, which could provide additional failures for debuging test.",
+      "revId": "8d5edc3ca3164a92a36a45c60a45cb3ae174b0b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///G8\u003d",
+        "filename": "opendaylight/northbound/integrationtest/src/test/java/org/opendaylight/controller/northbound/integrationtest/NorthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-06-10T15:24:23Z",
+      "side": 1,
+      "message": "Do not catch this exception, you are hiding the message of JSONException, which could provide additional failures for debuging test.",
+      "revId": "8d5edc3ca3164a92a36a45c60a45cb3ae174b0b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
