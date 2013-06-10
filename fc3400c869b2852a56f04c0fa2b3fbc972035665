@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///IQ\u003d",
+        "filename": "opendaylight/topologymanager/src/test/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-06-10T09:54:26Z",
+      "side": 1,
+      "message": "The string should not be assumed with the current format here, as soon as the format may change the test will break. It\u0027s more robust the test if the NodeConnector is created an the toString is provided",
+      "revId": "fc3400c869b2852a56f04c0fa2b3fbc972035665",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
