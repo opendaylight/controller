@@ -7,11 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.util;
 
-import java.util.List;
-
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
-import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
 
 /**
@@ -21,33 +18,14 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  *
  */
 public final class Uint16 extends AbstractUnsignedInteger {
-
     private static final QName name = BaseTypes.constructQName("uint16");
     private Integer defaultValue = null;
     private static final String description = "uint16 represents integer values between 0 and 65535, inclusively.";
     private final UnsignedIntegerTypeDefinition baseType;
 
-    private Uint16() {
-        super(name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = this;
-    }
-
     public Uint16(final SchemaPath path) {
         super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = new Uint16();
-    }
-
-    public Uint16(final SchemaPath path, final Integer defaultValue) {
-        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
-        this.baseType = new Uint16();
-        this.defaultValue = defaultValue;
-    }
-
-    public Uint16(final SchemaPath path, final List<RangeConstraint> rangeStatements,
-            final String units, final Integer defaultValue) {
-        super(path, name, description, rangeStatements, units);
-        this.baseType = new Uint16();
-        this.defaultValue = defaultValue;
+        this.baseType = this;
     }
 
     /*

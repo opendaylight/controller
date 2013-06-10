@@ -23,7 +23,6 @@ import org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDef
  * @see InstanceIdentifierTypeDefinition
  */
 public final class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
-
     private static final QName name = BaseTypes
             .constructQName("instance-identifier");
     private static final String description = "The instance-identifier built-in type is used to " +
@@ -36,20 +35,12 @@ public final class InstanceIdentifier implements InstanceIdentifierTypeDefinitio
     private final InstanceIdentifierTypeDefinition baseType;
     private final boolean requireInstance;
 
-    private InstanceIdentifier(RevisionAwareXPath xpath, boolean requireInstance) {
-        super();
-        path = BaseTypes.schemaPath(name);
-        this.xpath = xpath;
-        this.requireInstance = requireInstance;
-        this.baseType = this;
-    }
-
     public InstanceIdentifier(final SchemaPath path, RevisionAwareXPath xpath, boolean requireInstance) {
         super();
         this.path = path;
         this.xpath = xpath;
         this.requireInstance = requireInstance;
-        this.baseType = new InstanceIdentifier(xpath, requireInstance);
+        this.baseType = this;
     }
 
     /*

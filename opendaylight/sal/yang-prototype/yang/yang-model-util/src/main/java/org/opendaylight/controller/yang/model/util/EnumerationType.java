@@ -22,7 +22,6 @@ import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
  * @see EnumTypeDefinition
  */
 public final class EnumerationType implements EnumTypeDefinition {
-
     private final QName name = BaseTypes.constructQName("enumeration");
     private final SchemaPath path;
     private final String description = "The enumeration built-in type represents values from a set of assigned names.";
@@ -30,32 +29,24 @@ public final class EnumerationType implements EnumTypeDefinition {
 
     private final EnumPair defaultEnum;
     private final List<EnumPair> enums;
-    private String units = "";
+    private final String units = "";
     private final EnumTypeDefinition baseType;
-
-    private EnumerationType(final List<EnumPair> enums) {
-        this.path = BaseTypes.schemaPath(name);
-        this.enums = Collections.unmodifiableList(enums);
-        this.defaultEnum = null;
-        baseType = this;
-    }
 
     public EnumerationType(final SchemaPath path, final List<EnumPair> enums) {
         super();
         this.path = path;
         this.enums = Collections.unmodifiableList(enums);
         this.defaultEnum = null;
-        baseType = new EnumerationType(enums);
+        this.baseType = this;
     }
 
     public EnumerationType(final SchemaPath path, final EnumPair defaultEnum,
-            final List<EnumPair> enums, final String units) {
+            final List<EnumPair> enums) {
         super();
         this.path = path;
-        baseType = new EnumerationType(enums);
+        this.baseType = this;
         this.defaultEnum = defaultEnum;
         this.enums = Collections.unmodifiableList(enums);
-        this.units = units;
     }
 
     /*

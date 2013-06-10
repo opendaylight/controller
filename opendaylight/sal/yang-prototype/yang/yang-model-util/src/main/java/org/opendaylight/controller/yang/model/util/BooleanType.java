@@ -22,30 +22,22 @@ import org.opendaylight.controller.yang.model.api.type.BooleanTypeDefinition;
  * @see BooleanTypeDefinition
  */
 public final class BooleanType implements BooleanTypeDefinition {
-
     private final QName name = BaseTypes.constructQName("boolean");
     private final SchemaPath path;
     private final String description = "The boolean built-in type represents a boolean value.";
     private final String reference = "https://tools.ietf.org/html/rfc6020#section-9.5";
     private final BooleanTypeDefinition baseType;
     private final Boolean defaultValue;
-    private String units = "";
+    private final String units = "";
 
     /**
      * Default constructor with default value set to "false".
      */
-    private BooleanType() {
-        super();
-        this.defaultValue = false;
-        this.path = BaseTypes.schemaPath(name);
-        this.baseType = this;
-    }
-
     public BooleanType(final SchemaPath path) {
         super();
         this.defaultValue = false;
         this.path = path;
-        this.baseType = new BooleanType();
+        this.baseType = this;
     }
 
     /**
@@ -58,23 +50,7 @@ public final class BooleanType implements BooleanTypeDefinition {
         super();
         this.defaultValue = defaultValue;
         this.path = path;
-        this.baseType = new BooleanType();
-    }
-
-    /**
-     * Boolean Type constructor.
-     *
-     * @param defaultValue
-     *            Default Value
-     * @param units
-     *            Units
-     */
-    public BooleanType(final SchemaPath path, final Boolean defaultValue, final String units) {
-        super();
-        this.defaultValue = defaultValue;
-        this.units = units;
-        this.path = path;
-        this.baseType = new BooleanType();
+        this.baseType = this;
     }
 
     /*
