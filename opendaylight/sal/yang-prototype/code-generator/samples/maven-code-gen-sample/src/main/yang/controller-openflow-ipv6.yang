@@ -1,0 +1,31 @@
+module controller-openflow-ipv6 {
+	yang-version 1;
+	namespace "urn:opendaylight:controller:network:openflow:ipv6";
+	prefix "of6";
+
+	import controller-network {
+		prefix cn;
+	}
+	import ietf-inet-types { prefix "inet"; }
+	import controller-openflow-ne {prefix "of";}
+
+	revision 2013-06-07 {
+	   description "Initial demo";
+	}
+
+
+
+	augment "/cn:network/cn:network-elements/cn:network-element/of:flow-tables/of:flow-table/of:flows/of:flow/of:match" {
+
+	    	leaf nl-src {
+	    		type inet:ipv6-prefix;
+	    	}
+
+	    	leaf nl-dst {
+	    		type inet:ipv6-prefix;
+	    	}
+	    } 
+
+}
+
+	
