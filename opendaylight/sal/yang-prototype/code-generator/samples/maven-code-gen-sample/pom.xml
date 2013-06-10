@@ -31,8 +31,7 @@
                                     </outputBaseDir>
                                 </generator>
                             </codeGenerators>
-                            <resourceProviders>
-                            </resourceProviders>
+                            <inspectDependencies>false</inspectDependencies>
                         </configuration>
                     </execution>
                 </executions>

@@ -16,7 +16,7 @@ import org.apache.maven.it.VerificationException;
 import org.apache.maven.it.Verifier;
 import org.junit.Test;
 
-public class YangToSourcesPluginTest {
+public class YangToSourcesPluginTestIT {
 
     // TODO Test yang files in transitive dependencies
 
@@ -112,7 +112,7 @@ public class YangToSourcesPluginTest {
 
     @Test
     public void testNoOutputDir() throws VerificationException {
-        Verifier v = YangToSourcesPluginTest.setUp("NoOutputDir/", false);
+        Verifier v = YangToSourcesPluginTestIT.setUp("NoOutputDir/", false);
         verifyCorrectLog(v);
     }
 
@@ -126,7 +126,7 @@ public class YangToSourcesPluginTest {
         v1.assertFilePresent("target/classes/META-INF/yang/testfile2.yang");
         v1.assertFilePresent("target/classes/META-INF/yang/testfile3.yang");
 
-        Verifier v2 = YangToSourcesPluginTest.setUp("GenerateTest2/", false);
+        Verifier v2 = YangToSourcesPluginTestIT.setUp("GenerateTest2/", false);
         v2.executeGoal("clean");
         v2.executeGoal("package");
         v2.assertFilePresent("target/classes/META-INF/yang/private.yang");
