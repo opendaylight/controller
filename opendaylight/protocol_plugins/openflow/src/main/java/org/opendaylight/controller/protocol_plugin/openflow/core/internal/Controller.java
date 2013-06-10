@@ -21,11 +21,14 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.jboss.netty.util.HashedWheelTimer;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
@@ -50,6 +53,11 @@ public class Controller implements IController, CommandProvider {
     // only 1 switch state listener
     private ISwitchStateListener switchStateListener;
     private AtomicInteger switchInstanceNumber;
+    private HashedWheelTimer hashedWheelTimer = null;
+    private ExecutorService executorSvc = null;
+    
+    
+    private static final int SHARED_SWITCH_HANDLER_THREAD_POOL_SIZE = 20;
 
     /*
      * this thread monitors the switchEvents queue for new incoming events from
@@ -116,6 +124,8 @@ public class Controller implements IController, CommandProvider {
         this.messageListeners = new ConcurrentHashMap<OFType, IMessageListener>();
         this.switchStateListener = null;
         this.switchInstanceNumber = new AtomicInteger(0);
+        this.hashedWheelTimer = new HashedWheelTimer();
+        this.executorSvc = Executors.newFixedThreadPool(SHARED_SWITCH_HANDLER_THREAD_POOL_SIZE);
         registerWithOSGIConsole();
     }
 
@@ -221,7 +231,7 @@ public class Controller implements IController, CommandProvider {
             int i = this.switchInstanceNumber.addAndGet(1);
             String instanceName = "SwitchHandler-" + i;
             SwitchHandler switchHandler = new SwitchHandler(this, sc,
-                    instanceName);
+                    instanceName, executorSvc, hashedWheelTimer );
             switchHandler.start();
             if (sc.isConnected()) {
                 logger.info("Switch:{} is connected to the Controller", 
@@ -269,26 +279,30 @@ public class Controller implements IController, CommandProvider {
     public void takeSwitchEventAdd(ISwitch sw) {
         SwitchEvent ev = new SwitchEvent(
                 SwitchEvent.SwitchEventType.SWITCH_ADD, sw, null);
-        addSwitchEvent(ev);
+        //addSwitchEvent(ev);
+        handleSwitchEventDirectly(ev);
     }
 
     public void takeSwitchEventDelete(ISwitch sw) {
         SwitchEvent ev = new SwitchEvent(
                 SwitchEvent.SwitchEventType.SWITCH_DELETE, sw, null);
-        addSwitchEvent(ev);
+        //addSwitchEvent(ev);
+        handleSwitchEventDirectly(ev);
     }
 
     public void takeSwitchEventError(ISwitch sw) {
         SwitchEvent ev = new SwitchEvent(
                 SwitchEvent.SwitchEventType.SWITCH_ERROR, sw, null);
-        addSwitchEvent(ev);
+        //addSwitchEvent(ev);
+        handleSwitchEventDirectly(ev);
     }
 
     public void takeSwitchEventMsg(ISwitch sw, OFMessage msg) {
         if (messageListeners.get(msg.getType()) != null) {
             SwitchEvent ev = new SwitchEvent(
                     SwitchEvent.SwitchEventType.SWITCH_MESSAGE, sw, msg);
-            addSwitchEvent(ev);
+            //addSwitchEvent(ev);
+            handleSwitchEventDirectly(ev);
         }
     }
 
@@ -374,4 +388,44 @@ public class Controller implements IController, CommandProvider {
         help.append("\t controllerShowConnConfig\n");
         return help.toString();
     }
+    
+    
+    
+    private void handleSwitchEventDirectly(SwitchEvent ev){
+        SwitchEvent.SwitchEventType eType = ev.getEventType();
+        ISwitch sw = ev.getSwitch();
+        switch (eType) {
+        case SWITCH_ADD:
+            Long sid = sw.getId();
+            ISwitch existingSwitch = switches.get(sid);
+            if (existingSwitch != null) {
+                logger.info("Replacing existing {} with New {}",
+                        existingSwitch, sw);
+                disconnectSwitch(existingSwitch);
+            }
+            switches.put(sid, sw);
+            notifySwitchAdded(sw);
+            break;
+        case SWITCH_DELETE:
+            disconnectSwitch(sw);
+            break;
+        case SWITCH_ERROR:
+            disconnectSwitch(sw);
+            break;
+        case SWITCH_MESSAGE:
+            OFMessage msg = ev.getMsg();
+            if (msg != null) {
+                IMessageListener listener = messageListeners
+                        .get(msg.getType());
+                if (listener != null) {
+                    listener.receive(sw, msg);
+                }
+            }
+            break;
+        default:
+            logger.error("Unknown switch event {}", eType.ordinal());
+        }
+        	
+    }
+    
 }

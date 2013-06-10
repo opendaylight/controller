@@ -54,5 +54,7 @@
   <logger name="org.opendaylight.controller.topologymanager" level="INFO"/>
   <logger name="org.opendaylight.controller.usermanager" level="INFO"/>
   <!-- Web modules -->
-  <logger name="org.opendaylight.controller.web" level="INFO"/>	
+  <logger name="org.opendaylight.controller.web" level="INFO"/>
+  <!-- Samples -->
+  <logger name="org.opendaylight.controller.samples.reactiveforwarding.internal" level="INFO"/>	
 </configuration>

@@ -97,6 +97,7 @@
     <module>../../samples/simpleforwarding</module>
     <module>../../samples/loadbalancer</module>
     <module>../../samples/northbound/loadbalancer</module>
+    <module>../../samples/reactiveforwarding</module>
     <module>../../commons/concepts</module>
     <module>../../commons/integrationtest</module>
     

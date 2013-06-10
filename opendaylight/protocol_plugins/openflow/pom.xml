@@ -38,7 +38,8 @@
               org.slf4j,
               org.eclipse.osgi.framework.console,
               org.osgi.framework,
-              javax.net.ssl
+              javax.net.ssl,
+              org.jboss.netty.util.*
             </Import-Package>
             <Export-Package>
               org.opendaylight.controller.protocol_plugin.openflow.internal
@@ -68,6 +69,11 @@
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>org.openflow.openflowj</artifactId>
       <version>1.0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.netty</groupId>
+      <artifactId>netty</artifactId>
+      <version>3.2.6.Final</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

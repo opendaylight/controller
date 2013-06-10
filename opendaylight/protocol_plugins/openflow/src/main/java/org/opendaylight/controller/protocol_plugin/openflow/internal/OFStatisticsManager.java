@@ -239,13 +239,13 @@ IInventoryShimExternalListener, CommandProvider {
      */
     void start() {
         // Start managed timers
-        statisticsTimer.scheduleAtFixedRate(statisticsTimerTask, 0, tickPeriod);
+        //statisticsTimer.scheduleAtFixedRate(statisticsTimerTask, 0, tickPeriod);
 
         // Start statistics collector thread
-        statisticsCollector.start();
+        //statisticsCollector.start();
 
         // Start bandwidth utilization computer thread
-        txRatesUpdater.start();
+        //txRatesUpdater.start();
 
         // OSGI console
         registerWithOSGIConsole();

@@ -24,16 +24,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+//import java.util.Timer;
+//import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+//import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.jboss.netty.util.HashedWheelTimer;
+import org.jboss.netty.util.Timeout;
+import org.jboss.netty.util.TimerTask;
+
 
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
@@ -83,7 +88,7 @@ public class SwitchHandler implements ISwitch {
     private BasicFactory factory;
     private AtomicInteger xid;
     private SwitchState state;
-    private Timer periodicTimer;
+    //private Timer periodicTimer;
     private Map<Short, OFPhysicalPort> physicalPorts;
     private Map<Short, Integer> portBandwidth;
     private Date connectedDate;
@@ -97,6 +102,10 @@ public class SwitchHandler implements ISwitch {
     private Integer responseTimerValue;
     private PriorityBlockingQueue<PriorityMessage> transmitQ;
     private Thread transmitThread;
+
+    private HashedWheelTimer hashedWheelTimer = null; //systemwide timer reference
+    private TimerTask livelinessTask = null; // Task for checking switch-liveliness
+    private Timeout timerTaskHandle = null; // handle of submitted task so that cancellation is possible
 
     private enum SwitchState {
         NON_OPERATIONAL(0), WAIT_FEATURES_REPLY(1), WAIT_CONFIG_REPLY(2), OPERATIONAL(
@@ -114,7 +123,7 @@ public class SwitchHandler implements ISwitch {
         }
     }
 
-    public SwitchHandler(Controller core, SocketChannel sc, String name) {
+    public SwitchHandler(Controller core, SocketChannel sc, String name, ExecutorService exec, HashedWheelTimer timer) {
         this.instanceName = name;
         this.thisISwitch = this;
         this.sid = (long) 0;
@@ -132,8 +141,10 @@ public class SwitchHandler implements ISwitch {
         this.state = SwitchState.NON_OPERATIONAL;
         this.probeSent = false;
         this.xid = new AtomicInteger(this.socket.hashCode());
-        this.periodicTimer = null;
-        this.executor = Executors.newFixedThreadPool(4);
+        //this.periodicTimer = null;
+        this.livelinessTask = null;
+        this.executor = exec;
+        this.hashedWheelTimer = timer;
         this.messageWaitingDone = new ConcurrentHashMap<Integer, Callable<Object>>();
         this.responseTimerValue = MESSAGE_RESPONSE_TIMER;
         String rTimer = System.getProperty("of.messageResponseTimer");
@@ -444,6 +455,15 @@ public class SwitchHandler implements ISwitch {
     }
 
     private void startSwitchTimer() {
+    	
+    	if (livelinessTask == null){
+    		livelinessTask = new SwitchLivelinessTask();
+    	}
+    	
+    	timerTaskHandle = hashedWheelTimer.newTimeout(livelinessTask, SWITCH_LIVENESS_TIMER, TimeUnit.MILLISECONDS);
+    	
+    	
+    	/*
         this.periodicTimer = new Timer();
         this.periodicTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -492,12 +512,18 @@ public class SwitchHandler implements ISwitch {
                 }
             }
         }, SWITCH_LIVENESS_TIMER, SWITCH_LIVENESS_TIMER);
+    */
     }
 
     private void cancelSwitchTimer() {
+    	if (timerTaskHandle != null){
+    		timerTaskHandle.cancel();
+    	}
+    	/*
         if (this.periodicTimer != null) {
             this.periodicTimer.cancel();
         }
+        */
     }
 
     private void reportError(Exception e) {
@@ -943,4 +969,57 @@ public class SwitchHandler implements ISwitch {
             return result;
         }
     }
+    
+    
+    private class SwitchLivelinessTask implements TimerTask {
+
+		@Override
+		public void run(Timeout timeout) throws Exception {
+
+            try {
+                Long now = System.currentTimeMillis();
+                if ((now - lastMsgReceivedTimeStamp) > switchLivenessTimeout) {
+                    if (probeSent) {
+                        // switch failed to respond to our probe, consider
+                        // it down
+                        logger.warn("{} is idle for too long, disconnect",
+                                toString());
+                        reportSwitchStateChange(false);
+                    } else {
+                        // send a probe to see if the switch is still alive
+                        logger.debug(
+                                "Send idle probe (Echo Request) to {}",
+                                this);
+                        probeSent = true;
+                        OFMessage echo = factory
+                                .getMessage(OFType.ECHO_REQUEST);
+                        asyncFastSend(echo);
+                    }
+                } else {
+                    if (state == SwitchState.WAIT_FEATURES_REPLY) {
+                        // send another features request
+                        OFMessage request = factory
+                                .getMessage(OFType.FEATURES_REQUEST);
+                        asyncFastSend(request);
+                    } else {
+                        if (state == SwitchState.WAIT_CONFIG_REPLY) {
+                            // send another config request
+                            OFSetConfig config = (OFSetConfig) factory
+                                    .getMessage(OFType.SET_CONFIG);
+                            config.setMissSendLength((short) 0xffff)
+                                    .setLengthU(OFSetConfig.MINIMUM_LENGTH);
+                            asyncFastSend(config);
+                            OFMessage getConfig = factory
+                                    .getMessage(OFType.GET_CONFIG_REQUEST);
+                            asyncFastSend(getConfig);
+                        }
+                    }
+                }
+                hashedWheelTimer.newTimeout(this, 2, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                reportError(e);
+            }
+		}
+    }
+    
 }

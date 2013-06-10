@@ -431,7 +431,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
      */
     void init() {
         this.txThread.start();
-        this.rxThread.start();
+        //this.rxThread.start();
     }
 
     /**
@@ -450,11 +450,11 @@ public class DataPacketService implements IPluginOutDataPacketService,
         this.rxQueue.clear();
         this.txQueue.clear();
         this.txThread.interrupt();
-        this.rxThread.interrupt();
+        //this.rxThread.interrupt();
         // Wait for them to be done
         try {
             this.txThread.join();
-            this.rxThread.join();
+            //this.rxThread.join();
         } catch (InterruptedException ex) {
             // Not a big deal
         }
@@ -476,20 +476,41 @@ public class DataPacketService implements IPluginOutDataPacketService,
         }
         currValue.incrementAndGet();
     }
+    
+    
+    
+    /**
+     * Modified to short-circuit the ingress-queue so that whole of 
+     * northbound could be executed in the reader thread of switchhandler
+     * in plugin-layer
+     * 
+     */
 
     @Override
     public PacketResult receiveDataPacket(RawPacket inPkt) {
+    	PacketResult result = null;
         if (inPkt.getIncomingNodeConnector() == null) {
             increaseStat("nullIncomingNodeConnector");
             return PacketResult.IGNORED;
         }
 
+        /*
         // If the queue was full don't wait, rather increase a counter
         // for it
         if (!this.rxQueue.offer(inPkt)) {
             increaseStat("fullRXQueue");
             return PacketResult.IGNORED;
         }
+        */
+        
+        // Handle incoming packets directly without ticking them to the 
+        // RXQueue. This execution occurs in the context of the switch-therad in 
+        // plugin layer
+        result = handleIncomingPacketDirectly(inPkt);
+        if (result != null){
+        	return result;
+        }
+        
 
         // Walk the chain of listener going first throw all the
         // parallel ones and for each parallel in serial
@@ -555,4 +576,51 @@ public class DataPacketService implements IPluginOutDataPacketService,
         // If something goes wrong then we have to return null
         return null;
     }
+    
+    private PacketResult handleIncomingPacketDirectly(RawPacket pkt){
+    	PacketResult res = null;
+
+    	// since listenDataPacket collection is already copy-on-rewrite
+    	// synchronization is not required
+        for (List<DataPacketListener> serialListeners : listenDataPacket) {
+            int i = 0;
+            for (i = 0; i < serialListeners.size(); i++) {
+                RawPacket copyPkt = null;
+                try {
+                    copyPkt = new RawPacket(pkt);
+                } catch (ConstructionException cex) {
+                    logger.debug("Error while cloning the packet");
+                }
+                if (copyPkt == null) {
+                    increaseStat("RXPacketCopyFailed");
+                    continue;
+                }
+                DataPacketListener l = serialListeners.get(i);
+                IListenDataPacket s = (l == null ? null
+                        : l.listener);
+                if (s != null) {
+                    try {
+                        // TODO Make sure to filter based
+                        // on the match too, later on
+                        res = s.receiveDataPacket(copyPkt);
+                        increaseStat("RXPacketSuccess");
+                        if (res.equals(PacketResult.CONSUME)) {
+                            increaseStat("RXPacketSerialExit");
+                            break;
+                        }
+                    } catch (Exception e) {
+                        increaseStat("RXPacketFailedForException");
+                    }
+                }
+            }
+        }
+        
+        if (res != null){
+        	return res;
+        }
+        return PacketResult.IGNORED;
+    
+    	
+    }
+    
 }
