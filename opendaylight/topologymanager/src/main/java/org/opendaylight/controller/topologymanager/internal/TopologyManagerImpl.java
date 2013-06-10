@@ -66,8 +66,8 @@ import org.slf4j.LoggerFactory;
  * topology database and notifies all the listeners of topology changes.
  */
 public class TopologyManagerImpl implements ITopologyManager,
-        IConfigurationContainerAware, IListenTopoUpdates, IObjectReader,
-        CommandProvider {
+IConfigurationContainerAware, IListenTopoUpdates, IObjectReader,
+CommandProvider {
     private static final Logger log = LoggerFactory
             .getLogger(TopologyManagerImpl.class);
     private ITopologyService topoService = null;
@@ -232,7 +232,7 @@ public class TopologyManagerImpl implements ITopologyManager,
         this.clusterContainerService.destroyCache("topologymanager.hostsDB");
         this.hostsDB = null;
         this.clusterContainerService
-                .destroyCache("topologymanager.nodeConnectorDB");
+        .destroyCache("topologymanager.nodeConnectorDB");
         this.nodeConnectorsDB = null;
         log.debug("Topology Manager DB Deallocated");
     }
@@ -596,82 +596,21 @@ public class TopologyManagerImpl implements ITopologyManager,
 
     private Edge getReverseLinkTuple(TopologyUserLinkConfig link) {
         TopologyUserLinkConfig rLink = new TopologyUserLinkConfig(
-                link.getName(), link.getDstNodeIDType(), link.getDstSwitchId(),
-                link.getDstNodeConnectorIDType(), link.getDstPort(),
-                link.getSrcNodeIDType(), link.getSrcSwitchId(),
-                link.getSrcNodeConnectorIDType(), link.getSrcPort());
+                link.getName(), link.getDstNodeConnector(), link.getSrcNodeConnector());
         return getLinkTuple(rLink);
     }
 
+
     private Edge getLinkTuple(TopologyUserLinkConfig link) {
         Edge linkTuple = null;
-
-        // if atleast 1 link exists for the srcPort and atleast 1 link exists
-        // for the dstPort
-        // that makes it ineligible for the Manual link addition
-        // This is just an extra protection to avoid mis-programming.
-        boolean srcLinkExists = false;
-        boolean dstLinkExists = false;
-        // TODO check a way to validate the port with inventory services
-        // if (srcSw.getPorts().contains(srcPort) &&
-        // dstSw.getPorts().contains(srcPort) &&
-        if (!srcLinkExists && !dstLinkExists) {
-            Node sNode = null;
-            Node dNode = null;
-            NodeConnector sPort = null;
-            NodeConnector dPort = null;
-            linkTuple = null;
-            String srcNodeIDType = link.getSrcNodeIDType();
-            String srcNodeConnectorIDType = link.getSrcNodeConnectorIDType();
-            String dstNodeIDType = link.getDstNodeIDType();
-            String dstNodeConnectorIDType = link.getDstNodeConnectorIDType();
-            try {
-                if (srcNodeIDType.equals(NodeIDType.OPENFLOW)) {
-                    sNode = new Node(srcNodeIDType, link.getSrcSwitchIDLong());
-                } else {
-                    sNode = new Node(srcNodeIDType, link.getSrcSwitchId());
-                }
-
-                if (dstNodeIDType.equals(NodeIDType.OPENFLOW)) {
-                    dNode = new Node(dstNodeIDType, link.getDstSwitchIDLong());
-                } else {
-                    dNode = new Node(dstNodeIDType, link.getDstSwitchId());
-                }
-
-                if (srcNodeConnectorIDType.equals(NodeConnectorIDType.OPENFLOW)) {
-                    Short srcPort = Short.valueOf((short) 0);
-                    if (!link.isSrcPortByName()) {
-                        srcPort = Short.parseShort(link.getSrcPort());
-                    }
-                    sPort = new NodeConnector(srcNodeConnectorIDType, srcPort,
-                            sNode);
-                } else {
-                    sPort = new NodeConnector(srcNodeConnectorIDType,
-                            link.getSrcPort(), sNode);
-                }
-
-                if (dstNodeConnectorIDType.equals(NodeConnectorIDType.OPENFLOW)) {
-                    Short dstPort = Short.valueOf((short) 0);
-                    if (!link.isDstPortByName()) {
-                        dstPort = Short.parseShort(link.getDstPort());
-                    }
-                    dPort = new NodeConnector(dstNodeConnectorIDType, dstPort,
-                            dNode);
-                } else {
-                    dPort = new NodeConnector(dstNodeConnectorIDType,
-                            link.getDstPort(), dNode);
-                }
-                linkTuple = new Edge(sPort, dPort);
-            } catch (ConstructionException cex) {
-                log.warn("Caught exception ", cex);
-            }
-            return linkTuple;
+        NodeConnector srcNodeConnector = NodeConnector.fromString(link.getSrcNodeConnector());
+        NodeConnector dstNodeConnector = NodeConnector.fromString(link.getDstNodeConnector());
+        if (srcNodeConnector == null || dstNodeConnector == null) return null;
+        try {
+            linkTuple = new Edge(srcNodeConnector, dstNodeConnector);
+        } catch (Exception e) {            
         }
-
-        if (srcLinkExists && dstLinkExists) {
-            link.setStatus(TopologyUserLinkConfig.STATUS.INCORRECT);
-        }
-        return null;
+        return linkTuple;
     }
 
     @Override
@@ -795,19 +734,7 @@ public class TopologyManagerImpl implements ITopologyManager,
             return;
         }
 
-        String nodeType1 = nc1.getNode().getType().toString();
-        String nid1 = nc1.getNode().getID().toString();
-        String ncType1 = nc1.getType().toString();
-        String ncid1 = nc1.getID().toString();
-
-        String nodeType2 = nc2.getNode().getType().toString();
-        String nid2 = nc2.getNode().getID().toString();
-        String ncType2 = nc2.getType().toString();
-        String ncid2 = nc2.getID().toString();
-
-        TopologyUserLinkConfig config = new TopologyUserLinkConfig(name,
-                nodeType1, nid1, ncType1, ncid1, nodeType2, nid2, ncType2,
-                ncid2);
+        TopologyUserLinkConfig config = new TopologyUserLinkConfig(name, ncStr1, ncStr2);
         ci.println(this.addUserLink(config));
     }
 
