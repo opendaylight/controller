@@ -40,10 +40,11 @@ public abstract class NetUtils {
      * @return	    the integer number
      */
     public static int byteArray4ToInt(byte[] ba) {
-        if (ba == null || ba.length != 4)
+        if (ba == null || ba.length != 4) {
             return 0;
-        return (int) ((0xff & ba[0]) << 24 | (0xff & ba[1]) << 16
-                | (0xff & ba[2]) << 8 | (0xff & ba[3]));
+        }
+        return (0xff & ba[0]) << 24 | (0xff & ba[1]) << 16
+                | (0xff & ba[2]) << 8 | (0xff & ba[3]);
     }
 
     /**
@@ -131,7 +132,7 @@ public abstract class NetUtils {
             int intMask = 0;
             int numBytes = prefixMask.length;
             for (int i = 0; i < numBytes; i++) {
-                intMask |= ((int) prefixMask[i] & 0xff) << (8 * (numBytes - 1 - i));
+                intMask |= (prefixMask[i] & 0xff) << (8 * (numBytes - 1 - i));
             }
 
             int bit = 1;
@@ -219,13 +220,13 @@ public abstract class NetUtils {
         if (isAny(testAddress) || isAny(filterAddress)) {
             return false;
         }
-        
+
         int testMaskLen = (testMask != null) ? NetUtils.getSubnetMaskLength(testMask.getAddress()) : 0;
         int filterMaskLen = (filterMask != null) ? NetUtils.getSubnetMaskLength(filterMask.getAddress()) : 0;
-        
+
         int testPrefixLen = (testAddress instanceof Inet6Address) ? (128 - testMaskLen) : (32 - testMaskLen);
         int filterPrefixLen = (filterAddress instanceof Inet6Address) ? (128 - filterMaskLen) : (32 - filterMaskLen);
-        
+
         // Mask length check. Test mask has to be more specific than filter one
         if (testPrefixLen < filterPrefixLen) {
             return true;
@@ -292,8 +293,9 @@ public abstract class NetUtils {
      * @return
      */
     public static boolean isIPv4AddressValid(String cidr) {
-        if (cidr == null)
+        if (cidr == null) {
             return false;
+        }
 
         String values[] = cidr.split("/");
         Pattern ipv4Pattern = Pattern
@@ -319,8 +321,9 @@ public abstract class NetUtils {
      * @return
      */
     public static boolean isIPv6AddressValid(String cidr) {
-        if (cidr == null)
+        if (cidr == null) {
             return false;
+        }
 
         String values[] = cidr.split("/");
         try {
@@ -341,29 +344,42 @@ public abstract class NetUtils {
         }
         return true;
     }
-    
+
+    /**
+     * Checks if the passed IP address in string form is a valid v4 or v6
+     * address. The address may specify a mask at the end as "/MMM"
+     *
+     * @param cidr
+     *            the v4 or v6 address as IP/MMM
+     * @return
+     */
+    public static boolean isIPAddressValid(String cidr) {
+        return NetUtils.isIPv4AddressValid(cidr)
+                || NetUtils.isIPv6AddressValid(cidr);
+    }
+
     /*
-     * Following utilities are useful when you need to 
+     * Following utilities are useful when you need to
      * compare or bit shift java primitive type variable
      * which are inerently signed
      */
     /**
      * Returns the unsigned value of the passed byte variable
-     * 
+     *
      * @param b	the byte value
      * @return the int variable containing the unsigned byte value
      */
     public static int getUnsignedByte(byte b) {
-		return (b > 0)? (int)b : ((int)b & 0x7F | 0x80);
+		return (b > 0)? (int)b : (b & 0x7F | 0x80);
 	}
-	
+
     /**
      * Return the unsigned value of the passed short variable
-     * 
+     *
      * @param s the short value
      * @return the int variable containing the unsigned short value
      */
 	public static int getUnsignedShort(short s) {
-		return (s > 0)? (int)s : ((int)s & 0x7FFF | 0x8000);
+		return (s > 0)? (int)s : (s & 0x7FFF | 0x8000);
 	}
 }

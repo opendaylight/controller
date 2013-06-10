@@ -273,7 +273,7 @@ public class NetUtilsTest {
                 .isIPv6AddressValid("fe80:::0:0:0:204:61ff:fe9d/-1")); //not valid both
 
     }
-    
+
     @Test
     public void testInetAddressConflict() throws UnknownHostException {
 
@@ -317,5 +317,18 @@ public class NetUtilsTest {
                 InetAddress.getByName("255.255.255.0"),
                 InetAddress.getByName("255.255.0.0")));
 
+    }
+
+    @Test
+    public void testIPAddressValidity() {
+        Assert.assertFalse(NetUtils.isIPAddressValid(null));
+        Assert.assertFalse(NetUtils.isIPAddressValid("abc"));
+        Assert.assertFalse(NetUtils.isIPAddressValid("1.1.1"));
+        Assert.assertFalse(NetUtils.isIPAddressValid("1.1.1.1/49"));
+
+        Assert.assertTrue(NetUtils.isIPAddressValid("1.1.1.1"));
+        Assert.assertTrue(NetUtils.isIPAddressValid("1.1.1.1/32"));
+        Assert.assertTrue(NetUtils
+                .isIPAddressValid("2001:420:281:1004:407a:57f4:4d15:c355"));
     }
 }

@@ -100,7 +100,7 @@ public class FlowConverter {
     /**
      * Returns the match in OF 1.0 (OFMatch) form or OF 1.0 + IPv6 extensions
      * form (V6Match)
-     * 
+     *
      * @return
      */
     public OFMatch getOFMatch() {
@@ -177,7 +177,7 @@ public class FlowConverter {
                  * actually the DSCP field followed by a zero ECN
                  */
                 byte tos = (Byte) match.getField(MatchType.NW_TOS).getValue();
-                byte dscp = (byte) ((int) tos << 2);
+                byte dscp = (byte) (tos << 2);
                 if (!isIPv6) {
                     ofMatch.setNetworkTypeOfService(dscp);
                     wildcards &= ~OFMatch.OFPFW_NW_TOS;
@@ -262,7 +262,7 @@ public class FlowConverter {
 
     /**
      * Returns the list of actions in OF 1.0 form
-     * 
+     *
      * @return
      */
     public List<OFAction> getOFActions() {
@@ -411,7 +411,7 @@ public class FlowConverter {
                     continue;
                 }
                 if (action.getType() == ActionType.SET_NEXT_HOP) {
-                    // TODO
+                    logger.info("Unsupported action: {}", action);
                     continue;
                 }
             }
@@ -424,7 +424,7 @@ public class FlowConverter {
     /**
      * Utility to convert a SAL flow to an OF 1.0 (OFFlowMod) or to an OF 1.0 +
      * IPv6 extension (V6FlowMod) Flow modifier Message
-     * 
+     *
      * @param sw
      * @param command
      * @param port
@@ -505,7 +505,7 @@ public class FlowConverter {
                     if (ofMatch.getInputPort() != 0) {
                         salMatch.setField(new MatchField(MatchType.IN_PORT,
                                 NodeConnectorCreator.createNodeConnector(
-                                        (Short) ofMatch.getInputPort(), node)));
+                                        ofMatch.getInputPort(), node)));
                     }
                     if (ofMatch.getDataLayerSource() != null
                             && !NetUtils
@@ -560,11 +560,11 @@ public class FlowConverter {
                     }
                     if (ofMatch.getTransportSource() != 0) {
                         salMatch.setField(MatchType.TP_SRC,
-                                ((Short) ofMatch.getTransportSource()));
+                                ofMatch.getTransportSource());
                     }
                     if (ofMatch.getTransportDestination() != 0) {
                         salMatch.setField(MatchType.TP_DST,
-                                ((Short) ofMatch.getTransportDestination()));
+                                ofMatch.getTransportDestination());
                     }
                 } else {
                     // Compute OF1.0 + IPv6 extensions Match
@@ -573,7 +573,7 @@ public class FlowConverter {
                         // Mask on input port is not defined
                         salMatch.setField(new MatchField(MatchType.IN_PORT,
                                 NodeConnectorCreator.createOFNodeConnector(
-                                        (Short) v6Match.getInputPort(), node)));
+                                        v6Match.getInputPort(), node)));
                     }
                     if (v6Match.getDataLayerSource() != null
                             && !NetUtils
@@ -623,11 +623,11 @@ public class FlowConverter {
                     }
                     if (v6Match.getTransportSource() != 0) {
                         salMatch.setField(MatchType.TP_SRC,
-                                ((Short) v6Match.getTransportSource()));
+                                (v6Match.getTransportSource()));
                     }
                     if (v6Match.getTransportDestination() != 0) {
                         salMatch.setField(MatchType.TP_DST,
-                                ((Short) v6Match.getTransportDestination()));
+                                (v6Match.getTransportDestination()));
                     }
                 }
             }
