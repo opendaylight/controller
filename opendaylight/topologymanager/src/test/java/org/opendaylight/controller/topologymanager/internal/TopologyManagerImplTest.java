@@ -116,19 +116,19 @@ public class TopologyManagerImplTest {
                             .equals(nodeId + 10))
                             || (headNcId.equals(nodeId + 10) && tailNcId
                                     .equals(nodeId))
-                            || (headNcId.equals(nodeId + 1) && tailNcId
-                                    .equals(nodeId + 11))
-                            || (headNcId.equals(nodeId + 11) && tailNcId
-                                    .equals(nodeId + 1)));
+                                    || (headNcId.equals(nodeId + 1) && tailNcId
+                                            .equals(nodeId + 11))
+                                            || (headNcId.equals(nodeId + 11) && tailNcId
+                                                    .equals(nodeId + 1)));
                 } else if (nodeId == 11 || nodeId == 13 || nodeId == 15) {
                     Assert.assertTrue((headNcId.equals(nodeId) && tailNcId
                             .equals(nodeId - 10))
                             || (headNcId.equals(nodeId) && tailNcId
                                     .equals(nodeId - 10))
-                            || (headNcId.equals(nodeId - 9) && tailNcId
-                                    .equals(nodeId + 1))
-                            || (headNcId.equals(nodeId + 1) && tailNcId
-                                    .equals(nodeId - 9)));
+                                    || (headNcId.equals(nodeId - 9) && tailNcId
+                                            .equals(nodeId + 1))
+                                            || (headNcId.equals(nodeId + 1) && tailNcId
+                                                    .equals(nodeId - 9)));
                 }
             }
             i.remove();
@@ -160,19 +160,19 @@ public class TopologyManagerImplTest {
                         .equals(headNodeId + 10))
                         || (headNcId.equals(headNodeId + 10) && tailNcId
                                 .equals(headNodeId))
-                        || (headNcId.equals(headNodeId + 1) && tailNcId
-                                .equals(headNodeId + 11))
-                        || (headNcId.equals(headNodeId + 11) && tailNcId
-                                .equals(headNodeId + 1)));
+                                || (headNcId.equals(headNodeId + 1) && tailNcId
+                                        .equals(headNodeId + 11))
+                                        || (headNcId.equals(headNodeId + 11) && tailNcId
+                                                .equals(headNodeId + 1)));
             } else if (headNodeId == 11 || headNodeId == 13 || headNodeId == 15) {
                 Assert.assertTrue((headNcId.equals(headNodeId) && tailNcId
                         .equals(headNodeId - 10))
                         || (headNcId.equals(headNodeId) && tailNcId
                                 .equals(headNodeId - 10))
-                        || (headNcId.equals(headNodeId - 9) && tailNcId
-                                .equals(headNodeId + 1))
-                        || (headNcId.equals(headNodeId + 1) && tailNcId
-                                .equals(headNodeId - 9)));
+                                || (headNcId.equals(headNodeId - 9) && tailNcId
+                                        .equals(headNodeId + 1))
+                                        || (headNcId.equals(headNodeId + 1) && tailNcId
+                                                .equals(headNodeId - 9)));
             }
 
             Set<Property> prop = entry.getValue();
@@ -212,13 +212,13 @@ public class TopologyManagerImplTest {
     @Test
     public void testAddDeleteUserLink() {
         TopologyUserLinkConfig link1 = new TopologyUserLinkConfig("default1",
-                "OF", "1", "OF", "2", "OF", "1", "OF", "2");
+                "OF|1@OF|2", "OF|1@OF|2");
         TopologyUserLinkConfig link2 = new TopologyUserLinkConfig("default1",
-                "OF", "10", "OF", "20", "OF", "10", "OF", "20");
+                "OF|10@OF|20", "OF|10@OF|20");
         TopologyUserLinkConfig link3 = new TopologyUserLinkConfig("default2",
-                "OF", "1", "OF", "2", "OF", "1", "OF", "2");
+                "OF|1@OF|2", "OF|1@OF|2");
         TopologyUserLinkConfig link4 = new TopologyUserLinkConfig("default20",
-                "OF", "10", "OF", "20", "OF", "10", "OF", "20");
+                "OF|10@OF|20", "OF|10@OF|20");
 
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         topoManagerImpl.nonClusterObjectCreate();
@@ -244,40 +244,34 @@ public class TopologyManagerImplTest {
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         topoManagerImpl.nonClusterObjectCreate();
 
-        String name = null;
-        String srcNodeIDType = null;
+        String name = "Test";
         String srcSwitchId = null;
         String srcNodeConnectorIDType = null;
         String srcPort = null;
+        String srcNodeIDType = null;
         String dstNodeIDType = null;
         String dstSwitchId = null;
         String dstNodeConnectorIDType = null;
         String dstPort = null;
+        String srcNodeConnector = null;
+        String dstNodeConnector = null;
 
         /* Creating userlinks and checking for their validity */
-        link[0] = new TopologyUserLinkConfig(name, srcNodeIDType, srcSwitchId,
-                srcNodeConnectorIDType, srcPort, dstNodeIDType, dstSwitchId,
-                dstNodeConnectorIDType, dstPort);
+        link[0] = new TopologyUserLinkConfig(name, srcNodeConnector, dstNodeConnector);
         Assert.assertTrue(link[0].isValid() == false);
 
-        srcSwitchId = "1";
-        link[0] = new TopologyUserLinkConfig(name, srcNodeIDType, srcSwitchId,
-                srcNodeConnectorIDType, srcPort, dstNodeIDType, dstSwitchId,
-                dstNodeConnectorIDType, dstPort);
+        srcNodeConnector = "OF|1@OF|1";
+        link[0] = new TopologyUserLinkConfig(name, srcNodeConnector, dstNodeConnector);
         Assert.assertTrue(link[0].isValid() == false);
 
-        dstSwitchId = "2";
-        link[0] = new TopologyUserLinkConfig(name, srcNodeIDType, srcSwitchId,
-                srcNodeConnectorIDType, srcPort, dstNodeIDType, dstSwitchId,
-                dstNodeConnectorIDType, dstPort);
-        Assert.assertTrue(link[0].isValid() == false);
+        dstNodeConnector = "OF|1@OF|2";
+        link[0] = new TopologyUserLinkConfig(name, srcNodeConnector, dstNodeConnector);
+        Assert.assertTrue(link[0].isValid() == true);
 
         Integer i;
 
         for (i = 0; i < 5; i++) {
-            link[i] = new TopologyUserLinkConfig(name, srcNodeIDType,
-                    srcSwitchId, srcNodeConnectorIDType, srcPort,
-                    dstNodeIDType, dstSwitchId, dstNodeConnectorIDType, dstPort);
+            link[i] = new TopologyUserLinkConfig();
 
             name = Integer.toString(i + 1);
             srcSwitchId = Integer.toString(i + 1);
@@ -286,29 +280,27 @@ public class TopologyManagerImplTest {
             dstPort = Integer.toString((i + 1) * 10);
 
             link[i].setName(name);
-            link[i].setSrcSwitchId(srcSwitchId);
-            link[i].setSrcPort(srcPort);
-            link[i].setDstSwitchId(dstSwitchId);
-            link[i].setDstPort(dstPort);
+            srcNodeConnectorIDType = dstNodeConnectorIDType = "INCORRECT";
+            srcNodeConnector = srcNodeConnectorIDType+"|"+srcSwitchId+"@"+srcNodeConnectorIDType+"|"+srcPort;
+            dstNodeConnector = dstNodeConnectorIDType+"|"+dstSwitchId+"@"+dstNodeConnectorIDType+"|"+dstPort;
 
+            link[i].setSrcNodeConnector(srcNodeConnector);
             Assert.assertTrue(link[i].isValid() == false);
 
-            link[i].setSrcNodeIDType("OF");
-            link[i].setSrcNodeConnectorIDType("OF");
-
+            srcNodeConnectorIDType = "OF";
+            srcNodeConnector = srcNodeConnectorIDType+"|"+srcSwitchId+"@"+srcNodeConnectorIDType+"|"+srcPort;
+            link[i].setSrcNodeConnector(srcNodeConnector);
             Assert.assertTrue(link[i].isValid() == false);
 
-            link[i].setDstNodeIDType("OF");
-            link[i].setDstNodeConnectorIDType("OF");
-
+            dstNodeConnectorIDType = "OF";
+            dstNodeConnector = dstNodeConnectorIDType+"|"+dstSwitchId+"@"+dstNodeConnectorIDType+"|"+dstPort;
+            link[i].setDstNodeConnector(dstNodeConnector);
             Assert.assertTrue(link[i].isValid() == true);
 
-            reverseLink[i] = new TopologyUserLinkConfig(name, dstNodeIDType,
-                    dstSwitchId, dstNodeConnectorIDType, dstPort,
-                    srcNodeIDType, srcSwitchId, srcNodeConnectorIDType, srcPort);
-
+            reverseLink[i] = new TopologyUserLinkConfig(name, dstNodeConnector, srcNodeConnector);
             topoManagerImpl.addUserLink(link[i]);
         }
+
         ConcurrentMap<String, TopologyUserLinkConfig> userLinks = topoManagerImpl
                 .getUserLinks();
         TopologyUserLinkConfig resultLink;
@@ -318,20 +310,16 @@ public class TopologyManagerImplTest {
 
             Assert.assertTrue(resultLink.getName().equals(
                     reverseLink[i].getName()));
-            Assert.assertTrue(resultLink.getDstSwitchId().equals(
-                    reverseLink[i].getSrcSwitchId()));
-            Assert.assertTrue(resultLink.getDstPort().equals(
-                    reverseLink[i].getSrcPort()));
-            Assert.assertTrue(resultLink.getSrcSwitchId().equals(
-                    reverseLink[i].getDstSwitchId()));
-            Assert.assertTrue(resultLink.getSrcPort().equals(
-                    reverseLink[i].getDstPort()));
+            Assert.assertTrue(resultLink.getDstNodeConnector().equals(
+                    reverseLink[i].getSrcNodeConnector()));
+            Assert.assertTrue(resultLink.getSrcNodeConnector().equals(
+                    reverseLink[i].getDstNodeConnector()));
         }
     }
 
     @Test
     public void testHostLinkMethods() throws ConstructionException,
-            UnknownHostException {
+    UnknownHostException {
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         topoManagerImpl.nonClusterObjectCreate();
         int hostCounter = 0;
@@ -372,7 +360,7 @@ public class TopologyManagerImplTest {
             nc[i] = NodeConnectorCreator.createOFNodeConnector((short) (i + 1),
                     NodeCreator.createOFNode((long) (i + 1)));
             topoManagerImpl
-                    .updateHostLink(nc[i], h[i], UpdateType.ADDED, props);
+            .updateHostLink(nc[i], h[i], UpdateType.ADDED, props);
         }
 
         for (int i = 0; i < 5; i++) {
