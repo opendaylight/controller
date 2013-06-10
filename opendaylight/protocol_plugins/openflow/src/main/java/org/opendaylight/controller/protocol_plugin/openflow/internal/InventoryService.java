@@ -23,16 +23,11 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
-import org.opendaylight.controller.sal.core.Actions;
-import org.opendaylight.controller.sal.core.Buffers;
-import org.opendaylight.controller.sal.core.Capabilities;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.Tables;
-import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
@@ -151,44 +146,6 @@ public class InventoryService implements IInventoryShimInternalListener,
      */
     @Override
     public ConcurrentMap<Node, Map<String, Property>> getNodeProps() {
-        if (nodeProps == null)
-            return null;
-        Map<Long, ISwitch> switches = controller.getSwitches();
-        for (Map.Entry<Long, ISwitch> entry : switches.entrySet()) {
-            ISwitch sw = entry.getValue();
-            Node node = OFSwitchToNode(sw);
-            Map<String, Property> propMap = null;
-            if (isDefaultContainer) {
-                propMap = new HashMap<String, Property>();
-                byte tables = sw.getTables();
-                Tables t = new Tables(tables);
-                if (t != null) {
-                    propMap.put(Tables.TablesPropName, t);
-                }
-                int cap = sw.getCapabilities();
-                Capabilities c = new Capabilities(cap);
-                if (c != null) {
-                    propMap.put(Capabilities.CapabilitiesPropName, c);
-                }
-                int act = sw.getActions();
-                Actions a = new Actions(act);
-                if (a != null) {
-                    propMap.put(Actions.ActionsPropName, a);
-                }
-                int buffers = sw.getBuffers();
-                Buffers b = new Buffers(buffers);
-                if (b != null) {
-                    propMap.put(Buffers.BuffersPropName, b);
-                }
-                Date connectedSince = sw.getConnectedDate();
-                Long connectedSinceTime = (connectedSince == null) ? 0
-                        : connectedSince.getTime();
-                TimeStamp timeStamp = new TimeStamp(connectedSinceTime,
-                        "connectedSince");
-                propMap.put(TimeStamp.TimeStampPropName, timeStamp);
-                nodeProps.put(node, propMap);
-            }
-        }
         return nodeProps;
     }
 
