@@ -8,6 +8,7 @@
     <modules>
         <module>yang</module>
         <module>code-generator</module>
+        <module>model</module>
     </modules>
 
     <properties>
