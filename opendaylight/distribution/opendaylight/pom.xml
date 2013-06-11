@@ -39,7 +39,9 @@
     <module>../../configuration/api</module>
     <module>../../configuration/implementation</module>
     <module>../../routing/dijkstra_implementation</module>
-    <module>../../arphandler</module>
+    <module>../../arphandler/api</module>
+    <module>../../arphandler/implementation</module>
+    <module>../../arphandler/integrationtest</module>
     <module>../../forwardingrulesmanager/api</module>
     <module>../../forwardingrulesmanager/implementation</module>
     <module>../../forwardingrulesmanager/integrationtest</module>

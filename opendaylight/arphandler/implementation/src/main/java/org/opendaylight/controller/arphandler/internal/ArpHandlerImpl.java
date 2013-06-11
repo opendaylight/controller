@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -22,13 +21,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.opendaylight.controller.arphandler.IArpHandler;
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
-import org.opendaylight.controller.hosttracker.hostAware.IHostFinder;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -47,10 +43,12 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Subnet;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ArpHandler implements IHostFinder, IListenDataPacket {
+public class ArpHandlerImpl implements IArpHandler, IListenDataPacket {
     private static final Logger logger = LoggerFactory
-            .getLogger(ArpHandler.class);
+            .getLogger(ArpHandlerImpl.class);
     private IfIptoHost hostTracker = null;
     private ISwitchManager switchManager = null;
     private ITopologyManager topologyManager;
@@ -114,12 +112,13 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         byte[] senderIP = sIP.getAddress();
         byte[] targetIP = tIP.getAddress();
         ARP arp = new ARP();
-        arp.setHardwareType(ARP.HW_TYPE_ETHERNET).setProtocolType(
-                EtherTypes.IPv4.shortValue())
-                .setHardwareAddressLength((byte) 6).setProtocolAddressLength(
-                        (byte) 4).setOpCode(ARP.REPLY)
-                .setSenderHardwareAddress(sMAC).setSenderProtocolAddress(
-                        senderIP).setTargetHardwareAddress(tMAC)
+        arp.setHardwareType(ARP.HW_TYPE_ETHERNET)
+                .setProtocolType(EtherTypes.IPv4.shortValue())
+                .setHardwareAddressLength((byte) 6)
+                .setProtocolAddressLength((byte) 4).setOpCode(ARP.REPLY)
+                .setSenderHardwareAddress(sMAC)
+                .setSenderProtocolAddress(senderIP)
+                .setTargetHardwareAddress(tMAC)
                 .setTargetProtocolAddress(targetIP);
 
         Ethernet ethernet = new Ethernet();
@@ -133,7 +132,10 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
     }
 
     private boolean isBroadcastMAC(byte[] mac) {
-        if (BitBufferHelper.toNumber(mac) == 0xffffffffffffL) { //TODO: implement this in our Ethernet
+        if (BitBufferHelper.toNumber(mac) == 0xffffffffffffL) { // TODO:
+                                                                // implement
+                                                                // this in our
+                                                                // Ethernet
             return true;
         }
         return false;
@@ -149,10 +151,9 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
     protected void handleARPPacket(Ethernet eHeader, ARP pkt, NodeConnector p) {
         if (pkt.getOpCode() == 0x1) {
             logger.debug("Received ARP REQUEST Packet from NodeConnector: {}",
-                         p);
+                    p);
         } else {
-            logger.debug("Received ARP REPLY Packet from NodeConnector: {}",
-                         p);
+            logger.debug("Received ARP REPLY Packet from NodeConnector: {}", p);
         }
         InetAddress targetIP = null;
         try {
@@ -175,9 +176,9 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
          */
         if (Arrays.equals(sourceMAC, getControllerMAC())) {
             if (logger.isDebugEnabled()) {
-              logger.debug(
-                    "Receive the self originated packet (srcMAC {}) --> DROP",
-                    HexEncode.bytesToHexString(sourceMAC));
+                logger.debug(
+                        "Receive the self originated packet (srcMAC {}) --> DROP",
+                        HexEncode.bytesToHexString(sourceMAC));
             }
             return;
         }
@@ -187,7 +188,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             subnet = switchManager.getSubnetByNetworkAddress(sourceIP);
         }
         if (subnet == null) {
-            logger.debug("can't find subnet matching {}, drop packet",sourceIP);
+            logger.debug("can't find subnet matching {}, drop packet", sourceIP);
             return;
         }
         logger.debug("Found {} matching {}", subnet, sourceIP);
@@ -203,19 +204,19 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         HostNodeConnector requestor = null;
         if (isUnicastMAC(sourceMAC)) {
             // TODO For not this is only OPENFLOW but we need to fix this
-            if (p.getType().equals(
-                    NodeConnector.NodeConnectorIDType.OPENFLOW)) {
+            if (p.getType().equals(NodeConnector.NodeConnectorIDType.OPENFLOW)) {
                 try {
-                    requestor = new HostNodeConnector(sourceMAC, sourceIP, p, subnet
-                            .getVlan());
+                    requestor = new HostNodeConnector(sourceMAC, sourceIP, p,
+                            subnet.getVlan());
                 } catch (ConstructionException e) {
                     return;
                 }
                 /*
-                 * Learn host from the received ARP REQ/REPLY, inform
-                 * Host Tracker
+                 * Learn host from the received ARP REQ/REPLY, inform Host
+                 * Tracker
                  */
-                logger.debug("Inform Host tracker of new host {}", requestor.getNetworkAddress());
+                logger.debug("Inform Host tracker of new host {}",
+                        requestor.getNetworkAddress());
                 synchronized (this.hostListener) {
                     for (IfHostListener listener : this.hostListener) {
                         listener.hostListener(requestor);
@@ -244,11 +245,11 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         }
 
         /*
-         * ARP Request Handling:
-         * If targetIP is the IP of the subnet, reply with ARP REPLY
-         * If targetIP is a known host, PROXY ARP (by sending ARP REPLY) on behalf of known target hosts.
-         * For unknown target hosts, generate and send an ARP request to ALL switches/ports using
-         * the IP address defined in the subnet as source address
+         * ARP Request Handling: If targetIP is the IP of the subnet, reply with
+         * ARP REPLY If targetIP is a known host, PROXY ARP (by sending ARP
+         * REPLY) on behalf of known target hosts. For unknown target hosts,
+         * generate and send an ARP request to ALL switches/ports using the IP
+         * address defined in the subnet as source address
          */
         /*
          * Send ARP reply if target IP is gateway IP
@@ -256,8 +257,8 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         if ((targetIP.equals(subnet.getNetworkAddress()))
                 && (isBroadcastMAC(targetMAC) || Arrays.equals(targetMAC,
                         getControllerMAC()))) {
-            sendARPReply(p, getControllerMAC(), targetIP, pkt
-                    .getSenderHardwareAddress(), sourceIP);
+            sendARPReply(p, getControllerMAC(), targetIP,
+                    pkt.getSenderHardwareAddress(), sourceIP);
             return;
         }
 
@@ -283,39 +284,37 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             return;
         }
         /*
-         * Known target host, send ARP REPLY
-         * make sure that targetMAC matches the host's MAC if it is not broadcastMAC
+         * Known target host, send ARP REPLY make sure that targetMAC matches
+         * the host's MAC if it is not broadcastMAC
          */
         if (isBroadcastMAC(targetMAC)
                 || Arrays.equals(host.getDataLayerAddressBytes(), targetMAC)) {
-            sendARPReply(p, host.getDataLayerAddressBytes(), host
-                    .getNetworkAddress(), pkt.getSenderHardwareAddress(),
+            sendARPReply(p, host.getDataLayerAddressBytes(),
+                    host.getNetworkAddress(), pkt.getSenderHardwareAddress(),
                     sourceIP);
             return;
         } else {
             /*
-             * target target MAC has been changed. For now, discard it.
-             * TODO: We may need to send unicast ARP REQUEST on behalf of the
-             * target back to the sender to trigger the sender to
-             * update its table
+             * target target MAC has been changed. For now, discard it. TODO: We
+             * may need to send unicast ARP REQUEST on behalf of the target back
+             * to the sender to trigger the sender to update its table
              */
             return;
         }
     }
 
     /*
-     *  Send a broadcast ARP Request to the switch/ ports  using
-     *  the networkAddress of the subnet as sender IP
-     *  the controller's MAC as sender MAC
-     *  the targetIP as the target Network Address
+     * Send a broadcast ARP Request to the switch/ ports using the
+     * networkAddress of the subnet as sender IP the controller's MAC as sender
+     * MAC the targetIP as the target Network Address
      */
     protected void sendBcastARPRequest(InetAddress targetIP, Subnet subnet) {
         Set<NodeConnector> nodeConnectors;
         if (subnet.isFlatLayer2()) {
             nodeConnectors = new HashSet<NodeConnector>();
             for (Node n : this.switchManager.getNodes()) {
-                nodeConnectors.addAll(this.switchManager
-                        .getUpNodeConnectors(n));
+                nodeConnectors
+                        .addAll(this.switchManager.getUpNodeConnectors(n));
             }
         } else {
             nodeConnectors = subnet.getNodeConnectors();
@@ -328,30 +327,28 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             byte[] senderIP = subnet.getNetworkAddress().getAddress();
             byte[] targetIPB = targetIP.getAddress();
             arp.setHardwareType(ARP.HW_TYPE_ETHERNET)
-               .setProtocolType(EtherTypes.IPv4.shortValue())
-               .setHardwareAddressLength((byte) 6)
-               .setProtocolAddressLength((byte) 4)
-               .setOpCode(ARP.REQUEST)
-               .setSenderHardwareAddress(getControllerMAC())
-               .setSenderProtocolAddress(senderIP)
-               .setTargetHardwareAddress(new byte[] { (byte) 0, (byte) 0,
-                                                     (byte) 0, (byte) 0,
-                                                     (byte) 0, (byte) 0 })
-               .setTargetProtocolAddress(targetIPB);
+                    .setProtocolType(EtherTypes.IPv4.shortValue())
+                    .setHardwareAddressLength((byte) 6)
+                    .setProtocolAddressLength((byte) 4)
+                    .setOpCode(ARP.REQUEST)
+                    .setSenderHardwareAddress(getControllerMAC())
+                    .setSenderProtocolAddress(senderIP)
+                    .setTargetHardwareAddress(
+                            new byte[] { (byte) 0, (byte) 0, (byte) 0,
+                                    (byte) 0, (byte) 0, (byte) 0 })
+                    .setTargetProtocolAddress(targetIPB);
 
             Ethernet ethernet = new Ethernet();
             ethernet.setSourceMACAddress(getControllerMAC())
-                    .setDestinationMACAddress(new byte[] { (byte) -1,
-                                                          (byte) -1,
-                                                          (byte) -1,
-                                                          (byte) -1,
-                                                          (byte) -1,
-                                                          (byte) -1 })
+                    .setDestinationMACAddress(
+                            new byte[] { (byte) -1, (byte) -1, (byte) -1,
+                                    (byte) -1, (byte) -1, (byte) -1 })
                     .setEtherType(EtherTypes.ARP.shortValue()).setPayload(arp);
 
             // TODO For now send port-by-port, see how to optimize to
             // send to multiple ports at once
-            RawPacket destPkt = this.dataPacketService.encodeDataPacket(ethernet);
+            RawPacket destPkt = this.dataPacketService
+                    .encodeDataPacket(ethernet);
             destPkt.setOutgoingNodeConnector(p);
 
             this.dataPacketService.transmitDataPacket(destPkt);
@@ -360,14 +357,13 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
 
     /*
      * Send a unicast ARP Request to the known host on a specific switch/port as
-     * defined in the host.
-     * The sender IP is the networkAddress of the subnet
+     * defined in the host. The sender IP is the networkAddress of the subnet
      * The sender MAC is the controller's MAC
      */
     protected void sendUcastARPRequest(HostNodeConnector host, Subnet subnet) {
-        //Long swID = host.getnodeconnectornodeId();
-        //Short portID = host.getnodeconnectorportId();
-        //Node n = NodeCreator.createOFNode(swID);
+        // Long swID = host.getnodeconnectornodeId();
+        // Short portID = host.getnodeconnectorportId();
+        // Node n = NodeCreator.createOFNode(swID);
         Node n = host.getnodeconnectorNode();
         if (n == null) {
             logger.error("cannot send UcastARP because cannot extract node "
@@ -385,18 +381,19 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         byte[] targetIP = host.getNetworkAddress().getAddress();
         byte[] targetMAC = host.getDataLayerAddressBytes();
         ARP arp = new ARP();
-        arp.setHardwareType(ARP.HW_TYPE_ETHERNET).setProtocolType(
-                EtherTypes.IPv4.shortValue())
-                .setHardwareAddressLength((byte) 6).setProtocolAddressLength(
-                        (byte) 4).setOpCode(ARP.REQUEST)
+        arp.setHardwareType(ARP.HW_TYPE_ETHERNET)
+                .setProtocolType(EtherTypes.IPv4.shortValue())
+                .setHardwareAddressLength((byte) 6)
+                .setProtocolAddressLength((byte) 4).setOpCode(ARP.REQUEST)
                 .setSenderHardwareAddress(getControllerMAC())
-                .setSenderProtocolAddress(senderIP).setTargetHardwareAddress(
-                        targetMAC).setTargetProtocolAddress(targetIP);
+                .setSenderProtocolAddress(senderIP)
+                .setTargetHardwareAddress(targetMAC)
+                .setTargetProtocolAddress(targetIP);
 
         Ethernet ethernet = new Ethernet();
         ethernet.setSourceMACAddress(getControllerMAC())
-                .setDestinationMACAddress(targetMAC).setEtherType(
-                        EtherTypes.ARP.shortValue()).setPayload(arp);
+                .setDestinationMACAddress(targetMAC)
+                .setEtherType(EtherTypes.ARP.shortValue()).setPayload(arp);
 
         RawPacket destPkt = this.dataPacketService.encodeDataPacket(ethernet);
         destPkt.setOutgoingNodeConnector(outPort);
@@ -433,17 +430,17 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
                     .getNetworkAddress());
         }
         if (subnet == null) {
-            logger.debug("can't find subnet matching {}", host
-                    .getNetworkAddress());
+            logger.debug("can't find subnet matching {}",
+                    host.getNetworkAddress());
             return;
         }
         sendUcastARPRequest(host, subnet);
     }
 
     /*
-     * An IP packet is punted to the controller, this means that the
-     * destination host is not known to the controller.
-     * Need to discover it by sending a Broadcast ARP Request
+     * An IP packet is punted to the controller, this means that the destination
+     * host is not known to the controller. Need to discover it by sending a
+     * Broadcast ARP Request
      */
     protected void handlePuntedIPPacket(IPv4 pkt, NodeConnector p) {
         InetAddress dIP = null;
@@ -480,7 +477,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     *
+     * 
      */
     void init() {
         arpRequestors = new ConcurrentHashMap<InetAddress, Set<HostNodeConnector>>();
@@ -488,29 +485,28 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
     }
 
     /**
-     * Function called by the dependency manager when at least one
-     * dependency become unsatisfied or when the component is shutting
-     * down because for example bundle is being stopped.
-     *
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     * 
      */
     void destroy() {
     }
 
     /**
-     * Function called by dependency manager after "init ()" is called
-     * and after the services provided by the class are registered in
-     * the service registry
-     *
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     * 
      */
     void start() {
         startPeriodicTimer();
     }
 
     /**
-     * Function called by the dependency manager before the services
-     * exported by the component are unregistered, this will be
-     * followed by a "destroy ()" calls
-     *
+     * Function called by the dependency manager before the services exported by
+     * the component are unregistered, this will be followed by a "destroy ()"
+     * calls
+     * 
      */
     void stop() {
         cancelPeriodicTimer();
@@ -533,20 +529,19 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         if (inPkt == null) {
             return PacketResult.IGNORED;
         }
-        logger
-                .trace("Received a frame of size: {}",
-                        inPkt.getPacketData().length);
+        logger.trace("Received a frame of size: {}",
+                inPkt.getPacketData().length);
         Packet formattedPak = this.dataPacketService.decodeDataPacket(inPkt);
         if (formattedPak instanceof Ethernet) {
             Object nextPak = formattedPak.getPayload();
             if (nextPak instanceof IPv4) {
-                handlePuntedIPPacket((IPv4) nextPak, inPkt
-                        .getIncomingNodeConnector());
+                handlePuntedIPPacket((IPv4) nextPak,
+                        inPkt.getIncomingNodeConnector());
                 logger.trace("Handled IP packet");
             }
             if (nextPak instanceof ARP) {
-                handleARPPacket((Ethernet) formattedPak, (ARP) nextPak, inPkt
-                        .getIncomingNodeConnector());
+                handleARPPacket((Ethernet) formattedPak, (ARP) nextPak,
+                        inPkt.getIncomingNodeConnector());
                 logger.trace("Handled ARP packet");
             }
         }
