@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.java.api.generator;
 
-public class Constants {
+final class Constants {
 
     public static final String IFC = "interface";
     public static final String CLASS = "class";
@@ -32,4 +32,9 @@ public class Constants {
     public static final String FINAL = "final";
     public static final String EXTENDS = "extends";
     public static final String IMPLEMENTS = "implements";
+    
+    public static final String ENUMERATION_NAME = "value";
+    public static final String ENUMERATION_TYPE = "int";	
+    
+    private Constants() {}
 }

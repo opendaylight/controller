@@ -51,8 +51,8 @@ class YangToSourcesProcessor {
 
     @VisibleForTesting
     YangToSourcesProcessor(Log log, File yangFilesRootDir,
-            List<CodeGeneratorArg> codeGenerators, MavenProject project,
-            boolean inspectDependencies, YangProvider yangProvider) {
+                           List<CodeGeneratorArg> codeGenerators, MavenProject project,
+                           boolean inspectDependencies, YangProvider yangProvider) {
         this.log = Util.checkNotNull(log, "log");
         this.yangFilesRootDir = Util.checkNotNull(yangFilesRootDir,
                 "yangFilesRootDir");
@@ -64,8 +64,8 @@ class YangToSourcesProcessor {
     }
 
     YangToSourcesProcessor(Log log, File yangFilesRootDir,
-            List<CodeGeneratorArg> codeGenerators, MavenProject project,
-            boolean inspectDependencies) {
+                           List<CodeGeneratorArg> codeGenerators, MavenProject project,
+                           boolean inspectDependencies) {
         this(log, yangFilesRootDir, codeGenerators, project,
                 inspectDependencies, new YangProvider());
     }
@@ -132,7 +132,7 @@ class YangToSourcesProcessor {
                 + "yang";
 
         void addYangsToMETA_INF(Log log, MavenProject project,
-                File yangFilesRootDir) throws MojoFailureException {
+                                File yangFilesRootDir) throws MojoFailureException {
             File targetYangDir = new File(project.getBasedir(), yangResourceDir);
 
             try {
@@ -151,7 +151,7 @@ class YangToSourcesProcessor {
         }
 
         private static void setResource(File targetYangDir, String targetPath,
-                MavenProject project) {
+                                        MavenProject project) {
             Resource res = new Resource();
             res.setDirectory(targetYangDir.getPath());
             if (targetPath != null)
@@ -198,7 +198,7 @@ class YangToSourcesProcessor {
      * Instantiate generator from class and call required method
      */
     private void generateSourcesWithOneGenerator(ContextHolder context,
-            CodeGeneratorArg codeGeneratorCfg) throws ClassNotFoundException,
+                                                 CodeGeneratorArg codeGeneratorCfg) throws ClassNotFoundException,
             InstantiationException, IllegalAccessException, IOException {
 
         codeGeneratorCfg.check();

@@ -11,7 +11,6 @@ module controller-network {
 	
 
 	
-	
 	typedef topology-id {
 		type string;
 	}
