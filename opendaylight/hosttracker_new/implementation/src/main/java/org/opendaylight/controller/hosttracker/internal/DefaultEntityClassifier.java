@@ -35,13 +35,14 @@ package org.opendaylight.controller.hosttracker.internal;
 
 import java.util.Collection;
 import java.util.EnumSet;
+
+import org.opendaylight.controller.hosttracker.Entity;
 import org.opendaylight.controller.hosttracker.IDevice;
 import org.opendaylight.controller.hosttracker.IDeviceService;
-import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
-import org.opendaylight.controller.hosttracker.Entity;
 import org.opendaylight.controller.hosttracker.IEntityClass;
 import org.opendaylight.controller.hosttracker.IEntityClassListener;
 import org.opendaylight.controller.hosttracker.IEntityClassifierService;
+import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 
 /**
  * This is a default entity classifier that simply classifies all

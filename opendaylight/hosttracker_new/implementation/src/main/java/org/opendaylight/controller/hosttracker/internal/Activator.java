@@ -9,18 +9,17 @@
 
 package org.opendaylight.controller.hosttracker.internal;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.apache.felix.dm.Component;
-import org.opendaylight.controller.hosttracker.internal.HostTracker;
-import org.opendaylight.controller.hosttracker.IfHostListener;
-import org.opendaylight.controller.hosttracker.IfIptoHost;
-import org.opendaylight.controller.hosttracker.IfNewHostNotify;
-import org.opendaylight.controller.hosttracker.hostAware.IHostFinder;
+import org.opendaylight.controller.hosttracker.IDeviceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
-import org.opendaylight.controller.switchmanager.IInventoryListener;
+import org.opendaylight.controller.sal.packet.IDataPacketService;
+import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
@@ -30,21 +29,14 @@ public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
             .getLogger(Activator.class);
 
-    /**
-     * Function called when the activator starts just after some
-     * initializations are done by the
-     * ComponentActivatorAbstractBase.
-     *
-     */
-    public void init() {
+    @Override
+    protected void init() {
+        
     }
 
-    /**
-     * Function called when the activator stops just before the
-     * cleanup done by ComponentActivatorAbstractBase
-     *
-     */
-    public void destroy() {
+    @Override
+    protected void destroy() {
+        
     }
 
     /**
@@ -56,8 +48,9 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getImplementations() {
-        Object[] res = { HostTracker.class };
+        Object[] res = { DeviceManagerImpl.class };
         return res;
     }
 
@@ -74,30 +67,40 @@ public class Activator extends ComponentActivatorAbstractBase {
      * also optional per-container different behavior if needed, usually
      * should not be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
-        if (imp.equals(HostTracker.class)) {
+        if (imp.equals(DeviceManagerImpl.class)) {
             // export the service
-            c.setInterface(new String[] { ISwitchManagerAware.class.getName(),
-                    IInventoryListener.class.getName(),
-                    IfIptoHost.class.getName(), IfHostListener.class.getName(),
-                    ITopologyManagerAware.class.getName() }, null);
+            // XXX - TODO merge with existing APIs 
+            Dictionary<String, String> props = new Hashtable<String, String>();
+            props.put("salListenerName", "devicemanager");
+
+            c.setInterface(new String[] { IDeviceService.class.getName(), 
+                                          IListenDataPacket.class.getName(),
+                                          ITopologyManagerAware.class.getName()},
+                           props);
 
             c.add(createContainerServiceDependency(containerName).setService(
                     ISwitchManager.class).setCallbacks("setSwitchManager",
                     "unsetSwitchManager").setRequired(false));
+
             c.add(createContainerServiceDependency(containerName).setService(
-                    IClusterContainerServices.class).setCallbacks(
-                    "setClusterContainerService",
-                    "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName).setService(
-                    IHostFinder.class).setCallbacks("setArpHandler",
-                    "unsetArpHandler").setRequired(false));
+                    IDataPacketService.class).setCallbacks(
+                    "setDataPacketService", "unsetDataPacketService")
+                    .setRequired(true));
+            
+//            c.add(createContainerServiceDependency(containerName).setService(
+//                    IClusterContainerServices.class).setCallbacks(
+//                    "setClusterContainerService",
+//                    "unsetClusterContainerService").setRequired(true));
             c.add(createContainerServiceDependency(containerName).setService(
                     ITopologyManager.class).setCallbacks("setTopologyManager",
                     "unsetTopologyManager").setRequired(false));
+            
             c.add(createContainerServiceDependency(containerName).setService(
-                    IfNewHostNotify.class).setCallbacks("setnewHostNotify",
-                    "unsetnewHostNotify").setRequired(false));
+                    IDataPacketService.class).setCallbacks(
+                    "setDataPacketService", "unsetDataPacketService")
+                    .setRequired(true));
         }
     }
 
@@ -114,6 +117,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * @return The list of implementations the bundle will support,
      * in Global version
      */
+    @Override
     protected Object[] getGlobalImplementations() {
         return null;
     }
@@ -126,8 +130,9 @@ public class Activator extends ComponentActivatorAbstractBase {
      * @param imp implementation to be configured
      * @param containerName container on which the configuration happens
      */
+    @Override
     protected void configureGlobalInstance(Component c, Object imp) {
-        if (imp.equals(HostTracker.class)) {
-        }
+
     }
+
 }

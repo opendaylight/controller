@@ -48,11 +48,11 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 import org.opendaylight.controller.hosttracker.Entity;
 import org.opendaylight.controller.hosttracker.IDevice;
 import org.opendaylight.controller.hosttracker.IEntityClass;
 import org.opendaylight.controller.hosttracker.SwitchPort;
+import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 import org.opendaylight.controller.hosttracker.SwitchPort.ErrorStatus;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.HexEncode;

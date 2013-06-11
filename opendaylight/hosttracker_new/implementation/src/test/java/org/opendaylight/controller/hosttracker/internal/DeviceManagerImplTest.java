@@ -1,3 +1,4 @@
+package org.opendaylight.controller.hosttracker.internal;
 ///*
 // * Copyright (c) 2011,2013 Big Switch Networks, Inc.
 // *

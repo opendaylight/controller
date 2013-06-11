@@ -80,6 +80,7 @@ import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import static org.opendaylight.controller.hosttracker.internal.DeviceManagerImpl.DeviceUpdate.Change.*;
 
 /**
