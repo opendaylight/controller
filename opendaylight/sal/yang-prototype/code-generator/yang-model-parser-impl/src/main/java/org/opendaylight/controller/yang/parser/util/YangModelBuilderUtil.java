@@ -76,13 +76,17 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.controller.yang.model.api.type.BinaryTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
+import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
+import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.util.BaseConstraints;
 import org.opendaylight.controller.yang.model.util.BaseTypes;
 import org.opendaylight.controller.yang.model.util.BinaryType;
@@ -103,8 +107,12 @@ import org.opendaylight.controller.yang.model.util.Uint32;
 import org.opendaylight.controller.yang.model.util.Uint64;
 import org.opendaylight.controller.yang.model.util.Uint8;
 import org.opendaylight.controller.yang.model.util.UnknownType;
+import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ConstraintsBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.ModuleBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.UnionTypeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -964,19 +972,48 @@ public final class YangModelBuilderUtil {
      * @return UnknownType object with constraints from parsed type body
      */
     public static TypeDefinition<?> parseUnknownTypeBody(QName typedefQName,
-            Type_body_stmtsContext ctx) {
+            Type_body_stmtsContext ctx, final List<String> actualPath,
+            final URI namespace, final Date revision, final String prefix,
+            Builder parent, ModuleBuilder moduleBuilder) {
+        String typeName = typedefQName.getLocalName();
+
         UnknownType.Builder unknownType = new UnknownType.Builder(typedefQName);
+
         if (ctx != null) {
             List<RangeConstraint> rangeStatements = getRangeConstraints(ctx);
             List<LengthConstraint> lengthStatements = getLengthConstraints(ctx);
             List<PatternConstraint> patternStatements = getPatternConstraint(ctx);
             Integer fractionDigits = getFractionDigits(ctx);
 
-            unknownType.rangeStatements(rangeStatements);
-            unknownType.lengthStatements(lengthStatements);
-            unknownType.patterns(patternStatements);
-            unknownType.fractionDigits(fractionDigits);
+            if (parent instanceof TypeDefinitionBuilder) {
+                TypeDefinitionBuilder typedef = (TypeDefinitionBuilder) parent;
+                typedef.setRanges(rangeStatements);
+                typedef.setLengths(lengthStatements);
+                typedef.setPatterns(patternStatements);
+                typedef.setFractionDigits(fractionDigits);
+                return unknownType.build();
+            } else {
+                TypeDefinition<?> baseType = unknownType.build();
+                TypeDefinition<?> result = null;
+                QName qname = new QName(namespace, revision, prefix, typeName);
+                ExtendedType.Builder typeBuilder = null;
+
+                SchemaPath schemaPath = createTypeSchemaPath(actualPath,
+                        namespace, revision, prefix, typeName, false, false);
+                typeBuilder = new ExtendedType.Builder(qname, baseType, "", "",
+                        schemaPath);
+
+                typeBuilder.ranges(rangeStatements);
+                typeBuilder.lengths(lengthStatements);
+                typeBuilder.patterns(patternStatements);
+                typeBuilder.fractionDigits(fractionDigits);
+
+                result = typeBuilder.build();
+
+                return result;
+            }
         }
+
         return unknownType.build();
     }
 
@@ -1000,7 +1037,7 @@ public final class YangModelBuilderUtil {
     public static TypeDefinition<?> parseTypeBody(final String typeName,
             final Type_body_stmtsContext typeBody,
             final List<String> actualPath, final URI namespace,
-            final Date revision, final String prefix) {
+            final Date revision, final String prefix, Builder parent) {
         TypeDefinition<?> baseType = null;
 
         List<RangeConstraint> rangeStatements = getRangeConstraints(typeBody);
@@ -1010,40 +1047,56 @@ public final class YangModelBuilderUtil {
         List<EnumTypeDefinition.EnumPair> enumConstants = getEnumConstants(
                 typeBody, actualPath, namespace, revision, prefix);
 
+        TypeConstraints constraints = new TypeConstraints();
+        constraints.addFractionDigits(fractionDigits);
+        constraints.addLengths(lengthStatements);
+        constraints.addPatterns(patternStatements);
+        constraints.addRanges(rangeStatements);
+
         SchemaPath baseTypePathFinal = createTypeSchemaPath(actualPath,
                 namespace, revision, prefix, typeName, true, true);
-        SchemaPath baseTypePath = createTypeSchemaPath(actualPath,
-                namespace, revision, prefix, typeName, true, false);
+        SchemaPath baseTypePath = createTypeSchemaPath(actualPath, namespace,
+                revision, prefix, typeName, true, false);
 
         if ("decimal64".equals(typeName)) {
             if (rangeStatements.isEmpty()) {
                 return new Decimal64(baseTypePathFinal, fractionDigits);
             }
-            baseType = new Decimal64(baseTypePath, fractionDigits);
+            Decimal64 decimalType = new Decimal64(baseTypePath, fractionDigits);
+            constraints.addRanges(decimalType.getRangeStatements());
+            baseType = decimalType;
         } else if (typeName.startsWith("int")) {
+            IntegerTypeDefinition intType = null;
             if ("int8".equals(typeName)) {
-                baseType = new Int8(baseTypePath);
+                intType = new Int8(baseTypePath);
             } else if ("int16".equals(typeName)) {
-                baseType = new Int16(baseTypePath);
+                intType = new Int16(baseTypePath);
             } else if ("int32".equals(typeName)) {
-                baseType = new Int32(baseTypePath);
+                intType = new Int32(baseTypePath);
             } else if ("int64".equals(typeName)) {
-                baseType = new Int64(baseTypePath);
+                intType = new Int64(baseTypePath);
             }
+            constraints.addRanges(intType.getRangeStatements());
+            baseType = intType;
         } else if (typeName.startsWith("uint")) {
+            UnsignedIntegerTypeDefinition uintType = null;
             if ("uint8".equals(typeName)) {
-                baseType = new Uint8(baseTypePath);
+                uintType = new Uint8(baseTypePath);
             } else if ("uint16".equals(typeName)) {
-                baseType = new Uint16(baseTypePath);
+                uintType = new Uint16(baseTypePath);
             } else if ("uint32".equals(typeName)) {
-                baseType = new Uint32(baseTypePath);
+                uintType = new Uint32(baseTypePath);
             } else if ("uint64".equals(typeName)) {
-                baseType = new Uint64(baseTypePath);
+                uintType = new Uint64(baseTypePath);
             }
+            constraints.addRanges(uintType.getRangeStatements());
+            baseType = uintType;
         } else if ("enumeration".equals(typeName)) {
             return new EnumerationType(baseTypePathFinal, enumConstants);
         } else if ("string".equals(typeName)) {
-            baseType = new StringType(baseTypePath);
+            StringTypeDefinition stringType = new StringType(baseTypePath);
+            constraints.addLengths(stringType.getLengthStatements());
+            baseType = stringType;
         } else if ("bits".equals(typeName)) {
             return new BitsType(baseTypePathFinal, getBits(typeBody,
                     actualPath, namespace, revision, prefix));
@@ -1054,11 +1107,23 @@ public final class YangModelBuilderUtil {
                     absolute);
             return new Leafref(baseTypePathFinal, xpath);
         } else if ("binary".equals(typeName)) {
-            baseType = new BinaryType(baseTypePath);
+            BinaryTypeDefinition binaryType = new BinaryType(baseTypePath);
+            constraints.addLengths(binaryType.getLengthConstraints());
+            baseType = binaryType;
         } else if ("instance-identifier".equals(typeName)) {
             boolean requireInstance = isRequireInstance(typeBody);
             baseType = new InstanceIdentifier(baseTypePath, null,
                     requireInstance);
+        }
+
+        if (parent instanceof TypeDefinitionBuilder
+                && !(parent instanceof UnionTypeBuilder)) {
+            TypeDefinitionBuilder typedef = (TypeDefinitionBuilder) parent;
+            typedef.setRanges(constraints.getRange());
+            typedef.setLengths(constraints.getLength());
+            typedef.setPatterns(constraints.getPatterns());
+            typedef.setFractionDigits(constraints.getFractionDigits());
+            return baseType;
         }
 
         TypeDefinition<?> result = null;
@@ -1070,10 +1135,10 @@ public final class YangModelBuilderUtil {
         typeBuilder = new ExtendedType.Builder(qname, baseType, "", "",
                 schemaPath);
 
-        typeBuilder.ranges(rangeStatements);
-        typeBuilder.lengths(lengthStatements);
-        typeBuilder.patterns(patternStatements);
-        typeBuilder.fractionDigits(fractionDigits);
+        typeBuilder.ranges(constraints.getRange());
+        typeBuilder.lengths(constraints.getLength());
+        typeBuilder.patterns(constraints.getPatterns());
+        typeBuilder.fractionDigits(constraints.getFractionDigits());
 
         result = typeBuilder.build();
         return result;

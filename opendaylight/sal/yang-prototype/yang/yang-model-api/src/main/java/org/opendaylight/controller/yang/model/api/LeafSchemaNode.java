@@ -20,4 +20,8 @@ public interface LeafSchemaNode extends DataSchemaNode {
      */
     TypeDefinition<?> getType();
 
+    String getDefault();
+
+    String getUnits();
+
 }

@@ -32,6 +32,7 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder
     private SchemaPath schemaPath;
 
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    private List<UnknownSchemaNode> unknownNodes;
     private List<RangeConstraint> ranges = Collections.emptyList();
     private List<LengthConstraint> lengths = Collections.emptyList();
     private List<PatternConstraint> patterns = Collections.emptyList();
@@ -73,9 +74,11 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder
         typeBuilder.fractionDigits(fractionDigits);
 
         // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
+        if (unknownNodes == null) {
+            unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
         }
         typeBuilder.unknownSchemaNodes(unknownNodes);
         result = typeBuilder.build();
@@ -162,6 +165,10 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder
     @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
+    }
+
+    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
+        this.unknownNodes = unknownNodes;
     }
 
     @Override

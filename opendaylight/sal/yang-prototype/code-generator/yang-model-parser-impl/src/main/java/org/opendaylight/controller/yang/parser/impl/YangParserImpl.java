@@ -41,15 +41,11 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BinaryTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.DecimalTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
-import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
-import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.IdentityrefType;
 import org.opendaylight.controller.yang.model.util.UnknownType;
-import org.opendaylight.controller.yang.model.util.YangTypesConverter;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
@@ -297,222 +293,116 @@ public final class YangParserImpl implements YangModelParser {
         if (!dirtyNodes.isEmpty()) {
             for (Map.Entry<List<String>, TypeAwareBuilder> entry : dirtyNodes
                     .entrySet()) {
-
                 final TypeAwareBuilder nodeToResolve = entry.getValue();
-                // different handling for union types
+
                 if (nodeToResolve instanceof UnionTypeBuilder) {
-                    final UnionTypeBuilder union = (UnionTypeBuilder) nodeToResolve;
-                    final List<TypeDefinition<?>> unionTypes = union.getTypes();
-                    final List<UnknownType> toRemove = new ArrayList<UnknownType>();
-                    for (TypeDefinition<?> td : unionTypes) {
-                        if (td instanceof UnknownType) {
-                            final UnknownType unknownType = (UnknownType) td;
-                            final TypeDefinitionBuilder resolvedType = resolveTypeUnion(
-                                    nodeToResolve, unknownType, modules, module);
-                            union.setTypedef(resolvedType);
-                            toRemove.add(unknownType);
-                        }
-                    }
-                    unionTypes.removeAll(toRemove);
+                    // special handling for union types
+                    resolveTypeUnion((UnionTypeBuilder) nodeToResolve, modules,
+                            module);
                 } else if (nodeToResolve.getTypedef() instanceof IdentityrefTypeBuilder) {
-                    // different handling for identityref types
+                    // special handling for identityref types
                     IdentityrefTypeBuilder idref = (IdentityrefTypeBuilder) nodeToResolve
                             .getTypedef();
                     nodeToResolve.setType(new IdentityrefType(findFullQName(
                             modules, module, idref), idref.getPath()));
                 } else {
-                    final TypeDefinitionBuilder resolvedType = resolveType(
-                            nodeToResolve, modules, module);
-                    nodeToResolve.setTypedef(resolvedType);
+                    resolveType(nodeToResolve, modules, module);
                 }
             }
         }
     }
 
-    private TypeDefinitionBuilder resolveType(
-            final TypeAwareBuilder nodeToResolve,
+    private void resolveType(final TypeAwareBuilder nodeToResolve,
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder builder) {
-        final TypeConstraints constraints = new TypeConstraints();
-
-        final TypeDefinitionBuilder targetTypeBuilder = getTypeDefinitionBuilderFromDirtyNode(
-                nodeToResolve, modules, builder);
-        final TypeConstraints tConstraints = findConstraints(nodeToResolve,
-                constraints, modules, builder);
-        targetTypeBuilder.setRanges(tConstraints.getRange());
-        targetTypeBuilder.setLengths(tConstraints.getLength());
-        targetTypeBuilder.setPatterns(tConstraints.getPatterns());
-        targetTypeBuilder.setFractionDigits(tConstraints.getFractionDigits());
-
-        return targetTypeBuilder;
-    }
-
-    private TypeDefinitionBuilder resolveTypeUnion(
-            final TypeAwareBuilder typeToResolve,
-            final UnknownType unknownType,
-            final Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            final ModuleBuilder builder) {
-        final TypeConstraints constraints = new TypeConstraints();
-
-        final TypeDefinitionBuilder targetTypeBuilder = getUnionBuilder(
-                typeToResolve, unknownType, modules, builder);
-        final TypeConstraints tConstraints = findConstraints(typeToResolve,
-                constraints, modules, builder);
-        targetTypeBuilder.setRanges(tConstraints.getRange());
-        targetTypeBuilder.setLengths(tConstraints.getLength());
-        targetTypeBuilder.setPatterns(tConstraints.getPatterns());
-        targetTypeBuilder.setFractionDigits(tConstraints.getFractionDigits());
-
-        return targetTypeBuilder;
-    }
-
-    private TypeDefinitionBuilder getTypeDefinitionBuilderFromDirtyNode(
-            final TypeAwareBuilder nodeToResolve,
-            final Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            final ModuleBuilder module) {
-
-        final UnknownType unknownType = (UnknownType) nodeToResolve.getType();
-        final QName unknownTypeQName = unknownType.getQName();
-
-        // search for module which contains referenced typedef
+        TypeDefinitionBuilder resolvedType = null;
+        final int line = nodeToResolve.getLine();
+        final TypeDefinition<?> typedefType = nodeToResolve.getType();
+        final QName unknownTypeQName = typedefType.getBaseType().getQName();
         final ModuleBuilder dependentModule = findDependentModule(modules,
-                module, unknownTypeQName.getPrefix(), nodeToResolve.getLine());
+                builder, unknownTypeQName.getPrefix(), line);
 
-        final TypeDefinitionBuilder lookedUpBuilder = findTypeDefinitionBuilder(
+        final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(
                 nodeToResolve.getPath(), dependentModule,
-                unknownTypeQName.getLocalName(), module.getName(),
-                nodeToResolve.getLine());
+                unknownTypeQName.getLocalName(), builder.getName(), line);
 
-        final TypeDefinitionBuilder lookedUpBuilderCopy = copyTypedefBuilder(
-                lookedUpBuilder, nodeToResolve instanceof TypeDefinitionBuilder);
-        final TypeDefinitionBuilder resolvedCopy = resolveCopiedBuilder(
-                lookedUpBuilderCopy, modules, dependentModule);
-        return resolvedCopy;
-    }
-
-    private TypeDefinitionBuilder getUnionBuilder(
-            final TypeAwareBuilder nodeToResolve,
-            final UnknownType unknownType,
-            final Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            final ModuleBuilder module) {
-
-        final TypeDefinition<?> baseTypeToResolve = nodeToResolve.getType();
-        if (baseTypeToResolve != null
-                && !(baseTypeToResolve instanceof UnknownType)) {
-            return (TypeDefinitionBuilder) nodeToResolve;
-        }
-
-        final QName unknownTypeQName = unknownType.getQName();
-        // search for module which contains referenced typedef
-        final ModuleBuilder dependentModule = findDependentModule(modules,
-                module, unknownTypeQName.getPrefix(), nodeToResolve.getLine());
-        final TypeDefinitionBuilder lookedUpBuilder = findTypeDefinitionBuilder(
-                nodeToResolve.getPath(), dependentModule,
-                unknownTypeQName.getLocalName(), module.getName(),
-                nodeToResolve.getLine());
-
-        final TypeDefinitionBuilder lookedUpBuilderCopy = copyTypedefBuilder(
-                lookedUpBuilder, nodeToResolve instanceof TypeDefinitionBuilder);
-        final TypeDefinitionBuilder resolvedCopy = resolveCopiedBuilder(
-                lookedUpBuilderCopy, modules, dependentModule);
-        return resolvedCopy;
-    }
-
-    private TypeDefinitionBuilder copyTypedefBuilder(
-            final TypeDefinitionBuilder old, final boolean seekByTypedefBuilder) {
-        if (old instanceof UnionTypeBuilder) {
-            final UnionTypeBuilder oldUnion = (UnionTypeBuilder) old;
-            final UnionTypeBuilder newUnion = new UnionTypeBuilder(
-                    old.getLine());
-            for (TypeDefinition<?> td : oldUnion.getTypes()) {
-                newUnion.setType(td);
-            }
-            for (TypeDefinitionBuilder tdb : oldUnion.getTypedefs()) {
-                newUnion.setTypedef(copyTypedefBuilder(tdb, true));
-            }
-            newUnion.setPath(old.getPath());
-            return newUnion;
-        }
-
-        final QName oldName = old.getQName();
-        final QName newName = new QName(oldName.getNamespace(),
-                oldName.getRevision(), oldName.getPrefix(),
-                oldName.getLocalName());
-        final TypeDefinitionBuilder tdb = new TypeDefinitionBuilderImpl(
-                newName, old.getLine());
-
-        tdb.setRanges(old.getRanges());
-        tdb.setLengths(old.getLengths());
-        tdb.setPatterns(old.getPatterns());
-        tdb.setFractionDigits(old.getFractionDigits());
-        tdb.setPath(old.getPath());
-
-        final TypeDefinition<?> oldType = old.getType();
-        if (oldType == null) {
-            tdb.setTypedef(old.getTypedef());
+        if (typedefType instanceof ExtendedType) {
+            final ExtendedType extType = (ExtendedType) typedefType;
+            final TypeDefinitionBuilder newType = extendedTypeWithNewBaseType(
+                    nodeToResolve, targetTypeBuilder, extType, modules, builder);
+            resolvedType = newType;
         } else {
-            tdb.setType(oldType);
+            resolvedType = targetTypeBuilder;
         }
-
-        if (!seekByTypedefBuilder) {
-            tdb.setDescription(old.getDescription());
-            tdb.setReference(old.getReference());
-            tdb.setStatus(old.getStatus());
-            tdb.setDefaultValue(old.getDefaultValue());
-            tdb.setUnits(old.getUnits());
-        }
-        return tdb;
+        nodeToResolve.setTypedef(resolvedType);
     }
 
-    private TypeDefinitionBuilder resolveCopiedBuilder(
-            final TypeDefinitionBuilder copy,
+    private void resolveTypeUnion(final UnionTypeBuilder union,
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder builder) {
 
-        if (copy instanceof UnionTypeBuilder) {
-            final UnionTypeBuilder union = (UnionTypeBuilder) copy;
-            final List<TypeDefinition<?>> unionTypes = union.getTypes();
-            final List<UnknownType> toRemove = new ArrayList<UnknownType>();
-            for (TypeDefinition<?> td : unionTypes) {
-                if (td instanceof UnknownType) {
-                    final UnknownType unknownType = (UnknownType) td;
-                    final TypeDefinitionBuilder resolvedType = resolveTypeUnion(
-                            union, unknownType, modules, builder);
-                    union.setTypedef(resolvedType);
-                    toRemove.add(unknownType);
+        final List<TypeDefinition<?>> unionTypes = union.getTypes();
+        final List<TypeDefinition<?>> toRemove = new ArrayList<TypeDefinition<?>>();
+        for (TypeDefinition<?> unionType : unionTypes) {
+            if (unionType instanceof UnknownType) {
+                final UnknownType ut = (UnknownType) unionType;
+                final ModuleBuilder dependentModule = findDependentModule(
+                        modules, builder, ut.getQName().getPrefix(),
+                        union.getLine());
+                final TypeDefinitionBuilder resolvedType = findTypeDefinitionBuilder(
+                        union.getPath(), dependentModule, ut.getQName()
+                                .getLocalName(), builder.getName(),
+                        union.getLine());
+                union.setTypedef(resolvedType);
+                toRemove.add(ut);
+            } else if (unionType instanceof ExtendedType) {
+                final ExtendedType extType = (ExtendedType) unionType;
+                TypeDefinition<?> extTypeBase = extType.getBaseType();
+                if (extTypeBase instanceof UnknownType) {
+                    final UnknownType ut = (UnknownType) extTypeBase;
+                    final ModuleBuilder dependentModule = findDependentModule(
+                            modules, builder, ut.getQName().getPrefix(),
+                            union.getLine());
+                    final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(
+                            union.getPath(), dependentModule, ut.getQName()
+                                    .getLocalName(), builder.getName(),
+                            union.getLine());
+
+                    final TypeDefinitionBuilder newType = extendedTypeWithNewBaseType(
+                            targetTypeBuilder, targetTypeBuilder, extType,
+                            modules, builder);
+
+                    union.setTypedef(newType);
+                    toRemove.add(extType);
                 }
             }
-            unionTypes.removeAll(toRemove);
-
-            return union;
         }
+        unionTypes.removeAll(toRemove);
+    }
 
-        final TypeDefinition<?> base = copy.getType();
-        final TypeDefinitionBuilder baseTdb = copy.getTypedef();
-        if (base != null && !(base instanceof UnknownType)) {
-            return copy;
-        } else if (base instanceof UnknownType) {
-            final UnknownType unknownType = (UnknownType) base;
-            final QName unknownTypeQName = unknownType.getQName();
-            final String unknownTypePrefix = unknownTypeQName.getPrefix();
-            final ModuleBuilder dependentModule = findDependentModule(modules,
-                    builder, unknownTypePrefix, copy.getLine());
-            final TypeDefinitionBuilder utBuilder = getTypeDefinitionBuilderFromDirtyNode(
-                    copy, modules, dependentModule);
-            copy.setTypedef(utBuilder);
-            return copy;
-        } else if (base == null && baseTdb != null) {
-            // make a copy of baseTypeDef and call again
-            final TypeDefinitionBuilder baseTdbCopy = copyTypedefBuilder(
-                    baseTdb, true);
-            final TypeDefinitionBuilder baseTdbCopyResolved = resolveCopiedBuilder(
-                    baseTdbCopy, modules, builder);
-            copy.setTypedef(baseTdbCopyResolved);
-            return copy;
-        } else {
-            throw new YangParseException(copy.getLine(),
-                    "Failed to resolve type " + copy.getQName().getLocalName());
-        }
+    private TypeDefinitionBuilder extendedTypeWithNewBaseType(
+            final TypeAwareBuilder nodeToResolve,
+            final TypeDefinitionBuilder newBaseType,
+            final ExtendedType oldExtendedType,
+            final Map<String, TreeMap<Date, ModuleBuilder>> modules,
+            final ModuleBuilder builder) {
+        final TypeConstraints constraints = findConstraints(nodeToResolve,
+                new TypeConstraints(), modules, builder);
+        final TypeDefinitionBuilderImpl newType = new TypeDefinitionBuilderImpl(
+                oldExtendedType.getQName(), nodeToResolve.getLine());
+        newType.setTypedef(newBaseType);
+        newType.setPath(oldExtendedType.getPath());
+        newType.setDescription(oldExtendedType.getDescription());
+        newType.setReference(oldExtendedType.getReference());
+        newType.setStatus(oldExtendedType.getStatus());
+        newType.setLengths(constraints.getLength());
+        newType.setPatterns(constraints.getPatterns());
+        newType.setRanges(constraints.getRange());
+        newType.setFractionDigits(constraints.getFractionDigits());
+        newType.setUnits(oldExtendedType.getUnits());
+        newType.setDefaultValue(oldExtendedType.getDefaultValue());
+        newType.setUnknownNodes(oldExtendedType.getUnknownSchemaNodes());
+        return newType;
     }
 
     private TypeConstraints findConstraints(
@@ -520,77 +410,63 @@ public final class YangParserImpl implements YangModelParser {
             final TypeConstraints constraints,
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder builder) {
+
         // union type cannot be restricted
         if (nodeToResolve instanceof UnionTypeBuilder) {
             return constraints;
         }
 
-        // if referenced type is UnknownType again, search recursively with
-        // current constraints
-        final TypeDefinition<?> referencedType = nodeToResolve.getType();
-        List<RangeConstraint> ranges = Collections.emptyList();
-        List<LengthConstraint> lengths = Collections.emptyList();
-        List<PatternConstraint> patterns = Collections.emptyList();
-        Integer fractionDigits = null;
-        if (referencedType == null) {
-            final TypeDefinitionBuilder tdb = nodeToResolve.getTypedef();
-            ranges = tdb.getRanges();
-            constraints.addRanges(ranges);
-            lengths = tdb.getLengths();
-            constraints.addLengths(lengths);
-            patterns = tdb.getPatterns();
-            constraints.addPatterns(patterns);
-            fractionDigits = tdb.getFractionDigits();
-            constraints.setFractionDigits(fractionDigits);
-            return constraints;
-        } else if (referencedType instanceof ExtendedType) {
-            final ExtendedType ext = (ExtendedType) referencedType;
-            ranges = ext.getRanges();
-            constraints.addRanges(ranges);
-            lengths = ext.getLengths();
-            constraints.addLengths(lengths);
-            patterns = ext.getPatterns();
-            constraints.addPatterns(patterns);
-            fractionDigits = ext.getFractionDigits();
-            constraints.setFractionDigits(fractionDigits);
-            if(YangTypesConverter.isBaseYangType(ext.getBaseType().getQName().getLocalName())) {
-                mergeConstraints(ext.getBaseType(), constraints);
-                return constraints;
-            } else {
-                return findConstraints(
-                        findTypeDefinitionBuilder(nodeToResolve.getPath(), builder,
-                                ext.getQName().getLocalName(), builder.getName(),
-                                nodeToResolve.getLine()), constraints, modules,
-                        builder);
-            }
-        } else if (referencedType instanceof UnknownType) {
-            final UnknownType unknown = (UnknownType) referencedType;
-            ranges = unknown.getRangeStatements();
-            constraints.addRanges(ranges);
-            lengths = unknown.getLengthStatements();
-            constraints.addLengths(lengths);
-            patterns = unknown.getPatterns();
-            constraints.addPatterns(patterns);
-            fractionDigits = unknown.getFractionDigits();
-            constraints.setFractionDigits(fractionDigits);
+        if (nodeToResolve instanceof TypeDefinitionBuilder) {
+            TypeDefinitionBuilder typedefToResolve = (TypeDefinitionBuilder) nodeToResolve;
+            constraints.addFractionDigits(typedefToResolve.getFractionDigits());
+            constraints.addLengths(typedefToResolve.getLengths());
+            constraints.addPatterns(typedefToResolve.getPatterns());
+            constraints.addRanges(typedefToResolve.getRanges());
+        }
 
-            String unknownTypePrefix = unknown.getQName().getPrefix();
-            if (unknownTypePrefix == null || "".equals(unknownTypePrefix)) {
-                unknownTypePrefix = builder.getPrefix();
-            }
-            final ModuleBuilder dependentModule = findDependentModule(modules,
-                    builder, unknown.getQName().getPrefix(),
-                    nodeToResolve.getLine());
-            final TypeDefinitionBuilder utBuilder = findTypeDefinitionBuilder(
-                    nodeToResolve.getPath(), dependentModule, unknown
-                            .getQName().getLocalName(), builder.getName(),
-                    nodeToResolve.getLine());
-            return findConstraints(utBuilder, constraints, modules,
-                    dependentModule);
+        TypeDefinition<?> type = nodeToResolve.getType();
+        if (type == null) {
+            return findConstraints(nodeToResolve.getTypedef(), constraints,
+                    modules, builder);
         } else {
-            // HANDLE BASE YANG TYPE
-            mergeConstraints(referencedType, constraints);
-            return constraints;
+            if (type instanceof UnknownType) {
+                ModuleBuilder dependentModule = findDependentModule(modules,
+                        builder, type.getQName().getPrefix(),
+                        nodeToResolve.getLine());
+                TypeDefinitionBuilder tdb = findTypeDefinitionBuilder(
+                        nodeToResolve.getPath(), dependentModule, type
+                                .getQName().getLocalName(), builder.getName(),
+                        nodeToResolve.getLine());
+                return findConstraints(tdb, constraints, modules,
+                        dependentModule);
+            } else if (type instanceof ExtendedType) {
+                ExtendedType extType = (ExtendedType) type;
+                constraints.addFractionDigits(extType.getFractionDigits());
+                constraints.addLengths(extType.getLengths());
+                constraints.addPatterns(extType.getPatterns());
+                constraints.addRanges(extType.getRanges());
+
+                TypeDefinition<?> base = extType.getBaseType();
+                if (base instanceof UnknownType) {
+                    ModuleBuilder dependentModule = findDependentModule(
+                            modules, builder, base.getQName().getPrefix(),
+                            nodeToResolve.getLine());
+                    TypeDefinitionBuilder tdb = findTypeDefinitionBuilder(
+                            nodeToResolve.getPath(), dependentModule, base
+                                    .getQName().getLocalName(),
+                            builder.getName(), nodeToResolve.getLine());
+                    return findConstraints(tdb, constraints, modules,
+                            dependentModule);
+                } else {
+                    // it has to be base yang type
+                    mergeConstraints(type, constraints);
+                    return constraints;
+                }
+            } else {
+                // it is base yang type
+                mergeConstraints(type, constraints);
+                return constraints;
+            }
         }
     }
 
@@ -677,7 +553,7 @@ public final class YangParserImpl implements YangModelParser {
             constraints.addRanges(((DecimalTypeDefinition) referencedType)
                     .getRangeStatements());
             constraints
-                    .setFractionDigits(((DecimalTypeDefinition) referencedType)
+                    .addFractionDigits(((DecimalTypeDefinition) referencedType)
                             .getFractionDigits());
         } else if (referencedType instanceof IntegerTypeDefinition) {
             constraints.addRanges(((IntegerTypeDefinition) referencedType)

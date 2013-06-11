@@ -49,13 +49,9 @@ final class TestUtils {
         return parser.parseYangModels(testFiles);
     }
 
-    public static Set<Module> loadModules(String... pathToYangFile) throws IOException {
-        YangModelParser parser = new YangParserImpl();
-        List<InputStream> input = new ArrayList<InputStream>();
-        for(String path : pathToYangFile) {
-            input.add(TestUtils.class.getResourceAsStream(path));
-        }
-        Set<Module> modules = new HashSet<Module>(
+    public static Set<Module> loadModules(List<InputStream> input) throws IOException {
+        final YangModelParser parser = new YangParserImpl();
+        final Set<Module> modules = new HashSet<Module>(
                 parser.parseYangModelsFromStreams(input));
         for(InputStream stream : input) {
             stream.close();
@@ -63,11 +59,11 @@ final class TestUtils {
         return modules;
     }
 
-    public static Module loadModule(String pathToYangFile) throws IOException {
-        YangModelParser parser = new YangParserImpl();
-        InputStream stream = TestUtils.class.getResourceAsStream(pathToYangFile);
-        List<InputStream> input = Collections.singletonList(stream);
-        Set<Module> modules = new HashSet<Module>(
+    public static Module loadModule(final InputStream stream) throws
+            IOException {
+        final YangModelParser parser = new YangParserImpl();
+        final List<InputStream> input = Collections.singletonList(stream);
+        final Set<Module> modules = new HashSet<Module>(
                 parser.parseYangModelsFromStreams(input));
         stream.close();
         return modules.iterator().next();

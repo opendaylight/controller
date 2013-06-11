@@ -23,14 +23,14 @@ public final class TypeConstraints {
     private final List<List<RangeConstraint>> ranges = new ArrayList<List<RangeConstraint>>();
     private final List<List<LengthConstraint>> lengths = new ArrayList<List<LengthConstraint>>();
     private final List<PatternConstraint> patterns = new ArrayList<PatternConstraint>();
-    private Integer fractionDigits;
+    private final List<Integer> fractionDigits = new ArrayList<Integer>();
 
     List<List<RangeConstraint>> getAllRanges() {
         return ranges;
     }
 
     public List<RangeConstraint> getRange() {
-        if(ranges.isEmpty()) {
+        if (ranges.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -108,7 +108,7 @@ public final class TypeConstraints {
     }
 
     public List<LengthConstraint> getLength() {
-        if(lengths.isEmpty()) {
+        if (lengths.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -190,13 +190,14 @@ public final class TypeConstraints {
     }
 
     public Integer getFractionDigits() {
-        return fractionDigits;
+        if (fractionDigits.isEmpty()) {
+            return null;
+        }
+        return fractionDigits.get(0);
     }
 
-    public void setFractionDigits(final Integer fractionDigits) {
-        if (this.fractionDigits == null) {
-            this.fractionDigits = fractionDigits;
-        }
+    public void addFractionDigits(final Integer fractionDigits) {
+        this.fractionDigits.add(fractionDigits);
     }
 
 }

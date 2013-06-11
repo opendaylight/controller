@@ -71,7 +71,6 @@ public class ModuleBuilder implements Builder {
     private final Map<List<String>, GroupingBuilder> addedGroupings = new HashMap<List<String>, GroupingBuilder>();
     private final List<AugmentationSchemaBuilder> addedAugments = new ArrayList<AugmentationSchemaBuilder>();
     private final Map<List<String>, UsesNodeBuilder> addedUsesNodes = new HashMap<List<String>, UsesNodeBuilder>();
-    //private final Map<List<String>, RefineHolder> addedRefines = new HashMap<List<String>, RefineHolder>();
     private final Map<List<String>, RpcDefinitionBuilder> addedRpcs = new HashMap<List<String>, RpcDefinitionBuilder>();
     private final Set<NotificationBuilder> addedNotifications = new HashSet<NotificationBuilder>();
     private final Set<IdentitySchemaNodeBuilder> addedIdentities = new HashSet<IdentitySchemaNodeBuilder>();
@@ -175,6 +174,14 @@ public class ModuleBuilder implements Builder {
 
     public void exitNode() {
         actualPath.pop();
+    }
+
+    public Builder getActualNode() {
+        if (actualPath.isEmpty()) {
+            return null;
+        } else {
+            return actualPath.get(0);
+        }
     }
 
     public Builder getModuleNode(final List<String> path) {
@@ -756,6 +763,11 @@ public class ModuleBuilder implements Builder {
         return builder;
     }
 
+    @Override
+    public String toString() {
+        return ModuleBuilder.class.getSimpleName() + "[" + name + "]";
+    }
+
     private final class ModuleImpl implements Module {
         private URI namespace;
         private final String name;
@@ -1101,8 +1113,7 @@ public class ModuleBuilder implements Builder {
                 if (parent instanceof AugmentationSchemaBuilder) {
                     nodeBuilder.setAugmenting(true);
                 }
-                ((DataNodeContainerBuilder) parent)
-                        .addChildNode(nodeBuilder);
+                ((DataNodeContainerBuilder) parent).addChildNode(nodeBuilder);
             } else if (parent instanceof ChoiceBuilder) {
                 ((ChoiceBuilder) parent).addChildNode(nodeBuilder);
             } else {

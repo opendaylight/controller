@@ -26,6 +26,7 @@ import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
+import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
 import org.opendaylight.controller.yang.model.util.BitsType;
 import org.opendaylight.controller.yang.model.util.EnumerationType;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
@@ -38,7 +39,8 @@ public class TypesResolutionTest {
 
     @Before
     public void init() throws FileNotFoundException {
-        testedModules = TestUtils.loadModules("src/test/resources/types");
+        testedModules = TestUtils.loadModules(getClass().getResource
+                ("/types").getPath());
     }
 
     @Test
@@ -122,16 +124,19 @@ public class TypesResolutionTest {
         List<TypeDefinition<?>> unionTypes = baseType.getTypes();
 
         ExtendedType ipv4 = (ExtendedType) unionTypes.get(0);
-        ExtendedType ipv4Base = (ExtendedType) ipv4.getBaseType();
+        assertTrue(ipv4.getBaseType() instanceof StringTypeDefinition);
         String expectedPattern = "(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}"
                 + "([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])"
                 + "(%[\\p{N}\\p{L}]+)?";
-        assertEquals(expectedPattern, ipv4Base.getPatterns().get(0)
+        assertEquals(expectedPattern, ipv4.getPatterns().get(0)
                 .getRegularExpression());
 
+        TypeDefinition<?> ipv4Address = TestUtils.findTypedef(typedefs, "ipv4-address");
+        assertEquals(ipv4Address, ipv4);
+
         ExtendedType ipv6 = (ExtendedType) unionTypes.get(1);
-        ExtendedType ipv6Base = (ExtendedType) ipv6.getBaseType();
-        List<PatternConstraint> ipv6Patterns = ipv6Base.getPatterns();
+        assertTrue(ipv6.getBaseType() instanceof StringTypeDefinition);
+        List<PatternConstraint> ipv6Patterns = ipv6.getPatterns();
         expectedPattern = "((:|[0-9a-fA-F]{0,4}):)([0-9a-fA-F]{0,4}:){0,5}"
                 + "((([0-9a-fA-F]{0,4}:)?(:|[0-9a-fA-F]{0,4}))|"
                 + "(((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}"
@@ -139,6 +144,9 @@ public class TypesResolutionTest {
                 + "(%[\\p{N}\\p{L}]+)?";
         assertEquals(expectedPattern, ipv6Patterns.get(0)
                 .getRegularExpression());
+
+        TypeDefinition<?> ipv6Address = TestUtils.findTypedef(typedefs, "ipv6-address");
+        assertEquals(ipv6Address, ipv6);
 
         expectedPattern = "(([^:]+:){6}(([^:]+:[^:]+)|(.*\\..*)))|"
                 + "((([^:]+:)*[^:]+)?::(([^:]+:)*[^:]+)?)" + "(%.+)?";
@@ -150,18 +158,18 @@ public class TypesResolutionTest {
     public void testDomainName() {
         Module tested = TestUtils.findModule(testedModules, "ietf-inet-types");
         Set<TypeDefinition<?>> typedefs = tested.getTypeDefinitions();
-        TypeDefinition<?> type = TestUtils.findTypedef(typedefs, "domain-name");
-        ExtendedType baseType = (ExtendedType) type.getBaseType();
-        List<PatternConstraint> patterns = baseType.getPatterns();
+        ExtendedType type = (ExtendedType)TestUtils.findTypedef(typedefs, "domain-name");
+        assertTrue(type.getBaseType() instanceof StringTypeDefinition);
+        List<PatternConstraint> patterns = type.getPatterns();
         assertEquals(1, patterns.size());
         String expectedPattern = "((([a-zA-Z0-9_]([a-zA-Z0-9\\-_]){0,61})?[a-zA-Z0-9]\\.)*"
                 + "([a-zA-Z0-9_]([a-zA-Z0-9\\-_]){0,61})?[a-zA-Z0-9]\\.?)"
                 + "|\\.";
         assertEquals(expectedPattern, patterns.get(0).getRegularExpression());
 
-        List<LengthConstraint> lengths = baseType.getLengths();
+        List<LengthConstraint> lengths = type.getLengths();
         assertEquals(1, lengths.size());
-        LengthConstraint length = baseType.getLengths().get(0);
+        LengthConstraint length = type.getLengths().get(0);
         assertEquals(1L, length.getMin());
         assertEquals(253L, length.getMax());
     }
@@ -173,7 +181,8 @@ public class TypesResolutionTest {
         LeafSchemaNode leaf = (LeafSchemaNode) tested
                 .getDataChildByName("inst-id-leaf1");
         ExtendedType leafType = (ExtendedType) leaf.getType();
-        InstanceIdentifier leafTypeBase = (InstanceIdentifier)leafType.getBaseType();
+        InstanceIdentifier leafTypeBase = (InstanceIdentifier) leafType
+                .getBaseType();
         assertFalse(leafTypeBase.requireInstance());
     }
 
@@ -300,6 +309,11 @@ public class TypesResolutionTest {
         ExtendedType testedType = (ExtendedType) TestUtils.findTypedef(
                 typedefs, "object-identifier-128");
 
+        List<PatternConstraint> patterns = testedType.getPatterns();
+        assertEquals(1, patterns.size());
+        PatternConstraint pattern = patterns.get(0);
+        assertEquals("\\d*(\\.\\d*){1,127}", pattern.getRegularExpression());
+
         QName testedTypeQName = testedType.getQName();
         assertEquals(URI.create("urn:ietf:params:xml:ns:yang:ietf-yang-types"),
                 testedTypeQName.getNamespace());
@@ -309,15 +323,13 @@ public class TypesResolutionTest {
         assertEquals("object-identifier-128", testedTypeQName.getLocalName());
 
         ExtendedType testedTypeBase = (ExtendedType) testedType.getBaseType();
+        patterns = testedTypeBase.getPatterns();
+        assertEquals(1, patterns.size());
 
-        List<PatternConstraint> patterns = testedTypeBase.getPatterns();
-        assertEquals(2, patterns.size());
-        PatternConstraint pattern1 = patterns.get(0);
-        assertEquals("\\d*(\\.\\d*){1,127}", pattern1.getRegularExpression());
-        PatternConstraint pattern2 = patterns.get(1);
+        pattern = patterns.get(0);
         assertEquals(
                 "(([0-1](\\.[1-3]?[0-9]))|(2\\.(0|([1-9]\\d*))))(\\.(0|([1-9]\\d*)))*",
-                pattern2.getRegularExpression());
+                pattern.getRegularExpression());
 
         QName testedTypeBaseQName = testedTypeBase.getQName();
         assertEquals(URI.create("urn:ietf:params:xml:ns:yang:ietf-yang-types"),
