@@ -38,6 +38,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector;
 
 /**

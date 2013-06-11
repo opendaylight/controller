@@ -30,6 +30,7 @@ import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.containermanager.IContainerManager;
+import org.opendaylight.controller.hosttracker.IDeviceService;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.northbound.commons.RestMessages;
@@ -85,6 +86,37 @@ public class HostTrackerNorthbound {
         return username;
     }
 
+    private IDeviceService getIDeviceService (String containerName){
+        IContainerManager containerManager = (IContainerManager) ServiceHelper
+                .getGlobalInstance(IContainerManager.class, this);
+        if (containerManager == null) {
+            throw new ServiceUnavailableException("Container "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        boolean found = false;
+        List<String> containerNames = containerManager.getContainerNames();
+        for (String cName : containerNames) {
+            if (cName.trim().equalsIgnoreCase(containerName.trim())) {
+                found = true;
+            }
+        }
+
+        if (found == false) {
+            throw new ResourceNotFoundException(containerName + " "
+                    + RestMessages.NOCONTAINER.toString());
+        }
+
+        IDeviceService  deviceService = (IDeviceService) ServiceHelper.getInstance(
+                IDeviceService.class, containerName, this);
+
+        if (deviceService == null) {
+            throw new ServiceUnavailableException("Host Tracker "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        return deviceService;
+    }
     private IfIptoHost getIfIpToHostService(String containerName) {
         IContainerManager containerManager = (IContainerManager) ServiceHelper
                 .getGlobalInstance(IContainerManager.class, this);
@@ -142,6 +174,7 @@ public class HostTrackerNorthbound {
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
+        
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
         if (hostTracker == null) {
             throw new ServiceUnavailableException("Host Tracker "
@@ -149,7 +182,7 @@ public class HostTrackerNorthbound {
         }
 
         return new Hosts(hostTracker.getAllHosts());
-    }
+        }
 
     /**
      * Returns a list of Hosts that are statically configured and are connected

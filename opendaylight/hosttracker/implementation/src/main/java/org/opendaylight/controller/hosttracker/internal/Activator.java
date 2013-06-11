@@ -14,6 +14,7 @@ import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.hosttracker.IDeviceService;
+import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, String> props = new Hashtable<String, String>();
             props.put("salListenerName", "devicemanager");
 
-            c.setInterface(new String[] { IDeviceService.class.getName(), 
+            c.setInterface(new String[] { IDeviceService.class.getName(),
+                                          IfIptoHost.class.getName(),
                                           IListenDataPacket.class.getName(),
                                           ITopologyManagerAware.class.getName()},
                            props);
