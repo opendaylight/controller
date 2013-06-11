@@ -134,4 +134,28 @@ public class ClassCodeGeneratorTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void toStringTest() {
+        final GeneratedTOBuilder toBuilder = new GeneratedTOBuilderImpl(
+                "simple.pack", "DefCtor");
+
+        GeneratedPropertyBuilder propBuilder = toBuilder.addProperty("foo");
+        propBuilder.addReturnType(Types.typeForClass(String.class));
+        propBuilder.setReadOnly(false);
+        toBuilder.addToStringProperty(propBuilder);
+
+        propBuilder = toBuilder.addProperty("bar");
+        propBuilder.addReturnType(Types.typeForClass(Integer.class));
+        propBuilder.setReadOnly(false);
+        toBuilder.addToStringProperty(propBuilder);
+        final GeneratedTransferObject genTO = toBuilder.toInstance();
+        final ClassCodeGenerator clsGen = new ClassCodeGenerator();
+        try {
+            final Writer writer = clsGen.generate(genTO);
+            assertNotNull(writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

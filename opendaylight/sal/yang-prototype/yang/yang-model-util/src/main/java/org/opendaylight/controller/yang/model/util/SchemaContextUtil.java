@@ -33,7 +33,7 @@ public final class SchemaContextUtil {
     public static DataSchemaNode findDataSchemaNode(final SchemaContext context, final SchemaPath schemaPath) {
         if (schemaPath != null) {
             final Module module = resolveModuleFromSchemaPath(context, schemaPath);
-            final Queue<QName> prefixedPath = new LinkedList<QName>(schemaPath.getPath());
+            final Queue<QName> prefixedPath = new LinkedList<>(schemaPath.getPath());
 
             if ((module != null) && (prefixedPath != null)) {
                 return findSchemaNodeForGivenPath(context, module, prefixedPath);
@@ -87,32 +87,35 @@ public final class SchemaContextUtil {
         return null;
     }
 
-    public static Module resolveModuleFromSchemaPath(final SchemaContext context, final SchemaPath schemaPath) {
+    private static Module resolveModuleFromSchemaPath(final SchemaContext
+        context, final SchemaPath schemaPath) {
         if ((schemaPath != null) && (schemaPath.getPath() != null)) {
-            List<QName> path = schemaPath.getPath();
-            final QName qname = path.get(path.size()-1);
+            final List<QName> path = schemaPath.getPath();
+            if (!path.isEmpty()) {
+                final QName qname = path.get(path.size() - 1);
 
-            if ((qname != null) && (qname.getNamespace() != null)) {
-                return context.findModuleByNamespace(qname.getNamespace());
+                if ((qname != null) && (qname.getNamespace() != null)) {
+                    return context.findModuleByNamespace(qname.getNamespace());
+                }
             }
         }
         return null;
     }
 
-    public static Module resolveModuleFromTypePath(final SchemaContext context, final TypeDefinition<?> type) {
+    public static Module findParentModuleForTypeDefinition(
+            final SchemaContext context, final TypeDefinition<?> type) {
         final SchemaPath schemaPath = type.getPath();
         if ((schemaPath != null) && (schemaPath.getPath() != null)) {
             if(type instanceof ExtendedType) {
                 List<QName> path = schemaPath.getPath();
-                final QName qname = path.get(path.size()-1);
+                final QName qname = path.get(path.size() - 1);
 
                 if ((qname != null) && (qname.getNamespace() != null)) {
                     return context.findModuleByNamespace(qname.getNamespace());
                 }
             } else {
-                LinkedList<QName> path = new LinkedList<QName>(schemaPath.getPath());
-                path.removeLast();
-                final QName qname = path.get(path.size()-1);
+                List<QName> path = schemaPath.getPath();
+                final QName qname = path.get(path.size() - 2);
 
                 if ((qname != null) && (qname.getNamespace() != null)) {
                     return context.findModuleByNamespace(qname.getNamespace());
@@ -142,7 +145,7 @@ public final class SchemaContextUtil {
                     "The Schema Path MUST contain at least ONE QName which defines namespace and Local name" +
                     "of path.");
         }
-        final QName qname = qnamedPath.get(0);
+        final QName qname = qnamedPath.get(qnamedPath.size() - 1);
         return context.findModuleByNamespace(qname.getNamespace());
     }
 
@@ -186,7 +189,7 @@ public final class SchemaContextUtil {
 
     private static Queue<QName> xpathToQNamePath(final SchemaContext context, final Module parentModule,
             final String xpath) {
-        final Queue<QName> path = new LinkedList<QName>();
+        final Queue<QName> path = new LinkedList<>();
         if (xpath != null) {
             final String[] prefixedPath = xpath.split("/");
 
@@ -240,7 +243,7 @@ public final class SchemaContextUtil {
     private static Queue<QName> resolveRelativeXPath(final SchemaContext context, final Module module,
             final RevisionAwareXPath relativeXPath,
             final SchemaPath leafrefSchemaPath) {
-        final Queue<QName> absolutePath = new LinkedList<QName>();
+        final Queue<QName> absolutePath = new LinkedList<>();
 
         if ((module != null) && (relativeXPath != null) && !relativeXPath.isAbsolute()
                 && (leafrefSchemaPath != null)) {
