@@ -19,11 +19,11 @@ package org.opendaylight.controller.hosttracker.internal;
 import java.util.EnumSet;
 
 import org.opendaylight.controller.hosttracker.Entity;
+import org.opendaylight.controller.hosttracker.IDeviceService;
+import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.controller.hosttracker.IDeviceService;
-import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 
 
 /**

@@ -18,8 +18,8 @@ package org.opendaylight.controller.hosttracker.test;
 
 import org.opendaylight.controller.hosttracker.Entity;
 import org.opendaylight.controller.hosttracker.IDeviceService;
-import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 import org.opendaylight.controller.hosttracker.IEntityClass;
+import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 import org.opendaylight.controller.hosttracker.internal.DefaultEntityClassifier;
 
 import static org.opendaylight.controller.hosttracker.IDeviceService.DeviceField.*;

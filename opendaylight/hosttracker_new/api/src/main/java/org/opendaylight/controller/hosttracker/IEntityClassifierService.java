@@ -36,8 +36,8 @@ package org.opendaylight.controller.hosttracker;
 import java.util.Collection;
 import java.util.EnumSet;
 
-import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 import org.opendaylight.controller.hosttracker.Entity;
+import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 
 /**
  * A component that wishes to participate in entity classification needs to 
