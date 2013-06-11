@@ -40,7 +40,8 @@ class YangToSourcesProcessor {
     static final String LOG_PREFIX = "yang-to-sources:";
     static final String META_INF_YANG_STRING = "META-INF" + File.separator
             + "yang";
-    static final File META_INF_YANG_DIR = new File(META_INF_YANG_STRING);
+    private static final String META_INF_YANG_STRING_FROM_JAR =
+            "META-INF/yang";
 
     private final Log log;
     private final File yangFilesRootDir;
@@ -94,6 +95,9 @@ class YangToSourcesProcessor {
                     Closeable dependentYangResult1 = dependentYangResult;
                     closeables.add(dependentYangResult1);
                     all.addAll(dependentYangResult.yangStreams);
+
+                    log.info("Yang Streams from jar: " + dependentYangResult
+                            .yangStreams.toString());
                 }
 
                 allYangModules = parser.parseYangModelsFromStreamsMapped(all);
@@ -224,6 +228,7 @@ class YangToSourcesProcessor {
         g.setMavenProject(project);
         g.setAdditionalConfig(codeGeneratorCfg.getAdditionalConfiguration());
         File resourceBaseDir = codeGeneratorCfg.getResourceBaseDir(project);
+                        if (entryName.startsWith(META_INF_YANG_STRING_FROM_JAR)) {
 
         YangProvider.setResource(resourceBaseDir, null, project);
         g.setResourceBaseDir(resourceBaseDir);

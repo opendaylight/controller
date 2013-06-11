@@ -18,7 +18,7 @@ import org.opendaylight.controller.yang.binding.Augmentable;
 import org.opendaylight.controller.yang.binding.Augmentation;
 import org.opendaylight.controller.yang.binding.DataObject;
 
-public class Types {
+public final class Types {
     private static final Type SET_TYPE = typeForClass(Set.class);
     private static final Type LIST_TYPE = typeForClass(List.class);
     private static final Type MAP_TYPE = typeForClass(Map.class);

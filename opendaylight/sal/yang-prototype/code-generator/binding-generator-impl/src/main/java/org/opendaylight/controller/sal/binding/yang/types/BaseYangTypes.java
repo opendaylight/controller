@@ -16,7 +16,7 @@ import org.opendaylight.controller.sal.binding.generator.spi.TypeProvider;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
-public class BaseYangTypes {
+public final class BaseYangTypes {
 
     private static Map<String, Type> typeMap = new HashMap<String, Type>();
 

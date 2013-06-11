@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTypeBuilderImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.impl.BindingGeneratorImpl;
+import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
@@ -117,6 +118,7 @@ public class GeneratorJavaFileTest {
         final List<Type> types = bindingGenerator.generateTypes(context);
         final Set<GeneratedType> typesToGenerate = new HashSet<GeneratedType>();
         final Set<GeneratedTransferObject> tosToGenerate = new HashSet<GeneratedTransferObject>();
+        final Set<Enumeration> enumerationToGenerate = new HashSet<Enumeration>();
         for (Type type : types) {
             if (type instanceof GeneratedType
                     && !(type instanceof GeneratedTransferObject)) {
@@ -126,10 +128,13 @@ public class GeneratorJavaFileTest {
             if (type instanceof GeneratedTransferObject) {
                 tosToGenerate.add((GeneratedTransferObject) type);
             }
+            if (type instanceof Enumeration) {
+            	enumerationToGenerate.add((Enumeration) type);            	
+            }
         }
 
         final GeneratorJavaFile generator = new GeneratorJavaFile(
-                typesToGenerate, tosToGenerate);
+                typesToGenerate, tosToGenerate, enumerationToGenerate);
         generator.generateToFile(new File(GENERATOR_OUTPUT_PATH));
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();

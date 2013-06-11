@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 
 import java.io.File;
+import java.net.URL;
 
 import org.apache.maven.it.VerificationException;
 import org.apache.maven.it.Verifier;
@@ -104,8 +105,11 @@ public class YangToSourcesPluginTestIT {
 
     static Verifier setUp(String project, boolean ignoreF)
             throws VerificationException {
-        Verifier verifier = new Verifier(new File("src/test/resources/"
-                + project).getAbsolutePath());
+        final URL path = YangToSourcesPluginTestIT
+                .class.getResource("/" + project
+                + "pom.xml");
+        File parent = new File(path.getPath());
+        Verifier verifier = new Verifier(parent.getParent());
         if (ignoreF)
             verifier.addCliOption("-fn");
         verifier.setMavenDebug(true);
@@ -122,7 +126,8 @@ public class YangToSourcesPluginTestIT {
     @Test
     public void testFindResourceOnCp() throws VerificationException {
         Verifier v1 = new Verifier(
-                new File("src/test/resources/GenerateTest1/").getAbsolutePath());
+                new File(getClass().getResource("/GenerateTest1/pom.xml")
+                        .getPath()).getParent());
         v1.executeGoal("clean");
         v1.executeGoal("package");
         v1.assertFilePresent("target/classes/META-INF/yang/testfile1.yang");
@@ -137,5 +142,4 @@ public class YangToSourcesPluginTestIT {
         v2.assertFileNotPresent("target/classes/META-INF/yang/testfile2.yang");
         v2.assertFileNotPresent("target/classes/META-INF/yang/testfile3.yang");
     }
-
 }

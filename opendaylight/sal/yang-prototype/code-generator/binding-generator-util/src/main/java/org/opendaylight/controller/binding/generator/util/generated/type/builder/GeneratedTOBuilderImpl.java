@@ -101,7 +101,8 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     
     @Override
     public EnumBuilder addEnumeration(String name) {
-        final EnumBuilder builder = new EnumerationBuilderImpl(packageName,
+        final String innerPackageName = packageName + "." + this.name;
+        final EnumBuilder builder = new EnumerationBuilderImpl(innerPackageName,
                 name);
         enumerations.add(builder);
         return builder;

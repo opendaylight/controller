@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * 
  * 
  */
-public class QName {
+public final class QName {
     protected static final Logger logger = LoggerFactory
         .getLogger(QName.class);
 

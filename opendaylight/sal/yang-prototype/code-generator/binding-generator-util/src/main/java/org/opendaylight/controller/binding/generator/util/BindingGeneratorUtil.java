@@ -3,11 +3,14 @@ package org.opendaylight.controller.binding.generator.util;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.*;
+import org.opendaylight.controller.yang.model.api.Module;
+import org.opendaylight.controller.yang.model.api.SchemaNode;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
+import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
 import java.util.*;
 
-public class BindingGeneratorUtil {
+public final class BindingGeneratorUtil {
 
     private static final String[] SET_VALUES = new String[]{"abstract",
             "assert", "boolean", "break", "byte", "case", "catch", "char",
@@ -19,7 +22,8 @@ public class BindingGeneratorUtil {
             "super", "switch", "synchronized", "this", "throw", "throws",
             "transient", "true", "try", "void", "volatile", "while"};
 
-    private BindingGeneratorUtil() {}
+    private BindingGeneratorUtil() {
+    }
 
     public static final Set<String> JAVA_RESERVED_WORDS = new HashSet<String>(
             Arrays.asList(SET_VALUES));
@@ -110,22 +114,43 @@ public class BindingGeneratorUtil {
 
     public static String packageNameForGeneratedType(
             final String basePackageName, final SchemaPath schemaPath) {
+        if (basePackageName == null) {
+            throw new IllegalArgumentException("Base Package Name cannot be " +
+                    "NULL!");
+        }
+        if (schemaPath == null) {
+            throw new IllegalArgumentException("Schema Path cannot be NULL!");
+        }
+
         final StringBuilder builder = new StringBuilder();
         builder.append(basePackageName);
-        if ((schemaPath != null) && (schemaPath.getPath() != null)) {
-            final List<QName> pathToNode = schemaPath.getPath();
-            final int traversalSteps = (pathToNode.size() - 1);
-            for (int i = 0; i < traversalSteps; ++i) {
-                builder.append(".");
-                String nodeLocalName = pathToNode.get(i).getLocalName();
+        final List<QName> pathToNode = schemaPath.getPath();
+        final int traversalSteps = (pathToNode.size() - 1);
+        for (int i = 0; i < traversalSteps; ++i) {
+            builder.append(".");
+            String nodeLocalName = pathToNode.get(i).getLocalName();
 
-                nodeLocalName = nodeLocalName.replace(":", ".");
-                nodeLocalName = nodeLocalName.replace("-", ".");
-                builder.append(nodeLocalName);
-            }
-            return validateJavaPackage(builder.toString());
+            nodeLocalName = nodeLocalName.replace(":", ".");
+            nodeLocalName = nodeLocalName.replace("-", ".");
+            builder.append(nodeLocalName);
         }
-        return null;
+        return validateJavaPackage(builder.toString());
+    }
+
+    public static String packageNameForTypeDefinition(
+            final String basePackageName, final TypeDefinition<?> typeDefinition) {
+        if (basePackageName == null) {
+            throw new IllegalArgumentException("Base Package Name cannot be " +
+                    "NULL!");
+        }
+        if (typeDefinition == null) {
+            throw new IllegalArgumentException("Type Definition reference " +
+                    "cannot be NULL!");
+        }
+
+        final StringBuilder builder = new StringBuilder();
+        builder.append(basePackageName);
+        return validateJavaPackage(builder.toString());
     }
 
     public static String parseToClassName(String token) {
