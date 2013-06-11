@@ -16,7 +16,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,7 +63,8 @@ import org.opendaylight.controller.yang.model.util.Uint32;
 import org.opendaylight.controller.yang.model.util.UnionType;
 
 public class YangParserTest {
-    private final DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final DateFormat simpleDateFormat = new SimpleDateFormat(
+            "yyyy-MM-dd");
 
     private Set<Module> modules;
 
@@ -209,7 +209,7 @@ public class YangParserTest {
         // leaf if-name
         LeafSchemaNode ifName = (LeafSchemaNode) test
                 .getDataChildByName("if-name");
-        Leafref ifNameType = (Leafref)ifName.getType();
+        Leafref ifNameType = (Leafref) ifName.getType();
         QName qname = ifNameType.getQName();
 
         URI baseYangTypeNS = URI.create("urn:ietf:params:xml:ns:yang:1");
@@ -219,9 +219,8 @@ public class YangParserTest {
         assertEquals("leafref", qname.getLocalName());
 
         // leaf name
-        LeafSchemaNode name = (LeafSchemaNode) test
-                .getDataChildByName("name");
-        StringType nameType = (StringType)name.getType();
+        LeafSchemaNode name = (LeafSchemaNode) test.getDataChildByName("name");
+        StringType nameType = (StringType) name.getType();
         QName nameQName = nameType.getQName();
 
         assertEquals(baseYangTypeNS, nameQName.getNamespace());
@@ -232,7 +231,7 @@ public class YangParserTest {
         // leaf count
         LeafSchemaNode count = (LeafSchemaNode) test
                 .getDataChildByName("count");
-        ExtendedType countType = (ExtendedType)count.getType();
+        ExtendedType countType = (ExtendedType) count.getType();
         QName countTypeQName = countType.getQName();
 
         URI expectedNS = URI.create("urn:simple.types.data.demo");
@@ -242,7 +241,7 @@ public class YangParserTest {
         assertEquals("t2", countTypeQName.getPrefix());
         assertEquals("int8", countTypeQName.getLocalName());
 
-        Int8 countTypeBase = (Int8)countType.getBaseType();
+        Int8 countTypeBase = (Int8) countType.getBaseType();
         QName countTypeBaseQName = countTypeBase.getQName();
 
         assertEquals(baseYangTypeNS, countTypeBaseQName.getNamespace());
@@ -341,17 +340,29 @@ public class YangParserTest {
     }
 
     @Test
-    public void testTypedefRangesResolving() {
+    public void testTypedefRangesResolving() throws ParseException {
         Module testModule = TestUtils.findModule(modules, "types1");
 
         LeafSchemaNode testleaf = (LeafSchemaNode) testModule
                 .getDataChildByName("testleaf");
         ExtendedType leafType = (ExtendedType) testleaf.getType();
-        assertEquals("my-type1", leafType.getQName().getLocalName());
-        assertEquals("t2", leafType.getQName().getPrefix());
+        QName leafTypeQName = leafType.getQName();
+        assertEquals("my-type1", leafTypeQName.getLocalName());
+        assertEquals("t1", leafTypeQName.getPrefix());
+        assertEquals(URI.create("urn:simple.container.demo"),
+                leafTypeQName.getNamespace());
+        Date expectedDate = simpleDateFormat.parse("2013-02-27");
+        assertEquals(expectedDate, leafTypeQName.getRevision());
+        assertEquals(1, leafType.getRanges().size());
+
         ExtendedType baseType = (ExtendedType) leafType.getBaseType();
-        assertEquals("my-base-int32-type", baseType.getQName().getLocalName());
-        assertEquals("t2", baseType.getQName().getPrefix());
+        QName baseTypeQName = baseType.getQName();
+        assertEquals("my-type1", baseTypeQName.getLocalName());
+        assertEquals("t2", baseTypeQName.getPrefix());
+        assertEquals(URI.create("urn:simple.types.data.demo"),
+                baseTypeQName.getNamespace());
+        assertEquals(expectedDate, baseTypeQName.getRevision());
+        assertEquals(2, baseType.getRanges().size());
 
         List<RangeConstraint> ranges = leafType.getRanges();
         assertEquals(1, ranges.size());
@@ -371,28 +382,21 @@ public class YangParserTest {
         assertEquals("my-string-type-ext", testleafTypeQName.getLocalName());
         assertEquals("t2", testleafTypeQName.getPrefix());
 
-        Set<String> expectedRegex = new HashSet<String>();
-        expectedRegex.add("[a-k]*");
-        expectedRegex.add("[b-u]*");
-        expectedRegex.add("[e-z]*");
-
-        Set<String> actualRegex = new HashSet<String>();
         List<PatternConstraint> patterns = testleafType.getPatterns();
-        assertEquals(3, patterns.size());
-        for (PatternConstraint pc : patterns) {
-            actualRegex.add(pc.getRegularExpression());
-        }
-        assertEquals(expectedRegex, actualRegex);
+        assertEquals(1, patterns.size());
+        PatternConstraint pattern = patterns.iterator().next();
+        assertEquals("[e-z]*", pattern.getRegularExpression());
 
-        TypeDefinition<?> baseType = testleafType.getBaseType();
+        ExtendedType baseType = (ExtendedType) testleafType.getBaseType();
         assertEquals("my-string-type2", baseType.getQName().getLocalName());
 
-        List<LengthConstraint> lengths = testleafType.getLengths();
-        assertEquals(1, lengths.size());
+        patterns = baseType.getPatterns();
+        assertEquals(1, patterns.size());
+        pattern = patterns.iterator().next();
+        assertEquals("[b-u]*", pattern.getRegularExpression());
 
-        LengthConstraint length = lengths.get(0);
-        assertEquals(5L, length.getMin());
-        assertEquals(10L, length.getMax());
+        List<LengthConstraint> lengths = testleafType.getLengths();
+        assertTrue(lengths.isEmpty());
     }
 
     @Test
@@ -424,14 +428,14 @@ public class YangParserTest {
         ExtendedType baseType = (ExtendedType) testleafType.getBaseType();
         assertEquals("my-base-int32-type", baseType.getQName().getLocalName());
 
-        ExtendedType int32Type = (ExtendedType) baseType.getBaseType();
-        Int32 int32TypeBase = (Int32)int32Type.getBaseType();
-        QName qname = int32TypeBase.getQName();
-        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"), qname.getNamespace());
+        Int32 int32Type = (Int32) baseType.getBaseType();
+        QName qname = int32Type.getQName();
+        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"),
+                qname.getNamespace());
         assertNull(qname.getRevision());
         assertEquals("", qname.getPrefix());
         assertEquals("int32", qname.getLocalName());
-        List<RangeConstraint> ranges = int32Type.getRanges();
+        List<RangeConstraint> ranges = baseType.getRanges();
         assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
         assertEquals(2L, range.getMin());
@@ -447,8 +451,12 @@ public class YangParserTest {
         ExtendedType type = (ExtendedType) testleaf.getType();
         assertEquals(4, (int) type.getFractionDigits());
 
-        Decimal64 baseType = (Decimal64) type.getBaseType();
-        assertEquals(6, (int) baseType.getFractionDigits());
+        ExtendedType typeBase = (ExtendedType) type.getBaseType();
+        assertEquals("my-decimal-type", typeBase.getQName().getLocalName());
+        assertNull(typeBase.getFractionDigits());
+
+        Decimal64 decimal = (Decimal64) typeBase.getBaseType();
+        assertEquals(6, (int) decimal.getFractionDigits());
     }
 
     @Test
@@ -872,7 +880,8 @@ public class YangParserTest {
         Set<TypeDefinition<?>> types = test.getTypeDefinitions();
 
         // my-base-int32-type
-        ExtendedType int32Typedef = (ExtendedType)TestUtils.findTypedef(types, "my-base-int32-type");
+        ExtendedType int32Typedef = (ExtendedType) TestUtils.findTypedef(types,
+                "my-base-int32-type");
         QName int32TypedefQName = int32Typedef.getQName();
 
         URI expectedNS = URI.create("urn:simple.types.data.demo");
@@ -888,24 +897,10 @@ public class YangParserTest {
         assertEquals(int32TypedefQName, typePath.get(0));
 
         // my-base-int32-type/int32
-        ExtendedType int32Ext = (ExtendedType)int32Typedef.getBaseType();
-        QName int32ExtQName = int32Ext.getQName();
-
-        assertEquals(expectedNS, int32ExtQName.getNamespace());
-        assertEquals(expectedDate, int32ExtQName.getRevision());
-        assertEquals("t2", int32ExtQName.getPrefix());
-        assertEquals("int32", int32ExtQName.getLocalName());
-
-        SchemaPath int32ExtSchemaPath = int32Ext.getPath();
-        List<QName> int32ExtPath = int32ExtSchemaPath.getPath();
-        assertEquals(2, int32ExtPath.size());
-        assertEquals(int32TypedefQName, int32ExtPath.get(0));
-        assertEquals(int32ExtQName, int32ExtPath.get(1));
-
-        // my-base-int32-type/int32/int32
-        Int32 int32 = (Int32)int32Ext.getBaseType();
+        Int32 int32 = (Int32) int32Typedef.getBaseType();
         QName int32QName = int32.getQName();
-        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"), int32QName.getNamespace());
+        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"),
+                int32QName.getNamespace());
         assertNull(int32QName.getRevision());
         assertEquals("", int32QName.getPrefix());
         assertEquals("int32", int32QName.getLocalName());
@@ -914,7 +909,6 @@ public class YangParserTest {
         List<QName> int32Path = int32SchemaPath.getPath();
         assertEquals(3, int32Path.size());
         assertEquals(int32TypedefQName, int32Path.get(0));
-        assertEquals(int32ExtQName, int32Path.get(1));
         assertEquals(int32QName, int32Path.get(2));
     }
 
@@ -924,7 +918,8 @@ public class YangParserTest {
         Set<TypeDefinition<?>> types = test.getTypeDefinitions();
 
         // my-base-int32-type
-        ExtendedType myDecType = (ExtendedType)TestUtils.findTypedef(types, "my-decimal-type");
+        ExtendedType myDecType = (ExtendedType) TestUtils.findTypedef(types,
+                "my-decimal-type");
         QName myDecTypeQName = myDecType.getQName();
 
         URI expectedNS = URI.create("urn:simple.types.data.demo");
@@ -940,10 +935,11 @@ public class YangParserTest {
         assertEquals(myDecTypeQName, typePath.get(0));
 
         // my-base-int32-type/int32
-        Decimal64 dec64 = (Decimal64)myDecType.getBaseType();
+        Decimal64 dec64 = (Decimal64) myDecType.getBaseType();
         QName dec64QName = dec64.getQName();
 
-        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"), dec64QName.getNamespace());
+        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"),
+                dec64QName.getNamespace());
         assertNull(dec64QName.getRevision());
         assertEquals("", dec64QName.getPrefix());
         assertEquals("decimal64", dec64QName.getLocalName());

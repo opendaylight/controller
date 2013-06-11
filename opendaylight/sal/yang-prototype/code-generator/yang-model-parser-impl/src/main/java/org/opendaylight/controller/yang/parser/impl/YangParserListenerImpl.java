@@ -342,7 +342,6 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
                 if ("union".equals(typeName)) {
                     List<String> typePath = new ArrayList<String>(actualPath);
                     typePath.add(typeName);
-
                     SchemaPath p = createActualSchemaPath(typePath, namespace,
                             revision, yangModelPrefix);
                     UnionTypeBuilder unionBuilder = moduleBuilder.addUnionType(
@@ -357,12 +356,15 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
                             line);
                 } else {
                     type = parseTypeBody(typeName, typeBody, actualPath,
-                            namespace, revision, yangModelPrefix);
+                            namespace, revision, yangModelPrefix,
+                            moduleBuilder.getActualNode());
                     moduleBuilder.setType(type, actualPath);
                 }
             }
         } else {
-            type = parseUnknownTypeBody(typeQName, typeBody);
+            type = parseUnknownTypeBody(typeQName, typeBody, actualPath,
+                    namespace, revision, yangModelPrefix,
+                    moduleBuilder.getActualNode(), moduleBuilder);
             // mark parent node of this type statement as dirty
             moduleBuilder.addDirtyNode(actualPath);
             moduleBuilder.setType(type, actualPath);
