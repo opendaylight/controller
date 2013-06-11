@@ -30,6 +30,7 @@ import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.containermanager.IContainerManager;
+import org.opendaylight.controller.hosttracker.IDeviceService;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.northbound.commons.RestMessages;
@@ -85,6 +86,38 @@ public class HostTrackerNorthbound {
         return username;
     }
 
+    private IDeviceService getIDeviceService(String containerName) {
+        IContainerManager containerManager = (IContainerManager) ServiceHelper
+                .getGlobalInstance(IContainerManager.class, this);
+        if (containerManager == null) {
+            throw new ServiceUnavailableException("Container "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        boolean found = false;
+        List<String> containerNames = containerManager.getContainerNames();
+        for (String cName : containerNames) {
+            if (cName.trim().equalsIgnoreCase(containerName.trim())) {
+                found = true;
+            }
+        }
+
+        if (found == false) {
+            throw new ResourceNotFoundException(containerName + " "
+                    + RestMessages.NOCONTAINER.toString());
+        }
+
+        IDeviceService deviceService = (IDeviceService) ServiceHelper
+                .getInstance(IDeviceService.class, containerName, this);
+
+        if (deviceService == null) {
+            throw new ServiceUnavailableException("Host Tracker "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        return deviceService;
+    }
+
     private IfIptoHost getIfIpToHostService(String containerName) {
         IContainerManager containerManager = (IContainerManager) ServiceHelper
                 .getGlobalInstance(IContainerManager.class, this);
@@ -135,20 +168,21 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Hosts getActiveHosts(@PathParam("containerName") String containerName) {
- 
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.READ, this)) {
+
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                Privilege.READ, this)) {
             throw new UnauthorizedException(
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
-        IfIptoHost hostTracker = getIfIpToHostService(containerName);
-        if (hostTracker == null) {
+
+        IDeviceService deviceService = getIDeviceService(containerName);
+        if (deviceService == null) {
             throw new ServiceUnavailableException("Host Tracker "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        return new Hosts(hostTracker.getAllHosts());
+        return new Hosts(deviceService.getAllDevices());
     }
 
     /**
@@ -170,8 +204,8 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Hosts getInactiveHosts(
             @PathParam("containerName") String containerName) {
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.READ, this)) {
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                Privilege.READ, this)) {
             throw new UnauthorizedException(
                     "User is not authorized to perform this operation on container "
                             + containerName);
@@ -207,8 +241,8 @@ public class HostTrackerNorthbound {
     public HostNodeConnector getHostDetails(
             @PathParam("containerName") String containerName,
             @PathParam("networkAddress") String networkAddress) {
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.READ, this)) {
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                Privilege.READ, this)) {
             throw new UnauthorizedException(
                     "User is not authorized to perform this operation on container "
                             + containerName);
@@ -276,8 +310,8 @@ public class HostTrackerNorthbound {
             @QueryParam("nodeConnectorId") String nodeConnectorId,
             @DefaultValue("0") @QueryParam("vlan") String vlan) {
 
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.WRITE, this)) {
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                Privilege.WRITE, this)) {
             throw new UnauthorizedException(
                     "User is not authorized to perform this operation on container "
                             + containerName);
@@ -342,9 +376,9 @@ public class HostTrackerNorthbound {
     public Response deleteFlow(
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "networkAddress") String networkAddress) {
- 
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.WRITE, this)) {
+
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                Privilege.WRITE, this)) {
             throw new UnauthorizedException(
                     "User is not authorized to perform this operation on container "
                             + containerName);

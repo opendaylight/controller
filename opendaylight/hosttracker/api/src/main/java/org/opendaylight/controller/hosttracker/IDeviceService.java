@@ -38,6 +38,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector;
 
 /**
@@ -143,7 +144,7 @@ public interface IDeviceService {
      * Get an unmodifiable collection view over all devices currently known.
      * @return the collection of all devices
      */
-    public Collection<? extends IDevice> getAllDevices();
+    public Set<HostNodeConnector> getAllDevices();
 
     /**
      * Create an index over a set of fields.  This allows efficient lookup
