@@ -24,63 +24,86 @@ import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 
-public class InterfaceGenerator implements CodeGenerator {
+public final class InterfaceGenerator implements CodeGenerator {
 
-    private Map<String, LinkedHashMap<String, Integer>> imports;
+	private Map<String, LinkedHashMap<String, Integer>> imports;
 
-    public Writer generate(Type type) throws IOException {
-        Writer writer = new StringWriter();
-        if (type instanceof GeneratedType
-                && !(type instanceof GeneratedTransferObject)) {
-            GeneratedType genType = (GeneratedType) type;
-            imports = GeneratorUtil.createImports(genType);
+	private String generateEnums(List<Enumeration> enums) {
+		String result = "";
+		if (enums != null) {
+			EnumGenerator enumGenerator = new EnumGenerator();
+			for (Enumeration en : enums) {
+				try {
+					result = result
+							+ (enumGenerator.generateInnerEnumeration(en, TAB).toString() + NL);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return result;
+	}
 
-            final String currentPkg = genType.getPackageName();
-            final List<Constant> constants = genType.getConstantDefinitions();
-            final List<MethodSignature> methods = genType
-                    .getMethodDefinitions();
-            final List<Enumeration> enums = genType.getEnumDefintions();
+	private String generateConstants(List<Constant> constants, String pkgName) {
+		String result = "";
+		if (constants != null) {
+			for (Constant c : constants) {
+				result = result
+						+ GeneratorUtil
+								.createConstant(c, TAB, imports, pkgName) + NL;
+			}
+			result.concat(NL);
+		}
+		return result;
+	}
 
-            writer.write(GeneratorUtil.createPackageDeclaration(genType
-                    .getPackageName()));
-            writer.write(NL);
+	public String generateMethods(List<MethodSignature> methods, String pkgName) {
+		String result = "";
 
-            List<String> importLines = GeneratorUtil.createImportLines(imports);
-            for (String line : importLines) {
-                writer.write(line + NL);
-            }
-            writer.write(NL);
+		if (methods != null) {
+			for (MethodSignature m : methods) {
+				result = result
+						+ GeneratorUtil.createMethodDeclaration(m, TAB,
+								imports, pkgName) + NL;
+			}
+			result = result + NL;
+		}
+		return result;
+	}
 
-            writer.write(GeneratorUtil.createIfcDeclaration(genType, "",
-                    imports));
-            writer.write(NL);
+	public Writer generate(Type type) throws IOException {
+		Writer writer = new StringWriter();
+		if (type instanceof GeneratedType
+				&& !(type instanceof GeneratedTransferObject)) {
+			GeneratedType genType = (GeneratedType) type;
+			imports = GeneratorUtil.createImports(genType);
 
-            if (constants != null) {
-                for (Constant c : constants) {
-                    writer.write(GeneratorUtil.createConstant(c, TAB, imports,
-                            currentPkg) + NL);
-                }
-                writer.write(NL);
-            }
+			final String currentPkg = genType.getPackageName();
+			final List<Constant> constants = genType.getConstantDefinitions();
+			final List<MethodSignature> methods = genType
+					.getMethodDefinitions();
+			final List<Enumeration> enums = genType.getEnumDefintions();
 
-            if (methods != null) {
-                for (MethodSignature m : methods) {
-                    writer.write(GeneratorUtil.createMethodDeclaration(m, TAB,
-                            imports, currentPkg) + NL);
-                }
-                writer.write(NL);
-            }
+			writer.write(GeneratorUtil.createPackageDeclaration(genType
+					.getPackageName()));
+			writer.write(NL);
 
-            if (enums != null) {
-                for (Enumeration e : enums) {
-                    writer.write(GeneratorUtil.createEnum(e, TAB) + NL);
-                }
-                writer.write(NL);
-            }
+			List<String> importLines = GeneratorUtil.createImportLines(imports);
+			for (String line : importLines) {
+				writer.write(line + NL);
+			}
+			writer.write(NL);
+			writer.write(GeneratorUtil.createIfcDeclaration(genType, "",
+					imports));
+			writer.write(NL);
 
-            writer.write(RCB);
-        }
-        return writer;
-    }
+			writer.write(generateEnums(enums));
+			writer.write(generateConstants(constants, currentPkg));
+			writer.write(generateMethods(methods, currentPkg));
+
+			writer.write(RCB);
+		}
+		return writer;
+	}
 
 }

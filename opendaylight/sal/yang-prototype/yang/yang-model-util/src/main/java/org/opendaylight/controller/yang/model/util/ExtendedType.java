@@ -194,126 +194,54 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((baseType == null) ? 0 : baseType.hashCode());
-        result = prime * result
-                + ((defaultValue == null) ? 0 : defaultValue.hashCode());
-        result = prime * result
-                + ((description == null) ? 0 : description.hashCode());
-        result = prime
-                * result
-                + ((unknownSchemaNodes == null) ? 0 : unknownSchemaNodes
-                        .hashCode());
-        result = prime * result + ((path == null) ? 0 : path.hashCode());
-        result = prime * result
-                + ((reference == null) ? 0 : reference.hashCode());
-        result = prime * result + ((status == null) ? 0 : status.hashCode());
-        result = prime * result
-                + ((typeName == null) ? 0 : typeName.hashCode());
-        result = prime * result + ((units == null) ? 0 : units.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (obj == null) {
+        if (!(o instanceof ExtendedType)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+
+        ExtendedType that = (ExtendedType) o;
+        if (path != null ? !path.equals(that.path) : that.path != null) {
             return false;
         }
-        ExtendedType other = (ExtendedType) obj;
-        if (baseType == null) {
-            if (other.baseType != null) {
-                return false;
-            }
-        } else if (!baseType.equals(other.baseType)) {
+        if (typeName != null ? !typeName.equals(that.typeName) : that.typeName != null)
             return false;
-        }
-        if (defaultValue == null) {
-            if (other.defaultValue != null) {
-                return false;
-            }
-        } else if (!defaultValue.equals(other.defaultValue)) {
-            return false;
-        }
-        if (description == null) {
-            if (other.description != null) {
-                return false;
-            }
-        } else if (!description.equals(other.description)) {
-            return false;
-        }
-        if (unknownSchemaNodes == null) {
-            if (other.unknownSchemaNodes != null) {
-                return false;
-            }
-        } else if (!unknownSchemaNodes.equals(other.unknownSchemaNodes)) {
-            return false;
-        }
-        if (path == null) {
-            if (other.path != null) {
-                return false;
-            }
-        } else if (!path.equals(other.path)) {
-            return false;
-        }
-        if (reference == null) {
-            if (other.reference != null) {
-                return false;
-            }
-        } else if (!reference.equals(other.reference)) {
-            return false;
-        }
-        if (status != other.status) {
-            return false;
-        }
-        if (typeName == null) {
-            if (other.typeName != null) {
-                return false;
-            }
-        } else if (!typeName.equals(other.typeName)) {
-            return false;
-        }
-        if (units == null) {
-            if (other.units != null) {
-                return false;
-            }
-        } else if (!units.equals(other.units)) {
-            return false;
-        }
+
         return true;
     }
 
     @Override
+    public int hashCode() {
+        int result = typeName != null ? typeName.hashCode() : 0;
+        result = 31 * result + (path != null ? path.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
-        StringBuilder builder2 = new StringBuilder();
-        builder2.append("ExtendedType [typeName=");
-        builder2.append(typeName);
-        builder2.append(", baseType=");
-        builder2.append(baseType);
-        builder2.append(", path=");
-        builder2.append(path);
-        builder2.append(", description=");
-        builder2.append(description);
-        builder2.append(", reference=");
-        builder2.append(reference);
-        builder2.append(", unknownSchemaNodes=");
-        builder2.append(unknownSchemaNodes);
-        builder2.append(", status=");
-        builder2.append(status);
-        builder2.append(", units=");
-        builder2.append(units);
-        builder2.append(", defaultValue=");
-        builder2.append(defaultValue);
-        builder2.append("]");
-        return builder2.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append("ExtendedType [typeName=");
+        builder.append(typeName);
+        builder.append(", baseType=");
+        builder.append(baseType);
+        builder.append(", path=");
+        builder.append(path);
+        builder.append(", description=");
+        builder.append(description);
+        builder.append(", reference=");
+        builder.append(reference);
+        builder.append(", unknownSchemaNodes=");
+        builder.append(unknownSchemaNodes);
+        builder.append(", status=");
+        builder.append(status);
+        builder.append(", units=");
+        builder.append(units);
+        builder.append(", defaultValue=");
+        builder.append(defaultValue);
+        builder.append("]");
+        return builder.toString();
     }
 
     public List<RangeConstraint> getRanges() {

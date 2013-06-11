@@ -43,53 +43,6 @@ public class GeneratedTypesTest {
     }
 
     @Test
-    public void testLeafEnumResolving() {
-        final String ietfInterfacesPath = getClass().getResource(
-                "/enum-test-models/ietf-interfaces@2012-11-15.yang").getPath();
-        final String ifTypePath = getClass().getResource(
-                "/enum-test-models/iana-if-type@2012-06-05.yang").getPath();
-        final String yangTypesPath = getClass().getResource(
-                "/enum-test-models/ietf-yang-types@2010-09-24.yang").getPath();
-
-        final SchemaContext context = resolveSchemaContextFromFiles(
-                ietfInterfacesPath, ifTypePath, yangTypesPath);
-        assertTrue(context != null);
-
-        final BindingGenerator bindingGen = new BindingGeneratorImpl();
-        final List<Type> genTypes = bindingGen.generateTypes(context);
-        assertTrue(genTypes != null);
-    }
-
-    @Test
-    public void testTypedefEnumResolving() {
-        final String ianaIfTypePath = getClass().getResource(
-                "/leafref-test-models/iana-if-type@2012-06-05.yang").getPath();
-
-        final SchemaContext context = resolveSchemaContextFromFiles(ianaIfTypePath);
-        assertTrue(context != null);
-        final BindingGenerator bindingGen = new BindingGeneratorImpl();
-        final List<Type> genTypes = bindingGen.generateTypes(context);
-        assertTrue(genTypes != null);
-        assertEquals(2, genTypes.size());
-
-        final Type type = genTypes.get(1);
-        assertTrue(type instanceof GeneratedTransferObject);
-
-        final GeneratedTransferObject genTransObj = (GeneratedTransferObject) type;
-        final List<GeneratedProperty> properties = genTransObj.getProperties();
-        assertNotNull(properties);
-        assertEquals(1, properties.size());
-
-        GeneratedProperty property = properties.get(0);
-        assertNotNull(property);
-        assertNotNull(property.getReturnType());
-
-        assertTrue(property.getReturnType() instanceof Enumeration);
-        final Enumeration enumer = (Enumeration) property.getReturnType();
-        assertEquals(272, enumer.getValues().size());
-    }
-
-    @Test
     public void testMultipleModulesResolving() {
         final String topologyPath = getClass().getResource(
                 "/abstract-topology.yang").getPath();
@@ -103,7 +56,7 @@ public class GeneratedTypesTest {
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
         assertTrue(genTypes != null);
-        assertEquals(24, genTypes.size());
+        assertEquals(27, genTypes.size());
     }
 
     @Test
@@ -140,7 +93,7 @@ public class GeneratedTypesTest {
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
         final List<Type> genTypes = bindingGen.generateTypes(context);
 
-        assertEquals(50, genTypes.size());
+        assertEquals(53, genTypes.size());
         assertTrue(genTypes != null);
 
         GeneratedTransferObject gtIfcKey = null;
@@ -310,8 +263,8 @@ public class GeneratedTypesTest {
         assertTrue(genTypes != null);
         assertEquals(3, genTypes.size());
 
-        final GeneratedType simpleContainer = (GeneratedType) genTypes.get(0);
-        final GeneratedType nestedContainer = (GeneratedType) genTypes.get(1);
+        final GeneratedType simpleContainer = (GeneratedType) genTypes.get(1);
+        final GeneratedType nestedContainer = (GeneratedType) genTypes.get(2);
 
         assertEquals("SimpleContainer", simpleContainer.getName());
         assertEquals("NestedContainer", nestedContainer.getName());
@@ -388,8 +341,8 @@ public class GeneratedTypesTest {
         assertTrue(genTypes != null);
         assertEquals(3, genTypes.size());
 
-        final GeneratedType simpleContainer = (GeneratedType) genTypes.get(0);
-        final GeneratedType nestedContainer = (GeneratedType) genTypes.get(1);
+        final GeneratedType simpleContainer = (GeneratedType) genTypes.get(1);
+        final GeneratedType nestedContainer = (GeneratedType) genTypes.get(2);
 
         assertEquals("SimpleContainer", simpleContainer.getName());
         assertEquals("NestedContainer", nestedContainer.getName());

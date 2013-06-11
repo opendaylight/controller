@@ -232,6 +232,7 @@ public final class YangParserImpl implements YangModelParser {
             final YangLexer lexer = new YangLexer(input);
             final CommonTokenStream tokens = new CommonTokenStream(lexer);
             final YangParser parser = new YangParser(tokens);
+
             result = parser.yang();
         } catch (IOException e) {
             logger.warn("Exception while reading yang file: " + yangStream, e);

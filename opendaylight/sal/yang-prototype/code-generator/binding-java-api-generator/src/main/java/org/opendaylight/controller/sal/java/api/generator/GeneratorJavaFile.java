@@ -18,35 +18,45 @@ import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
+import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GeneratorJavaFile {
+public final class GeneratorJavaFile {
 
     private static final Logger log = LoggerFactory
             .getLogger(GeneratorJavaFile.class);
     private final CodeGenerator interfaceGenerator;
     private final ClassCodeGenerator classGenerator;
+    private final EnumGenerator enumGenerator;
+    
     private final Set<GeneratedType> genTypes;
     private final Set<GeneratedTransferObject> genTransferObjects;
+    private final Set<Enumeration> enumerations; 
 
     public GeneratorJavaFile(final CodeGenerator codeGenerator,
             final Set<GeneratedType> types) {
         this.interfaceGenerator = codeGenerator;
         this.genTypes = types;
         this.genTransferObjects = new HashSet<>();
-        classGenerator = new ClassCodeGenerator();
+        this.enumerations = new HashSet<>();
+        this.classGenerator = new ClassCodeGenerator();
+        this.enumGenerator = new EnumGenerator();
     }
 
     public GeneratorJavaFile(final Set<GeneratedType> types,
-            final Set<GeneratedTransferObject> genTransferObjects) {
+            final Set<GeneratedTransferObject> genTransferObjects,
+            final Set<Enumeration> enumerations) {
         this.interfaceGenerator = new InterfaceGenerator();
         this.classGenerator = new ClassCodeGenerator();
+        this.enumGenerator = new EnumGenerator();
+        
         this.genTypes = types;
         this.genTransferObjects = genTransferObjects;
+        this.enumerations = enumerations;
     }
 
     public List<File> generateToFile(final File parentDirectory) throws IOException {
@@ -67,6 +77,16 @@ public class GeneratorJavaFile {
                 result.add(genFile);
             }
         }
+        
+        for (Enumeration enumeration : enumerations) {
+            final File genFile = generateTypeToJavaFile(parentDirectory,
+                    enumeration, enumGenerator);
+
+            if (genFile != null) {
+                result.add(genFile);
+            }
+        }
+        
         return result;
     }
 

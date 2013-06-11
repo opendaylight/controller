@@ -42,6 +42,8 @@ class YangToSourcesProcessor {
     private static final String LOG_PREFIX = "yang-to-sources:";
     private static final String META_INF_YANG_STRING = "META-INF"
             + File.separator + "yang";
+    private static final String META_INF_YANG_STRING_FROM_JAR =
+            "META-INF/yang";
     private static final File META_INF_YANG_DIR = new File(META_INF_YANG_STRING);
 
     private final Log log;
@@ -92,6 +94,9 @@ class YangToSourcesProcessor {
                     Closeable dependentYangResult1 = dependentYangResult;
                     closeables.add(dependentYangResult1);
                     all.addAll(dependentYangResult.yangStreams);
+
+                    log.info("Yang Streams from jar: " + dependentYangResult
+                            .yangStreams.toString());
                 }
 
                 allYangModules = parser.parseYangModelsFromStreamsMapped(all);
@@ -267,7 +272,7 @@ class YangToSourcesProcessor {
                         ZipEntry entry = entries.nextElement();
                         String entryName = entry.getName();
 
-                        if (entryName.startsWith(META_INF_YANG_STRING)) {
+                        if (entryName.startsWith(META_INF_YANG_STRING_FROM_JAR)) {
                             if (entry.isDirectory() == false
                                     && entryName.endsWith(".yang")) {
                                 foundFilesForReporting.add(entryName);

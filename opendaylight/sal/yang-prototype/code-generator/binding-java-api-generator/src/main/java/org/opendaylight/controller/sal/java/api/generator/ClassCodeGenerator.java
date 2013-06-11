@@ -17,11 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
+import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 
-public class ClassCodeGenerator implements CodeGenerator {
+public final class ClassCodeGenerator implements CodeGenerator {
 
     private Map<String, LinkedHashMap<String, Integer>> imports;
 
@@ -29,11 +30,12 @@ public class ClassCodeGenerator implements CodeGenerator {
     public Writer generate(Type type) throws IOException {
         final Writer writer = new StringWriter();
         if (type instanceof GeneratedTransferObject) {
-            GeneratedTransferObject genTO = (GeneratedTransferObject) type;
+            GeneratedTransferObject genTO = (GeneratedTransferObject) type;            
             imports = GeneratorUtil.createImports(genTO);
-
+            
             final String currentPkg = genTO.getPackageName();
             final List<GeneratedProperty> fields = genTO.getProperties();
+            final List<Enumeration> enums = genTO.getEnumDefintions();
 
             writer.write(GeneratorUtil.createPackageDeclaration(currentPkg));
             writer.write(NL);
@@ -48,6 +50,14 @@ public class ClassCodeGenerator implements CodeGenerator {
                     imports));
             writer.write(NL);
             writer.write(NL);
+            
+            if (enums != null) {           
+               	EnumGenerator enumGenerator = new EnumGenerator();
+            	for ( Enumeration e : enums ) {            		
+            		writer.write(enumGenerator.generateInnerEnumeration(e, TAB).toString());
+            		writer.write(NL);
+            	}
+            }
 
             if (fields != null) {
                 for (GeneratedProperty field : fields) {

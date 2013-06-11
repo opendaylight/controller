@@ -7,25 +7,21 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.junit.Assert.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
+import org.opendaylight.controller.sal.binding.model.api.*;
+import org.opendaylight.controller.yang.model.api.Module;
+import org.opendaylight.controller.yang.model.api.SchemaContext;
+import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
+import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
-import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
-import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
-import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
+import static org.junit.Assert.*;
 
 public class AugmentedTypeTest {
 
@@ -63,16 +59,16 @@ public class AugmentedTypeTest {
         GeneratedTransferObject gtTunnelKey = null;
         GeneratedType gtNetworkLink2 = null;
 
-        for(final Type type : genTypes) {
-            if(type.getName().equals("InterfaceKey") && type.getPackageName().contains("augment._abstract.topology")) {
+        for (final Type type : genTypes) {
+            if (type.getName().equals("InterfaceKey") && type.getPackageName().contains("augment._abstract.topology")) {
                 gtInterfaceKey = (GeneratedTransferObject) type;
-            } else if(type.getName().equals("Interface") && type.getPackageName().contains("augment._abstract.topology")) {
+            } else if (type.getName().equals("Interface") && type.getPackageName().contains("augment._abstract.topology")) {
                 gtInterface = (GeneratedType) type;
-            } else if(type.getName().equals("Tunnel") && type.getPackageName().contains("augment._abstract.topology")) {
+            } else if (type.getName().equals("Tunnel") && type.getPackageName().contains("augment._abstract.topology")) {
                 gtTunnel = (GeneratedType) type;
-            } else if(type.getName().equals("TunnelKey") && type.getPackageName().contains("augment._abstract.topology")) {
+            } else if (type.getName().equals("TunnelKey") && type.getPackageName().contains("augment._abstract.topology")) {
                 gtTunnelKey = (GeneratedTransferObject) type;
-            } else if(type.getName().equals("NetworkLink2") && type.getPackageName().contains("augment._abstract.topology")) {
+            } else if (type.getName().equals("NetworkLink2") && type.getPackageName().contains("augment._abstract.topology")) {
                 gtNetworkLink2 = (GeneratedType) type;
             }
         }
@@ -90,8 +86,10 @@ public class AugmentedTypeTest {
         }
         assertNotNull("getIfcKeyMethod is null", getIfcKeyMethod);
         assertNotNull("getIfcKeyMethod.getReturnType() is null", getIfcKeyMethod.getReturnType());
-        assertFalse("getIfcKeyMethod.getReturnType() should not be Void", getIfcKeyMethod.getReturnType().equals("java.lang.Void"));
-        assertTrue("getIfcKeyMethod.getReturnType().getName() must be InterfaceKey", getIfcKeyMethod.getReturnType().getName().equals("InterfaceKey"));
+        assertFalse("getIfcKeyMethod.getReturnType() should not be Void",
+                getIfcKeyMethod.getReturnType().equals("java.lang.Void"));
+        assertTrue("getIfcKeyMethod.getReturnType().getName() must be InterfaceKey",
+                getIfcKeyMethod.getReturnType().getName().equals("InterfaceKey"));
 
         MethodSignature getHigherLayerIfMethod = null;
         for (final MethodSignature method : gtInterfaceMethods) {
@@ -101,9 +99,12 @@ public class AugmentedTypeTest {
             }
         }
         assertNotNull("getHigherLayerIfMethod is null", getHigherLayerIfMethod);
-        assertNotNull("getHigherLayerIfMethod.getReturnType() is null", getHigherLayerIfMethod.getReturnType());
-        assertFalse("getHigherLayerIfMethod.getReturnType() should not be Void", getHigherLayerIfMethod.getReturnType().equals("java.lang.Void"));
-        assertTrue("getHigherLayerIfMethod.getReturnType().getName() must be List", getHigherLayerIfMethod.getReturnType().getName().equals("List"));
+        assertNotNull("getHigherLayerIfMethod.getReturnType() is null",
+                getHigherLayerIfMethod.getReturnType());
+        assertFalse("getHigherLayerIfMethod.getReturnType() should not be Void",
+                getHigherLayerIfMethod.getReturnType().equals("java.lang.Void"));
+        assertTrue("getHigherLayerIfMethod.getReturnType().getName() must be List",
+                getHigherLayerIfMethod.getReturnType().getName().equals("List"));
 
         // 'InterfaceKey'
         assertNotNull("gtInterfaceKey is null", gtInterfaceKey);
@@ -118,8 +119,10 @@ public class AugmentedTypeTest {
         }
         assertNotNull("gtInterfaceId is null", gtInterfaceId);
         assertNotNull("gtInterfaceId.getReturnType() is null", gtInterfaceId.getReturnType());
-        assertFalse("gtInterfaceId.getReturnType() should not be Void", gtInterfaceId.getReturnType().equals("java.lang.Void"));
-        assertTrue("gtInterfaceId.getReturnType().getName() must be String", gtInterfaceId.getReturnType().getName().equals("String"));
+        assertFalse("gtInterfaceId.getReturnType() should not be Void",
+                gtInterfaceId.getReturnType().equals("java.lang.Void"));
+        assertTrue("gtInterfaceId.getReturnType().getName() must be String",
+                gtInterfaceId.getReturnType().getName().equals("String"));
 
         // 'Tunnel'
         assertNotNull("gtTunnel is null", gtTunnel);
@@ -133,9 +136,12 @@ public class AugmentedTypeTest {
             }
         }
         assertNotNull("getTunnelKeyMethod is null", getTunnelKeyMethod);
-        assertNotNull("getTunnelKeyMethod.getReturnType()", getTunnelKeyMethod.getReturnType());
-        assertFalse("getTunnelKeyMethod.getReturnType() should not be Void", getTunnelKeyMethod.getReturnType().equals("java.lang.Void"));
-        assertTrue("getTunnelKeyMethod.getReturnType().getName() must be TunnelKey", getTunnelKeyMethod.getReturnType().getName().equals("TunnelKey"));
+        assertNotNull("getTunnelKeyMethod.getReturnType()",
+                getTunnelKeyMethod.getReturnType());
+        assertFalse("getTunnelKeyMethod.getReturnType() should not be Void",
+                getTunnelKeyMethod.getReturnType().equals("java.lang.Void"));
+        assertTrue("getTunnelKeyMethod.getReturnType().getName() must be TunnelKey",
+                getTunnelKeyMethod.getReturnType().getName().equals("TunnelKey"));
 
         // 'TunnelKey'
         assertNotNull("gtTunnelKey is null", gtTunnelKey);
@@ -149,9 +155,12 @@ public class AugmentedTypeTest {
             }
         }
         assertNotNull("gtTunnelId is null", gtTunnelId);
-        assertNotNull("gtTunnelId.getReturnType() is null", gtTunnelId.getReturnType());
-        assertFalse("gtTunnelId.getReturnType() should not be Void", gtTunnelId.getReturnType().equals("java.lang.Void"));
-        assertTrue("gtTunnelId.getReturnType().getName() must be Integer", gtTunnelId.getReturnType().getName().equals("Integer"));
+        assertNotNull("gtTunnelId.getReturnType() is null",
+                gtTunnelId.getReturnType());
+        assertFalse("gtTunnelId.getReturnType() should not be Void",
+                gtTunnelId.getReturnType().equals("java.lang.Void"));
+        assertTrue("gtTunnelId.getReturnType().getName() must be Integer",
+                gtTunnelId.getReturnType().getName().equals("Integer"));
 
         // 'NetworkLink2'
         assertNotNull("gtNetworkLink2 is null", gtNetworkLink2);
@@ -160,21 +169,18 @@ public class AugmentedTypeTest {
         assertNotNull("networkLink2Methods is null", networkLink2Methods);
 
 //        FIXME: in some cases getIfcMethod is null which causes test fail. fix ASAP
-//        MethodSignature getIfcMethod = null;
-//        for (MethodSignature method : networkLink2Methods) {
-//            if (method.getName().equals("getInterface")) {
-//                getIfcMethod = method;
-//                break;
-//            }
-//        }
+//      MethodSignature getIfcMethod = null;
+//      for (MethodSignature method : networkLink2Methods) {
+//          if (method.getName().equals("getInterface")) {
+//              getIfcMethod = method;
+//              break;
+//          }
+//      }
 //
-//        assertNotNull("getIfcMethod is null", getIfcMethod);
-//        assertNotNull("getIfcMethod.getReturnType() is null",
-//                getIfcMethod.getReturnType());
-//        assertFalse("getIfcMethod.getReturnType() should not be Void",
-//                getIfcMethod.getReturnType().equals("java.lang.Void"));
-//        assertTrue("getIfcMethod.getReturnType().getName() must be String",
-//                getIfcMethod.getReturnType().getName().equals("String"));
+//      assertNotNull("getIfcMethod is null", getIfcMethod);
+//      assertNotNull("getIfcMethod.getReturnType() is null", getIfcMethod.getReturnType());
+//      assertFalse("getIfcMethod.getReturnType() should not be Void", getIfcMethod.getReturnType().equals("java.lang.Void"));
+//      assertTrue("getIfcMethod.getReturnType().getName() must be String", getIfcMethod.getReturnType().getName().equals("String"));
     }
 
     @Test
