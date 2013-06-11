@@ -9,7 +9,7 @@
     <version>1.4.0-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
-  <artifactId>hosttracker.implementation</artifactId>
+  <artifactId>hosttracker_new.implementation</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
@@ -46,12 +46,13 @@
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.topology,
+              org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.hosttracker,
               org.opendaylight.controller.topologymanager,
               org.opendaylight.controller.sal.packet.address,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.hosttracker.hostAware,
+              org.opendaylight.controller.hosttracker_new.hostAware,
               javax.xml.bind.annotation,
               javax.xml.bind,
               org.apache.felix.dm,
@@ -117,7 +118,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>hosttracker</artifactId>
+      <artifactId>hosttracker_new</artifactId>
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
   </dependencies>

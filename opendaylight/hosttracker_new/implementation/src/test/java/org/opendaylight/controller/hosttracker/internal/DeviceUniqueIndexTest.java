@@ -30,6 +30,8 @@ import junit.framework.TestCase;
 
 import org.opendaylight.controller.hosttracker.Entity;
 import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
+import org.opendaylight.controller.hosttracker.internal.Device;
+import org.opendaylight.controller.hosttracker.internal.DeviceUniqueIndex;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
