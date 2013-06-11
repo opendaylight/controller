@@ -1,0 +1,18 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>model-parent</artifactId>
+        <groupId>org.opendaylight.controller</groupId>
+        <version>0.5-SNAPSHOT</version>
+    </parent>
+    <artifactId>model-topology</artifactId>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>ietf-inet-types</artifactId>
+        <version>2010.09.24-SNAPSHOT</version>
+    </dependency>
+    </dependencies>
+</project>
