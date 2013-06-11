@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///Ek\u003d",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-06-11T13:18:42Z",
+      "side": 1,
+      "message": "Ed, i have added this in the newer version of the patch. I guess this can be abandoned now.",
+      "revId": "719043b96f44c0d728ce0ad9bb0bbcab219366f6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
