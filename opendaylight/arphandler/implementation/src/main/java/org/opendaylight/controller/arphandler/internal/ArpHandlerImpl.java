@@ -18,13 +18,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.opendaylight.controller.arphandler.IArpHandler;
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
@@ -46,38 +41,35 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Subnet;
-import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ArpHandler implements IHostFinder, IListenDataPacket {
+public class ArpHandlerImpl implements IArpHandler  {
     private static final Logger logger = LoggerFactory
-            .getLogger(ArpHandler.class);
+            .getLogger(ArpHandlerImpl.class);
     private IfIptoHost hostTracker = null;
     private ISwitchManager switchManager = null;
-    private ITopologyManager topologyManager;
     private IDataPacketService dataPacketService = null;
     private Set<IfHostListener> hostListener = Collections
             .synchronizedSet(new HashSet<IfHostListener>());
-    private ConcurrentHashMap<InetAddress, Set<HostNodeConnector>> arpRequestors;
-    private ConcurrentHashMap<InetAddress, Short> countDownTimers;
-    private Timer periodicTimer;
 
-    void setHostListener(IfHostListener s) {
+    public void setHostListener(IfHostListener s) {
         if (this.hostListener != null) {
             this.hostListener.add(s);
         }
     }
 
-    void unsetHostListener(IfHostListener s) {
+    public void unsetHostListener(IfHostListener s) {
         if (this.hostListener != null) {
             this.hostListener.remove(s);
         }
     }
 
-    void setDataPacketService(IDataPacketService s) {
+    public void setDataPacketService(IDataPacketService s) {
         this.dataPacketService = s;
     }
 
-    void unsetDataPacketService(IDataPacketService s) {
+    public void unsetDataPacketService(IDataPacketService s) {
         if (this.dataPacketService == s) {
             this.dataPacketService = null;
         }
@@ -96,16 +88,6 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         logger.debug("UNSetting HostTracker");
         if (this.hostTracker == s) {
             this.hostTracker = null;
-        }
-    }
-
-    public void setTopologyManager(ITopologyManager tm) {
-        this.topologyManager = tm;
-    }
-
-    public void unsetTopologyManager(ITopologyManager tm) {
-        if (this.topologyManager == tm) {
-            this.topologyManager = null;
         }
     }
 
@@ -174,11 +156,9 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
          * This is to avoid continuous flooding
          */
         if (Arrays.equals(sourceMAC, getControllerMAC())) {
-            if (logger.isDebugEnabled()) {
-              logger.debug(
+            logger.debug(
                     "Receive the self originated packet (srcMAC {}) --> DROP",
                     HexEncode.bytesToHexString(sourceMAC));
-            }
             return;
         }
 
@@ -187,26 +167,28 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             subnet = switchManager.getSubnetByNetworkAddress(sourceIP);
         }
         if (subnet == null) {
-            logger.debug("can't find subnet matching {}, drop packet",sourceIP);
+            logger.debug("can't find subnet matching {}, drop packet", sourceIP
+                    .toString());
             return;
         }
-        logger.debug("Found {} matching {}", subnet, sourceIP);
+        logger.debug("Found {} matching {}", subnet.toString(), sourceIP
+                .toString());
         /*
          * Make sure that the host is a legitimate member of this subnet
          */
         if (!subnet.hasNodeConnector(p)) {
             logger.debug("{} showing up on {} does not belong to {}",
-                    new Object[] { sourceIP, p, subnet });
+                    new Object[] { sourceIP.toString(), p, subnet.toString() });
             return;
         }
 
-        HostNodeConnector requestor = null;
         if (isUnicastMAC(sourceMAC)) {
             // TODO For not this is only OPENFLOW but we need to fix this
             if (p.getType().equals(
                     NodeConnector.NodeConnectorIDType.OPENFLOW)) {
+                HostNodeConnector host = null;
                 try {
-                    requestor = new HostNodeConnector(sourceMAC, sourceIP, p, subnet
+                    host = new HostNodeConnector(sourceMAC, sourceIP, p, subnet
                             .getVlan());
                 } catch (ConstructionException e) {
                     return;
@@ -215,34 +197,27 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
                  * Learn host from the received ARP REQ/REPLY, inform
                  * Host Tracker
                  */
-                logger.debug("Inform Host tracker of new host {}", requestor.getNetworkAddress());
+                logger.debug("Inform Host tracker of new host {}", host);
                 synchronized (this.hostListener) {
                     for (IfHostListener listener : this.hostListener) {
-                        listener.hostListener(requestor);
+                        listener.hostListener(host);
                     }
                 }
             }
         }
         /*
-         * Gratuitous ARP. If there are hosts (in arpRequestors) waiting for the
-         * ARP reply for this sourceIP, it's time to generate the reply and it
-         * to these hosts
+         * No further action is needed if this is a gratuitous ARP
          */
         if (sourceIP.equals(targetIP)) {
-            generateAndSendReply(sourceIP, sourceMAC);
             return;
         }
 
         /*
-         * ARP Reply. If there are hosts (in arpRequesttors) waiting for the ARP
-         * reply for this sourceIP, it's time to generate the reply and it to
-         * these hosts
+         * No further action is needed if this is a ARP Reply
          */
         if (pkt.getOpCode() != ARP.REQUEST) {
-            generateAndSendReply(sourceIP, sourceMAC);
             return;
         }
-
         /*
          * ARP Request Handling:
          * If targetIP is the IP of the subnet, reply with ARP REPLY
@@ -266,19 +241,6 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
          */
         HostNodeConnector host = hostTracker.hostQuery(targetIP);
         if (host == null) {
-            // add the requestor to the list so that we can replay the reply
-            // when the host responds
-            if (requestor != null) {
-                Set<HostNodeConnector> requestorSet = arpRequestors
-                        .get(targetIP);
-                if ((requestorSet == null) || requestorSet.isEmpty()) {
-                    requestorSet = new HashSet<HostNodeConnector>();
-                    countDownTimers.put(targetIP, (short) 2); // set max timeout
-                                                              // to 2sec
-                }
-                requestorSet.add(requestor);
-                arpRequestors.put(targetIP, requestorSet);
-            }
             sendBcastARPRequest(targetIP, subnet);
             return;
         }
@@ -321,9 +283,6 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             nodeConnectors = subnet.getNodeConnectors();
         }
         for (NodeConnector p : nodeConnectors) {
-            if (topologyManager.isInternal(p)) {
-                continue;
-            }
             ARP arp = new ARP();
             byte[] senderIP = subnet.getNetworkAddress().getAddress();
             byte[] targetIPB = targetIP.getAddress();
@@ -350,7 +309,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
                     .setEtherType(EtherTypes.ARP.shortValue()).setPayload(arp);
 
             // TODO For now send port-by-port, see how to optimize to
-            // send to multiple ports at once
+            // send to a bunch of port on the same node in a shoot
             RawPacket destPkt = this.dataPacketService.encodeDataPacket(ethernet);
             destPkt.setOutgoingNodeConnector(p);
 
@@ -405,17 +364,18 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
     }
 
     public void find(InetAddress networkAddress) {
-        logger.debug("Received find IP {}", networkAddress);
+        logger.debug("Received find IP {}", networkAddress.toString());
 
         Subnet subnet = null;
         if (switchManager != null) {
             subnet = switchManager.getSubnetByNetworkAddress(networkAddress);
         }
         if (subnet == null) {
-            logger.debug("can't find subnet matching IP {}", networkAddress);
+            logger.debug("can't find subnet matching IP {}", networkAddress
+                    .toString());
             return;
         }
-        logger.debug("found subnet {}", subnet);
+        logger.debug("found subnet {}", subnet.toString());
 
         // send a broadcast ARP Request to this interface
         sendBcastARPRequest(networkAddress, subnet);
@@ -434,7 +394,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
         }
         if (subnet == null) {
             logger.debug("can't find subnet matching {}", host
-                    .getNetworkAddress());
+                    .getNetworkAddress().toString());
             return;
         }
         sendUcastARPRequest(host, subnet);
@@ -459,10 +419,11 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             subnet = switchManager.getSubnetByNetworkAddress(dIP);
         }
         if (subnet == null) {
-            logger.debug("can't find subnet matching {}, drop packet", dIP);
+            logger.debug("can't find subnet matching {}, drop packet", dIP
+                    .toString());
             return;
         }
-        logger.debug("Found {} matching {}", subnet, dIP);
+        logger.debug("Found {} matching {}", subnet.toString(), dIP.toString());
         /*
          * unknown destination host, initiate ARP request
          */
@@ -483,8 +444,6 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
      *
      */
     void init() {
-        arpRequestors = new ConcurrentHashMap<InetAddress, Set<HostNodeConnector>>();
-        countDownTimers = new ConcurrentHashMap<InetAddress, Short>();
     }
 
     /**
@@ -503,7 +462,6 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
      *
      */
     void start() {
-        startPeriodicTimer();
     }
 
     /**
@@ -513,15 +471,14 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
      *
      */
     void stop() {
-        cancelPeriodicTimer();
     }
 
-    void setSwitchManager(ISwitchManager s) {
+    public void setSwitchManager(ISwitchManager s) {
         logger.debug("SwitchManager set");
         this.switchManager = s;
     }
 
-    void unsetSwitchManager(ISwitchManager s) {
+    public void unsetSwitchManager(ISwitchManager s) {
         if (this.switchManager == s) {
             logger.debug("SwitchManager removed!");
             this.switchManager = null;
@@ -551,55 +508,5 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
             }
         }
         return PacketResult.IGNORED;
-    }
-
-    private void startPeriodicTimer() {
-        this.periodicTimer = new Timer("ArpHandler Periodic Timer");
-        this.periodicTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                Set<InetAddress> targetIPs = countDownTimers.keySet();
-                Set<InetAddress> expiredTargets = new HashSet<InetAddress>();
-                for (InetAddress t : targetIPs) {
-                    short tick = countDownTimers.get(t);
-                    tick--;
-                    if (tick <= 0) {
-                        expiredTargets.add(t);
-                    } else {
-                        countDownTimers.replace(t, tick);
-                    }
-                }
-                for (InetAddress t : expiredTargets) {
-                    countDownTimers.remove(t);
-                    // remove the requestor(s) who have been waited for the ARP
-                    // reply from this target for more than 1sec
-                    arpRequestors.remove(t);
-                    logger.debug("{} didn't respond to ARP request", t);
-                }
-            }
-        }, 0, 1000);
-    }
-
-    private void cancelPeriodicTimer() {
-        if (this.periodicTimer != null) {
-            this.periodicTimer.cancel();
-        }
-    }
-
-    private void generateAndSendReply(InetAddress sourceIP, byte[] sourceMAC) {
-        Set<HostNodeConnector> hosts = arpRequestors.remove(sourceIP);
-        if ((hosts == null) || hosts.isEmpty()) {
-            return;
-        }
-        countDownTimers.remove(sourceIP);
-        for (HostNodeConnector host : hosts) {
-            logger.debug(
-                    "Sending ARP Reply with src {}/{}, target {}/{}",
-                    new Object[] { sourceMAC, sourceIP,
-                            host.getDataLayerAddressBytes(),
-                            host.getNetworkAddress() });
-            sendARPReply(host.getnodeConnector(), sourceMAC, sourceIP,
-                    host.getDataLayerAddressBytes(), host.getNetworkAddress());
-        }
     }
 }

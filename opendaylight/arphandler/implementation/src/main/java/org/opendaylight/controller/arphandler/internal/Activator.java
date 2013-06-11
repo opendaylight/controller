@@ -9,24 +9,22 @@
 
 package org.opendaylight.controller.arphandler.internal;
 
-import java.util.Hashtable;
 import java.util.Dictionary;
-import org.apache.felix.dm.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Hashtable;
 
+import org.apache.felix.dm.Component;
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.IHostFinder;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
-import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
+import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
-import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Activator extends ComponentActivatorAbstractBase {
-    protected static final Logger logger = LoggerFactory
-            .getLogger(Activator.class);
+    protected static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
     /**
      * Function called when the activator starts just after some
@@ -57,7 +55,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * Object
      */
     public Object[] getImplementations() {
-        Object[] res = { ArpHandler.class };
+        Object[] res = { ArpHandlerImpl.class };
         return res;
     }
 
@@ -75,7 +73,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * should not be the case though.
      */
     public void configureInstance(Component c, Object imp, String containerName) {
-        if (imp.equals(ArpHandler.class)) {
+        if (imp.equals(ArpHandlerImpl.class)) {
             // export the service
             Dictionary<String, String> props = new Hashtable<String, String>();
             props.put("salListenerName", "arphandler");
@@ -87,10 +85,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                     "unsetSwitchManager").setRequired(true));
 
             c.add(createContainerServiceDependency(containerName).setService(
-                    ITopologyManager.class).setCallbacks("setTopologyManager",
-                    "unsetTopologyMananger").setRequired(true));
-
-           c.add(createContainerServiceDependency(containerName).setService(
                     IDataPacketService.class).setCallbacks(
                     "setDataPacketService", "unsetDataPacketService")
                     .setRequired(true));
