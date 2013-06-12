@@ -1104,6 +1104,8 @@ public class NorthboundIT {
 
                 mavenBundle("org.opendaylight.controller", "usermanager",
                         "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller",
+                        "usermanager.implementation", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "logging.bridge",
                         "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "clustering.test",

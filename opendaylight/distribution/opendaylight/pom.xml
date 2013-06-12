@@ -57,7 +57,8 @@
     <module>../../statisticsmanager/implementation</module>
     <module>../../statisticsmanager/integrationtest</module>
     <module>../../topologymanager</module>
-    <module>../../usermanager</module>
+    <module>../../usermanager/api</module>
+    <module>../../usermanager/implementation</module>
     <module>../../security</module>
 
 
