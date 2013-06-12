@@ -46,6 +46,8 @@
     <module>../../hosttracker/api</module>
     <module>../../hosttracker/implementation</module>
     <module>../../hosttracker/integrationtest</module>
+    <module>../../hosttracker_new/api</module>
+    <module>../../hosttracker_new/implementation</module>
     <module>../../containermanager/api</module>
     <module>../../containermanager/implementation</module>
     <module>../../switchmanager/api</module>
