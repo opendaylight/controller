@@ -17,7 +17,7 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.usermanager.IUserManager;
-import org.opendaylight.controller.usermanager.internal.UserConfig;
+import org.opendaylight.controller.usermanager.UserConfig;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
