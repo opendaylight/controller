@@ -156,9 +156,9 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
                     "usermanager.authorizationSaveConfigEvent",
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheConfigException cce) {
-            logger.error("\nCache configuration invalid - check cache mode");
+            logger.error("Cache configuration invalid - check cache mode");
         } catch (CacheExistException ce) {
-            logger.error("\nCache already exits - destroy and recreate if needed");
+            logger.debug("Skipping cache creation as already present");
         }
     }
 
@@ -172,43 +172,43 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         activeUsers = (ConcurrentMap<String, AuthenticatedUser>) clusterGlobalService
                 .getCache("usermanager.activeUsers");
         if (activeUsers == null) {
-            logger.error("\nFailed to get cache for activeUsers");
+            logger.error("Failed to get cache for activeUsers");
         }
 
         localUserConfigList = (ConcurrentMap<String, UserConfig>) clusterGlobalService
                 .getCache("usermanager.localUserConfigList");
         if (localUserConfigList == null) {
-            logger.error("\nFailed to get cache for localUserConfigList");
+            logger.error("Failed to get cache for localUserConfigList");
         }
 
         remoteServerConfigList = (ConcurrentMap<String, ServerConfig>) clusterGlobalService
                 .getCache("usermanager.remoteServerConfigList");
         if (remoteServerConfigList == null) {
-            logger.error("\nFailed to get cache for remoteServerConfigList");
+            logger.error("Failed to get cache for remoteServerConfigList");
         }
 
         authorizationConfList = (ConcurrentMap<String, AuthorizationConfig>) clusterGlobalService
                 .getCache("usermanager.authorizationConfList");
         if (authorizationConfList == null) {
-            logger.error("\nFailed to get cache for authorizationConfList");
+            logger.error("Failed to get cache for authorizationConfList");
         }
 
         localUserListSaveConfigEvent = (ConcurrentMap<Long, String>) clusterGlobalService
                 .getCache("usermanager.localUserSaveConfigEvent");
         if (localUserListSaveConfigEvent == null) {
-            logger.error("\nFailed to get cache for localUserSaveConfigEvent");
+            logger.error("Failed to get cache for localUserSaveConfigEvent");
         }
 
         remoteServerSaveConfigEvent = (ConcurrentMap<Long, String>) clusterGlobalService
                 .getCache("usermanager.remoteServerSaveConfigEvent");
         if (remoteServerSaveConfigEvent == null) {
-            logger.error("\nFailed to get cache for remoteServerSaveConfigEvent");
+            logger.error("Failed to get cache for remoteServerSaveConfigEvent");
         }
 
         authorizationSaveConfigEvent = (ConcurrentMap<Long, String>) clusterGlobalService
                 .getCache("usermanager.authorizationSaveConfigEvent");
         if (authorizationSaveConfigEvent == null) {
-            logger.error("\nFailed to get cache for authorizationSaveConfigEvent");
+            logger.error("Failed to get cache for authorizationSaveConfigEvent");
         }
     }
 
@@ -866,29 +866,29 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     @Override
     public List<String> getUserRoles(String userName) {
-        if (userName == null) {
-            return new ArrayList<String>(0);
+        List<String> roles = null;
+        if (userName != null) {
+            /*
+             * First look in active users then in local configured users,
+             * finally in local authorized users
+             */
+            if (activeUsers.containsKey(userName)) {
+                roles = activeUsers.get(userName).getUserRoles();
+            } else if (localUserConfigList.containsKey(userName)) {
+                roles = localUserConfigList.get(userName).getRoles();
+            } else if (authorizationConfList.containsKey(userName)) {
+                roles = authorizationConfList.get(userName).getRoles();
+            }
         }
-        AuthenticatedUser locatedUser = activeUsers.get(userName);
-        return (locatedUser == null) ? new ArrayList<String>(0) : locatedUser
-                .getUserRoles();
+        return (roles == null) ? new ArrayList<String>(0) : roles;
     }
 
     @Override
     public UserLevel getUserLevel(String username) {
-        // Returns the controller well-know user level for the passed user
-        List<String> rolesNames = null;
+        // Returns the highest controller user level for the passed user
+        List<String> rolesNames = getUserRoles(username);
 
-        // First check in active users then in local configured users
-        if (activeUsers.containsKey(username)) {
-            List<String> roles = activeUsers.get(username).getUserRoles();
-            rolesNames = (roles == null || roles.isEmpty()) ? null : roles;
-        } else if (localUserConfigList.containsKey(username)) {
-            UserConfig config = localUserConfigList.get(username);
-            rolesNames = (config == null) ? null : config.getRoles();
-        }
-
-        if (rolesNames == null) {
+        if (rolesNames.isEmpty()) {
             return UserLevel.NOUSER;
         }
 
@@ -926,19 +926,11 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     @Override
     public List<UserLevel> getUserLevels(String username) {
-        // Returns the controller well-know user levels for the passed user
-        List<String> rolesNames = null;
+        // Returns the controller user levels for the passed user
+        List<String> rolesNames =  getUserRoles(username);
         List<UserLevel> levels = new ArrayList<UserLevel>();
 
-        if (activeUsers.containsKey(username)) {
-            List<String> roles = activeUsers.get(username).getUserRoles();
-            rolesNames = (roles == null || roles.isEmpty()) ? null : roles;
-        } else if (localUserConfigList.containsKey(username)) {
-            UserConfig config = localUserConfigList.get(username);
-            rolesNames = (config == null) ? null : config.getRoles();
-        }
-
-        if (rolesNames == null) {
+        if (rolesNames.isEmpty()) {
             return levels;
         }
 
@@ -1075,7 +1067,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     }
 
-    // following are setters for use in unit testing
+    // Following are setters for use in unit testing
     void setLocalUserConfigList(ConcurrentMap<String, UserConfig> ucl) {
         if (ucl != null) {
             this.localUserConfigList = ucl;
@@ -1118,5 +1110,33 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     @Override
     public String getPassword(String username) {
         return localUserConfigList.get(username).getPassword();
+    }
+
+    @Override
+    public boolean isRoleInUse(String role) {
+        if (role == null || role.isEmpty()) {
+            return false;
+        }
+        // Check against controller roles
+        if (role.equals(UserLevel.SYSTEMADMIN.toString())
+                || role.equals(UserLevel.NETWORKADMIN.toString())
+                || role.equals(UserLevel.NETWORKOPERATOR.toString())) {
+            return true;
+        }
+        // Check if container roles
+        if (containerAuthorizationClient != null) {
+            if (containerAuthorizationClient.isApplicationRole(role)) {
+                return true;
+            }
+        }
+        // Finally if application role
+        if (applicationAuthorizationClients != null) {
+            for (IResourceAuthorization client : this.applicationAuthorizationClients) {
+                if (client.isApplicationRole(role)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
