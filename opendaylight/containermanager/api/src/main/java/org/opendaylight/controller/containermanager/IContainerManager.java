@@ -23,14 +23,14 @@ public interface IContainerManager {
     /**
      * Returns a list of Containers that currently exist.
      *
-     * @return	array of String Container names
+     * @return  array of String Container names
      */
     public boolean hasNonDefaultContainer();
 
     /**
      * Returns a list of Containers that currently exist.
      *
-     * @return	array of String Container names
+     * @return  array of String Container names
      */
     public List<String> getContainerNames();
 
@@ -39,7 +39,7 @@ public interface IContainerManager {
      * TODO : REMOVE THIS FUNCTION and make Save as a service rather than the
      * current hack of calling individual save routines.
      *
-     * @return	status code
+     * @return  status code
      */
     public Status saveContainerConfig();
 }

@@ -19,22 +19,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class NodeConnectors {
-	@XmlElement
-	List<NodeConnectorProperties> nodeConnectorProperties;
-	//To satisfy JAXB
-	private NodeConnectors() {
-		
-	}
-	
-	public NodeConnectors(List<NodeConnectorProperties> nodeConnectorProperties) {
-		this.nodeConnectorProperties = nodeConnectorProperties;
-	}
+        @XmlElement
+        List<NodeConnectorProperties> nodeConnectorProperties;
+        //To satisfy JAXB
+        private NodeConnectors() {
 
-	public List<NodeConnectorProperties> getNodeConnectorProperties() {
-		return nodeConnectorProperties;
-	}
+        }
 
-	public void setNodeConnectorProperties(List<NodeConnectorProperties> nodeConnectorProperties) {
-		this.nodeConnectorProperties = nodeConnectorProperties;
-	}
+        public NodeConnectors(List<NodeConnectorProperties> nodeConnectorProperties) {
+                this.nodeConnectorProperties = nodeConnectorProperties;
+        }
+
+        public List<NodeConnectorProperties> getNodeConnectorProperties() {
+                return nodeConnectorProperties;
+        }
+
+        public void setNodeConnectorProperties(List<NodeConnectorProperties> nodeConnectorProperties) {
+                this.nodeConnectorProperties = nodeConnectorProperties;
+        }
 }

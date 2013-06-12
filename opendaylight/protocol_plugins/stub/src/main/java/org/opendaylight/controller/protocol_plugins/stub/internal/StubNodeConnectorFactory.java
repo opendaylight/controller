@@ -13,7 +13,7 @@ public class StubNodeConnectorFactory implements INodeConnectorFactory
        * Function called by the dependency manager when at least one dependency
        * become unsatisfied or when the component is shutting down because for
        * example bundle is being stopped.
-       * 
+       *
        */
       void destroy() {
       }
@@ -21,7 +21,7 @@ public class StubNodeConnectorFactory implements INodeConnectorFactory
       /**
        * Function called by dependency manager after "init ()" is called and after
        * the services provided by the class are registered in the service registry
-       * 
+       *
        */
       void start() {
       }
@@ -30,11 +30,11 @@ public class StubNodeConnectorFactory implements INodeConnectorFactory
        * Function called by the dependency manager before the services exported by
        * the component are unregistered, this will be followed by a "destroy ()"
        * calls
-       * 
+       *
        */
       void stop() {
       }
-      
+
       public NodeConnector fromStringNoNode(String typeStr, String IDStr,
               Node n){
           if(typeStr.equals("STUB")){

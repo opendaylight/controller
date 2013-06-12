@@ -17,111 +17,111 @@ import javax.xml.bind.annotation.XmlRootElement;
  * This class represents the host where load balancing service will
  * redirect VIP traffic for load balancing. All these hosts have to
  * register with a pool to be a part of traffic load balancing.
- * This entity is referred to as a 'PoolMember'. 
- * Load balancer service differentiates each pool member based on its 
+ * This entity is referred to as a 'PoolMember'.
+ * Load balancer service differentiates each pool member based on its
  * two properties { ip address, attached pool }.
  * A host (IP) can be attached to two different pools through creation of two
  * different pool member objects.
- * 
+ *
  * NOTE: Each pool member should have a unique name.
  *
  */
 @XmlRootElement(name="poolmember")
 @XmlAccessorType(XmlAccessType.NONE)
 public class PoolMember {
-    
+
     /*
      * Unique name of the pool member
      */
     @XmlElement
     private String name;
-    
+
     /*
      * IP address of the pool member
      */
     @XmlElement
     private String ip;
-    
+
     /*
      * Name of the pool this member is attached to.
      */
     @XmlElement(name="poolname")
     private String poolName;
-    
+
     /*
      * Status (active/inactive)
      */
     @XmlElement
     private String status;
-    
+
     /**
      * Private constructor used for JAXB mapping
      */
     @SuppressWarnings("unused")
     private PoolMember() {}
-    
+
     public PoolMember(String name, String memberIP, String poolName){
         this.name = name;
         this.ip = memberIP;
         this.poolName = poolName;
     }
-    
+
     /**
      * @return the name
      */
     public String getName() {
         return name;
     }
-    
+
     /**
      * @param name the name to set
      */
     public void setName(String name) {
         this.name = name;
     }
-    
+
     /**
      * @return the ip
      */
     public String getIp() {
         return ip;
     }
-    
+
     /**
      * @param ip the ip to set
      */
     public void setIp(String ip) {
         this.ip = ip;
     }
-    
+
     /**
      * @return the poolName
      */
     public String getPoolName() {
         return poolName;
     }
-    
+
     /**
      * @param poolName the poolName to set
      */
     public void setPoolName(String poolName) {
         this.poolName = poolName;
     }
-    
+
     /**
      * @return the status
      */
     public String getStatus() {
         return status;
     }
-    
+
     /**
      * @param status the status to set
      */
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -134,7 +134,7 @@ public class PoolMember {
                 + ((poolName == null) ? 0 : poolName.hashCode());
         return result;
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */

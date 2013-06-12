@@ -55,12 +55,42 @@
       <plugin>
        <groupId>org.ops4j.pax.exam</groupId>
        <artifactId>maven-paxexam-plugin</artifactId>
+       <version>1.2.4</version>
         <executions>
           <execution>
             <id>generate-config</id>
             <goals>
               <goal>generate-depends-file</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <configuration>
+          <failsOnError>true</failsOnError>
+          <configLocation>${project.parent.parent.basedir}/space_and_tabs_checks.xml</configLocation>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>${propertymavenplugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>set-system-properties</goal>
+            </goals>
+            <configuration>
+              <properties>
+                <property>
+                  <name>logback.configurationFile</name>
+                  <value>${project.parent.parent.basedir}/logback.xml</value>
+                </property>
+              </properties>
+            </configuration>
           </execution>
         </executions>
       </plugin>

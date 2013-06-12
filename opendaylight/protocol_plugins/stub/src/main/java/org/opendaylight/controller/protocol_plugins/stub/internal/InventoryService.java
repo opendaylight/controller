@@ -112,24 +112,24 @@ public class InventoryService implements IPluginInInventoryService {
             node = new Node("STUB", new Integer(0xCAFE));
         }catch(ConstructionException e){
             node = null;
-        }       
-     
+        }
+
         nodeProps.put(node, propMap);
-        
+
         try{
             node = new Node("STUB", 3366);
         }catch(ConstructionException e){
             node = null;
-        }       
+        }
         nodeProps.put(node, propMap);
-        
+
         try{
             node = new Node("STUB", 4477);
         }catch(ConstructionException e){
             node = null;
-        }       
+        }
         nodeProps.put(node, propMap);
-        
+
         return nodeProps;
     }
 

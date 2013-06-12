@@ -110,7 +110,7 @@ public class UDP extends Packet {
      */
     public void setHeaderField(String headerField, byte[] readValue) {
         /*if (headerField.equals("Protocol")) {
-        	payloadClass = decodeMap.get(readValue);
+                payloadClass = decodeMap.get(readValue);
         }*/
         hdrFieldsMap.put(headerField, readValue);
     }

@@ -95,7 +95,7 @@ public class DaylightWebAdmin {
 
         return userManager.removeLocalUser(userName).getDescription();
     }
-    
+
     @RequestMapping(value = "/users/password/{username}", method = RequestMethod.POST)
     @ResponseBody
     public Status changePassword(@PathVariable("username") String username, HttpServletRequest request,
@@ -105,23 +105,23 @@ public class DaylightWebAdmin {
         if (userManager == null) {
             return new Status(StatusCode.GONE, "User Manager not found");
         }
-        
+
         if (!authorize(userManager, UserLevel.NETWORKADMIN, request)) {
             return new Status(StatusCode.FORBIDDEN, "Operation not permitted");
         }
-        
+
         if (newPassword.isEmpty()) {
             return new Status(StatusCode.BADREQUEST, "Empty passwords not allowed");
         }
-        
+
         Status status = userManager.changeLocalUserPassword(username, currentPassword, newPassword);
-        
+
         return status;
     }
 
     /**
      * Is the operation permitted for the given level
-     * 
+     *
      * @param level
      */
     private boolean authorize(IUserManager userManager, UserLevel level,

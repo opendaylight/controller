@@ -21,7 +21,7 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
  * Execute it multiple times to achieve QinQ
  *
  * 802.1q = [TPID(16) + TCI(16)]
- * 			TCI = [PCP(3) + CFI(1) + VID(12)]
+ *                      TCI = [PCP(3) + CFI(1) + VID(12)]
  *
  *
  *

@@ -32,10 +32,10 @@ public interface IfIptoHost {
      * Northbound APIs. If a binding is unknown, then an ARP request is initiated
      * immediately to discover the host.
      *
-     * @param networkAddress	IP Address of the Host encapsulated in class InetAddress
-     * @return					{@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}
-     * 							Class that contains the Host info such as its MAC address,
-     * 							Switch ID, port, VLAN. If Host is not found, returns NULL
+     * @param networkAddress    IP Address of the Host encapsulated in class InetAddress
+     * @return                  {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}
+     *                                                  Class that contains the Host info such as its MAC address,
+     *                                                  Switch ID, port, VLAN. If Host is not found, returns NULL
      */
     public HostNodeConnector hostFind(InetAddress networkAddress);
 
@@ -43,10 +43,10 @@ public interface IfIptoHost {
      * Checks the local Host Database to see if a Host has been learned for a
      * given IP address.
      *
-     * @param networkAddress	IP Address of the Host encapsulated in class InetAddress
-     * @return					{@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}
-     * 							Class that contains the Host info such as its MAC address,
-     * 							Switch ID, port, VLAN. If Host is not found, returns NULL
+     * @param networkAddress    IP Address of the Host encapsulated in class InetAddress
+     * @return                  {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}
+     *                                                  Class that contains the Host info such as its MAC address,
+     *                                                  Switch ID, port, VLAN. If Host is not found, returns NULL
      *
      */
     public HostNodeConnector hostQuery(InetAddress networkAddress);
@@ -55,8 +55,8 @@ public interface IfIptoHost {
      * Initiates an immediate discovery of the Host for a given IP address. This
      * provides for the calling applications to block on the host discovery.
      *
-     * @param networkAddress 		IP address encapsulated in InetAddress class
-     * @return						Future {@link org.opendaylight.controller.hosttracker.HostTrackerCallable}
+     * @param networkAddress            IP address encapsulated in InetAddress class
+     * @return                      Future {@link org.opendaylight.controller.hosttracker.HostTrackerCallable}
      */
     public Future<HostNodeConnector> discoverHost(InetAddress networkAddress);
 
@@ -64,8 +64,8 @@ public interface IfIptoHost {
      * Returns the Network Hierarchy for a given Host. This API is typically used by
      * applications like Hadoop for Rack Awareness functionality.
      *
-     * @param 					IP address of the Host encapsulated in InetAddress class
-     * @return					List of String ArrayList containing the Hierarchies.
+     * @param                                   IP address of the Host encapsulated in InetAddress class
+     * @return                  List of String ArrayList containing the Hierarchies.
      */
     public List<List<String>> getHostNetworkHierarchy(InetAddress hostAddress);
 
@@ -73,9 +73,9 @@ public interface IfIptoHost {
      * Returns all the the Hosts either learned dynamically or added statically via
      * Northbound APIs.
      *
-     * @return					Set of {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}.
-     * 							Class that contains the Host info such as its MAC address,
-     * 							Switch ID, port, VLAN.
+     * @return                  Set of {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}.
+     *                                                  Class that contains the Host info such as its MAC address,
+     *                                                  Switch ID, port, VLAN.
      */
     public Set<HostNodeConnector> getAllHosts();
 
@@ -84,9 +84,9 @@ public interface IfIptoHost {
      * are categorized as "Active" because the Switch and Port they are connected to, are in
      * up state.
      *
-     * @return					Set of {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}.
-     * 							Class that contains the Host info such as MAC address,
-     * 							Switch ID, port, VLAN. If Host is not found, returns NULL
+     * @return                  Set of {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}.
+     *                                                  Class that contains the Host info such as MAC address,
+     *                                                  Switch ID, port, VLAN. If Host is not found, returns NULL
      */
     public Set<HostNodeConnector> getActiveStaticHosts();
 
@@ -95,10 +95,10 @@ public interface IfIptoHost {
      * are categorized as "Inactive" because either the Switch or the Port they are connected
      * to, is in down state.
      *
-     * @return					Set of HostNodeConnector {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}.
-     * 							HostNodeConnector is Class that
-     * 							contains the Host info such as its MAC address, OpenFlowNode
-     * 							ID, port, VLAN.
+     * @return                  Set of HostNodeConnector {@link org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector}.
+     *                                                  HostNodeConnector is Class that
+     *                                                  contains the Host info such as its MAC address, OpenFlowNode
+     *                                                  ID, port, VLAN.
      */
     public Set<HostNodeConnector> getInactiveStaticHosts();
 
@@ -106,12 +106,12 @@ public interface IfIptoHost {
      * Hosts can be learned dynamically or added statically. This method allows the addition
      * of a Host to the local database statically.
      *
-     * @param networkAddress		IP Address of the Host
-     * @param dataLayerAddress		MAC Address of the Host
-     * @param nc				    NodeConnector to which the host is attached
-     * @param vlan					VLAN the host belongs to
-     * @return						The status object as described in {@code Status}
-     * 								indicating the result of this action.
+     * @param networkAddress        IP Address of the Host
+     * @param dataLayerAddress      MAC Address of the Host
+     * @param nc                                    NodeConnector to which the host is attached
+     * @param vlan                  VLAN the host belongs to
+     * @return                      The status object as described in {@code Status}
+     *                                                          indicating the result of this action.
      */
     public Status addStaticHost(String networkAddress, String dataLayerAddress,
                                 NodeConnector nc, String vlan);
@@ -120,8 +120,8 @@ public interface IfIptoHost {
      * Allows the deletion of statically learned Host
      *
      * @param networkAddress
-     * @return						The status object as described in {@code Status}
-     * 								indicating the result of this action.
+     * @return                      The status object as described in {@code Status}
+     *                                                          indicating the result of this action.
      */
     public Status removeStaticHost(String networkAddress);
 }

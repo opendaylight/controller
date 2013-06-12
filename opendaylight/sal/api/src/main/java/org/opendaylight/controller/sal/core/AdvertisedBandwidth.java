@@ -23,25 +23,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @SuppressWarnings("serial")
 public class AdvertisedBandwidth extends Bandwidth {
-	public static final String AdvertisedBandwidthPropName = "advertisedBandwidth";
-	
-	public AdvertisedBandwidth(long value) {
-		super(AdvertisedBandwidthPropName);
-		this.bandwidthValue = value;
-	}
-	
-	/*
+        public static final String AdvertisedBandwidthPropName = "advertisedBandwidth";
+
+        public AdvertisedBandwidth(long value) {
+                super(AdvertisedBandwidthPropName);
+                this.bandwidthValue = value;
+        }
+
+        /*
      * Private constructor used for JAXB mapping
      */
     private AdvertisedBandwidth() {
-    	super(AdvertisedBandwidthPropName);
-		this.bandwidthValue = 0;
+        super(AdvertisedBandwidthPropName);
+                this.bandwidthValue = 0;
     }
-	
-	public AdvertisedBandwidth clone() {
-		return new AdvertisedBandwidth(this.bandwidthValue);  
+
+        public AdvertisedBandwidth clone() {
+                return new AdvertisedBandwidth(this.bandwidthValue);
     }
-	
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();

@@ -67,7 +67,7 @@ public class NodeDescription {
     @Override
     public String toString() {
         return "HwDescription[manufacturer=" + manufacturer + ", hardware="
-        		+ hardware + ", software=" + software + ", serialNumber=" 
-        		+ serialNumber + ", description=" + description + "]";
+                        + hardware + ", software=" + software + ", serialNumber="
+                        + serialNumber + ", description=" + description + "]";
     }
 }
