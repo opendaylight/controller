@@ -57,6 +57,7 @@
     <module>../../topologymanager</module>
     <module>../../usermanager/api</module>
     <module>../../usermanager/implementation</module>
+    <module>../../usermanager/integrationtest</module>
     <module>../../security</module>
 
 
