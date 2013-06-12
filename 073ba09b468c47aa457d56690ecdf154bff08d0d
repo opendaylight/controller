@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAEn///C0\u003d",
+        "filename": "opendaylight/arphandler/src/test/java/org/opendaylight/controller/arphandler/internal/ArphandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-12T14:37:53Z",
+      "side": 1,
+      "message": "Carriage-returns should be address as well. If not now, soon...",
+      "revId": "073ba09b468c47aa457d56690ecdf154bff08d0d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///C8\u003d",
+        "filename": "opendaylight/commons/concepts/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-12T14:37:53Z",
+      "side": 1,
+      "message": "I guess we should add \n          \u003cconsoleOutput\u003etrue\u003c/consoleOutput\u003e\nto display the exact error ?",
+      "revId": "073ba09b468c47aa457d56690ecdf154bff08d0d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///DA\u003d",
+        "filename": "opendaylight/commons/concepts/src/main/java/org/opendaylight/controller/concepts/transform/CompositeClassBasedTransformer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-12T14:37:53Z",
+      "side": 1,
+      "message": "As seen in all the base bundles, we followed a convention to not include Author names especially because this is an open-source project and the community owns \u0026 authors the code.\n\nShould we include an enforcement to catch @author and break the build ?",
+      "revId": "073ba09b468c47aa457d56690ecdf154bff08d0d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///C4\u003d",
+        "filename": "opendaylight/commons/integrationtest/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-12T14:37:53Z",
+      "side": 1,
+      "message": "Same comment on missing\n          \u003cconsoleOutput\u003etrue\u003c/consoleOutput\u003e",
+      "revId": "073ba09b468c47aa457d56690ecdf154bff08d0d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///DE\u003d",
+        "filename": "opendaylight/commons/opendaylight/space_and_tabs_checks.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-12T14:37:53Z",
+      "side": 1,
+      "message": "Carriage-returns should be addressed as well. If not now, soon...",
+      "revId": "073ba09b468c47aa457d56690ecdf154bff08d0d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn///Cw\u003d",
+        "filename": "opendaylight/commons/parent/sun_coding_style.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-06-12T14:37:53Z",
+      "side": 1,
+      "message": "I guess it is useful to explicitly specify that this coding_style will not fix the trailing space issue as enforced by the check-enforcer.",
+      "revId": "073ba09b468c47aa457d56690ecdf154bff08d0d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
