@@ -37,6 +37,8 @@ public class ARP extends Packet {
     public static short REQUEST = (short) 0x1;
     public static short REPLY = (short) 0x2;
 
+    public static short PROTO_TYPE_IP = 0x800;
+
     private static Map<String, Pair<Integer, Integer>> fieldCoordinates = new LinkedHashMap<String, Pair<Integer, Integer>>() {
         private static final long serialVersionUID = 1L;
         {
