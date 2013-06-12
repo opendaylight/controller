@@ -56,7 +56,7 @@ public class Activator implements BundleActivator {
                         this.listener.logged(entry);
                     }
                 }
-                
+
                 /*
                  * Install the default exception handler so that the uncaught
                  * exceptions are handled by our customized handler. This new
@@ -65,13 +65,13 @@ public class Activator implements BundleActivator {
                  */
                 Thread.setDefaultUncaughtExceptionHandler(new org.opendaylight.
                         controller.logging.bridge.internal.UncaughtExceptionHandler());
-                
+
                 /*
                  * Install the Shutdown handler. This will intercept SIGTERM signal and
                  * close the system bundle. This allows for a graceful  closing of OSGI
                  * framework.
                  */
-                
+
                 Runtime.getRuntime().addShutdownHook(new shutdownHandler(context));
             } else {
                 this.log.error("Cannot register the LogListener because "
@@ -95,13 +95,13 @@ public class Activator implements BundleActivator {
         this.listener = null;
         this.log = null;
     }
-    
+
     private class shutdownHandler extends Thread {
         BundleContext bundlecontext;
         public shutdownHandler(BundleContext ctxt) {
                 this.bundlecontext = ctxt;
         }
-        
+
         public void run () {
             try {
                 this.bundlecontext.getBundle(0).stop();
@@ -109,7 +109,7 @@ public class Activator implements BundleActivator {
             } catch (BundleException e) {
                 log.debug("Bundle couldn't be stopped");
             }
-        }   
+        }
     }
 
 }

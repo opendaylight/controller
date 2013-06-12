@@ -11,7 +11,7 @@ package org.opendaylight.controller.sal.packet;
  * Describes an exception that is raised when the process of serializing or
  * deserializing a network packet/stream fails. This generally happens when the
  * packet/stream is malformed.
- * 
+ *
  */
 public class PacketException extends Exception {
     private static final long serialVersionUID = 1L;

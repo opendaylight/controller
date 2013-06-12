@@ -41,38 +41,38 @@ import org.opendaylight.controller.samples.loadbalancer.IConfigManager;
 /**
  * This class exposes North bound REST APIs for the Load Balancer Service.
  * Following APIs are exposed by the Load Balancer Service:
- * 
+ *
  * Data retrieval REST APIs::
- * 	1. Get details of all existing pools
- * 		Type : GET  
- * 		URI : /one/nb/v2/lb/{container-name}/
- * 	NOTE: Current implementation of the opendaylight usage 'default' as a container-name
- * 	e.g : http://localhost:8080/one/nb/v2/lb/default will give you list of all the pools
- * 	
- * 	2. Get details of all the existing VIPs
- * 		Type : GET
- * 		URI:  /one/nb/v2/lb/{container-name}/vips
- * 
+ *      1. Get details of all existing pools
+ *              Type : GET
+ *              URI : /one/nb/v2/lb/{container-name}/
+ *      NOTE: Current implementation of the opendaylight usage 'default' as a container-name
+ *      e.g : http://localhost:8080/one/nb/v2/lb/default will give you list of all the pools
+ *
+ *      2. Get details of all the existing VIPs
+ *              Type : GET
+ *              URI:  /one/nb/v2/lb/{container-name}/vips
+ *
  * Pool related REST APIs::
- * 	1. Create Pool : 
- * 		Type : POST
- * 		URI : /one/nb/v2/lb/{container-name}/create/pool
- * 		Request body :
+ *      1. Create Pool :
+ *              Type : POST
+ *              URI : /one/nb/v2/lb/{container-name}/create/pool
+ *              Request body :
  *                      {
  *                              "name":"",
  *                              "lbmethod":""
  *                      }
- * 		Currently, two load balancing policies are allowed {"roundrobin" and "random" }
- * 
- * 	2. Delete Pool : 
- * 		Type : DELETE
- * 		URI : /one/nb/v2/lb/{container-name}/delete/pool/{pool-name}
- * 
+ *              Currently, two load balancing policies are allowed {"roundrobin" and "random" }
+ *
+ *      2. Delete Pool :
+ *              Type : DELETE
+ *              URI : /one/nb/v2/lb/{container-name}/delete/pool/{pool-name}
+ *
  * VIP related REST APIs::
- * 	1. Create VIP: 
- * 		Type : POST
- * 		URI : /one/nb/v2/lb/{container-name}/create/vip
- * 		Request body :
+ *      1. Create VIP:
+ *              Type : POST
+ *              URI : /one/nb/v2/lb/{container-name}/create/vip
+ *              Request body :
  *                      {
  *                              "name":"",
  *                              "ip":"ip in (xxx.xxx.xxx.xxx) format",
@@ -80,12 +80,12 @@ import org.opendaylight.controller.samples.loadbalancer.IConfigManager;
  *                              "port":"any valid port number",
  *                              "poolname":"" (optional)
  *                       }
- * 		The pool name is optional and can be set up at a later stage (using the REST API given below).
- * 
- * 	2. Update VIP: Update pool name of the VIP
- * 		Type : PUT
- * 		URI : /one/nb/v2/lb/{container-name}/update/vip
- * 		Request body :
+ *              The pool name is optional and can be set up at a later stage (using the REST API given below).
+ *
+ *      2. Update VIP: Update pool name of the VIP
+ *              Type : PUT
+ *              URI : /one/nb/v2/lb/{container-name}/update/vip
+ *              Request body :
  *                      {
  *                              "name":"",
  *                              "poolname":""
@@ -94,34 +94,34 @@ import org.opendaylight.controller.samples.loadbalancer.IConfigManager;
  *              and not of the VIP name itself.
  *              The specified pool name must already exist. If the specified VIP is already attached to a pool, the update
  *              will fail.
- * 
- * 	3. Delete VIP : 
- * 		Type : DELETE
- * 		URI : /one/nb/v2/lb/{container-name}/delete/vip/{vip-name} 
- * 
+ *
+ *      3. Delete VIP :
+ *              Type : DELETE
+ *              URI : /one/nb/v2/lb/{container-name}/delete/vip/{vip-name}
+ *
  * Pool member related REST APIs::
- * 	1. Create pool member:
- * 		Type : POST
- * 		URI : /one/nb/v2/lb/default/create/poolmember
- * 		Request body :
+ *      1. Create pool member:
+ *              Type : POST
+ *              URI : /one/nb/v2/lb/default/create/poolmember
+ *              Request body :
  *                      {
  *                              "name":"",
  *                              "ip":"ip in (xxx.xxx.xxx.xxx) format",
  *                              "poolname":"existing pool name"
  *                       }
- * 
- * 	2. Delete pool member:
- * 		Type : DELETE
- * 		URI	: /one/nb/v2/lb/{container-name}/delete/poolmember/{pool-member-name}/{pool-name}
- *	
- *	NOTE: Property "name" of each individual entity must be unique. 
- *	All the above REST APIs throw appropriate response codes in case of error/success. 
- *	Please consult the respective methods to get details of various response codes.
+ *
+ *      2. Delete pool member:
+ *              Type : DELETE
+ *              URI : /one/nb/v2/lb/{container-name}/delete/poolmember/{pool-member-name}/{pool-name}
+ *
+ *  NOTE: Property "name" of each individual entity must be unique.
+ *  All the above REST APIs throw appropriate response codes in case of error/success.
+ *  Please consult the respective methods to get details of various response codes.
  */
 
 @Path("/")
 public class LoadBalancerNorthbound {
-    
+
     /*
      * Method returns the Load balancer service instance running within
      * 'default' container.
@@ -148,7 +148,7 @@ public class LoadBalancerNorthbound {
         }
 
         IConfigManager configManager = (IConfigManager) ServiceHelper.getInstance(
-        		IConfigManager.class, containerName, this);
+                        IConfigManager.class, containerName, this);
 
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer"
@@ -168,13 +168,13 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 503, condition = "Load balancer service is unavailable") })
     public Pools getAllPools(
             @PathParam("containerName") String containerName) {
-        
+
         IConfigManager configManager = getConfigManagerService(containerName);
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer "
                                                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        
+
         return new Pools(configManager.getAllPools());
     }
 
@@ -188,7 +188,7 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 503, condition = "Load balancer service is unavailable") })
     public VIPs getAllVIPs(
             @PathParam("containerName") String containerName) {
-        
+
         IConfigManager configManager = getConfigManagerService(containerName);
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer "
@@ -209,7 +209,7 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 415, condition = "Invalid input data")})
     public Response addVIP(@PathParam("containerName") String containerName,
             @TypeHint(VIP.class) JAXBElement<VIP> inVIP){
-        
+
         VIP vipInput = inVIP.getValue();
         String name = vipInput.getName();
         String ip = vipInput.getIp();
@@ -222,16 +222,16 @@ public class LoadBalancerNorthbound {
                 protocolPort < 0 ){
             throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
         }
-        
+
         IConfigManager configManager = getConfigManagerService(containerName);
-        
+
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        
+
         if(!configManager.vipExists(name, ip, protocol, protocolPort, poolName)){
-            
+
             VIP vip = configManager.createVIP(name, ip, protocol, protocolPort, poolName);
             if ( vip != null){
                 return Response.status(Response.Status.CREATED).build();
@@ -254,7 +254,7 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 415, condition = "Invalid input name")})
     public Response updateVIP(@PathParam("containerName") String containerName,
             @TypeHint(VIP.class) JAXBElement<VIP> inVIP) {
-        
+
         VIP vipInput = inVIP.getValue();
         String name = vipInput.getName();
         String poolName = vipInput.getPoolName();
@@ -262,25 +262,25 @@ public class LoadBalancerNorthbound {
                 poolName.isEmpty()){
             throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
         }
-        
+
         IConfigManager configManager = getConfigManagerService(containerName);
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer "
                                                 + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        
+
         if(!configManager.poolExists(poolName))
             throw new ResourceNotFoundException(NBConst.RES_POOL_NOT_FOUND);
-        
+
         if(configManager.getVIPAttachedPool(name)!=null)
             throw new MethodNotAllowedException(NBConst.RES_VIP_POOL_EXIST);
-        
+
         if(configManager.updateVIP(name, poolName)!= null)
             return Response.status(Response.Status.ACCEPTED).build();
-        
+
         throw new InternalServerErrorException(NBConst.RES_VIP_UPDATE_FAILED);
     }
-    
+
     @Path("/{containerName}/delete/vip/{vipName}")
     @DELETE
     @Consumes( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -293,19 +293,19 @@ public class LoadBalancerNorthbound {
     public Response deleteVIP(
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "vipName") String vipName) {
-        
+
         if(vipName.isEmpty())
             throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
-        
+
         IConfigManager configManager = getConfigManagerService(containerName);
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer"
                                             + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        
+
         if(!configManager.vipExists(vipName))
             throw new ResourceNotFoundException(NBConst.RES_VIP_NOT_FOUND);
-        
+
         for(VIP vip : configManager.getAllVIPs()){
             if(vip.getName().equals(vipName)){
                 configManager.deleteVIP(vipName);
@@ -326,7 +326,7 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 415, condition = "Invalid input data")})
     public Response addPool(@PathParam("containerName") String containerName,
             @TypeHint(Pool.class) JAXBElement<Pool> inPool) {
-        
+
         Pool poolInput = inPool.getValue();
         String name = poolInput.getName();
         String lbMethod =poolInput.getLbMethod();
@@ -334,15 +334,15 @@ public class LoadBalancerNorthbound {
                 lbMethod.isEmpty()){
             throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
         }
-        
+
         IConfigManager configManager = getConfigManagerService(containerName);
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer "
                                             + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        
+
         if(!configManager.poolExists(name)){
-            
+
             Pool pool = configManager.createPool(name, lbMethod);
             if ( pool != null){
                 return Response.status(Response.Status.CREATED).build();
@@ -365,19 +365,19 @@ public class LoadBalancerNorthbound {
     public Response deletePool(
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "poolName") String poolName) {
-        
+
         if(poolName.isEmpty())
             throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
-        
+
         IConfigManager configManager = getConfigManagerService(containerName);
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer"
                                         + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        
+
         if(!configManager.poolExists(poolName))
             throw new ResourceNotFoundException(NBConst.RES_POOL_NOT_FOUND);
-        
+
         for(Pool pool:configManager.getAllPools()){
             if(pool.getName().equals(poolName)){
                 configManager.deletePool(poolName);
@@ -399,37 +399,37 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 415, condition = "Invalid input data")})
     public Response addPoolMember(@PathParam("containerName") String containerName,
             @TypeHint(PoolMember.class) JAXBElement<PoolMember> inPoolMember){
-        
+
         PoolMember pmInput = inPoolMember.getValue();
-    	String name = pmInput.getName();
-    	String memberIP = pmInput.getIp();
-    	String poolName = pmInput.getPoolName();
-    	
-    	if(name.isEmpty() ||
-    	        memberIP.isEmpty()||
-    	        poolName.isEmpty()){
-    	    throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
-    	}
-    	
-    	IConfigManager configManager = getConfigManagerService(containerName);
-    	if (configManager == null) {
-    	    throw new ServiceUnavailableException("Load Balancer "
-    	                                + RestMessages.SERVICEUNAVAILABLE.toString());
-    	}
-    	
-    	if(!configManager.poolExists(poolName))
-    	    throw new ResourceNotFoundException(NBConst.RES_POOL_NOT_FOUND);
-    	
-    	if(!configManager.memberExists(name, memberIP, poolName)){
-    	    
-    	    PoolMember poolMember = configManager.addPoolMember(name, memberIP, poolName);
-    	    if ( poolMember != null){
-    	        return Response.status(Response.Status.CREATED).build();
-    	    }
-    	}else{
-    	    throw new ResourceConflictException(NBConst.RES_POOLMEMBER_ALREADY_EXIST);
-    	}
-    	throw new InternalServerErrorException(NBConst.RES_POOLMEMBER_CREATION_FAILED);
+        String name = pmInput.getName();
+        String memberIP = pmInput.getIp();
+        String poolName = pmInput.getPoolName();
+
+        if(name.isEmpty() ||
+                memberIP.isEmpty()||
+                poolName.isEmpty()){
+            throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
+        }
+
+        IConfigManager configManager = getConfigManagerService(containerName);
+        if (configManager == null) {
+            throw new ServiceUnavailableException("Load Balancer "
+                                        + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        if(!configManager.poolExists(poolName))
+            throw new ResourceNotFoundException(NBConst.RES_POOL_NOT_FOUND);
+
+        if(!configManager.memberExists(name, memberIP, poolName)){
+
+            PoolMember poolMember = configManager.addPoolMember(name, memberIP, poolName);
+            if ( poolMember != null){
+                return Response.status(Response.Status.CREATED).build();
+            }
+        }else{
+            throw new ResourceConflictException(NBConst.RES_POOLMEMBER_ALREADY_EXIST);
+        }
+        throw new InternalServerErrorException(NBConst.RES_POOLMEMBER_CREATION_FAILED);
     }
 
     @Path("/{containerName}/delete/poolmember/{poolMemberName}/{poolName}")
@@ -445,25 +445,25 @@ public class LoadBalancerNorthbound {
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "poolMemberName") String poolMemberName,
             @PathParam(value = "poolName") String poolName) {
-        
+
         if(poolMemberName.isEmpty()||
                 poolName.isEmpty())
             throw new UnsupportedMediaTypeException(RestMessages.INVALIDDATA.toString());
-        
+
         IConfigManager configManager = getConfigManagerService(containerName);
-        
+
         if (configManager == null) {
             throw new ServiceUnavailableException("Load Balancer"
                                         + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        
+
         if(!configManager.poolExists(poolName))
             throw new ResourceNotFoundException(NBConst.RES_POOL_NOT_FOUND);
-        
+
         if(configManager.memberExists(poolMemberName, poolName)){
-            
+
             configManager.removePoolMember(poolMemberName, poolName);
-            
+
             return Response.ok().build();
         }
         throw new ResourceNotFoundException(NBConst.RES_POOLMEMBER_NOT_FOUND);

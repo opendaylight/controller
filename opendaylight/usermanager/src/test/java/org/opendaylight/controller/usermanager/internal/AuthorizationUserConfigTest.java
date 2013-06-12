@@ -65,13 +65,13 @@ public class AuthorizationUserConfigTest {
         roles.clear();
         roles.add(UserLevel.NETWORKADMIN.toString());
         assertTrue(userConfig.update("ciscocisco", null, roles).isSuccess());
-        
+
         // Role change and same new password
         roles.clear();
         roles.add(UserLevel.NETWORKOPERATOR.toString());
         assertTrue(userConfig.update("ciscocisco", "ciscocisco", roles)
                 .isSuccess());
-        
+
         // New Password = null, No change in password
         assertTrue(userConfig.getPassword().equals("ciscocisco"));
 

@@ -19,35 +19,35 @@ import org.openflow.protocol.OFMessage;
  * encryption and decryption of the network data.
  */
 public interface IMessageReadWrite {
-	/**
-	 * Sends the OF message out over the socket channel. For secure
-	 * communication, the data will be encrypted.
-	 * 
-	 * @param msg OF message to be sent
-	 * @throws Exception
-	 */
-	public void asyncSend(OFMessage msg) throws Exception;
+        /**
+         * Sends the OF message out over the socket channel. For secure
+         * communication, the data will be encrypted.
+         *
+         * @param msg OF message to be sent
+         * @throws Exception
+         */
+        public void asyncSend(OFMessage msg) throws Exception;
 
-	/**
-	 * Resumes sending the remaining messages in the outgoing buffer
-	 * @throws Exception
-	 */
-	public void resumeSend() throws Exception;
+        /**
+         * Resumes sending the remaining messages in the outgoing buffer
+         * @throws Exception
+         */
+        public void resumeSend() throws Exception;
 
-	/**
-	 * Reads the incoming network data from the socket and retrieves the OF
-	 * messages. For secure communication, the data will be decrypted first.
-	 * 
-	 * @return list of OF messages
-	 * @throws Exception
-	 */
+        /**
+         * Reads the incoming network data from the socket and retrieves the OF
+         * messages. For secure communication, the data will be decrypted first.
+         *
+         * @return list of OF messages
+         * @throws Exception
+         */
     public List<OFMessage> readMessages() throws Exception;
-    
-	/**
-	 * Proper clean up when the switch connection is closed
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
+
+        /**
+         * Proper clean up when the switch connection is closed
+         *
+         * @return
+         * @throws Exception
+         */
     public void stop() throws Exception;
 }

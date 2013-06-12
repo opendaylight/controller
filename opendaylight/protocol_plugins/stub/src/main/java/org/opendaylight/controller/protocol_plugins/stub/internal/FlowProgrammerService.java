@@ -29,7 +29,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
     }
@@ -37,7 +37,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     void start() {
     }
@@ -46,15 +46,15 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     void stop() {
     }
-    
-    
+
+
     /**
      * Synchronously add a flow to the network node
-     * 
+     *
      * @param node
      * @param flow
      */
@@ -64,7 +64,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
 
     /**
      * Synchronously modify existing flow on the switch
-     * 
+     *
      * @param node
      * @param flow
      */
@@ -73,7 +73,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
     }
     /**
      * Synchronously remove the flow from the network node
-     * 
+     *
      * @param node
      * @param flow
      */
@@ -83,7 +83,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
 
     /**
      * Asynchronously add a flow to the network node
-     * 
+     *
      * @param node
      * @param flow
      * @param rid
@@ -94,7 +94,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
 
     /**
      * Asynchronously modify existing flow on the switch
-     * 
+     *
      * @param node
      * @param flow
      * @param rid
@@ -105,7 +105,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
 
     /**
      * Asynchronously remove the flow from the network node
-     * 
+     *
      * @param node
      * @param flow
      * @param rid
@@ -116,7 +116,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
 
     /**
      * Remove all flows present on the network node
-     * 
+     *
      * @param node
      */
     public Status removeAllFlows(Node node){
@@ -126,7 +126,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
     /**
      * Send Barrier message synchronously. The caller will be blocked until the
      * Barrier reply arrives.
-     * 
+     *
      * @param node
      */
     public Status syncSendBarrierMessage(Node node){
@@ -135,7 +135,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService
 
     /**
      * Send Barrier message asynchronously. The caller is not blocked.
-     * 
+     *
      * @param node
      */
     public Status asyncSendBarrierMessage(Node node){

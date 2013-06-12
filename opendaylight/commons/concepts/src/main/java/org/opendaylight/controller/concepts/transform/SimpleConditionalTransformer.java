@@ -10,15 +10,15 @@ package org.opendaylight.controller.concepts.transform;
 
 /**
  * Simple condition-based transformer
- * 
+ *
  * The transformer provides {@link #isAcceptable(Object)} method,
  * which could be used to query transformer if the input will produce
  * result.
- * 
+ *
  * This interface is simplified version of {@link RuleBasedTransformer} - does not
  * provide decoupling of Acceptance rule from transformer, and should be used only
  * for simple use-cases.
- *  
+ *
  * @author Tony Tkacik
  *
  * @param <I> Input class for transformation
@@ -28,9 +28,9 @@ public interface SimpleConditionalTransformer<I,P> extends Transformer<I, P>, Ac
 
 
     /**
-     * Checks if the input is acceptable 
+     * Checks if the input is acceptable
      * for processing by the transformer.
-     * 
+     *
      * @return true it the input is acceptable for processing by transformer.
      */
     @Override

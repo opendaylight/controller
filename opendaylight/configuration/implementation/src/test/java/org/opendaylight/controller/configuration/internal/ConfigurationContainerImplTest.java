@@ -14,52 +14,51 @@ import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 
 
 
-public class ConfigurationContainerImplTest { 
-	
+public class ConfigurationContainerImplTest {
 
-	@Test
-	public void testAddRemoveSaveConfiguration() {
-		
-		ConfigurationContainerImpl configurationContainerImpl = new ConfigurationContainerImpl();
-		IConfigurationContainerAware testConfigurationContainerAware = new ConfigurationContainerAwareTest();
-		
-		configurationContainerImpl.addConfigurationContainerAware(testConfigurationContainerAware);
-		configurationContainerImpl.addConfigurationContainerAware(testConfigurationContainerAware);
-		
-		Assert.assertEquals(1, configurationContainerImpl.getConfigurationAwareListSize());
-		
-		IConfigurationContainerAware testConfigurationAware1 = new ConfigurationContainerAwareTest();
-		configurationContainerImpl.addConfigurationContainerAware(testConfigurationAware1);
-		
-		Assert.assertEquals(2, configurationContainerImpl.getConfigurationAwareListSize());
-		
-		IConfigurationContainerAware testConfigurationAware2 = new ConfigurationContainerAwareTest();
-		configurationContainerImpl.addConfigurationContainerAware(testConfigurationAware2);
-		
-		Assert.assertEquals(3, configurationContainerImpl.getConfigurationAwareListSize());
-		
-		IConfigurationContainerAware testConfigurationAware3 = new ConfigurationContainerAwareTest();
-		configurationContainerImpl.addConfigurationContainerAware(testConfigurationAware3);
-		
-		Assert.assertEquals(4, configurationContainerImpl.getConfigurationAwareListSize());
-		
-		configurationContainerImpl.removeConfigurationContainerAware(testConfigurationContainerAware);
-		Assert.assertEquals(3, configurationContainerImpl.getConfigurationAwareListSize());
-		
-		configurationContainerImpl.removeConfigurationContainerAware(testConfigurationContainerAware);
-		Assert.assertEquals(3, configurationContainerImpl.getConfigurationAwareListSize());
-		
-		configurationContainerImpl.removeConfigurationContainerAware(testConfigurationAware3);
-		Assert.assertEquals(2, configurationContainerImpl.getConfigurationAwareListSize());
-		
-		configurationContainerImpl.removeConfigurationContainerAware(testConfigurationAware2);
-		Assert.assertEquals(1, configurationContainerImpl.getConfigurationAwareListSize());
-		
-		configurationContainerImpl.removeConfigurationContainerAware(testConfigurationAware1);
-		Assert.assertEquals(0, configurationContainerImpl.getConfigurationAwareListSize());
-		
-		
-	}
-	
+
+        @Test
+        public void testAddRemoveSaveConfiguration() {
+
+                ConfigurationContainerImpl configurationContainerImpl = new ConfigurationContainerImpl();
+                IConfigurationContainerAware testConfigurationContainerAware = new ConfigurationContainerAwareTest();
+
+                configurationContainerImpl.addConfigurationContainerAware(testConfigurationContainerAware);
+                configurationContainerImpl.addConfigurationContainerAware(testConfigurationContainerAware);
+
+                Assert.assertEquals(1, configurationContainerImpl.getConfigurationAwareListSize());
+
+                IConfigurationContainerAware testConfigurationAware1 = new ConfigurationContainerAwareTest();
+                configurationContainerImpl.addConfigurationContainerAware(testConfigurationAware1);
+
+                Assert.assertEquals(2, configurationContainerImpl.getConfigurationAwareListSize());
+
+                IConfigurationContainerAware testConfigurationAware2 = new ConfigurationContainerAwareTest();
+                configurationContainerImpl.addConfigurationContainerAware(testConfigurationAware2);
+
+                Assert.assertEquals(3, configurationContainerImpl.getConfigurationAwareListSize());
+
+                IConfigurationContainerAware testConfigurationAware3 = new ConfigurationContainerAwareTest();
+                configurationContainerImpl.addConfigurationContainerAware(testConfigurationAware3);
+
+                Assert.assertEquals(4, configurationContainerImpl.getConfigurationAwareListSize());
+
+                configurationContainerImpl.removeConfigurationContainerAware(testConfigurationContainerAware);
+                Assert.assertEquals(3, configurationContainerImpl.getConfigurationAwareListSize());
+
+                configurationContainerImpl.removeConfigurationContainerAware(testConfigurationContainerAware);
+                Assert.assertEquals(3, configurationContainerImpl.getConfigurationAwareListSize());
+
+                configurationContainerImpl.removeConfigurationContainerAware(testConfigurationAware3);
+                Assert.assertEquals(2, configurationContainerImpl.getConfigurationAwareListSize());
+
+                configurationContainerImpl.removeConfigurationContainerAware(testConfigurationAware2);
+                Assert.assertEquals(1, configurationContainerImpl.getConfigurationAwareListSize());
+
+                configurationContainerImpl.removeConfigurationContainerAware(testConfigurationAware1);
+                Assert.assertEquals(0, configurationContainerImpl.getConfigurationAwareListSize());
+
+
+        }
+
 }
-

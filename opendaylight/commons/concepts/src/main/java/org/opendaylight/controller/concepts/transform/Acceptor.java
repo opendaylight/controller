@@ -12,7 +12,7 @@ package org.opendaylight.controller.concepts.transform;
 public interface Acceptor<I> {
 
     /**
-     * 
+     *
      * @param input
      * @return true if input is accepted.
      */

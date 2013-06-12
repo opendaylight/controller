@@ -210,7 +210,7 @@ public abstract class BitBufferHelper {
      * @param int startOffset - offset to start fetching bits from data from
      * @param int numBits - number of bits to be fetched from data
      * @return byte [] - LSB aligned bits
-     * 
+     *
      * @throws BufferException
      *             when the startOffset and numBits parameters are not congruent
      *             with the data buffer size
@@ -291,7 +291,7 @@ public abstract class BitBufferHelper {
      * @param byte - input byte to be inserted
      * @param startOffset - offset of data[] to start inserting byte from
      * @param numBits - number of bits of input to be inserted into data[]
-     * 
+     *
      * @throws BufferException
      *             when the input, startOffset and numBits are not congruent
      *             with the data buffer size
@@ -322,7 +322,7 @@ public abstract class BitBufferHelper {
 
     /**
      * Returns numBits 1's in the MSB position
-     * 
+     *
      * @param numBits
      * @return
      */
@@ -336,7 +336,7 @@ public abstract class BitBufferHelper {
 
     /**
      * Returns numBits 1's in the LSB position
-     * 
+     *
      * @param numBits
      * @return
      */
@@ -350,7 +350,7 @@ public abstract class BitBufferHelper {
 
     /**
      * Returns the numerical value of the byte array passed
-     * 
+     *
      * @param byte[] - array
      * @return long - numerical value of byte array passed
      */
@@ -371,7 +371,7 @@ public abstract class BitBufferHelper {
     /**
      * Returns the numerical value of the last numBits (LSB bits) of the byte
      * array passed
-     * 
+     *
      * @param byte[] - array
      * @param int - numBits
      * @return long - numerical value of byte array passed
@@ -404,10 +404,10 @@ public abstract class BitBufferHelper {
      * Accepts a number as input and returns its value in byte form in LSB
      * aligned form example: input = 5000 [1001110001000] bytes = 19, -120
      * [00010011] [10001000]
-     * 
+     *
      * @param Number
      * @return byte[]
-     * 
+     *
      */
 
     public static byte[] toByteArray(Number input) {
@@ -443,12 +443,12 @@ public abstract class BitBufferHelper {
      * Accepts a number as input and returns its value in byte form in MSB
      * aligned form example: input = 5000 [1001110001000] bytes = -114, 64
      * [10011100] [01000000]
-     * 
+     *
      * @param Number
      *            input
      * @param int numBits - the number of bits to be returned
      * @return byte[]
-     * 
+     *
      */
     public static byte[] toByteArray(Number input, int numBits) {
         Class<? extends Number> dataType = input.getClass();
@@ -500,7 +500,7 @@ public abstract class BitBufferHelper {
     /**
      * Takes an LSB aligned byte array and returned the LSB numBits in a MSB
      * aligned byte array
-     * 
+     *
      * @param inputbytes
      * @param numBits
      * @return
@@ -508,10 +508,10 @@ public abstract class BitBufferHelper {
     /**
      * It aligns the last numBits bits to the head of the byte array following
      * them with numBits % 8 zero bits.
-     * 
+     *
      * Example: For inputbytes = [00000111][01110001] and numBits = 12 it
      * returns: shiftedBytes = [01110111][00010000]
-     * 
+     *
      * @param byte[] inputBytes
      * @param int numBits - number of bits to be left aligned
      * @return byte[]
@@ -566,10 +566,10 @@ public abstract class BitBufferHelper {
     /**
      * It aligns the first numBits bits to the right end of the byte array
      * preceding them with numBits % 8 zero bits.
-     * 
+     *
      * Example: For inputbytes = [01110111][00010000] and numBits = 12 it
      * returns: shiftedBytes = [00000111][01110001]
-     * 
+     *
      * @param byte[] inputBytes
      * @param int numBits - number of bits to be right aligned
      * @return byte[]
@@ -603,7 +603,7 @@ public abstract class BitBufferHelper {
      * Insert in the data buffer at position dictated by the offset the number
      * of bits specified from the input data byte array. The input byte array
      * has the bits stored starting from the LSB
-     * 
+     *
      * @param byte[] data
      * @param byte[] inputdata
      * @param int startOffset
@@ -623,8 +623,8 @@ public abstract class BitBufferHelper {
         int InputMSBbits = 0, InputLSBbits = 0;
         int i;
 
-        if (numBits == 0) { 
-            return; 
+        if (numBits == 0) {
+            return;
         }
 
         if (extraOffsetBits == 0) {

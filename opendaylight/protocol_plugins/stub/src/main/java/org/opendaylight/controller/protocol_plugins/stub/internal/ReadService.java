@@ -47,8 +47,8 @@ import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 /**
  * Stub Implementation for IPluginInReadService used by SAL
- * 
- * 
+ *
+ *
  */
 public class ReadService implements IPluginInReadService {
     private static final Logger logger = LoggerFactory
@@ -57,7 +57,7 @@ public class ReadService implements IPluginInReadService {
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
-     * 
+     *
      */
     void init() {
     }
@@ -66,7 +66,7 @@ public class ReadService implements IPluginInReadService {
      * Function called by the dependency manager when at least one dependency
      * become unsatisfied or when the component is shutting down because for
      * example bundle is being stopped.
-     * 
+     *
      */
     void destroy() {
     }
@@ -74,7 +74,7 @@ public class ReadService implements IPluginInReadService {
     /**
      * Function called by dependency manager after "init ()" is called and after
      * the services provided by the class are registered in the service registry
-     * 
+     *
      */
     void start() {
     }
@@ -83,7 +83,7 @@ public class ReadService implements IPluginInReadService {
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     * 
+     *
      */
     void stop() {
     }

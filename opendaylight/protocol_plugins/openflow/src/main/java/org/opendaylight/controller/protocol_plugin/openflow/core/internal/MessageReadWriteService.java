@@ -52,7 +52,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
 
     /**
      * Sends the OF message out over the socket channel.
-     * 
+     *
      * @param msg
      *            OF message to be sent
      * @throws Exception
@@ -90,7 +90,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
 
     /**
      * Resumes sending the remaining messages in the outgoing buffer
-     * 
+     *
      * @throws Exception
      */
     @Override
@@ -116,7 +116,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
     /**
      * Reads the incoming network data from the socket and retrieves the OF
      * messages.
-     * 
+     *
      * @return list of OF messages
      * @throws Exception
      */

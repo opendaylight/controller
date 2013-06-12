@@ -22,7 +22,7 @@ import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 public interface ITopologyServiceShimListener {
     /**
      * Called to update on Edge in the topology graph
-     * 
+     *
      * @param topoedgeupdateList
      *            List of topoedgeupdates Each topoedgeupdate includes edge, its
      *            Properties ( BandWidth and/or Latency etc) and update type.
@@ -32,7 +32,7 @@ public interface ITopologyServiceShimListener {
     /**
      * Called when an Edge utilization is above the safe threshold configured on
      * the controller
-     * 
+     *
      * @param {@link org.opendaylight.controller.sal.core.Edge}
      */
     public void edgeOverUtilized(Edge edge);
@@ -40,7 +40,7 @@ public interface ITopologyServiceShimListener {
     /**
      * Called when the Edge utilization is back to normal, below the safety
      * threshold level configured on the controller
-     * 
+     *
      * @param {@link org.opendaylight.controller.sal.core.Edge}
      */
     public void edgeUtilBackToNormal(Edge edge);
