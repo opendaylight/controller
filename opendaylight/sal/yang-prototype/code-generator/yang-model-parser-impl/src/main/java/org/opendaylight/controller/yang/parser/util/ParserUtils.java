@@ -36,6 +36,7 @@ import org.opendaylight.controller.yang.model.util.BooleanType;
 import org.opendaylight.controller.yang.model.util.Decimal64;
 import org.opendaylight.controller.yang.model.util.EmptyType;
 import org.opendaylight.controller.yang.model.util.EnumerationType;
+import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.IdentityrefType;
 import org.opendaylight.controller.yang.model.util.InstanceIdentifier;
 import org.opendaylight.controller.yang.model.util.Int16;
@@ -253,9 +254,30 @@ public final class ParserUtils {
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, unionType.getQName());
                 return new UnionType(newSchemaPath, unionType.getTypes());
+            } else if(nodeType instanceof ExtendedType) {
+                ExtendedType extType = (ExtendedType)nodeType;
+                newSchemaPath = createNewSchemaPath(parentSchemaPath,
+                        nodeQName, extType.getQName());
+                result = createNewExtendedType(newSchemaPath, extType);
             }
         }
         return result;
+    }
+
+    private static TypeDefinition<?> createNewExtendedType(
+            SchemaPath newSchemaPath, ExtendedType oldExtendedType) {
+        QName qname = oldExtendedType.getQName();
+        TypeDefinition<?> baseType = oldExtendedType.getBaseType();
+        String desc = oldExtendedType.getDescription();
+        String ref = oldExtendedType.getReference();
+        ExtendedType.Builder builder = new ExtendedType.Builder(qname, baseType, desc, ref, newSchemaPath);
+        builder.status(oldExtendedType.getStatus());
+        builder.lengths(oldExtendedType.getLengths());
+        builder.patterns(oldExtendedType.getPatterns());
+        builder.ranges(oldExtendedType.getRanges());
+        builder.fractionDigits(oldExtendedType.getFractionDigits());
+        builder.unknownSchemaNodes(oldExtendedType.getUnknownSchemaNodes());
+        return builder.build();
     }
 
     private static TypeDefinition<?> createNewStringType(SchemaPath schemaPath,
