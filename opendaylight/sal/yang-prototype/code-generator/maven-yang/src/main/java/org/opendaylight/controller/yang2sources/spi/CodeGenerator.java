@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 
@@ -39,10 +40,36 @@ public interface CodeGenerator {
      * @throws IOException
      */
     Collection<File> generateSources(SchemaContext context, File outputBaseDir,
-            Set<Module> currentModules, File projectBaseDir)
-            throws IOException;
+            Set<Module> currentModules) throws IOException;
 
+    /**
+     * Utilize maven logging if necessary
+     *
+     * @param log
+     */
     void setLog(Log log);
 
+    /**
+     * Provided map contains all configuration that was set in pom for code
+     * generator in additionalConfiguration tag
+     *
+     * @param additionalConfiguration
+     */
     void setAdditionalConfig(Map<String, String> additionalConfiguration);
+
+    /**
+     * Provided folder is marked as resources and its content will be packaged
+     * in resulting jar. Feel free to add necessary resources
+     *
+     * @param resourceBaseDir
+     */
+    void setResourceBaseDir(File resourceBaseDir);
+
+    /**
+     * Provided maven project object. Any additional information about current
+     * maven project can be accessed from it.
+     *
+     * @param resourceBaseDir
+     */
+    void setMavenProject(MavenProject project);
 }

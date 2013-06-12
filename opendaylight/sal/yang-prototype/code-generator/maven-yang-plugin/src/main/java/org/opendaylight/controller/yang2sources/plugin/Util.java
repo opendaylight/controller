@@ -7,21 +7,31 @@
  */
 package org.opendaylight.controller.yang2sources.plugin;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.opendaylight.controller.yang.model.api.Module;
+import org.opendaylight.controller.yang.model.api.SchemaContext;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -81,23 +91,6 @@ final class Util {
         }
     }
 
-    static String[] listFilesAsArrayOfPaths(File rootDir)
-            throws FileNotFoundException {
-        String[] filesArray = new String[] {};
-        Collection<File> yangFiles = listFiles(rootDir);
-
-        // If collection is empty, return empty array [] rather then [null]
-        // array, that is created by default
-        return yangFiles.isEmpty() ? filesArray : Collections2.transform(
-                yangFiles, new Function<File, String>() {
-
-                    @Override
-                    public String apply(File input) {
-                        return input.getPath();
-                    }
-                }).toArray(filesArray);
-    }
-
     private static void toCache(final File rootDir,
             final Collection<File> yangFiles) {
         cache.put(rootDir, yangFiles);
@@ -137,7 +130,7 @@ final class Util {
         return String.format("%s %s", logPrefix, innerMessage);
     }
 
-    public static List<File> getClassPath(MavenProject project) {
+    static List<File> getClassPath(MavenProject project) {
         List<File> dependencies = Lists.newArrayList();
         for (Artifact element : project.getArtifacts()) {
             File asFile = element.getFile();
@@ -155,13 +148,117 @@ final class Util {
                 : false;
     }
 
-    public static boolean acceptedFilter(String name, List<String> filter) {
-        for (String f : filter) {
-            if (name.endsWith(f)) {
-                return true;
+    static <T> T checkNotNull(T obj, String paramName) {
+        return Preconditions.checkNotNull(obj, "Parameter " + paramName
+                + " is null");
+    }
+
+    final static class YangsInZipsResult implements Closeable {
+        final List<InputStream> yangStreams;
+        private final List<Closeable> zipInputStreams;
+
+        private YangsInZipsResult(List<InputStream> yangStreams,
+                List<Closeable> zipInputStreams) {
+            this.yangStreams = yangStreams;
+            this.zipInputStreams = zipInputStreams;
+        }
+
+        @Override
+        public void close() throws IOException {
+            for (InputStream is : yangStreams) {
+                is.close();
+            }
+            for (Closeable is : zipInputStreams) {
+                is.close();
             }
         }
-        return false;
+    }
+
+    static YangsInZipsResult findYangFilesInDependenciesAsStream(Log log,
+            MavenProject project)
+            throws MojoFailureException {
+        List<InputStream> yangsFromDependencies = new ArrayList<>();
+        List<Closeable> zips = new ArrayList<>();
+        try {
+            List<File> filesOnCp = Util.getClassPath(project);
+            log.info(Util.message(
+                    "Searching for yang files in following dependencies: %s",
+                    YangToSourcesProcessor.LOG_PREFIX, filesOnCp));
+
+            for (File file : filesOnCp) {
+                List<String> foundFilesForReporting = new ArrayList<>();
+                // is it jar file or directory?
+                if (file.isDirectory()) {
+                    File yangDir = new File(file,
+                            YangToSourcesProcessor.META_INF_YANG_STRING);
+                    if (yangDir.exists() && yangDir.isDirectory()) {
+                        File[] yangFiles = yangDir
+                                .listFiles(new FilenameFilter() {
+                                    @Override
+                                    public boolean accept(File dir, String name) {
+                                        return name.endsWith(".yang")
+                                                && new File(dir, name).isFile();
+                                    }
+                                });
+                        for (File yangFile : yangFiles) {
+                            yangsFromDependencies.add(new NamedFileInputStream(
+                                    yangFile));
+                        }
+                    }
+
+                } else {
+                    ZipFile zip = new ZipFile(file);
+                    zips.add(zip);
+
+                    Enumeration<? extends ZipEntry> entries = zip.entries();
+                    while (entries.hasMoreElements()) {
+                        ZipEntry entry = entries.nextElement();
+                        String entryName = entry.getName();
+
+                        if (entryName
+                                .startsWith(YangToSourcesProcessor.META_INF_YANG_STRING)) {
+                            if (entry.isDirectory() == false
+                                    && entryName.endsWith(".yang")) {
+                                foundFilesForReporting.add(entryName);
+                                // This will be closed after all strams are
+                                // parsed.
+                                InputStream entryStream = zip
+                                        .getInputStream(entry);
+                                yangsFromDependencies.add(entryStream);
+                            }
+                        }
+                    }
+                }
+                if (foundFilesForReporting.size() > 0) {
+                    log.info(Util.message("Found %d yang files in %s: %s",
+                            YangToSourcesProcessor.LOG_PREFIX,
+                            foundFilesForReporting.size(), file,
+                            foundFilesForReporting));
+                }
+
+            }
+        } catch (Exception e) {
+            throw new MojoFailureException(e.getMessage(), e);
+        }
+        return new YangsInZipsResult(yangsFromDependencies, zips);
+    }
+
+    final static class ContextHolder {
+        private final SchemaContext context;
+        private final Set<Module> yangModules;
+
+        ContextHolder(SchemaContext context, Set<Module> yangModules) {
+            this.context = context;
+            this.yangModules = yangModules;
+        }
+
+        SchemaContext getContext() {
+            return context;
+        }
+
+        Set<Module> getYangModules() {
+            return yangModules;
+        }
     }
 
 }

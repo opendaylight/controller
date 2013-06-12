@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.impl.BindingGeneratorImpl;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
@@ -30,8 +31,7 @@ public class CodeGeneratorImpl implements CodeGenerator {
 
     @Override
     public Collection<File> generateSources(SchemaContext context,
-            File outputBaseDir, Set<Module> yangModules, File projectBaseDir)
-            throws IOException {
+            File outputBaseDir, Set<Module> yangModules) throws IOException {
 
         final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
         final List<Type> types = bindingGenerator.generateTypes(context);
@@ -49,9 +49,7 @@ public class CodeGeneratorImpl implements CodeGenerator {
         final GeneratorJavaFile generator = new GeneratorJavaFile(
                 typesToGenerate, tosToGenerate);
 
-        return generator.generateToFile(outputBaseDir.getPath().startsWith(
-                projectBaseDir.getPath()) ? outputBaseDir : new File(
-                projectBaseDir, outputBaseDir.getPath()));
+        return generator.generateToFile(outputBaseDir);
     }
 
     @Override
@@ -63,6 +61,16 @@ public class CodeGeneratorImpl implements CodeGenerator {
     @Override
     public void setAdditionalConfig(Map<String, String> additionalConfiguration) {
         // no additional config utilized
+    }
+
+    @Override
+    public void setResourceBaseDir(File resourceBaseDir) {
+        // no resource processing necessary
+    }
+
+    @Override
+    public void setMavenProject(MavenProject project) {
+        // no additional information needed
     }
 
 }

@@ -19,6 +19,11 @@
             <artifactId>maven-plugin-api</artifactId>
             <version>3.0.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>3.0.5</version>
+        </dependency>
     </dependencies>
 
     <build>
