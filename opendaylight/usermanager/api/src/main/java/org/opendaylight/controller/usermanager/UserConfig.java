@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.usermanager.internal;
+package org.opendaylight.controller.usermanager;
 
 import java.io.Serializable;
 import java.util.ArrayList;

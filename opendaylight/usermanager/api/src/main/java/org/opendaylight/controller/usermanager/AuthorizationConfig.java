@@ -6,9 +6,10 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.usermanager.internal;
+package org.opendaylight.controller.usermanager;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.opendaylight.controller.sal.utils.Status;
@@ -44,4 +45,9 @@ public class AuthorizationConfig extends UserConfig {
     public String toString() {
         return "AuthorizationConfig=[user: " + user + ", roles: " + roles + "]";
     }
+
+    public String getRolesString() {
+        return super.getRolesString();
+    }
+
 }

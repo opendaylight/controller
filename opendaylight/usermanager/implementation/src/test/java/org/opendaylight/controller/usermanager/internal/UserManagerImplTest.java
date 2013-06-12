@@ -25,6 +25,8 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.usermanager.AuthResponse;
 import org.opendaylight.controller.usermanager.IAAAProvider;
 import org.opendaylight.controller.usermanager.IUserManager;
+import org.opendaylight.controller.usermanager.ServerConfig;
+import org.opendaylight.controller.usermanager.UserConfig;
 
 /**
  * Unit Tests for UserManagerImpl
@@ -142,7 +144,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#addRemoveLocalUser(org.opendaylight.controller.usermanager.internal.UserConfig, boolean)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#addRemoveLocalUser(org.opendaylight.controller.usermanager.org.opendaylight.controller.usermanager.internal.UserConfig, boolean)}
      * .
      */
     @Test

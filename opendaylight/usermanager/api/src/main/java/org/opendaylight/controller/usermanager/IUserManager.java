@@ -15,9 +15,9 @@ import java.util.Set;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.usermanager.internal.AuthorizationConfig;
-import org.opendaylight.controller.usermanager.internal.ServerConfig;
-import org.opendaylight.controller.usermanager.internal.UserConfig;
+import org.opendaylight.controller.usermanager.AuthorizationConfig;
+import org.opendaylight.controller.usermanager.ServerConfig;
+import org.opendaylight.controller.usermanager.UserConfig;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.context.SecurityContextRepository;
 

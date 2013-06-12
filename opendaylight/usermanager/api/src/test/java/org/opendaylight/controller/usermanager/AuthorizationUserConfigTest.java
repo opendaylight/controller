@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.usermanager.internal;
+package org.opendaylight.controller.usermanager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,6 +18,8 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.usermanager.AuthResponse;
+import org.opendaylight.controller.usermanager.AuthorizationConfig;
+import org.opendaylight.controller.usermanager.UserConfig;
 
 /*
  * This test case includes tests for UserConfig and the extending class AuthorizationConfig
