@@ -14,7 +14,7 @@ import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
  * This interface defines the method to notify detected Host on the network. The
  * information includes Host's IP address, MAC address, switch ID, port, and
  * VLAN.
- *
+ * 
  */
 
 public interface IfHostListener {
@@ -23,7 +23,7 @@ public interface IfHostListener {
      * HostTracker.java. If a Host is learned for the first time then adds it to
      * the local database and informs other applications of coming up a new
      * Host. For the hosts which it has already learned, it refreshes them.
-     *
+     * 
      * @param host
      *            Host info encapsulated in HostNodeConnector class
      */

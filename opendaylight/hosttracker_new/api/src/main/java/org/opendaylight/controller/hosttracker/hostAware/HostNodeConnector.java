@@ -82,6 +82,20 @@ public class HostNodeConnector extends Host {
     }
 
     /**
+     * @return the NodeId
+     */
+    public Long getnodeconnectornodeId() {
+        return (Long) this.nodeConnector.getNode().getID();
+    }
+
+    /**
+     * @return the port
+     */
+    public Short getnodeconnectorportId() {
+        return (Short) this.nodeConnector.getID();
+    }
+
+    /**
      * @return the DataLayerAddress
      */
     public byte[] getDataLayerAddressBytes() {
@@ -174,7 +188,7 @@ public class HostNodeConnector extends Host {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
