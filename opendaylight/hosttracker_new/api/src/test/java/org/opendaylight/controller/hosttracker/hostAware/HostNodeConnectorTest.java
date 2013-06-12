@@ -14,6 +14,7 @@ import java.net.UnknownHostException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 
@@ -62,8 +63,10 @@ public class HostNodeConnectorTest extends TestCase {
                     .equals(nc1));
             Assert.assertTrue(hostnodeconnector_2.getnodeconnectorNode()
                     .equals(node));
-            Assert.assertTrue(node.equals(hostnodeconnector_2
-                    .getnodeconnectorNode()));
+            Assert.assertTrue(node.getID().equals(
+                    hostnodeconnector_2.getnodeconnectornodeId()));
+            Assert.assertTrue(hostnodeconnector_2.getnodeconnectorportId()
+                    .equals((short) 2));
         } catch (ConstructionException e) {
             Assert.assertTrue(false);
         }

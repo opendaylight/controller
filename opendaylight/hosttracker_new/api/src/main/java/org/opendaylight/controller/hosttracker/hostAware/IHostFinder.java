@@ -9,6 +9,7 @@
 package org.opendaylight.controller.hosttracker.hostAware;
 
 import java.net.InetAddress;
+
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 
 /**
