@@ -61,7 +61,7 @@ public class GenEnumResolvingTest {
         assertTrue(genTypes != null);
 
         assertEquals("Expected count of all Generated Types from yang models " +
-                "is 22", 22, genTypes.size());
+                "is 22", 25, genTypes.size());
 
         GeneratedType genInterface = null;
         for (final Type type : genTypes) {
@@ -135,7 +135,7 @@ public class GenEnumResolvingTest {
         final BindingGenerator bindingGen = new BindingGeneratorImpl();
         final List<Type> genTypes = bindingGen.generateTypes(context);
         assertTrue(genTypes != null);
-        assertEquals(2, genTypes.size());
+        assertEquals(3, genTypes.size());
 
         final Type type = genTypes.get(1);
         assertTrue(type instanceof Enumeration);
