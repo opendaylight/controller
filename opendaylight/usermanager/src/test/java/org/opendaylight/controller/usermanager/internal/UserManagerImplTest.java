@@ -55,14 +55,17 @@ public class UserManagerImplTest {
                         // Server config can't be empty
                         static final long serialVersionUID = 8645L;
 
+                        @Override
                         public String getAddress() {
                             return "1.1.1.1";
                         }
 
+                        @Override
                         public String getSecret() {
                             return "secret";
                         }
 
+                        @Override
                         public String getProtocol() {
                             return "IPv4";
                         }
@@ -80,11 +83,21 @@ public class UserManagerImplTest {
                             "7029,7455,8165,7029,7881", roles));
                 }
             });
+
+            um.setAuthorizationConfList(new ConcurrentHashMap<String, AuthorizationConfig>() {
+                static final long serialVersionUID = 2L;
+                {
+                    List<String> roles = new ArrayList<String>(3);
+                    roles.add(UserLevel.NETWORKOPERATOR.toString());
+                    roles.add("Container1-Admin");
+                    roles.add("Application2-User");
+
+                    put("Andrew", new AuthorizationConfig("Andrew", roles));
+                }
+            });
             // instantiate an empty activeUser collection
             um.setActiveUsers(new ConcurrentHashMap<String, AuthenticatedUser>());
-
         }
-
     }
 
     /**
@@ -97,11 +110,13 @@ public class UserManagerImplTest {
         // instantiate an anonymous AAAProvider
         IAAAProvider a3p = new IAAAProvider() {
 
+            @Override
             public AuthResponse authService(String userName, String password,
                     String server, String secretKey) {
                 return new AuthResponse();
             };
 
+            @Override
             public String getName() {
                 return "dummyAAAProvider";
             }
@@ -254,6 +269,9 @@ public class UserManagerImplTest {
         Assert.assertTrue(um.getUserLevel("Jack") == UserLevel.SYSTEMADMIN);
         // Run the check on configured users
         Assert.assertTrue(um.getUserLevel("John") == UserLevel.NETWORKOPERATOR);
-        Assert.assertTrue(um.getUserLevel("Andrew") == UserLevel.NOUSER);
+        // Run the check on local authorized users
+        Assert.assertTrue(um.getUserLevel("Andrew") == UserLevel.NETWORKOPERATOR);
+        // Non locally known user
+        Assert.assertTrue(um.getUserLevel("Tom") == UserLevel.NOUSER);
     }
 }

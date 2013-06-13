@@ -267,6 +267,18 @@ public interface IUserManager extends UserDetailsService {
      */
     public ISessionManager getSessionManager();
 
+    /**
+     * Checks if the specified role belongs to any application. Usually an
+     * application will call this function when configuring a role, to check if
+     * that role is already being used by another application.
+     *
+     * @param role
+     *            The role to check
+     * @return true if the specified role belongs to any application or if the
+     *         role is a well-known controller role, false otherwise.
+     */
+    public boolean isRoleInUse(String role);
+
     /* non-Javadoc
      * Returns the password for a given user
      *
