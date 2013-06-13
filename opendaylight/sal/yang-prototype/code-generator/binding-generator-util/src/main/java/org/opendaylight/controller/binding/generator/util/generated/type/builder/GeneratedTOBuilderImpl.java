@@ -16,6 +16,7 @@ import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferIdentityObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.Type;
@@ -26,11 +27,11 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedP
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 
-public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
+public class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
     private String packageName;
     private final String name;
     private String comment = "";
-    
+
     private GeneratedTransferObject extendsType;
     private final List<Type> implementsTypes = new ArrayList<Type>();
     private final List<EnumBuilder> enumerations = new ArrayList<EnumBuilder>();
@@ -81,7 +82,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         }
         return null;
     }
-    
+
     @Override
     public boolean addImplementsType(final Type genType) {
         if (genType != null) {
@@ -98,7 +99,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         }
         return false;
     }
-    
+
     @Override
     public EnumBuilder addEnumeration(String name) {
         final String innerPackageName = packageName + "." + this.name;
@@ -149,10 +150,20 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
 
     @Override
     public GeneratedTransferObject toInstance() {
-        return new GeneratedTransferObjectImpl(packageName, name, comment, 
-                annotationBuilders, extendsType, implementsTypes, constantDefintions, enumerations,
-                methodDefinitions, properties, equalsProperties,
-                hashProperties, toStringProperties);
+        return new GeneratedTransferObjectImpl(packageName, name, comment,
+                annotationBuilders, extendsType, implementsTypes,
+                constantDefintions, enumerations, methodDefinitions,
+                properties, equalsProperties, hashProperties,
+                toStringProperties);
+    }
+
+    @Override
+    public GeneratedTransferObject toIdentityInstance() {
+        return new GeneratedTransferIdentityObjectImpl(packageName, name, comment,
+                annotationBuilders, extendsType, implementsTypes,
+                constantDefintions, enumerations, methodDefinitions,
+                properties, equalsProperties, hashProperties,
+                toStringProperties);
     }
 
     private static final class GeneratedPropertyBuilderImpl implements
@@ -227,8 +238,9 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
 
         @Override
         public GeneratedProperty toInstance(final Type definingType) {
-            return new GeneratedPropertyImpl(name, comment, annotationBuilders, definingType,
-                    returnType, isFinal, isReadOnly, parameters, accessModifier);
+            return new GeneratedPropertyImpl(name, comment, annotationBuilders,
+                    definingType, returnType, isFinal, isReadOnly, parameters,
+                    accessModifier);
         }
     }
 
@@ -244,9 +256,10 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         private final boolean isReadOnly;
         private final List<MethodSignature.Parameter> parameters;
         private final AccessModifier modifier;
-        
+
         public GeneratedPropertyImpl(final String name, final String comment,
-                final List<AnnotationTypeBuilder> annotationBuilders, final Type parent, final Type returnType,
+                final List<AnnotationTypeBuilder> annotationBuilders,
+                final Type parent, final Type returnType,
                 final boolean isFinal, final boolean isReadOnly,
                 final List<Parameter> parameters, final AccessModifier modifier) {
             super();
@@ -284,7 +297,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         public List<AnnotationType> getAnnotations() {
             return annotations;
         }
-        
+
         @Override
         public Type getReturnType() {
             return returnType;
@@ -309,8 +322,6 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         public boolean isFinal() {
             return isFinal;
         }
-
-        
 
         @Override
         public int hashCode() {
@@ -354,7 +365,8 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
                 if (other.returnType != null) {
                     return false;
                 }
-            } else if (!returnType.getPackageName().equals(other.returnType.getPackageName())) {
+            } else if (!returnType.getPackageName().equals(
+                    other.returnType.getPackageName())) {
                 return false;
             } else if (!returnType.getName().equals(other.returnType.getName())) {
                 return false;
@@ -394,7 +406,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         }
     }
 
-    private static final class GeneratedTransferObjectImpl implements
+    private static class GeneratedTransferObjectImpl implements
             GeneratedTransferObject {
 
         private final String packageName;
@@ -412,8 +424,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         private final List<Type> implementsTypes;
 
         public GeneratedTransferObjectImpl(final String packageName,
-                final String name,
-                final String comment,
+                final String name, final String comment,
                 final List<AnnotationTypeBuilder> annotationBuilders,
                 final GeneratedTransferObject extendsType,
                 final List<Type> implementsTypes,
@@ -430,7 +441,8 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             this.comment = comment;
             this.annotations = toUnmodifiableAnnotations(annotationBuilders);
             this.extendsType = extendsType;
-            this.implementsTypes = Collections.unmodifiableList(implementsTypes);
+            this.implementsTypes = Collections
+                    .unmodifiableList(implementsTypes);
             this.constants = toUnmodifiableConstant(constantBuilders);
             this.enumerations = toUnmodifiableEnumerations(enumBuilders);
             this.properties = toUnmodifiableProperties(propBuilers);
@@ -499,17 +511,17 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         public Type getParentType() {
             return null;
         }
-        
+
         @Override
         public String getComment() {
             return comment;
         }
-        
+
         @Override
         public List<AnnotationType> getAnnotations() {
             return annotations;
         }
-        
+
         @Override
         public List<Type> getImplements() {
             return implementsTypes;
@@ -519,7 +531,7 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
         public GeneratedTransferObject getExtends() {
             return extendsType;
         }
-        
+
         @Override
         public List<Enumeration> getEnumDefintions() {
             return enumerations;
@@ -621,6 +633,28 @@ public final class GeneratedTOBuilderImpl implements GeneratedTOBuilder {
             builder.append(methods);
             builder.append("]");
             return builder.toString();
+        }
+    }
+
+    private static final class GeneratedTransferIdentityObjectImpl extends
+            GeneratedTransferObjectImpl implements
+            GeneratedTransferIdentityObject {
+        public GeneratedTransferIdentityObjectImpl(final String packageName,
+                final String name, final String comment,
+                final List<AnnotationTypeBuilder> annotationBuilders,
+                final GeneratedTransferObject extendsType,
+                final List<Type> implementsTypes,
+                final List<ConstantBuilder> constantBuilders,
+                final List<EnumBuilder> enumBuilders,
+                final List<MethodSignatureBuilder> methodBuilders,
+                final List<GeneratedPropertyBuilder> propBuilers,
+                final List<GeneratedPropertyBuilder> equalsBuilers,
+                final List<GeneratedPropertyBuilder> hashCodeBuilers,
+                final List<GeneratedPropertyBuilder> stringBuilers) {
+            super(packageName, name, comment, annotationBuilders, extendsType,
+                    implementsTypes, constantBuilders, enumBuilders,
+                    methodBuilders, propBuilers, equalsBuilers,
+                    hashCodeBuilers, stringBuilers);
         }
     }
 }

@@ -11,11 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
 import org.opendaylight.controller.sal.binding.model.api.ConcreteType;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
+import org.opendaylight.controller.sal.binding.model.api.WildcardType;
 import org.opendaylight.controller.yang.binding.Augmentable;
 import org.opendaylight.controller.yang.binding.Augmentation;
+import org.opendaylight.controller.yang.binding.BaseIdentity;
 import org.opendaylight.controller.yang.binding.DataObject;
 
 public final class Types {
@@ -36,7 +40,7 @@ public final class Types {
 
     /**
      * Returns an instance of {@link ConcreteType} describing the class
-     * 
+     *
      * @param cls
      *            Class to describe
      * @return Description of class
@@ -49,7 +53,7 @@ public final class Types {
     /**
      * Returns an instance of {@link ParameterizedType} describing the typed
      * {@link Map}<K,V>
-     * 
+     *
      * @param keyType
      *            Key Type
      * @param valueType
@@ -63,7 +67,7 @@ public final class Types {
     /**
      * Returns an instance of {@link ParameterizedType} describing the typed
      * {@link Set}<V> with concrete type of value.
-     * 
+     *
      * @param valueType
      *            Value Type
      * @return Description of generic type instance of Set
@@ -75,7 +79,7 @@ public final class Types {
     /**
      * Returns an instance of {@link ParameterizedType} describing the typed
      * {@link List}<V> with concrete type of value.
-     * 
+     *
      * @param valueType
      *            Value Type
      * @return Description of type instance of List
@@ -84,8 +88,15 @@ public final class Types {
         return parameterizedTypeFor(LIST_TYPE, valueType);
     }
 
+    public static GeneratedTransferObject getBaseIdentityTO() {
+        Class<BaseIdentity> cls = BaseIdentity.class;
+        GeneratedTOBuilderImpl gto = new GeneratedTOBuilderImpl(cls.getPackage().getName(),
+                cls.getSimpleName());
+        return gto.toInstance();
+    }
+
     /**
-     * 
+     *
      * @param type
      * @param parameters
      * @return
@@ -94,17 +105,21 @@ public final class Types {
             Type... parameters) {
         return new ParametrizedTypeImpl(type, parameters);
     }
-    
+
+    public static WildcardType wildcardTypeFor(String packageName, String typeName) {
+        return new WildcardTypeImpl(packageName, typeName);
+    }
+
     public static ParameterizedType augmentableTypeFor(Type valueType) {
         final Type augmentable = typeForClass(Augmentable.class);
         return parameterizedTypeFor(augmentable, valueType);
     }
-    
+
     public static ParameterizedType augmentationTypeFor(Type valueType) {
         final Type augmentation = typeForClass(Augmentation.class);
         return parameterizedTypeFor(augmentation, valueType);
     }
-    
+
     private static class ConcreteTypeImpl extends AbstractBaseType implements
             ConcreteType {
         private ConcreteTypeImpl(String pkName, String name) {
@@ -135,4 +150,12 @@ public final class Types {
         }
 
     }
+
+    private static class WildcardTypeImpl extends AbstractBaseType
+            implements WildcardType {
+        public WildcardTypeImpl(String packageName, String typeName) {
+            super(packageName, typeName);
+        }
+    }
+
 }

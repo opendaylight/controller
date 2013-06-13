@@ -69,6 +69,11 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
     }
 
     @Override
+    public Set<GroupingBuilder> getGroupings() {
+        return groupings;
+    }
+
+    @Override
     public void addGrouping(GroupingBuilder grouping) {
         groupings.add(grouping);
     }

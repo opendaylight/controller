@@ -24,6 +24,8 @@ public interface DataNodeContainerBuilder extends Builder {
 
     void addChildNode(DataSchemaNodeBuilder childNode);
 
+    Set<GroupingBuilder> getGroupings();
+
     void addGrouping(GroupingBuilder groupingBuilder);
 
     void addUsesNode(UsesNodeBuilder usesBuilder);

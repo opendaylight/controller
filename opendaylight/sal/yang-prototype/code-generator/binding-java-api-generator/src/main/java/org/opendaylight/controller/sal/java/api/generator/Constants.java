@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.java.api.generator;
 
 final class Constants {
-
     public static final String IFC = "interface";
     public static final String CLASS = "class";
     public static final String PKG = "package";
@@ -24,11 +23,13 @@ final class Constants {
     public static final String COMMA = ",";
     public static final String NL = "\n";
     public static final String SC = ";";
-    public static final String TAB = "\t";
+    public static final String TAB = "    ";
 
     public static final String PUBLIC = "public";
     public static final String PRIVATE = "private";
+    public static final String PROTECTED = "protected";
     public static final String STATIC = "static";
+    public static final String ABSTRACT = "abstract";
     public static final String FINAL = "final";
     public static final String EXTENDS = "extends";
     public static final String IMPLEMENTS = "implements";

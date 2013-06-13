@@ -19,6 +19,7 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.EnumBuilde
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedPropertyBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTypeBuilder;
+import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.*;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
@@ -103,7 +104,8 @@ public final class TypeProviderImpl implements TypeProvider {
                 final LeafrefTypeDefinition leafref = (LeafrefTypeDefinition) baseTypeDef;
                 returnType = provideTypeForLeafref(leafref);
             } else if (baseTypeDef instanceof IdentityrefTypeDefinition) {
-
+                final IdentityrefTypeDefinition idref = (IdentityrefTypeDefinition)typeDefinition;
+                returnType = returnTypeForIdentityref(idref);
             } else if (baseTypeDef instanceof EnumTypeDefinition) {
                 final EnumTypeDefinition enumTypeDef = (EnumTypeDefinition) baseTypeDef;
                 returnType = resolveEnumFromTypeDefinition(enumTypeDef,
@@ -128,7 +130,8 @@ public final class TypeProviderImpl implements TypeProvider {
                 final LeafrefTypeDefinition leafref = (LeafrefTypeDefinition) typeDefinition;
                 returnType = provideTypeForLeafref(leafref);
             } else if (typeDefinition instanceof IdentityrefTypeDefinition) {
-
+                final IdentityrefTypeDefinition idref = (IdentityrefTypeDefinition)typeDefinition;
+                returnType = returnTypeForIdentityref(idref);
             } else {
                 returnType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
                         .javaTypeForSchemaDefinitionType(typeDefinition);
@@ -140,6 +143,29 @@ public final class TypeProviderImpl implements TypeProvider {
 //            throw new IllegalArgumentException("Type Provider can't resolve " +
 //                    "type for specified Type Definition " + typedefName);
 //        }
+        return returnType;
+    }
+    
+    private Type returnTypeForIdentityref(IdentityrefTypeDefinition idref) {
+        QName baseIdQName = idref.getIdentity();
+        Module module = schemaContext.findModuleByNamespace(baseIdQName.getNamespace());
+        IdentitySchemaNode identity = null;
+        for(IdentitySchemaNode id : module.getIdentities()) {
+            if(id.getQName().equals(baseIdQName)) {
+                identity = id;
+            }
+        }
+        if(identity == null) {
+            throw new IllegalArgumentException("Target identity '" + baseIdQName + "' do not exists");
+        }
+
+        final String basePackageName = moduleNamespaceToPackageName(module);
+        final String packageName = packageNameForGeneratedType(basePackageName, identity.getPath());
+        final String genTypeName = parseToClassName(identity.getQName().getLocalName());
+
+        Type baseType = Types.typeForClass(Class.class);
+        Type paramType = Types.wildcardTypeFor(packageName, genTypeName);
+        Type returnType = Types.parameterizedTypeFor(baseType, paramType);
         return returnType;
     }
 

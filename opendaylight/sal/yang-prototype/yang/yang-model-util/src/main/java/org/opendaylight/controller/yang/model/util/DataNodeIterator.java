@@ -8,29 +8,30 @@ import java.util.Set;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.controller.yang.model.api.DataNodeContainer;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
+import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 
 public class DataNodeIterator implements Iterator<DataSchemaNode> {
-    
+
     private final DataNodeContainer container;
     private List<ListSchemaNode> allLists;
     private List<ContainerSchemaNode> allContainers;
     private List<LeafSchemaNode> allLeafs;
     private List<LeafListSchemaNode> allLeafLists;
     private List<DataSchemaNode> allChilds;
-    
+
     public DataNodeIterator(final DataNodeContainer container) {
         if (container == null) {
             throw new IllegalArgumentException("Data Node Container MUST be specified and cannot be NULL!");
         }
-        
+
         init();
         this.container = container;
         traverse(this.container);
     }
-    
+
     private void init() {
         this.allContainers = new ArrayList<ContainerSchemaNode>();
         this.allLists = new ArrayList<ListSchemaNode>();
@@ -38,28 +39,28 @@ public class DataNodeIterator implements Iterator<DataSchemaNode> {
         this.allLeafLists = new ArrayList<LeafListSchemaNode>();
         this.allChilds = new ArrayList<DataSchemaNode>();
     }
-    
+
     public List<ContainerSchemaNode> allContainers() {
         return allContainers;
     }
-    
+
     public List<ListSchemaNode> allLists() {
         return allLists;
     }
-    
+
     public List<LeafSchemaNode> allLeafs() {
         return allLeafs;
     }
-    
+
     public List<LeafListSchemaNode> allLeafLists() {
         return allLeafLists;
     }
-    
+
     private void traverse(final DataNodeContainer dataNode) {
         if (dataNode == null) {
             return;
         }
-        
+
         final Set<DataSchemaNode> childs = dataNode.getChildNodes();
         if (childs != null) {
             for (DataSchemaNode childNode : childs) {
@@ -83,15 +84,21 @@ public class DataNodeIterator implements Iterator<DataSchemaNode> {
                     allLeafLists.add(leafList);
                 }
             }
-            return;
+        }
+
+        final Set<GroupingDefinition> groupings = dataNode.getGroupings();
+        if(groupings != null) {
+            for(GroupingDefinition grouping : groupings) {
+                traverse(grouping);
+            }
         }
     }
-    
+
     @Override
     public boolean hasNext() {
         if (container.getChildNodes() != null) {
             Set<DataSchemaNode> childs = container.getChildNodes();
-            
+
             if ((childs != null) && !childs.isEmpty()) {
                 return childs.iterator().hasNext();
             }

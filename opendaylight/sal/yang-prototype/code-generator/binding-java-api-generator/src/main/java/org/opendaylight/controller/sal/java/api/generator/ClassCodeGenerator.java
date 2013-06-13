@@ -19,6 +19,7 @@ import java.util.Map;
 import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
+import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferIdentityObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 
@@ -29,6 +30,8 @@ public final class ClassCodeGenerator implements CodeGenerator {
     @Override
     public Writer generate(Type type) throws IOException {
         final Writer writer = new StringWriter();
+        boolean isIdentity = type instanceof GeneratedTransferIdentityObject;
+
         if (type instanceof GeneratedTransferObject) {
             GeneratedTransferObject genTO = (GeneratedTransferObject) type;            
             imports = GeneratorUtil.createImports(genTO);
@@ -47,7 +50,7 @@ public final class ClassCodeGenerator implements CodeGenerator {
             writer.write(NL);
 
             writer.write(GeneratorUtil.createClassDeclaration(genTO, "",
-                    imports));
+                    imports, isIdentity));
             writer.write(NL);
             writer.write(NL);
             
@@ -66,7 +69,7 @@ public final class ClassCodeGenerator implements CodeGenerator {
                 }
                 writer.write(NL);
                 writer.write(GeneratorUtil.createConstructor(genTO, TAB,
-                        imports) + NL);
+                        imports, isIdentity) + NL);
                 writer.write(NL);
                 for (GeneratedProperty field : fields) {
                     writer.write(GeneratorUtil.createGetter(field, TAB,

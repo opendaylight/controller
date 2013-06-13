@@ -907,7 +907,7 @@ public final class ParserUtils {
 
     public static UsesNodeBuilder copyUsesNodeBuilder(UsesNodeBuilder old) {
         final UsesNodeBuilder copy = new UsesNodeBuilderImpl(
-                old.getGroupingPathString(), old.getLine());
+                old.getGroupingName(), old.getLine());
         for (AugmentationSchemaBuilder augment : old.getAugmentations()) {
             copy.addAugment(augment);
         }
