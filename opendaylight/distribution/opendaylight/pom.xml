@@ -38,6 +38,7 @@
     <module>../../clustering/test</module>
     <module>../../configuration/api</module>
     <module>../../configuration/implementation</module>
+    <module>../../configuration/integrationtest</module>
     <module>../../routing/dijkstra_implementation</module>
     <module>../../arphandler</module>
     <module>../../forwardingrulesmanager/api</module>
