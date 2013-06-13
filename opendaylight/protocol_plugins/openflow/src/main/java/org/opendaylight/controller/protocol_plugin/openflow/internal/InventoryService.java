@@ -53,6 +53,7 @@ public class InventoryService implements IInventoryShimInternalListener,
     private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in global container only
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in global container only
     private boolean isDefaultContainer = false;
+    private String containerName = null;
 
     void setController(IController s) {
         this.controller = s;
@@ -75,7 +76,7 @@ public class InventoryService implements IInventoryShimInternalListener,
 
         Dictionary props = c.getServiceProperties();
         if (props != null) {
-            String containerName = (String) props.get("containerName");
+            containerName = (String) props.get("containerName");
             isDefaultContainer = containerName.equals(GlobalConstants.DEFAULT
                     .toString());
         }
@@ -146,6 +147,7 @@ public class InventoryService implements IInventoryShimInternalListener,
      */
     @Override
     public ConcurrentMap<Node, Map<String, Property>> getNodeProps() {
+        logger.debug("getNodePros for container {}", containerName);
         return nodeProps;
     }
 
@@ -218,9 +220,14 @@ public class InventoryService implements IInventoryShimInternalListener,
         }
 
         // update local cache
-        Map<String, Property> propMap = new HashMap<String, Property>();
-        for (Property prop : props) {
-            propMap.put(prop.getName(), prop);
+        Map<String, Property> propMap = nodeProps.get(node);
+        if (propMap == null) {
+            propMap = new HashMap<String, Property>();
+        }
+        if (props != null) {
+            for (Property prop : props) {
+                propMap.put(prop.getName(), prop);
+            }
         }
         nodeProps.put(node, propMap);
 
