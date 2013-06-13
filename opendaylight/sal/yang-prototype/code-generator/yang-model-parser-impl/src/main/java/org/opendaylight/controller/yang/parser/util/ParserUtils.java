@@ -10,6 +10,7 @@ package org.opendaylight.controller.yang.parser.util;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.ModuleImport;
@@ -27,6 +28,9 @@ import org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition
 import org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.IntegerTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
+import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
+import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
 import org.opendaylight.controller.yang.model.api.type.StringTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.UnionTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefinition;
@@ -76,7 +80,7 @@ public final class ParserUtils {
 
     /**
      * Get module import referenced by given prefix.
-     *
+     * 
      * @param builder
      *            module to search
      * @param prefix
@@ -97,7 +101,7 @@ public final class ParserUtils {
 
     /**
      * Parse uses path.
-     *
+     * 
      * @param usesPath
      *            as String
      * @return SchemaPath from given String
@@ -124,7 +128,7 @@ public final class ParserUtils {
 
     /**
      * Add all augment's child nodes to given target.
-     *
+     * 
      * @param augment
      * @param target
      */
@@ -133,54 +137,139 @@ public final class ParserUtils {
             final DataNodeContainerBuilder target) {
         for (DataSchemaNodeBuilder builder : augment.getChildNodes()) {
             builder.setAugmenting(true);
-            correctAugmentChildPath(augment, target.getPath());
+            correctAugmentChildPath(builder, target.getPath());
             target.addChildNode(builder);
         }
     }
 
     public static void fillAugmentTarget(
-            final AugmentationSchemaBuilder augment,
-            final ChoiceBuilder target) {
+            final AugmentationSchemaBuilder augment, final ChoiceBuilder target) {
         for (DataSchemaNodeBuilder builder : augment.getChildNodes()) {
             builder.setAugmenting(true);
-            correctAugmentChildPath(augment, target.getPath());
+            correctAugmentChildPath(builder, target.getPath());
             target.addChildNode(builder);
         }
     }
 
-    private static void correctAugmentChildPath(final DataNodeContainerBuilder node,
+    private static void correctAugmentChildPath(
+            final DataSchemaNodeBuilder childNode,
             final SchemaPath parentSchemaPath) {
-        for (DataSchemaNodeBuilder builder : node.getChildNodes()) {
 
-            // add correct path
-            List<QName> targetNodePath = new ArrayList<QName>(
-                    parentSchemaPath.getPath());
-            targetNodePath.add(builder.getQName());
-            builder.setPath(new SchemaPath(targetNodePath, true));
+        // set correct path
+        List<QName> targetNodePath = new ArrayList<QName>(
+                parentSchemaPath.getPath());
+        targetNodePath.add(childNode.getQName());
+        childNode.setPath(new SchemaPath(targetNodePath, true));
 
-            if (builder instanceof DataNodeContainerBuilder) {
-                DataNodeContainerBuilder cnb = (DataNodeContainerBuilder) builder;
-                correctAugmentChildPath(cnb, builder.getPath());
+        // set correct path for all child nodes
+        if (childNode instanceof DataNodeContainerBuilder) {
+            DataNodeContainerBuilder dataNodeContainer = (DataNodeContainerBuilder) childNode;
+            for (DataSchemaNodeBuilder child : dataNodeContainer
+                    .getChildNodes()) {
+                correctAugmentChildPath(child, childNode.getPath());
             }
+        }
 
-            // if child can contains type, correct path for this type too
-            if (builder instanceof TypeAwareBuilder) {
-                TypeAwareBuilder nodeBuilder = (TypeAwareBuilder) builder;
-                QName nodeBuilderQName = nodeBuilder.getQName();
-                TypeDefinition<?> nodeBuilderType = nodeBuilder.getType();
-                if (nodeBuilderType != null) {
-                    TypeDefinition<?> newType = createCorrectTypeDefinition(
-                            parentSchemaPath, nodeBuilderQName, nodeBuilderType);
-                    nodeBuilder.setType(newType);
-                } else {
-                    TypeDefinitionBuilder nodeBuilderTypedef = nodeBuilder
-                            .getTypedef();
-                    SchemaPath newSchemaPath = createNewSchemaPath(
-                            nodeBuilderTypedef.getPath(), nodeBuilderQName,
-                            nodeBuilderTypedef.getQName());
-                    nodeBuilderTypedef.setPath(newSchemaPath);
+        // if node can contains type, correct path for this type too
+        if (childNode instanceof TypeAwareBuilder) {
+            TypeAwareBuilder nodeBuilder = (TypeAwareBuilder) childNode;
+            correctTypeAwareNodePath(nodeBuilder, parentSchemaPath);
+        }
+    }
+
+    /**
+     * Repair schema path of node type.
+     * 
+     * @param node
+     *            node which contains type statement
+     * @param parentSchemaPath
+     *            schema path of parent node
+     */
+    private static void correctTypeAwareNodePath(
+            TypeAwareBuilder node, SchemaPath parentSchemaPath) {
+        final QName nodeBuilderQName = node.getQName();
+        final TypeDefinition<?> nodeType = node.getType();
+
+        Integer fd = null;
+        List<LengthConstraint> lengths = null;
+        List<PatternConstraint> patterns = null;
+        List<RangeConstraint> ranges = null;
+
+        if (nodeType != null) {
+            if (nodeType instanceof ExtendedType) {
+                ExtendedType et = (ExtendedType) nodeType;
+                if (nodeType
+                        .getQName()
+                        .getLocalName()
+                        .equals(nodeType.getBaseType().getQName()
+                                .getLocalName())) {
+                    fd = et.getFractionDigits();
+                    lengths = et.getLengths();
+                    patterns = et.getPatterns();
+                    ranges = et.getRanges();
+                    if (!hasConstraints(fd, lengths, patterns, ranges)) {
+                        return;
+                    }
                 }
             }
+            TypeDefinition<?> newType = createCorrectTypeDefinition(
+                    parentSchemaPath, nodeBuilderQName, nodeType);
+            node.setType(newType);
+        } else {
+            TypeDefinitionBuilder nodeBuilderTypedef = node.getTypedef();
+
+            fd = nodeBuilderTypedef.getFractionDigits();
+            lengths = nodeBuilderTypedef.getLengths();
+            patterns = nodeBuilderTypedef.getPatterns();
+            ranges = nodeBuilderTypedef.getRanges();
+
+            String tdbTypeName = nodeBuilderTypedef.getQName().getLocalName();
+            String baseTypeName = null;
+            if (nodeBuilderTypedef.getType() == null) {
+                baseTypeName = nodeBuilderTypedef.getTypedef().getQName()
+                        .getLocalName();
+            } else {
+                baseTypeName = nodeBuilderTypedef.getType().getQName()
+                        .getLocalName();
+            }
+            if (!(tdbTypeName.equals(baseTypeName))) {
+                return;
+            }
+
+            if (!hasConstraints(fd, lengths, patterns, ranges)) {
+                return;
+            }
+
+            SchemaPath newSchemaPath = createNewSchemaPath(
+                    nodeBuilderTypedef.getPath(), nodeBuilderQName,
+                    nodeBuilderTypedef.getQName());
+            nodeBuilderTypedef.setPath(newSchemaPath);
+        }
+    }
+
+    /**
+     * Check if there are some constraints.
+     * 
+     * @param fd
+     *            fraction digits
+     * @param lengths
+     *            length constraints
+     * @param patterns
+     *            pattern constraints
+     * @param ranges
+     *            range constraints
+     * @return true, if any of constraints are present, false otherwise
+     */
+    private static boolean hasConstraints(final Integer fd,
+            final List<LengthConstraint> lengths,
+            final List<PatternConstraint> patterns,
+            final List<RangeConstraint> ranges) {
+        if (fd == null && (lengths == null || lengths.isEmpty())
+                && (patterns == null || patterns.isEmpty())
+                && (ranges == null || ranges.isEmpty())) {
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -210,7 +299,8 @@ public final class ParserUtils {
                 DecimalTypeDefinition decimalType = (DecimalTypeDefinition) nodeType;
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, decimalType.getQName());
-                result = new Decimal64(newSchemaPath, decimalType.getFractionDigits());
+                result = new Decimal64(newSchemaPath,
+                        decimalType.getFractionDigits());
             } else if (nodeType instanceof EmptyTypeDefinition) {
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, nodeType.getQName());
@@ -254,8 +344,8 @@ public final class ParserUtils {
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, unionType.getQName());
                 return new UnionType(newSchemaPath, unionType.getTypes());
-            } else if(nodeType instanceof ExtendedType) {
-                ExtendedType extType = (ExtendedType)nodeType;
+            } else if (nodeType instanceof ExtendedType) {
+                ExtendedType extType = (ExtendedType) nodeType;
                 newSchemaPath = createNewSchemaPath(parentSchemaPath,
                         nodeQName, extType.getQName());
                 result = createNewExtendedType(newSchemaPath, extType);
@@ -270,7 +360,8 @@ public final class ParserUtils {
         TypeDefinition<?> baseType = oldExtendedType.getBaseType();
         String desc = oldExtendedType.getDescription();
         String ref = oldExtendedType.getReference();
-        ExtendedType.Builder builder = new ExtendedType.Builder(qname, baseType, desc, ref, newSchemaPath);
+        ExtendedType.Builder builder = new ExtendedType.Builder(qname,
+                baseType, desc, ref, newSchemaPath);
         builder.status(oldExtendedType.getStatus());
         builder.lengths(oldExtendedType.getLengths());
         builder.patterns(oldExtendedType.getPatterns());
@@ -559,9 +650,9 @@ public final class ParserUtils {
      * <li>reference</li>
      * <li>config</li>
      * </ul>
-     *
+     * 
      * These parameters may be refined for any node.
-     *
+     * 
      * @param node
      *            node to refine
      * @param refine

@@ -848,14 +848,20 @@ public class YangParserTest {
         Leafref ifcIdType = (Leafref) ifcId.getType();
         SchemaPath ifcIdTypeSchemaPath = ifcIdType.getPath();
         List<QName> ifcIdTypePath = ifcIdTypeSchemaPath.getPath();
-        QName q0 = new QName(new URI("urn:simple.types.data.demo"),
-                simpleDateFormat.parse("2013-02-27"), "data", "interfaces");
-        QName q1 = new QName(new URI("urn:simple.types.data.demo"),
-                simpleDateFormat.parse("2013-02-27"), "data", "ifEntry");
-        QName q2 = new QName(new URI("urn:simple.container.demo.test"),
-                simpleDateFormat.parse("2013-02-27"), "data", "augment-holder");
-        QName q3 = new QName(new URI("urn:simple.container.demo"),
-                simpleDateFormat.parse("2013-02-27"), "data", "interface-id");
+        
+        URI types1URI = URI.create("urn:simple.container.demo");
+        URI types2URI = URI.create("urn:simple.types.data.demo");
+        URI types3URI = URI.create("urn:simple.container.demo.test");
+        Date expectedDate = simpleDateFormat.parse("2013-02-27");
+        
+        QName q0 = new QName(types2URI,
+                expectedDate, "data", "interfaces");
+        QName q1 = new QName(types2URI,
+                expectedDate, "data", "ifEntry");
+        QName q2 = new QName(types3URI,
+                expectedDate, "data", "augment-holder");
+        QName q3 = new QName(types1URI,
+                expectedDate, "data", "interface-id");
         assertEquals(q0, ifcIdTypePath.get(0));
         assertEquals(q1, ifcIdTypePath.get(1));
         assertEquals(q2, ifcIdTypePath.get(2));
@@ -869,9 +875,18 @@ public class YangParserTest {
         assertEquals(q0, higherLayerTypePath.get(0));
         assertEquals(q1, higherLayerTypePath.get(1));
         assertEquals(q2, higherLayerTypePath.get(2));
-        q3 = new QName(new URI("urn:simple.container.demo"),
-                simpleDateFormat.parse("2013-02-27"), "data", "higher-layer-if");
+        q3 = new QName(types1URI,
+                expectedDate, "data", "higher-layer-if");
         assertEquals(q3, higherLayerTypePath.get(3));
+        
+        LeafSchemaNode myType = (LeafSchemaNode) augment
+                .getDataChildByName("my-type");
+        ExtendedType leafType = (ExtendedType)myType.getType();
+        
+        testModule = TestUtils.findModule(modules, "types2");
+        TypeDefinition<?> typedef = TestUtils.findTypedef(testModule.getTypeDefinitions(), "my-type1");
+        
+        assertEquals(typedef, leafType);
     }
 
     @Test

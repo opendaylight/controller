@@ -123,6 +123,9 @@ module types1 {
                 path "/if:interfaces/if:interface/if:higher-layer-if";
             }
         }
+        leaf my-type {
+            type data:my-type1;
+        }
     }
     
     container mycont {
