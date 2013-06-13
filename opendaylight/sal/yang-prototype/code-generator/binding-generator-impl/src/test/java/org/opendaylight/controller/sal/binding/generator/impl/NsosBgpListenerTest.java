@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
@@ -24,15 +25,15 @@ import java.util.Set;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-public class UnionTypeDefTest {
+public class NsosBgpListenerTest {
+
     private final static List<File> yangModels = new ArrayList<>();
     private final static String yangModelsFolder = AugmentedTypeTest.class
-            .getResource("/union-test-models").getPath();
+            .getResource("/nsos-bgp-listener-models").getPath();
 
     @BeforeClass
     public static void loadTestResources() {
         final File augFolder = new File(yangModelsFolder);
-
         for (final File fileEntry : augFolder.listFiles()) {
             if (fileEntry.isFile()) {
                 yangModels.add(fileEntry);
@@ -41,7 +42,7 @@ public class UnionTypeDefTest {
     }
 
     @Test
-    public void unionTypeResolvingTest() {
+    public void nsosBgpListenerImplTest() {
         final YangModelParser parser = new YangParserImpl();
         final Set<Module> modules = parser.parseYangModels(yangModels);
         final SchemaContext context = parser.resolveSchemaContext(modules);
@@ -55,4 +56,5 @@ public class UnionTypeDefTest {
 
         //TODO: implement test
     }
+
 }

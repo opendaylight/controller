@@ -528,7 +528,12 @@ public final class GeneratorUtil {
 			if (packageName.startsWith("java.lang")) {
 				builder.append(type.getName());
 			} else {
-				builder.append(packageName + "." + type.getName());
+                if (!packageName.isEmpty()) {
+                    builder.append(packageName + "." + type.getName());
+                } else {
+                    builder.append(type.getName());
+                }
+
 			}
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;
@@ -645,7 +650,8 @@ public final class GeneratorUtil {
 			String genTypePkg) {
 		String typeName = type.getName();
 		String typePkg = type.getPackageName();
-		if (typePkg.startsWith("java.lang") || typePkg.equals(genTypePkg)) {
+		if (typePkg.startsWith("java.lang") || typePkg.equals(genTypePkg) ||
+                typePkg.isEmpty()) {
 			return;
 		}
 		LinkedHashMap<String, Integer> packages = importedTypes.get(typeName);

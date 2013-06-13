@@ -22,16 +22,17 @@ public final class Types {
     private static final Type SET_TYPE = typeForClass(Set.class);
     private static final Type LIST_TYPE = typeForClass(List.class);
     private static final Type MAP_TYPE = typeForClass(Map.class);
-    
     public static final Type DATA_OBJECT = typeForClass(DataObject.class);
-    
-    private Types() {
-    }
 
     public static ConcreteType voidType() {
         return new ConcreteTypeImpl(Void.class.getPackage().getName(),
                 Void.class.getSimpleName());
     }
+
+    public static final Type primitiveType(final String primitiveType) {
+        return new ConcreteTypeImpl("", primitiveType);
+    }
+
 
     /**
      * Returns an instance of {@link ConcreteType} describing the class

@@ -1,0 +1,54 @@
+module nsos-bgp-listener-impl {
+    yang-version 1;
+    namespace "urn:cisco:params:xml:ns:yang:nsos:bgp:listener:impl";
+    prefix "bgpl-impl";
+
+    import ietf-inet-types { prefix inet; }
+    import nsos-config { prefix nsos; revision-date 2013-04-05; }
+
+    organization "Cisco Systems, Inc.";
+
+    contact "Robert Varga <rovarga@cisco.com>";
+
+    description
+        "This module contains the base YANG definitions for NS-OS
+         BGP listener implementation.
+
+        Copyright (c)2013 Cisco Systems, Inc. All rights reserved.";
+
+    revision "2013-04-09" {
+        description
+            "Initial revision";
+        reference "NS-OS System Design, version 1.2.";
+    }
+
+    identity bgp-listener-impl {
+        base nsos:module-type;
+    }
+
+    augment "/nsos:modules/nsos:module/nsos:module-type" {
+        case bgp-impl {
+            when "/nsos:modules/nsos:module/nsos:module-type = 'bgp-listener-impl'";
+
+            container "configuration" {
+
+                container peer {
+                    leaf port {
+                        type inet:port-number;
+                        default 179;
+                    }
+					leaf core-size {
+						type uint32;
+					}
+                }
+
+                leaf as-number {
+                    mandatory true;
+                    type inet:as-number;
+                }
+
+            }
+        }
+    }
+}
+
