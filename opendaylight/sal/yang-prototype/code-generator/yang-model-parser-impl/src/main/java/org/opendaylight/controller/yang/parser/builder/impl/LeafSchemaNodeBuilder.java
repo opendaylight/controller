@@ -290,6 +290,7 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder
             }
         }
 
+        @Override
         public String getDefault() {
             return defaultStr;
         }
@@ -298,6 +299,7 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder
             this.defaultStr = defaultStr;
         }
 
+        @Override
         public String getUnits() {
             return unitsStr;
         }

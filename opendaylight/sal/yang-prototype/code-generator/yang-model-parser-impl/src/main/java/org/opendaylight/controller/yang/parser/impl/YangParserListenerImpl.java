@@ -410,15 +410,15 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
         GroupingBuilder builder = moduleBuilder.addGrouping(groupQName,
                 actualPath, ctx.getStart().getLine());
         moduleBuilder.enterNode(builder);
-        updatePath("grouping");
         updatePath(groupName);
+        builder.setPath(createActualSchemaPath(actualPath, namespace, revision,
+                yangModelPrefix));
         parseSchemaNodeArgs(ctx, builder);
     }
 
     @Override
     public void exitGrouping_stmt(YangParser.Grouping_stmtContext ctx) {
         String actContainer = actualPath.pop();
-        actContainer += "-" + actualPath.pop();
         logger.debug("exiting " + actContainer);
         moduleBuilder.exitNode();
     }
@@ -495,8 +495,11 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
         final String groupingPathStr = stringFromNode(ctx);
         UsesNodeBuilder builder = moduleBuilder.addUsesNode(groupingPathStr,
                 actualPath, ctx.getStart().getLine());
+
         moduleBuilder.enterNode(builder);
         updatePath(groupingPathStr);
+        builder.setPath(createActualSchemaPath(actualPath, namespace, revision,
+                yangModelPrefix));
     }
 
     @Override

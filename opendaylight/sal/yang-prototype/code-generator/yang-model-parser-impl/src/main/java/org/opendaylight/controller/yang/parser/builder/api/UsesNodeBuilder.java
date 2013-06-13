@@ -19,9 +19,13 @@ import org.opendaylight.controller.yang.parser.util.RefineHolder;
  */
 public interface UsesNodeBuilder extends Builder {
 
-    String getGroupingPathString();
+    String getGroupingName();
 
-    SchemaPath getGroupingPath();
+    void setGroupingPath(SchemaPath groupingPath);
+
+    SchemaPath getPath();
+
+    void setPath(SchemaPath path);
 
     Set<AugmentationSchemaBuilder> getAugmentations();
 

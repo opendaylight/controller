@@ -761,15 +761,15 @@ public final class YangParserImpl implements YangModelParser {
                 .getUsesNodes();
         for (Map.Entry<List<String>, UsesNodeBuilder> entry : moduleUses
                 .entrySet()) {
-            final List<String> key = entry.getKey();
             final UsesNodeBuilder usesNode = entry.getValue();
             final int line = usesNode.getLine();
 
-            final String groupingName = key.get(key.size() - 1);
+            GroupingBuilder targetGrouping = getTargetGrouping(usesNode, modules, module);
+            usesNode.setGroupingPath(targetGrouping.getPath());
 
             for (RefineHolder refine : usesNode.getRefines()) {
                 SchemaNodeBuilder refineTarget = getRefineNodeBuilderCopy(
-                        groupingName, refine, modules, module);
+                        targetGrouping, refine, modules, module);
                 ParserUtils.checkRefine(refineTarget, refine);
                 ParserUtils.refineDefault(refineTarget, refine, line);
                 if (refineTarget instanceof LeafSchemaNodeBuilder) {
@@ -805,6 +805,82 @@ public final class YangParserImpl implements YangModelParser {
         }
     }
 
+    private GroupingBuilder getTargetGrouping(
+            final UsesNodeBuilder usesBuilder,
+            final Map<String, TreeMap<Date, ModuleBuilder>> modules,
+            final ModuleBuilder module) {
+        final int line = usesBuilder.getLine();
+        String groupingString = usesBuilder.getGroupingName();
+        String groupingPrefix;
+        String groupingName;
+
+        if(groupingString.contains(":")) {
+            String[] splitted = groupingString.split(":");
+            if(splitted.length != 2 || groupingString.contains("/")) {
+                throw new YangParseException(module.getName(), line, "Invalid name of target grouping");
+            }
+            groupingPrefix = splitted[0];
+            groupingName = splitted[1];
+        } else {
+            groupingPrefix = module.getPrefix();
+            groupingName = groupingString;
+        }
+
+        ModuleBuilder dependentModule = null;
+        if(groupingPrefix.equals(module.getPrefix())) {
+            dependentModule = module;
+        } else {
+            dependentModule = findDependentModule(modules, module, groupingPrefix, line);
+        }
+
+
+        List<QName> path = usesBuilder.getPath().getPath();
+        GroupingBuilder result = null;
+        Set<GroupingBuilder> groupings = dependentModule.getModuleGroupings();
+        result = findGrouping(groupings, groupingName);
+
+        if (result == null) {
+            Builder currentNode = null;
+            final List<String> currentPath = new ArrayList<String>();
+            currentPath.add(dependentModule.getName());
+
+            for (int i = 0; i < path.size(); i++) {
+                QName qname = path.get(i);
+                currentPath.add(qname.getLocalName());
+                currentNode = dependentModule.getModuleNode(currentPath);
+
+                if (currentNode instanceof RpcDefinitionBuilder) {
+                    groupings = ((RpcDefinitionBuilder) currentNode).getGroupings();
+                } else if (currentNode instanceof DataNodeContainerBuilder) {
+                    groupings = ((DataNodeContainerBuilder) currentNode).getGroupings();
+                } else {
+                    groupings = Collections.emptySet();
+                }
+
+                result = findGrouping(groupings, groupingName);
+                if (result != null) {
+                    break;
+                }
+            }
+        }
+
+        if (result != null) {
+            return result;
+        }
+        throw new YangParseException(module.getName(), line,
+                "Referenced grouping '" + groupingName + "' not found.");
+    }
+
+    private GroupingBuilder findGrouping(Set<GroupingBuilder> groupings,
+            String name) {
+        for (GroupingBuilder grouping : groupings) {
+            if (grouping.getQName().getLocalName().equals(name)) {
+                return grouping;
+            }
+        }
+        return null;
+    }
+
     /**
      * Find original builder of node to refine and return copy of this builder.
      * <p>
@@ -825,11 +901,11 @@ public final class YangParserImpl implements YangModelParser {
      *         otherwise
      */
     private SchemaNodeBuilder getRefineNodeBuilderCopy(
-            final String groupingPath, final RefineHolder refine,
+            final GroupingBuilder targetGrouping, final RefineHolder refine,
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module) {
         Builder result = null;
-        final Builder lookedUpBuilder = findRefineTargetBuilder(groupingPath,
+        final Builder lookedUpBuilder = findRefineTargetBuilder(targetGrouping,
                 refine, modules, module);
         if (lookedUpBuilder instanceof LeafSchemaNodeBuilder) {
             result = ParserUtils
@@ -876,28 +952,11 @@ public final class YangParserImpl implements YangModelParser {
      * @return Builder object of refine node if it is present in grouping, null
      *         otherwise
      */
-    private Builder findRefineTargetBuilder(final String groupingPath,
+    private Builder findRefineTargetBuilder(final GroupingBuilder builder,
             final RefineHolder refine,
             final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module) {
         final String refineNodeName = refine.getName();
-        final SchemaPath path = ParserUtils.parseUsesPath(groupingPath);
-        final List<String> builderPath = new ArrayList<String>();
-        String prefix = null;
-        for (QName qname : path.getPath()) {
-            builderPath.add(qname.getLocalName());
-            prefix = qname.getPrefix();
-        }
-        if (prefix == null) {
-            prefix = module.getPrefix();
-        }
-
-        final ModuleBuilder dependentModule = findDependentModule(modules,
-                module, prefix, refine.getLine());
-        builderPath.add(0, dependentModule.getName());
-        final GroupingBuilder builder = dependentModule
-                .getGrouping(builderPath);
-
         Builder result = builder.getChildNode(refineNodeName);
         if (result == null) {
             Set<GroupingBuilder> grps = builder.getGroupings();
