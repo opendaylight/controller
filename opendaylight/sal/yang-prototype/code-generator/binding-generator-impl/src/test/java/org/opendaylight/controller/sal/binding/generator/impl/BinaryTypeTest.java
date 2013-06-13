@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- */
+* Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v1.0 which accompanies this distribution,
+* and is available at http://www.eclipse.org/legal/epl-v10.html
+*/
 package org.opendaylight.controller.sal.binding.generator.impl;
 
 import org.junit.BeforeClass;
@@ -24,15 +24,14 @@ import java.util.Set;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-public class UnionTypeDefTest {
+public class BinaryTypeTest {
     private final static List<File> yangModels = new ArrayList<>();
     private final static String yangModelsFolder = AugmentedTypeTest.class
-            .getResource("/union-test-models").getPath();
+            .getResource("/binary-type-test-models").getPath();
 
     @BeforeClass
     public static void loadTestResources() {
         final File augFolder = new File(yangModelsFolder);
-
         for (final File fileEntry : augFolder.listFiles()) {
             if (fileEntry.isFile()) {
                 yangModels.add(fileEntry);
@@ -41,7 +40,7 @@ public class UnionTypeDefTest {
     }
 
     @Test
-    public void unionTypeResolvingTest() {
+    public void binaryTypeTest() {
         final YangModelParser parser = new YangParserImpl();
         final Set<Module> modules = parser.parseYangModels(yangModels);
         final SchemaContext context = parser.resolveSchemaContext(modules);
