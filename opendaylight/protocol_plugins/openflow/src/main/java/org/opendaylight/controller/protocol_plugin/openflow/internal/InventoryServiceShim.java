@@ -236,6 +236,8 @@ public class InventoryServiceShim implements IContainerListener,
     @Override
     public void tagUpdated(String containerName, Node n, short oldTag,
             short newTag, UpdateType t) {
+        logger.debug("tagUpdated: {} type {} for container {}", new Object[] {
+                n, t, containerName });
     }
 
     @Override
@@ -246,6 +248,8 @@ public class InventoryServiceShim implements IContainerListener,
     @Override
     public void nodeConnectorUpdated(String containerName, NodeConnector p,
             UpdateType t) {
+        logger.debug("nodeConnectorUpdated: {} type {} for container {}",
+                new Object[] { p, t, containerName });
         if (this.containerMap == null) {
             logger.error("containerMap is NULL");
             return;
@@ -283,6 +287,7 @@ public class InventoryServiceShim implements IContainerListener,
 
         // notify InventoryService
         notifyInventoryShimInternalListener(containerName, p, t, null);
+        notifyInventoryShimInternalListener(containerName, p.getNode(), t, null);
     }
 
     private void notifyInventoryShimExternalListener(Node node,
@@ -308,7 +313,7 @@ public class InventoryServiceShim implements IContainerListener,
                     type, props);
             logger.trace(
                     "notifyInventoryShimInternalListener {} type {} for container {}",
-                    nodeConnector, type, container);
+                    new Object[] { nodeConnector, type, container });
         }
     }
 
@@ -371,6 +376,18 @@ public class InventoryServiceShim implements IContainerListener,
 
         // Notify external listener
         notifyInventoryShimExternalListener(node, type, props);
+    }
+
+    private void notifyInventoryShimInternalListener(String container,
+            Node node, UpdateType type, Set<Property> props) {
+        IInventoryShimInternalListener inventoryShimInternalListener = inventoryShimInternalListeners
+                .get(container);
+        if (inventoryShimInternalListener != null) {
+            inventoryShimInternalListener.updateNode(node, type, props);
+            logger.trace(
+                    "notifyInventoryShimInternalListener {} type {} for container {}",
+                    new Object[] { node, type, container });
+        }
     }
 
     private void addNode(ISwitch sw) {
