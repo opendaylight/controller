@@ -48,8 +48,12 @@ public class YangToSourcesPluginTestIT {
         Verifier v = setUp("AdditionalConfig/", false);
         v.verifyTextInLog("[DEBUG] yang-to-sources: Additional configuration picked up for : org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl: {nm1=abcd=a.b.c.d, nm2=abcd2=a.b.c.d.2}");
         v.verifyTextInLog("[DEBUG] yang-to-sources: Additional configuration picked up for : org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl: {c1=config}");
-        v.verifyTextInLog("../files marked as resources: META-INF/yang");
-        v.verifyTextInLog("target/generated-resources marked as resources for generator: org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl");
+        v.verifyTextInLog(File.separator
+                + "files marked as resources: META-INF" + File.separator
+                + "yang");
+        v.verifyTextInLog("target"
+                + File.separator
+                + "generated-resources marked as resources for generator: org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl");
     }
 
     @Test
@@ -105,9 +109,8 @@ public class YangToSourcesPluginTestIT {
 
     static Verifier setUp(String project, boolean ignoreF)
             throws VerificationException {
-        final URL path = YangToSourcesPluginTestIT
-                .class.getResource("/" + project
-                + "pom.xml");
+        final URL path = YangToSourcesPluginTestIT.class.getResource("/"
+                + project + "pom.xml");
         File parent = new File(path.getPath());
         Verifier verifier = new Verifier(parent.getParent());
         if (ignoreF)
@@ -125,9 +128,8 @@ public class YangToSourcesPluginTestIT {
 
     @Test
     public void testFindResourceOnCp() throws VerificationException {
-        Verifier v1 = new Verifier(
-                new File(getClass().getResource("/GenerateTest1/pom.xml")
-                        .getPath()).getParent());
+        Verifier v1 = new Verifier(new File(getClass().getResource(
+                "/GenerateTest1/pom.xml").getPath()).getParent());
         v1.executeGoal("clean");
         v1.executeGoal("package");
         v1.assertFilePresent("target/classes/META-INF/yang/testfile1.yang");
