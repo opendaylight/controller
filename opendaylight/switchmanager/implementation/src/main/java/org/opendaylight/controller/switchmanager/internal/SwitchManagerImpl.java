@@ -820,6 +820,8 @@ CommandProvider {
 
     @Override
     public void updateNode(Node node, UpdateType type, Set<Property> props) {
+        log.debug("updateNode: {} type {} props {} for container {}",
+                new Object[] { node, type, props, containerName });
         switch (type) {
         case ADDED:
             addNode(node, props);
@@ -841,7 +843,8 @@ CommandProvider {
         Node node = nodeConnector.getNode();
         Map<String, Property> propMap = new HashMap<String, Property>();
 
-        log.trace("{} {}", nodeConnector, type);
+        log.debug("updateNodeConnector: {} type {} props {} for container {}",
+                new Object[] { nodeConnector, type, props, containerName });
 
         if (nodeConnectorProps == null) {
             return;
@@ -1335,6 +1338,8 @@ CommandProvider {
         Set<Node> nodeSet = nodeProps.keySet();
         if (nodeSet != null) {
             for (Node node : nodeSet) {
+                log.debug("getInventories: {} added for container {}",
+                        new Object[] { node, containerName });
                 addNode(node, null);
             }
         }
@@ -1384,17 +1389,17 @@ CommandProvider {
     }
 
     private void bulkUpdateService(IInventoryListener service) {
+        Map<String, Property> propMap;
+        UpdateType type = UpdateType.ADDED;
+
         for (Node node : getNodes()) {
-            service.notifyNode(node, UpdateType.ADDED, null);
+            propMap = nodeProps.get(node);
+            service.notifyNode(node, type, propMap);
         }
 
-        Map<String, Property> propMap = new HashMap<String, Property>();
-        propMap.put(State.StatePropName, new State(State.EDGE_UP));
         for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
-            if (isNodeConnectorEnabled(nodeConnector)) {
-                service.notifyNodeConnector(nodeConnector, UpdateType.ADDED,
-                        propMap);
-            }
+            propMap = nodeConnectorProps.get(nodeConnector);
+            service.notifyNodeConnector(nodeConnector, type, propMap);
         }
     }
 
