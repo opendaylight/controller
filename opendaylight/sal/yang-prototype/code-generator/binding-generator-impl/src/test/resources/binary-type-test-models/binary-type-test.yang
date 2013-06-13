@@ -1,0 +1,57 @@
+module binary-type-test {
+    yang-version 1;
+    namespace "urn:binary:types:model";
+    prefix "btt";
+
+    import binary-types {
+        prefix "bin";
+        revision-date 2013-06-13;
+    }
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    description
+        "Simple test to test imported binary types and resolving of binary
+        type in leaf statement.";
+
+    revision "2013-06-13" {
+        reference "NO REF";
+    }
+
+    typedef binary-type {
+        type binary {
+            length 128;
+        }
+    }
+
+    container container-foo {
+        leaf binary-leaf {
+            type binary {
+                length 128;
+            }
+        }
+
+        list binary-list {
+            key "binary-key";
+
+            leaf binary-key {
+                type btt:binary-type;
+            }
+
+            leaf imported-simple-binary {
+                type bin:simple-binary;
+            }
+        }
+
+        leaf imported-restrict-binary {
+            type bin:restricted-binary;
+        }
+
+        leaf-list binary-list {
+            type binary {
+                length 256;
+            }
+        }
+    }
+}

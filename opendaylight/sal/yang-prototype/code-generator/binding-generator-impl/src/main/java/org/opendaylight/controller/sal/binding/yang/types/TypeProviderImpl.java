@@ -87,12 +87,10 @@ public final class TypeProviderImpl implements TypeProvider {
             throw new IllegalArgumentException("Type Definition cannot be " +
                     "NULL!");
         }
-
         if (typeDefinition.getQName() == null) {
             throw new IllegalArgumentException("Type Definition cannot have " +
                     "non specified QName (QName cannot be NULL!)");
         }
-
         if (typeDefinition.getQName().getLocalName() == null) {
             throw new IllegalArgumentException("Type Definitions Local Name " +
                     "cannot be NULL!");
@@ -136,6 +134,12 @@ public final class TypeProviderImpl implements TypeProvider {
                         .javaTypeForSchemaDefinitionType(typeDefinition);
             }
         }
+        //TODO: add throw exception when we will be able to resolve ALL yang
+        // types!
+//        if (returnType == null) {
+//            throw new IllegalArgumentException("Type Provider can't resolve " +
+//                    "type for specified Type Definition " + typedefName);
+//        }
         return returnType;
     }
 

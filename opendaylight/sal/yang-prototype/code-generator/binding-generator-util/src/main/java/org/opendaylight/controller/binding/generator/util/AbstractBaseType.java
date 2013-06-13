@@ -63,7 +63,9 @@ public class AbstractBaseType implements Type {
 
     @Override
     public String toString() {
-
+        if (packageName.isEmpty()) {
+            return "Type (" + name + ")";
+        }
         return "Type (" + packageName + "." + name + ")";
     }
 

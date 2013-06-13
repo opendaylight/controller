@@ -53,5 +53,7 @@ public class AugmentRleativeXPathTest {
 
         assertNotNull("genTypes is null", genTypes);
         assertFalse("genTypes is empty", genTypes.isEmpty());
+
+        //TODO: implement test
     }
 }

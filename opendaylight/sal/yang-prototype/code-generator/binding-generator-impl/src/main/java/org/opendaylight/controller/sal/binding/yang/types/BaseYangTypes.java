@@ -32,6 +32,7 @@ public final class BaseYangTypes {
     public static final Type UINT16_TYPE = Types.typeForClass(Integer.class);
     public static final Type UINT32_TYPE = Types.typeForClass(Long.class);
     public static final Type UINT64_TYPE = Types.typeForClass(BigInteger.class);
+    public static final Type BINARY_TYPE = Types.primitiveType("byte[]");
 
     static {
         typeMap.put("boolean", BOOLEAN_TYPE);
@@ -46,6 +47,7 @@ public final class BaseYangTypes {
         typeMap.put("uint16", UINT16_TYPE);
         typeMap.put("uint32", UINT32_TYPE);
         typeMap.put("uint64", UINT64_TYPE);
+        typeMap.put("binary", BINARY_TYPE);
     }
 
     public static final TypeProvider BASE_YANG_TYPES_PROVIDER = new TypeProvider() {
