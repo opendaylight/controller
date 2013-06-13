@@ -40,6 +40,7 @@ class YangToSourcesProcessor {
     static final String LOG_PREFIX = "yang-to-sources:";
     static final String META_INF_YANG_STRING = "META-INF" + File.separator
             + "yang";
+    static final String META_INF_YANG_STRING_JAR = "META-INF" + "/" + "yang";
     static final File META_INF_YANG_DIR = new File(META_INF_YANG_STRING);
 
     private final Log log;

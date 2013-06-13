@@ -216,7 +216,7 @@ final class Util {
                         String entryName = entry.getName();
 
                         if (entryName
-                                .startsWith(YangToSourcesProcessor.META_INF_YANG_STRING)) {
+                                .startsWith(YangToSourcesProcessor.META_INF_YANG_STRING_JAR)) {
                             if (entry.isDirectory() == false
                                     && entryName.endsWith(".yang")) {
                                 foundFilesForReporting.add(entryName);
