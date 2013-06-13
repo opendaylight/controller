@@ -73,16 +73,16 @@ public class TopologyManagerImplTest {
             NodeConnector tailnc1 = NodeConnectorCreator
                     .createOFNodeConnector((short) (i + 10),
                             NodeCreator.createOFNode((long) (i + 10)));
-            Edge e1 = new Edge(headnc1, tailnc1);
+            Edge e1 = new Edge(tailnc1, headnc1);
             TopoEdgeUpdate teu1 = new TopoEdgeUpdate(e1, props,
                     UpdateType.ADDED);
             topoedgeupdateList.add(teu1);
 
-            NodeConnector headnc2 = NodeConnectorCreator.createOFNodeConnector(
-                    (short) (i + 1), headnc1.getNode());
             NodeConnector tailnc2 = NodeConnectorCreator.createOFNodeConnector(
+                    (short) (i + 1), headnc1.getNode());
+            NodeConnector headnc2 = NodeConnectorCreator.createOFNodeConnector(
                     (short) (i + 11), tailnc1.getNode());
-            Edge e2 = new Edge(headnc2, tailnc2);
+            Edge e2 = new Edge(tailnc2, headnc2);
             TopoEdgeUpdate teu2 = new TopoEdgeUpdate(e2, props,
                     UpdateType.ADDED);
             topoedgeupdateList.add(teu2);
@@ -111,25 +111,12 @@ public class TopologyManagerImplTest {
                         .longValue();
                 Long tailNcId = ((Short) edge.getTailNodeConnector().getID())
                         .longValue();
-                if (nodeId == 1 || nodeId == 3 || nodeId == 5) {
-                    Assert.assertTrue((headNcId.equals(nodeId) && tailNcId
-                            .equals(nodeId + 10))
-                            || (headNcId.equals(nodeId + 10) && tailNcId
-                                    .equals(nodeId))
-                                    || (headNcId.equals(nodeId + 1) && tailNcId
-                                            .equals(nodeId + 11))
-                                            || (headNcId.equals(nodeId + 11) && tailNcId
-                                                    .equals(nodeId + 1)));
-                } else if (nodeId == 11 || nodeId == 13 || nodeId == 15) {
-                    Assert.assertTrue((headNcId.equals(nodeId) && tailNcId
-                            .equals(nodeId - 10))
-                            || (headNcId.equals(nodeId) && tailNcId
-                                    .equals(nodeId - 10))
-                                    || (headNcId.equals(nodeId - 9) && tailNcId
-                                            .equals(nodeId + 1))
-                                            || (headNcId.equals(nodeId + 1) && tailNcId
-                                                    .equals(nodeId - 9)));
-                }
+                Assert.assertTrue(
+                        (headNcId.equals(nodeId) && tailNcId.equals(nodeId + 10))
+                        || (headNcId.equals(nodeId + 11) && tailNcId.equals(nodeId + 1))
+                        || (headNcId.equals(nodeId + 1) && tailNcId.equals(nodeId - 9))
+                        || (headNcId.equals(nodeId - 10) && tailNcId.equals(nodeId))
+                        );
             }
             i.remove();
         }
