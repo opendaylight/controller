@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn//++U\u003d",
+        "filename": "opendaylight/configuration/integrationtest/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 14
+      },
+      "writtenOn": "2013-06-13T00:31:15Z",
+      "side": 1,
+      "message": "You\u0027re adding containermanager and containermanager.implementation twice.  The build is outputing a warning for it.",
+      "revId": "bffb6c62d5b3d2122957569f944cd9fbe93791f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn///Hw\u003d",
         "filename": "opendaylight/configuration/integrationtest/src/test/java/org/opendaylight/controller/configuration/internal/ConfigurationIntegrationTest.java",
         "patchSetId": 1
