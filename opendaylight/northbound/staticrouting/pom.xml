@@ -91,6 +91,6 @@
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>com.sun.jersey.jersey-servlet</artifactId>
       <version>1.17-SNAPSHOT</version>
-    </dependency>   
+    </dependency>
   </dependencies>
 </project>

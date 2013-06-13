@@ -70,7 +70,7 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>configuration</artifactId>
       <version>0.4.0-SNAPSHOT</version>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

@@ -1,78 +1,78 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-	version="3.0">
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>free access</web-resource-name>
-			<url-pattern>/js/*</url-pattern>
-			<url-pattern>/images/*</url-pattern>
-			<url-pattern>/css/*</url-pattern>
-			<url-pattern>/favicon.ico</url-pattern>
-		</web-resource-collection>
-	</security-constraint>
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+        version="3.0">
+        <security-constraint>
+                <web-resource-collection>
+                        <web-resource-name>free access</web-resource-name>
+                        <url-pattern>/js/*</url-pattern>
+                        <url-pattern>/images/*</url-pattern>
+                        <url-pattern>/css/*</url-pattern>
+                        <url-pattern>/favicon.ico</url-pattern>
+                </web-resource-collection>
+        </security-constraint>
 
-	<security-constraint>
-		<display-name>TopologyApp</display-name>
-		<web-resource-collection>
-			<web-resource-name>TopoGUI</web-resource-name>
-			<url-pattern>/*</url-pattern>
-		</web-resource-collection>
-		<auth-constraint>
-			<role-name>System-Admin</role-name>
-			<role-name>Network-Admin</role-name>
-			<role-name>Network-Operator</role-name>
-			<role-name>Container-User</role-name>
-		</auth-constraint>
-	</security-constraint>
-	<security-role>
-		<role-name>System-Admin</role-name>
-	</security-role>
-	<security-role>
-		<role-name>Network-Admin</role-name>
-	</security-role>
-	<security-role>
-		<role-name>Network-Operator</role-name>
-	</security-role>
-	<security-role>
-		<role-name>Container-User</role-name>
-	</security-role>
+        <security-constraint>
+                <display-name>TopologyApp</display-name>
+                <web-resource-collection>
+                        <web-resource-name>TopoGUI</web-resource-name>
+                        <url-pattern>/*</url-pattern>
+                </web-resource-collection>
+                <auth-constraint>
+                        <role-name>System-Admin</role-name>
+                        <role-name>Network-Admin</role-name>
+                        <role-name>Network-Operator</role-name>
+                        <role-name>Container-User</role-name>
+                </auth-constraint>
+        </security-constraint>
+        <security-role>
+                <role-name>System-Admin</role-name>
+        </security-role>
+        <security-role>
+                <role-name>Network-Admin</role-name>
+        </security-role>
+        <security-role>
+                <role-name>Network-Operator</role-name>
+        </security-role>
+        <security-role>
+                <role-name>Container-User</role-name>
+        </security-role>
 
-	<login-config>
-		<auth-method>FORM</auth-method>
-		<form-login-config>
-			<form-login-page>/WEB-INF/jsp/login.jsp</form-login-page>
-			<form-error-page>/WEB-INF/jsp/error.jsp</form-error-page>
-		</form-login-config>
-	</login-config>
+        <login-config>
+                <auth-method>FORM</auth-method>
+                <form-login-config>
+                        <form-login-page>/WEB-INF/jsp/login.jsp</form-login-page>
+                        <form-error-page>/WEB-INF/jsp/error.jsp</form-error-page>
+                </form-login-config>
+        </login-config>
 
     <error-page>
             <error-code>403</error-code>
             <location>/WEB-INF/jsp/autherror.jsp</location>
     </error-page>
 
-	<servlet>
-		<servlet-name>Topology</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
+        <servlet>
+                <servlet-name>Topology</servlet-name>
+                <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+                <load-on-startup>1</load-on-startup>
+        </servlet>
 
 
 
-	<servlet-mapping>
-		<servlet-name>Topology</servlet-name>
-		<url-pattern>/</url-pattern>
-	</servlet-mapping>
+        <servlet-mapping>
+                <servlet-name>Topology</servlet-name>
+                <url-pattern>/</url-pattern>
+        </servlet-mapping>
 
-	<listener>
-		<listener-class>org.opendaylight.controller.web.ControllerUISessionManager</listener-class>
-	</listener>
+        <listener>
+                <listener-class>org.opendaylight.controller.web.ControllerUISessionManager</listener-class>
+        </listener>
 
-	<session-config>
-		<cookie-config>
-			<path>/</path>
-		</cookie-config>
-	</session-config>
+        <session-config>
+                <cookie-config>
+                        <path>/</path>
+                </cookie-config>
+        </session-config>
 
 
 </web-app>

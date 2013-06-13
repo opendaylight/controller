@@ -30,13 +30,13 @@
                connectionTimeout="20000"
                redirectPort="8443" />
 
-<!-- 
-	Please remove the comments around the following Connector tag to enable HTTPS Authentication support.
-	Remember to add a valid keystore in the configuration folder.
-	More info : http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration 
+<!--
+        Please remove the comments around the following Connector tag to enable HTTPS Authentication support.
+        Remember to add a valid keystore in the configuration folder.
+        More info : http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
 -->
- 
- <!-- 
+
+ <!--
     <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
                maxThreads="150" scheme="https" secure="true"
                clientAuth="false" sslProtocol="TLS"
@@ -49,13 +49,13 @@
             unpackWARs="false" autoDeploy="false"
             deployOnStartup="false" createDirs="false">
         <Realm className="org.opendaylight.controller.security.ControllerCustomRealm" />
-	    <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
-     
+            <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
-			prefix="web_access_log_" suffix=".txt" resolveHosts="false"
-			rotatable="true" fileDateFormat="yyyy-MM"
-			pattern="%{yyyy-MM-dd HH:mm:ss.SSS z}t - [%a] - %r"/>
-		
+                        prefix="web_access_log_" suffix=".txt" resolveHosts="false"
+                        rotatable="true" fileDateFormat="yyyy-MM"
+                        pattern="%{yyyy-MM-dd HH:mm:ss.SSS z}t - [%a] - %r"/>
+
       </Host>
     </Engine>
   </Service>

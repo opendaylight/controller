@@ -33,7 +33,7 @@
               org.opendaylight.controller.sal.authorization,
               org.opendaylight.controller.containermanager,
               org.opendaylight.controller.usermanager,
-              javax.servlet.http, 
+              javax.servlet.http,
               org.slf4j
             </Import-Package>
           </instructions>

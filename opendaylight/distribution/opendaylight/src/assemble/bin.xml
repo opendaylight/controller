@@ -1,4 +1,4 @@
-<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" 
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
   <id>osgipackage</id>
@@ -12,9 +12,9 @@
       <excludes>
         <exclude>org.opendaylight.controller.thirdparty:org.openflow.openflowj</exclude>
         <exclude>org.opendaylight.controller:clustering.stub</exclude>
-		<exclude>org.opendaylight.controller:logging.bridge</exclude>
-		<exclude>org.opendaylight.controller:protocol_plugins.stub</exclude>
-		<exclude>org.opendaylight.controller:*.integrationtest</exclude>
+                <exclude>org.opendaylight.controller:logging.bridge</exclude>
+                <exclude>org.opendaylight.controller:protocol_plugins.stub</exclude>
+                <exclude>org.opendaylight.controller:*.integrationtest</exclude>
       </excludes>
       <binaries>
         <outputDirectory>opendaylight/plugins</outputDirectory>
@@ -25,19 +25,19 @@
         <includeDependencies>false</includeDependencies>
       </binaries>
     </moduleSet>
-	<moduleSet>
-	  <includes>
-		<include>org.opendaylight.controller:logging.bridge</include>
-	  </includes>
-	  <binaries>
-		<outputDirectory>opendaylight/lib</outputDirectory>
-		<outputFileNameMapping>
-		  ${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}
-		</outputFileNameMapping>
-		<unpack>false</unpack>
-		<includeDependencies>false</includeDependencies>
-	  </binaries>
-	</moduleSet>
+        <moduleSet>
+          <includes>
+                <include>org.opendaylight.controller:logging.bridge</include>
+          </includes>
+          <binaries>
+                <outputDirectory>opendaylight/lib</outputDirectory>
+                <outputFileNameMapping>
+                  ${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}
+                </outputFileNameMapping>
+                <unpack>false</unpack>
+                <includeDependencies>false</includeDependencies>
+          </binaries>
+        </moduleSet>
   </moduleSets>
   <dependencySets>
     <dependencySet>
@@ -52,15 +52,15 @@
         <exclude>virgomirror:org.eclipse.jdt.core.compiler.batch</exclude>
         <exclude>org.apache.felix:org.apache.felix.fileinstall</exclude>
         <exclude>geminiweb:org.eclipse.virgo.kernel.equinox.extensions</exclude>
-		<exclude>org.slf4j:slf4j-api</exclude>
-		<exclude>ch.qos.logback:logback-core</exclude>
-		<exclude>ch.qos.logback:logback-classic</exclude>
-		<exclude>com.sun.jersey:jersey-core</exclude>
-		<exclude>com.sun.jersey:jersey-json</exclude>
-		<exclude>com.sun.jersey:jersey-server</exclude>
+                <exclude>org.slf4j:slf4j-api</exclude>
+                <exclude>ch.qos.logback:logback-core</exclude>
+                <exclude>ch.qos.logback:logback-classic</exclude>
+                <exclude>com.sun.jersey:jersey-core</exclude>
+                <exclude>com.sun.jersey:jersey-json</exclude>
+                <exclude>com.sun.jersey:jersey-server</exclude>
       </excludes>
       <outputFileNameMapping>
-        ${artifact.groupId}.${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}      
+        ${artifact.groupId}.${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}
       </outputFileNameMapping>
       <unpack>false</unpack>
       <scope>runtime</scope>
@@ -78,16 +78,16 @@
         <include>virgomirror:org.eclipse.jdt.core.compiler.batch</include>
         <include>org.apache.felix:org.apache.felix.fileinstall</include>
         <include>geminiweb:org.eclipse.virgo.kernel.equinox.extensions</include>
-		<include>org.slf4j:slf4j-api</include>
-		<include>ch.qos.logback:logback-core</include>
-		<include>ch.qos.logback:logback-classic</include>
-		<include>com.sun.jersey:jersey-core</include>
-		<include>com.sun.jersey:jersey-json</include>
-		<include>com.sun.jersey:jersey-server</include>
+                <include>org.slf4j:slf4j-api</include>
+                <include>ch.qos.logback:logback-core</include>
+                <include>ch.qos.logback:logback-classic</include>
+                <include>com.sun.jersey:jersey-core</include>
+                <include>com.sun.jersey:jersey-json</include>
+                <include>com.sun.jersey:jersey-server</include>
       </includes>
       <useTransitiveDependencies>false</useTransitiveDependencies>
       <outputFileNameMapping>
-        ${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}      
+        ${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}
       </outputFileNameMapping>
       <unpack>false</unpack>
       <scope>runtime</scope>

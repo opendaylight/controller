@@ -19,7 +19,7 @@
     <!--
         Used to register JMX statistics in any available MBean server
     -->
-    <jmxStatistics enabled="true"/>    
+    <jmxStatistics enabled="true"/>
   </default>
   <!-- transactionManagerLookupClass="org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup" -->
   <namedCache name="transactional-type">
