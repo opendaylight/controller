@@ -35,6 +35,8 @@ package org.opendaylight.controller.hosttracker;
 
 import java.util.Date;
 
+import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
+
 /**
  * Represents an independent device on the network. A device consists of a set
  * of entities, and all the information known about a given device comes only
@@ -131,5 +133,7 @@ public interface IDevice {
      * @see IEntityClassifierService
      */
     public IEntityClass getEntityClass();
+
+    public HostNodeConnector toHostNodeConnector();
 
 }

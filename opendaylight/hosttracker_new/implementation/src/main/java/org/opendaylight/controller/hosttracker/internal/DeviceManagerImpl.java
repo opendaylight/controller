@@ -37,6 +37,7 @@ import static org.opendaylight.controller.hosttracker.internal.DeviceManagerImpl
 import static org.opendaylight.controller.hosttracker.internal.DeviceManagerImpl.DeviceUpdate.Change.CHANGE;
 import static org.opendaylight.controller.hosttracker.internal.DeviceManagerImpl.DeviceUpdate.Change.DELETE;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -54,6 +55,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +66,9 @@ import org.opendaylight.controller.hosttracker.IDeviceService;
 import org.opendaylight.controller.hosttracker.IEntityClass;
 import org.opendaylight.controller.hosttracker.IEntityClassListener;
 import org.opendaylight.controller.hosttracker.IEntityClassifierService;
+import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.SwitchPort;
+import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
@@ -79,6 +83,7 @@ import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.ListenerDispatcher;
 import org.opendaylight.controller.sal.utils.MultiIterator;
 import org.opendaylight.controller.sal.utils.SingletonTask;
+import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
@@ -93,7 +98,7 @@ import org.slf4j.LoggerFactory;
  * @author readams
  */
 public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
-        IListenDataPacket, ITopologyManagerAware {
+        IListenDataPacket, ITopologyManagerAware, IfIptoHost {
     protected static Logger logger = LoggerFactory
             .getLogger(DeviceManagerImpl.class);
 
@@ -533,6 +538,18 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     // *********************
     // IDeviceManagerService
     // *********************
+
+    void setSwitchManager(ISwitchManager s) {
+        logger.debug("SwitchManager set");
+        this.switchManager = s;
+    }
+
+    void unsetSwitchManager(ISwitchManager s) {
+        if (this.switchManager == s) {
+            logger.debug("SwitchManager removed!");
+            this.switchManager = null;
+        }
+    }
 
     @Override
     public IDevice getDevice(Long deviceKey) {
@@ -2041,6 +2058,68 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
          * "Number of times this controller has transitioned from SLAVE " +
          * "to MASTER role. Will be 0 or 1.", CounterType.ALWAYS_COUNT);
          */
+    }
+
+    @Override
+    public HostNodeConnector hostFind(InetAddress networkAddress) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public HostNodeConnector hostQuery(InetAddress networkAddress) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Future<HostNodeConnector> discoverHost(InetAddress networkAddress) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<List<String>> getHostNetworkHierarchy(InetAddress hostAddress) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set<HostNodeConnector> getAllHosts() {
+        Collection<Device> devices = Collections
+                .unmodifiableCollection(deviceMap.values());
+        Iterator<Device> i = devices.iterator();
+        Set<HostNodeConnector> nc = new HashSet<HostNodeConnector>();
+        while (i.hasNext()) {
+            Device device = i.next();
+            nc.add(device.toHostNodeConnector());
+        }
+        return nc;
+    }
+
+    @Override
+    public Set<HostNodeConnector> getActiveStaticHosts() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set<HostNodeConnector> getInactiveStaticHosts() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Status addStaticHost(String networkAddress, String dataLayerAddress,
+            NodeConnector nc, String vlan) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Status removeStaticHost(String networkAddress) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /**
