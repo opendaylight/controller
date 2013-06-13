@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-	version="3.0">
-  
-  	<servlet>
-	  <servlet-name>JAXRSFlowProgrammer</servlet-name>
-	  <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
-	  <init-param>
-	    <param-name>javax.ws.rs.Application</param-name>
-	    <param-value>org.opendaylight.controller.flowprogrammer.northbound.FlowProgrammerNorthboundRSApplication</param-value>
-	  </init-param>
-	  <load-on-startup>1</load-on-startup>
-	</servlet>
-	
-	<servlet-mapping>
-	  <servlet-name>JAXRSFlowProgrammer</servlet-name>
-	  <url-pattern>/*</url-pattern>
-	</servlet-mapping>
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+        version="3.0">
 
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>NB api</web-resource-name>
-			<url-pattern>/*</url-pattern>
-		</web-resource-collection>
-		<auth-constraint>
-			<role-name>System-Admin</role-name>
-			<role-name>Network-Admin</role-name>
-			<role-name>Network-Operator</role-name>
-			<role-name>Container-User</role-name>
-		</auth-constraint>
-	</security-constraint>
-    
+        <servlet>
+          <servlet-name>JAXRSFlowProgrammer</servlet-name>
+          <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+          <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>org.opendaylight.controller.flowprogrammer.northbound.FlowProgrammerNorthboundRSApplication</param-value>
+          </init-param>
+          <load-on-startup>1</load-on-startup>
+        </servlet>
+
+        <servlet-mapping>
+          <servlet-name>JAXRSFlowProgrammer</servlet-name>
+          <url-pattern>/*</url-pattern>
+        </servlet-mapping>
+
+        <security-constraint>
+                <web-resource-collection>
+                        <web-resource-name>NB api</web-resource-name>
+                        <url-pattern>/*</url-pattern>
+                </web-resource-collection>
+                <auth-constraint>
+                        <role-name>System-Admin</role-name>
+                        <role-name>Network-Admin</role-name>
+                        <role-name>Network-Operator</role-name>
+                        <role-name>Container-User</role-name>
+                </auth-constraint>
+        </security-constraint>
+
     <security-role>
-		<role-name>System-Admin</role-name>
-	</security-role>
-	<security-role>
-		<role-name>Network-Admin</role-name>
-	</security-role>
-	<security-role>
-		<role-name>Network-Operator</role-name>
-	</security-role>
-	<security-role>
-		<role-name>Container-User</role-name>
-	</security-role>
-	
-	<login-config>
-		<auth-method>BASIC</auth-method>
-		<realm-name>opendaylight</realm-name>
-	</login-config>
+                <role-name>System-Admin</role-name>
+        </security-role>
+        <security-role>
+                <role-name>Network-Admin</role-name>
+        </security-role>
+        <security-role>
+                <role-name>Network-Operator</role-name>
+        </security-role>
+        <security-role>
+                <role-name>Container-User</role-name>
+        </security-role>
+
+        <login-config>
+                <auth-method>BASIC</auth-method>
+                <realm-name>opendaylight</realm-name>
+        </login-config>
 </web-app>

@@ -54,5 +54,5 @@
   <logger name="org.opendaylight.controller.topologymanager" level="INFO"/>
   <logger name="org.opendaylight.controller.usermanager" level="INFO"/>
   <!-- Web modules -->
-  <logger name="org.opendaylight.controller.web" level="INFO"/>	
+  <logger name="org.opendaylight.controller.web" level="INFO"/>
 </configuration>

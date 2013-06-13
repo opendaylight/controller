@@ -39,7 +39,7 @@
               org.opendaylight.controller.protocol_plugins.stub.internal
             </Export-Package>
             <Bundle-Activator>
-              org.opendaylight.controller.protocol_plugins.stub.internal.Activator 
+              org.opendaylight.controller.protocol_plugins.stub.internal.Activator
             </Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
