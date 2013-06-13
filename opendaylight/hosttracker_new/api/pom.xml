@@ -22,8 +22,8 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.opendaylight.controller.hosttracker_new,
-              org.opendaylight.controller.hosttracker_new.hostAware
+              org.opendaylight.controller.hosttracker,
+              org.opendaylight.controller.hosttracker.hostAware
             </Export-Package>
             <Import-Package>
               org.opendaylight.controller.sal.core,

@@ -33,6 +33,7 @@
 
 package org.opendaylight.controller.hosttracker.internal;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,6 +52,7 @@ import org.opendaylight.controller.hosttracker.IDeviceService.DeviceField;
 import org.opendaylight.controller.hosttracker.IEntityClass;
 import org.opendaylight.controller.hosttracker.SwitchPort;
 import org.opendaylight.controller.hosttracker.SwitchPort.ErrorStatus;
+import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.slf4j.Logger;
@@ -777,6 +779,28 @@ public class Device implements IDevice {
         if (!Arrays.equals(entities, other.entities))
             return false;
         return true;
+    }
+
+    public HostNodeConnector toHostNodeConnector() {
+        Integer[] ipv4s = this.getIPv4Addresses();
+        try {
+            InetAddress ip = InetAddress.getByName(ipv4s[ipv4s.length - 1]
+                    .toString());
+            byte[] macAddr = macLongToByte(this.getMACAddress());
+            HostNodeConnector nc = new HostNodeConnector(macAddr, ip, null,
+                    (short) 0);
+            return nc;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private byte[] macLongToByte(long mac) {
+        byte[] macAddr = new byte[6];
+        for (int i = 0; i < 6; i++) {
+            macAddr[5 - i] = (byte) (mac >> (8 * i));
+        }
+        return macAddr;
     }
 
     @Override
