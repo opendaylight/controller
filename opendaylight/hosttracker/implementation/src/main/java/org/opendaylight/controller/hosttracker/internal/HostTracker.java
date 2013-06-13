@@ -33,11 +33,11 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
-import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
-import org.opendaylight.controller.hosttracker.hostAware.IHostFinder;
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.IfNewHostNotify;
+import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
+import org.opendaylight.controller.hosttracker.hostAware.IHostFinder;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
@@ -433,7 +433,7 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                  */
                 removePendingARPFromList(i);
                 logger.debug("Host Removed from ARPPending List, IP: {}",
-                          networkAddr);
+                        networkAddr);
                 return;
             }
         }
@@ -991,13 +991,14 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                      * there
                      */
                     if (logger.isTraceEnabled()) {
-                      logger.trace(
-                              "ARP Probing ({}) for {}({})",
-                              new Object[] {
-                                      arp_cntdown,
-                                      host.getNetworkAddress().getHostAddress(),
-                                      HexEncode.bytesToHexString(host
-                                              .getDataLayerAddressBytes()) });
+                        logger.trace(
+                                "ARP Probing ({}) for {}({})",
+                                new Object[] {
+                                        arp_cntdown,
+                                        host.getNetworkAddress()
+                                                .getHostAddress(),
+                                        HexEncode.bytesToHexString(host
+                                                .getDataLayerAddressBytes()) });
                     }
                     host.setArpSendCountDown(arp_cntdown);
                     hostFinder.probe(host);
@@ -1260,7 +1261,9 @@ public class HostTracker implements IfIptoHost, IfHostListener,
         for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
             HostNodeConnector host = entry.getValue();
             if (host.getnodeConnector().equals(nodeConnector)) {
-                logger.debug(" NodeConnector: {} is down, remove from Hosts_DB", nodeConnector);
+                logger.debug(
+                        " NodeConnector: {} is down, remove from Hosts_DB",
+                        nodeConnector);
                 removeKnownHost(entry.getKey());
                 notifyHostLearnedOrRemoved(host, false);
             }

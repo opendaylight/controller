@@ -59,8 +59,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 public class HostTrackerIT {
-    private Logger log = LoggerFactory
-            .getLogger(HostTrackerIT.class);
+    private Logger log = LoggerFactory.getLogger(HostTrackerIT.class);
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
