@@ -29,7 +29,7 @@
               org.apache.felix.dm
             </Import-Package>
             <Export-Package>
-              org.opendaylight.controller.statisticsmanager 
+              org.opendaylight.controller.statisticsmanager
             </Export-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>

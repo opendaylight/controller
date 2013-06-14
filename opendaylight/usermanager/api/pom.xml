@@ -48,12 +48,12 @@
             </Import-Package>
             <Export-Package>
               org.opendaylight.controller.usermanager,
-<!-- 
+<!--
               org.opendaylight.controller.usermanager.internal
  -->
              </Export-Package>
             <Bundle-Activator>
-<!-- 
+<!--
               org.opendaylight.controller.usermanager.internal.Activator
  -->
              </Bundle-Activator>

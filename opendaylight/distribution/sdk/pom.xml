@@ -38,7 +38,7 @@
     <!-- Northbound common hooks -->
     <module>../../northbound/commons</module>
   </modules>
-  
+
   <build>
     <plugins>
       <plugin>
