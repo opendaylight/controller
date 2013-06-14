@@ -14,6 +14,7 @@ import java.util.Hashtable;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.hosttracker.IDeviceService;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
+import org.opendaylight.controller.hosttracker.IfNewHostNotify;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
 import org.opendaylight.controller.sal.packet.IListenDataPacket;
@@ -91,6 +92,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setDataPacketService",
                             "unsetDataPacketService").setRequired(true));
 
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IfNewHostNotify.class)
+                    .setCallbacks("setNewHostNotify",
+                            "unsetNewHostNotify").setRequired(true));
+
             // c.add(createContainerServiceDependency(containerName).setService(
             // IClusterContainerServices.class).setCallbacks(
             // "setClusterContainerService",
@@ -99,11 +105,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(ITopologyManager.class)
                     .setCallbacks("setTopologyManager", "unsetTopologyManager")
                     .setRequired(false));
-
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IDataPacketService.class)
-                    .setCallbacks("setDataPacketService",
-                            "unsetDataPacketService").setRequired(true));
         }
     }
 
