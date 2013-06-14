@@ -52,7 +52,7 @@
               org.opendaylight.controller.sal.packet.address,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.hosttracker_new.hostAware,
+              org.opendaylight.controller.hosttracker.hostAware,
               javax.xml.bind.annotation,
               javax.xml.bind,
               org.apache.felix.dm,

@@ -13,6 +13,7 @@ import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.hosttracker.IDeviceService;
+import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
 import org.opendaylight.controller.sal.packet.IListenDataPacket;
@@ -74,9 +75,11 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, String> props = new Hashtable<String, String>();
             props.put("salListenerName", "devicemanager");
 
-            c.setInterface(new String[] { IDeviceService.class.getName(),
-                    IListenDataPacket.class.getName(),
-                    ITopologyManagerAware.class.getName() }, props);
+            c.setInterface(
+                    new String[] { IDeviceService.class.getName(),
+                            IfIptoHost.class.getName(),
+                            IListenDataPacket.class.getName(),
+                            ITopologyManagerAware.class.getName() }, props);
 
             c.add(createContainerServiceDependency(containerName)
                     .setService(ISwitchManager.class)
