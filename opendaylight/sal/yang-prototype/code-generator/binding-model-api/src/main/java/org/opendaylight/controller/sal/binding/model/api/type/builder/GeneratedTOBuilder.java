@@ -13,9 +13,9 @@ import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject
 
  */
 public interface GeneratedTOBuilder extends GeneratedTypeBuilder {
-    
+
     public boolean addExtendsType(final GeneratedTransferObject genTransObj);
-    
+
     public GeneratedPropertyBuilder addProperty(final String name);
 
     public boolean addEqualsIdentity(final GeneratedPropertyBuilder property);
@@ -26,4 +26,7 @@ public interface GeneratedTOBuilder extends GeneratedTypeBuilder {
 
     @Override
     public GeneratedTransferObject toInstance();
+
+    public GeneratedTransferObject toIdentityInstance();
+
 }

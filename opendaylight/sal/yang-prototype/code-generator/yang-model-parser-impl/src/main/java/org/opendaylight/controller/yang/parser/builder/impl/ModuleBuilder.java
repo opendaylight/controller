@@ -240,6 +240,17 @@ public class ModuleBuilder implements Builder {
         return typedefs;
     }
 
+    public Set<GroupingBuilder> getModuleGroupings() {
+        final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
+        for (Map.Entry<List<String>, GroupingBuilder> entry : addedGroupings
+                .entrySet()) {
+            if (entry.getKey().size() == 2) {
+                groupings.add(entry.getValue());
+            }
+        }
+        return groupings;
+    }
+
     public String getName() {
         return name;
     }

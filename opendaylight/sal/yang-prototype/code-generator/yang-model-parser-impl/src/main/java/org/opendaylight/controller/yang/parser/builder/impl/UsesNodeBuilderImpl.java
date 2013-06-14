@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.AugmentationSchema;
 import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
@@ -27,25 +26,25 @@ import org.opendaylight.controller.yang.parser.util.RefineHolder;
 
 public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     private boolean isBuilt;
-    private final UsesNodeImpl instance;
+    private UsesNodeImpl instance;
     private final int line;
-    private final String groupingPathStr;
-    private final SchemaPath groupingPath;
+    private SchemaPath schemaPath;
+    private final String groupingName;
+    private SchemaPath groupingPath;
     private boolean augmenting;
     private final Set<AugmentationSchemaBuilder> addedAugments = new HashSet<AugmentationSchemaBuilder>();
     private List<SchemaNodeBuilder> refineBuilders = new ArrayList<SchemaNodeBuilder>();
     private List<RefineHolder> refines = new ArrayList<RefineHolder>();
 
-    public UsesNodeBuilderImpl(final String groupingPathStr, final int line) {
-        this.groupingPathStr = groupingPathStr;
-        this.groupingPath = parseUsesPath(groupingPathStr);
+    public UsesNodeBuilderImpl(final String groupingName, final int line) {
+        this.groupingName = groupingName;
         this.line = line;
-        instance = new UsesNodeImpl(groupingPath);
     }
 
     @Override
     public UsesNode build() {
         if (!isBuilt) {
+            instance = new UsesNodeImpl(groupingPath);
             instance.setAugmenting(augmenting);
 
             // AUGMENTATIONS
@@ -74,13 +73,23 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     }
 
     @Override
-    public String getGroupingPathString() {
-        return groupingPathStr;
+    public void setGroupingPath(SchemaPath groupingPath) {
+        this.groupingPath = groupingPath;
     }
 
     @Override
-    public SchemaPath getGroupingPath() {
-        return groupingPath;
+    public SchemaPath getPath() {
+        return schemaPath;
+    }
+
+    @Override
+    public void setPath(SchemaPath path) {
+        this.schemaPath = path;
+    }
+
+    @Override
+    public String getGroupingName() {
+        return groupingName;
     }
 
     @Override
@@ -123,23 +132,6 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
         refines.add(refine);
     }
 
-    private SchemaPath parseUsesPath(final String groupingPathStr) {
-        final String[] splittedPath = groupingPathStr.split("/");
-        final List<QName> path = new ArrayList<QName>();
-        QName name;
-        for (String pathElement : splittedPath) {
-            final String[] splittedElement = pathElement.split(":");
-            if (splittedElement.length == 1) {
-                name = new QName(null, null, null, splittedElement[0]);
-            } else {
-                name = new QName(null, null, splittedElement[0],
-                        splittedElement[1]);
-            }
-            path.add(name);
-        }
-        final boolean absolute = groupingPathStr.startsWith("/");
-        return new SchemaPath(path, absolute);
-    }
 
     private final class UsesNodeImpl implements UsesNode {
         private final SchemaPath groupingPath;

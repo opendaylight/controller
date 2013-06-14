@@ -138,4 +138,34 @@ module abstract-topology {
             }
         }
     }
+    
+    identity crypto-base {
+        description "crypto-base description";
+    }
+    
+    identity crypto-alg {
+        base crypto-base;
+        description "crypto-alg description";
+    }
+    
+    grouping target {
+        container nodes {
+            leaf source {
+                type int8;
+            }
+            leaf target {
+                type int16;
+            }
+        }
+        leaf id {
+            type string;
+        }
+    }
+    
+    leaf idreftest {
+        type identityref {
+            base crypto-alg;
+        }
+    }
+    
 }

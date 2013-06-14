@@ -103,6 +103,10 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder,
         addedTypedefs.add(type);
     }
 
+    public Set<GroupingBuilder> getGroupings() {
+        return addedGroupings;
+    }
+
     public void addGrouping(GroupingBuilder grouping) {
         addedGroupings.add(grouping);
     }

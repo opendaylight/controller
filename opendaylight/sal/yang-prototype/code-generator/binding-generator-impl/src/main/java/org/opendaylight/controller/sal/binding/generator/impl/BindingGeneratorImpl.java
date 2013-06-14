@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.binding.generator.impl;
 
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.controller.binding.generator.util.Types;
+import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTypeBuilderImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.spi.TypeProvider;
@@ -23,6 +24,7 @@ import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
 import org.opendaylight.controller.yang.model.util.DataNodeIterator;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
+import org.opendaylight.controller.yang.model.util.SchemaContextUtil;
 
 import java.util.*;
 import java.util.concurrent.Future;
@@ -65,6 +67,8 @@ public final class BindingGeneratorImpl implements BindingGenerator {
             generatedTypes.addAll(allAugmentsToGenTypes(module));
             generatedTypes.addAll(allRPCMethodsToGenType(module));
             generatedTypes.addAll(allNotificationsToGenType(module));
+            generatedTypes.addAll(allIdentitiesToGenTypes(module, context));
+            generatedTypes.addAll(allGroupingsToGenTypes(module));
         }
         return generatedTypes;
     }
@@ -100,6 +104,9 @@ public final class BindingGeneratorImpl implements BindingGenerator {
             generatedTypes.addAll(allAugmentsToGenTypes(contextModule));
             generatedTypes.addAll(allRPCMethodsToGenType(contextModule));
             generatedTypes.addAll(allNotificationsToGenType(contextModule));
+            generatedTypes.addAll(allIdentitiesToGenTypes(contextModule,
+                    context));
+            generatedTypes.addAll(allGroupingsToGenTypes(contextModule));
 
             if (modules.contains(contextModule)) {
                 filteredGenTypes.addAll(generatedTypes);
@@ -395,6 +402,84 @@ public final class BindingGeneratorImpl implements BindingGenerator {
             }
         }
         return genNotifyTypes;
+    }
+
+    private List<Type> allIdentitiesToGenTypes(final Module module,
+            final SchemaContext context) {
+        List<Type> genTypes = new ArrayList<Type>();
+
+        final Set<IdentitySchemaNode> schemaIdentities = module.getIdentities();
+
+        final String basePackageName = moduleNamespaceToPackageName(module);
+
+        if (schemaIdentities != null && !schemaIdentities.isEmpty()) {
+            for (final IdentitySchemaNode identity : schemaIdentities) {
+                genTypes.add(identityToGenType(basePackageName, identity,
+                        context));
+            }
+        }
+        return genTypes;
+    }
+
+    private GeneratedType identityToGenType(final String basePackageName,
+            IdentitySchemaNode identity, SchemaContext context) {
+        if (identity == null) {
+            return null;
+        }
+
+        final String packageName = packageNameForGeneratedType(basePackageName,
+                identity.getPath());
+
+        final String genTypeName = parseToClassName(identity.getQName()
+                .getLocalName());
+        final GeneratedTOBuilderImpl newType = new GeneratedTOBuilderImpl(
+                packageName, genTypeName);
+
+        IdentitySchemaNode baseIdentity = identity.getBaseIdentity();
+        if (baseIdentity != null) {
+            Module baseIdentityParentModule = SchemaContextUtil.findParentModule(
+                    context, baseIdentity);
+
+            final String returnTypePkgName = moduleNamespaceToPackageName(baseIdentityParentModule);
+            final String returnTypeName = parseToClassName(baseIdentity
+                    .getQName().getLocalName());
+
+            GeneratedTransferObject gto = new GeneratedTOBuilderImpl(
+                    returnTypePkgName, returnTypeName).toInstance();
+            newType.addExtendsType(gto);
+        } else {
+            newType.addExtendsType(Types.getBaseIdentityTO());
+        }
+
+        return newType.toIdentityInstance();
+    }
+
+    private List<Type> allGroupingsToGenTypes(Module module) {
+        final List<Type> genTypes = new ArrayList<Type>();
+        final String basePackageName = moduleNamespaceToPackageName(module);
+        Set<GroupingDefinition> groupings = module.getGroupings();
+        if (groupings != null && !groupings.isEmpty()) {
+            for (final GroupingDefinition grouping : groupings) {
+                genTypes.add(groupingToGenType(basePackageName, grouping));
+            }
+        }
+        return genTypes;
+    }
+
+    private GeneratedType groupingToGenType(final String basePackageName,
+            GroupingDefinition grouping) {
+        if (grouping == null) {
+            return null;
+        }
+
+        final String packageName = packageNameForGeneratedType(basePackageName,
+                grouping.getPath());
+        final Set<DataSchemaNode> schemaNodes = grouping.getChildNodes();
+        final GeneratedTypeBuilder typeBuilder = addRawInterfaceDefinition(
+                packageName, grouping);
+
+        resolveDataSchemaNodes(basePackageName, typeBuilder, schemaNodes);
+        return typeBuilder.toInstance();
     }
 
     private EnumTypeDefinition enumTypeDefFromExtendedType(
