@@ -1,0 +1,14 @@
+OVERVIEW
+========
+This distribution is built to allow to deploy all the commons parents
+in one shot. This is needed because the way how maven works when a
+"mvn deploy" is called on a multi-module project, only the modules
+that are listed in there are deployed. All the opendaylight modules
+has a parent, those parents module will not be deployed when deploying
+a distribution hence if someone tries to compile a module without
+compiling the whole system it will run in missing parent errors.
+To address the issue this distribution will collect all the known
+parents and deploy them in one shot.
+
+The user of this distribution is one of the Jenkins jobs and not
+developers.
