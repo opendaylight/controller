@@ -257,7 +257,87 @@ public class NorthboundIT {
     }
 
     @Test
-    public void testSwitchManager() {
+    public void testStaticRoutingNorthbound() throws JSONException {
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/staticroute/";
+
+        String name1 = "testRoute1";
+        String prefix1 = "192.168.1.1/24";
+        String nextHop1 = "0.0.0.0";
+        String name2 = "testRoute2";
+        String prefix2 = "192.168.1.1/16";
+        String nextHop2 = "1.1.1.1";
+
+        // Test GET static routes in default container, expecting no results
+        String result = getJsonResult(baseURL + "default");
+        JSONTokener jt = new JSONTokener(result);
+        JSONObject json = new JSONObject(jt);
+        Assert.assertEquals("{}", result);
+
+        // Test insert static route
+        String requestBody = "{\"name\":\"" + name1 + "\", \"prefix\":\""
+                + prefix1 + "\", \"nextHop\":\"" + nextHop1 + "\"}";
+        result = getJsonResult(baseURL + "default/" + name1, "POST",
+                requestBody);
+        Assert.assertEquals(201, httpResponseCode.intValue());
+
+        requestBody = "{\"name\":\"" + name2 + "\", \"prefix\":\"" + prefix2
+                + "\", \"nextHop\":\"" + nextHop2 + "\"}";
+        result = getJsonResult(baseURL + "default/" + name2, "POST",
+                requestBody);
+        Assert.assertEquals(201, httpResponseCode.intValue());
+
+        // Test Get all static routes
+        result = getJsonResult(baseURL + "default");
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        JSONArray staticRoutes = json.getJSONArray("staticRoute");
+        Assert.assertEquals(2, staticRoutes.length());
+        JSONObject route;
+        for (int i = 0; i < staticRoutes.length(); i++) {
+            route = staticRoutes.getJSONObject(i);
+            if (route.getString("name").equals(name1)) {
+                Assert.assertEquals(prefix1, route.getString("prefix"));
+                Assert.assertEquals(nextHop1, route.getString("nextHop"));
+            } else if (route.getString("name").equals(name2)) {
+                Assert.assertEquals(prefix2, route.getString("prefix"));
+                Assert.assertEquals(nextHop2, route.getString("nextHop"));
+            } else {
+                // static route has unknown name
+                Assert.assertTrue(false);
+            }
+        }
+
+        // Test get specific static route
+        result = getJsonResult(baseURL + "default/" + name1);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+
+        Assert.assertEquals(name1, json.getString("name"));
+        Assert.assertEquals(prefix1, json.getString("prefix"));
+        Assert.assertEquals(nextHop1, json.getString("nextHop"));
+
+        result = getJsonResult(baseURL + "default/" + name2);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+
+        Assert.assertEquals(name2, json.getString("name"));
+        Assert.assertEquals(prefix2, json.getString("prefix"));
+        Assert.assertEquals(nextHop2, json.getString("nextHop"));
+
+        // Test delete static route
+        result = getJsonResult(baseURL + "default/" + name1, "DELETE");
+        Assert.assertEquals(200, httpResponseCode.intValue());
+
+        result = getJsonResult(baseURL + "default");
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        JSONObject singleStaticRoute = json.getJSONObject("staticRoute");
+        Assert.assertEquals(name2, singleStaticRoute.getString("name"));
+
+    }
+
+    @Test
+    public void testSwitchManager() throws JSONException {
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/switch/default/";
 
         // define Node/NodeConnector attributes for test
@@ -280,203 +360,166 @@ public class NorthboundIT {
         int ncBandwidth = 1000000000;
 
         // Test GET all nodes
-        try {
-            String result = getJsonResult(baseURL + "nodes");
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
 
-            // Test for first node
-            JSONObject node = getJsonInstance(json, "nodeProperties", nodeId_1);
-            Assert.assertNotNull(node);
-            testNodeProperties(node, nodeId_1, nodeType, timestamp_1,
-                    timestampName_1, actionsValue_1, capabilitiesValue_1,
-                    tablesValue_1, buffersValue_1);
+        String result = getJsonResult(baseURL + "nodes");
+        JSONTokener jt = new JSONTokener(result);
+        JSONObject json = new JSONObject(jt);
 
-            // Test 2nd node, properties of 2nd node same as first node
-            node = getJsonInstance(json, "nodeProperties", nodeId_2);
-            Assert.assertNotNull(node);
-            testNodeProperties(node, nodeId_2, nodeType, timestamp_1,
-                    timestampName_1, actionsValue_1, capabilitiesValue_1,
-                    tablesValue_1, buffersValue_1);
+        // Test for first node
+        JSONObject node = getJsonInstance(json, "nodeProperties", nodeId_1);
+        Assert.assertNotNull(node);
+        testNodeProperties(node, nodeId_1, nodeType, timestamp_1,
+                timestampName_1, actionsValue_1, capabilitiesValue_1,
+                tablesValue_1, buffersValue_1);
 
-            // Test 3rd node, properties of 3rd node same as first node
-            node = getJsonInstance(json, "nodeProperties", nodeId_3);
-            Assert.assertNotNull(node);
-            testNodeProperties(node, nodeId_3, nodeType, timestamp_1,
-                    timestampName_1, actionsValue_1, capabilitiesValue_1,
-                    tablesValue_1, buffersValue_1);
+        // Test 2nd node, properties of 2nd node same as first node
+        node = getJsonInstance(json, "nodeProperties", nodeId_2);
+        Assert.assertNotNull(node);
+        testNodeProperties(node, nodeId_2, nodeType, timestamp_1,
+                timestampName_1, actionsValue_1, capabilitiesValue_1,
+                tablesValue_1, buffersValue_1);
 
-        } catch (Exception e) {
-            Assert.assertTrue(false);
-        }
+        // Test 3rd node, properties of 3rd node same as first node
+        node = getJsonInstance(json, "nodeProperties", nodeId_3);
+        Assert.assertNotNull(node);
+        testNodeProperties(node, nodeId_3, nodeType, timestamp_1,
+                timestampName_1, actionsValue_1, capabilitiesValue_1,
+                tablesValue_1, buffersValue_1);
 
         // Test GET nodeConnectors of a node
-        try {
-            //Test first node
-            String result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
-            JSONObject nodeConnectorProperties = json
-                    .getJSONObject("nodeConnectorProperties");
+        // Test first node
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        JSONObject nodeConnectorProperties = json
+                .getJSONObject("nodeConnectorProperties");
 
-            testNodeConnectorProperties(nodeConnectorProperties,
-                    nodeConnectorId_1, ncType, nodeId_1, nodeType, ncState,
-                    ncCapabilities, ncBandwidth);
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1,
+                ncType, nodeId_1, nodeType, ncState, ncCapabilities,
+                ncBandwidth);
 
-            //Test second node
-            result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
-            jt = new JSONTokener(result);
-            json = new JSONObject(jt);
-            nodeConnectorProperties = json
-                    .getJSONObject("nodeConnectorProperties");
+        // Test second node
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
 
-            testNodeConnectorProperties(nodeConnectorProperties,
-                    nodeConnectorId_2, ncType, nodeId_2, nodeType, ncState,
-                    ncCapabilities, ncBandwidth);
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_2,
+                ncType, nodeId_2, nodeType, ncState, ncCapabilities,
+                ncBandwidth);
 
-            //Test third node
-            result = getJsonResult(baseURL + "node/STUB/" + nodeId_3);
-            jt = new JSONTokener(result);
-            json = new JSONObject(jt);
+        // Test third node
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_3);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
 
-            nodeConnectorProperties = json
-                    .getJSONObject("nodeConnectorProperties");
-            testNodeConnectorProperties(nodeConnectorProperties,
-                    nodeConnectorId_3, ncType, nodeId_3, nodeType, ncState,
-                    ncCapabilities, ncBandwidth);
-
-        } catch (Exception e) {
-            Assert.assertTrue(false);
-        }
+        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_3,
+                ncType, nodeId_3, nodeType, ncState, ncCapabilities,
+                ncBandwidth);
 
         // Test delete node property
-        try {
-            // Delete timestamp property from node1
-            String result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
-                    + "/property/timeStamp", "DELETE");
-            Assert.assertEquals(200, httpResponseCode.intValue());
+        // Delete timestamp property from node1
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
+                + "/property/timeStamp", "DELETE");
+        Assert.assertEquals(200, httpResponseCode.intValue());
 
-            // Check node1
-            result = getJsonResult(baseURL + "nodes");
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
-            JSONObject node = getJsonInstance(json, "nodeProperties", nodeId_1);
-            Assert.assertNotNull(node);
-            testNodeProperties(node, nodeId_1, nodeType, null, null,
-                    actionsValue_1, capabilitiesValue_1, tablesValue_1,
-                    buffersValue_1);
+        // Check node1
+        result = getJsonResult(baseURL + "nodes");
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        node = getJsonInstance(json, "nodeProperties", nodeId_1);
+        Assert.assertNotNull(node);
+        testNodeProperties(node, nodeId_1, nodeType, null, null,
+                actionsValue_1, capabilitiesValue_1, tablesValue_1,
+                buffersValue_1);
 
-            // Delete actions property from node2
-            result = getJsonResult(baseURL + "node/STUB/" + nodeId_2
-                    + "/property/actions", "DELETE");
-            Assert.assertEquals(200, httpResponseCode.intValue());
+        // Delete actions property from node2
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_2
+                + "/property/actions", "DELETE");
+        Assert.assertEquals(200, httpResponseCode.intValue());
 
-            // Check node2
-            result = getJsonResult(baseURL + "nodes");
-            jt = new JSONTokener(result);
-            json = new JSONObject(jt);
-            node = getJsonInstance(json, "nodeProperties", nodeId_2);
-            Assert.assertNotNull(node);
-            testNodeProperties(node, nodeId_2, nodeType, timestamp_1,
-                    timestampName_1, null, capabilitiesValue_1, tablesValue_1,
-                    buffersValue_1);
-
-        } catch (Exception e) {
-            Assert.assertTrue(false);
-        }
+        // Check node2
+        result = getJsonResult(baseURL + "nodes");
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        node = getJsonInstance(json, "nodeProperties", nodeId_2);
+        Assert.assertNotNull(node);
+        testNodeProperties(node, nodeId_2, nodeType, timestamp_1,
+                timestampName_1, null, capabilitiesValue_1, tablesValue_1,
+                buffersValue_1);
 
         // Test add property to node
-        try {
-            // Add Tier and Bandwidth property to node1
-            String result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
-                    + "/property/tier/1001", "PUT");
-            Assert.assertEquals(201, httpResponseCode.intValue());
-            result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
-                    + "/property/bandwidth/1002", "PUT");
-            Assert.assertEquals(201, httpResponseCode.intValue());
+        // Add Tier and Bandwidth property to node1
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
+                + "/property/tier/1001", "PUT");
+        Assert.assertEquals(201, httpResponseCode.intValue());
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
+                + "/property/bandwidth/1002", "PUT");
+        Assert.assertEquals(201, httpResponseCode.intValue());
 
-            // Test for first node
-            result = getJsonResult(baseURL + "nodes");
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
-            JSONObject node = getJsonInstance(json, "nodeProperties", nodeId_1);
-            Assert.assertNotNull(node);
-            Assert.assertEquals(1001, node.getJSONObject("properties")
-                    .getJSONObject("tier").getInt("tierValue"));
-            Assert.assertEquals(1002, node.getJSONObject("properties")
-                    .getJSONObject("bandwidth").getInt("bandwidthValue"));
-
-        } catch (Exception e) {
-            Assert.assertTrue(false);
-        }
+        // Test for first node
+        result = getJsonResult(baseURL + "nodes");
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        node = getJsonInstance(json, "nodeProperties", nodeId_1);
+        Assert.assertNotNull(node);
+        Assert.assertEquals(1001, node.getJSONObject("properties")
+                .getJSONObject("tier").getInt("tierValue"));
+        Assert.assertEquals(1002, node.getJSONObject("properties")
+                .getJSONObject("bandwidth").getInt("bandwidthValue"));
 
         // Test delete nodeConnector property
-        try {
-            // Delete state property of nodeconnector1
-            String result = getJsonResult(baseURL + "nodeconnector/STUB/"
-                    + nodeId_1 + "/STUB/" + nodeConnectorId_1
-                    + "/property/state", "DELETE");
-            Assert.assertEquals(200, httpResponseCode.intValue());
+        // Delete state property of nodeconnector1
+        result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_1
+                + "/STUB/" + nodeConnectorId_1 + "/property/state", "DELETE");
+        Assert.assertEquals(200, httpResponseCode.intValue());
 
-            result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
-            JSONObject nodeConnectorProperties = json
-                    .getJSONObject("nodeConnectorProperties");
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
 
-            testNodeConnectorProperties(nodeConnectorProperties,
-                    nodeConnectorId_1, ncType, nodeId_1, nodeType, null,
-                    ncCapabilities, ncBandwidth);
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1,
+                ncType, nodeId_1, nodeType, null, ncCapabilities, ncBandwidth);
 
-            // Delete capabilities property of nodeconnector2
-            result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_2
-                    + "/STUB/" + nodeConnectorId_2 + "/property/capabilities",
-                    "DELETE");
-            Assert.assertEquals(200, httpResponseCode.intValue());
+        // Delete capabilities property of nodeconnector2
+        result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_2
+                + "/STUB/" + nodeConnectorId_2 + "/property/capabilities",
+                "DELETE");
+        Assert.assertEquals(200, httpResponseCode.intValue());
 
-            result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
-            jt = new JSONTokener(result);
-            json = new JSONObject(jt);
-            nodeConnectorProperties = json
-                    .getJSONObject("nodeConnectorProperties");
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
 
-            testNodeConnectorProperties(nodeConnectorProperties,
-                    nodeConnectorId_2, ncType, nodeId_2, nodeType, ncState,
-                    null, ncBandwidth);
-
-        } catch (Exception e) {
-            Assert.assertTrue(false);
-        }
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_2,
+                ncType, nodeId_2, nodeType, ncState, null, ncBandwidth);
 
         // Test PUT nodeConnector property
-        try {
-            int newBandwidth = 1001;
+        int newBandwidth = 1001;
 
-            // Add Name/Bandwidth property to nodeConnector1
-            String result = getJsonResult(baseURL + "nodeconnector/STUB/"
-                    + nodeId_1 + "/STUB/" + nodeConnectorId_1
-                    + "/property/bandwidth/" + newBandwidth, "PUT");
-            Assert.assertEquals(201, httpResponseCode.intValue());
+        // Add Name/Bandwidth property to nodeConnector1
+        result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_1
+                + "/STUB/" + nodeConnectorId_1 + "/property/bandwidth/"
+                + newBandwidth, "PUT");
+        Assert.assertEquals(201, httpResponseCode.intValue());
 
-            result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
-            JSONObject nodeConnectorProperties = json
-                    .getJSONObject("nodeConnectorProperties");
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
 
-            // Check for new bandwidth value, state value removed from previous
-            // test
-            testNodeConnectorProperties(nodeConnectorProperties,
-                    nodeConnectorId_1, ncType, nodeId_1, nodeType, null,
-                    ncCapabilities, newBandwidth);
+        // Check for new bandwidth value, state value removed from previous
+        // test
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1,
+                ncType, nodeId_1, nodeType, null, ncCapabilities, newBandwidth);
 
-        } catch (Exception e) {
-            Assert.assertTrue(false);
-        }
     }
 
     @Test
-    public void testStatistics() {
+    public void testStatistics() throws JSONException {
         String actionTypes[] = { "drop", "loopback", "flood", "floodAll",
                 "controller", "swPath", "hwPath", "output", "setDlSrc",
                 "setDlDst", "setDlType", "setVlanId", "setVlanPcp",
@@ -485,262 +528,247 @@ public class NorthboundIT {
         System.out.println("Starting Statistics JAXB client.");
 
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/statistics/default/";
-        try {
-            String result = getJsonResult(baseURL + "flowstats");
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
-            JSONObject flowStatistics = getJsonInstance(json, "flowStatistics",
-                    0xCAFE);
-            JSONObject node = flowStatistics.getJSONObject("node");
-            // test that node was returned properly
-            Assert.assertTrue(node.getInt("@id") == 0xCAFE);
-            Assert.assertTrue(node.getString("@type").equals("STUB"));
 
-            // test that flow statistics results are correct
-            JSONArray flowStats = flowStatistics.getJSONArray("flowStat");
-            for (int i = 0; i < flowStats.length(); i++) {
+        String result = getJsonResult(baseURL + "flowstats");
+        JSONTokener jt = new JSONTokener(result);
+        JSONObject json = new JSONObject(jt);
+        JSONObject flowStatistics = getJsonInstance(json, "flowStatistics",
+                0xCAFE);
+        JSONObject node = flowStatistics.getJSONObject("node");
+        // test that node was returned properly
+        Assert.assertTrue(node.getInt("@id") == 0xCAFE);
+        Assert.assertTrue(node.getString("@type").equals("STUB"));
 
-                JSONObject flowStat = flowStats.getJSONObject(i);
-                testFlowStat(flowStat, actionTypes[i]);
+        // test that flow statistics results are correct
+        JSONArray flowStats = flowStatistics.getJSONArray("flowStat");
+        for (int i = 0; i < flowStats.length(); i++) {
 
-            }
-
-            // for /controller/nb/v2/statistics/default/portstats
-            result = getJsonResult(baseURL + "portstats");
-            jt = new JSONTokener(result);
-            json = new JSONObject(jt);
-            JSONObject portStatistics = getJsonInstance(json, "portStatistics",
-                    0xCAFE);
-            JSONObject node2 = portStatistics.getJSONObject("node");
-            // test that node was returned properly
-            Assert.assertTrue(node2.getInt("@id") == 0xCAFE);
-            Assert.assertTrue(node2.getString("@type").equals("STUB"));
-
-            // test that port statistic results are correct
-            JSONObject portStat = portStatistics.getJSONObject("portStat");
-            Assert.assertTrue(portStat.getInt("receivePackets") == 250);
-            Assert.assertTrue(portStat.getInt("transmitPackets") == 500);
-            Assert.assertTrue(portStat.getInt("receiveBytes") == 1000);
-            Assert.assertTrue(portStat.getInt("transmitBytes") == 5000);
-            Assert.assertTrue(portStat.getInt("receiveDrops") == 2);
-            Assert.assertTrue(portStat.getInt("transmitDrops") == 50);
-            Assert.assertTrue(portStat.getInt("receiveErrors") == 3);
-            Assert.assertTrue(portStat.getInt("transmitErrors") == 10);
-            Assert.assertTrue(portStat.getInt("receiveFrameError") == 5);
-            Assert.assertTrue(portStat.getInt("receiveOverRunError") == 6);
-            Assert.assertTrue(portStat.getInt("receiveCrcError") == 1);
-            Assert.assertTrue(portStat.getInt("collisionCount") == 4);
-
-            // test for getting one specific node's stats
-            result = getJsonResult(baseURL + "flowstats/STUB/51966");
-            jt = new JSONTokener(result);
-            json = new JSONObject(jt);
-            node = json.getJSONObject("node");
-            // test that node was returned properly
-            Assert.assertTrue(node.getInt("@id") == 0xCAFE);
-            Assert.assertTrue(node.getString("@type").equals("STUB"));
-
-            // test that flow statistics results are correct
-            flowStats = json.getJSONArray("flowStat");
-            for (int i = 0; i < flowStats.length(); i++) {
-                JSONObject flowStat = flowStats.getJSONObject(i);
-                testFlowStat(flowStat, actionTypes[i]);
-            }
-
-            result = getJsonResult(baseURL + "portstats/STUB/51966");
-            jt = new JSONTokener(result);
-            json = new JSONObject(jt);
-            node2 = json.getJSONObject("node");
-            // test that node was returned properly
-            Assert.assertTrue(node2.getInt("@id") == 0xCAFE);
-            Assert.assertTrue(node2.getString("@type").equals("STUB"));
-
-            // test that port statistic results are correct
-            portStat = json.getJSONObject("portStat");
-            Assert.assertTrue(portStat.getInt("receivePackets") == 250);
-            Assert.assertTrue(portStat.getInt("transmitPackets") == 500);
-            Assert.assertTrue(portStat.getInt("receiveBytes") == 1000);
-            Assert.assertTrue(portStat.getInt("transmitBytes") == 5000);
-            Assert.assertTrue(portStat.getInt("receiveDrops") == 2);
-            Assert.assertTrue(portStat.getInt("transmitDrops") == 50);
-            Assert.assertTrue(portStat.getInt("receiveErrors") == 3);
-            Assert.assertTrue(portStat.getInt("transmitErrors") == 10);
-            Assert.assertTrue(portStat.getInt("receiveFrameError") == 5);
-            Assert.assertTrue(portStat.getInt("receiveOverRunError") == 6);
-            Assert.assertTrue(portStat.getInt("receiveCrcError") == 1);
-            Assert.assertTrue(portStat.getInt("collisionCount") == 4);
-
-        } catch (Exception e) {
-            // Got an unexpected exception
-            Assert.assertTrue(false);
+            JSONObject flowStat = flowStats.getJSONObject(i);
+            testFlowStat(flowStat, actionTypes[i]);
 
         }
+
+        // for /controller/nb/v2/statistics/default/portstats
+        result = getJsonResult(baseURL + "portstats");
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        JSONObject portStatistics = getJsonInstance(json, "portStatistics",
+                0xCAFE);
+        JSONObject node2 = portStatistics.getJSONObject("node");
+        // test that node was returned properly
+        Assert.assertTrue(node2.getInt("@id") == 0xCAFE);
+        Assert.assertTrue(node2.getString("@type").equals("STUB"));
+
+        // test that port statistic results are correct
+        JSONObject portStat = portStatistics.getJSONObject("portStat");
+        Assert.assertTrue(portStat.getInt("receivePackets") == 250);
+        Assert.assertTrue(portStat.getInt("transmitPackets") == 500);
+        Assert.assertTrue(portStat.getInt("receiveBytes") == 1000);
+        Assert.assertTrue(portStat.getInt("transmitBytes") == 5000);
+        Assert.assertTrue(portStat.getInt("receiveDrops") == 2);
+        Assert.assertTrue(portStat.getInt("transmitDrops") == 50);
+        Assert.assertTrue(portStat.getInt("receiveErrors") == 3);
+        Assert.assertTrue(portStat.getInt("transmitErrors") == 10);
+        Assert.assertTrue(portStat.getInt("receiveFrameError") == 5);
+        Assert.assertTrue(portStat.getInt("receiveOverRunError") == 6);
+        Assert.assertTrue(portStat.getInt("receiveCrcError") == 1);
+        Assert.assertTrue(portStat.getInt("collisionCount") == 4);
+
+        // test for getting one specific node's stats
+        result = getJsonResult(baseURL + "flowstats/STUB/51966");
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        node = json.getJSONObject("node");
+        // test that node was returned properly
+        Assert.assertTrue(node.getInt("@id") == 0xCAFE);
+        Assert.assertTrue(node.getString("@type").equals("STUB"));
+
+        // test that flow statistics results are correct
+        flowStats = json.getJSONArray("flowStat");
+        for (int i = 0; i < flowStats.length(); i++) {
+            JSONObject flowStat = flowStats.getJSONObject(i);
+            testFlowStat(flowStat, actionTypes[i]);
+        }
+
+        result = getJsonResult(baseURL + "portstats/STUB/51966");
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        node2 = json.getJSONObject("node");
+        // test that node was returned properly
+        Assert.assertTrue(node2.getInt("@id") == 0xCAFE);
+        Assert.assertTrue(node2.getString("@type").equals("STUB"));
+
+        // test that port statistic results are correct
+        portStat = json.getJSONObject("portStat");
+        Assert.assertTrue(portStat.getInt("receivePackets") == 250);
+        Assert.assertTrue(portStat.getInt("transmitPackets") == 500);
+        Assert.assertTrue(portStat.getInt("receiveBytes") == 1000);
+        Assert.assertTrue(portStat.getInt("transmitBytes") == 5000);
+        Assert.assertTrue(portStat.getInt("receiveDrops") == 2);
+        Assert.assertTrue(portStat.getInt("transmitDrops") == 50);
+        Assert.assertTrue(portStat.getInt("receiveErrors") == 3);
+        Assert.assertTrue(portStat.getInt("transmitErrors") == 10);
+        Assert.assertTrue(portStat.getInt("receiveFrameError") == 5);
+        Assert.assertTrue(portStat.getInt("receiveOverRunError") == 6);
+        Assert.assertTrue(portStat.getInt("receiveCrcError") == 1);
+        Assert.assertTrue(portStat.getInt("collisionCount") == 4);
     }
 
-    private void testFlowStat(JSONObject flowStat, String actionType) {
-        try {
-            Assert.assertTrue(flowStat.getInt("tableId") == 1);
-            Assert.assertTrue(flowStat.getInt("durationSeconds") == 40);
-            Assert.assertTrue(flowStat.getInt("durationNanoseconds") == 400);
-            Assert.assertTrue(flowStat.getInt("packetCount") == 200);
-            Assert.assertTrue(flowStat.getInt("byteCount") == 100);
+    private void testFlowStat(JSONObject flowStat, String actionType)
+            throws JSONException {
+        Assert.assertTrue(flowStat.getInt("tableId") == 1);
+        Assert.assertTrue(flowStat.getInt("durationSeconds") == 40);
+        Assert.assertTrue(flowStat.getInt("durationNanoseconds") == 400);
+        Assert.assertTrue(flowStat.getInt("packetCount") == 200);
+        Assert.assertTrue(flowStat.getInt("byteCount") == 100);
 
-            // test that flow information is correct
-            JSONObject flow = flowStat.getJSONObject("flow");
-            Assert.assertTrue(flow.getInt("priority") == 3500);
-            Assert.assertTrue(flow.getInt("idleTimeout") == 1000);
-            Assert.assertTrue(flow.getInt("hardTimeout") == 2000);
-            Assert.assertTrue(flow.getInt("id") == 12345);
+        // test that flow information is correct
+        JSONObject flow = flowStat.getJSONObject("flow");
+        Assert.assertTrue(flow.getInt("priority") == 3500);
+        Assert.assertTrue(flow.getInt("idleTimeout") == 1000);
+        Assert.assertTrue(flow.getInt("hardTimeout") == 2000);
+        Assert.assertTrue(flow.getInt("id") == 12345);
 
-            JSONObject match = (flow.getJSONObject("match")
-                    .getJSONObject("matchField"));
-            Assert.assertTrue(match.getString("type").equals("NW_DST"));
-            Assert.assertTrue(match.getString("value").equals("1.1.1.1"));
+        JSONObject match = (flow.getJSONObject("match")
+                .getJSONObject("matchField"));
+        Assert.assertTrue(match.getString("type").equals("NW_DST"));
+        Assert.assertTrue(match.getString("value").equals("1.1.1.1"));
 
-            JSONObject act = flow.getJSONObject("actions");
-            Assert.assertTrue(act.getString("@type").equals(actionType));
+        JSONObject act = flow.getJSONObject("actions");
+        Assert.assertTrue(act.getString("@type").equals(actionType));
 
-            if (act.getString("@type").equals("output")) {
-                JSONObject port = act.getJSONObject("port");
-                JSONObject port_node = port.getJSONObject("node");
-                Assert.assertTrue(port.getInt("@id") == 51966);
-                Assert.assertTrue(port.getString("@type").equals("STUB"));
-                Assert.assertTrue(port_node.getInt("@id") == 51966);
-                Assert.assertTrue(port_node.getString("@type").equals("STUB"));
-            }
-
-            if (act.getString("@type").equals("setDlSrc")) {
-                byte srcMatch[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2,
-                        (byte) 1 };
-                String src = act.getString("address");
-                byte srcBytes[] = new byte[5];
-                srcBytes[0] = Byte.parseByte(src.substring(0, 2));
-                srcBytes[1] = Byte.parseByte(src.substring(2, 4));
-                srcBytes[2] = Byte.parseByte(src.substring(4, 6));
-                srcBytes[3] = Byte.parseByte(src.substring(6, 8));
-                srcBytes[4] = Byte.parseByte(src.substring(8, 10));
-                Assert.assertTrue(Arrays.equals(srcBytes, srcMatch));
-            }
-
-            if (act.getString("@type").equals("setDlDst")) {
-                byte dstMatch[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4,
-                        (byte) 5 };
-                String dst = act.getString("address");
-                byte dstBytes[] = new byte[5];
-                dstBytes[0] = Byte.parseByte(dst.substring(0, 2));
-                dstBytes[1] = Byte.parseByte(dst.substring(2, 4));
-                dstBytes[2] = Byte.parseByte(dst.substring(4, 6));
-                dstBytes[3] = Byte.parseByte(dst.substring(6, 8));
-                dstBytes[4] = Byte.parseByte(dst.substring(8, 10));
-                Assert.assertTrue(Arrays.equals(dstBytes, dstMatch));
-            }
-            if (act.getString("@type").equals("setDlType"))
-                Assert.assertTrue(act.getInt("dlType") == 10);
-            if (act.getString("@type").equals("setVlanId"))
-                Assert.assertTrue(act.getInt("vlanId") == 2);
-            if (act.getString("@type").equals("setVlanPcp"))
-                Assert.assertTrue(act.getInt("pcp") == 3);
-            if (act.getString("@type").equals("setVlanCfi"))
-                Assert.assertTrue(act.getInt("cfi") == 1);
-
-            if (act.getString("@type").equals("setNwSrc"))
-                Assert.assertTrue(act.getString("address").equals("2.2.2.2"));
-            if (act.getString("@type").equals("setNwDst"))
-                Assert.assertTrue(act.getString("address").equals("1.1.1.1"));
-
-            if (act.getString("@type").equals("pushVlan")) {
-                int head = act.getInt("VlanHeader");
-                // parsing vlan header
-                int id = head & 0xfff;
-                int cfi = (head >> 12) & 0x1;
-                int pcp = (head >> 13) & 0x7;
-                int tag = (head >> 16) & 0xffff;
-                Assert.assertTrue(id == 1234);
-                Assert.assertTrue(cfi == 1);
-                Assert.assertTrue(pcp == 1);
-                Assert.assertTrue(tag == 0x8100);
-            }
-            if (act.getString("@type").equals("setNwTos"))
-                Assert.assertTrue(act.getInt("tos") == 16);
-            if (act.getString("@type").equals("setTpSrc"))
-                Assert.assertTrue(act.getInt("port") == 4201);
-            if (act.getString("@type").equals("setTpDst"))
-                Assert.assertTrue(act.getInt("port") == 8080);
-        } catch (Exception e) {
-            Assert.assertTrue(false);
+        if (act.getString("@type").equals("output")) {
+            JSONObject port = act.getJSONObject("port");
+            JSONObject port_node = port.getJSONObject("node");
+            Assert.assertTrue(port.getInt("@id") == 51966);
+            Assert.assertTrue(port.getString("@type").equals("STUB"));
+            Assert.assertTrue(port_node.getInt("@id") == 51966);
+            Assert.assertTrue(port_node.getString("@type").equals("STUB"));
         }
+
+        if (act.getString("@type").equals("setDlSrc")) {
+            byte srcMatch[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2,
+                    (byte) 1 };
+            String src = act.getString("address");
+            byte srcBytes[] = new byte[5];
+            srcBytes[0] = Byte.parseByte(src.substring(0, 2));
+            srcBytes[1] = Byte.parseByte(src.substring(2, 4));
+            srcBytes[2] = Byte.parseByte(src.substring(4, 6));
+            srcBytes[3] = Byte.parseByte(src.substring(6, 8));
+            srcBytes[4] = Byte.parseByte(src.substring(8, 10));
+            Assert.assertTrue(Arrays.equals(srcBytes, srcMatch));
+        }
+
+        if (act.getString("@type").equals("setDlDst")) {
+            byte dstMatch[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4,
+                    (byte) 5 };
+            String dst = act.getString("address");
+            byte dstBytes[] = new byte[5];
+            dstBytes[0] = Byte.parseByte(dst.substring(0, 2));
+            dstBytes[1] = Byte.parseByte(dst.substring(2, 4));
+            dstBytes[2] = Byte.parseByte(dst.substring(4, 6));
+            dstBytes[3] = Byte.parseByte(dst.substring(6, 8));
+            dstBytes[4] = Byte.parseByte(dst.substring(8, 10));
+            Assert.assertTrue(Arrays.equals(dstBytes, dstMatch));
+        }
+        if (act.getString("@type").equals("setDlType"))
+            Assert.assertTrue(act.getInt("dlType") == 10);
+        if (act.getString("@type").equals("setVlanId"))
+            Assert.assertTrue(act.getInt("vlanId") == 2);
+        if (act.getString("@type").equals("setVlanPcp"))
+            Assert.assertTrue(act.getInt("pcp") == 3);
+        if (act.getString("@type").equals("setVlanCfi"))
+            Assert.assertTrue(act.getInt("cfi") == 1);
+
+        if (act.getString("@type").equals("setNwSrc"))
+            Assert.assertTrue(act.getString("address").equals("2.2.2.2"));
+        if (act.getString("@type").equals("setNwDst"))
+            Assert.assertTrue(act.getString("address").equals("1.1.1.1"));
+
+        if (act.getString("@type").equals("pushVlan")) {
+            int head = act.getInt("VlanHeader");
+            // parsing vlan header
+            int id = head & 0xfff;
+            int cfi = (head >> 12) & 0x1;
+            int pcp = (head >> 13) & 0x7;
+            int tag = (head >> 16) & 0xffff;
+            Assert.assertTrue(id == 1234);
+            Assert.assertTrue(cfi == 1);
+            Assert.assertTrue(pcp == 1);
+            Assert.assertTrue(tag == 0x8100);
+        }
+        if (act.getString("@type").equals("setNwTos"))
+            Assert.assertTrue(act.getInt("tos") == 16);
+        if (act.getString("@type").equals("setTpSrc"))
+            Assert.assertTrue(act.getInt("port") == 4201);
+        if (act.getString("@type").equals("setTpDst"))
+            Assert.assertTrue(act.getInt("port") == 8080);
     }
 
     @Test
-    public void testFlowProgrammer() {
-        try {
-            String baseURL = "http://127.0.0.1:8080/controller/nb/v2/flow/default/";
-            // Attempt to get a flow that doesn't exit. Should return 404
-            // status.
-            String result = getJsonResult(baseURL + "STUB/51966/test1", "GET");
-            Assert.assertTrue(result.equals("404"));
+    public void testFlowProgrammer() throws JSONException {
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/flow/default/";
+        // Attempt to get a flow that doesn't exit. Should return 404
+        // status.
+        String result = getJsonResult(baseURL + "STUB/51966/test1", "GET");
+        Assert.assertTrue(result.equals("404"));
 
-            // test add flow1
-            String fc = "{\"dynamic\":\"false\", \"name\":\"test1\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
-            result = getJsonResult(baseURL + "STUB/51966/test1", "POST", fc);
-            Assert.assertTrue(httpResponseCode == 201);
+        // test add flow1
+        String fc = "{\"dynamic\":\"false\", \"name\":\"test1\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
+        result = getJsonResult(baseURL + "STUB/51966/test1", "POST", fc);
+        Assert.assertTrue(httpResponseCode == 201);
 
-            // test get returns flow that was added.
-            result = getJsonResult(baseURL + "STUB/51966/test1", "GET");
-            // check that result came out fine.
-            Assert.assertTrue(httpResponseCode == 200);
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
-            Assert.assertTrue(json.getString("name").equals("test1"));
-            Assert.assertTrue(json.getString("actions").equals("DROP"));
-            Assert.assertTrue(json.getString("installInHw").equals("true"));
-            JSONObject node = json.getJSONObject("node");
-            Assert.assertTrue(node.getString("@type").equals("STUB"));
-            Assert.assertTrue(node.getString("@id").equals("51966"));
-            // test adding same flow again fails due to repeat name..return 409
-            // code
-            result = getJsonResult(baseURL + "STUB/51966/test1", "POST", fc);
-            Assert.assertTrue(result.equals("409"));
+        // test get returns flow that was added.
+        result = getJsonResult(baseURL + "STUB/51966/test1", "GET");
+        // check that result came out fine.
+        Assert.assertTrue(httpResponseCode == 200);
+        JSONTokener jt = new JSONTokener(result);
+        JSONObject json = new JSONObject(jt);
+        Assert.assertTrue(json.getString("name").equals("test1"));
+        Assert.assertTrue(json.getString("actions").equals("DROP"));
+        Assert.assertTrue(json.getString("installInHw").equals("true"));
+        JSONObject node = json.getJSONObject("node");
+        Assert.assertTrue(node.getString("@type").equals("STUB"));
+        Assert.assertTrue(node.getString("@id").equals("51966"));
+        // test adding same flow again fails due to repeat name..return 409
+        // code
+        result = getJsonResult(baseURL + "STUB/51966/test1", "POST", fc);
+        Assert.assertTrue(result.equals("409"));
 
-            fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
-            result = getJsonResult(baseURL + "STUB/51966/test2", "POST", fc);
-            // test should return 500 for error due to same flow being added.
-            Assert.assertTrue(result.equals("500"));
+        fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
+        result = getJsonResult(baseURL + "STUB/51966/test2", "POST", fc);
+        // test should return 500 for error due to same flow being added.
+        Assert.assertTrue(result.equals("500"));
 
-            // add second flow that's different
-            fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"nwSrc\":\"1.1.1.1\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
-            result = getJsonResult(baseURL + "STUB/51966/test2", "POST", fc);
-            Assert.assertTrue(httpResponseCode == 201);
+        // add second flow that's different
+        fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"nwSrc\":\"1.1.1.1\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
+        result = getJsonResult(baseURL + "STUB/51966/test2", "POST", fc);
+        Assert.assertTrue(httpResponseCode == 201);
 
-            // check that request returns both flows given node.
-            result = getJsonResult(baseURL + "STUB/51966/", "GET");
-            jt = new JSONTokener(result);
-            json = new JSONObject(jt);
-            Assert.assertTrue(json.get("flowConfig") instanceof JSONArray);
-            JSONArray ja = json.getJSONArray("flowConfig");
-            Integer count = ja.length();
-            Assert.assertTrue(count == 2);
+        // check that request returns both flows given node.
+        result = getJsonResult(baseURL + "STUB/51966/", "GET");
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        Assert.assertTrue(json.get("flowConfig") instanceof JSONArray);
+        JSONArray ja = json.getJSONArray("flowConfig");
+        Integer count = ja.length();
+        Assert.assertTrue(count == 2);
 
-            // check that request returns both flows given just container.
-            result = getJsonResult(baseURL);
-            jt = new JSONTokener(result);
-            json = new JSONObject(jt);
-            Assert.assertTrue(json.get("flowConfig") instanceof JSONArray);
-            ja = json.getJSONArray("flowConfig");
-            count = ja.length();
-            Assert.assertTrue(count == 2);
+        // check that request returns both flows given just container.
+        result = getJsonResult(baseURL);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        Assert.assertTrue(json.get("flowConfig") instanceof JSONArray);
+        ja = json.getJSONArray("flowConfig");
+        count = ja.length();
+        Assert.assertTrue(count == 2);
 
-            // delete a flow, check that it's no longer in list.
-            result = getJsonResult(baseURL + "STUB/51966/test2", "DELETE");
-            Assert.assertTrue(httpResponseCode == 200);
+        // delete a flow, check that it's no longer in list.
+        result = getJsonResult(baseURL + "STUB/51966/test2", "DELETE");
+        Assert.assertTrue(httpResponseCode == 200);
 
-            result = getJsonResult(baseURL + "STUB/51966/test2", "GET");
-            Assert.assertTrue(result.equals("404"));
-
-        } catch (Exception e) {
-            Assert.assertTrue(false);
-        }
-
+        result = getJsonResult(baseURL + "STUB/51966/test2", "GET");
+        Assert.assertTrue(result.equals("404"));
     }
 
     // method to extract a JSONObject with specified node ID from a JSONObject
@@ -792,7 +820,7 @@ public class NorthboundIT {
     }
 
     @Test
-    public void testHostTracker() {
+    public void testHostTracker() throws JSONException {
 
         System.out.println("Starting HostTracker JAXB client.");
 
@@ -818,34 +846,29 @@ public class NorthboundIT {
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/host/default";
 
         // test POST method: addHost()
-        try {
-            String queryParameter = new QueryParameter("dataLayerAddress",
-                    dataLayerAddress_1).add("nodeType", nodeType_1)
-                    .add("nodeId", nodeId_1.toString())
-                    .add("nodeConnectorType", nodeConnectorType_1)
-                    .add("nodeConnectorId", nodeConnectorId_1.toString())
-                    .add("vlan", vlan_1).getString();
+        String queryParameter = new QueryParameter("dataLayerAddress",
+                dataLayerAddress_1).add("nodeType", nodeType_1)
+                .add("nodeId", nodeId_1.toString())
+                .add("nodeConnectorType", nodeConnectorType_1)
+                .add("nodeConnectorId", nodeConnectorId_1.toString())
+                .add("vlan", vlan_1).getString();
 
-            String result = getJsonResult(baseURL + "/" + networkAddress_1
-                    + queryParameter, "POST");
-            Assert.assertTrue(httpResponseCode.intValue() == (Integer) 201);
+        String result = getJsonResult(baseURL + "/" + networkAddress_1
+                + queryParameter, "POST");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 201);
 
-            // vlan is not passed through query parameter but should be
-            // defaulted to "0"
-            queryParameter = new QueryParameter("dataLayerAddress",
-                    dataLayerAddress_2).add("nodeType", nodeType_2)
-                    .add("nodeId", nodeId_2.toString())
-                    .add("nodeConnectorType", nodeConnectorType_2)
-                    .add("nodeConnectorId", nodeConnectorId_2.toString())
-                    .getString();
+        // vlan is not passed through query parameter but should be
+        // defaulted to "0"
+        queryParameter = new QueryParameter("dataLayerAddress",
+                dataLayerAddress_2).add("nodeType", nodeType_2)
+                .add("nodeId", nodeId_2.toString())
+                .add("nodeConnectorType", nodeConnectorType_2)
+                .add("nodeConnectorId", nodeConnectorId_2.toString())
+                .getString();
 
-            result = getJsonResult(baseURL + "/" + networkAddress_2
-                    + queryParameter, "POST");
-            Assert.assertTrue(httpResponseCode.intValue() == (Integer) 201);
-        } catch (Exception e) {
-            // Got an unexpected exception
-            Assert.assertTrue(false);
-        }
+        result = getJsonResult(baseURL + "/" + networkAddress_2
+                + queryParameter, "POST");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 201);
 
         // define variables for decoding returned strings
         String networkAddress;
@@ -853,69 +876,59 @@ public class NorthboundIT {
 
         // the two hosts should be in inactive host DB
         // test GET method: getInactiveHosts()
-        try {
-            String result = getJsonResult(baseURL + "/inactive", "GET");
-            Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
+        result = getJsonResult(baseURL + "/inactive", "GET");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
-            // there should be at least two hosts in the DB
-            Assert.assertTrue(json.get("host") instanceof JSONArray);
-            JSONArray ja = json.getJSONArray("host");
-            Integer count = ja.length();
-            Assert.assertTrue(count == 2);
+        JSONTokener jt = new JSONTokener(result);
+        JSONObject json = new JSONObject(jt);
+        // there should be at least two hosts in the DB
+        Assert.assertTrue(json.get("host") instanceof JSONArray);
+        JSONArray ja = json.getJSONArray("host");
+        Integer count = ja.length();
+        Assert.assertTrue(count == 2);
 
-            for (int i = 0; i < count; i++) {
-                host_jo = ja.getJSONObject(i);
-                dl_jo = host_jo.getJSONObject("dataLayerAddress");
-                nc_jo = host_jo.getJSONObject("nodeConnector");
-                node_jo = nc_jo.getJSONObject("node");
+        for (int i = 0; i < count; i++) {
+            host_jo = ja.getJSONObject(i);
+            dl_jo = host_jo.getJSONObject("dataLayerAddress");
+            nc_jo = host_jo.getJSONObject("nodeConnector");
+            node_jo = nc_jo.getJSONObject("node");
 
-                networkAddress = host_jo.getString("networkAddress");
-                if (networkAddress.equalsIgnoreCase(networkAddress_1)) {
-                    Assert.assertTrue(dl_jo.getString("macAddress")
-                            .equalsIgnoreCase(dataLayerAddress_1));
-                    Assert.assertTrue(nc_jo.getString("@type")
-                            .equalsIgnoreCase(nodeConnectorType_1));
-                    Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
-                    Assert.assertTrue(node_jo.getString("@type")
-                            .equalsIgnoreCase(nodeType_1));
-                    Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
-                    Assert.assertTrue(host_jo.getString("vlan")
-                            .equalsIgnoreCase(vlan_1));
-                } else if (networkAddress.equalsIgnoreCase(networkAddress_2)) {
-                    Assert.assertTrue(dl_jo.getString("macAddress")
-                            .equalsIgnoreCase(dataLayerAddress_2));
-                    Assert.assertTrue(nc_jo.getString("@type")
-                            .equalsIgnoreCase(nodeConnectorType_2));
-                    Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_2);
-                    Assert.assertTrue(node_jo.getString("@type")
-                            .equalsIgnoreCase(nodeType_2));
-                    Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_2);
-                    Assert.assertTrue(host_jo.getString("vlan")
-                            .equalsIgnoreCase(vlan_2));
-                } else {
-                    Assert.assertTrue(false);
-                }
+            networkAddress = host_jo.getString("networkAddress");
+            if (networkAddress.equalsIgnoreCase(networkAddress_1)) {
+                Assert.assertTrue(dl_jo.getString("macAddress")
+                        .equalsIgnoreCase(dataLayerAddress_1));
+                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(
+                        nodeConnectorType_1));
+                Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
+                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(
+                        nodeType_1));
+                Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
+                Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(
+                        vlan_1));
+            } else if (networkAddress.equalsIgnoreCase(networkAddress_2)) {
+                Assert.assertTrue(dl_jo.getString("macAddress")
+                        .equalsIgnoreCase(dataLayerAddress_2));
+                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(
+                        nodeConnectorType_2));
+                Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_2);
+                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(
+                        nodeType_2));
+                Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_2);
+                Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(
+                        vlan_2));
+            } else {
+                Assert.assertTrue(false);
             }
-        } catch (Exception e) {
-            // Got an unexpected exception
-            Assert.assertTrue(false);
         }
 
         // test GET method: getActiveHosts() - no host expected
-        try {
-            String result = getJsonResult(baseURL, "GET");
-            Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
+        result = getJsonResult(baseURL, "GET");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
-            Assert.assertFalse(hostInJson(json, networkAddress_1));
-            Assert.assertFalse(hostInJson(json, networkAddress_2));
-        } catch (Exception e) {
-            // Got an unexpected exception
-            Assert.assertTrue(false);
-        }
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+        Assert.assertFalse(hostInJson(json, networkAddress_1));
+        Assert.assertFalse(hostInJson(json, networkAddress_2));
 
         // put the 1st host into active host DB
         Node nd;
@@ -931,75 +944,57 @@ public class NorthboundIT {
         }
 
         // verify the host shows up in active host DB
-        try {
-            String result = getJsonResult(baseURL, "GET");
-            Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
+        result = getJsonResult(baseURL, "GET");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
-            Assert.assertTrue(hostInJson(json, networkAddress_1));
-        } catch (Exception e) {
-            // Got an unexpected exception
-            Assert.assertTrue(false);
-        }
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+
+        Assert.assertTrue(hostInJson(json, networkAddress_1));
 
         // test GET method for getHostDetails()
-        try {
-            String result = getJsonResult(baseURL + "/" + networkAddress_1,
-                    "GET");
-            Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
+        result = getJsonResult(baseURL + "/" + networkAddress_1, "GET");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
-            Assert.assertFalse(json.length() == 0);
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
 
-            dl_jo = json.getJSONObject("dataLayerAddress");
-            nc_jo = json.getJSONObject("nodeConnector");
-            node_jo = nc_jo.getJSONObject("node");
+        Assert.assertFalse(json.length() == 0);
 
-            Assert.assertTrue(json.getString("networkAddress")
-                    .equalsIgnoreCase(networkAddress_1));
-            Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(
-                    dataLayerAddress_1));
-            Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(
-                    nodeConnectorType_1));
-            Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
-            Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(
-                    nodeType_1));
-            Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
-            Assert.assertTrue(json.getString("vlan").equalsIgnoreCase(vlan_1));
-        } catch (Exception e) {
-            // Got an unexpected exception
-            Assert.assertTrue(false);
-        }
+        dl_jo = json.getJSONObject("dataLayerAddress");
+        nc_jo = json.getJSONObject("nodeConnector");
+        node_jo = nc_jo.getJSONObject("node");
+
+        Assert.assertTrue(json.getString("networkAddress").equalsIgnoreCase(
+                networkAddress_1));
+        Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(
+                dataLayerAddress_1));
+        Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(
+                nodeConnectorType_1));
+        Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
+        Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(
+                nodeType_1));
+        Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
+        Assert.assertTrue(json.getString("vlan").equalsIgnoreCase(vlan_1));
 
         // test DELETE method for deleteFlow()
-        try {
-            String result = getJsonResult(baseURL + "/" + networkAddress_1,
-                    "DELETE");
-            Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
-        } catch (Exception e) {
-            // Got an unexpected exception
-            Assert.assertTrue(false);
-        }
+        result = getJsonResult(baseURL + "/" + networkAddress_1, "DELETE");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
         // verify host_1 removed from active host DB
         // test GET method: getActiveHosts() - no host expected
-        try {
-            String result = getJsonResult(baseURL, "GET");
-            Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
-            JSONTokener jt = new JSONTokener(result);
-            JSONObject json = new JSONObject(jt);
+        result = getJsonResult(baseURL, "GET");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
 
-            Assert.assertFalse(hostInJson(json, networkAddress_1));
-        } catch (Exception e) {
-            // Got an unexpected exception
-            Assert.assertTrue(false);
-        }
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+
+        Assert.assertFalse(hostInJson(json, networkAddress_1));
+
     }
 
     private Boolean hostInJson(JSONObject json, String hostIp)
