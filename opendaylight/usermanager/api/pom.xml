@@ -6,7 +6,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
     <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../commons/opendaylight</relativePath>
+    <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
   <artifactId>usermanager</artifactId>
@@ -48,11 +48,15 @@
             </Import-Package>
             <Export-Package>
               org.opendaylight.controller.usermanager,
+<!-- 
               org.opendaylight.controller.usermanager.internal
-            </Export-Package>
+ -->
+             </Export-Package>
             <Bundle-Activator>
+<!-- 
               org.opendaylight.controller.usermanager.internal.Activator
-            </Bundle-Activator>
+ -->
+             </Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
