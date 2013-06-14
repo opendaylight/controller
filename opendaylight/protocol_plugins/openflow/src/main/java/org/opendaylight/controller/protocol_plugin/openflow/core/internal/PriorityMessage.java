@@ -10,7 +10,6 @@ package org.opendaylight.controller.protocol_plugin.openflow.core.internal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.openflow.protocol.OFMessage;
 
 /**

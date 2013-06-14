@@ -14,8 +14,6 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 /**
  * @file   DataLinkAddress.java
  *
@@ -94,7 +92,6 @@ abstract public class DataLinkAddress implements Serializable {
 
     @Override
     public String toString() {
-        return "DataLinkAddress[" + ReflectionToStringBuilder.toString(this)
-                + "]";
+        return "DataLinkAddress [name=" + name + "]";
     }
 }

@@ -11,7 +11,6 @@ package org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6e
 
 import java.nio.ByteBuffer;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.openflow.protocol.statistics.OFVendorStatistics;
 
 
@@ -150,7 +149,8 @@ public class V6StatsRequest extends OFVendorStatistics {
 
     @Override
     public String toString() {
-        return "V6StatsRequest[" + ReflectionToStringBuilder.toString(this)
+        return "V6StatsRequest [msgsubtype=" + msgsubtype + ", outPort="
+                + outPort + ", match_len=" + match_len + ", tableId=" + tableId
                 + "]";
     }
 

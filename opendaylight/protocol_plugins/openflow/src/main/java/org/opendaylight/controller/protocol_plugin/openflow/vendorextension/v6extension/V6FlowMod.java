@@ -13,7 +13,6 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.openflow.protocol.OFPacketOut;
 import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFVendor;
@@ -229,12 +228,15 @@ public class V6FlowMod extends OFVendor implements Cloneable {
         }
     }
 
-    /**
-     * Prints the contents of V6FlowMod in a string format.
-     */
     @Override
     public String toString() {
-        return "V6FlowMod[" + ReflectionToStringBuilder.toString(this) + "]";
+        return "V6FlowMod [match=" + match + ", cookie=" + cookie
+                + ", command=" + command + ", idleTimeout=" + idleTimeout
+                + ", hardTimeout=" + hardTimeout + ", priority=" + priority
+                + ", bufferId=" + bufferId + ", outPort=" + outPort
+                + ", flags=" + flags + ", actions=" + actions + ", match_len="
+                + match_len + ", actions_len=" + actions_len + ", pad_size="
+                + pad_size + "]";
     }
 
 }
