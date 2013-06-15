@@ -1,43 +1,55 @@
 package org.opendaylight.controller.web;
 
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
-import org.opendaylight.controller.sal.authorization.Resource;
+import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.controller.usermanager.IUserManager;
 
 public class DaylightWebUtil {
-    private static String defaultName = GlobalConstants.DEFAULT.toString();
 
     /**
-     * Returns the container that this user is authorized to access. If the user is not authorized to the requested
-     * container, then this method will return the default container.
+     * Returns the access privilege the user has on the specified container
      *
-     * @param request - HttpServletRequest object to retrieve username
-     * @param container - requested container
-     * @param bundle - respective bundle
-     * @return container name if cleared, else it will always be 'default'
+     * @param userName
+     *            The user name
+     * @param container
+     *            The container name. If null, the default container will be assumed
+     * @param bundle
+     *            The bundle originating the request
+     * @return The access privilege the user is granted on the container
      */
-    public static String getAuthorizedContainer(HttpServletRequest request, String container, Object bundle) {
-        if (container == null) {
-            return defaultName;
+    public static Privilege getContainerPrivilege(String userName,
+            String container, Object bundle) {
+        // Derive the target resource
+        String resource = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Retrieve the Container Authorization service
+        IContainerAuthorization auth = (IContainerAuthorization) ServiceHelper
+                .getGlobalInstance(IContainerAuthorization.class, bundle);
+        if (auth != null) {
+            return auth.getResourcePrivilege(userName, resource);
         }
 
-        String username = request.getUserPrincipal().getName();
-        IContainerAuthorization containerAuthorization = (IContainerAuthorization)
-                ServiceHelper.getGlobalInstance(IContainerAuthorization.class, bundle);
-        if (containerAuthorization != null) {
-            Set<Resource> resources = containerAuthorization.getAllResourcesforUser(username);
-            for(Resource resource : resources) {
-                String name = (String) resource.getResource();
-                if(container.equals(name)) {
-                    return name;
+        /*
+         * Container Authorization service not available. We can only derive the
+         * access privilege to the default container based on user level
+         */
+        if (resource.equals(GlobalConstants.DEFAULT.toString())) {
+            IUserManager userManager = (IUserManager) ServiceHelper
+                    .getGlobalInstance(IUserManager.class, bundle);
+            if (userManager != null) {
+                switch (userManager.getUserLevel(userName)) {
+                case NETWORKADMIN:
+                    return Privilege.WRITE;
+                case NETWORKOPERATOR:
+                    return Privilege.READ;
+                default:
+                    return Privilege.NONE;
                 }
             }
         }
-        return defaultName;
+
+        return Privilege.NONE;
     }
 }

@@ -11,9 +11,12 @@ package org.opendaylight.controller.devices.web;
 import java.util.List;
 import java.util.Map;
 
+import org.opendaylight.controller.sal.authorization.Privilege;
+
 public class DevicesJsonBean {
     private List<String> columnNames;
     private List<Map<String, String>> nodeData;
+    private Privilege privilege;
 
     public List<String> getColumnNames() {
         return columnNames;
@@ -29,5 +32,13 @@ public class DevicesJsonBean {
 
     public void setNodeData(List<Map<String, String>> nodeData) {
         this.nodeData = nodeData;
+    }
+
+    public void setPrivilege(Privilege privilege) {
+        this.privilege = privilege;
+    }
+
+    public Privilege getPrivilege() {
+        return privilege;
     }
 }

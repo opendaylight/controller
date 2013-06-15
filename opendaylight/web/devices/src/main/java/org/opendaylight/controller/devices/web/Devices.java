@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.web.DaylightWebUtil;
 import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.stereotype.Controller;
@@ -30,12 +29,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.opendaylight.controller.forwarding.staticrouting.IForwardingStaticRouting;
 import org.opendaylight.controller.forwarding.staticrouting.StaticRouteConfig;
+import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Tier;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
@@ -82,13 +83,20 @@ public class Devices implements IDaylightWeb {
 
     @RequestMapping(value = "/nodesLearnt", method = RequestMethod.GET)
     @ResponseBody
-    public DevicesJsonBean getNodesLearnt(HttpServletRequest request, @RequestParam(required = false) String container) {
+    public DevicesJsonBean getNodesLearnt(HttpServletRequest request,
+            @RequestParam(required = false) String container) {
         Gson gson = new Gson();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         List<Map<String, String>> nodeData = new ArrayList<Map<String, String>>();
-        if (switchManager != null) {
+        if (switchManager != null && privilege != Privilege.NONE) {
             for (Switch device : switchManager.getNetworkDevices()) {
                 HashMap<String, String> nodeDatum = new HashMap<String, String>();
                 Node node = device.getNode();
@@ -174,6 +182,7 @@ public class Devices implements IDaylightWeb {
 
         DevicesJsonBean result = new DevicesJsonBean();
         result.setNodeData(nodeData);
+        result.setPrivilege(privilege);
         List<String> columnNames = new ArrayList<String>();
         columnNames.add("Node ID");
         columnNames.add("Node Name");
@@ -199,13 +208,19 @@ public class Devices implements IDaylightWeb {
             @RequestParam("nodeId") String nodeId,
             @RequestParam("tier") String tier,
             @RequestParam("operationMode") String operationMode,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil
+                .getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return unauthorizedMessage();
         }
 
         StatusJsonBean resultBean = new StatusJsonBean();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
@@ -224,9 +239,16 @@ public class Devices implements IDaylightWeb {
 
     @RequestMapping(value = "/staticRoutes", method = RequestMethod.GET)
     @ResponseBody
-    public DevicesJsonBean getStaticRoutes(HttpServletRequest request, @RequestParam(required = false) String container) {
+    public DevicesJsonBean getStaticRoutes(HttpServletRequest request,
+            @RequestParam(required = false) String container) {
         Gson gson = new Gson();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+
         IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
                 .getInstance(IForwardingStaticRouting.class, containerName,
                         this);
@@ -239,16 +261,19 @@ public class Devices implements IDaylightWeb {
         if (routeConfigs == null) {
             return null;
         }
-        for (StaticRouteConfig conf : routeConfigs.values()) {
-            Map<String, String> staticRoute = new HashMap<String, String>();
-            staticRoute.put("name", conf.getName());
-            staticRoute.put("staticRoute", conf.getStaticRoute());
-            staticRoute.put("nextHopType", conf.getNextHopType());
-            staticRoute.put("nextHop", conf.getNextHop());
-            staticRoute.put("json", gson.toJson(conf));
-            staticRoutes.add(staticRoute);
+        if (privilege != Privilege.NONE) {
+            for (StaticRouteConfig conf : routeConfigs.values()) {
+                Map<String, String> staticRoute = new HashMap<String, String>();
+                staticRoute.put("name", conf.getName());
+                staticRoute.put("staticRoute", conf.getStaticRoute());
+                staticRoute.put("nextHopType", conf.getNextHopType());
+                staticRoute.put("nextHop", conf.getNextHop());
+                staticRoute.put("json", gson.toJson(conf));
+                staticRoutes.add(staticRoute);
+            }
         }
         DevicesJsonBean result = new DevicesJsonBean();
+        result.setPrivilege(privilege);
         result.setColumnNames(StaticRouteConfig.getGuiFieldsNames());
         result.setNodeData(staticRoutes);
         return result;
@@ -260,13 +285,19 @@ public class Devices implements IDaylightWeb {
             @RequestParam("routeName") String routeName,
             @RequestParam("staticRoute") String staticRoute,
             @RequestParam("nextHop") String nextHop,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil
+                .getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return unauthorizedMessage();
         }
 
         StatusJsonBean result = new StatusJsonBean();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         try {
             IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
                     .getInstance(IForwardingStaticRouting.class, containerName,
@@ -294,13 +325,18 @@ public class Devices implements IDaylightWeb {
     @ResponseBody
     public StatusJsonBean deleteStaticRoute(
             @RequestParam("routesToDelete") String routesToDelete,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return unauthorizedMessage();
         }
 
         StatusJsonBean resultBean = new StatusJsonBean();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         try {
             IForwardingStaticRouting staticRouting = (IForwardingStaticRouting) ServiceHelper
                     .getInstance(IForwardingStaticRouting.class, containerName,
@@ -329,22 +365,33 @@ public class Devices implements IDaylightWeb {
 
     @RequestMapping(value = "/subnets", method = RequestMethod.GET)
     @ResponseBody
-    public DevicesJsonBean getSubnetGateways(HttpServletRequest request, @RequestParam(required = false) String container) {
+    public DevicesJsonBean getSubnetGateways(HttpServletRequest request,
+            @RequestParam(required = false) String container) {
         Gson gson = new Gson();
         List<Map<String, String>> subnets = new ArrayList<Map<String, String>>();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, containerName, this);
-        if (switchManager != null) {
-            for (SubnetConfig conf : switchManager.getSubnetsConfigList()) {
-                Map<String, String> subnet = new HashMap<String, String>();
-                subnet.put("name", conf.getName());
-                subnet.put("subnet", conf.getSubnet());
-                subnet.put("json", gson.toJson(conf));
-                subnets.add(subnet);
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(
+                userName, containerName, this);
+
+        if (privilege != Privilege.NONE) {
+            ISwitchManager switchManager = (ISwitchManager) ServiceHelper
+                    .getInstance(ISwitchManager.class, containerName, this);
+            if (switchManager != null) {
+                for (SubnetConfig conf : switchManager.getSubnetsConfigList()) {
+                    Map<String, String> subnet = new HashMap<String, String>();
+                    subnet.put("name", conf.getName());
+                    subnet.put("subnet", conf.getSubnet());
+                    subnet.put("json", gson.toJson(conf));
+                    subnets.add(subnet);
+                }
             }
         }
         DevicesJsonBean result = new DevicesJsonBean();
+        result.setPrivilege(privilege);
         result.setColumnNames(SubnetConfig.getGuiFieldsNames());
         result.setNodeData(subnets);
         return result;
@@ -355,13 +402,18 @@ public class Devices implements IDaylightWeb {
     public StatusJsonBean addSubnetGateways(
             @RequestParam("gatewayName") String gatewayName,
             @RequestParam("gatewayIPAddress") String gatewayIPAddress,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return unauthorizedMessage();
         }
 
         StatusJsonBean resultBean = new StatusJsonBean();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
@@ -386,13 +438,18 @@ public class Devices implements IDaylightWeb {
     @ResponseBody
     public StatusJsonBean deleteSubnetGateways(
             @RequestParam("gatewaysToDelete") String gatewaysToDelete,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, container, this) != Privilege.WRITE) {
             return unauthorizedMessage();
         }
 
         StatusJsonBean resultBean = new StatusJsonBean();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
@@ -419,14 +476,18 @@ public class Devices implements IDaylightWeb {
     public StatusJsonBean addSubnetGatewayPort(
             @RequestParam("portsName") String portsName,
             @RequestParam("ports") String ports,
-            @RequestParam("nodeId") String nodeId,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            @RequestParam("nodeId") String nodeId, HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return unauthorizedMessage();
         }
 
         StatusJsonBean resultBean = new StatusJsonBean();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
@@ -453,13 +514,18 @@ public class Devices implements IDaylightWeb {
     public StatusJsonBean deleteSubnetGatewayPort(
             @RequestParam("gatewayName") String gatewayName,
             @RequestParam("nodePort") String nodePort,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return unauthorizedMessage();
         }
 
         StatusJsonBean resultBean = new StatusJsonBean();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
@@ -483,38 +549,51 @@ public class Devices implements IDaylightWeb {
 
     @RequestMapping(value = "/spanPorts", method = RequestMethod.GET)
     @ResponseBody
-    public DevicesJsonBean getSpanPorts(HttpServletRequest request, @RequestParam(required = false) String container) {
+    public DevicesJsonBean getSpanPorts(HttpServletRequest request,
+            @RequestParam(required = false) String container) {
         Gson gson = new Gson();
-        List<String> spanConfigs_json = new ArrayList<String>();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, containerName, this);
-        if (switchManager != null) {
-            for (SpanConfig conf : switchManager.getSpanConfigList()) {
-                spanConfigs_json.add(gson.toJson(conf));
-            }
-        }
-        ObjectMapper mapper = new ObjectMapper();
         List<Map<String, String>> spanConfigs = new ArrayList<Map<String, String>>();
-        for (String config_json : spanConfigs_json) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, String> config_data = mapper.readValue(config_json,
-                        HashMap.class);
-                Map<String, String> config = new HashMap<String, String>();
-                for (String name : config_data.keySet()) {
-                    config.put(name, config_data.get(name));
-                    // Add switch name value (non-configuration field)
-                    config.put("nodeName",
-                            getNodeDesc(config_data.get("nodeId"), containerName));
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(
+                userName, containerName, this);
+
+        if (privilege != Privilege.NONE) {
+            List<String> spanConfigs_json = new ArrayList<String>();
+            ISwitchManager switchManager = (ISwitchManager) ServiceHelper
+                    .getInstance(ISwitchManager.class, containerName, this);
+            if (switchManager != null) {
+                for (SpanConfig conf : switchManager.getSpanConfigList()) {
+                    spanConfigs_json.add(gson.toJson(conf));
                 }
-                config.put("json", config_json);
-                spanConfigs.add(config);
-            } catch (Exception e) {
-                // TODO: Handle the exception.
+            }
+            ObjectMapper mapper = new ObjectMapper();
+
+            for (String config_json : spanConfigs_json) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> config_data = mapper.readValue(config_json,
+                            HashMap.class);
+                    Map<String, String> config = new HashMap<String, String>();
+                    for (String name : config_data.keySet()) {
+                        config.put(name, config_data.get(name));
+                        // Add switch name value (non-configuration field)
+                        config.put("nodeName",
+                                getNodeDesc(config_data.get("nodeId"), containerName));
+                    }
+                    config.put("json", config_json);
+                    spanConfigs.add(config);
+                } catch (Exception e) {
+                    // TODO: Handle the exception.
+                }
             }
         }
+
         DevicesJsonBean result = new DevicesJsonBean();
+        result.setPrivilege(privilege);
         result.setColumnNames(SpanConfig.getGuiFieldsNames());
         result.setNodeData(spanConfigs);
         return result;
@@ -522,8 +601,18 @@ public class Devices implements IDaylightWeb {
 
     @RequestMapping(value = "/nodeports")
     @ResponseBody
-    public Map<String, Object> getNodePorts(HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+    public Map<String, Object> getNodePorts(HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) == Privilege.NONE) {
+            return null;
+        }
+
+
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         if (switchManager == null) {
@@ -537,7 +626,7 @@ public class Devices implements IDaylightWeb {
             port = new HashMap<Short, String>(); // new port
             Set<NodeConnector> nodeConnectorSet = node.getNodeConnectors();
 
-            if (nodeConnectorSet != null)
+            if (nodeConnectorSet != null) {
                 for (NodeConnector nodeConnector : nodeConnectorSet) {
                     String nodeConnectorName = ((Name) switchManager
                             .getNodeConnectorProp(nodeConnector,
@@ -545,6 +634,7 @@ public class Devices implements IDaylightWeb {
                     port.put((Short) nodeConnector.getID(), nodeConnectorName
                             + "(" + nodeConnector.getID() + ")");
                 }
+            }
 
             nodes.put(node.getNode().toString(), port);
         }
@@ -556,15 +646,20 @@ public class Devices implements IDaylightWeb {
     @ResponseBody
     public StatusJsonBean addSpanPort(
             @RequestParam("jsonData") String jsonData,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return unauthorizedMessage();
         }
 
         StatusJsonBean resultBean = new StatusJsonBean();
         try {
             Gson gson = new Gson();
-            String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
             SpanConfig cfgObject = gson.fromJson(jsonData, SpanConfig.class);
@@ -588,15 +683,20 @@ public class Devices implements IDaylightWeb {
     @ResponseBody
     public StatusJsonBean deleteSpanPorts(
             @RequestParam("spanPortsToDelete") String spanPortsToDelete,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return unauthorizedMessage();
         }
 
         StatusJsonBean resultBean = new StatusJsonBean();
         try {
             Gson gson = new Gson();
-            String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
             String[] spans = spanPortsToDelete.split("###");
@@ -632,26 +732,6 @@ public class Devices implements IDaylightWeb {
         }
         return (description.isEmpty() || description.equalsIgnoreCase("none")) ? nodeId
                 : description;
-    }
-
-    /**
-     * Is the operation permitted for the given level
-     *
-     * @param level
-     */
-    private boolean authorize(UserLevel level, HttpServletRequest request) {
-        IUserManager userManager = (IUserManager) ServiceHelper
-                .getGlobalInstance(IUserManager.class, this);
-        if (userManager == null) {
-            return false;
-        }
-
-        String username = request.getUserPrincipal().getName();
-        UserLevel userLevel = userManager.getUserLevel(username);
-        if (userLevel.toNumber() <= level.toNumber()) {
-            return true;
-        }
-        return false;
     }
 
     private StatusJsonBean unauthorizedMessage() {

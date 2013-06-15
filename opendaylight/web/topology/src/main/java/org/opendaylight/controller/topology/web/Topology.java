@@ -25,9 +25,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendaylight.controller.configuration.IConfigurationAware;
-import org.opendaylight.controller.containermanager.IContainerAuthorization;
-import org.opendaylight.controller.sal.authorization.Resource;
-import org.opendaylight.controller.sal.authorization.UserLevel;
+import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
@@ -47,9 +45,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
-import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.web.DaylightWebUtil;
-import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,7 +88,15 @@ public class Topology implements IObjectReader, IConfigurationAware {
     @RequestMapping(value = "/visual.json", method = RequestMethod.GET)
     @ResponseBody
     public Collection<Map<String, Object>> getLinkData(@RequestParam(required = false) String container, HttpServletRequest request) {
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+
+        if (privilege == Privilege.NONE) {
+            return null;
+        }
 
         ITopologyManager topologyManager = (ITopologyManager) ServiceHelper
                 .getInstance(ITopologyManager.class, containerName, this);
@@ -384,11 +388,15 @@ public class Topology implements IObjectReader, IConfigurationAware {
     public Map<String, Object> post(@PathVariable String nodeId, @RequestParam(required = true) String x,
                 @RequestParam(required = true) String y, @RequestParam(required = false) String container,
                 HttpServletRequest request) {
-        if (!authorize(UserLevel.NETWORKADMIN, request)) {
-                return new HashMap<String, Object>(); // silently disregard new node position
-        }
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
 
-        String containerName = getAuthorizedContainer(request, container);
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+
+        if (privilege != Privilege.WRITE) {
+            return new HashMap<String, Object>(); // silently disregard new node position
+        }
 
         String id = new String(nodeId);
 
@@ -539,51 +547,13 @@ public class Topology implements IObjectReader, IConfigurationAware {
         public static final String HOST = "host";
     }
 
-    private boolean authorize(UserLevel level, HttpServletRequest request) {
-        IUserManager userManager = (IUserManager) ServiceHelper
-                .getGlobalInstance(IUserManager.class, this);
-        if (userManager == null) {
-                return false;
-        }
-
-        String username = request.getUserPrincipal().getName();
-        UserLevel userLevel = userManager.getUserLevel(username);
-        if (userLevel.toNumber() <= level.toNumber()) {
-                return true;
-        }
-        return false;
-    }
-
-    private String getAuthorizedContainer(HttpServletRequest request, String container) {
-        String username = request.getUserPrincipal().getName();
-        IContainerAuthorization containerAuthorization = (IContainerAuthorization) ServiceHelper.
-                        getGlobalInstance(IContainerAuthorization.class, this);
-        if (containerAuthorization != null) {
-                Set<Resource> resources = containerAuthorization.getAllResourcesforUser(username);
-                if (authorizeContainer(container, resources)) {
-                        return container;
-                }
-        }
-
-        return GlobalConstants.DEFAULT.toString();
-    }
-
-    private boolean authorizeContainer(String container, Set<Resource> resources) {
-        for(Resource resource : resources) {
-                String containerName = (String) resource.getResource();
-                if (containerName.equals(container)) {
-                        return true;
-                }
-        }
-
-        return false;
-    }
-
     @SuppressWarnings("unchecked")
         private void loadConfiguration() {
         ObjectReader objReader = new ObjectReader();
         metaCache = (Map<String, Map<String, Map<String, Object>>>) objReader.read(this, topologyWebFileName);
-        if (metaCache == null) metaCache = new HashMap<String, Map<String, Map<String, Object>>>();
+        if (metaCache == null) {
+            metaCache = new HashMap<String, Map<String, Map<String, Object>>>();
+        }
     }
 
     @Override
