@@ -28,7 +28,6 @@
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.usermanager,
-              org.opendaylight.controller.usermanager.internal,
               org.opendaylight.controller.containermanager,
               com.google.gson,
               javax.annotation,
