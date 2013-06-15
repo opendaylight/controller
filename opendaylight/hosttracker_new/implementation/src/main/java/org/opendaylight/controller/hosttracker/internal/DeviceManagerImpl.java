@@ -67,6 +67,7 @@ import org.opendaylight.controller.hosttracker.IEntityClass;
 import org.opendaylight.controller.hosttracker.IEntityClassListener;
 import org.opendaylight.controller.hosttracker.IEntityClassifierService;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
+import org.opendaylight.controller.hosttracker.IfNewHostNotify;
 import org.opendaylight.controller.hosttracker.SwitchPort;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.Edge;
@@ -291,6 +292,10 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     protected ListenerDispatcher<String, IDeviceListener> deviceListeners;
 
     /**
+     * Using the IfNewHostNotify to notify listeners of host changes.
+     */
+    private Set<IfNewHostNotify> newHostNotify = Collections.synchronizedSet(new HashSet<IfNewHostNotify>());
+    /**
      * A device update event to be dispatched
      */
     protected static class DeviceUpdate {
@@ -428,6 +433,14 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     // ********************
     // Dependency injection
     // ********************
+
+    void setNewHostNotify(IfNewHostNotify obj){
+        this.newHostNotify.add(obj);
+    }
+
+    void unsetNewHostNotify(IfNewHostNotify obj){
+        this.newHostNotify.remove(obj);
+    }
 
     void setDataPacketService(IDataPacketService s) {
         this.dataPacketService = s;
@@ -780,11 +793,11 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         if (inPkt == null) {
             return PacketResult.IGNORED;
         }
-        try {
-            throw new Exception("Sample");
-        } catch (Exception e) {
-            logger.error("Sample stack trace", e);
-        }
+//        try {
+//            throw new Exception("Sample");
+//        } catch (Exception e) {
+//            logger.error("Sample stack trace", e);
+//        }
 
         Packet formattedPak = this.dataPacketService.decodeDataPacket(inPkt);
         Ethernet eth;
@@ -1444,9 +1457,28 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
 
     protected void notifyListeners(List<IDeviceListener> listeners,
             DeviceUpdate update) {
-        if (listeners == null) {
+        if (listeners == null && newHostNotify.isEmpty()) {
             return;
         }
+        /**
+         * TODO: IfNewHostNotify is needed for current controller API.
+         * Adding logic so that existing apps (like SimpleForwardingManager)
+         * work.  IDeviceListener adds additional methods and uses IListener's
+         * callback ordering.  The two interfaces need to be merged.
+         */
+
+        for (IfNewHostNotify notify : newHostNotify){
+            switch (update.change) {
+            case ADD:
+                notify.notifyHTClient(update.device.toHostNodeConnector());
+                break;
+            }
+        }
+
+        /**
+         * TODO: Remove this section as IDeviceListener functionality gets
+         * merged with IfNewHostNotify
+         */
         for (IDeviceListener listener : listeners) {
             switch (update.change) {
             case ADD:

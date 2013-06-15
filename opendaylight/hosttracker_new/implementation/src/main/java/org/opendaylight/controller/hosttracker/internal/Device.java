@@ -784,10 +784,14 @@ public class Device implements IDevice {
     public HostNodeConnector toHostNodeConnector() {
         Integer[] ipv4s = this.getIPv4Addresses();
         try {
+            Entity e = this.entities[this.entities.length-1];
+            NodeConnector n = null;
+            if(e!=null)
+                 n = e.getPort();
             InetAddress ip = InetAddress.getByName(ipv4s[ipv4s.length - 1]
                     .toString());
             byte[] macAddr = macLongToByte(this.getMACAddress());
-            HostNodeConnector nc = new HostNodeConnector(macAddr, ip, null,
+            HostNodeConnector nc = new HostNodeConnector(macAddr, ip, n,
                     (short) 0);
             return nc;
         } catch (Exception e) {
