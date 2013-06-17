@@ -39,6 +39,13 @@ module types3 {
             description "Description for augment holder";
         }
     }
+    
+    augment "/data:interfaces/data:ifEntry/t3:augment-holder/t1:schemas" {
+        when "if:leafType='ds1'";
+        leaf linkleaf {
+            type binary;
+        }
+    }
 
     container network {
         mnt:mountpoint point {

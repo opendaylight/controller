@@ -21,13 +21,14 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  *
  */
 public final class Uint64 extends AbstractUnsignedInteger {
+    public static final BigInteger MAX_VALUE = new BigInteger("18446744073709551615");
     private static final QName name = BaseTypes.constructQName("uint64");
     private final BigInteger defaultValue = null;
     private static final String description = "uint64 represents integer values between 0 and 18446744073709551615, inclusively.";
     private final UnsignedIntegerTypeDefinition baseType;
 
     public Uint64(final SchemaPath path) {
-        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        super(path, name, description, MAX_VALUE, "");
         this.baseType = this;
     }
 
@@ -58,8 +59,7 @@ public final class Uint64 extends AbstractUnsignedInteger {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result
-                + ((defaultValue == null) ? 0 : defaultValue.hashCode());
+        result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
         return result;
     }
 
@@ -95,4 +95,5 @@ public final class Uint64 extends AbstractUnsignedInteger {
         builder.append("]");
         return builder.toString();
     }
+
 }

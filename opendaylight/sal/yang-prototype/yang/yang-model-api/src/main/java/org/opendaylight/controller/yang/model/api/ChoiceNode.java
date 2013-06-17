@@ -19,5 +19,7 @@ public interface ChoiceNode extends DataSchemaNode, AugmentationTarget {
      * @return ChoiceCaseNode objects defined in this node
      */
     Set<ChoiceCaseNode> getCases();
+    
+    String getDefaultCase();
 
 }

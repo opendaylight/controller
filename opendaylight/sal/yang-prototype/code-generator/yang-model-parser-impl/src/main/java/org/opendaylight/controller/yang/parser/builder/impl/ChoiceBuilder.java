@@ -102,8 +102,7 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
 
     public void addChildNode(DataSchemaNodeBuilder childNode) {
         if (!(childNode instanceof ChoiceCaseBuilder)) {
-            ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(
-                    childNode.getQName(), childNode.getLine());
+            ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(childNode.getQName(), childNode.getLine());
             caseBuilder.addChildNode(childNode);
             cases.add(caseBuilder);
         } else {
@@ -203,7 +202,6 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
         this.defaultCase = defaultCase;
     }
 
-
     private final class ChoiceNodeImpl implements ChoiceNode {
         private final QName qname;
         private SchemaPath path;
@@ -297,8 +295,7 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
             return augmentations;
         }
 
-        private void setAvailableAugmentations(
-                Set<AugmentationSchema> availableAugmentations) {
+        private void setAvailableAugmentations(Set<AugmentationSchema> availableAugmentations) {
             if (availableAugmentations != null) {
                 this.augmentations = availableAugmentations;
             }
@@ -309,8 +306,7 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
             return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(
-                List<UnknownSchemaNode> unknownSchemaNodes) {
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
             if (unknownSchemaNodes != null) {
                 this.unknownNodes = unknownSchemaNodes;
             }
@@ -327,6 +323,7 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
             }
         }
 
+        @Override
         public String getDefaultCase() {
             return defaultCase;
         }
@@ -375,8 +372,7 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    ChoiceNodeImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(ChoiceNodeImpl.class.getSimpleName());
             sb.append("[");
             sb.append("qname=" + qname);
             sb.append("]");

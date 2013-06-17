@@ -13,18 +13,18 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
 
 /**
  * Implementation of Yang uint32 built-in type. <br>
- * uint32 represents integer values between 0 and 4294967295, inclusively. The
- * Java counterpart of Yang uint32 built-in type is {@link Long}.
+ * uint32 represents integer values between 0 and 4294967295, inclusively.
  *
  */
 public final class Uint32 extends AbstractUnsignedInteger {
+    public static final long MAX_VALUE = 4294967295L;
     private static final QName name = BaseTypes.constructQName("uint32");
     private final Long defaultValue = null;
     private static final String description = "uint32 represents integer values between 0 and 4294967295, inclusively.";
     private final UnsignedIntegerTypeDefinition baseType;
 
     public Uint32(final SchemaPath path) {
-        super(path, name, description, Short.MIN_VALUE, Short.MAX_VALUE, "");
+        super(path, name, description, MAX_VALUE, "");
         this.baseType = this;
     }
 
@@ -55,8 +55,7 @@ public final class Uint32 extends AbstractUnsignedInteger {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result
-                + ((defaultValue == null) ? 0 : defaultValue.hashCode());
+        result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
         return result;
     }
 
@@ -92,4 +91,5 @@ public final class Uint32 extends AbstractUnsignedInteger {
         builder.append("]");
         return builder.toString();
     }
+
 }

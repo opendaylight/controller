@@ -24,12 +24,12 @@ public class YangParserNegativeTest {
     @Test
     public void testInvalidImport() throws IOException {
         try {
-            try (InputStream stream = new FileInputStream(getClass().getResource
-                    ("/negative-scenario/testfile1.yang").getPath())) {
+            try (InputStream stream = new FileInputStream(getClass().getResource("/negative-scenario/testfile1.yang")
+                    .getPath())) {
                 TestUtils.loadModule(stream);
                 fail("ValidationException should by thrown");
             }
-        } catch(YangValidationException e) {
+        } catch (YangValidationException e) {
             assertTrue(e.getMessage().contains("Not existing module imported"));
         }
     }
@@ -37,13 +37,14 @@ public class YangParserNegativeTest {
     @Test
     public void testTypeNotFound() throws IOException {
         try {
-            try (InputStream stream = new FileInputStream(getClass().getResource
-                    ("/negative-scenario/testfile2.yang").getPath())) {
+            try (InputStream stream = new FileInputStream(getClass().getResource("/negative-scenario/testfile2.yang")
+                    .getPath())) {
                 TestUtils.loadModule(stream);
                 fail("YangParseException should by thrown");
             }
-        } catch(YangParseException e) {
-            assertTrue(e.getMessage().contains("Error in module 'test2' on line 24: Referenced type 'int-ext' not found."));
+        } catch (YangParseException e) {
+            assertTrue(e.getMessage().contains(
+                    "Error in module 'test2' on line 24: Referenced type 'int-ext' not found."));
         }
     }
 
@@ -51,19 +52,18 @@ public class YangParserNegativeTest {
     public void testInvalidAugmentTarget() throws IOException {
         try {
             final List<InputStream> streams = new ArrayList<>(2);
-            try (InputStream testFile0 = new FileInputStream(getClass().getResource
-                    ("/negative-scenario/testfile0.yang").getPath())) {
+            try (InputStream testFile0 = new FileInputStream(getClass()
+                    .getResource("/negative-scenario/testfile0.yang").getPath())) {
                 streams.add(testFile0);
-                try (InputStream testFile3 = new FileInputStream(getClass().getResource
-                        ("/negative-scenario/testfile3.yang").getPath())) {
+                try (InputStream testFile3 = new FileInputStream(getClass().getResource(
+                        "/negative-scenario/testfile3.yang").getPath())) {
                     streams.add(testFile3);
-                    assertEquals("Expected loaded files count is 2", 2,
-                            streams.size());
+                    assertEquals("Expected loaded files count is 2", 2, streams.size());
                     TestUtils.loadModules(streams);
                     fail("YangParseException should by thrown");
                 }
             }
-        } catch(YangParseException e) {
+        } catch (YangParseException e) {
             assertTrue(e.getMessage().contains("Failed to resolve augments in module 'test3'."));
         }
     }
@@ -71,14 +71,42 @@ public class YangParserNegativeTest {
     @Test
     public void testInvalidRefine() throws IOException {
         try {
-            try (InputStream stream = new FileInputStream(getClass().getResource
-                    ("/negative-scenario/testfile4.yang").getPath())) {
+            try (InputStream stream = new FileInputStream(getClass().getResource("/negative-scenario/testfile4.yang")
+                    .getPath())) {
                 TestUtils.loadModule(stream);
                 fail("YangParseException should by thrown");
             }
-        } catch(YangParseException e) {
+        } catch (YangParseException e) {
             assertTrue(e.getMessage().contains("Can not refine 'presence' for 'node'."));
         }
+    }
+
+    @Test
+    public void testInvalidLength() throws IOException {
+        try {
+            try (InputStream stream = new FileInputStream(getClass().getResource("/negative-scenario/testfile5.yang")
+                    .getPath())) {
+                TestUtils.loadModule(stream);
+                fail("YangParseException should by thrown");
+            }
+        } catch (YangParseException e) {
+            assertTrue(e.getMessage().contains("Invalid length constraint: <4, 10>"));
+        }
+
+    }
+
+    @Test
+    public void testInvalidRange() throws IOException {
+        try {
+            try (InputStream stream = new FileInputStream(getClass().getResource("/negative-scenario/testfile6.yang")
+                    .getPath())) {
+                TestUtils.loadModule(stream);
+                fail("YangParseException should by thrown");
+            }
+        } catch (YangParseException e) {
+            assertTrue(e.getMessage().contains("Invalid range constraint: <5, 20>"));
+        }
+
     }
 
 }
