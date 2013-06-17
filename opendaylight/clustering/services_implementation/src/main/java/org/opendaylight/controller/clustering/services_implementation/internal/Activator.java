@@ -84,26 +84,27 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(ClusterContainerManager.class)) {
-            c.setInterface(new String[] { IClusterContainerServices.class
-                    .getName() }, null);
+            c.setInterface(new String[] { IClusterContainerServices.class.getName() },
+                           null);
 
-            c.add(createServiceDependency().setService(IClusterServices.class)
-                    .setCallbacks("setClusterService", "unsetClusterService")
-                    .setRequired(true));
+            c.add(createServiceDependency()
+                  .setService(IClusterServices.class)
+                  .setCallbacks("setClusterService", "unsetClusterService")
+                  .setRequired(true));
 
             // CacheUpdate services will be none or many so the
             // dependency is optional
-            c.add(createContainerServiceDependency(containerName).setService(
-                    ICacheUpdateAware.class).setCallbacks(
-                    "setCacheUpdateAware", "unsetCacheUpdateAware")
-                    .setRequired(false));
+            c.add(createContainerServiceDependency(containerName)
+                  .setService(ICacheUpdateAware.class)
+                  .setCallbacks("setCacheUpdateAware", "unsetCacheUpdateAware")
+                  .setRequired(false));
 
             // Coordinator change event can be one or many so
             // dependency is optional
-            c.add(createContainerServiceDependency(containerName).setService(
-                    ICoordinatorChangeAware.class).setCallbacks(
-                    "setCoordinatorChangeAware", "unsetCoordinatorChangeAware")
-                    .setRequired(false));
+            c.add(createContainerServiceDependency(containerName)
+                  .setService(ICoordinatorChangeAware.class)
+                  .setCallbacks("setCoordinatorChangeAware", "unsetCoordinatorChangeAware")
+                  .setRequired(false));
         }
     }
 
@@ -120,30 +121,30 @@ public class Activator extends ComponentActivatorAbstractBase {
     public void configureGlobalInstance(Component c, Object imp) {
         if (imp.equals(ClusterManager.class)) {
             // export the service for Apps and Plugins
-            c.setInterface(new String[] { IClusterServices.class.getName() },
-                    null);
+            c.setInterface(new String[] { IClusterServices.class.getName() }, null);
         }
 
         if (imp.equals(ClusterGlobalManager.class)) {
-            c.setInterface(new String[] { IClusterGlobalServices.class
-                    .getName() }, null);
+            c.setInterface(new String[] { IClusterGlobalServices.class.getName() }, null);
 
-            c.add(createServiceDependency().setService(IClusterServices.class)
-                    .setCallbacks("setClusterService", "unsetClusterService")
-                    .setRequired(true));
+            c.add(createServiceDependency()
+                  .setService(IClusterServices.class)
+                  .setCallbacks("setClusterService", "unsetClusterService")
+                  .setRequired(true));
 
             // CacheUpdate services will be none or many so the
             // dependency is optional
-            c.add(createServiceDependency().setService(ICacheUpdateAware.class)
-                    .setCallbacks("setCacheUpdateAware",
-                            "unsetCacheUpdateAware").setRequired(false));
+            c.add(createServiceDependency()
+                  .setService(ICacheUpdateAware.class)
+                  .setCallbacks("setCacheUpdateAware", "unsetCacheUpdateAware")
+                  .setRequired(false));
 
             // Coordinator change event can be one or many so
             // dependency is optional
-            c.add(createServiceDependency().setService(
-                    ICoordinatorChangeAware.class).setCallbacks(
-                    "setCoordinatorChangeAware", "unsetCoordinatorChangeAware")
-                    .setRequired(false));
+            c.add(createServiceDependency()
+                  .setService(ICoordinatorChangeAware.class)
+                  .setCallbacks("setCoordinatorChangeAware", "unsetCoordinatorChangeAware")
+                  .setRequired(false));
         }
     }
 }

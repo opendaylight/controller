@@ -65,27 +65,65 @@ public class ServiceHelper {
      * @return true if registration happened, false otherwise
      */
     public static boolean registerGlobalService(Class<?> clazz,
-            Object instance, Dictionary<String, Object> properties) {
+                                                Object instance,
+                                                Dictionary<String, Object> properties) {
+        ServiceRegistration registration = registerGlobalServiceWReg(clazz, instance, properties);
+        if (registration == null) {
+            logger.error("Failed to register {} for instance {}", clazz, instance);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Register a Service in the OSGi service registry and return the ServiceRegistration
+     *
+     * @param clazz The target class
+     * @param containerName The container name
+     * @param instance of the object exporting the service, be careful
+     * the object must implement/extend clazz else the registration
+     * will fail unless a ServiceFactory is passed as parameter
+     * @param properties The properties to be attached to the service
+     * registration
+     * @return the ServiceRegistration if registration happened, null otherwise
+     */
+    public static ServiceRegistration registerServiceWReg(Class<?> clazz, String containerName,
+                                                          Object instance, Dictionary<String, Object> properties) {
+        if (properties == null) {
+            properties = (Dictionary<String, Object>) new Hashtable<String, Object>();
+        }
+        properties.put("containerName", containerName);
+        return registerGlobalServiceWReg(clazz, instance, properties);
+    }
+
+    /**
+     * Register a Global Service in the OSGi service registry
+     *
+     * @param clazz The target class
+     * @param instance of the object exporting the service, be careful
+     * the object must implement/extend clazz else the registration
+     * will fail unless a ServiceFactory is passed as parameter
+     * @param properties The properties to be attached to the service
+     * registration
+     * @return the ServiceRegistration if registration happened, null otherwise
+     */
+    public static ServiceRegistration registerGlobalServiceWReg(Class<?> clazz,
+                                                                Object instance,
+                                                                Dictionary<String, Object> properties) {
         try {
-            BundleContext bCtx = FrameworkUtil.getBundle(instance.getClass())
-                    .getBundleContext();
+            BundleContext bCtx = FrameworkUtil.getBundle(instance.getClass()).getBundleContext();
             if (bCtx == null) {
                 logger.error("Could not retrieve the BundleContext");
-                return false;
+                return null;
             }
 
-            ServiceRegistration registration = bCtx.registerService(clazz
-                    .getName(), instance, properties);
-            if (registration == null) {
-                logger.error("Failed to register {} for instance {}", clazz,
-                        instance);
-            }
-            return true;
+            ServiceRegistration registration = bCtx.registerService(clazz.getName(), instance, properties);
+            return registration;
         } catch (Exception e) {
             logger.error("Exception {} while registering the service {}",
-                    e.getMessage(), instance.toString());
+                         e.getMessage(), instance.toString());
         }
-        return false;
+        return null;
     }
 
     /**
