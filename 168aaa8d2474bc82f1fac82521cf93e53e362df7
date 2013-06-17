@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAEn//+xI\u003d",
+        "filename": "opendaylight/web/devices/src/main/java/org/opendaylight/controller/devices/web/Devices.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-17T21:27:00Z",
+      "side": 1,
+      "message": "The StatusJsonBean represent the status of a configuration request (POST). Either is succesfull or not and in the second  case a reason of failure is carried. I do not see a need for this object to carry a privilege information. If the configuration was denied because of a not-enough privilege reason, the message string  will carry this information.\n\nThe privilege to be passed to the front-end is merely for presentation on existing resources (GET), so that front-end can show the appropriate control buttons on this resources for the current user.",
+      "parentUuid": "AAAAEn//+xY\u003d",
+      "revId": "168aaa8d2474bc82f1fac82521cf93e53e362df7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAEn//+xU\u003d",
         "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebUtil.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-06-17T20:53:01Z",
       "side": 1,
       "message": "Since the public API is changing, does that mean this calls for a minor version bump ?",
+      "revId": "168aaa8d2474bc82f1fac82521cf93e53e362df7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAEn//+xM\u003d",
+        "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-17T21:27:00Z",
+      "side": 1,
+      "message": "Ideally yes. But this is a very ad hoc method for the container authorization for web bundles. Given ODL code does not even provide a bundle for creating containers and given the existing method which I remove is of doubt use, I thought it was ok at this stage of the project to skip the version bump.\n\nPlease let me know if you think otherwise, I can take of the version stuff.",
+      "parentUuid": "AAAAEn//+xU\u003d",
       "revId": "168aaa8d2474bc82f1fac82521cf93e53e362df7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
