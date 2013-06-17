@@ -9,10 +9,12 @@
 
 package org.opendaylight.controller.sal.authorization;
 
+import java.io.Serializable;
+
 /**
  * It represents the group/resource access privilege
  */
-public enum Privilege {
+public enum Privilege implements Serializable {
     NONE(""), // no privilege
     READ("r"), // read only
     USE("u"), // use

@@ -18,17 +18,18 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
+import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
-import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.web.DaylightWebUtil;
 import org.opendaylight.controller.web.IDaylightWeb;
 import org.springframework.stereotype.Controller;
@@ -75,7 +76,13 @@ public class Flows implements IDaylightWeb {
     @RequestMapping(value = "/main")
     @ResponseBody
     public Set<Map<String, Object>> getFlows(HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) == Privilege.NONE) {
+            return null;
+        }
 
         // fetch frm
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
@@ -112,7 +119,13 @@ public class Flows implements IDaylightWeb {
     @RequestMapping(value = "/node-ports")
     @ResponseBody
     public Map<String, Object> getNodePorts(HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) == Privilege.NONE) {
+            return null;
+        }
 
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
@@ -159,7 +172,13 @@ public class Flows implements IDaylightWeb {
     @RequestMapping(value = "/node-flows")
     @ResponseBody
     public Map<String, Object> getNodeFlows(HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) == Privilege.NONE) {
+            return null;
+        }
 
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
@@ -198,11 +217,13 @@ public class Flows implements IDaylightWeb {
             @RequestParam(required = false) String body,
             @RequestParam(required = true) String nodeId,
             HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!isUserAuthorized(UserLevel.NETWORKADMIN, request)) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return "Operation not authorized";
         }
-
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
 
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, containerName, this);
@@ -229,11 +250,13 @@ public class Flows implements IDaylightWeb {
             @PathVariable("name") String name,
             @RequestParam(required = true) String action,
             HttpServletRequest request, @RequestParam(required = false) String container) {
-        if (!isUserAuthorized(UserLevel.NETWORKADMIN, request)) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return "Operation not authorized";
         }
-
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
 
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
                 .getInstance(IForwardingRulesManager.class, containerName, this);
@@ -257,25 +280,4 @@ public class Flows implements IDaylightWeb {
         return (result.isSuccess()) ? StatusCode.SUCCESS.toString() : result
                 .getDescription();
     }
-
-    /**
-     * Returns whether the current user's level is same or above the required
-     * authorization level.
-     *
-     * @param requiredLevel
-     *            the authorization level required
-     */
-    private boolean isUserAuthorized(UserLevel requiredLevel,
-            HttpServletRequest request) {
-        IUserManager userManager = (IUserManager) ServiceHelper
-                .getGlobalInstance(IUserManager.class, this);
-        if (userManager == null) {
-            return false;
-        }
-
-        String username = request.getUserPrincipal().getName();
-        UserLevel userLevel = userManager.getUserLevel(username);
-        return (userLevel.ordinal() <= requiredLevel.ordinal());
-    }
-
 }

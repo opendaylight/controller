@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.SetVlanId;
+import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -50,9 +52,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/")
 public class Troubleshoot implements IDaylightWeb {
     private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
+    private static final List<String> flowStatsColumnNames = Arrays.asList("Node", "In Port",
+            "DL Src", "DL Dst", "DL Type", "DL Vlan", "NW Src", "NW Dst",
+            "NW Proto", "TP Src", "TP Dst", "Actions", "Bytes", "Packets",
+            "Time (s)", "Timeout (s)", "Out Port(s)", "Out Vlan",
+            "Priority");
+    private static final List<String> portStatsColumnNames = Arrays.asList("Node Connector",
+            "Rx Pkts", "Tx Pkts", "Rx Bytes", "Tx Bytes", "Rx Drops",
+            "Tx Drops", "Rx Errs", "Tx Errs", "Rx Frame Errs",
+            "Rx OverRun Errs", "Rx CRC Errs", "Collisions");
+    private static final List<String> nodesColumnNames = Arrays.asList("Node", "Node ID", "Statistics");
+    private static final List<String> nodeStatsColumnNames = Arrays.asList("Node", "Node ID", "Statistics");
     private final String WEB_NAME = "Troubleshoot";
     private final String WEB_ID = "troubleshoot";
     private final short WEB_ORDER = 4;
+
 
     public Troubleshoot() {
         ServiceHelper.registerGlobalService(IDaylightWeb.class, this, null);
@@ -81,30 +95,29 @@ public class Troubleshoot implements IDaylightWeb {
     @RequestMapping(value = "/existingNodes", method = RequestMethod.GET)
     @ResponseBody
     public TroubleshootingJsonBean getExistingNodes(HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, containerName, this);
-        List<HashMap<String, String>> lines = new ArrayList<HashMap<String, String>>();
-        Set<Node> nodeSet = null;
-        if (switchManager != null) {
-            nodeSet = switchManager.getNodes();
-        }
-        if (nodeSet != null) {
-            for (Node node : nodeSet) {
-                HashMap<String, String> device = new HashMap<String, String>();
-                device.put("nodeName", switchManager.getNodeDescription(node));
-                device.put("nodeId", node.toString());
-                lines.add(device);
+        List<Map<String, String>> lines = new ArrayList<Map<String, String>>();
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+
+        if (privilege != Privilege.NONE) {
+            ISwitchManager switchManager = (ISwitchManager) ServiceHelper
+                    .getInstance(ISwitchManager.class, containerName, this);
+            Set<Node> nodeSet = (switchManager != null) ? switchManager.getNodes() : null;
+            if (nodeSet != null) {
+                for (Node node : nodeSet) {
+                    Map<String, String> device = new HashMap<String, String>();
+                    device.put("nodeName", switchManager.getNodeDescription(node));
+                    device.put("nodeId", node.toString());
+                    lines.add(device);
+                }
             }
         }
+
         TroubleshootingJsonBean result = new TroubleshootingJsonBean();
-
-        List<String> guiFieldNames = new ArrayList<String>();
-        guiFieldNames.add("Node");
-        guiFieldNames.add("Node ID");
-        guiFieldNames.add("Statistics");
-
-        result.setColumnNames(guiFieldNames);
+        result.setColumnNames(nodesColumnNames);
         result.setNodeData(lines);
         return result;
     }
@@ -112,35 +125,34 @@ public class Troubleshoot implements IDaylightWeb {
     @RequestMapping(value = "/uptime", method = RequestMethod.GET)
     @ResponseBody
     public TroubleshootingJsonBean getUptime(HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, containerName, this);
-        List<HashMap<String, String>> lines = new ArrayList<HashMap<String, String>>();
-        Set<Node> nodeSet = null;
-        if (switchManager != null) {
-            nodeSet = switchManager.getNodes();
-        }
-        if (nodeSet != null) {
-            for (Node node : nodeSet) {
-                HashMap<String, String> device = new HashMap<String, String>();
-                device.put("nodeName", switchManager.getNodeDescription(node));
-                device.put("nodeId", node.toString());
-                TimeStamp timeStamp = (TimeStamp) switchManager.getNodeProp(
-                        node, TimeStamp.TimeStampPropName);
-                Long time = (timeStamp == null) ? 0 : timeStamp.getValue();
-                String date = (time == 0) ? "" : (new Date(time)).toString();
-                device.put("connectedSince", date);
-                lines.add(device);
+        List<Map<String, String>> lines = new ArrayList<Map<String, String>>();
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+
+        if (privilege != Privilege.NONE) {
+            ISwitchManager switchManager = (ISwitchManager) ServiceHelper
+                    .getInstance(ISwitchManager.class, containerName, this);
+            Set<Node> nodeSet = (switchManager != null) ? switchManager.getNodes() : null;
+            if (nodeSet != null) {
+                for (Node node : nodeSet) {
+                    Map<String, String> device = new HashMap<String, String>();
+                    device.put("nodeName", switchManager.getNodeDescription(node));
+                    device.put("nodeId", node.toString());
+                    TimeStamp timeStamp = (TimeStamp) switchManager.getNodeProp(
+                            node, TimeStamp.TimeStampPropName);
+                    Long time = (timeStamp == null) ? 0 : timeStamp.getValue();
+                    String date = (time == 0) ? "" : (new Date(time)).toString();
+                    device.put("connectedSince", date);
+                    lines.add(device);
+                }
             }
         }
+
         TroubleshootingJsonBean result = new TroubleshootingJsonBean();
-
-        List<String> guiFieldNames = new ArrayList<String>();
-        guiFieldNames.add("Node");
-        guiFieldNames.add("Node ID");
-        guiFieldNames.add("Connected");
-
-        result.setColumnNames(guiFieldNames);
+        result.setColumnNames(nodeStatsColumnNames);
         result.setNodeData(lines);
         return result;
     }
@@ -150,24 +162,27 @@ public class Troubleshoot implements IDaylightWeb {
     public TroubleshootingJsonBean getFlowStats(
             @RequestParam("nodeId") String nodeId,
             HttpServletRequest request, @RequestParam(required = false) String container) {
-        Node node = Node.fromString(nodeId);
-        List<HashMap<String, String>> cells = new ArrayList<HashMap<String, String>>();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
-        IStatisticsManager statisticsManager = (IStatisticsManager) ServiceHelper
-                .getInstance(IStatisticsManager.class, containerName, this);
+        List<Map<String, String>> cells = new ArrayList<Map<String, String>>();
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
 
-        List<FlowOnNode> statistics = statisticsManager.getFlows(node);
-        for (FlowOnNode stats : statistics) {
-            cells.add(this.convertFlowStatistics(node, stats, containerName));
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+
+        if (privilege != Privilege.NONE) {
+            IStatisticsManager statisticsManager = (IStatisticsManager) ServiceHelper
+                    .getInstance(IStatisticsManager.class, containerName, this);
+            if (statisticsManager != null) {
+                Node node = Node.fromString(nodeId);
+                List<FlowOnNode> statistics = statisticsManager.getFlows(node);
+                for (FlowOnNode stats : statistics) {
+                    cells.add(this.convertFlowStatistics(node, stats, containerName));
+                }
+            }
         }
-        List<String> columnNames = new ArrayList<String>();
-        columnNames.addAll(Arrays.asList(new String[] { "Node", "In Port",
-                "DL Src", "DL Dst", "DL Type", "DL Vlan", "NW Src", "NW Dst",
-                "NW Proto", "TP Src", "TP Dst", "Actions", "Bytes", "Packets",
-                "Time (s)", "Timeout (s)", "Out Port(s)", "Out Vlan",
-                "Priority" }));
+
         TroubleshootingJsonBean result = new TroubleshootingJsonBean();
-        result.setColumnNames(columnNames);
+        result.setColumnNames(flowStatsColumnNames);
         result.setNodeData(cells);
         return result;
     }
@@ -177,30 +192,35 @@ public class Troubleshoot implements IDaylightWeb {
     public TroubleshootingJsonBean getPortStats(
             @RequestParam("nodeId") String nodeId,
             HttpServletRequest request, @RequestParam(required = false) String container) {
-        Node node = Node.fromString(nodeId);
-        List<HashMap<String, String>> cells = new ArrayList<HashMap<String, String>>();
-        String containerName = DaylightWebUtil.getAuthorizedContainer(request, container, this);
-        IStatisticsManager statisticsManager = (IStatisticsManager) ServiceHelper
-                .getInstance(IStatisticsManager.class, containerName, this);
-        List<NodeConnectorStatistics> statistics = statisticsManager
-                .getNodeConnectorStatistics(node);
-        for (NodeConnectorStatistics stats : statistics) {
-            cells.add(this.convertPortsStatistics(stats));
+        List<Map<String, String>> cells = new ArrayList<Map<String, String>>();
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+
+        // Derive the privilege this user has on the current container
+        String userName = request.getUserPrincipal().getName();
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+
+        if (privilege != Privilege.NONE) {
+            IStatisticsManager statisticsManager = (IStatisticsManager) ServiceHelper
+                    .getInstance(IStatisticsManager.class, containerName, this);
+            if (statisticsManager != null) {
+                Node node = Node.fromString(nodeId);
+                List<NodeConnectorStatistics> statistics = statisticsManager
+                        .getNodeConnectorStatistics(node);
+                for (NodeConnectorStatistics stats : statistics) {
+                    cells.add(this.convertPortsStatistics(stats));
+                }
+            }
         }
+
         TroubleshootingJsonBean result = new TroubleshootingJsonBean();
-        List<String> columnNames = new ArrayList<String>();
-        columnNames.addAll(Arrays.asList(new String[] { "Node Connector",
-                "Rx Pkts", "Tx Pkts", "Rx Bytes", "Tx Bytes", "Rx Drops",
-                "Tx Drops", "Rx Errs", "Tx Errs", "Rx Frame Errs",
-                "Rx OverRun Errs", "Rx CRC Errs", "Collisions" }));
-        result.setColumnNames(columnNames);
+        result.setColumnNames(portStatsColumnNames);
         result.setNodeData(cells);
         return result;
     }
 
-    private HashMap<String, String> convertPortsStatistics(
+    private Map<String, String> convertPortsStatistics(
             NodeConnectorStatistics ncStats) {
-        HashMap<String, String> row = new HashMap<String, String>();
+        Map<String, String> row = new HashMap<String, String>();
 
         row.put("nodeConnector",
                 String.valueOf(ncStats.getNodeConnector().toString()));
@@ -223,10 +243,10 @@ public class Troubleshoot implements IDaylightWeb {
         return row;
     }
 
-    private HashMap<String, String> convertFlowStatistics(Node node,
+    private Map<String, String> convertFlowStatistics(Node node,
             FlowOnNode flowOnNode,
             String containerName) {
-        HashMap<String, String> row = new HashMap<String, String>();
+        Map<String, String> row = new HashMap<String, String>();
         Flow flow = flowOnNode.getFlow();
         Match match = flow.getMatch();
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper

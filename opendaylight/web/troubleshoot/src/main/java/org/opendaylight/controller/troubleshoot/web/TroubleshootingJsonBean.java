@@ -9,12 +9,12 @@
 
 package org.opendaylight.controller.troubleshoot.web;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TroubleshootingJsonBean {
     private List<String> columnNames;
-    private List<HashMap<String, String>> nodeData;
+    private List<Map<String, String>> nodeData;
 
     public List<String> getColumnNames() {
         return columnNames;
@@ -24,11 +24,11 @@ public class TroubleshootingJsonBean {
         this.columnNames = columnNames;
     }
 
-    public List<HashMap<String, String>> getNodeData() {
+    public List<Map<String, String>> getNodeData() {
         return nodeData;
     }
 
-    public void setNodeData(List<HashMap<String, String>> nodeData) {
+    public void setNodeData(List<Map<String, String>> nodeData) {
         this.nodeData = nodeData;
     }
 }
