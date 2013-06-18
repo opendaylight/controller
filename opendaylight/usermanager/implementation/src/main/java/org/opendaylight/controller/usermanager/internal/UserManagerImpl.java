@@ -43,6 +43,7 @@ import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.usermanager.AuthResponse;
+import org.opendaylight.controller.usermanager.AuthenticatedUser;
 import org.opendaylight.controller.usermanager.AuthorizationConfig;
 import org.opendaylight.controller.usermanager.IAAAProvider;
 import org.opendaylight.controller.usermanager.ISessionManager;
@@ -51,7 +52,6 @@ import org.opendaylight.controller.usermanager.ServerConfig;
 import org.opendaylight.controller.usermanager.UserConfig;
 import org.opendaylight.controller.usermanager.security.SessionManager;
 import org.opendaylight.controller.usermanager.security.UserSecurityContextRepository;
-import org.opendaylight.controller.usermanager.internal.AuthenticatedUser;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;

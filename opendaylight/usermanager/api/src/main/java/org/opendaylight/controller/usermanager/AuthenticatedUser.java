@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.usermanager.internal;
+package org.opendaylight.controller.usermanager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.opendaylight.controller.sal.authorization.UserLevel;
-import org.opendaylight.controller.usermanager.ODLUserLevel;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 

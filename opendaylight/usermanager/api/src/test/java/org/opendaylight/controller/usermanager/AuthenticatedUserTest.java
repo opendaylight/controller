@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.usermanager.internal;
+package org.opendaylight.controller.usermanager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.opendaylight.controller.sal.authorization.UserLevel;
+import org.opendaylight.controller.usermanager.AuthenticatedUser;
 import org.springframework.security.core.GrantedAuthority;
 
 public class AuthenticatedUserTest {
