@@ -31,6 +31,7 @@ import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
+import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -191,7 +192,14 @@ public class Topology implements IObjectReader, IConfigurationAware {
                         break;
                     }
                 }
-                EdgeBean edge = new EdgeBean(link, bandwidth);
+                NodeConnector headNodeConnector = link.getHeadNodeConnector();
+                NodeConnector tailNodeConnector = link.getTailNodeConnector();
+
+                String headDescription = this.getNodeConnectorDescription(headNodeConnector, switchManager);
+                String tailDescription = this.getNodeConnectorDescription(tailNodeConnector, switchManager);
+                String headPortDescription = this.getNodeConnectorPortDescription(headNodeConnector, switchManager);
+                String tailPortDescription = this.getNodeConnectorPortDescription(tailNodeConnector, switchManager);
+                EdgeBean edge = new EdgeBean(link, bandwidth, headDescription, tailDescription, headPortDescription, tailPortDescription);
                 adjacencies.add(edge.out());
             }
 
@@ -254,11 +262,32 @@ public class Topology implements IObjectReader, IConfigurationAware {
     }
 
     protected NodeBean createNodeBean(String description, Node node) {
+        String name = this.getDescription(description, node);
+        return  new NodeBean(node.toString(), name, NodeType.NODE);
+    }
+
+    private String getDescription(String description, Node node) {
         String name = (description == null ||
-                        description.trim().isEmpty() ||
-                        description.equalsIgnoreCase("none"))?
-                                        node.toString() : description;
-                return  new NodeBean(node.toString(), name, NodeType.NODE);
+                description.trim().isEmpty() ||
+                description.equalsIgnoreCase("none"))?
+                                node.toString() : description;
+        return name;
+    }
+
+    private String getNodeConnectorDescription(NodeConnector nodeConnector, ISwitchManager switchManager) {
+        Node node = nodeConnector.getNode();
+        String description = switchManager.getNodeDescription(node);
+        String name = this.getDescription(description, node);
+        return name;
+    }
+
+    private String getNodeConnectorPortDescription(NodeConnector nodeConnector, ISwitchManager switchManager) {
+        Name ncName = (Name) switchManager.getNodeConnectorProp(nodeConnector, Name.NamePropName);
+        String nodeConnectorName = nodeConnector.getNodeConnectorIDString();
+        if (ncName != null) {
+            nodeConnectorName = ncName.getValue();
+        }
+        return nodeConnectorName;
     }
 
     @SuppressWarnings("unchecked")
@@ -465,36 +494,47 @@ public class Topology implements IObjectReader, IConfigurationAware {
                 data = new HashMap<String, String>();
         }
 
-        public EdgeBean(Edge link, Bandwidth bandwidth) {
-                this();
-                this.source = link.getHeadNodeConnector();
-                this.destination = link.getTailNodeConnector();
+        /**
+         * EdgeBean object that includes complete node description
+         *
+         * @param link
+         * @param bandwidth
+         * @param headDescription
+         * @param tailDescription
+         */
+        public EdgeBean(Edge link, Bandwidth bandwidth, String headDescription,
+                String tailDescription, String headPortDescription, String tailPortDescription) {
+            this();
+            this.source = link.getHeadNodeConnector();
+            this.destination = link.getTailNodeConnector();
 
-                // data
-                data.put("$bandwidth", bandwidth.toString());
-                data.put("$color", bandwidthColor(bandwidth));
-                data.put("$nodeToPort", destination.getID().toString());
-                data.put("$nodeFromPort", source.getID().toString());
-                data.put("$descFrom", source.getNode().toString());
-                data.put("$descTo", destination.getNode().toString());
-                data.put("$nodeFromPortName", source.toString());
-                data.put("$nodeToPortName", destination.toString());
+            // data
+            data.put("$bandwidth", bandwidth.toString());
+            data.put("$color", bandwidthColor(bandwidth));
+            data.put("$nodeToPort", destination.getID().toString());
+            data.put("$nodeFromPort", source.getID().toString());
+            data.put("$descFrom", headDescription);
+            data.put("$descTo", tailDescription);
+            data.put("$nodeFromPortName", source.toString());
+            data.put("$nodeToPortName", destination.toString());
+            data.put("$nodeFromPortDescription", headPortDescription);
+            data.put("$nodeToPortDescription", tailPortDescription);
         }
 
         public EdgeBean(NodeConnector connector, Long hostId) {
-                this();
-                this.source = null;
-                this.destination = connector;
-                this.hostId = hostId;
+            this();
+            this.source = null;
+            this.destination = connector;
+            this.hostId = hostId;
 
-                data.put("$bandwidth", "N/A");
-                data.put("$color", bandwidthColor(new Bandwidth(0)));
-                data.put("$nodeToPort", connector.getNodeConnectorIDString());
-                data.put("$nodeFromPort", connector.getNodeConnectorIDString());
-                data.put("$descTo", "");
-                data.put("$descFrom", "");
-                data.put("$nodeToPortName", "");
-                data.put("$nodeFromPortName", "");
+            data.put("$bandwidth", "N/A");
+            data.put("$color", bandwidthColor(new Bandwidth(0)));
+            data.put("$nodeToPort", connector.getNodeConnectorIDString());
+            data.put("$nodeFromPort", connector.getNodeConnectorIDString());
+            data.put("$descTo", "");
+            data.put("$descFrom", "");
+            data.put("$nodeToPortName", "");
+            data.put("$nodeFromPortName", "");
         }
 
         public Map<String, Object> out() {
