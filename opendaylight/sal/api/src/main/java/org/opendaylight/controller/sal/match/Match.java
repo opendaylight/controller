@@ -225,13 +225,14 @@ public class Match implements Cloneable, Serializable {
         Match reverse = this.clone();
 
         // Flip symmetric fields
-        for (Map.Entry<MatchType, MatchType> entry : Match.reversableMatches
-                .entrySet()) {
+        for (Map.Entry<MatchType, MatchType> entry : Match.reversableMatches.entrySet()) {
             MatchType from = entry.getKey();
             MatchType to = entry.getValue();
             if (this.isPresent(from)) {
-                reverse.setField(to, this.getField(from).getValue(), this
-                        .getField(from).getMask());
+                reverse.setField(to, this.getField(from).getValue(), this.getField(from).getMask());
+                if (!this.isPresent(to)) {
+                    reverse.clearField(from);
+                }
             }
         }
 
