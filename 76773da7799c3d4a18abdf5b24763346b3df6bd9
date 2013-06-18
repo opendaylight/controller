@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///+U\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-model-api/src/main/java/org/opendaylight/controller/yang/model/api/ChoiceNode.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-18T20:02:42Z",
+      "side": 1,
+      "message": "white spaces",
+      "revId": "76773da7799c3d4a18abdf5b24763346b3df6bd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///+Y\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-model-util/src/main/java/org/opendaylight/controller/yang/model/util/AbstractUnsignedInteger.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-18T20:02:42Z",
+      "side": 1,
+      "message": "Trailing space here and below. Not sure why jenkins build went through.",
+      "revId": "76773da7799c3d4a18abdf5b24763346b3df6bd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
