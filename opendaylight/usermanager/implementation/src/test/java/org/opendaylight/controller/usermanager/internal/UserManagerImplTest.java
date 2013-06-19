@@ -23,6 +23,7 @@ import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.usermanager.AuthResponse;
+import org.opendaylight.controller.usermanager.AuthenticatedUser;
 import org.opendaylight.controller.usermanager.IAAAProvider;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.usermanager.ServerConfig;
