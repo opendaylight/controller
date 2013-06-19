@@ -71,9 +71,14 @@ import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.IfNewHostNotify;
 import org.opendaylight.controller.hosttracker.SwitchPort;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.controller.sal.core.Host;
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
+import org.opendaylight.controller.sal.core.Tier;
+import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.packet.ARP;
 import org.opendaylight.controller.sal.packet.Ethernet;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
@@ -81,6 +86,8 @@ import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
+import org.opendaylight.controller.sal.packet.address.DataLinkAddress;
+import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ListenerDispatcher;
@@ -1461,6 +1468,45 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
 
     protected void notifyListeners(List<IDeviceListener> listeners,
             DeviceUpdate update) {
+       // Topology update is for some reason outside of listeners registry
+       // logic
+        Entity[] ents = update.device.getEntities();
+        Entity e = ents[ents.length-1];
+        NodeConnector p = e.getPort();
+        Node node = p.getNode();
+        Host h = null;
+        try {
+            byte[] mac = toMacByteArray(e.getMacAddress());
+            DataLinkAddress dla = new EthernetAddress(
+                    mac);
+            e.getIpv4Address();
+            InetAddress.getAllByName(e.getIpv4Address().toString());
+            h = new org.opendaylight.controller.sal.core.Host(dla,
+                    InetAddress.getByName(e.getIpv4Address().toString()));
+        } catch (ConstructionException ce) {
+            p = null;
+            h = null;
+        } catch (UnknownHostException ue){
+            p = null;
+            h = null;
+        }
+
+        if (topology != null && p != null && h != null) {
+            if (update.change.equals(DeviceUpdate.Change.ADD)) {
+                Tier tier = new Tier(1);
+                switchManager.setNodeProp(node, tier);
+                topology.updateHostLink(p, h, UpdateType.ADDED, null);
+            } else {
+                // No need to reset the tiering if no other hosts are currently
+                // connected
+                // If this switch was discovered to be an access switch, it
+                // still is even if the host is down
+                Tier tier = new Tier(0);
+                switchManager.setNodeProp(node, tier);
+                topology.updateHostLink(p, h, UpdateType.REMOVED, null);
+            }
+        }
+
         if (listeners == null && newHostNotify.isEmpty()) {
             return;
         }
@@ -1994,6 +2040,13 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         return mac;
     }
 
+    private byte[] toMacByteArray(long addr){
+        byte[] mac = new byte[6];
+        for(int i = 0; i < 6; i++){
+            mac[i] = (byte) (addr >> (i*8));
+        }
+        return mac;
+    }
     /**
      * Accepts an IPv4 address in a byte array and returns the corresponding
      * 32-bit integer value.
