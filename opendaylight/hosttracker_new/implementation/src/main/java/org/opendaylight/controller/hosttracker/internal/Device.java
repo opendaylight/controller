@@ -78,6 +78,8 @@ public class Device implements IDevice {
     protected final Short[] vlanIds;
     protected volatile String dhcpClientName;
 
+    private boolean staticHost;
+
     /**
      * These are the old attachment points for the device that were valid no
      * more than INACTIVITY_TIME ago.
@@ -793,6 +795,7 @@ public class Device implements IDevice {
             byte[] macAddr = macLongToByte(this.getMACAddress());
             HostNodeConnector nc = new HostNodeConnector(macAddr, ip, n,
                     (short) 0);
+            nc.setStaticHost(this.isStaticHost());
             return nc;
         } catch (Exception e) {
             return null;
@@ -805,6 +808,14 @@ public class Device implements IDevice {
             macAddr[5 - i] = (byte) (mac >> (8 * i));
         }
         return macAddr;
+    }
+
+    public boolean isStaticHost(){
+        return this.staticHost;
+    }
+
+    public void setStaticHost(boolean isStatic){
+        this.staticHost = isStatic;
     }
 
     @Override
