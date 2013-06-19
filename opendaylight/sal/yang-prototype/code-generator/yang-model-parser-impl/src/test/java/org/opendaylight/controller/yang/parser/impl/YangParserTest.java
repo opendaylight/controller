@@ -63,8 +63,7 @@ import org.opendaylight.controller.yang.model.util.Uint32;
 import org.opendaylight.controller.yang.model.util.UnionType;
 
 public class YangParserTest {
-    private final DateFormat simpleDateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd");
+    private final DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private Set<Module> modules;
 
@@ -109,14 +108,12 @@ public class YangParserTest {
         String expectedPrefix = "t2";
         Date expectedRevision = TestUtils.createDate("2013-02-27");
 
-        ContainerSchemaNode interfaces = (ContainerSchemaNode) test
-                .getDataChildByName("interfaces");
+        ContainerSchemaNode interfaces = (ContainerSchemaNode) test.getDataChildByName("interfaces");
         // test SchemaNode args
-        QName expectedQName = new QName(expectedNamespace, expectedRevision,
-                expectedPrefix, "interfaces");
+        QName expectedQName = new QName(expectedNamespace, expectedRevision, expectedPrefix, "interfaces");
         assertEquals(expectedQName, interfaces.getQName());
-        SchemaPath expectedPath = TestUtils.createPath(true, expectedNamespace,
-                expectedRevision, expectedPrefix, "interfaces");
+        SchemaPath expectedPath = TestUtils.createPath(true, expectedNamespace, expectedRevision, expectedPrefix,
+                "interfaces");
         assertEquals(expectedPath, interfaces.getPath());
         assertNull(interfaces.getDescription());
         assertNull(interfaces.getReference());
@@ -141,8 +138,7 @@ public class YangParserTest {
         assertEquals(0, interfaces.getGroupings().size());
         assertEquals(0, interfaces.getUses().size());
 
-        ListSchemaNode ifEntry = (ListSchemaNode) interfaces
-                .getDataChildByName("ifEntry");
+        ListSchemaNode ifEntry = (ListSchemaNode) interfaces.getDataChildByName("ifEntry");
         assertNotNull(ifEntry);
     }
 
@@ -153,17 +149,14 @@ public class YangParserTest {
         String expectedPrefix = "t2";
         Date expectedRevision = TestUtils.createDate("2013-02-27");
 
-        ContainerSchemaNode interfaces = (ContainerSchemaNode) test
-                .getDataChildByName("interfaces");
+        ContainerSchemaNode interfaces = (ContainerSchemaNode) test.getDataChildByName("interfaces");
 
-        ListSchemaNode ifEntry = (ListSchemaNode) interfaces
-                .getDataChildByName("ifEntry");
+        ListSchemaNode ifEntry = (ListSchemaNode) interfaces.getDataChildByName("ifEntry");
         // test SchemaNode args
-        QName expectedQName = new QName(expectedNamespace, expectedRevision,
-                expectedPrefix, "ifEntry");
+        QName expectedQName = new QName(expectedNamespace, expectedRevision, expectedPrefix, "ifEntry");
         assertEquals(expectedQName, ifEntry.getQName());
-        SchemaPath expectedPath = TestUtils.createPath(true, expectedNamespace,
-                expectedRevision, expectedPrefix, "interfaces", "ifEntry");
+        SchemaPath expectedPath = TestUtils.createPath(true, expectedNamespace, expectedRevision, expectedPrefix,
+                "interfaces", "ifEntry");
         assertEquals(expectedPath, ifEntry.getPath());
         assertNull(ifEntry.getDescription());
         assertNull(ifEntry.getReference());
@@ -179,13 +172,11 @@ public class YangParserTest {
         assertEquals(1, (int) constraints.getMinElements());
         assertEquals(11, (int) constraints.getMaxElements());
         // test AugmentationTarget args
-        Set<AugmentationSchema> availableAugmentations = ifEntry
-                .getAvailableAugmentations();
+        Set<AugmentationSchema> availableAugmentations = ifEntry.getAvailableAugmentations();
         assertEquals(2, availableAugmentations.size());
         // test ListSchemaNode args
         List<QName> expectedKey = new ArrayList<QName>();
-        expectedKey.add(new QName(expectedNamespace, expectedRevision,
-                expectedPrefix, "ifIndex"));
+        expectedKey.add(new QName(expectedNamespace, expectedRevision, expectedPrefix, "ifIndex"));
         assertEquals(expectedKey, ifEntry.getKeyDefinition());
         assertFalse(ifEntry.isUserOrdered());
         // test DataNodeContainer args
@@ -194,11 +185,9 @@ public class YangParserTest {
         assertEquals(0, ifEntry.getGroupings().size());
         assertEquals(0, ifEntry.getUses().size());
 
-        LeafSchemaNode ifIndex = (LeafSchemaNode) ifEntry
-                .getDataChildByName("ifIndex");
+        LeafSchemaNode ifIndex = (LeafSchemaNode) ifEntry.getDataChildByName("ifIndex");
         assertTrue(ifIndex.getType() instanceof Uint32);
-        LeafSchemaNode ifMtu = (LeafSchemaNode) ifEntry
-                .getDataChildByName("ifMtu");
+        LeafSchemaNode ifMtu = (LeafSchemaNode) ifEntry.getDataChildByName("ifMtu");
         assertTrue(ifMtu.getType() instanceof Int32);
     }
 
@@ -207,8 +196,7 @@ public class YangParserTest {
         Module test = TestUtils.findModule(modules, "types2");
 
         // leaf if-name
-        LeafSchemaNode ifName = (LeafSchemaNode) test
-                .getDataChildByName("if-name");
+        LeafSchemaNode ifName = (LeafSchemaNode) test.getDataChildByName("if-name");
         Leafref ifNameType = (Leafref) ifName.getType();
         QName qname = ifNameType.getQName();
 
@@ -229,8 +217,7 @@ public class YangParserTest {
         assertEquals("string", nameQName.getLocalName());
 
         // leaf count
-        LeafSchemaNode count = (LeafSchemaNode) test
-                .getDataChildByName("count");
+        LeafSchemaNode count = (LeafSchemaNode) test.getDataChildByName("count");
         ExtendedType countType = (ExtendedType) count.getType();
         QName countTypeQName = countType.getQName();
 
@@ -255,46 +242,40 @@ public class YangParserTest {
         // testfile1
         Module module1 = TestUtils.findModule(modules, "types1");
 
-        Set<AugmentationSchema> module1Augmentations = module1
-                .getAugmentations();
+        Set<AugmentationSchema> module1Augmentations = module1.getAugmentations();
         AugmentationSchema augment1 = module1Augmentations.iterator().next();
-        LeafSchemaNode augmentedLeafDefinition = (LeafSchemaNode) augment1
-                .getDataChildByName("ds0ChannelNumber");
+        LeafSchemaNode augmentedLeafDefinition = (LeafSchemaNode) augment1.getDataChildByName("ds0ChannelNumber");
         assertTrue(augmentedLeafDefinition.isAugmenting());
 
         // testfile2
         Module module2 = TestUtils.findModule(modules, "types2");
 
-        ContainerSchemaNode interfaces = (ContainerSchemaNode) module2
-                .getDataChildByName("interfaces");
-        ListSchemaNode ifEntry = (ListSchemaNode) interfaces
-                .getDataChildByName("ifEntry");
-        ContainerSchemaNode augmentedContainer = (ContainerSchemaNode) ifEntry
-                .getDataChildByName("augment-holder");
+        ContainerSchemaNode interfaces = (ContainerSchemaNode) module2.getDataChildByName("interfaces");
+        ListSchemaNode ifEntry = (ListSchemaNode) interfaces.getDataChildByName("ifEntry");
+        ContainerSchemaNode augmentedContainer = (ContainerSchemaNode) ifEntry.getDataChildByName("augment-holder");
+
+        ContainerSchemaNode schemas = (ContainerSchemaNode) augmentedContainer.getDataChildByName("schemas");
+        LeafSchemaNode linkleaf = (LeafSchemaNode) schemas.getDataChildByName("linkleaf");
+        assertNotNull(linkleaf);
 
         // augmentation defined in testfile1 and augmentation returned from
         // augmented container have to be same
-        Set<AugmentationSchema> augmentedContainerAugments = augmentedContainer
-                .getAvailableAugmentations();
-        AugmentationSchema augmentDefinition = augmentedContainerAugments
-                .iterator().next();
+        Set<AugmentationSchema> augmentedContainerAugments = augmentedContainer.getAvailableAugmentations();
+        AugmentationSchema augmentDefinition = augmentedContainerAugments.iterator().next();
         assertEquals(augment1, augmentDefinition);
 
-        LeafSchemaNode augmentedLeaf = (LeafSchemaNode) augmentedContainer
-                .getDataChildByName("ds0ChannelNumber");
+        LeafSchemaNode augmentedLeaf = (LeafSchemaNode) augmentedContainer.getDataChildByName("ds0ChannelNumber");
         assertTrue(augmentedLeaf.isAugmenting());
         assertEquals(augmentedLeafDefinition, augmentedLeaf);
 
-        Set<AugmentationSchema> ifEntryAugments = ifEntry
-                .getAvailableAugmentations();
+        Set<AugmentationSchema> ifEntryAugments = ifEntry.getAvailableAugmentations();
         assertEquals(2, ifEntryAugments.size());
 
         // testfile3
         Module module3 = TestUtils.findModule(modules, "types3");
 
-        Set<AugmentationSchema> module3Augmentations = module3
-                .getAugmentations();
-        assertEquals(2, module3Augmentations.size());
+        Set<AugmentationSchema> module3Augmentations = module3.getAugmentations();
+        assertEquals(3, module3Augmentations.size());
         AugmentationSchema augment3 = null;
         for (AugmentationSchema as : module3Augmentations) {
             if ("if:ifType='ds0'".equals(as.getWhenCondition().toString())) {
@@ -314,12 +295,9 @@ public class YangParserTest {
     public void testAugmentTarget() {
         Module test = TestUtils.findModule(modules, "types2");
 
-        ContainerSchemaNode interfaces = (ContainerSchemaNode) test
-                .getDataChildByName("interfaces");
-        ListSchemaNode ifEntry = (ListSchemaNode) interfaces
-                .getDataChildByName("ifEntry");
-        Set<AugmentationSchema> augmentations = ifEntry
-                .getAvailableAugmentations();
+        ContainerSchemaNode interfaces = (ContainerSchemaNode) test.getDataChildByName("interfaces");
+        ListSchemaNode ifEntry = (ListSchemaNode) interfaces.getDataChildByName("ifEntry");
+        Set<AugmentationSchema> augmentations = ifEntry.getAvailableAugmentations();
         assertEquals(2, augmentations.size());
 
         AugmentationSchema augment = null;
@@ -328,29 +306,25 @@ public class YangParserTest {
                 augment = as;
             }
         }
-        ContainerSchemaNode augmentHolder = (ContainerSchemaNode) augment
-                .getDataChildByName("augment-holder");
+        ContainerSchemaNode augmentHolder = (ContainerSchemaNode) augment.getDataChildByName("augment-holder");
         assertNotNull(augmentHolder);
         assertTrue(augmentHolder.isAugmenting());
         QName augmentHolderQName = augmentHolder.getQName();
         assertEquals("augment-holder", augmentHolderQName.getLocalName());
         assertEquals("t3", augmentHolderQName.getPrefix());
-        assertEquals("Description for augment holder",
-                augmentHolder.getDescription());
+        assertEquals("Description for augment holder", augmentHolder.getDescription());
     }
 
     @Test
     public void testTypedefRangesResolving() throws ParseException {
         Module testModule = TestUtils.findModule(modules, "types1");
 
-        LeafSchemaNode testleaf = (LeafSchemaNode) testModule
-                .getDataChildByName("testleaf");
+        LeafSchemaNode testleaf = (LeafSchemaNode) testModule.getDataChildByName("testleaf");
         ExtendedType leafType = (ExtendedType) testleaf.getType();
         QName leafTypeQName = leafType.getQName();
         assertEquals("my-type1", leafTypeQName.getLocalName());
         assertEquals("t1", leafTypeQName.getPrefix());
-        assertEquals(URI.create("urn:simple.container.demo"),
-                leafTypeQName.getNamespace());
+        assertEquals(URI.create("urn:simple.container.demo"), leafTypeQName.getNamespace());
         Date expectedDate = simpleDateFormat.parse("2013-02-27");
         assertEquals(expectedDate, leafTypeQName.getRevision());
         assertEquals(1, leafType.getRanges().size());
@@ -359,15 +333,14 @@ public class YangParserTest {
         QName baseTypeQName = baseType.getQName();
         assertEquals("my-type1", baseTypeQName.getLocalName());
         assertEquals("t2", baseTypeQName.getPrefix());
-        assertEquals(URI.create("urn:simple.types.data.demo"),
-                baseTypeQName.getNamespace());
+        assertEquals(URI.create("urn:simple.types.data.demo"), baseTypeQName.getNamespace());
         assertEquals(expectedDate, baseTypeQName.getRevision());
         assertEquals(2, baseType.getRanges().size());
 
         List<RangeConstraint> ranges = leafType.getRanges();
         assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
-        assertEquals(3L, range.getMin());
+        assertEquals(12L, range.getMin());
         assertEquals(20L, range.getMax());
     }
 
@@ -375,8 +348,7 @@ public class YangParserTest {
     public void testTypedefPatternsResolving() {
         Module testModule = TestUtils.findModule(modules, "types1");
 
-        LeafSchemaNode testleaf = (LeafSchemaNode) testModule
-                .getDataChildByName("test-string-leaf");
+        LeafSchemaNode testleaf = (LeafSchemaNode) testModule.getDataChildByName("test-string-leaf");
         ExtendedType testleafType = (ExtendedType) testleaf.getType();
         QName testleafTypeQName = testleafType.getQName();
         assertEquals("my-string-type-ext", testleafTypeQName.getLocalName());
@@ -403,8 +375,7 @@ public class YangParserTest {
     public void testTypedefLengthsResolving() {
         Module testModule = TestUtils.findModule(modules, "types1");
 
-        LeafSchemaNode testleaf = (LeafSchemaNode) testModule
-                .getDataChildByName("leaf-with-length");
+        LeafSchemaNode testleaf = (LeafSchemaNode) testModule.getDataChildByName("leaf-with-length");
         ExtendedType testleafType = (ExtendedType) testleaf.getType();
         assertEquals("my-string-type", testleafType.getQName().getLocalName());
 
@@ -420,8 +391,7 @@ public class YangParserTest {
     public void testTypeDef() {
         Module testModule = TestUtils.findModule(modules, "types2");
 
-        LeafSchemaNode testleaf = (LeafSchemaNode) testModule
-                .getDataChildByName("nested-type-leaf");
+        LeafSchemaNode testleaf = (LeafSchemaNode) testModule.getDataChildByName("nested-type-leaf");
         ExtendedType testleafType = (ExtendedType) testleaf.getType();
         assertEquals("my-type1", testleafType.getQName().getLocalName());
 
@@ -430,8 +400,7 @@ public class YangParserTest {
 
         Int32 int32Type = (Int32) baseType.getBaseType();
         QName qname = int32Type.getQName();
-        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"),
-                qname.getNamespace());
+        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"), qname.getNamespace());
         assertNull(qname.getRevision());
         assertEquals("", qname.getPrefix());
         assertEquals("int32", qname.getLocalName());
@@ -446,8 +415,7 @@ public class YangParserTest {
     public void testTypedefDecimal1() {
         Module testModule = TestUtils.findModule(modules, "types1");
 
-        LeafSchemaNode testleaf = (LeafSchemaNode) testModule
-                .getDataChildByName("test-decimal-leaf");
+        LeafSchemaNode testleaf = (LeafSchemaNode) testModule.getDataChildByName("test-decimal-leaf");
         ExtendedType type = (ExtendedType) testleaf.getType();
         assertEquals(4, (int) type.getFractionDigits());
 
@@ -463,8 +431,7 @@ public class YangParserTest {
     public void testTypedefDecimal2() {
         Module testModule = TestUtils.findModule(modules, "types1");
 
-        LeafSchemaNode testleaf = (LeafSchemaNode) testModule
-                .getDataChildByName("test-decimal-leaf2");
+        LeafSchemaNode testleaf = (LeafSchemaNode) testModule.getDataChildByName("test-decimal-leaf2");
         TypeDefinition<?> baseType = testleaf.getType().getBaseType();
         assertTrue(testleaf.getType().getBaseType() instanceof Decimal64);
         Decimal64 baseTypeCast = (Decimal64) baseType;
@@ -475,8 +442,7 @@ public class YangParserTest {
     public void testTypedefUnion() {
         Module testModule = TestUtils.findModule(modules, "types1");
 
-        LeafSchemaNode testleaf = (LeafSchemaNode) testModule
-                .getDataChildByName("union-leaf");
+        LeafSchemaNode testleaf = (LeafSchemaNode) testModule.getDataChildByName("union-leaf");
         ExtendedType testleafType = (ExtendedType) testleaf.getType();
         assertEquals("my-union-ext", testleafType.getQName().getLocalName());
 
@@ -501,8 +467,7 @@ public class YangParserTest {
     public void testNestedUnionResolving1() {
         Module testModule = TestUtils.findModule(modules, "types1");
 
-        LeafSchemaNode testleaf = (LeafSchemaNode) testModule
-                .getDataChildByName("nested-union-leaf");
+        LeafSchemaNode testleaf = (LeafSchemaNode) testModule.getDataChildByName("nested-union-leaf");
 
         ExtendedType nestedUnion1 = (ExtendedType) testleaf.getType();
         assertEquals("nested-union1", nestedUnion1.getQName().getLocalName());
@@ -517,14 +482,11 @@ public class YangParserTest {
         assertTrue(unionTypes.get(1) instanceof ExtendedType);
 
         ExtendedType extendedUnion = (ExtendedType) unionTypes.get(1);
-        ExtendedType extendedUnionBase = (ExtendedType) extendedUnion
-                .getBaseType();
+        ExtendedType extendedUnionBase = (ExtendedType) extendedUnion.getBaseType();
         assertEquals("my-union", extendedUnionBase.getQName().getLocalName());
 
-        UnionType extendedTargetUnion = (UnionType) extendedUnionBase
-                .getBaseType();
-        List<TypeDefinition<?>> extendedTargetTypes = extendedTargetUnion
-                .getTypes();
+        UnionType extendedTargetUnion = (UnionType) extendedUnionBase.getBaseType();
+        List<TypeDefinition<?>> extendedTargetTypes = extendedTargetUnion.getTypes();
         assertTrue(extendedTargetTypes.get(0).getBaseType() instanceof Int16);
         assertTrue(extendedTargetTypes.get(1) instanceof Int32);
 
@@ -541,24 +503,19 @@ public class YangParserTest {
     public void testNestedUnionResolving2() {
         Module testModule = TestUtils.findModule(modules, "types1");
 
-        LeafSchemaNode testleaf = (LeafSchemaNode) testModule
-                .getDataChildByName("custom-union-leaf");
+        LeafSchemaNode testleaf = (LeafSchemaNode) testModule.getDataChildByName("custom-union-leaf");
 
         ExtendedType testleafType = (ExtendedType) testleaf.getType();
         QName testleafTypeQName = testleafType.getQName();
-        assertEquals(URI.create("urn:simple.container.demo.test"),
-                testleafTypeQName.getNamespace());
-        assertEquals(TestUtils.createDate("2013-02-27"),
-                testleafTypeQName.getRevision());
+        assertEquals(URI.create("urn:simple.container.demo.test"), testleafTypeQName.getNamespace());
+        assertEquals(TestUtils.createDate("2013-02-27"), testleafTypeQName.getRevision());
         assertEquals("t3", testleafTypeQName.getPrefix());
         assertEquals("union1", testleafTypeQName.getLocalName());
 
         ExtendedType union2 = (ExtendedType) testleafType.getBaseType();
         QName union2QName = union2.getQName();
-        assertEquals(URI.create("urn:simple.container.demo.test"),
-                union2QName.getNamespace());
-        assertEquals(TestUtils.createDate("2013-02-27"),
-                union2QName.getRevision());
+        assertEquals(URI.create("urn:simple.container.demo.test"), union2QName.getNamespace());
+        assertEquals(TestUtils.createDate("2013-02-27"), union2QName.getRevision());
         assertEquals("t3", union2QName.getPrefix());
         assertEquals("union2", union2QName.getLocalName());
 
@@ -570,10 +527,8 @@ public class YangParserTest {
 
         ExtendedType nestedUnion2 = (ExtendedType) unionTypes.get(1);
         QName nestedUnion2QName = nestedUnion2.getQName();
-        assertEquals(URI.create("urn:simple.types.data.demo"),
-                nestedUnion2QName.getNamespace());
-        assertEquals(TestUtils.createDate("2013-02-27"),
-                nestedUnion2QName.getRevision());
+        assertEquals(URI.create("urn:simple.types.data.demo"), nestedUnion2QName.getNamespace());
+        assertEquals(TestUtils.createDate("2013-02-27"), nestedUnion2QName.getRevision());
         assertEquals("t2", nestedUnion2QName.getPrefix());
         assertEquals("nested-union2", nestedUnion2QName.getLocalName());
 
@@ -585,19 +540,15 @@ public class YangParserTest {
 
         ExtendedType myUnionExt = (ExtendedType) nestedUnion2Types.get(1);
         QName myUnionExtQName = myUnionExt.getQName();
-        assertEquals(URI.create("urn:simple.types.data.demo"),
-                myUnionExtQName.getNamespace());
-        assertEquals(TestUtils.createDate("2013-02-27"),
-                myUnionExtQName.getRevision());
+        assertEquals(URI.create("urn:simple.types.data.demo"), myUnionExtQName.getNamespace());
+        assertEquals(TestUtils.createDate("2013-02-27"), myUnionExtQName.getRevision());
         assertEquals("t2", myUnionExtQName.getPrefix());
         assertEquals("my-union-ext", myUnionExtQName.getLocalName());
 
         ExtendedType myUnion = (ExtendedType) myUnionExt.getBaseType();
         QName myUnionQName = myUnion.getQName();
-        assertEquals(URI.create("urn:simple.types.data.demo"),
-                myUnionQName.getNamespace());
-        assertEquals(TestUtils.createDate("2013-02-27"),
-                myUnionQName.getRevision());
+        assertEquals(URI.create("urn:simple.types.data.demo"), myUnionQName.getNamespace());
+        assertEquals(TestUtils.createDate("2013-02-27"), myUnionQName.getRevision());
         assertEquals("t2", myUnionQName.getPrefix());
         assertEquals("my-union", myUnionQName.getLocalName());
 
@@ -618,10 +569,8 @@ public class YangParserTest {
     public void testRefine() {
         Module testModule = TestUtils.findModule(modules, "types2");
 
-        ContainerSchemaNode peer = (ContainerSchemaNode) testModule
-                .getDataChildByName("peer");
-        ContainerSchemaNode destination = (ContainerSchemaNode) peer
-                .getDataChildByName("destination");
+        ContainerSchemaNode peer = (ContainerSchemaNode) testModule.getDataChildByName("peer");
+        ContainerSchemaNode destination = (ContainerSchemaNode) peer.getDataChildByName("destination");
         Set<UsesNode> usesNodes = destination.getUses();
         assertEquals(1, usesNodes.size());
         UsesNode usesNode = usesNodes.iterator().next();
@@ -651,53 +600,39 @@ public class YangParserTest {
         // leaf address
         assertNotNull(refineLeaf);
         assertEquals("address", refineLeaf.getQName().getLocalName());
-        assertEquals("description of address defined by refine",
-                refineLeaf.getDescription());
-        assertEquals("address reference added by refine",
-                refineLeaf.getReference());
+        assertEquals("description of address defined by refine", refineLeaf.getDescription());
+        assertEquals("address reference added by refine", refineLeaf.getReference());
         assertFalse(refineLeaf.isConfiguration());
         assertTrue(refineLeaf.getConstraints().isMandatory());
-        Set<MustDefinition> leafMustConstraints = refineLeaf.getConstraints()
-                .getMustConstraints();
+        Set<MustDefinition> leafMustConstraints = refineLeaf.getConstraints().getMustConstraints();
         assertEquals(1, leafMustConstraints.size());
         MustDefinition leafMust = leafMustConstraints.iterator().next();
-        assertEquals(
-                "\"ifType != 'ethernet' or (ifType = 'ethernet' and ifMTU = 1500)\"",
-                leafMust.toString());
+        assertEquals("\"ifType != 'ethernet' or (ifType = 'ethernet' and ifMTU = 1500)\"", leafMust.toString());
 
         // container port
         assertNotNull(refineContainer);
-        Set<MustDefinition> mustConstraints = refineContainer.getConstraints()
-                .getMustConstraints();
+        Set<MustDefinition> mustConstraints = refineContainer.getConstraints().getMustConstraints();
         assertTrue(mustConstraints.isEmpty());
-        assertEquals("description of port defined by refine",
-                refineContainer.getDescription());
-        assertEquals("port reference added by refine",
-                refineContainer.getReference());
+        assertEquals("description of port defined by refine", refineContainer.getDescription());
+        assertEquals("port reference added by refine", refineContainer.getReference());
         assertFalse(refineContainer.isConfiguration());
         assertTrue(refineContainer.isPresenceContainer());
 
         // list addresses
         assertNotNull(refineList);
-        assertEquals("description of addresses defined by refine",
-                refineList.getDescription());
-        assertEquals("addresses reference added by refine",
-                refineList.getReference());
+        assertEquals("description of addresses defined by refine", refineList.getDescription());
+        assertEquals("addresses reference added by refine", refineList.getReference());
         assertFalse(refineList.isConfiguration());
         assertEquals(2, (int) refineList.getConstraints().getMinElements());
         assertEquals(12, (int) refineList.getConstraints().getMaxElements());
 
         // grouping target-inner
         assertNotNull(refineGrouping);
-        Set<DataSchemaNode> refineGroupingChildren = refineGrouping
-                .getChildNodes();
+        Set<DataSchemaNode> refineGroupingChildren = refineGrouping.getChildNodes();
         assertEquals(1, refineGroupingChildren.size());
-        LeafSchemaNode refineGroupingLeaf = (LeafSchemaNode) refineGroupingChildren
-                .iterator().next();
-        assertEquals("inner-grouping-id", refineGroupingLeaf.getQName()
-                .getLocalName());
-        assertEquals("new target-inner grouping description",
-                refineGrouping.getDescription());
+        LeafSchemaNode refineGroupingLeaf = (LeafSchemaNode) refineGroupingChildren.iterator().next();
+        assertEquals("inner-grouping-id", refineGroupingLeaf.getQName().getLocalName());
+        assertEquals("new target-inner grouping description", refineGrouping.getDescription());
 
         // typedef group-type
         assertNotNull(typedef);
@@ -709,8 +644,7 @@ public class YangParserTest {
     @Test
     public void testChoice() {
         Module testModule = TestUtils.findModule(modules, "types1");
-        ContainerSchemaNode peer = (ContainerSchemaNode) testModule
-                .getDataChildByName("transfer");
+        ContainerSchemaNode peer = (ContainerSchemaNode) testModule.getDataChildByName("transfer");
         ChoiceNode how = (ChoiceNode) peer.getDataChildByName("how");
         Set<ChoiceCaseNode> cases = how.getCases();
         assertEquals(3, cases.size());
@@ -719,8 +653,7 @@ public class YangParserTest {
     @Test
     public void testAnyXml() {
         Module testModule = TestUtils.findModule(modules, "types1");
-        AnyXmlSchemaNode data = (AnyXmlSchemaNode) testModule
-                .getDataChildByName("data");
+        AnyXmlSchemaNode data = (AnyXmlSchemaNode) testModule.getDataChildByName("data");
         assertNotNull(data);
     }
 
@@ -731,8 +664,7 @@ public class YangParserTest {
         assertEquals(1, deviations.size());
 
         Deviation dev = deviations.iterator().next();
-        SchemaPath expectedPath = TestUtils.createPath(true, null, null,
-                "data", "system", "user");
+        SchemaPath expectedPath = TestUtils.createPath(true, null, null, "data", "system", "user");
         assertEquals(expectedPath, dev.getTargetPath());
         assertEquals(Deviate.ADD, dev.getDeviate());
     }
@@ -740,8 +672,7 @@ public class YangParserTest {
     @Test
     public void testUnknownNode() {
         Module testModule = TestUtils.findModule(modules, "types3");
-        ContainerSchemaNode network = (ContainerSchemaNode) testModule
-                .getDataChildByName("network");
+        ContainerSchemaNode network = (ContainerSchemaNode) testModule.getDataChildByName("network");
         List<UnknownSchemaNode> unknownNodes = network.getUnknownSchemaNodes();
         assertEquals(1, unknownNodes.size());
         UnknownSchemaNode unknownNode = unknownNodes.get(0);
@@ -759,8 +690,7 @@ public class YangParserTest {
     @Test
     public void testExtension() {
         Module testModule = TestUtils.findModule(modules, "types3");
-        List<ExtensionDefinition> extensions = testModule
-                .getExtensionSchemaNodes();
+        List<ExtensionDefinition> extensions = testModule.getExtensionSchemaNodes();
         assertEquals(1, extensions.size());
         ExtensionDefinition extension = extensions.get(0);
         assertEquals("name", extension.getArgument());
@@ -774,17 +704,15 @@ public class YangParserTest {
         String expectedPrefix = "t3";
         Date expectedRevision = TestUtils.createDate("2013-02-27");
 
-        Set<NotificationDefinition> notifications = testModule
-                .getNotifications();
+        Set<NotificationDefinition> notifications = testModule.getNotifications();
         assertEquals(1, notifications.size());
 
         NotificationDefinition notification = notifications.iterator().next();
         // test SchemaNode args
-        QName expectedQName = new QName(expectedNamespace, expectedRevision,
-                expectedPrefix, "event");
+        QName expectedQName = new QName(expectedNamespace, expectedRevision, expectedPrefix, "event");
         assertEquals(expectedQName, notification.getQName());
-        SchemaPath expectedPath = TestUtils.createPath(true, expectedNamespace,
-                expectedRevision, expectedPrefix, "event");
+        SchemaPath expectedPath = TestUtils.createPath(true, expectedNamespace, expectedRevision, expectedPrefix,
+                "event");
         assertEquals(expectedPath, notification.getPath());
         assertNull(notification.getDescription());
         assertNull(notification.getReference());
@@ -796,14 +724,11 @@ public class YangParserTest {
         assertEquals(0, notification.getGroupings().size());
         assertEquals(0, notification.getUses().size());
 
-        LeafSchemaNode eventClass = (LeafSchemaNode) notification
-                .getDataChildByName("event-class");
+        LeafSchemaNode eventClass = (LeafSchemaNode) notification.getDataChildByName("event-class");
         assertTrue(eventClass.getType() instanceof StringType);
-        AnyXmlSchemaNode reportingEntity = (AnyXmlSchemaNode) notification
-                .getDataChildByName("reporting-entity");
+        AnyXmlSchemaNode reportingEntity = (AnyXmlSchemaNode) notification.getDataChildByName("reporting-entity");
         assertNotNull(reportingEntity);
-        LeafSchemaNode severity = (LeafSchemaNode) notification
-                .getDataChildByName("severity");
+        LeafSchemaNode severity = (LeafSchemaNode) notification.getDataChildByName("severity");
         assertTrue(severity.getType() instanceof StringType);
     }
 
@@ -815,8 +740,7 @@ public class YangParserTest {
         assertEquals(1, rpcs.size());
 
         RpcDefinition rpc = rpcs.iterator().next();
-        assertEquals("Retrieve all or part of a specified configuration.",
-                rpc.getDescription());
+        assertEquals("Retrieve all or part of a specified configuration.", rpc.getDescription());
         assertEquals("RFC 6241, Section 7.1", rpc.getReference());
 
         ContainerSchemaNode input = rpc.getInput();
@@ -843,49 +767,41 @@ public class YangParserTest {
         assertEquals(1, augments.size());
         AugmentationSchema augment = augments.iterator().next();
 
-        LeafSchemaNode ifcId = (LeafSchemaNode) augment
-                .getDataChildByName("interface-id");
+        LeafSchemaNode ifcId = (LeafSchemaNode) augment.getDataChildByName("interface-id");
         Leafref ifcIdType = (Leafref) ifcId.getType();
         SchemaPath ifcIdTypeSchemaPath = ifcIdType.getPath();
         List<QName> ifcIdTypePath = ifcIdTypeSchemaPath.getPath();
-        
+
         URI types1URI = URI.create("urn:simple.container.demo");
         URI types2URI = URI.create("urn:simple.types.data.demo");
         URI types3URI = URI.create("urn:simple.container.demo.test");
         Date expectedDate = simpleDateFormat.parse("2013-02-27");
-        
-        QName q0 = new QName(types2URI,
-                expectedDate, "data", "interfaces");
-        QName q1 = new QName(types2URI,
-                expectedDate, "data", "ifEntry");
-        QName q2 = new QName(types3URI,
-                expectedDate, "data", "augment-holder");
-        QName q3 = new QName(types1URI,
-                expectedDate, "data", "interface-id");
+
+        QName q0 = new QName(types2URI, expectedDate, "data", "interfaces");
+        QName q1 = new QName(types2URI, expectedDate, "data", "ifEntry");
+        QName q2 = new QName(types3URI, expectedDate, "data", "augment-holder");
+        QName q3 = new QName(types1URI, expectedDate, "data", "interface-id");
         assertEquals(q0, ifcIdTypePath.get(0));
         assertEquals(q1, ifcIdTypePath.get(1));
         assertEquals(q2, ifcIdTypePath.get(2));
         assertEquals(q3, ifcIdTypePath.get(3));
 
-        LeafListSchemaNode higherLayer = (LeafListSchemaNode) augment
-                .getDataChildByName("higher-layer-if");
+        LeafListSchemaNode higherLayer = (LeafListSchemaNode) augment.getDataChildByName("higher-layer-if");
         Leafref higherLayerType = (Leafref) higherLayer.getType();
         SchemaPath higherLayerTypeSchemaPath = higherLayerType.getPath();
         List<QName> higherLayerTypePath = higherLayerTypeSchemaPath.getPath();
         assertEquals(q0, higherLayerTypePath.get(0));
         assertEquals(q1, higherLayerTypePath.get(1));
         assertEquals(q2, higherLayerTypePath.get(2));
-        q3 = new QName(types1URI,
-                expectedDate, "data", "higher-layer-if");
+        q3 = new QName(types1URI, expectedDate, "data", "higher-layer-if");
         assertEquals(q3, higherLayerTypePath.get(3));
-        
-        LeafSchemaNode myType = (LeafSchemaNode) augment
-                .getDataChildByName("my-type");
-        ExtendedType leafType = (ExtendedType)myType.getType();
-        
+
+        LeafSchemaNode myType = (LeafSchemaNode) augment.getDataChildByName("my-type");
+        ExtendedType leafType = (ExtendedType) myType.getType();
+
         testModule = TestUtils.findModule(modules, "types2");
         TypeDefinition<?> typedef = TestUtils.findTypedef(testModule.getTypeDefinitions(), "my-type1");
-        
+
         assertEquals(typedef, leafType);
     }
 
@@ -895,8 +811,7 @@ public class YangParserTest {
         Set<TypeDefinition<?>> types = test.getTypeDefinitions();
 
         // my-base-int32-type
-        ExtendedType int32Typedef = (ExtendedType) TestUtils.findTypedef(types,
-                "my-base-int32-type");
+        ExtendedType int32Typedef = (ExtendedType) TestUtils.findTypedef(types, "my-base-int32-type");
         QName int32TypedefQName = int32Typedef.getQName();
 
         URI expectedNS = URI.create("urn:simple.types.data.demo");
@@ -914,8 +829,7 @@ public class YangParserTest {
         // my-base-int32-type/int32
         Int32 int32 = (Int32) int32Typedef.getBaseType();
         QName int32QName = int32.getQName();
-        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"),
-                int32QName.getNamespace());
+        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"), int32QName.getNamespace());
         assertNull(int32QName.getRevision());
         assertEquals("", int32QName.getPrefix());
         assertEquals("int32", int32QName.getLocalName());
@@ -933,8 +847,7 @@ public class YangParserTest {
         Set<TypeDefinition<?>> types = test.getTypeDefinitions();
 
         // my-base-int32-type
-        ExtendedType myDecType = (ExtendedType) TestUtils.findTypedef(types,
-                "my-decimal-type");
+        ExtendedType myDecType = (ExtendedType) TestUtils.findTypedef(types, "my-decimal-type");
         QName myDecTypeQName = myDecType.getQName();
 
         URI expectedNS = URI.create("urn:simple.types.data.demo");
@@ -953,8 +866,7 @@ public class YangParserTest {
         Decimal64 dec64 = (Decimal64) myDecType.getBaseType();
         QName dec64QName = dec64.getQName();
 
-        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"),
-                dec64QName.getNamespace());
+        assertEquals(URI.create("urn:ietf:params:xml:ns:yang:1"), dec64QName.getNamespace());
         assertNull(dec64QName.getRevision());
         assertEquals("", dec64QName.getPrefix());
         assertEquals("decimal64", dec64QName.getLocalName());

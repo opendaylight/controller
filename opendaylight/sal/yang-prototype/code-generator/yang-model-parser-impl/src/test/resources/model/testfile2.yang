@@ -35,7 +35,7 @@ module types2 {
     
     typedef my-string-type {
         type my-custom-string {
-            length "5..10";
+            length "6..10";
         }
     }
     

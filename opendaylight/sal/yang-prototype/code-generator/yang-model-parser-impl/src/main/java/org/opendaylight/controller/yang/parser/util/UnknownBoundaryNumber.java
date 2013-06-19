@@ -41,7 +41,7 @@ final class UnknownBoundaryNumber extends Number {
 
     @Override
     public String toString() {
-        return UnknownBoundaryNumber.class.getSimpleName() + "[" + value + "]";
+        return value;
     }
 
 }

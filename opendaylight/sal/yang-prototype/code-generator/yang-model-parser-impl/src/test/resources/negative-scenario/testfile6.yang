@@ -1,0 +1,18 @@
+module test5 {
+    yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+
+    typedef my-custom-int {
+        type int32 {
+            range "5..11 | 15..20";
+        }
+    }
+
+    typedef my-int-type {
+        type my-custom-int {
+            range "min..max";
+        }
+    }
+
+}

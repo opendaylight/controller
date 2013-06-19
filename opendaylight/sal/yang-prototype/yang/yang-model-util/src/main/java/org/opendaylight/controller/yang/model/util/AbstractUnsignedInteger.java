@@ -19,7 +19,7 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  * interface which represents UNSIGNED Integer values defined in Yang language. <br>
  * The integer built-in types in Yang are uint8, uint16, uint32, and uint64.
  * They represent unsigned integers of different sizes:
- *
+ * 
  * <ul>
  * <li>uint8 - represents integer values between 0 and 255, inclusively.</li>
  * <li>uint16 - represents integer values between 0 and 65535, inclusively.</li>
@@ -28,10 +28,10 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  * <li>uint64 - represents integer values between 0 and 18446744073709551615,
  * inclusively.</li>
  * </ul>
- *
+ * 
  */
-public abstract class AbstractUnsignedInteger implements
-        UnsignedIntegerTypeDefinition {
+public abstract class AbstractUnsignedInteger implements UnsignedIntegerTypeDefinition {
+    private static final long MIN_VALUE = 0;
     private final QName name;
     private final SchemaPath path;
     private final String description;
@@ -40,28 +40,25 @@ public abstract class AbstractUnsignedInteger implements
     private final List<RangeConstraint> rangeStatements;
 
     /**
-     *
+     * 
      * @param actualPath
      * @param namespace
      * @param revision
      * @param name
      * @param description
-     * @param minRange
+     * @param MIN_VALUE
      * @param maxRange
      * @param units
      */
-    public AbstractUnsignedInteger(final SchemaPath path, final QName name,
-            final String description, final Number minRange,
+    public AbstractUnsignedInteger(final SchemaPath path, final QName name, final String description,
             final Number maxRange, final String units) {
         this.name = name;
         this.description = description;
         this.path = path;
         this.units = units;
         this.rangeStatements = new ArrayList<RangeConstraint>();
-        final String rangeDescription = "Integer values between " + minRange
-                + " and " + maxRange + ", inclusively.";
-        this.rangeStatements.add(BaseConstraints.rangeConstraint(minRange,
-                maxRange, rangeDescription,
+        final String rangeDescription = "Integer values between " + MIN_VALUE + " and " + maxRange + ", inclusively.";
+        this.rangeStatements.add(BaseConstraints.rangeConstraint(MIN_VALUE, maxRange, rangeDescription,
                 "https://tools.ietf.org/html/rfc6020#section-9.2.4"));
     }
 
@@ -71,8 +68,7 @@ public abstract class AbstractUnsignedInteger implements
      * @param rangeStatements
      * @param units
      */
-    public AbstractUnsignedInteger(final SchemaPath path, final QName name,
-            final String description,
+    public AbstractUnsignedInteger(final SchemaPath path, final QName name, final String description,
             final List<RangeConstraint> rangeStatements, final String units) {
         this.name = name;
         this.description = description;
@@ -125,14 +121,11 @@ public abstract class AbstractUnsignedInteger implements
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result
-                + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((path == null) ? 0 : path.hashCode());
-        result = prime * result
-                + ((rangeStatements == null) ? 0 : rangeStatements.hashCode());
-        result = prime * result
-                + ((reference == null) ? 0 : reference.hashCode());
+        result = prime * result + ((rangeStatements == null) ? 0 : rangeStatements.hashCode());
+        result = prime * result + ((reference == null) ? 0 : reference.hashCode());
         result = prime * result + ((units == null) ? 0 : units.hashCode());
         return result;
     }

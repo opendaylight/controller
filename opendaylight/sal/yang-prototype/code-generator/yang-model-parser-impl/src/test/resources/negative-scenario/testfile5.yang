@@ -1,0 +1,19 @@
+module test5 {
+    yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+
+    typedef my-custom-string {
+        type string {
+            pattern "[a-k]*";
+            length "5..11";
+        }
+    }
+
+    typedef my-string-type {
+        type my-custom-string {
+            length "4..10";
+        }
+    }
+
+}

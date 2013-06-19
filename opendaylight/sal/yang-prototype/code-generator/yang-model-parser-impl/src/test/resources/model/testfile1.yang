@@ -22,7 +22,7 @@ module types1 {
 
     leaf testleaf {
         type data:my-type1 {
-            range "min..max";
+            range "12..max";
         }
     }
 
@@ -125,6 +125,8 @@ module types1 {
         }
         leaf my-type {
             type data:my-type1;
+        }
+        container schemas {
         }
     }
     
