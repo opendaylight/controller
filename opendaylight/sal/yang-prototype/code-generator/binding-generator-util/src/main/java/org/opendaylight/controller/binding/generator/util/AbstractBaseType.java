@@ -24,6 +24,15 @@ public class AbstractBaseType implements Type {
         return name;
     }
 
+    @Override
+    public String getFullyQualifiedName() {
+        if (packageName.isEmpty()) {
+            return name;
+        } else {
+            return packageName + "." + name;
+        }
+    }
+
     protected AbstractBaseType(String pkName, String name) {
         this.packageName = pkName;
         this.name = name;
@@ -68,5 +77,4 @@ public class AbstractBaseType implements Type {
         }
         return "Type (" + packageName + "." + name + ")";
     }
-
 }

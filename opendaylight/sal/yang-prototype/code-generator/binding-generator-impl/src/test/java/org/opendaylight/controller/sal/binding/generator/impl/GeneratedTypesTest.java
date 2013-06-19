@@ -16,7 +16,6 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
-import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;

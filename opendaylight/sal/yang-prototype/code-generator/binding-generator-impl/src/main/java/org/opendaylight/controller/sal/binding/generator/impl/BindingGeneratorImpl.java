@@ -334,7 +334,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
 
                 final Type rpcRes = Types.parameterizedTypeFor(
                         Types.typeForClass(RpcResult.class), outTypeInstance);
-                method.addReturnType(Types.parameterizedTypeFor(future, rpcRes));
+                method.setReturnType(Types.parameterizedTypeFor(future, rpcRes));
                 for (DataNodeIterator it : rpcInOut) {
                     List<ContainerSchemaNode> nContainers = it.allContainers();
                     if ((nContainers != null) && !nContainers.isEmpty()) {
@@ -446,16 +446,16 @@ public final class BindingGeneratorImpl implements BindingGenerator {
 
             GeneratedTransferObject gto = new GeneratedTOBuilderImpl(
                     returnTypePkgName, returnTypeName).toInstance();
-            newType.addExtendsType(gto);
+            newType.setExtendsType(gto);
         } else {
-            newType.addExtendsType(Types.getBaseIdentityTO());
+            newType.setExtendsType(Types.getBaseIdentityTO());
         }
-
-        return newType.toIdentityInstance();
+        newType.setAbstract(true);
+        return newType.toInstance();
     }
 
     private List<Type> allGroupingsToGenTypes(Module module) {
-        final List<Type> genTypes = new ArrayList<Type>();
+        final List<Type> genTypes = new ArrayList<>();
         final String basePackageName = moduleNamespaceToPackageName(module);
         Set<GroupingDefinition> groupings = module.getGroupings();
         if (groupings != null && !groupings.isEmpty()) {
@@ -804,8 +804,8 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                             .addProperty(parseToClassName(leafName));
 
                     propBuilder.setReadOnly(isReadOnly);
-                    propBuilder.addReturnType(returnType);
-                    propBuilder.addComment(leafDesc);
+                    propBuilder.setReturnType(returnType);
+                    propBuilder.setComment(leafDesc);
 
                     toBuilder.addEqualsIdentity(propBuilder);
                     toBuilder.addHashIdentity(propBuilder);
@@ -946,8 +946,8 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         final MethodSignatureBuilder getMethod = interfaceBuilder
                 .addMethod(getterMethodName(schemaNodeName));
 
-        getMethod.addComment(comment);
-        getMethod.addReturnType(returnType);
+        getMethod.setComment(comment);
+        getMethod.setReturnType(returnType);
 
         return getMethod;
     }
@@ -959,10 +959,10 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         final MethodSignatureBuilder setMethod = interfaceBuilder
                 .addMethod(setterMethodName(schemaNodeName));
 
-        setMethod.addComment(comment);
+        setMethod.setComment(comment);
         setMethod.addParameter(parameterType,
                 parseToValidParamName(schemaNodeName));
-        setMethod.addReturnType(Types.voidType());
+        setMethod.setReturnType(Types.voidType());
 
         return setMethod;
     }

@@ -10,8 +10,18 @@ package org.opendaylight.controller.sal.binding.model.api;
 import java.io.IOException;
 import java.io.Writer;
 
+/**
+ *
+ *
+ */
 public interface CodeGenerator {
 
+    /**
+     *
+     * @param type
+     * @return
+     * @throws IOException
+     */
     Writer generate(Type type) throws IOException;
 
 }

@@ -7,49 +7,46 @@
  */
 package org.opendaylight.controller.binding.generator.util.generated.type.builder;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.opendaylight.controller.sal.binding.model.api.AccessModifier;
 import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.sal.binding.model.api.type.builder.AnnotationTypeBuilder;
-import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 
-final class MethodSignatureBuilderImpl extends AbstractTypeMemberBuilder implements MethodSignatureBuilder {
+import java.util.Collections;
+import java.util.List;
 
-    private final List<MethodSignature.Parameter> parameters;
-    private boolean isAbstract;
+class MethodSignatureImpl extends AbstractTypeMember implements MethodSignature {
 
-    public MethodSignatureBuilderImpl(final String name) {
-        super(name);
-        this.parameters = new ArrayList<>();
-    }
+    private final List<Parameter> params;
+    private final boolean isAbstract;
 
-    @Override
-    public void setAbstract(boolean isAbstract) {
+    public MethodSignatureImpl(final Type definingType, final String name,
+                               final List<AnnotationType> annotations,
+                               final String comment, final AccessModifier accessModifier,
+                               final Type returnType, final List<Parameter> params, boolean isFinal,
+                               boolean isAbstract) {
+        super(definingType, name, annotations, comment, accessModifier, returnType, isFinal);
+        this.params = Collections.unmodifiableList(params);
         this.isAbstract = isAbstract;
     }
 
     @Override
-    public void addParameter(Type type, String name) {
-        parameters.add(new MethodParameterImpl(name, type));
+    public boolean isAbstract() {
+        return isAbstract;
     }
 
     @Override
-    public MethodSignature toInstance(Type definingType) {
-        final List<AnnotationType> annotations = toAnnotationTypes();
-        return new MethodSignatureImpl(definingType, getName(), annotations,
-                getComment(), getAccessModifier(), getReturnType(), parameters, isFinal(), isAbstract);
+    public List<Parameter> getParameters() {
+        return params;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result
-                + ((parameters == null) ? 0 : parameters.hashCode());
+                + ((params == null) ? 0 : params.hashCode());
         result = prime * result
                 + ((getReturnType() == null) ? 0 : getReturnType().hashCode());
         return result;
@@ -66,7 +63,7 @@ final class MethodSignatureBuilderImpl extends AbstractTypeMemberBuilder impleme
         if (getClass() != obj.getClass()) {
             return false;
         }
-        MethodSignatureBuilderImpl other = (MethodSignatureBuilderImpl) obj;
+        MethodSignatureImpl other = (MethodSignatureImpl) obj;
         if (getName() == null) {
             if (other.getName() != null) {
                 return false;
@@ -74,11 +71,11 @@ final class MethodSignatureBuilderImpl extends AbstractTypeMemberBuilder impleme
         } else if (!getName().equals(other.getName())) {
             return false;
         }
-        if (parameters == null) {
-            if (other.parameters != null) {
+        if (params == null) {
+            if (other.params != null) {
                 return false;
             }
-        } else if (!parameters.equals(other.parameters)) {
+        } else if (!params.equals(other.params)) {
             return false;
         }
         if (getReturnType() == null) {
@@ -94,16 +91,24 @@ final class MethodSignatureBuilderImpl extends AbstractTypeMemberBuilder impleme
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("MethodSignatureBuilderImpl [name=");
+        builder.append("MethodSignatureImpl [name=");
         builder.append(getName());
-        builder.append(", returnType=");
-        builder.append(getReturnType());
-        builder.append(", parameters=");
-        builder.append(parameters);
-        builder.append(", annotationBuilders=");
-        builder.append(getAnnotationBuilders());
         builder.append(", comment=");
         builder.append(getComment());
+        if (getDefiningType() != null) {
+            builder.append(", definingType=");
+            builder.append(getDefiningType().getPackageName());
+            builder.append(".");
+            builder.append(getDefiningType().getName());
+        } else {
+            builder.append(", definingType= null");
+        }
+        builder.append(", returnType=");
+        builder.append(getReturnType());
+        builder.append(", params=");
+        builder.append(params);
+        builder.append(", annotations=");
+        builder.append(getAnnotations());
         builder.append("]");
         return builder.toString();
     }

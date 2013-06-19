@@ -11,7 +11,6 @@ import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 
 /**
-
  *
  */
 public interface ConstantBuilder {

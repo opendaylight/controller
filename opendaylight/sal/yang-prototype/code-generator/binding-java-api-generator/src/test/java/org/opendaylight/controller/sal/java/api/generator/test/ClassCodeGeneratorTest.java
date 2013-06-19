@@ -110,11 +110,11 @@ public class ClassCodeGeneratorTest {
                 "simple.pack", "DefCtor");
 
         GeneratedPropertyBuilder propBuilder = toBuilder.addProperty("foo");
-        propBuilder.addReturnType(Types.typeForClass(String.class));
+        propBuilder.setReturnType(Types.typeForClass(String.class));
         propBuilder.setReadOnly(false);
 
         propBuilder = toBuilder.addProperty("bar");
-        propBuilder.addReturnType(Types.typeForClass(Integer.class));
+        propBuilder.setReturnType(Types.typeForClass(Integer.class));
         propBuilder.setReadOnly(false);
 
         final GeneratedTransferObject genTO = toBuilder.toInstance();
@@ -141,12 +141,12 @@ public class ClassCodeGeneratorTest {
                 "simple.pack", "DefCtor");
 
         GeneratedPropertyBuilder propBuilder = toBuilder.addProperty("foo");
-        propBuilder.addReturnType(Types.typeForClass(String.class));
+        propBuilder.setReturnType(Types.typeForClass(String.class));
         propBuilder.setReadOnly(false);
         toBuilder.addToStringProperty(propBuilder);
 
         propBuilder = toBuilder.addProperty("bar");
-        propBuilder.addReturnType(Types.typeForClass(Integer.class));
+        propBuilder.setReturnType(Types.typeForClass(Integer.class));
         propBuilder.setReadOnly(false);
         toBuilder.addToStringProperty(propBuilder);
         final GeneratedTransferObject genTO = toBuilder.toInstance();

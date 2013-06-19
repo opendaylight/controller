@@ -1,0 +1,56 @@
+module simple-bits-demo {
+	
+    namespace "urn:simple:bits:demo";
+    prefix "sbd";
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";    
+
+    revision 2013-06-11 {
+        
+    }
+
+
+	typedef byte-type {
+		type bits {
+			bit first-bit {
+				position 10;
+			}
+			bit second-bit {
+				position 20;
+			}
+			bit third-bit {
+				position 30;
+			}
+			bit forth-bit {
+				position 40;
+			}		
+			bit fifth-bit {
+				position 50;
+			}		
+			bit sixth-bit {
+				position 60;
+			}		
+			bit seventh-bit {
+				position 70;
+			}		
+			bit eight-bit {
+				position 80;
+			}		
+			
+	}
+
+	typedef jo {
+	type uint32;
+	}
+
+	
+    container leaf-parent-container {
+		leaf byte-leaf {
+			type byte-type;
+		}
+		
+	}
+
+
+}
