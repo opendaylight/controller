@@ -104,18 +104,27 @@ one.f.switchmanager.nodesLearnt = {
 	modal : {
 		initialize: {
 			updateNode: function(evt) {
-				var nodeId = decodeURIComponent(evt.target.id);
-				var h3 = "Update Node Information";
-	            var footer = one.f.switchmanager.nodesLearnt.modal.footer.updateNode();
-	            var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.modal, h3, "", footer);
-	            
-	            // bind save button
-	            $('#' + one.f.switchmanager.nodesLearnt.id.modal.save, $modal).click(function() {
-	            	one.f.switchmanager.nodesLearnt.modal.save($modal);
-	            });
-	            // inject body (nodePorts)
 	            one.f.switchmanager.nodesLearnt.ajax.main(one.f.switchmanager.rootUrl + "/tiers", function(tiers) {
-	                var $body = one.f.switchmanager.nodesLearnt.modal.body.updateNode(nodeId, evt.target.switchDetails, tiers);
+
+                    var nodeId = decodeURIComponent(evt.target.id);
+                    var h3;
+                    var footer = [];
+                    var $body = one.f.switchmanager.nodesLearnt.modal.body.updateNode(nodeId, evt.target.switchDetails, tiers);
+                    if (one.main.registry.container == 'default' && evt.target.privilege == 'WRITE'){
+                        h3 = "Update Node Information";
+                        footer = one.f.switchmanager.nodesLearnt.modal.footer.updateNode();
+                    } else { //disable node edit
+                        $body.find('*').attr('disabled', 'disabled');
+                        h3 = 'Node Information';
+                    }
+
+                    var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.modal, h3, "", footer);
+                    // bind save button
+                    $('#' + one.f.switchmanager.nodesLearnt.id.modal.save, $modal).click(function() {
+                        one.f.switchmanager.nodesLearnt.modal.save($modal);
+                    });
+
+	                // inject body (nodePorts)
 	                one.lib.modal.inject.body($modal, $body);
 	                $modal.modal();
 	            });
@@ -160,7 +169,6 @@ one.f.switchmanager.nodesLearnt = {
 				$select.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.operationMode);
 				$select.val(switchDetails["mode"]);
 				$fieldset.append($label).append($select);
-				
 				$form.append($fieldset);
 				return $form;
 			},
@@ -205,11 +213,10 @@ one.f.switchmanager.nodesLearnt = {
 		footer: {
 			updateNode: function() {
 				var footer = [];
-				if(one.role < 2) {
-					var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.nodesLearnt.id.modal.save, "btn-success", "");
-		            var $saveButton = one.lib.dashlet.button.button(saveButton);
-		            footer.push($saveButton);
-				}
+                var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.nodesLearnt.id.modal.save, "btn-success", "");
+                var $saveButton = one.lib.dashlet.button.button(saveButton);
+                footer.push($saveButton);
+
 	            return footer;
 			},
 			popout: function() {
@@ -226,14 +233,17 @@ one.f.switchmanager.nodesLearnt = {
 				var tr = {};
 				var entry = [];
 				var nodenameentry = value["nodeName"] ? value["nodeName"] : "Click to update";
+
 				// TODO: Move anchor tag creation to one.lib.form.
-				var aTag = document.createElement("a");
-				aTag.setAttribute("id", encodeURIComponent(value["nodeId"]));
-				aTag.switchDetails = value;
-				aTag.addEventListener("click", one.f.switchmanager.nodesLearnt.modal.initialize.updateNode);
-				aTag.addEventListener("mouseover", function(evt) {
-					evt.target.style.cursor = "pointer";
-				}, false);
+				var aTag;
+                aTag = document.createElement("a");
+                aTag.privilege = data.privilege;
+                aTag.addEventListener("click", one.f.switchmanager.nodesLearnt.modal.initialize.updateNode);
+                aTag.addEventListener("mouseover", function(evt) {
+                    evt.target.style.cursor = "pointer";
+                }, false);
+                aTag.setAttribute("id", encodeURIComponent(value["nodeId"]));
+                aTag.switchDetails = value;
 				aTag.innerHTML = nodenameentry;
 				entry.push(aTag);
 				entry.push(value["nodeId"]);
@@ -287,55 +297,56 @@ one.f.switchmanager.subnetGatewayConfig = {
 		one.lib.dashlet.empty($dashlet);
 		$dashlet.append(one.lib.dashlet.header(one.f.dashlet.subnetGatewayConfig.name));
 		// Add gateway IP Address button
-		if(one.role < 2) {
-			var button = one.lib.dashlet.button.single("Add Gateway IP Address", 
-					one.f.switchmanager.subnetGatewayConfig.id.dashlet.addIPAddress, "btn-primary", "btn-mini");
-	        var $button = one.lib.dashlet.button.button(button);
-	        $button.click(function() {
-	        	var $modal = one.f.switchmanager.subnetGatewayConfig.modal.initialize.gateway();
-	            $modal.modal();
-	        });
-			$dashlet.append($button);
-		
-		
-			// Delete gateway ip address button
-	        var button = one.lib.dashlet.button.single("Delete Gateway IP Address(es)", 
-	        		one.f.switchmanager.subnetGatewayConfig.id.dashlet.removeIPAddress, "btn-primary", "btn-mini");
-	        var $button = one.lib.dashlet.button.button(button);
-	        $button.click(function() {
-	        	var requestData = {};
-	        	var gatewaysToDelete = [];
-	        	var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
-	        	checkedCheckBoxes.each(function(index, value) {
-	        		gatewaysToDelete.push(checkedCheckBoxes[index].id);
-	        	}); 
-	        	if(gatewaysToDelete.length > 0) {
-	        		requestData["gatewaysToDelete"] = gatewaysToDelete.toString();
-	            	var url = one.f.switchmanager.rootUrl + "/subnetGateway/delete";
-	        		one.f.switchmanager.subnetGatewayConfig.ajax.main(url, requestData, function(response) {
-	        			if(response.status == true) {
-	        				// refresh dashlet by passing dashlet div as param
-	                    	one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
-	        			} else {
-	        				alert(response.message);
-	        			}
-	        		});
-	        	} 
-	        });
-	        $dashlet.append($button);
-	
-			// Add Ports button
-			var button = one.lib.dashlet.button.single("Add Ports", 
-					one.f.switchmanager.subnetGatewayConfig.id.dashlet.addPorts, "btn-primary", "btn-mini");
-	        var $button = one.lib.dashlet.button.button(button);
-	        $button.click(function() {
-	        	var $modal = one.f.switchmanager.subnetGatewayConfig.modal.initialize.ports();
-	            $modal.modal();
-	        });
-			$dashlet.append($button);
-		}
 		var url = one.f.switchmanager.rootUrl + "/subnets";
 		one.f.switchmanager.subnetGatewayConfig.ajax.main(url, {}, function(content) {
+
+            if (content.privilege === 'WRITE') {
+                var button = one.lib.dashlet.button.single("Add Gateway IP Address",
+                    one.f.switchmanager.subnetGatewayConfig.id.dashlet.addIPAddress, "btn-primary", "btn-mini");
+                var $button = one.lib.dashlet.button.button(button);
+                $button.click(function() {
+                    var $modal = one.f.switchmanager.subnetGatewayConfig.modal.initialize.gateway();
+                    $modal.modal();
+                });
+                $dashlet.append($button);
+
+                // Delete gateway ip address button
+                var button = one.lib.dashlet.button.single("Delete Gateway IP Address(es)",
+                    one.f.switchmanager.subnetGatewayConfig.id.dashlet.removeIPAddress, "btn-primary", "btn-mini");
+                var $button = one.lib.dashlet.button.button(button);
+                $button.click(function() {
+                    var requestData = {};
+                    var gatewaysToDelete = [];
+                    var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
+                    checkedCheckBoxes.each(function(index, value) {
+                        gatewaysToDelete.push(checkedCheckBoxes[index].id);
+                    });
+                    if (gatewaysToDelete.length > 0) {
+                        requestData["gatewaysToDelete"] = gatewaysToDelete.toString();
+                        var url = one.f.switchmanager.rootUrl + "/subnetGateway/delete";
+                        one.f.switchmanager.subnetGatewayConfig.ajax.main(url, requestData, function(response) {
+                            if (response.status == true) {
+                                // refresh dashlet by passing dashlet div as param
+                                one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
+                            } else {
+                                alert(response.message);
+                            }
+                        });
+                    }
+                });
+                $dashlet.append($button);
+
+                // Add Ports button
+                var button = one.lib.dashlet.button.single("Add Ports",
+                    one.f.switchmanager.subnetGatewayConfig.id.dashlet.addPorts, "btn-primary", "btn-mini");
+                var $button = one.lib.dashlet.button.button(button);
+                $button.click(function() {
+                    var $modal = one.f.switchmanager.subnetGatewayConfig.modal.initialize.ports();
+                    $modal.modal();
+                });
+                $dashlet.append($button);
+            }
+
 			var body = one.f.switchmanager.subnetGatewayConfig.data.devices(content);
 			// first column contains checkbox. no need for header
 			content.columnNames.splice(0,0," ");
@@ -502,11 +513,9 @@ one.f.switchmanager.subnetGatewayConfig = {
 		},
 		footer : function() {
             var footer = [];
-            if(one.role < 2) {
-            	 var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.subnetGatewayConfig.id.modal.save, "btn-success", "");
-                 var $saveButton = one.lib.dashlet.button.button(saveButton);
-                 footer.push($saveButton);
-            }
+            var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.subnetGatewayConfig.id.modal.save, "btn-success", "");
+            var $saveButton = one.lib.dashlet.button.button(saveButton);
+            footer.push($saveButton);
             return footer;
         }
 	},
@@ -591,47 +600,47 @@ one.f.switchmanager.staticRouteConfig = {
 	dashlet: function($dashlet) {
 		one.lib.dashlet.empty($dashlet);
 		
-		if(one.role < 2) {
-			// Add static route button
-			var button = one.lib.dashlet.button.single("Add Static Route", 
-					one.f.switchmanager.staticRouteConfig.id.dashlet.add, "btn-primary", "btn-mini");
-	        var $button = one.lib.dashlet.button.button(button);
-	        $button.click(function() {
-	        	var $modal = one.f.switchmanager.staticRouteConfig.modal.initialize();
-	            $modal.modal();
-	        });
-	        $dashlet.append(one.lib.dashlet.header(one.f.dashlet.staticRouteConfig.name));
-	        $dashlet.append($button);
-	        
-	        // Delete static route button
-	        var button = one.lib.dashlet.button.single("Delete Static Route(s)", 
-	        		one.f.switchmanager.staticRouteConfig.id.dashlet.remove, "btn-primary", "btn-mini");
-	        var $button = one.lib.dashlet.button.button(button);
-	        $button.click(function() {
-	        	var requestData = {};
-	        	var routesToDelete = [];
-	        	var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
-	        	checkedCheckBoxes.each(function(index, value) {
-	        		routesToDelete.push(checkedCheckBoxes[index].id);
-	        	}); 
-	        	if(routesToDelete.length > 0) {
-	        		requestData["routesToDelete"] = routesToDelete.toString();
-	            	var url = one.f.switchmanager.rootUrl + "/staticRoute/delete";
-	        		one.f.switchmanager.staticRouteConfig.ajax.main(url, requestData, function(response) {
-	        			if(response.status == true) {
-	        				// refresh dashlet by passing dashlet div as param
-	                    	one.f.switchmanager.staticRouteConfig.dashlet($("#left-bottom .dashlet"));
-	        			} else {
-	        				alert(response.message);
-	        			}
-	        		});
-	        	} 
-	        });
-	        $dashlet.append($button);
-		}
-		
+
 		var url = one.f.switchmanager.rootUrl + "/staticRoutes";
 		one.f.switchmanager.staticRouteConfig.ajax.main(url, {}, function(content) {
+
+            if (content.privilege === 'WRITE') {
+                // Add static route button
+                var button = one.lib.dashlet.button.single("Add Static Route", one.f.switchmanager.staticRouteConfig.id.dashlet.add, "btn-primary", "btn-mini");
+                var $button = one.lib.dashlet.button.button(button);
+                $button.click(function() {
+                    var $modal = one.f.switchmanager.staticRouteConfig.modal.initialize();
+                    $modal.modal();
+                });
+                $dashlet.append(one.lib.dashlet.header(one.f.dashlet.staticRouteConfig.name));
+                $dashlet.append($button);
+
+                // Delete static route button
+                var button = one.lib.dashlet.button.single("Delete Static Route(s)", one.f.switchmanager.staticRouteConfig.id.dashlet.remove, "btn-primary", "btn-mini");
+                var $button = one.lib.dashlet.button.button(button);
+                $button.click(function() {
+                    var requestData = {};
+                    var routesToDelete = [];
+                    var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
+                    checkedCheckBoxes.each(function(index, value) {
+                        routesToDelete.push(checkedCheckBoxes[index].id);
+                    });
+                    if (routesToDelete.length > 0) {
+                        requestData["routesToDelete"] = routesToDelete.toString();
+                        var url = one.f.switchmanager.rootUrl + "/staticRoute/delete";
+                        one.f.switchmanager.staticRouteConfig.ajax.main(url, requestData, function(response) {
+                            if (response.status == true) {
+                                // refresh dashlet by passing dashlet div as param
+                                one.f.switchmanager.staticRouteConfig.dashlet($("#left-bottom .dashlet"));
+                            } else {
+                                alert(response.message);
+                            }
+                        });
+                    }
+                });
+                $dashlet.append($button);
+            }
+
 			var body = one.f.switchmanager.staticRouteConfig.data.staticRouteConfig(content);
 			// first column contains checkbox. no need for header
 			content.columnNames.splice(0,0," ");
@@ -712,11 +721,9 @@ one.f.switchmanager.staticRouteConfig = {
         },
 		footer : function() {
             var footer = [];
-            if (one.role < 2) {
-            	 var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.staticRouteConfig.id.modal.save, "btn-success", "");
-                 var $saveButton = one.lib.dashlet.button.button(saveButton);
-                 footer.push($saveButton);
-            }
+            var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.staticRouteConfig.id.modal.save, "btn-success", "");
+            var $saveButton = one.lib.dashlet.button.button(saveButton);
+            footer.push($saveButton);
             return footer;
         }
 	},
@@ -761,51 +768,52 @@ one.f.switchmanager.spanPortConfig = {
 	},
 	dashlet: function($dashlet) {
 		one.lib.dashlet.empty($dashlet);
-		if(one.role < 2) {
-
-			// Add span port button
-			var button = one.lib.dashlet.button.single("Add Span Port", one.f.switchmanager.spanPortConfig.id.dashlet.add, "btn-primary", "btn-mini");
-			var $button = one.lib.dashlet.button.button(button);
-
-			$button.click(function() {
-				var $modal = one.f.switchmanager.spanPortConfig.modal.initialize();
-				$modal.modal();
-			});
-			$dashlet.append(one.lib.dashlet.header(one.f.dashlet.spanPortConfig.name));
-			$dashlet.append($button);
-
-			// Delete span port button
-			var button = one.lib.dashlet.button.single("Delete SPAN Port(s)", 
-					one.f.switchmanager.spanPortConfig.id.dashlet.remove, "btn-primary", "btn-mini");
-			var $button = one.lib.dashlet.button.button(button);
-			$button.click(function() {
-
-				var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
-				if(checkedCheckBoxes.length > 0) {
-					var spanPortsToDelete = "";
-					checkedCheckBoxes.each(function(index, value) {
-						spanPortsToDelete += checkedCheckBoxes[index].spanPort + "###";
-					}); 
-
-					var requestData = {};
-					requestData["spanPortsToDelete"] = spanPortsToDelete;
-					var url = one.f.switchmanager.rootUrl + "/spanPorts/delete";
-					one.f.switchmanager.spanPortConfig.ajax.main(url, requestData, function(response) {
-						if(response.status == true) {
-							// refresh dashlet by passing dashlet div as param
-							one.f.switchmanager.spanPortConfig.dashlet($("#right-bottom .dashlet"));
-						} else {
-							alert(response.message);
-						}
-					});
-				}
-			});
-			$dashlet.append($button);
-		}
         
         //populate table in dashlet
 		var url = one.f.switchmanager.rootUrl + "/spanPorts";
 		one.f.switchmanager.spanPortConfig.ajax.main(url, {}, function(content) {
+
+            if (content.privilege === 'WRITE') {
+
+                // Add span port button
+                var button = one.lib.dashlet.button.single("Add Span Port", one.f.switchmanager.spanPortConfig.id.dashlet.add, "btn-primary", "btn-mini");
+                var $button = one.lib.dashlet.button.button(button);
+
+                $button.click(function() {
+                    var $modal = one.f.switchmanager.spanPortConfig.modal.initialize();
+                    $modal.modal();
+                });
+                $dashlet.append(one.lib.dashlet.header(one.f.dashlet.spanPortConfig.name));
+                $dashlet.append($button);
+
+                // Delete span port button
+                var button = one.lib.dashlet.button.single("Delete SPAN Port(s)", one.f.switchmanager.spanPortConfig.id.dashlet.remove, "btn-primary", "btn-mini");
+                var $button = one.lib.dashlet.button.button(button);
+                $button.click(function() {
+
+                    var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
+                    if (checkedCheckBoxes.length > 0) {
+                        var spanPortsToDelete = "";
+                        checkedCheckBoxes.each(function(index, value) {
+                            spanPortsToDelete += checkedCheckBoxes[index].spanPort + "###";
+                        });
+
+                        var requestData = {};
+                        requestData["spanPortsToDelete"] = spanPortsToDelete;
+                        var url = one.f.switchmanager.rootUrl + "/spanPorts/delete";
+                        one.f.switchmanager.spanPortConfig.ajax.main(url, requestData, function(response) {
+                            if (response.status == true) {
+                                // refresh dashlet by passing dashlet div as param
+                                one.f.switchmanager.spanPortConfig.dashlet($("#right-bottom .dashlet"));
+                            } else {
+                                alert(response.message);
+                            }
+                        });
+                    }
+                });
+                $dashlet.append($button);
+            }
+
 			var body = one.f.switchmanager.spanPortConfig.data.devices(content);
 			// first column contains the checkbox. no header required.
 			content.columnNames.splice(0,0," ");
@@ -911,11 +919,9 @@ one.f.switchmanager.spanPortConfig = {
         },
 		footer : function() {
             var footer = [];
-            if (one.role < 2) {
-                var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.spanPortConfig.id.modal.save, "btn-success", "");
-                var $saveButton = one.lib.dashlet.button.button(saveButton);
-                footer.push($saveButton);
-            }
+            var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.spanPortConfig.id.modal.save, "btn-success", "");
+            var $saveButton = one.lib.dashlet.button.button(saveButton);
+            footer.push($saveButton);
             return footer;
         }
 	},

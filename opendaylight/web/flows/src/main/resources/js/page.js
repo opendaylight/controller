@@ -1,9 +1,9 @@
 
-/* 
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved. 
- * 
- * This program and the accompanying materials are made available under the 
- * terms of the Eclipse Public License v1.0 which accompanies this distribution, 
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
@@ -60,7 +60,7 @@ one.f.nodes = {
     dashlet : function($dashlet) {
         var $h4 = one.lib.dashlet.header("Nodes");
         $dashlet.append($h4);
-        
+
         // load body
         one.f.nodes.ajax.dashlet(function($table) {
 			// total nodes count
@@ -109,14 +109,14 @@ one.f.nodes = {
         dashlet : function(body, callback) {
             var attributes = ['table-striped', 'table-bordered', 'table-hover', 'table-condensed'];
             var $table = one.lib.dashlet.table.table(attributes);
-            
+
             var headers = ['Node', 'Flows'];
             var $thead = one.lib.dashlet.table.header(headers);
             $table.append($thead);
-            
+
             var $tbody = one.lib.dashlet.table.body(body);
             $table.append($tbody);
-            
+
             return $table;
         }
     }
@@ -129,7 +129,7 @@ one.f.detail = {
     dashlet : function($dashlet, details) {
         var $h4 = one.lib.dashlet.header("Flow Details");
         $dashlet.append($h4);
-        
+
         // details
         if (details == undefined) {
         	var $none = $(document.createElement('div'));
@@ -137,7 +137,7 @@ one.f.detail = {
             var $p = $(document.createElement('p'));
             $p.text('Please select a flow');
             $p.addClass('text-center').addClass('text-info');
-            
+
             $dashlet.append($none)
             	.append($p);
         }
@@ -302,23 +302,32 @@ one.f.flows = {
     },
     registry : {},
     dashlet : function($dashlet, callback) {
-        var $h4 = one.lib.dashlet.header("Flow Entries");
-        
-        if (one.role < 2) {
-	        var button = one.lib.dashlet.button.single("Add Flow Entry", one.f.flows.id.dashlet.add, "btn-primary", "btn-mini");
-	        var $button = one.lib.dashlet.button.button(button);
-	        
-	        $button.click(function() {
-	            var $modal = one.f.flows.modal.initialize();
-	            $modal.modal();
-	        });
-        }
-        
-        $dashlet.append($h4);
-        if (one.role < 2) $dashlet.append($button);
-        
+
         // load body
         one.f.flows.ajax.dashlet(function($table) {
+
+            var $h4 = one.lib.dashlet.header("Flow Entries");
+
+            $dashlet.append($h4);
+            if (one.f.flows.registry.privilege === 'WRITE') {
+                var button = one.lib.dashlet.button.single("Add Flow Entry", one.f.flows.id.dashlet.add, "btn-primary", "btn-mini");
+                var $button = one.lib.dashlet.button.button(button);
+
+                $button.click(function() {
+                    var $modal = one.f.flows.modal.initialize();
+                    $modal.modal();
+                });
+                $dashlet.append($button);
+
+            }
+
+            // table bindings
+            $table.find('tbody').find('tr').click(function() {
+                var id = $($(this).find('td')[0]).text();
+                var node = $(this).data('id');
+                one.f.flows.detail(id, node);
+            });
+
 			// total flows
 			var flowCount = $table.find('tbody').find('tr').size();
 			// prompt output
@@ -332,13 +341,7 @@ one.f.flows = {
 			$p = $(document.createElement('p'));
 			$p.append(out);
 			$dashlet.append($p);
-            // table bindings
-            $table.find('tbody').find('tr').click(function() {
-                var id = $($(this).find('td')[0]).text();
-				var node = $(this).data('id');
-                one.f.flows.detail(id, node);
-            });
-            // add to dashlet
+            // add table to dashlet
             $dashlet.append($table);
             // details callback
             if(callback != undefined) callback();
@@ -350,7 +353,7 @@ one.f.flows = {
         $detailDashlet.empty();
         var $h4 = one.lib.dashlet.header("Flow Overview");
         $detailDashlet.append($h4);
-        
+
         // details
         var flows = one.f.flows.registry.flows;
         var flow;
@@ -359,7 +362,7 @@ one.f.flows = {
                 flow = value;
             }
         });
-        if (one.role < 2) {
+        if (one.f.flows.registry.privilege === 'WRITE') {
 	        // remove button
 	        var button = one.lib.dashlet.button.single("Remove Flow", one.f.flows.id.dashlet.remove, "btn-danger", "btn-mini");
 	        var $button = one.lib.dashlet.button.button(button);
@@ -395,11 +398,12 @@ one.f.flows = {
 	                }
 	            });
 	        });
+
+	        $detailDashlet.append($button).append($toggle);
         }
         // append details
         var body = one.f.detail.data.dashlet(flow);
         var $body = one.f.detail.body.dashlet(body);
-        if (one.role < 2) $detailDashlet.append($button).append($toggle);
         $detailDashlet.append($body);
 		var body = one.f.detail.data.description(flow);
 		var $body = one.f.detail.body.description(body);
@@ -436,15 +440,15 @@ one.f.flows = {
             },
             footer : function() {
                 var footer = [];
-                
+
                 var removeButton = one.lib.dashlet.button.single("Remove Flow", one.f.flows.id.modal.dialog.remove, "btn-danger", "");
                 var $removeButton = one.lib.dashlet.button.button(removeButton);
                 footer.push($removeButton);
-                
+
                 var closeButton = one.lib.dashlet.button.single("Cancel", one.f.flows.id.modal.dialog.close, "", "");
                 var $closeButton = one.lib.dashlet.button.button(closeButton);
                 footer.push($closeButton);
-                
+
                 return footer;
             },
             body : function(id) {
@@ -457,12 +461,12 @@ one.f.flows = {
             var h3 = "Add Flow Entry";
             var footer = one.f.flows.modal.footer();
             var $modal = one.lib.modal.spawn(one.f.flows.id.modal.modal, h3, "", footer);
-            
+
             // bind close button
             $('#'+one.f.flows.id.modal.close, $modal).click(function() {
                 $modal.modal('hide');
             });
-            
+
             // bind add flow button
             $('#'+one.f.flows.id.modal.add, $modal).click(function() {
                 one.f.flows.modal.add($modal, 'false');
@@ -472,18 +476,18 @@ one.f.flows = {
             $('#'+one.f.flows.id.modal.install, $modal).click(function() {
                 one.f.flows.modal.add($modal, 'true');
             });
-            
+
             // inject body (nodePorts)
             one.f.flows.modal.ajax.nodes(function(nodes, nodeports) {
                 var $body = one.f.flows.modal.body(nodes, nodeports);
                 one.lib.modal.inject.body($modal, $body);
             });
-            
+
             return $modal;
         },
         add : function($modal, install) {
             var result = {};
-            
+
             result['name'] = $('#'+one.f.flows.id.modal.form.name, $modal).val();
             result['ingressPort'] = $('#'+one.f.flows.id.modal.form.port, $modal).val();
             result['priority'] = $('#'+one.f.flows.id.modal.form.priority, $modal).val();
@@ -505,11 +509,11 @@ one.f.flows = {
 			result['installInHw'] = install;
 
             var nodeId = $('#'+one.f.flows.id.modal.form.nodes, $modal).val();
-            
+
             $.each(result, function(key, value) {
                 if (value == "") delete result[key];
             });
-            
+
             var action = [];
             var $table = $('#'+one.f.flows.id.modal.action.table, $modal);
             $($table.find('tbody').find('tr')).each(function(index, value) {
@@ -518,7 +522,7 @@ one.f.flows = {
 				}
             });
             result['actions'] = action;
-            
+
             // frontend validation
 			if (result['name'] == undefined) {
 				alert('Need flow name');
@@ -532,13 +536,13 @@ one.f.flows = {
 				alert('Please specify an action');
 				return;
 			}
-            
+
 			// package for ajax call
             var resource = {};
             resource['body'] = JSON.stringify(result);
             resource['action'] = 'add';
 			resource['nodeId'] = nodeId;
-            
+
             one.f.flows.modal.ajax.saveflow(resource, function(data) {
                 if (data == "Success") {
                     $modal.modal('hide');
@@ -556,7 +560,7 @@ one.f.flows = {
                     var nodes = one.f.flows.modal.data.nodes(data);
                     var nodeports = data;
                     one.f.flows.registry['nodeports'] = nodeports;
-                    
+
                     successCallback(nodes, nodeports);
                 });
             },
@@ -606,7 +610,7 @@ one.f.flows = {
 			one.lib.form.select.prepend($select, { '' : 'Please Select a Node' });
 			$select.val($select.find("option:first").val());
 			$select.attr('id', one.f.flows.id.modal.form.nodes);
-			
+
 			// bind onchange
 			$select.change(function() {
 			    // retrieve port value
@@ -763,9 +767,9 @@ one.f.flows = {
                 one.f.flows.modal.action.parse(action.attr('value'));
 				$select[0].selectedIndex = 0;
             });
-            
+
 			$fieldset.append($select).append($table);
-            
+
 			// return
 			$form.append($fieldset);
 			return $form;
@@ -1128,11 +1132,11 @@ one.f.flows = {
                 var addButton = one.lib.dashlet.button.single("Add Action", one.f.flows.id.modal.action.add, "btn-primary", "");
                 var $addButton = one.lib.dashlet.button.button(addButton);
                 footer.push($addButton);
-                
+
                 var closeButton = one.lib.dashlet.button.single("Close", one.f.flows.id.modal.action.close, "", "");
                 var $closeButton = one.lib.dashlet.button.button(closeButton);
                 footer.push($closeButton);
-                
+
                 return footer;
             }
         },
@@ -1142,23 +1146,24 @@ one.f.flows = {
 			var installButton = one.lib.dashlet.button.single("Install Flow", one.f.flows.id.modal.install, "btn-success", "");
 			var $installButton = one.lib.dashlet.button.button(installButton);
 			footer.push($installButton);
-            
+
             var addButton = one.lib.dashlet.button.single("Save Flow", one.f.flows.id.modal.add, "btn-primary", "");
             var $addButton = one.lib.dashlet.button.button(addButton);
             footer.push($addButton);
-            
+
             var closeButton = one.lib.dashlet.button.single("Close", one.f.flows.id.modal.close, "", "");
             var $closeButton = one.lib.dashlet.button.button(closeButton);
             footer.push($closeButton);
-            
+
             return footer;
         }
     },
     ajax : {
         dashlet : function(callback) {
             $.getJSON(one.f.address.root+one.f.address.flows.main, function(data) {
-                one.f.flows.registry['flows'] = data;
-                var body = one.f.flows.data.dashlet(data);
+                one.f.flows.registry['flows'] = data.flows;
+                one.f.flows.registry['privilege'] = data.privilege;
+                var body = one.f.flows.data.dashlet(data.flows);
                 var $body = one.f.flows.body.dashlet(body, callback);
                 callback($body);
             });
@@ -1178,7 +1183,7 @@ one.f.flows = {
                 	tr['type'] = ['warning'];
                 tr['entry'] = entry;
                 tr['id'] = value['nodeId'];
-                
+
                 body.push(tr);
             });
             return body;
@@ -1188,14 +1193,14 @@ one.f.flows = {
         dashlet : function(body, callback) {
             var attributes = ['table-striped', 'table-bordered', 'table-hover', 'table-condensed', 'table-cursor'];
             var $table = one.lib.dashlet.table.table(attributes);
-            
+
             var headers = ['Flow Name', 'Node'];
             var $thead = one.lib.dashlet.table.header(headers);
             $table.append($thead);
-            
+
             var $tbody = one.lib.dashlet.table.body(body);
             $table.append($tbody);
-            
+
             return $table;
         }
     }
