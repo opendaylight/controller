@@ -255,7 +255,7 @@ public abstract class BitBufferHelper {
             // Now adding the rest of the bits if any
             if (extranumBits != 0) {
                 if (extranumBits < (NetUtils.NumBitsInAByte - extraOffsetBits)) {
-                    valfromnext = (byte) (data[startByteOffset + i + 1] & ((getMSBMask(extranumBits)) >> extraOffsetBits));
+                    valfromnext = (byte) (data[startByteOffset + i] & ((getMSBMask(extranumBits)) >> extraOffsetBits));
                     bytes[i] = (byte) (valfromnext << extraOffsetBits);
                 } else if (extranumBits == (NetUtils.NumBitsInAByte - extraOffsetBits)) {
                     valfromcurr = (data[startByteOffset + i])

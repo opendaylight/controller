@@ -33,6 +33,10 @@ public class Ethernet extends Packet {
         etherTypeClassMap.put(EtherTypes.ARP.shortValue(), ARP.class);
         etherTypeClassMap.put(EtherTypes.IPv4.shortValue(), IPv4.class);
         etherTypeClassMap.put(EtherTypes.LLDP.shortValue(), LLDP.class);
+        etherTypeClassMap.put(EtherTypes.VLANTAGGED.shortValue(), IEEE8021Q.class);
+        etherTypeClassMap.put(EtherTypes.OLDQINQ.shortValue(), IEEE8021Q.class);
+        etherTypeClassMap.put(EtherTypes.QINQ.shortValue(), IEEE8021Q.class);
+        etherTypeClassMap.put(EtherTypes.CISCOQINQ.shortValue(), IEEE8021Q.class);
     }
     private static Map<String, Pair<Integer, Integer>> fieldCoordinates = new LinkedHashMap<String, Pair<Integer, Integer>>() {
         private static final long serialVersionUID = 1L;
