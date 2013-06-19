@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -33,6 +32,10 @@ public class Ethernet extends Packet {
         etherTypeClassMap.put(EtherTypes.ARP.shortValue(), ARP.class);
         etherTypeClassMap.put(EtherTypes.IPv4.shortValue(), IPv4.class);
         etherTypeClassMap.put(EtherTypes.LLDP.shortValue(), LLDP.class);
+        etherTypeClassMap.put(EtherTypes.VLANTAGGED.shortValue(), IEEE8021Q.class);
+        etherTypeClassMap.put(EtherTypes.OLDQINQ.shortValue(), IEEE8021Q.class);
+        etherTypeClassMap.put(EtherTypes.QINQ.shortValue(), IEEE8021Q.class);
+        etherTypeClassMap.put(EtherTypes.CISCOQINQ.shortValue(), IEEE8021Q.class);
     }
     private static Map<String, Pair<Integer, Integer>> fieldCoordinates = new LinkedHashMap<String, Pair<Integer, Integer>>() {
         private static final long serialVersionUID = 1L;
@@ -55,8 +58,8 @@ public class Ethernet extends Packet {
     }
 
     /**
-     * Constructor that sets the access level for the packet and
-     * creates and sets the HashMap
+     * Constructor that sets the access level for the packet and creates and
+     * sets the HashMap
      */
     public Ethernet(boolean writeAccess) {
         super(writeAccess);
@@ -68,14 +71,14 @@ public class Ethernet extends Packet {
     @Override
     public void setHeaderField(String headerField, byte[] readValue) {
         if (headerField.equals(ETHT)) {
-            payloadClass = etherTypeClassMap.get(BitBufferHelper
-                    .getShort(readValue));
+            payloadClass = etherTypeClassMap.get(BitBufferHelper.getShort(readValue));
         }
         hdrFieldsMap.put(headerField, readValue);
     }
 
     /**
      * Gets the destination MAC address stored
+     * 
      * @return byte[] - the destinationMACAddress
      */
     public byte[] getDestinationMACAddress() {
@@ -84,6 +87,7 @@ public class Ethernet extends Packet {
 
     /**
      * Gets the source MAC address stored
+     * 
      * @return byte[] - the sourceMACAddress
      */
     public byte[] getSourceMACAddress() {
@@ -92,6 +96,7 @@ public class Ethernet extends Packet {
 
     /**
      * Gets the etherType stored
+     * 
      * @return short - the etherType
      */
     public short getEtherType() {
@@ -100,6 +105,7 @@ public class Ethernet extends Packet {
 
     /**
      * Sets the destination MAC address for the current Ethernet object instance
+     * 
      * @param byte[] - the destinationMACAddress to set
      */
     public Ethernet setDestinationMACAddress(byte[] destinationMACAddress) {
@@ -109,6 +115,7 @@ public class Ethernet extends Packet {
 
     /**
      * Sets the source MAC address for the current Ethernet object instance
+     * 
      * @param byte[] - the sourceMACAddress to set
      */
     public Ethernet setSourceMACAddress(byte[] sourceMACAddress) {
@@ -118,6 +125,7 @@ public class Ethernet extends Packet {
 
     /**
      * Sets the etherType for the current Ethernet object instance
+     * 
      * @param short - the etherType to set
      */
     public Ethernet setEtherType(short etherType) {
