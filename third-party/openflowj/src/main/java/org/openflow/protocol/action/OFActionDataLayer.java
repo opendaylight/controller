@@ -44,7 +44,7 @@ public abstract class OFActionDataLayer extends OFAction {
     @Override
     public void writeTo(ByteBuffer data) {
         super.writeTo(data);
-        data.put(this.dataLayerAddress);
+        data.put(this.dataLayerAddress, 0, OFPhysicalPort.OFP_ETH_ALEN);
         data.putInt(0);
         data.putShort((short) 0);
     }
