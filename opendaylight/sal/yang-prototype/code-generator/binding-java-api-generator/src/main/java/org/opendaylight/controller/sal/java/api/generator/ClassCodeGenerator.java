@@ -30,7 +30,6 @@ public final class ClassCodeGenerator implements CodeGenerator {
     @Override
     public Writer generate(Type type) throws IOException {
         final Writer writer = new StringWriter();
-        boolean isIdentity = type instanceof GeneratedTransferIdentityObject;
 
         if (type instanceof GeneratedTransferObject) {
             GeneratedTransferObject genTO = (GeneratedTransferObject) type;            
@@ -38,7 +37,7 @@ public final class ClassCodeGenerator implements CodeGenerator {
             
             final String currentPkg = genTO.getPackageName();
             final List<GeneratedProperty> fields = genTO.getProperties();
-            final List<Enumeration> enums = genTO.getEnumDefintions();
+            final List<Enumeration> enums = genTO.getEnumerations();
 
             writer.write(GeneratorUtil.createPackageDeclaration(currentPkg));
             writer.write(NL);
@@ -50,7 +49,7 @@ public final class ClassCodeGenerator implements CodeGenerator {
             writer.write(NL);
 
             writer.write(GeneratorUtil.createClassDeclaration(genTO, "",
-                    imports, isIdentity));
+                    imports, genTO.isAbstract()));
             writer.write(NL);
             writer.write(NL);
             
@@ -69,7 +68,7 @@ public final class ClassCodeGenerator implements CodeGenerator {
                 }
                 writer.write(NL);
                 writer.write(GeneratorUtil.createConstructor(genTO, TAB,
-                        imports, isIdentity) + NL);
+                        imports, genTO.isAbstract()) + NL);
                 writer.write(NL);
                 for (GeneratedProperty field : fields) {
                     writer.write(GeneratorUtil.createGetter(field, TAB,

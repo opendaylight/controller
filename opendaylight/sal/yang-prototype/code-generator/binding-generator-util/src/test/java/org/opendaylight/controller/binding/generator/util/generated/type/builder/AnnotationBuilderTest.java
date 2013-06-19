@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.junit.Test;
 import org.opendaylight.controller.binding.generator.util.Types;
-import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
 import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
@@ -76,7 +75,7 @@ public class AnnotationBuilderTest {
 
         final MethodSignatureBuilder methodBuilder = genTypeBuilder
                 .addMethod("simpleMethod");
-        methodBuilder.addReturnType(Types.typeForClass(Integer.class));
+        methodBuilder.setReturnType(Types.typeForClass(Integer.class));
         final AnnotationTypeBuilder annotManAttr = methodBuilder
                 .addAnnotation("org.springframework.jmx.export.annotation",
                         "ManagedAttribute");
@@ -142,7 +141,7 @@ public class AnnotationBuilderTest {
 
         final GeneratedPropertyBuilder propertyBuilder = genTOBuilder
                 .addProperty("simpleProperty");
-        propertyBuilder.addReturnType(Types.typeForClass(Integer.class));
+        propertyBuilder.setReturnType(Types.typeForClass(Integer.class));
         final AnnotationTypeBuilder annotManAttr = propertyBuilder
                 .addAnnotation("org.springframework.jmx.export.annotation",
                         "ManagedAttribute");

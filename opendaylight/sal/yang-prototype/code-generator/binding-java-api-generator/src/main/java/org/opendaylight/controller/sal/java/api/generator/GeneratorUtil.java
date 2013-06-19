@@ -622,7 +622,7 @@ public final class GeneratorUtil {
         final String genTypePkg = genType.getPackageName();
 
         final List<Constant> constants = genType.getConstantDefinitions();
-        final List<MethodSignature> methods = genType.getMethodDefinitions();
+		final List<MethodSignature> methods = genType.getMethodDefinitions();
         List<Type> impl = genType.getImplements();
 
         // IMPLEMENTATIONS

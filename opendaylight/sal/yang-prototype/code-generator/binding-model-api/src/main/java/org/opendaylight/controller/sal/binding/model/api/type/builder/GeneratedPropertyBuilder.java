@@ -7,29 +7,38 @@
   */
 package org.opendaylight.controller.sal.binding.model.api.type.builder;
 
-import org.opendaylight.controller.sal.binding.model.api.AccessModifier;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 
 /**
-
+ * Generated Property Builder is interface that contains methods to build and
+ * instantiate Generated Property definition.
  *
+ * @see GeneratedProperty
  */
-public interface GeneratedPropertyBuilder {
-    
-    public AnnotationTypeBuilder addAnnotation(final String packageName, final String name);
-    
-    public String getName();
-    
-    public boolean addReturnType(final Type returnType);
-    
-    public void accessorModifier(final AccessModifier modifier);
-    
-    public void addComment(final String comment);
-    
-    public void setFinal(final boolean isFinal);
-    
+public interface GeneratedPropertyBuilder extends TypeMemberBuilder {
+
+    /**
+     * Sets isReadOnly flag for property. If property is marked as read only
+     * it is the same as set property in java as final.
+     *
+     * @param isReadOnly Read Only property flag.
+     */
     public void setReadOnly(final boolean isReadOnly);
-    
+
+    /**
+     * Returns <code>new</code> <i>immutable</i> instance of Generated
+     * Property.
+     * <br>
+     * The <code>definingType</code> param cannot be <code>null</code>. The
+     * every member in Java MUST be declared and defined inside the scope of
+     * <code>class</code> definition. In case that
+     * defining Type will be passed as <code>null</code> reference the method
+     * SHOULD thrown {@link IllegalArgumentException}.
+     *
+     * @param definingType Defining Type of Generated Property
+     * @return <code>new</code> <i>immutable</i> instance of Generated
+     * Property.
+     */
     public GeneratedProperty toInstance(final Type definingType);
 }

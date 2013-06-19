@@ -21,11 +21,9 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedT
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTypeBuilder;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.*;
-import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.*;
+import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
-import org.opendaylight.controller.yang.model.api.type.IdentityrefTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.LeafrefTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.UnionTypeDefinition;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 
 import java.util.HashMap;
@@ -56,13 +54,13 @@ public final class TypeProviderImpl implements TypeProvider {
     public void putReferencedType(final SchemaPath refTypePath,
                                   final Type refType) {
         if (refTypePath == null) {
-            throw new IllegalArgumentException("Path reference of " +
-                    "Enumeration Type Definition cannot be NULL!");
+            throw new IllegalArgumentException("Path reference of "
+                    + "Enumeration Type Definition cannot be NULL!");
         }
 
         if (refType == null) {
-            throw new IllegalArgumentException("Reference to Enumeration " +
-                    "Type cannot be NULL!");
+            throw new IllegalArgumentException("Reference to Enumeration "
+                    + "Type cannot be NULL!");
         }
         referencedTypes.put(refTypePath, refType);
     }
@@ -85,16 +83,13 @@ public final class TypeProviderImpl implements TypeProvider {
             final TypeDefinition<?> typeDefinition) {
         Type returnType = null;
         if (typeDefinition == null) {
-            throw new IllegalArgumentException("Type Definition cannot be " +
-                    "NULL!");
+            throw new IllegalArgumentException("Type Definition cannot be NULL!");
         }
         if (typeDefinition.getQName() == null) {
-            throw new IllegalArgumentException("Type Definition cannot have " +
-                    "non specified QName (QName cannot be NULL!)");
+            throw new IllegalArgumentException("Type Definition cannot have non specified QName (QName cannot be NULL!)");
         }
         if (typeDefinition.getQName().getLocalName() == null) {
-            throw new IllegalArgumentException("Type Definitions Local Name " +
-                    "cannot be NULL!");
+            throw new IllegalArgumentException("Type Definitions Local Name cannot be NULL!");
         }
         final String typedefName = typeDefinition.getQName().getLocalName();
         if (typeDefinition instanceof ExtendedType) {
@@ -104,15 +99,15 @@ public final class TypeProviderImpl implements TypeProvider {
                 final LeafrefTypeDefinition leafref = (LeafrefTypeDefinition) baseTypeDef;
                 returnType = provideTypeForLeafref(leafref);
             } else if (baseTypeDef instanceof IdentityrefTypeDefinition) {
-                final IdentityrefTypeDefinition idref = (IdentityrefTypeDefinition)typeDefinition;
+                final IdentityrefTypeDefinition idref = (IdentityrefTypeDefinition) baseTypeDef;
                 returnType = returnTypeForIdentityref(idref);
             } else if (baseTypeDef instanceof EnumTypeDefinition) {
                 final EnumTypeDefinition enumTypeDef = (EnumTypeDefinition) baseTypeDef;
                 returnType = resolveEnumFromTypeDefinition(enumTypeDef,
                         typedefName);
             } else {
-                final Module module = findParentModuleForTypeDefinition(schemaContext,
-                        typeDefinition);
+                final Module module = findParentModuleForTypeDefinition(
+                        schemaContext, typeDefinition);
                 if (module != null) {
                     final Map<String, Type> genTOs = genTypeDefsContextMap
                             .get(module.getName());
@@ -130,32 +125,32 @@ public final class TypeProviderImpl implements TypeProvider {
                 final LeafrefTypeDefinition leafref = (LeafrefTypeDefinition) typeDefinition;
                 returnType = provideTypeForLeafref(leafref);
             } else if (typeDefinition instanceof IdentityrefTypeDefinition) {
-                final IdentityrefTypeDefinition idref = (IdentityrefTypeDefinition)typeDefinition;
+                final IdentityrefTypeDefinition idref = (IdentityrefTypeDefinition) typeDefinition;
                 returnType = returnTypeForIdentityref(idref);
             } else {
                 returnType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
                         .javaTypeForSchemaDefinitionType(typeDefinition);
             }
         }
-        //TODO: add throw exception when we will be able to resolve ALL yang
+        // TODO: add throw exception when we will be able to resolve ALL yang
         // types!
-//        if (returnType == null) {
-//            throw new IllegalArgumentException("Type Provider can't resolve " +
-//                    "type for specified Type Definition " + typedefName);
-//        }
+        // if (returnType == null) {
+        // throw new IllegalArgumentException("Type Provider can't resolve " +
+        // "type for specified Type Definition " + typedefName);
+        // }
         return returnType;
     }
-    
+
     private Type returnTypeForIdentityref(IdentityrefTypeDefinition idref) {
         QName baseIdQName = idref.getIdentity();
         Module module = schemaContext.findModuleByNamespace(baseIdQName.getNamespace());
         IdentitySchemaNode identity = null;
-        for(IdentitySchemaNode id : module.getIdentities()) {
-            if(id.getQName().equals(baseIdQName)) {
+        for (IdentitySchemaNode id : module.getIdentities()) {
+            if (id.getQName().equals(baseIdQName)) {
                 identity = id;
             }
         }
-        if(identity == null) {
+        if (identity == null) {
             throw new IllegalArgumentException("Target identity '" + baseIdQName + "' do not exists");
         }
 
@@ -173,16 +168,13 @@ public final class TypeProviderImpl implements TypeProvider {
             final TypeDefinition<?> typeDefinition) {
         Type returnType = null;
         if (typeDefinition == null) {
-            throw new IllegalArgumentException("Type Definition cannot be " +
-                    "NULL!");
+            throw new IllegalArgumentException("Type Definition cannot be NULL!");
         }
         if (typeDefinition.getQName() == null) {
-            throw new IllegalArgumentException("Type Definition cannot have " +
-                    "non specified QName (QName cannot be NULL!)");
+            throw new IllegalArgumentException("Type Definition cannot have non specified QName (QName cannot be NULL!)");
         }
         if (typeDefinition.getQName() == null) {
-            throw new IllegalArgumentException("Type Definitions Local Name " +
-                    "cannot be NULL!");
+            throw new IllegalArgumentException("Type Definitions Local Name cannot be NULL!");
         }
 
         final String typedefName = typeDefinition.getQName().getLocalName();
@@ -191,8 +183,8 @@ public final class TypeProviderImpl implements TypeProvider {
 
             if (!(baseTypeDef instanceof LeafrefTypeDefinition)
                     && !(baseTypeDef instanceof IdentityrefTypeDefinition)) {
-                final Module module = findParentModuleForTypeDefinition(schemaContext,
-                        typeDefinition);
+                final Module module = findParentModuleForTypeDefinition(
+                        schemaContext, typeDefinition);
 
                 if (module != null) {
                     final Map<String, Type> genTOs = genTypeDefsContextMap
@@ -209,8 +201,7 @@ public final class TypeProviderImpl implements TypeProvider {
     private TypeDefinition<?> baseTypeDefForExtendedType(
             final TypeDefinition<?> extendTypeDef) {
         if (extendTypeDef == null) {
-            throw new IllegalArgumentException("Type Definiition reference " +
-                    "cannot be NULL!");
+            throw new IllegalArgumentException("Type Definiition reference cannot be NULL!");
         }
         final TypeDefinition<?> baseTypeDef = extendTypeDef.getBaseType();
         if (baseTypeDef instanceof ExtendedType) {
@@ -224,13 +215,11 @@ public final class TypeProviderImpl implements TypeProvider {
     public Type provideTypeForLeafref(final LeafrefTypeDefinition leafrefType) {
         Type returnType = null;
         if (leafrefType == null) {
-            throw new IllegalArgumentException("Leafref Type Definition " +
-                    "reference cannot be NULL!");
+            throw new IllegalArgumentException("Leafref Type Definition reference cannot be NULL!");
         }
 
         if (leafrefType.getPathStatement() == null) {
-            throw new IllegalArgumentException("The Path Statement for " +
-                    "Leafref Type Definition cannot be NULL!");
+            throw new IllegalArgumentException("The Path Statement for Leafref Type Definition cannot be NULL!");
         }
 
         final RevisionAwareXPath xpath = leafrefType.getPathStatement();
@@ -240,22 +229,23 @@ public final class TypeProviderImpl implements TypeProvider {
             if (strXPath.matches(".*//[.* | .*//].*")) {
                 returnType = Types.typeForClass(Object.class);
             } else {
-                final Module module = findParentModuleForTypeDefinition(schemaContext, leafrefType);
+                final Module module = findParentModuleForTypeDefinition(
+                        schemaContext, leafrefType);
                 if (module != null) {
                     final DataSchemaNode dataNode;
                     if (xpath.isAbsolute()) {
                         dataNode = findDataSchemaNode(schemaContext, module,
                                 xpath);
                     } else {
-                        dataNode = findDataSchemaNodeForRelativeXPath(schemaContext,
-                                module, leafrefType, xpath);
+                        dataNode = findDataSchemaNodeForRelativeXPath(
+                                schemaContext, module, leafrefType, xpath);
                     }
 
                     if (leafContainsEnumDefinition(dataNode)) {
                         returnType = referencedTypes.get(dataNode.getPath());
                     } else if (leafListContainsEnumDefinition(dataNode)) {
-                        returnType = Types.listTypeFor(referencedTypes.get(
-                                dataNode.getPath()));
+                        returnType = Types.listTypeFor(referencedTypes
+                                .get(dataNode.getPath()));
                     } else {
                         returnType = resolveTypeFromDataSchemaNode(dataNode);
                     }
@@ -275,8 +265,7 @@ public final class TypeProviderImpl implements TypeProvider {
         return false;
     }
 
-    private boolean leafListContainsEnumDefinition(
-            final DataSchemaNode dataNode) {
+    private boolean leafListContainsEnumDefinition(final DataSchemaNode dataNode) {
         if (dataNode instanceof LeafListSchemaNode) {
             final LeafListSchemaNode leafList = (LeafListSchemaNode) dataNode;
             if (leafList.getType() instanceof EnumTypeDefinition) {
@@ -289,25 +278,22 @@ public final class TypeProviderImpl implements TypeProvider {
     private Enumeration resolveEnumFromTypeDefinition(
             final EnumTypeDefinition enumTypeDef, final String enumName) {
         if (enumTypeDef == null) {
-            throw new IllegalArgumentException("EnumTypeDefinition reference " +
-                    "cannot be NULL!");
+            throw new IllegalArgumentException("EnumTypeDefinition reference cannot be NULL!");
         }
         if (enumTypeDef.getValues() == null) {
-            throw new IllegalArgumentException("EnumTypeDefinition MUST " +
-                    "contain at least ONE value definition!");
+            throw new IllegalArgumentException("EnumTypeDefinition MUST contain at least ONE value definition!");
         }
         if (enumTypeDef.getQName() == null) {
-            throw new IllegalArgumentException("EnumTypeDefinition MUST " +
-                    "contain NON-NULL QName!");
+            throw new IllegalArgumentException("EnumTypeDefinition MUST contain NON-NULL QName!");
         }
         if (enumTypeDef.getQName().getLocalName() == null) {
-            throw new IllegalArgumentException("Local Name in " +
-                    "EnumTypeDefinition QName cannot be NULL!");
+            throw new IllegalArgumentException("Local Name in EnumTypeDefinition QName cannot be NULL!");
         }
 
         final String enumerationName = parseToClassName(enumName);
 
-        Module module = findParentModuleForTypeDefinition(schemaContext, enumTypeDef);
+        Module module = findParentModuleForTypeDefinition(schemaContext,
+                enumTypeDef);
         final String basePackageName = moduleNamespaceToPackageName(module);
 
         final EnumBuilder enumBuilder = new EnumerationBuilderImpl(
@@ -320,24 +306,19 @@ public final class TypeProviderImpl implements TypeProvider {
             final EnumTypeDefinition enumTypeDef, final String enumName,
             final GeneratedTypeBuilder typeBuilder) {
         if (enumTypeDef == null) {
-            throw new IllegalArgumentException("EnumTypeDefinition reference " +
-                    "cannot be NULL!");
+            throw new IllegalArgumentException("EnumTypeDefinition reference cannot be NULL!");
         }
         if (enumTypeDef.getValues() == null) {
-            throw new IllegalArgumentException("EnumTypeDefinition MUST " +
-                    "contain at least ONE value definition!");
+            throw new IllegalArgumentException("EnumTypeDefinition MUST contain at least ONE value definition!");
         }
         if (enumTypeDef.getQName() == null) {
-            throw new IllegalArgumentException("EnumTypeDefinition MUST " +
-                    "contain NON-NULL QName!");
+            throw new IllegalArgumentException("EnumTypeDefinition MUST contain NON-NULL QName!");
         }
         if (enumTypeDef.getQName().getLocalName() == null) {
-            throw new IllegalArgumentException("Local Name in " +
-                    "EnumTypeDefinition QName cannot be NULL!");
+            throw new IllegalArgumentException("Local Name in EnumTypeDefinition QName cannot be NULL!");
         }
         if (typeBuilder == null) {
-            throw new IllegalArgumentException("Generated Type Builder " +
-                    "reference cannot be NULL!");
+            throw new IllegalArgumentException("Generated Type Builder reference cannot be NULL!");
         }
 
         final String enumerationName = parseToClassName(enumName);
@@ -350,8 +331,7 @@ public final class TypeProviderImpl implements TypeProvider {
     }
 
     private void updateEnumPairsFromEnumTypeDef(
-            final EnumTypeDefinition enumTypeDef,
-            final EnumBuilder enumBuilder) {
+            final EnumTypeDefinition enumTypeDef, final EnumBuilder enumBuilder) {
         if (enumBuilder != null) {
             final List<EnumPair> enums = enumTypeDef.getValues();
             if (enums != null) {
@@ -390,8 +370,7 @@ public final class TypeProviderImpl implements TypeProvider {
     private void resolveTypeDefsFromContext() {
         final Set<Module> modules = schemaContext.getModules();
         if (modules == null) {
-            throw new IllegalArgumentException("Sef of Modules cannot be " +
-                    "NULL!");
+            throw new IllegalArgumentException("Sef of Modules cannot be NULL!");
         }
         for (final Module module : modules) {
             if (module == null) {
@@ -413,7 +392,8 @@ public final class TypeProviderImpl implements TypeProvider {
                 final List<ExtendedType> extUnions = UnionDependencySort
                         .sort(typeDefinitions);
                 for (final ExtendedType extUnionType : extUnions) {
-                    addUnionGeneratedTypeDefinition(basePackageName, extUnionType);
+                    addUnionGeneratedTypeDefinition(basePackageName,
+                            extUnionType);
                 }
             }
         }
@@ -423,7 +403,6 @@ public final class TypeProviderImpl implements TypeProvider {
                                         final String moduleName, final TypeDefinition<?> typedef) {
         if ((basePackageName != null) && (moduleName != null)
                 && (typedef != null) && (typedef.getQName() != null)) {
-
 
             final String typedefName = typedef.getQName().getLocalName();
             final TypeDefinition<?> baseTypeDefinition = baseTypeDefForExtendedType(typedef);
@@ -435,6 +414,11 @@ public final class TypeProviderImpl implements TypeProvider {
                     returnType = resolveEnumFromTypeDefinition(enumTypeDef,
                             typedefName);
 
+                } else if (baseTypeDefinition instanceof BitsTypeDefinition) {
+                    final BitsTypeDefinition bitsTypeDefinition = (BitsTypeDefinition) baseTypeDefinition;
+                    returnType = bitsTypedefToTransferObject(bitsTypeDefinition,
+                            basePackageName, typedefName);
+
                 } else {
                     final Type javaType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
                             .javaTypeForSchemaDefinitionType(baseTypeDefinition);
@@ -443,8 +427,8 @@ public final class TypeProviderImpl implements TypeProvider {
                             javaType);
                 }
                 if (returnType != null) {
-                    final Map<String, Type> typeMap = genTypeDefsContextMap.get
-                            (moduleName);
+                    final Map<String, Type> typeMap = genTypeDefsContextMap
+                            .get(moduleName);
                     if (typeMap != null) {
                         typeMap.put(typedefName, returnType);
                     }
@@ -468,7 +452,7 @@ public final class TypeProviderImpl implements TypeProvider {
             final GeneratedPropertyBuilder genPropBuilder = genTOBuilder
                     .addProperty(propertyName);
 
-            genPropBuilder.addReturnType(javaType);
+            genPropBuilder.setReturnType(javaType);
             genTOBuilder.addEqualsIdentity(genPropBuilder);
             genTOBuilder.addHashIdentity(genPropBuilder);
             genTOBuilder.addToStringProperty(genPropBuilder);
@@ -480,26 +464,22 @@ public final class TypeProviderImpl implements TypeProvider {
     private void addUnionGeneratedTypeDefinition(final String basePackageName,
                                                  final TypeDefinition<?> typedef) {
         if (basePackageName == null) {
-            throw new IllegalArgumentException("Base Package Name cannot be " +
-                    "NULL!");
+            throw new IllegalArgumentException("Base Package Name cannot be NULL!");
         }
         if (typedef == null) {
-            throw new IllegalArgumentException("Type Definition cannot be " +
-                    "NULL!");
+            throw new IllegalArgumentException("Type Definition cannot be NULL!");
         }
         if (typedef.getQName() == null) {
-            throw new IllegalArgumentException("Type Definition cannot have " +
-                    "non specified QName (QName cannot be NULL!)");
+            throw new IllegalArgumentException("Type Definition cannot have non specified QName (QName cannot be NULL!)");
         }
 
         final TypeDefinition<?> baseTypeDefinition = typedef.getBaseType();
         if ((baseTypeDefinition != null)
                 && (baseTypeDefinition instanceof UnionTypeDefinition)) {
             final UnionTypeDefinition unionTypeDef = (UnionTypeDefinition) baseTypeDefinition;
-            final List<TypeDefinition<?>> unionTypes = unionTypeDef
-                    .getTypes();
-            final Module parentModule = findParentModuleForTypeDefinition(schemaContext,
-                    typedef);
+            final List<TypeDefinition<?>> unionTypes = unionTypeDef.getTypes();
+            final Module parentModule = findParentModuleForTypeDefinition(
+                    schemaContext, typedef);
 
             Map<String, Type> genTOsMap = null;
             if (parentModule != null && parentModule.getName() != null) {
@@ -510,17 +490,17 @@ public final class TypeProviderImpl implements TypeProvider {
                     basePackageName, typedef);
             if ((unionTypes != null) && (unionGenTransObject != null)) {
                 for (final TypeDefinition<?> unionType : unionTypes) {
-                    final String typeName = unionType.getQName()
-                            .getLocalName();
+                    final String typeName = unionType.getQName().getLocalName();
                     if (unionType instanceof ExtendedType) {
-                        final Module unionTypeModule = findParentModuleForTypeDefinition(schemaContext,
-                                unionType);
-                        if (unionTypeModule != null && unionTypeModule.getName() != null) {
+                        final Module unionTypeModule = findParentModuleForTypeDefinition(
+                                schemaContext, unionType);
+                        if (unionTypeModule != null
+                                && unionTypeModule.getName() != null) {
                             final Map<String, Type> innerGenTOs = genTypeDefsContextMap
                                     .get(unionTypeModule.getName());
 
-                            final GeneratedTransferObject genTransferObject =
-                                    (GeneratedTransferObject) innerGenTOs.get(typeName);
+                            final GeneratedTransferObject genTransferObject = (GeneratedTransferObject) innerGenTOs
+                                    .get(typeName);
                             if (genTransferObject != null) {
                                 updateUnionTypeAsProperty(unionGenTransObject,
                                         genTransferObject,
@@ -528,8 +508,7 @@ public final class TypeProviderImpl implements TypeProvider {
                             }
                         }
                     } else if (unionType instanceof EnumTypeDefinition) {
-                        final EnumBuilder
-                                enumBuilder = resolveInnerEnumFromTypeDefinition(
+                        final EnumBuilder enumBuilder = resolveInnerEnumFromTypeDefinition(
                                 (EnumTypeDefinition) unionType, typeName,
                                 unionGenTransObject);
                         final Type enumRefType = new ReferencedTypeImpl(
@@ -556,10 +535,9 @@ public final class TypeProviderImpl implements TypeProvider {
             final GeneratedTOBuilder unionGenTransObject, final Type type,
             final String propertyName) {
         if (unionGenTransObject != null && type != null) {
-            final GeneratedPropertyBuilder propBuilder =
-                    unionGenTransObject.addProperty(parseToValidParamName(
-                            propertyName));
-            propBuilder.addReturnType(type);
+            final GeneratedPropertyBuilder propBuilder = unionGenTransObject
+                    .addProperty(parseToValidParamName(propertyName));
+            propBuilder.setReturnType(type);
             propBuilder.setReadOnly(false);
 
             if (!(type instanceof Enumeration)) {
@@ -586,5 +564,36 @@ public final class TypeProviderImpl implements TypeProvider {
             return newType;
         }
         return null;
+    }
+
+    private GeneratedTransferObject bitsTypedefToTransferObject(
+            final BitsTypeDefinition bitsTypeDefinition, final String basePackageName, final String typedefName) {
+
+        if (bitsTypeDefinition == null) {
+            throw new IllegalArgumentException("Bits TypeDefinition cannot be NULL!");
+        }
+        if (basePackageName == null) {
+            throw new IllegalArgumentException("Base Package Name cannot be NULL!");
+        }
+        if (typedefName == null) {
+            throw new IllegalArgumentException("Type Definition Local Name cannot be NULL!");
+        }
+
+        final String typeDefName = parseToClassName(typedefName);
+        final GeneratedTOBuilder genTOBuilder = new GeneratedTOBuilderImpl(basePackageName, typeDefName);
+
+        final List<Bit> bitList = bitsTypeDefinition.getBits();
+        GeneratedPropertyBuilder genPropertyBuilder;
+        for (final Bit bit : bitList) {
+            String name = bit.getName();
+            genPropertyBuilder = genTOBuilder.addProperty(parseToValidParamName(name));
+            genPropertyBuilder.setReadOnly(false);
+            genPropertyBuilder.setReturnType(BaseYangTypes.BOOLEAN_TYPE);
+
+            genTOBuilder.addEqualsIdentity(genPropertyBuilder);
+            genTOBuilder.addHashIdentity(genPropertyBuilder);
+            genTOBuilder.addToStringProperty(genPropertyBuilder);
+        }
+        return genTOBuilder.toInstance();
     }
 }
