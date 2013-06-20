@@ -75,12 +75,13 @@ public class Flows implements IDaylightWeb {
 
     @RequestMapping(value = "/main")
     @ResponseBody
-    public Set<Map<String, Object>> getFlows(HttpServletRequest request, @RequestParam(required = false) String container) {
+    public Map<String, Object> getFlows(HttpServletRequest request, @RequestParam(required = false) String container) {
         String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
 
         // Derive the privilege this user has on the current container
         String userName = request.getUserPrincipal().getName();
-        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) == Privilege.NONE) {
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
+        if (privilege  == Privilege.NONE) {
             return null;
         }
 
@@ -100,7 +101,7 @@ public class Flows implements IDaylightWeb {
 
         // get static flow list
         List<FlowConfig> staticFlowList = frm.getStaticFlows();
-        Set<Map<String, Object>> output = new HashSet<Map<String, Object>>();
+        Set<Map<String, Object>> flowSet = new HashSet<Map<String, Object>>();
         for (FlowConfig flowConfig : staticFlowList) {
             Map<String, Object> entry = new HashMap<String, Object>();
             entry.put("flow", flowConfig);
@@ -110,9 +111,12 @@ public class Flows implements IDaylightWeb {
             entry.put("node", (description.isEmpty() || description
                     .equalsIgnoreCase("none")) ? node.toString() : description);
             entry.put("nodeId", node.toString());
-            output.add(entry);
+            flowSet.add(entry);
         }
 
+        Map <String, Object> output = new HashMap<String, Object>(2);
+        output.put("flows", flowSet);
+        output.put("privilege", privilege);
         return output;
     }
 
