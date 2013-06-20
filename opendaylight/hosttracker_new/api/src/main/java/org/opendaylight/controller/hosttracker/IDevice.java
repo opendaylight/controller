@@ -134,6 +134,10 @@ public interface IDevice {
      */
     public IEntityClass getEntityClass();
 
+    public boolean isStaticHost();
+
+    public void setStaticHost(boolean isStatic);
+
     public HostNodeConnector toHostNodeConnector();
 
 }

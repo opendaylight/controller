@@ -38,6 +38,7 @@ import static org.opendaylight.controller.hosttracker.internal.DeviceManagerImpl
 import static org.opendaylight.controller.hosttracker.internal.DeviceManagerImpl.DeviceUpdate.Change.DELETE;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -81,10 +82,12 @@ import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
+import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ListenerDispatcher;
 import org.opendaylight.controller.sal.utils.MultiIterator;
 import org.opendaylight.controller.sal.utils.SingletonTask;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
@@ -1179,6 +1182,7 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         logger.info("Primary index {}", primaryIndex);
         ArrayList<Long> deleteQueue = null;
         LinkedList<DeviceUpdate> deviceUpdates = null;
+        Device oldDevice = null;
         Device device = null;
 
         // we may need to restart the learning process if we detect
@@ -1334,7 +1338,7 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                 // modified this Device).
                 if (!res)
                     continue;
-
+                oldDevice = device;
                 device = newDevice;
                 // update indices
                 if (!updateIndices(device, deviceKey)) {
@@ -1363,7 +1367,7 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                 if (moved) {
                     // we count device moved events in
                     // sendDeviceMovedNotification()
-                    sendDeviceMovedNotification(device);
+                    sendDeviceMovedNotification(device, oldDevice);
                     if (logger.isTraceEnabled()) {
                         logger.trace("Device moved: attachment points {},"
                                 + "entities {}", device.attachmentPoints,
@@ -1472,6 +1476,10 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
             case ADD:
                 notify.notifyHTClient(update.device.toHostNodeConnector());
                 break;
+            case DELETE:
+                notify.notifyHTClientHostRemoved(update.device.toHostNodeConnector());
+                break;
+            case CHANGE:
             }
         }
 
@@ -1898,6 +1906,19 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
             }
         }
     }
+    /**
+     * Send update notifications to listeners.
+     * IfNewHostNotify listeners need to remove old device and add new device.
+     * @param device
+     * @param oldDevice
+     */
+    protected void sendDeviceMovedNotification(Device device, Device oldDevice){
+        for (IfNewHostNotify notify : newHostNotify){
+                notify.notifyHTClientHostRemoved(oldDevice.toHostNodeConnector());
+                notify.notifyHTClient(device.toHostNodeConnector());
+            }
+        sendDeviceMovedNotification(device);
+        }
 
     /**
      * this method will reclassify and reconcile a device - possibilities are -
@@ -2131,8 +2152,16 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
 
     @Override
     public Set<HostNodeConnector> getActiveStaticHosts() {
-        // TODO Auto-generated method stub
-        return null;
+        Collection<Device> devices = Collections
+                .unmodifiableCollection(deviceMap.values());
+        Iterator<Device> i = devices.iterator();
+        Set<HostNodeConnector> nc = new HashSet<HostNodeConnector>();
+        while (i.hasNext()) {
+            Device device = i.next();
+            if(device.isStaticHost())
+                nc.add(device.toHostNodeConnector());
+        }
+        return nc;
     }
 
     @Override
@@ -2144,14 +2173,41 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     @Override
     public Status addStaticHost(String networkAddress, String dataLayerAddress,
             NodeConnector nc, String vlan) {
-        // TODO Auto-generated method stub
-        return null;
+        Long mac = HexEncode.stringToLong(dataLayerAddress);
+        try{
+            InetAddress addr = InetAddress.getByName(networkAddress);
+            int ip = toIPv4Address(addr.getAddress());
+            Entity e = new Entity(mac, Short.valueOf(vlan), ip, nc, new Date());
+            Device d = this.learnDeviceByEntity(e);
+            d.setStaticHost(true);
+            return new Status(StatusCode.SUCCESS);
+        }catch(UnknownHostException e){
+            return new Status(StatusCode.INTERNALERROR);
+        }
     }
 
     @Override
     public Status removeStaticHost(String networkAddress) {
-        // TODO Auto-generated method stub
-        return null;
+        Integer addr;
+        try {
+            addr = toIPv4Address(InetAddress.getByName(networkAddress).getAddress());
+        } catch (UnknownHostException e) {
+            return new Status(StatusCode.NOTFOUND, "Host does not exist");
+        }
+        Iterator<Device> di = this.getDeviceIteratorForQuery(null, null, addr, null);
+        List<IDeviceListener> listeners = deviceListeners
+                .getOrderedListeners();
+        while(di.hasNext()){
+            Device d = di.next();
+            if(d.isStaticHost()){
+                deleteDevice(d);
+                for (IfNewHostNotify notify : newHostNotify)
+                    notify.notifyHTClientHostRemoved(d.toHostNodeConnector());
+                for (IDeviceListener listener : listeners)
+                        listener.deviceRemoved(d);
+            }
+        }
+        return new Status(StatusCode.SUCCESS);
     }
 
     /**
