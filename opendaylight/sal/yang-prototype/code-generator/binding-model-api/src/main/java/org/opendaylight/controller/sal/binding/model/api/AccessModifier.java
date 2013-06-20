@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.sal.binding.model.api;
 
+/**
+ * Enum definition which provides four access modifiers that are described
+ * in Java programming language (Default, Private, Protected, Public).
+ */
 public enum AccessModifier {
-    PRIVATE, PUBLIC, PROTECTED
+    DEFAULT, PRIVATE, PUBLIC, PROTECTED
 }

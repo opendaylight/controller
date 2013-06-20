@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.binding.generator.util.generated.type.builder;
 
 import java.util.ArrayList;
@@ -18,9 +25,8 @@ final class AnnotationTypeBuilderImpl implements AnnotationTypeBuilder {
         super();
         this.packageName = packageName;
         this.name = name;
-        
-        annotationBuilders = new ArrayList<AnnotationTypeBuilder>();
-        parameters = new ArrayList<AnnotationType.Parameter>();
+        annotationBuilders = new ArrayList<>();
+        parameters = new ArrayList<>();
     }
 
     @Override
@@ -31,6 +37,11 @@ final class AnnotationTypeBuilderImpl implements AnnotationTypeBuilder {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getFullyQualifiedName() {
+        return packageName + "." + name;
     }
 
     @Override
@@ -134,7 +145,7 @@ final class AnnotationTypeBuilderImpl implements AnnotationTypeBuilder {
             this.packageName = packageName;
             this.name = name;
             
-            this.annotations = new ArrayList<AnnotationType>();
+            this.annotations = new ArrayList<>();
             for (final AnnotationTypeBuilder builder : annotationBuilders) {
                 annotations.add(builder.toInstance());
             }
@@ -142,7 +153,7 @@ final class AnnotationTypeBuilderImpl implements AnnotationTypeBuilder {
             this.annotations = Collections.unmodifiableList(annotations); 
             this.parameters = Collections.unmodifiableList(parameters);
             
-            paramNames = new ArrayList<String>();
+            paramNames = new ArrayList<>();
             for (final AnnotationType.Parameter parameter : parameters) {
                 paramNames.add(parameter.getName());
             }
@@ -157,6 +168,11 @@ final class AnnotationTypeBuilderImpl implements AnnotationTypeBuilder {
         @Override
         public String getName() {
             return name;
+        }
+
+        @Override
+        public String getFullyQualifiedName() {
+            return packageName + "." + name;
         }
 
         @Override

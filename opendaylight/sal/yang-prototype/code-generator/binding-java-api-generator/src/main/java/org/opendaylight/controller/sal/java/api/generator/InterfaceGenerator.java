@@ -82,7 +82,7 @@ public final class InterfaceGenerator implements CodeGenerator {
 			final List<Constant> constants = genType.getConstantDefinitions();
 			final List<MethodSignature> methods = genType
 					.getMethodDefinitions();
-			final List<Enumeration> enums = genType.getEnumDefintions();
+			final List<Enumeration> enums = genType.getEnumerations();
 
 			writer.write(GeneratorUtil.createPackageDeclaration(genType
 					.getPackageName()));
@@ -105,5 +105,4 @@ public final class InterfaceGenerator implements CodeGenerator {
 		}
 		return writer;
 	}
-
 }

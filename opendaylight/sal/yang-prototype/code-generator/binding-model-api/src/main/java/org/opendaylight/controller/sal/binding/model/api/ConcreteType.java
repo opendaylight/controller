@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.sal.binding.model.api;
 
+/**
+ * The Concrete Type is marker interface that encapsulates definition of java
+ * concrete type.
+ */
 public interface ConcreteType extends Type {
 
 }

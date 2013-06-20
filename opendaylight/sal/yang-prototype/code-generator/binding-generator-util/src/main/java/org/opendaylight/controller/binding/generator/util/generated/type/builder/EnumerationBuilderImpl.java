@@ -27,7 +27,7 @@ public final class EnumerationBuilderImpl implements EnumBuilder {
         super();
         this.packageName = packageName;
         this.name = name;
-        values = new ArrayList<Enumeration.Pair>();
+        values = new ArrayList<>();
     }
     
     @Override
@@ -39,7 +39,12 @@ public final class EnumerationBuilderImpl implements EnumBuilder {
     public String getName() {
         return name;
     }
-    
+
+    @Override
+    public String getFullyQualifiedName() {
+        return packageName + "." + name;
+    }
+
     @Override
     public AnnotationTypeBuilder addAnnotation(final String packageName, final String name) {
         if (packageName != null && name != null) {
@@ -220,7 +225,7 @@ public final class EnumerationBuilderImpl implements EnumBuilder {
         private final String packageName;
         private final String name;
         private final List<Pair> values;
-        private List<AnnotationType> annotations = new ArrayList<AnnotationType>();
+        private List<AnnotationType> annotations = new ArrayList<>();
         
         public EnumerationImpl(final Type definingType,
                 final List<AnnotationTypeBuilder> annotationBuilders,
@@ -250,6 +255,11 @@ public final class EnumerationBuilderImpl implements EnumBuilder {
         @Override
         public String getName() {
             return name;
+        }
+
+        @Override
+        public String getFullyQualifiedName() {
+            return packageName + "." + name;
         }
 
         @Override
