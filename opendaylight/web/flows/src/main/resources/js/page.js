@@ -372,7 +372,7 @@ one.f.flows = {
 	        });
 	        // toggle button
 	        var toggle;
-	        if (flow['flow']['installInHw'] == 'true') {
+	        if (flow['flow']['installInHw'] == 'true' && flow['flow']['status'] == 'Success') {
 	            toggle = one.lib.dashlet.button.single("Uninstall Flow", one.f.flows.id.dashlet.toggle, "btn-warning", "btn-mini");
 	        } else {
 	            toggle = one.lib.dashlet.button.single("Install Flow", one.f.flows.id.dashlet.toggle, "btn-success", "btn-mini");
@@ -1177,9 +1177,11 @@ one.f.flows = {
                 var entry = [];
                 entry.push(value['name']);
                 entry.push(value['node']);
-                if (value['flow']['installInHw'] == 'true')
+                if (value['flow']['installInHw'] == 'true' && value['flow']['status'] == 'Success')
                 	tr['type'] = ['success'];
-                else if (value['flow']['installInHw'] == 'false')
+                else if (value['flow']['installInHw'] == 'false' && value['flow']['status'] == 'Success')
+                	tr['type'] = ['warning'];
+                else 
                 	tr['type'] = ['warning'];
                 tr['entry'] = entry;
                 tr['id'] = value['nodeId'];

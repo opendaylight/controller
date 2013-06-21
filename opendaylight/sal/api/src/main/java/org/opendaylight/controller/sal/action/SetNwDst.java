@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -22,12 +21,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class SetNwDst extends Action {
+    private static final long serialVersionUID = 1L;
     InetAddress address;
 
     /* Dummy constructor for JAXB */
-    private SetNwDst  () {
+    @SuppressWarnings("unused")
+    private SetNwDst() {
     }
 
     public SetNwDst(InetAddress address) {
@@ -38,31 +38,36 @@ public class SetNwDst extends Action {
     /**
      * Returns the network address this action will set
      *
-     * @return  InetAddress
+     * @return InetAddress
      */
     public InetAddress getAddress() {
         return address;
     }
 
-    @XmlElement (name="address")
+    @XmlElement(name = "address")
     public String getAddressAsString() {
         return address.getHostAddress();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SetNwDst other = (SetNwDst) obj;
         if (address == null) {
-            if (other.address != null)
+            if (other.address != null) {
                 return false;
-        } else if (!address.equals(other.address))
+            }
+        } else if (!address.equals(other.address)) {
             return false;
+        }
         return true;
     }
 

@@ -27,12 +27,11 @@ import org.slf4j.LoggerFactory;
 @XmlAccessorType(XmlAccessType.NONE)
 public class MatchField implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
-    private static final Logger logger = LoggerFactory
-            .getLogger(MatchField.class);
+    private static final Logger logger = LoggerFactory.getLogger(MatchField.class);
     private MatchType type; // the field we want to match
     private Object value; // the value of the field we want to match
     private Object mask; // the value of the mask we want to match on the
-                         // specified field
+    // specified field
     private transient boolean isValid;
 
     // To satisfy JAXB
@@ -134,16 +133,11 @@ public class MatchField implements Cloneable, Serializable {
 
     private boolean checkValueType() {
         if (type.isCongruentType(value, mask) == false) {
-            String valueClass = (value == null) ? "null" : value.getClass()
-                    .getSimpleName();
-            String maskClass = (mask == null) ? "null" : mask.getClass()
-                    .getSimpleName();
-            String error = "Invalid match field's value or mask types.For field: "
-                    + type.id()
-                    + " Expected:"
-                    + type.dataType().getSimpleName()
-                    + " or equivalent,"
-                    + " Got:(" + valueClass + "," + maskClass + ")";
+            String valueClass = (value == null) ? "null" : value.getClass().getSimpleName();
+            String maskClass = (mask == null) ? "null" : mask.getClass().getSimpleName();
+            String error = "Invalid match field's value or mask types.For field: " + type.id() + " Expected:"
+                    + type.dataType().getSimpleName() + " or equivalent," + " Got:(" + valueClass + "," + maskClass
+                    + ")";
             throwException(error);
             return false;
         }
@@ -154,13 +148,9 @@ public class MatchField implements Cloneable, Serializable {
         if (type.isValid(value, mask) == false) {
             String maskString = (mask == null) ? "null" : ("0x" + Integer
                     .toHexString(Integer.parseInt(mask.toString())));
-            String error = "Invalid match field's value or mask assignement.For field: "
-                    + type.id()
-                    + " Expected: "
-                    + type.getRange()
-                    + ", Got:(0x"
-                    + Integer.toHexString(Integer.parseInt(value.toString()))
-                    + "," + maskString + ")";
+            String error = "Invalid match field's value or mask assignement.For field: " + type.id() + " Expected: "
+                    + type.getRange() + ", Got:(0x" + Integer.toHexString(Integer.parseInt(value.toString())) + ","
+                    + maskString + ")";
 
             throwException(error);
             return false;
@@ -188,7 +178,7 @@ public class MatchField implements Cloneable, Serializable {
                 }
             }
         } catch (CloneNotSupportedException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         return cloned;
     }
@@ -200,12 +190,7 @@ public class MatchField implements Cloneable, Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((mask == null) ? 0 : mask.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
-        return result;
+        return type.hashCode(value, mask);
     }
 
     @Override
@@ -223,7 +208,6 @@ public class MatchField implements Cloneable, Serializable {
         if (type != other.type) {
             return false;
         }
-        return (type.equalValues(this.value, other.value) && type.equalMasks(
-                this.mask, other.mask));
+        return (type.equalValues(this.value, other.value) && type.equalMasks(this.mask, other.mask));
     }
 }

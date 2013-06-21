@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -19,13 +18,14 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class SetNwTos extends Action {
-        @XmlElement
+    private static final long serialVersionUID = 1L;
+    @XmlElement
     private int tos;
 
     /* Dummy constructor for JAXB */
-    private SetNwTos () {
+    @SuppressWarnings("unused")
+    private SetNwTos() {
     }
 
     public SetNwTos(int tos) {
@@ -45,15 +45,19 @@ public class SetNwTos extends Action {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SetNwTos other = (SetNwTos) obj;
-        if (tos != other.tos)
+        if (tos != other.tos) {
             return false;
+        }
         return true;
     }
 

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -14,15 +13,13 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Represents the action of sending the packet to the local hardware path for processing
- *
- *
- *
+ * Represents the action of sending the packet to the local hardware path for
+ * processing
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class HwPath extends Action {
+    private static final long serialVersionUID = 1L;
 
     public HwPath() {
         type = ActionType.HW_PATH;

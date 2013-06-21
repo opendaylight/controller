@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -20,13 +19,14 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class SetTpSrc extends Action {
-        @XmlElement
+    private static final long serialVersionUID = 1L;
+    @XmlElement
     private int port;
 
     /* Dummy constructor for JAXB */
-    private SetTpSrc () {
+    @SuppressWarnings("unused")
+    private SetTpSrc() {
     }
 
     public SetTpSrc(int port) {
@@ -37,6 +37,7 @@ public class SetTpSrc extends Action {
 
     /**
      * Returns the transport port the action will set
+     *
      * @return
      */
     public int getPort() {
@@ -45,15 +46,19 @@ public class SetTpSrc extends Action {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SetTpSrc other = (SetTpSrc) obj;
-        if (port != other.port)
+        if (port != other.port) {
             return false;
+        }
         return true;
     }
 
