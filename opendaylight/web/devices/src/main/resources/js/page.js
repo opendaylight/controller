@@ -110,7 +110,7 @@ one.f.switchmanager.nodesLearnt = {
                     var h3;
                     var footer = [];
                     var $body = one.f.switchmanager.nodesLearnt.modal.body.updateNode(nodeId, evt.target.switchDetails, tiers);
-                    if (one.main.registry.container == 'default' && evt.target.privilege == 'WRITE'){
+                    if (evt.target.privilege == 'WRITE'){
                         h3 = "Update Node Information";
                         footer = one.f.switchmanager.nodesLearnt.modal.footer.updateNode();
                     } else { //disable node edit
