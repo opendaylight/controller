@@ -55,6 +55,7 @@ import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
@@ -65,13 +66,14 @@ import org.slf4j.LoggerFactory;
  * Configuration Java Object which represents a flow configuration information
  * for Forwarding Rules Manager.
  */
-
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class FlowConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(FlowConfig.class);
-    private static final String staticFlowsGroup = "**StaticFlows";
+    public static final String staticFlowsGroup = "**StaticFlows";
+    public static final String internalStaticFlowsGroup = "**InternalStaticFlows";
+    public static final String internalStaticFlowBegin = "**";
     private boolean dynamic;
     private String status;
 
@@ -128,13 +130,10 @@ public class FlowConfig implements Serializable {
     public FlowConfig() {
     }
 
-    public FlowConfig(String installInHw, String name, Node node,
-            String priority, String cookie, String ingressPort,
-            String portGroup, String vlanId, String vlanPriority,
-            String etherType, String srcMac, String dstMac, String protocol,
-            String tosBits, String srcIP, String dstIP, String tpSrc,
-            String tpDst, String idleTimeout, String hardTimeout,
-            List<String> actions) {
+    public FlowConfig(String installInHw, String name, Node node, String priority, String cookie, String ingressPort,
+            String portGroup, String vlanId, String vlanPriority, String etherType, String srcMac, String dstMac,
+            String protocol, String tosBits, String srcIP, String dstIP, String tpSrc, String tpDst,
+            String idleTimeout, String hardTimeout, List<String> actions) {
         super();
         this.installInHw = installInHw;
         this.name = name;
@@ -202,7 +201,7 @@ public class FlowConfig implements Serializable {
 
     public boolean isInternalFlow() {
         // Controller generated static flows have name starting with "**"
-        return (this.name != null && this.name.startsWith("**"));
+        return (this.name != null && this.name.startsWith(FlowConfig.internalStaticFlowBegin));
     }
 
     public String getName() {
@@ -254,17 +253,13 @@ public class FlowConfig implements Serializable {
 
     @Override
     public String toString() {
-        return "FlowConfig [dynamic=" + dynamic + ", status=" + status
-                + ", installInHw=" + installInHw + ", name=" + name
-                + ", switchId=" + node + ", ingressPort=" + ingressPort
-                + ", portGroup=" + portGroup + ", etherType=" + etherType
-                + ", priority=" + priority + ", vlanId=" + vlanId
-                + ", vlanPriority=" + vlanPriority + ", dlSrc=" + dlSrc
-                + ", dlDst=" + dlDst + ", nwSrc=" + nwSrc + ", nwDst=" + nwDst
-                + ", protocol=" + protocol + ", tosBits=" + tosBits
-                + ", tpSrc=" + tpSrc + ", tpDst=" + tpDst + ", cookie="
-                + cookie + ", idleTimeout=" + idleTimeout + ", hardTimeout="
-                + hardTimeout + ", actions=" + actions + "]";
+        return "FlowConfig [dynamic=" + dynamic + ", status=" + status + ", installInHw=" + installInHw + ", name="
+                + name + ", switchId=" + node + ", ingressPort=" + ingressPort + ", portGroup=" + portGroup
+                + ", etherType=" + etherType + ", priority=" + priority + ", vlanId=" + vlanId + ", vlanPriority="
+                + vlanPriority + ", dlSrc=" + dlSrc + ", dlDst=" + dlDst + ", nwSrc=" + nwSrc + ", nwDst=" + nwDst
+                + ", protocol=" + protocol + ", tosBits=" + tosBits + ", tpSrc=" + tpSrc + ", tpDst=" + tpDst
+                + ", cookie=" + cookie + ", idleTimeout=" + idleTimeout + ", hardTimeout=" + hardTimeout + ", actions="
+                + actions + "]";
     }
 
     public void setPortGroup(String portGroup) {
@@ -376,11 +371,7 @@ public class FlowConfig implements Serializable {
     }
 
     public boolean isIPv6() {
-        if (NetUtils.isIPv6AddressValid(this.getSrcIp())
-                || NetUtils.isIPv6AddressValid(this.getDstIp())) {
-            return true;
-        }
-        return false;
+        return NetUtils.isIPv6AddressValid(this.getSrcIp()) || NetUtils.isIPv6AddressValid(this.getDstIp());
     }
 
     public List<String> getActions() {
@@ -424,30 +415,22 @@ public class FlowConfig implements Serializable {
         result = prime * result + ((dlDst == null) ? 0 : dlDst.hashCode());
         result = prime * result + ((dlSrc == null) ? 0 : dlSrc.hashCode());
         result = prime * result + (dynamic ? 1231 : 1237);
-        result = prime * result
-                + ((etherType == null) ? 0 : etherType.hashCode());
-        result = prime * result
-                + ((ingressPort == null) ? 0 : ingressPort.hashCode());
+        result = prime * result + ((etherType == null) ? 0 : etherType.hashCode());
+        result = prime * result + ((ingressPort == null) ? 0 : ingressPort.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((nwDst == null) ? 0 : nwDst.hashCode());
         result = prime * result + ((nwSrc == null) ? 0 : nwSrc.hashCode());
-        result = prime * result
-                + ((portGroup == null) ? 0 : portGroup.hashCode());
-        result = prime * result
-                + ((priority == null) ? 0 : priority.hashCode());
-        result = prime * result
-                + ((protocol == null) ? 0 : protocol.hashCode());
+        result = prime * result + ((portGroup == null) ? 0 : portGroup.hashCode());
+        result = prime * result + ((priority == null) ? 0 : priority.hashCode());
+        result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
         result = prime * result + ((node == null) ? 0 : node.hashCode());
         result = prime * result + ((tosBits == null) ? 0 : tosBits.hashCode());
         result = prime * result + ((tpDst == null) ? 0 : tpDst.hashCode());
         result = prime * result + ((tpSrc == null) ? 0 : tpSrc.hashCode());
         result = prime * result + ((vlanId == null) ? 0 : vlanId.hashCode());
-        result = prime * result
-                + ((vlanPriority == null) ? 0 : vlanPriority.hashCode());
-        result = prime * result
-                + ((idleTimeout == null) ? 0 : idleTimeout.hashCode());
-        result = prime * result
-                + ((hardTimeout == null) ? 0 : hardTimeout.hashCode());
+        result = prime * result + ((vlanPriority == null) ? 0 : vlanPriority.hashCode());
+        result = prime * result + ((idleTimeout == null) ? 0 : idleTimeout.hashCode());
+        result = prime * result + ((hardTimeout == null) ? 0 : hardTimeout.hashCode());
         return result;
     }
 
@@ -614,13 +597,10 @@ public class FlowConfig implements Serializable {
             return false;
         }
 
-        Pattern macPattern = Pattern
-                .compile("([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}");
+        Pattern macPattern = Pattern.compile("([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}");
         Matcher mm = macPattern.matcher(mac);
         if (!mm.matches()) {
-            log.debug(
-                    "Ethernet address {} is not valid. Example: 00:05:b9:7c:81:5f",
-                    mac);
+            log.debug("Ethernet address {} is not valid. Example: 00:05:b9:7c:81:5f", mac);
             return false;
         }
         return true;
@@ -672,17 +652,16 @@ public class FlowConfig implements Serializable {
         return ((to >= 0) && (to <= 0xffff));
     }
 
-    private boolean conflictWithContainerFlow(IContainer container,
-            StringBuffer resultStr) {
+    private Status conflictWithContainerFlow(IContainer container) {
         // Return true if it's default container
         if (container.getName().equals(GlobalConstants.DEFAULT.toString())) {
-            return false;
+            return new Status(StatusCode.SUCCESS);
         }
 
         // No container flow = no conflict
         List<ContainerFlow> cFlowList = container.getContainerFlows();
         if (((cFlowList == null)) || cFlowList.isEmpty()) {
-            return false;
+            return new Status(StatusCode.SUCCESS);
         }
 
         // Check against each container's flow
@@ -693,36 +672,34 @@ public class FlowConfig implements Serializable {
         for (ContainerFlow cFlow : cFlowList) {
             if (cFlow.allowsFlow(flow)) {
                 log.trace("Config is congruent with at least one container flow");
-                return false;
+                return new Status(StatusCode.SUCCESS);
             }
         }
         String msg = "Flow Config conflicts with all existing container flows";
-        resultStr.append(msg);
         log.trace(msg);
 
-        return true;
+        return new Status(StatusCode.BADREQUEST, msg);
     }
 
-    public boolean isValid(IContainer container, StringBuffer resultStr) {
+    public Status validate(IContainer container) {
         EtherIPType etype = EtherIPType.ANY;
         EtherIPType ipsrctype = EtherIPType.ANY;
         EtherIPType ipdsttype = EtherIPType.ANY;
 
-        String containerName = (container == null) ? GlobalConstants.DEFAULT
-                .toString() : container.getName();
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, containerName, this);
+        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container.getName();
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName,
+                this);
 
         Switch sw = null;
         try {
-            if (name == null) {
-                resultStr.append(String.format("Name is null"));
-                return false;
+            if (name == null || name.trim().isEmpty()) {
+                return new Status(StatusCode.BADREQUEST, "Invalid name");
             }
+
             if (node == null) {
-                resultStr.append(String.format("Node is null"));
-                return false;
+                return new Status(StatusCode.BADREQUEST, "Node is null");
             }
+
             if (switchManager != null) {
                 for (Switch device : switchManager.getNetworkDevices()) {
                     if (device.getNode().equals(node)) {
@@ -731,20 +708,16 @@ public class FlowConfig implements Serializable {
                     }
                 }
                 if (sw == null) {
-                    resultStr.append(String.format("Node %s not found", node));
-                    return false;
+                    return new Status(StatusCode.BADREQUEST, String.format("Node %s not found", node));
                 }
             } else {
                 log.debug("switchmanager is not set yet");
             }
 
             if (priority != null) {
-                if (Integer.decode(priority) < 0
-                        || (Integer.decode(priority) > 65535)) {
-                    resultStr.append(String.format(
-                            "priority %s is not in the range 0 - 65535",
+                if (Integer.decode(priority) < 0 || (Integer.decode(priority) > 65535)) {
+                    return new Status(StatusCode.BADREQUEST, String.format("priority %s is not in the range 0 - 65535",
                             priority));
-                    return false;
                 }
             }
 
@@ -756,39 +729,27 @@ public class FlowConfig implements Serializable {
             if (ingressPort != null) {
                 Short port = Short.decode(ingressPort);
                 if (isPortValid(sw, port) == false) {
-                    resultStr
-                            .append(String
-                                    .format("Ingress port %d is not valid for the Switch",
-                                            port));
-                    if ((container != null)
-                            && !container.getName().equals(
-                                    GlobalConstants.DEFAULT.toString())) {
-                        resultStr
-                                .append(" in Container " + container.getName());
+                    String msg = String.format("Ingress port %d is not valid for the Switch", port);
+                    if ((container != null) && !container.getName().equals(GlobalConstants.DEFAULT.toString())) {
+                        msg += " in Container " + container.getName();
                     }
-                    return false;
+                    return new Status(StatusCode.BADREQUEST, msg);
                 }
             }
 
             if ((vlanId != null) && !isVlanIdValid(vlanId)) {
-                resultStr.append(String.format(
-                        "Vlan ID %s is not in the range 0 - 4095", vlanId));
-                return false;
+                return new Status(StatusCode.BADREQUEST, String.format("Vlan ID %s is not in the range 0 - 4095",
+                        vlanId));
             }
 
             if ((vlanPriority != null) && !isVlanPriorityValid(vlanPriority)) {
-                resultStr.append(String.format(
-                        "Vlan priority %s is not in the range 0 - 7",
+                return new Status(StatusCode.BADREQUEST, String.format("Vlan priority %s is not in the range 0 - 7",
                         vlanPriority));
-                return false;
             }
-
             if (etherType != null) {
                 int type = Integer.decode(etherType);
                 if ((type < 0) || (type > 0xffff)) {
-                    resultStr.append(String.format(
-                            "Ethernet type %s is not valid", etherType));
-                    return false;
+                    return new Status(StatusCode.BADREQUEST, String.format("Ethernet type %s is not valid", etherType));
                 } else {
                     if (type == 0x800) {
                         etype = EtherIPType.V4;
@@ -799,36 +760,27 @@ public class FlowConfig implements Serializable {
             }
 
             if ((tosBits != null) && !isTOSBitsValid(tosBits)) {
-                resultStr.append(String.format(
-                        "IP ToS bits %s is not in the range 0 - 63", tosBits));
-                return false;
+                return new Status(StatusCode.BADREQUEST, String.format("IP ToS bits %s is not in the range 0 - 63",
+                        tosBits));
             }
 
             if ((tpSrc != null) && !isTpPortValid(tpSrc)) {
-                resultStr.append(String.format(
-                        "Transport source port %s is not valid", tpSrc));
-                return false;
+                return new Status(StatusCode.BADREQUEST, String.format("Transport source port %s is not valid", tpSrc));
             }
+
             if ((tpDst != null) && !isTpPortValid(tpDst)) {
-                resultStr.append(String.format(
-                        "Transport destination port %s is not valid", tpDst));
-                return false;
+                return new Status(StatusCode.BADREQUEST, String.format("Transport destination port %s is not valid",
+                        tpDst));
             }
 
             if ((dlSrc != null) && !isL2AddressValid(dlSrc)) {
-                resultStr
-                        .append(String
-                                .format("Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
-                                        dlSrc));
-                return false;
+                return new Status(StatusCode.BADREQUEST, String.format(
+                        "Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f", dlSrc));
             }
 
             if ((dlDst != null) && !isL2AddressValid(dlDst)) {
-                resultStr
-                        .append(String
-                                .format("Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
-                                        dlDst));
-                return false;
+                return new Status(StatusCode.BADREQUEST, String.format(
+                        "Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f", dlDst));
             }
 
             if (nwSrc != null) {
@@ -837,9 +789,7 @@ public class FlowConfig implements Serializable {
                 } else if (NetUtils.isIPv6AddressValid(nwSrc)) {
                     ipsrctype = EtherIPType.V6;
                 } else {
-                    resultStr.append(String.format(
-                            "IP source address %s is not valid", nwSrc));
-                    return false;
+                    return new Status(StatusCode.BADREQUEST, String.format("IP source address %s is not valid", nwSrc));
                 }
             }
 
@@ -849,42 +799,33 @@ public class FlowConfig implements Serializable {
                 } else if (NetUtils.isIPv6AddressValid(nwDst)) {
                     ipdsttype = EtherIPType.V6;
                 } else {
-                    resultStr.append(String.format(
-                            "IP destination address %s is not valid", nwDst));
-                    return false;
+                    return new Status(StatusCode.BADREQUEST, String.format("IP destination address %s is not valid",
+                            nwDst));
                 }
             }
 
             if (etype != EtherIPType.ANY) {
                 if ((ipsrctype != EtherIPType.ANY) && (ipsrctype != etype)) {
-                    resultStr.append(String
-                            .format("Type mismatch between Ethernet & Src IP"));
-                    return false;
+                    return new Status(StatusCode.BADREQUEST, String.format("Type mismatch between Ethernet & Src IP"));
                 }
                 if ((ipdsttype != EtherIPType.ANY) && (ipdsttype != etype)) {
-                    resultStr.append(String
-                            .format("Type mismatch between Ethernet & Dst IP"));
-                    return false;
+                    return new Status(StatusCode.BADREQUEST, String.format("Type mismatch between Ethernet & Dst IP"));
                 }
             }
             if (ipsrctype != ipdsttype) {
                 if (!((ipsrctype == EtherIPType.ANY) || (ipdsttype == EtherIPType.ANY))) {
-                    resultStr
-                            .append(String.format("IP Src Dest Type mismatch"));
-                    return false;
+                    return new Status(StatusCode.BADREQUEST, String.format("IP Src Dest Type mismatch"));
                 }
             }
 
             if ((idleTimeout != null) && !isTimeoutValid(idleTimeout)) {
-                resultStr.append(String.format(
-                        "Idle Timeout value %s is not valid", idleTimeout));
-                return false;
+                return new Status(StatusCode.BADREQUEST, String.format("Idle Timeout value %s is not valid",
+                        idleTimeout));
             }
 
             if ((hardTimeout != null) && !isTimeoutValid(hardTimeout)) {
-                resultStr.append(String.format(
-                        "Hard Timeout value %s is not valid", hardTimeout));
-                return false;
+                return new Status(StatusCode.BADREQUEST, String.format("Hard Timeout value %s is not valid",
+                        hardTimeout));
             }
 
             Matcher sstr;
@@ -894,24 +835,17 @@ public class FlowConfig implements Serializable {
                     sstr = Pattern.compile("OUTPUT=(.*)").matcher(actiongrp);
                     if (sstr.matches()) {
                         for (String t : sstr.group(1).split(",")) {
-                            Matcher n = Pattern.compile("(?:(\\d+))")
-                                    .matcher(t);
+                            Matcher n = Pattern.compile("(?:(\\d+))").matcher(t);
                             if (n.matches()) {
                                 if (n.group(1) != null) {
                                     Short port = Short.parseShort(n.group(1));
                                     if (isPortValid(sw, port) == false) {
-                                        resultStr
-                                                .append(String
-                                                        .format("Output port %d is not valid for this switch",
-                                                                port));
+                                        String msg = String.format("Output port %d is not valid for this switch", port);
                                         if ((container != null)
-                                                && !container.getName().equals(
-                                                        GlobalConstants.DEFAULT
-                                                                .toString())) {
-                                            resultStr.append(" in Container "
-                                                    + container.getName());
+                                                && !container.getName().equals(GlobalConstants.DEFAULT.toString())) {
+                                            msg += " in Container " + container.getName();
                                         }
-                                        return false;
+                                        return new Status(StatusCode.BADREQUEST, msg);
                                     }
                                 }
                             }
@@ -919,243 +853,181 @@ public class FlowConfig implements Serializable {
                         continue;
                     }
                     // Check src IP
-                    sstr = Pattern.compile(ActionType.FLOOD.toString())
-                            .matcher(actiongrp);
+                    sstr = Pattern.compile(ActionType.FLOOD.toString()).matcher(actiongrp);
                     if (sstr.matches()) {
                         if (container != null) {
-                            resultStr.append(String.format(
-                                    "flood is not allowed in container %s",
-                                    container.getName()));
-                            return false;
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "flood is not allowed in container %s", container.getName()));
                         }
                         continue;
                     }
                     // Check src IP
-                    sstr = Pattern.compile(
-                            ActionType.SET_NW_SRC.toString() + "=(.*)")
-                            .matcher(actiongrp);
+                    sstr = Pattern.compile(ActionType.SET_NW_SRC.toString() + "=(.*)").matcher(actiongrp);
                     if (sstr.matches()) {
                         if (!NetUtils.isIPv4AddressValid(sstr.group(1))) {
-                            resultStr.append(String.format(
-                                    "IP source address %s is not valid",
+                            return new Status(StatusCode.BADREQUEST, String.format("IP source address %s is not valid",
                                     sstr.group(1)));
-                            return false;
                         }
                         continue;
                     }
                     // Check dst IP
-                    sstr = Pattern.compile(
-                            ActionType.SET_NW_DST.toString() + "=(.*)")
-                            .matcher(actiongrp);
+                    sstr = Pattern.compile(ActionType.SET_NW_DST.toString() + "=(.*)").matcher(actiongrp);
                     if (sstr.matches()) {
                         if (!NetUtils.isIPv4AddressValid(sstr.group(1))) {
-                            resultStr.append(String.format(
-                                    "IP destination address %s is not valid",
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "IP destination address %s is not valid", sstr.group(1)));
+                        }
+                        continue;
+                    }
+
+                    sstr = Pattern.compile(ActionType.SET_VLAN_ID.toString() + "=(.*)").matcher(actiongrp);
+                    if (sstr.matches()) {
+                        if ((sstr.group(1) != null) && !isVlanIdValid(sstr.group(1))) {
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "Vlan ID %s is not in the range 0 - 4095", sstr.group(1)));
+                        }
+                        continue;
+                    }
+
+                    sstr = Pattern.compile(ActionType.SET_VLAN_PCP.toString() + "=(.*)").matcher(actiongrp);
+                    if (sstr.matches()) {
+                        if ((sstr.group(1) != null) && !isVlanPriorityValid(sstr.group(1))) {
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "Vlan priority %s is not in the range 0 - 7", sstr.group(1)));
+                        }
+                        continue;
+                    }
+
+                    sstr = Pattern.compile(ActionType.SET_DL_SRC.toString() + "=(.*)").matcher(actiongrp);
+                    if (sstr.matches()) {
+                        if ((sstr.group(1) != null) && !isL2AddressValid(sstr.group(1))) {
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
                                     sstr.group(1)));
-                            return false;
                         }
                         continue;
                     }
-
-                    sstr = Pattern.compile(
-                            ActionType.SET_VLAN_ID.toString() + "=(.*)")
-                            .matcher(actiongrp);
+                    sstr = Pattern.compile(ActionType.SET_DL_DST.toString() + "=(.*)").matcher(actiongrp);
                     if (sstr.matches()) {
-                        if ((sstr.group(1) != null)
-                                && !isVlanIdValid(sstr.group(1))) {
-                            resultStr.append(String.format(
-                                    "Vlan ID %s is not in the range 0 - 4095",
+                        if ((sstr.group(1) != null) && !isL2AddressValid(sstr.group(1))) {
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
                                     sstr.group(1)));
-                            return false;
                         }
                         continue;
                     }
 
-                    sstr = Pattern.compile(
-                            ActionType.SET_VLAN_PCP.toString() + "=(.*)")
-                            .matcher(actiongrp);
+                    sstr = Pattern.compile(ActionType.SET_NW_TOS.toString() + "=(.*)").matcher(actiongrp);
                     if (sstr.matches()) {
-                        if ((sstr.group(1) != null)
-                                && !isVlanPriorityValid(sstr.group(1))) {
-                            resultStr
-                                    .append(String
-                                            .format("Vlan priority %s is not in the range 0 - 7",
-                                                    sstr.group(1)));
-                            return false;
+                        if ((sstr.group(1) != null) && !isTOSBitsValid(sstr.group(1))) {
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "IP ToS bits %s is not in the range 0 - 63", sstr.group(1)));
                         }
                         continue;
                     }
 
-                    sstr = Pattern.compile(
-                            ActionType.SET_DL_SRC.toString() + "=(.*)")
-                            .matcher(actiongrp);
+                    sstr = Pattern.compile(ActionType.SET_TP_SRC.toString() + "=(.*)").matcher(actiongrp);
                     if (sstr.matches()) {
-                        if ((sstr.group(1) != null)
-                                && !isL2AddressValid(sstr.group(1))) {
-                            resultStr
-                                    .append(String
-                                            .format("Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
-                                                    sstr.group(1)));
-                            return false;
+                        if ((sstr.group(1) != null) && !isTpPortValid(sstr.group(1))) {
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "Transport source port %s is not valid", sstr.group(1)));
                         }
                         continue;
                     }
 
-                    sstr = Pattern.compile(
-                            ActionType.SET_DL_DST.toString() + "=(.*)")
-                            .matcher(actiongrp);
+                    sstr = Pattern.compile(ActionType.SET_TP_DST.toString() + "=(.*)").matcher(actiongrp);
                     if (sstr.matches()) {
-                        if ((sstr.group(1) != null)
-                                && !isL2AddressValid(sstr.group(1))) {
-                            resultStr
-                                    .append(String
-                                            .format("Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
-                                                    sstr.group(1)));
-                            return false;
+                        if ((sstr.group(1) != null) && !isTpPortValid(sstr.group(1))) {
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "Transport destination port %s is not valid", sstr.group(1)));
                         }
                         continue;
                     }
-
-                    sstr = Pattern.compile(
-                            ActionType.SET_NW_TOS.toString() + "=(.*)")
-                            .matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null)
-                                && !isTOSBitsValid(sstr.group(1))) {
-                            resultStr
-                                    .append(String
-                                            .format("IP ToS bits %s is not in the range 0 - 63",
-                                                    sstr.group(1)));
-                            return false;
-                        }
-                        continue;
-                    }
-
-                    sstr = Pattern.compile(
-                            ActionType.SET_TP_SRC.toString() + "=(.*)")
-                            .matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null)
-                                && !isTpPortValid(sstr.group(1))) {
-                            resultStr.append(String.format(
-                                    "Transport source port %s is not valid",
-                                    sstr.group(1)));
-                            return false;
-                        }
-                        continue;
-                    }
-
-                    sstr = Pattern.compile(
-                            ActionType.SET_TP_DST.toString() + "=(.*)")
-                            .matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null)
-                                && !isTpPortValid(sstr.group(1))) {
-                            resultStr
-                                    .append(String
-                                            .format("Transport destination port %s is not valid",
-                                                    sstr.group(1)));
-                            return false;
-                        }
-                        continue;
-                    }
-                    sstr = Pattern.compile(
-                            ActionType.SET_NEXT_HOP.toString() + "=(.*)")
-                            .matcher(actiongrp);
+                    sstr = Pattern.compile(ActionType.SET_NEXT_HOP.toString() + "=(.*)").matcher(actiongrp);
                     if (sstr.matches()) {
                         if (!NetUtils.isIPAddressValid(sstr.group(1))) {
-                            resultStr.append(String.format(
-                                    "IP destination address %s is not valid",
-                                    sstr.group(1)));
-                            return false;
+                            return new Status(StatusCode.BADREQUEST, String.format(
+                                    "IP destination address %s is not valid", sstr.group(1)));
                         }
                         continue;
                     }
                 }
             }
             // Check against the container flow
-            if ((container != null)
-                    && conflictWithContainerFlow(container, resultStr)) {
-                return false;
+            Status status;
+            if ((container != null) && !(status = conflictWithContainerFlow(container)).isSuccess()) {
+                return status;
             }
         } catch (NumberFormatException e) {
-            resultStr.append(String.format("Invalid number format %s",
-                    e.getMessage()));
-            return false;
+            return new Status(StatusCode.BADREQUEST, String.format("Invalid number format %s", e.getMessage()));
         }
 
-        return true;
+        return new Status(StatusCode.SUCCESS);
     }
 
     public FlowEntry getFlowEntry() {
-        return new FlowEntry(FlowConfig.staticFlowsGroup, this.name,
-                this.getFlow(), this.getNode());
+        return new FlowEntry(FlowConfig.staticFlowsGroup, this.name, this.getFlow(), this.getNode());
     }
 
     public Flow getFlow() {
         Match match = new Match();
 
         if (this.ingressPort != null) {
-            match.setField(
-                    MatchType.IN_PORT,
-                    NodeConnectorCreator.createOFNodeConnector(
-                            Short.parseShort(ingressPort), getNode()));
+            match.setField(MatchType.IN_PORT,
+                    NodeConnectorCreator.createOFNodeConnector(Short.parseShort(ingressPort), getNode()));
         }
         if (this.dlSrc != null) {
-            match.setField(MatchType.DL_SRC,
-                    HexEncode.bytesFromHexString(this.dlSrc));
+            match.setField(MatchType.DL_SRC, HexEncode.bytesFromHexString(this.dlSrc));
         }
         if (this.dlDst != null) {
-            match.setField(MatchType.DL_DST,
-                    HexEncode.bytesFromHexString(this.dlDst));
+            match.setField(MatchType.DL_DST, HexEncode.bytesFromHexString(this.dlDst));
         }
         if (this.etherType != null) {
-            match.setField(MatchType.DL_TYPE, Integer.decode(etherType)
-                    .shortValue());
+            match.setField(MatchType.DL_TYPE, Integer.decode(etherType).shortValue());
         }
         if (this.vlanId != null) {
             match.setField(MatchType.DL_VLAN, Short.parseShort(this.vlanId));
         }
         if (this.vlanPriority != null) {
-            match.setField(MatchType.DL_VLAN_PR,
-                    Byte.parseByte(this.vlanPriority));
+            match.setField(MatchType.DL_VLAN_PR, Byte.parseByte(this.vlanPriority));
         }
         if (this.nwSrc != null) {
             String parts[] = this.nwSrc.split("/");
             InetAddress ip = NetUtils.parseInetAddress(parts[0]);
             InetAddress mask = null;
+            int maskLen = 0;
             if (parts.length > 1) {
-                int maskLen = Integer.parseInt(parts[1]);
-                mask = NetUtils.getInetNetworkMask(maskLen,
-                        ip instanceof Inet6Address);
+                maskLen = Integer.parseInt(parts[1]);
+            } else {
+                maskLen = (ip instanceof Inet6Address) ? 128 : 32;
             }
+            mask = NetUtils.getInetNetworkMask(maskLen, ip instanceof Inet6Address);
             match.setField(MatchType.NW_SRC, ip, mask);
         }
         if (this.nwDst != null) {
             String parts[] = this.nwDst.split("/");
             InetAddress ip = NetUtils.parseInetAddress(parts[0]);
             InetAddress mask = null;
+            int maskLen = 0;
             if (parts.length > 1) {
-                int maskLen = Integer.parseInt(parts[1]);
-                mask = NetUtils.getInetNetworkMask(maskLen,
-                        ip instanceof Inet6Address);
+                maskLen = Integer.parseInt(parts[1]);
+            } else {
+                maskLen = (ip instanceof Inet6Address) ? 128 : 32;
             }
+            mask = NetUtils.getInetNetworkMask(maskLen, ip instanceof Inet6Address);
             match.setField(MatchType.NW_DST, ip, mask);
         }
         if (this.protocol != null) {
-            match.setField(MatchType.NW_PROTO,
-                    IPProtocols.getProtocolNumberByte(this.protocol));
+            match.setField(MatchType.NW_PROTO, IPProtocols.getProtocolNumberByte(this.protocol));
         }
         if (this.tosBits != null) {
             match.setField(MatchType.NW_TOS, Byte.parseByte(this.tosBits));
         }
         if (this.tpSrc != null) {
-            match.setField(MatchType.TP_SRC, Integer.valueOf(this.tpSrc)
-                    .shortValue());
+            match.setField(MatchType.TP_SRC, Integer.valueOf(this.tpSrc).shortValue());
         }
         if (this.tpDst != null) {
-            match.setField(MatchType.TP_DST, Integer.valueOf(this.tpDst)
-                    .shortValue());
+            match.setField(MatchType.TP_DST, Integer.valueOf(this.tpDst).shortValue());
         }
 
         Flow flow = new Flow(match, getActionList());
@@ -1186,9 +1058,8 @@ public class FlowConfig implements Serializable {
         return this.node.equals(node);
     }
 
-    public void toggleStatus() {
-        installInHw = (installInHw == null) ? "true" : (installInHw
-                .equals("true")) ? "false" : "true";
+    public void toggleInstallation() {
+        installInHw = (installInHw == null) ? "true" : (installInHw.equals("true")) ? "false" : "true";
     }
 
     /*
@@ -1202,156 +1073,118 @@ public class FlowConfig implements Serializable {
         if (actions != null) {
             Matcher sstr;
             for (String actiongrp : actions) {
-                sstr = Pattern.compile(ActionType.OUTPUT + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.OUTPUT + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
                     for (String t : sstr.group(1).split(",")) {
                         Matcher n = Pattern.compile("(?:(\\d+))").matcher(t);
                         if (n.matches()) {
                             if (n.group(1) != null) {
                                 short ofPort = Short.parseShort(n.group(1));
-                                actionList.add(new Output(NodeConnectorCreator
-                                        .createOFNodeConnector(ofPort,
-                                                this.getNode())));
+                                actionList.add(new Output(NodeConnectorCreator.createOFNodeConnector(ofPort,
+                                        this.getNode())));
                             }
                         }
                     }
                     continue;
                 }
 
-                sstr = Pattern.compile(ActionType.DROP.toString()).matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.DROP.toString()).matcher(actiongrp);
                 if (sstr.matches()) {
                     actionList.add(new Drop());
                     continue;
                 }
 
-                sstr = Pattern.compile(ActionType.LOOPBACK.toString()).matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.LOOPBACK.toString()).matcher(actiongrp);
                 if (sstr.matches()) {
                     actionList.add(new Loopback());
                     continue;
                 }
 
-                sstr = Pattern.compile(ActionType.FLOOD.toString()).matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.FLOOD.toString()).matcher(actiongrp);
                 if (sstr.matches()) {
                     actionList.add(new Flood());
                     continue;
                 }
 
-                sstr = Pattern.compile(ActionType.SW_PATH.toString()).matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SW_PATH.toString()).matcher(actiongrp);
                 if (sstr.matches()) {
                     actionList.add(new SwPath());
                     continue;
                 }
 
-                sstr = Pattern.compile(ActionType.HW_PATH.toString()).matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.HW_PATH.toString()).matcher(actiongrp);
                 if (sstr.matches()) {
                     actionList.add(new HwPath());
                     continue;
                 }
 
-                sstr = Pattern.compile(ActionType.CONTROLLER.toString())
-                        .matcher(actiongrp);
+                sstr = Pattern.compile(ActionType.CONTROLLER.toString()).matcher(actiongrp);
                 if (sstr.matches()) {
                     actionList.add(new Controller());
                     continue;
                 }
 
-                sstr = Pattern.compile(
-                        ActionType.SET_VLAN_ID.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_VLAN_ID.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList.add(new SetVlanId(
-                            Short.parseShort(sstr.group(1))));
+                    actionList.add(new SetVlanId(Short.parseShort(sstr.group(1))));
                     continue;
                 }
 
-                sstr = Pattern.compile(
-                        ActionType.SET_VLAN_PCP.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_VLAN_PCP.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList
-                            .add(new SetVlanPcp(Byte.parseByte(sstr.group(1))));
+                    actionList.add(new SetVlanPcp(Byte.parseByte(sstr.group(1))));
                     continue;
                 }
 
-                sstr = Pattern.compile(ActionType.POP_VLAN.toString()).matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.POP_VLAN.toString()).matcher(actiongrp);
                 if (sstr.matches()) {
                     actionList.add(new PopVlan());
                     continue;
                 }
 
-                sstr = Pattern.compile(
-                        ActionType.SET_DL_SRC.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_DL_SRC.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList.add(new SetDlSrc(HexEncode
-                            .bytesFromHexString(sstr.group(1))));
+                    actionList.add(new SetDlSrc(HexEncode.bytesFromHexString(sstr.group(1))));
                     continue;
                 }
 
-                sstr = Pattern.compile(
-                        ActionType.SET_DL_DST.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_DL_DST.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList.add(new SetDlDst(HexEncode
-                            .bytesFromHexString(sstr.group(1))));
+                    actionList.add(new SetDlDst(HexEncode.bytesFromHexString(sstr.group(1))));
                     continue;
                 }
-                sstr = Pattern.compile(
-                        ActionType.SET_NW_SRC.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_NW_SRC.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList.add(new SetNwSrc(NetUtils.parseInetAddress(sstr
-                            .group(1))));
+                    actionList.add(new SetNwSrc(NetUtils.parseInetAddress(sstr.group(1))));
                     continue;
                 }
-                sstr = Pattern.compile(
-                        ActionType.SET_NW_DST.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_NW_DST.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList.add(new SetNwDst(NetUtils.parseInetAddress(sstr
-                            .group(1))));
+                    actionList.add(new SetNwDst(NetUtils.parseInetAddress(sstr.group(1))));
                     continue;
                 }
 
-                sstr = Pattern.compile(
-                        ActionType.SET_NW_TOS.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_NW_TOS.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
                     actionList.add(new SetNwTos(Byte.parseByte(sstr.group(1))));
                     continue;
                 }
 
-                sstr = Pattern.compile(
-                        ActionType.SET_TP_SRC.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_TP_SRC.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList
-                            .add(new SetTpSrc(Integer.valueOf(sstr.group(1))));
+                    actionList.add(new SetTpSrc(Integer.valueOf(sstr.group(1))));
                     continue;
                 }
 
-                sstr = Pattern.compile(
-                        ActionType.SET_TP_DST.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_TP_DST.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList
-                            .add(new SetTpDst(Integer.valueOf(sstr.group(1))));
+                    actionList.add(new SetTpDst(Integer.valueOf(sstr.group(1))));
                     continue;
                 }
 
-                sstr = Pattern.compile(
-                        ActionType.SET_NEXT_HOP.toString() + "=(.*)").matcher(
-                        actiongrp);
+                sstr = Pattern.compile(ActionType.SET_NEXT_HOP.toString() + "=(.*)").matcher(actiongrp);
                 if (sstr.matches()) {
-                    actionList.add(new SetNextHop(NetUtils.parseInetAddress(sstr
-                            .group(1))));
+                    actionList.add(new SetNextHop(NetUtils.parseInetAddress(sstr.group(1))));
                     continue;
                 }
             }

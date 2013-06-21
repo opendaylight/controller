@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -8,6 +7,8 @@
  */
 
 package org.opendaylight.controller.sal.action;
+
+import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -19,30 +20,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Represents the generic action to be applied to the matched frame/packet/message
+ * Represents the generic action to be applied to the matched
+ * frame/packet/message
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlSeeAlso({Controller.class, Drop.class, Flood.class, FloodAll.class, HwPath.class, Loopback.class, Output.class,
-                         PopVlan.class, PushVlan.class, SetDlDst.class, SetDlSrc.class, SetDlType.class, SetNwDst.class, SetNwSrc.class,
-                         SetNwTos.class, SetTpDst.class, SetTpSrc.class, SetVlanCfi.class, SetVlanId.class, SetVlanPcp.class, SwPath.class})
-public abstract class Action {
+@XmlSeeAlso({ Controller.class, Drop.class, Flood.class, FloodAll.class, HwPath.class, Loopback.class, Output.class,
+    PopVlan.class, PushVlan.class, SetDlDst.class, SetDlSrc.class, SetDlType.class, SetNwDst.class, SetNwSrc.class,
+    SetNwTos.class, SetTpDst.class, SetTpSrc.class, SetVlanCfi.class, SetVlanId.class, SetVlanPcp.class,
+    SwPath.class })
+public abstract class Action implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
-    private static boolean debug = false; // Enable to find where in the code an invalid assignment is made
+    private static boolean debug = false; // Enable to find where in the code an
+    // invalid assignment is made
     @XmlTransient
     protected ActionType type;
     private transient boolean isValid = true;
 
     /* Dummy constructor for JAXB */
-    public Action () {
+    public Action() {
     }
 
     /*
-    public Action (ActionType type, Object value) {
-        this.type = type;
-        this.value = value;
-        this.isValid = true;
-    } */
+     * public Action (ActionType type, Object value) { this.type = type;
+     * this.value = value; this.isValid = true; }
+     */
 
     /**
      * Checks if the passed value is in the valid range for this action
@@ -58,8 +61,8 @@ public abstract class Action {
     }
 
     /**
-     * Checks if the passed value is in the valid range for the passed action type
-     * This method is used for complex Action types which are
+     * Checks if the passed value is in the valid range for the passed action
+     * type This method is used for complex Action types which are
      *
      * @param value
      * @return boolean
@@ -78,15 +81,14 @@ public abstract class Action {
      * @return void
      */
     private void throwValueException(int value) {
-        String error = "Invalid field value assignement. For type: "
-                + type.getId() + " Expected: " + type.getRange() + ", Got: 0x"
-                + Integer.toHexString(value);
+        String error = "Invalid field value assignement. For type: " + type.getId() + " Expected: " + type.getRange()
+                + ", Got: 0x" + Integer.toHexString(value);
         try {
             throw new Exception(error);
         } catch (Exception e) {
             logger.error(e.getMessage());
             if (debug) {
-                logger.error("",e);
+                logger.error("", e);
             }
         }
     }
@@ -112,7 +114,7 @@ public abstract class Action {
     /**
      * Returns whether the Action is valid or not
      *
-     * @return  boolean
+     * @return boolean
      */
     public boolean isValid() {
         return isValid;
@@ -128,15 +130,19 @@ public abstract class Action {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Action other = (Action) obj;
-        if (type != other.type)
+        if (type != other.type) {
             return false;
+        }
         return true;
     }
 

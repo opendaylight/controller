@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.sal.match;
 
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Arrays;
 
@@ -19,9 +20,6 @@ import org.opendaylight.controller.sal.utils.NetUtils;
  * Represents the binding between the id, the value and mask type and the range
  * values of the elements type that can be matched on the network
  * frame/packet/message
- *
- *
- *
  */
 public enum MatchType {
     IN_PORT("inPort", 1 << 0, NodeConnector.class, 1, 0),
@@ -45,8 +43,7 @@ public enum MatchType {
     private long minValue;
     private long maxValue;
 
-    private MatchType(String id, int index, Class<?> dataType, long minValue,
-            long maxValue) {
+    private MatchType(String id, int index, Class<?> dataType, long minValue, long maxValue) {
         this.id = id;
         this.index = index;
         this.dataType = dataType;
@@ -67,8 +64,7 @@ public enum MatchType {
     }
 
     public String getRange() {
-        return "[0x" + Long.toHexString(minValue) + "-0x"
-                + Long.toHexString(maxValue) + "]";
+        return "[0x" + Long.toHexString(minValue) + "-0x" + Long.toHexString(maxValue) + "]";
     }
 
     /**
@@ -146,13 +142,11 @@ public enum MatchType {
             val = ((Integer) value).intValue();
             msk = (mask != null) ? ((Integer) mask).intValue() : 0;
 
-        } else if (value.getClass() == Short.class
-                || value.getClass() == short.class) {
+        } else if (value.getClass() == Short.class || value.getClass() == short.class) {
             val = ((Short) value).intValue() & 0xffff;
             msk = (mask != null) ? ((Short) mask).intValue() & 0xffff : 0;
 
-        } else if (value.getClass() == Byte.class
-                || value.getClass() == byte.class) {
+        } else if (value.getClass() == Byte.class || value.getClass() == byte.class) {
             val = ((Byte) value).intValue() & 0xff;
             msk = (mask != null) ? ((Byte) mask).intValue() & 0xff : 0;
         }
@@ -178,13 +172,12 @@ public enum MatchType {
             byte mac[] = (byte[]) mask;
             long bitmask = 0;
             for (short i = 0; i < 6; i++) {
-                bitmask |= (((long) mac[i] & 0xffL) << ((5 - i) * 8));
+                bitmask |= ((mac[i] & 0xffL) << ((5 - i) * 8));
             }
             return bitmask;
         }
         if (this.dataType == Integer.class || this.dataType == int.class) {
-            return (mask == null) ? this.maxValue : ((Integer) mask)
-                    .longValue();
+            return (mask == null) ? this.maxValue : ((Integer) mask).longValue();
 
         }
         if (this.dataType == Short.class || this.dataType == short.class) {
@@ -208,24 +201,56 @@ public enum MatchType {
             return HexEncode.bytesToHexStringFormat((byte[]) value);
         case DL_TYPE:
         case DL_VLAN:
-            return ((Integer) NetUtils.getUnsignedShort((Short) value))
-                    .toString();
+            return ((Integer) NetUtils.getUnsignedShort((Short) value)).toString();
         case NW_SRC:
         case NW_DST:
             return ((InetAddress) value).getHostAddress();
         case NW_TOS:
-            return ((Integer) NetUtils.getUnsignedByte((Byte) value))
-                    .toString();
+            return ((Integer) NetUtils.getUnsignedByte((Byte) value)).toString();
         case TP_SRC:
         case TP_DST:
-            return ((Integer) NetUtils.getUnsignedShort((Short) value))
-                    .toString();
+            return ((Integer) NetUtils.getUnsignedShort((Short) value)).toString();
         default:
             break;
         }
         return value.toString();
     }
 
+    public int valueHashCode(Object o) {
+        if (o == null) {
+            return 0;
+        }
+        switch (this) {
+        case DL_SRC:
+        case DL_DST:
+            return NetUtils.byteArray4ToInt((byte[])o);
+        default:
+            return o.hashCode();
+        }
+    }
+
+    public int hashCode(Object v, Object m) {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + this.hashCode();
+
+        switch (this) {
+        case DL_SRC:
+        case DL_DST:
+            result = prime * result + ((v == null)? 0 : NetUtils.byteArray4ToInt((byte[])v));
+            result = prime * result + ((m == null)? 0 : NetUtils.byteArray4ToInt((byte[])m));
+            break;
+        case NW_SRC:
+        case NW_DST:
+            result = prime * result + ((v == null)? 0 : v.hashCode());
+            result = prime * result + ((m == null)? NetUtils.gethighestIP(v instanceof Inet6Address).hashCode() : m.hashCode());
+            break;
+        default:
+            result = prime * result + ((v == null)? 0 : v.hashCode());
+            result = prime * result + ((m == null)? 0 : m.hashCode());
+        }
+        return result;
+    }
     public boolean equalValues(Object a, Object b) {
         if (a == b) {
             return true;

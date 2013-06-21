@@ -34,8 +34,7 @@ import org.opendaylight.controller.clustering.services.IClusterContainerServices
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 
 public class Activator extends ComponentActivatorAbstractBase {
-    protected static final Logger logger = LoggerFactory
-            .getLogger(Activator.class);
+    protected static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
     /**
      * Function called when the activator starts just after some initializations
@@ -94,50 +93,32 @@ public class Activator extends ComponentActivatorAbstractBase {
 
             // export the service
             if (containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                interfaces = new String[] { IContainerListener.class.getName(),
-                        ISwitchManagerAware.class.getName(),
-                        IForwardingRulesManager.class.getName(),
-                        IInventoryListener.class.getName(),
-                        ICacheUpdateAware.class.getName(),
-                        IConfigurationContainerAware.class.getName(),
+                interfaces = new String[] { IContainerListener.class.getName(), ISwitchManagerAware.class.getName(),
+                        IForwardingRulesManager.class.getName(), IInventoryListener.class.getName(),
+                        ICacheUpdateAware.class.getName(), IConfigurationContainerAware.class.getName(),
                         IFlowProgrammerListener.class.getName() };
             } else {
-                interfaces = new String[] {
-                        ISwitchManagerAware.class.getName(),
-                        IForwardingRulesManager.class.getName(),
-                        IInventoryListener.class.getName(),
-                        ICacheUpdateAware.class.getName(),
-                        IConfigurationContainerAware.class.getName(),
+                interfaces = new String[] { ISwitchManagerAware.class.getName(),
+                        IForwardingRulesManager.class.getName(), IInventoryListener.class.getName(),
+                        ICacheUpdateAware.class.getName(), IConfigurationContainerAware.class.getName(),
                         IFlowProgrammerListener.class.getName() };
             }
 
             c.setInterface(interfaces, props);
 
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IFlowProgrammerService.class)
-                    .setCallbacks("setFlowProgrammerService",
-                            "unsetFlowProgrammerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(IFlowProgrammerService.class)
+                    .setCallbacks("setFlowProgrammerService", "unsetFlowProgrammerService").setRequired(true));
 
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IClusterContainerServices.class)
-                    .setCallbacks("setClusterContainerService",
-                            "unsetClusterContainerService").setRequired(true));
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(ISwitchManager.class)
-                    .setCallbacks("setSwitchManager", "unsetSwitchManager")
-                    .setRequired(true));
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IForwardingRulesManagerAware.class)
-                    .setCallbacks("setFrmAware", "unsetFrmAware")
-                    .setRequired(false));
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IfIptoHost.class)
-                    .setCallbacks("setHostFinder", "unsetHostFinder")
-                    .setRequired(true));
-            c.add(createContainerServiceDependency(containerName)
-                    .setService(IContainer.class)
-                    .setCallbacks("setIContainer", "unsetIContainer")
-                    .setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(IClusterContainerServices.class)
+                    .setCallbacks("setClusterContainerService", "unsetClusterContainerService").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(ISwitchManager.class)
+                    .setCallbacks("setSwitchManager", "unsetSwitchManager").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(IForwardingRulesManagerAware.class)
+                    .setCallbacks("setFrmAware", "unsetFrmAware").setRequired(false));
+            c.add(createContainerServiceDependency(containerName).setService(IfIptoHost.class)
+                    .setCallbacks("setHostFinder", "unsetHostFinder").setRequired(true));
+            c.add(createContainerServiceDependency(containerName).setService(IContainer.class)
+                    .setCallbacks("setIContainer", "unsetIContainer").setRequired(true));
         }
     }
 }

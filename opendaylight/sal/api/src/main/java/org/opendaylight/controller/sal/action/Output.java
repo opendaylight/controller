@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -18,25 +17,23 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 
 /**
  * Represents the action of sending the packet out of a physical port
- *
- *
- *
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class Output extends Action {
-        @XmlElement
+    private static final long serialVersionUID = 1L;
+    @XmlElement
     private NodeConnector port;
 
     /* Dummy constructor for JAXB */
-    private Output () {
+    @SuppressWarnings("unused")
+    private Output() {
     }
 
     public Output(NodeConnector port) {
         type = ActionType.OUTPUT;
         this.port = port;
-        //checkValue(port);
+        // checkValue(port);
     }
 
     public NodeConnector getPort() {
@@ -45,18 +42,23 @@ public class Output extends Action {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Output other = (Output) obj;
         if (port == null) {
-            if (other.port != null)
+            if (other.port != null) {
                 return false;
-        } else if (!port.equals(other.port))
+            }
+        } else if (!port.equals(other.port)) {
             return false;
+        }
         return true;
     }
 
