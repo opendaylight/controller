@@ -24,20 +24,18 @@ import org.opendaylight.controller.sal.utils.NetUtils;
  *
  */
 public enum MatchType {
-    IN_PORT("inPort", 1 << 0, NodeConnector.class, 1, 0),
-    DL_SRC("dlSrc", 1 << 1, Byte[].class, 0, 0xffffffffffffL),
-    DL_DST("dlDst", 1 << 2, Byte[].class, 0, 0xffffffffffffL),
-    DL_VLAN("dlVlan", 1 << 3, Short.class, 1, 0xfff), // 2 bytes
-    DL_VLAN_PR("dlVlanPriority", 1 << 4, Byte.class, 0, 0x7), // 3 bits
-    DL_OUTER_VLAN("dlOuterVlan", 1 << 5, Short.class, 1, 0xfff),
-    DL_OUTER_VLAN_PR("dlOuterVlanPriority", 1 << 6, Short.class, 0, 0x7),
-    DL_TYPE("dlType", 1 << 7, Short.class, 0, 0xffff), // 2 bytes
-    NW_TOS("nwTOS", 1 << 8, Byte.class, 0, 0x3f), // 6 bits (DSCP field)
-    NW_PROTO("nwProto", 1 << 9, Byte.class, 0, 0xff), // 1 byte
-    NW_SRC("nwSrc", 1 << 10, InetAddress.class, 0, 0),
-    NW_DST("nwDst", 1 << 11, InetAddress.class, 0, 0),
-    TP_SRC("tpSrc", 1 << 12, Short.class, 1, 0xffff), // 2 bytes
-    TP_DST("tpDst", 1 << 13, Short.class, 1, 0xffff); // 2 bytes
+    IN_PORT("inPort", 1 << 0, NodeConnector.class, 1, 0), DL_SRC("dlSrc", 1 << 1, Byte[].class, 0, 0xffffffffffffL), DL_DST(
+            "dlDst", 1 << 2, Byte[].class, 0, 0xffffffffffffL), DL_VLAN("dlVlan", 1 << 3, Short.class, 1, 0xfff), // 2
+            // bytes
+            DL_VLAN_PR("dlVlanPriority", 1 << 4, Byte.class, 0, 0x7), // 3 bits
+            DL_OUTER_VLAN("dlOuterVlan", 1 << 5, Short.class, 1, 0xfff), DL_OUTER_VLAN_PR("dlOuterVlanPriority", 1 << 6,
+                    Short.class, 0, 0x7), DL_TYPE("dlType", 1 << 7, Short.class, 0, 0xffff), // 2
+                    // bytes
+                    NW_TOS("nwTOS", 1 << 8, Byte.class, 0, 0x3f), // 6 bits (DSCP field)
+                    NW_PROTO("nwProto", 1 << 9, Byte.class, 0, 0xff), // 1 byte
+                    NW_SRC("nwSrc", 1 << 10, InetAddress.class, 0, 0), NW_DST("nwDst", 1 << 11, InetAddress.class, 0, 0), TP_SRC(
+                            "tpSrc", 1 << 12, Short.class, 1, 0xffff), // 2 bytes
+                            TP_DST("tpDst", 1 << 13, Short.class, 1, 0xffff); // 2 bytes
 
     private String id;
     private int index;
@@ -45,8 +43,7 @@ public enum MatchType {
     private long minValue;
     private long maxValue;
 
-    private MatchType(String id, int index, Class<?> dataType, long minValue,
-            long maxValue) {
+    private MatchType(String id, int index, Class<?> dataType, long minValue, long maxValue) {
         this.id = id;
         this.index = index;
         this.dataType = dataType;
@@ -67,8 +64,7 @@ public enum MatchType {
     }
 
     public String getRange() {
-        return "[0x" + Long.toHexString(minValue) + "-0x"
-                + Long.toHexString(maxValue) + "]";
+        return "[0x" + Long.toHexString(minValue) + "-0x" + Long.toHexString(maxValue) + "]";
     }
 
     /**
@@ -146,13 +142,11 @@ public enum MatchType {
             val = ((Integer) value).intValue();
             msk = (mask != null) ? ((Integer) mask).intValue() : 0;
 
-        } else if (value.getClass() == Short.class
-                || value.getClass() == short.class) {
+        } else if (value.getClass() == Short.class || value.getClass() == short.class) {
             val = ((Short) value).intValue() & 0xffff;
             msk = (mask != null) ? ((Short) mask).intValue() & 0xffff : 0;
 
-        } else if (value.getClass() == Byte.class
-                || value.getClass() == byte.class) {
+        } else if (value.getClass() == Byte.class || value.getClass() == byte.class) {
             val = ((Byte) value).intValue() & 0xff;
             msk = (mask != null) ? ((Byte) mask).intValue() & 0xff : 0;
         }
@@ -178,13 +172,12 @@ public enum MatchType {
             byte mac[] = (byte[]) mask;
             long bitmask = 0;
             for (short i = 0; i < 6; i++) {
-                bitmask |= (((long) mac[i] & 0xffL) << ((5 - i) * 8));
+                bitmask |= ((mac[i] & 0xffL) << ((5 - i) * 8));
             }
             return bitmask;
         }
         if (this.dataType == Integer.class || this.dataType == int.class) {
-            return (mask == null) ? this.maxValue : ((Integer) mask)
-                    .longValue();
+            return (mask == null) ? this.maxValue : ((Integer) mask).longValue();
 
         }
         if (this.dataType == Short.class || this.dataType == short.class) {
@@ -208,18 +201,15 @@ public enum MatchType {
             return HexEncode.bytesToHexStringFormat((byte[]) value);
         case DL_TYPE:
         case DL_VLAN:
-            return ((Integer) NetUtils.getUnsignedShort((Short) value))
-                    .toString();
+            return ((Integer) NetUtils.getUnsignedShort((Short) value)).toString();
         case NW_SRC:
         case NW_DST:
             return ((InetAddress) value).getHostAddress();
         case NW_TOS:
-            return ((Integer) NetUtils.getUnsignedByte((Byte) value))
-                    .toString();
+            return ((Integer) NetUtils.getUnsignedByte((Byte) value)).toString();
         case TP_SRC:
         case TP_DST:
-            return ((Integer) NetUtils.getUnsignedShort((Short) value))
-                    .toString();
+            return ((Integer) NetUtils.getUnsignedShort((Short) value)).toString();
         default:
             break;
         }

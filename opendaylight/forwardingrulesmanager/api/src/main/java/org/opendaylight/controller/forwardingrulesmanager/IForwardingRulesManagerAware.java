@@ -11,7 +11,6 @@ package org.opendaylight.controller.forwardingrulesmanager;
 /**
  * The interface which describes the methods forwarding rules manager will call
  * for notifying the listeners of policy installation updates.
- *
  */
 public interface IForwardingRulesManagerAware {
 
