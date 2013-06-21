@@ -32,6 +32,5 @@ public interface PortGroupChangeListener {
      *            true indicates that the PortGroup is added. False indicates
      *            that the PortGroup is removed.
      */
-    void portGroupChanged(PortGroupConfig config,
-            Map<Node, PortGroup> portGroupData, boolean add);
+    void portGroupChanged(PortGroupConfig config, Map<Node, PortGroup> portGroupData, boolean add);
 }

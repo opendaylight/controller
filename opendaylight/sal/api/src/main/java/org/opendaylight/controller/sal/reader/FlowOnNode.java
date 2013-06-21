@@ -38,6 +38,7 @@ public class FlowOnNode {
     private long byteCount;
 
     /* Dummy constructor for JAXB */
+    @SuppressWarnings("unused")
     private FlowOnNode () {
     }
 

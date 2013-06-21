@@ -13,13 +13,13 @@ import org.opendaylight.controller.sal.utils.Status;
 
 /**
  * @file IPluginOutFlowProgrammer.java
- *
+ * 
  * @brief Flow programmer interface to be implemented by protocol plugins
  */
 public interface IPluginInFlowProgrammerService {
     /**
      * Synchronously add a flow to the network node
-     *
+     * 
      * @param node
      * @param flow
      */
@@ -27,7 +27,7 @@ public interface IPluginInFlowProgrammerService {
 
     /**
      * Synchronously modify existing flow on the switch
-     *
+     * 
      * @param node
      * @param flow
      */
@@ -35,7 +35,7 @@ public interface IPluginInFlowProgrammerService {
 
     /**
      * Synchronously remove the flow from the network node
-     *
+     * 
      * @param node
      * @param flow
      */
@@ -43,7 +43,7 @@ public interface IPluginInFlowProgrammerService {
 
     /**
      * Asynchronously add a flow to the network node
-     *
+     * 
      * @param node
      * @param flow
      * @param rid
@@ -52,7 +52,7 @@ public interface IPluginInFlowProgrammerService {
 
     /**
      * Asynchronously modify existing flow on the switch
-     *
+     * 
      * @param node
      * @param flow
      * @param rid
@@ -61,7 +61,7 @@ public interface IPluginInFlowProgrammerService {
 
     /**
      * Asynchronously remove the flow from the network node
-     *
+     * 
      * @param node
      * @param flow
      * @param rid
@@ -70,7 +70,7 @@ public interface IPluginInFlowProgrammerService {
 
     /**
      * Remove all flows present on the network node
-     *
+     * 
      * @param node
      */
     Status removeAllFlows(Node node);
@@ -78,14 +78,14 @@ public interface IPluginInFlowProgrammerService {
     /**
      * Send Barrier message synchronously. The caller will be blocked until the
      * Barrier reply arrives.
-     *
+     * 
      * @param node
      */
     Status syncSendBarrierMessage(Node node);
 
     /**
      * Send Barrier message asynchronously. The caller is not blocked.
-     *
+     * 
      * @param node
      */
     Status asyncSendBarrierMessage(Node node);

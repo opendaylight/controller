@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -32,15 +31,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represent a flow: match + actions + flow specific properties
- *
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class Flow implements Cloneable, Serializable {
-    protected static final Logger logger = LoggerFactory
-    .getLogger(Flow.class);
-        private static final long serialVersionUID = 1L;
-        @XmlElement
+    protected static final Logger logger = LoggerFactory.getLogger(Flow.class);
+    private static final long serialVersionUID = 1L;
+    @XmlElement
     private Match match;
     @XmlElement
     private List<Action> actions;
@@ -63,7 +60,7 @@ public class Flow implements Cloneable, Serializable {
             try {
                 throw new Exception("Conflicting Match and Action list");
             } catch (Exception e) {
-                logger.error("",e);
+                logger.error("", e);
             }
         } else {
             this.match = match;
@@ -81,8 +78,8 @@ public class Flow implements Cloneable, Serializable {
     }
 
     /**
-     * Set the Match for this flow
-     * This operation will overwrite an existing Match if present
+     * Set the Match for this flow This operation will overwrite an existing
+     * Match if present
      *
      * @param match
      */
@@ -92,6 +89,7 @@ public class Flow implements Cloneable, Serializable {
 
     /**
      * Returns a copy of the actions list of this flow
+     *
      * @return
      */
     public List<Action> getActions() {
@@ -99,12 +97,10 @@ public class Flow implements Cloneable, Serializable {
     }
 
     /**
-     * Set the actions list for this flow
-     * If a list is already present, it will be
-     * replaced with the passed one. During
-     * addition, only the valid actions will be added
-     * It is a no op if the passed actions is null
-     * An empty actions is a vlaid input
+     * Set the actions list for this flow If a list is already present, it will
+     * be replaced with the passed one. During addition, only the valid actions
+     * will be added It is a no op if the passed actions is null An empty
+     * actions is a vlaid input
      *
      * @param actions
      */
@@ -122,8 +118,8 @@ public class Flow implements Cloneable, Serializable {
     }
 
     /**
-     * Returns whether the Flow is for IPv4 or IPv6
-     * Information is derived from match and actions list
+     * Returns whether the Flow is for IPv4 or IPv6 Information is derived from
+     * match and actions list
      *
      * @return
      */
@@ -132,8 +128,8 @@ public class Flow implements Cloneable, Serializable {
     }
 
     /**
-     * Returns true if it finds at least one action which is for IPv6
-     * in the list of actions for this Flow
+     * Returns true if it finds at least one action which is for IPv6 in the
+     * list of actions for this Flow
      *
      * @return
      */
@@ -152,8 +148,7 @@ public class Flow implements Cloneable, Serializable {
                     }
                     break;
                 case SET_DL_TYPE:
-                    if (((SetDlType) action).getDlType() == EtherTypes.IPv6
-                            .intValue()) {
+                    if (((SetDlType) action).getDlType() == EtherTypes.IPv6.intValue()) {
                         return true;
                     }
                     break;
@@ -172,7 +167,7 @@ public class Flow implements Cloneable, Serializable {
             cloned.match = this.getMatch();
             cloned.actions = this.getActions();
         } catch (CloneNotSupportedException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         return cloned;
     }
@@ -192,40 +187,49 @@ public class Flow implements Cloneable, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Flow other = (Flow) obj;
         if (actions == null) {
-            if (other.actions != null)
+            if (other.actions != null) {
                 return false;
-        } else if (!actions.equals(other.actions))
+            }
+        } else if (!actions.equals(other.actions)) {
             return false;
-        if (hardTimeout != other.hardTimeout)
+        }
+        if (hardTimeout != other.hardTimeout) {
             return false;
-        if (id != other.id)
+        }
+        if (id != other.id) {
             return false;
-        if (idleTimeout != other.idleTimeout)
+        }
+        if (idleTimeout != other.idleTimeout) {
             return false;
+        }
         if (match == null) {
-            if (other.match != null)
+            if (other.match != null) {
                 return false;
-        } else if (!match.equals(other.match))
+            }
+        } else if (!match.equals(other.match)) {
             return false;
-        if (priority != other.priority)
+        }
+        if (priority != other.priority) {
             return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "Flow[match = " + match + ", actions = " + actions
-                + ", priority = " + priority + ", id = " + id
-                + ", idleTimeout = " + idleTimeout + ", hardTimeout = "
-                + hardTimeout + "]";
+        return "Flow[match = " + match + ", actions = " + actions + ", priority = " + priority + ", id = " + id
+                + ", idleTimeout = " + idleTimeout + ", hardTimeout = " + hardTimeout + "]";
     }
 
     public short getPriority() {
@@ -264,7 +268,8 @@ public class Flow implements Cloneable, Serializable {
      * Adds the specified action to the list of action of this flow
      *
      * @param action
-     * @return false if the passed action is null or not valid or if it fails to add it
+     * @return false if the passed action is null or not valid or if it fails to
+     *         add it
      */
     public boolean addAction(Action action) {
         if (action == null || !action.isValid()) {
@@ -281,18 +286,21 @@ public class Flow implements Cloneable, Serializable {
     }
 
     /**
-     * remove ALL actions of type actionType from the list of actions of this flow
+     * remove ALL actions of type actionType from the list of actions of this
+     * flow
      *
      * @param actionType
-     * @return false if an action of that type is present and it fails to remove it
+     * @return false if an action of that type is present and it fails to remove
+     *         it
      */
     public boolean removeAction(ActionType actionType) {
         Iterator<Action> actionIter = this.getActions().iterator();
         while (actionIter.hasNext()) {
             Action action = actionIter.next();
             if (action.getType() == actionType) {
-                if (!this.removeAction(action))
+                if (!this.removeAction(action)) {
                     return false;
+                }
             }
         }
         return true;

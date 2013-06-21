@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -14,15 +13,13 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Represents the action of flooding the packet out all the physical ports except the input port
- *
- *
- *
+ * Represents the action of flooding the packet out all the physical ports
+ * except the input port
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class FloodAll extends Action {
+    private static final long serialVersionUID = 1L;
 
     public FloodAll() {
         type = ActionType.FLOOD_ALL;

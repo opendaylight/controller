@@ -25,8 +25,7 @@ import org.slf4j.LoggerFactory;
  * instance the flows constituting a policy all share the same group name.
  */
 public class FlowEntry implements Cloneable, Serializable {
-    protected static final Logger logger = LoggerFactory
-            .getLogger(FlowEntry.class);
+    protected static final Logger logger = LoggerFactory.getLogger(FlowEntry.class);
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(FlowEntry.class);
     private String groupName; // group name
@@ -86,55 +85,68 @@ public class FlowEntry implements Cloneable, Serializable {
         return cloned;
     }
 
+    /*
+     * Only accounts fields which uniquely identify a flow for collision
+     * purposes: node, match and priority
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((flow == null) ? 0 : flow.hashCode());
-        result = prime * result
-                + ((flowName == null) ? 0 : flowName.hashCode());
-        result = prime * result
-                + ((groupName == null) ? 0 : groupName.hashCode());
         result = prime * result + ((node == null) ? 0 : node.hashCode());
+        result = prime * result + ((flow == null) ? 0 : (int) flow.getPriority());
+        result = prime * result + ((flow == null || flow.getMatch() == null) ? 0 : flow.getMatch().hashCode());
+
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         FlowEntry other = (FlowEntry) obj;
         if (flow == null) {
-            if (other.flow != null)
+            if (other.flow != null) {
                 return false;
-        } else if (!flow.equals(other.flow))
+            }
+        } else if (!flow.equals(other.flow)) {
             return false;
+        }
         if (flowName == null) {
-            if (other.flowName != null)
+            if (other.flowName != null) {
                 return false;
-        } else if (!flowName.equals(other.flowName))
+            }
+        } else if (!flowName.equals(other.flowName)) {
             return false;
+        }
         if (groupName == null) {
-            if (other.groupName != null)
+            if (other.groupName != null) {
                 return false;
-        } else if (!groupName.equals(other.groupName))
+            }
+        } else if (!groupName.equals(other.groupName)) {
             return false;
+        }
         if (node == null) {
-            if (other.node != null)
+            if (other.node != null) {
                 return false;
-        } else if (!node.equals(other.node))
+            }
+        } else if (!node.equals(other.node)) {
             return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "FlowEntry[flowName = " + flowName + ", groupName = "
-                + groupName + ",node = " + node + ", flow = " + flow + "]";
+        return "FlowEntry[flowName = " + flowName + ", groupName = " + groupName + ", node = " + node + ", flow = "
+                + flow + "]";
     }
 
     private String constructFlowName() {
@@ -169,5 +181,15 @@ public class FlowEntry implements Cloneable, Serializable {
         flow.setMatch(myMatch);
 
         return this;
+    }
+
+    /**
+     * Returns whether this entry is the result of an internal generated static
+     * flow
+     *
+     * @return true if internal generated static flow, false otherwise
+     */
+    public boolean isInternal() {
+        return flowName.startsWith(FlowConfig.internalStaticFlowBegin);
     }
 }
