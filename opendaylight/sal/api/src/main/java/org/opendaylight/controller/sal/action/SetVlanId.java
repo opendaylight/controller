@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -20,14 +19,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class SetVlanId extends Action {
-        @XmlElement
+    private static final long serialVersionUID = 1L;
+    @XmlElement
     private int vlanId;
 
-        private SetVlanId() {
+    @SuppressWarnings("unused")
+    private SetVlanId() {
 
-        }
+    }
 
     public SetVlanId(int vlanId) {
         type = ActionType.SET_VLAN_ID;
@@ -46,15 +46,19 @@ public class SetVlanId extends Action {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SetVlanId other = (SetVlanId) obj;
-        if (vlanId != other.vlanId)
+        if (vlanId != other.vlanId) {
             return false;
+        }
         return true;
     }
 

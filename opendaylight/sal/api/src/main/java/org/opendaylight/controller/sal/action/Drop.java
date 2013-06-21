@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -15,13 +14,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Represent the action of dropping the matched packet
- *
- *
- *
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class Drop extends Action {
+    private static final long serialVersionUID = 1L;
+
     public Drop() {
         type = ActionType.DROP;
     }

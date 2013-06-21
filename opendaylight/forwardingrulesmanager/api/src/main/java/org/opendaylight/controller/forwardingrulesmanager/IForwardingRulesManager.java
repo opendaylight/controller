@@ -18,7 +18,6 @@ import org.opendaylight.controller.sal.utils.Status;
 /**
  * Interface that describes methods for installing or removing forwarding rules
  * and to access to the flows database.
- *
  */
 public interface IForwardingRulesManager {
 
@@ -47,6 +46,19 @@ public interface IForwardingRulesManager {
     public Status uninstallFlowEntry(FlowEntry flow);
 
     /**
+     * It requests FRM to remove all the Flow Entry that are part of the
+     * specified group. FRM will request the SDN protocol plugin to uninstall
+     * the flows from the network node one by one. Based on the result of this
+     * operation FRM will update its database accordingly and will return the
+     * proper {@code Status} code.
+     *
+     * @param groupName
+     *            the group name
+     * @return the {@code Status} object indicating the result of this action
+     */
+    public Status uninstallFlowEntryGroup(String groupName);
+
+    /**
      * It requests FRM to replace the currently installed Flow Entry with the
      * new one. It is up to the SDN protocol plugin to decide how to convey this
      * message to the network node. It could be a delete + add or a single
@@ -73,7 +85,6 @@ public interface IForwardingRulesManager {
      * not valid an error code is returned. If the existing flow is equal to the
      * passed one it will be a no op and success code is returned.
      *
-     *
      * @param newone
      *            the new flow entry to install
      * @return the {@code Status} object indicating the result of this action
@@ -99,7 +110,7 @@ public interface IForwardingRulesManager {
      * call. A unique request id is returned to the caller. FRM will request the
      * SDN protocol plugin to uninstall the flow from the network node. As
      * immediate result of this asynchronous call, FRM will update its flow
-     * database as if the flow was successfully installed.
+     * database as if the flow was successfully removed.
      *
      * @param flow
      *            the flow entry to uninstall
@@ -107,6 +118,19 @@ public interface IForwardingRulesManager {
      *         this asynchronous request
      */
     public Status uninstallFlowEntryAsync(FlowEntry flow);
+
+    /**
+     * It requests FRM to remove all the Flow Entry that are part of the
+     * specified group through an asynchronous call. FRM will request the SDN
+     * protocol plugin to uninstall the flows from the network node one by one.
+     * As immediate result of this asynchronous call, FRM will update its flow
+     * database as if the flow was successfully removed.
+     *
+     * @param groupName
+     *            the group name
+     * @return the {@code Status} object indicating the result of this action
+     */
+    public Status uninstallFlowEntryGroupAsync(String groupName);
 
     /**
      * It requests FRM to replace the currently installed Flow Entry with the
@@ -194,8 +218,7 @@ public interface IForwardingRulesManager {
      * @param dstPort
      *            the list of ports to be added to the flow output actions
      */
-    public void addOutputPort(Node node, String flowName,
-            List<NodeConnector> dstPort);
+    public void addOutputPort(Node node, String flowName, List<NodeConnector> dstPort);
 
     /**
      * Remove a list of output port from the flow with the specified name on the
@@ -208,8 +231,7 @@ public interface IForwardingRulesManager {
      * @param dstPortthe
      *            list of ports to be removed from the flow output actions
      */
-    public void removeOutputPort(Node node, String flowName,
-            List<NodeConnector> dstPort);
+    public void removeOutputPort(Node node, String flowName, List<NodeConnector> dstPort);
 
     /**
      * Replace the current output port in the specified flow with the specified
@@ -224,8 +246,7 @@ public interface IForwardingRulesManager {
      * @param dstPort
      *            the new output action port
      */
-    public void replaceOutputPort(Node node, String flowName,
-            NodeConnector outPort);
+    public void replaceOutputPort(Node node, String flowName, NodeConnector outPort);
 
     /**
      * Returns the output port configured on the specified flow

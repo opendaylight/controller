@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -12,9 +11,6 @@ package org.opendaylight.controller.sal.action;
 /**
  * The enumeration of actions supported by the controller
  * Each entry has a unique id and the values range for the action element where applicable
- *
- *
- *
  */
 public enum ActionType {
     DROP("drop", 0, 0),
@@ -61,8 +57,7 @@ public enum ActionType {
     }
 
     public String getRange() {
-        return "[0x" + Long.toHexString(minValue) + "-0x"
-                + Long.toHexString(maxValue) + "]";
+        return "[0x" + Long.toHexString(minValue) + "-0x" + Long.toHexString(maxValue) + "]";
     }
 
     public boolean takesParameter() {

@@ -4,8 +4,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.osgi.framework.ServiceReference;
@@ -21,13 +19,9 @@ import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManage
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Drop;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
-import org.opendaylight.controller.sal.reader.FlowOnNode;
-import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
-import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -156,10 +150,10 @@ public class ForwardingRulesManagerIT {
         assertNotNull(bc);
         boolean debugit = false;
         Bundle b[] = bc.getBundles();
-        for (int i = 0; i < b.length; i++) {
-            int state = b[i].getState();
+        for (Bundle element : b) {
+            int state = element.getState();
             if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
-                log.debug("Bundle:" + b[i].getSymbolicName() + " state:"
+                log.debug("Bundle:" + element.getSymbolicName() + " state:"
                         + stateToString(state));
                 debugit = true;
             }

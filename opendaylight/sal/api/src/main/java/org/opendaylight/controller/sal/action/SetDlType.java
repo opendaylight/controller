@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -22,13 +21,14 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class SetDlType extends Action {
-        @XmlElement
+    private static final long serialVersionUID = 1L;
+    @XmlElement
     private int dlType;
 
     /* Dummy constructor for JAXB */
-    private SetDlType () {
+    @SuppressWarnings("unused")
+    private SetDlType() {
     }
 
     public SetDlType(int dlType) {
@@ -54,15 +54,19 @@ public class SetDlType extends Action {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SetDlType other = (SetDlType) obj;
-        if (dlType != other.dlType)
+        if (dlType != other.dlType) {
             return false;
+        }
         return true;
     }
 

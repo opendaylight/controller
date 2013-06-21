@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -24,12 +23,13 @@ import org.opendaylight.controller.sal.utils.HexEncode;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class SetDlSrc extends Action {
+    private static final long serialVersionUID = 1L;
     private byte[] address;
 
     /* Dummy constructor for JAXB */
-    private SetDlSrc  () {
+    @SuppressWarnings("unused")
+    private SetDlSrc() {
     }
 
     public SetDlSrc(byte[] dlAddress) {
@@ -57,15 +57,19 @@ public class SetDlSrc extends Action {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SetDlSrc other = (SetDlSrc) obj;
-        if (!Arrays.equals(address, other.address))
+        if (!Arrays.equals(address, other.address)) {
             return false;
+        }
         return true;
     }
 

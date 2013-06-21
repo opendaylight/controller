@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -15,14 +14,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Pop vlan action (strip the outermost 802.1q header)
- *
- *
- *
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class PopVlan extends Action {
+    private static final long serialVersionUID = 1L;
 
     public PopVlan() {
         type = ActionType.POP_VLAN;

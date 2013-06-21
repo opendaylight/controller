@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -17,19 +16,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 
 /**
- * Insert a 802.1q (outermost) header action
- * Execute it multiple times to achieve QinQ
+ * Insert a 802.1q (outermost) header action Execute it multiple times to
+ * achieve QinQ
  *
- * 802.1q = [TPID(16) + TCI(16)]
- *                      TCI = [PCP(3) + CFI(1) + VID(12)]
- *
- *
- *
+ * 802.1q = [TPID(16) + TCI(16)] TCI = [PCP(3) + CFI(1) + VID(12)]
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class PushVlan extends Action {
+    private static final long serialVersionUID = 1L;
     private int tag; // TPID - 16 bits
     private int pcp; // PCP - 3 bits
     private int cfi; // CFI - 1 bit (drop eligible)
@@ -38,7 +33,8 @@ public class PushVlan extends Action {
     private transient int header; // full 802.1q header [TPID + TCI] - 32 bits
 
     /* Dummy constructor for JAXB */
-    private PushVlan () {
+    @SuppressWarnings("unused")
+    private PushVlan() {
     }
 
     public PushVlan(int tag, int pcp, int cfi, int vlanId) {
@@ -68,8 +64,7 @@ public class PushVlan extends Action {
     }
 
     private int createHeader() {
-        return (tag & 0xffff) << 16 | (pcp & 0x7) << 13 | (cfi & 0x1) << 12
-                | (vlanId & 0xfff);
+        return (tag & 0xffff) << 16 | (pcp & 0x7) << 13 | (cfi & 0x1) << 12 | (vlanId & 0xfff);
     }
 
     private void runChecks() {
@@ -80,18 +75,18 @@ public class PushVlan extends Action {
         checkValue(tci);
 
         // Run action specific check which cannot be run by parent
-        if (tag != EtherTypes.VLANTAGGED.intValue()
-                && tag != EtherTypes.QINQ.intValue()
-                && tag != EtherTypes.OLDQINQ.intValue()
-                && tag != EtherTypes.CISCOQINQ.intValue()) {
-            // pass a value which will tell fail and tell something about the original wrong value
+        if (tag != EtherTypes.VLANTAGGED.intValue() && tag != EtherTypes.QINQ.intValue()
+                && tag != EtherTypes.OLDQINQ.intValue() && tag != EtherTypes.CISCOQINQ.intValue()) {
+            // pass a value which will tell fail and tell something about the
+            // original wrong value
             checkValue(ActionType.SET_DL_TYPE, 0xBAD << 16 | tag);
         }
     }
 
     /**
-     * Returns the VID portion of the 802.1q header this action will insert
-     * VID - (12 bits)
+     * Returns the VID portion of the 802.1q header this action will insert VID
+     * - (12 bits)
+     *
      * @return byte[]
      */
     public int getVlanId() {
@@ -99,8 +94,9 @@ public class PushVlan extends Action {
     }
 
     /**
-     * Returns the CFI portion of the 802.1q header this action will insert
-     * CFI - (1 bit)
+     * Returns the CFI portion of the 802.1q header this action will insert CFI
+     * - (1 bit)
+     *
      * @return
      */
     public int getCfi() {
@@ -110,6 +106,7 @@ public class PushVlan extends Action {
     /**
      * Returns the vlan PCP portion of the 802.1q header this action will insert
      * PCP - (3 bits)
+     *
      * @return byte[]
      */
     public int getPcp() {
@@ -125,8 +122,9 @@ public class PushVlan extends Action {
     }
 
     /**
-     * Returns the TCI portion of the 802.1q header this action will insert
-     * TCI = [PCP + CFI + VID] - (16 bits)
+     * Returns the TCI portion of the 802.1q header this action will insert TCI
+     * = [PCP + CFI + VID] - (16 bits)
+     *
      * @return
      */
     public int getTci() {
@@ -134,33 +132,40 @@ public class PushVlan extends Action {
     }
 
     /**
-     * Returns the full 802.1q header this action will insert
-     * header = [TPID + TIC] (32 bits)
+     * Returns the full 802.1q header this action will insert header = [TPID +
+     * TIC] (32 bits)
      *
      * @return int
      */
-    @XmlElement(name="VlanHeader")
+    @XmlElement(name = "VlanHeader")
     public int getHeader() {
         return header;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         PushVlan other = (PushVlan) obj;
-        if (cfi != other.cfi)
+        if (cfi != other.cfi) {
             return false;
-        if (pcp != other.pcp)
+        }
+        if (pcp != other.pcp) {
             return false;
-        if (tag != other.tag)
+        }
+        if (tag != other.tag) {
             return false;
-        if (vlanId != other.vlanId)
+        }
+        if (vlanId != other.vlanId) {
             return false;
+        }
         return true;
     }
 
@@ -177,8 +182,7 @@ public class PushVlan extends Action {
 
     @Override
     public String toString() {
-        return type + "[tag = " + tag + ", pcp = " + pcp + ", cfi = " + cfi
-                + ", vlanId = " + vlanId + "]";
+        return type + "[tag = " + tag + ", pcp = " + pcp + ", cfi = " + cfi + ", vlanId = " + vlanId + "]";
     }
 
 }

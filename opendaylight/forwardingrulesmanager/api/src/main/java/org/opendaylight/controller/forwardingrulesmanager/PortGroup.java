@@ -17,8 +17,6 @@ import java.util.Set;
  *
  * PortGroup is used by PortGroupProvider application to signal a set of ports
  * that represent a configured PortGroupConfig.
- *
- *
  */
 public class PortGroup {
     private long matrixSwitchId;
@@ -99,7 +97,6 @@ public class PortGroup {
 
     @Override
     public String toString() {
-        return "PortGroup [matrixSwitchId=" + matrixSwitchId + ", ports="
-                + ports + "]";
+        return "PortGroup [matrixSwitchId=" + matrixSwitchId + ", ports=" + ports + "]";
     }
 }
