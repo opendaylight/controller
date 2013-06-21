@@ -13,7 +13,6 @@ package org.opendaylight.controller.sal.flowprogrammer;
  * functional modules the asynchronous messages related to flow programming
  * coming from the network nodes.
  */
-public interface IFlowProgrammerListener extends
-        IPluginOutFlowProgrammerService {
+public interface IFlowProgrammerListener extends IPluginOutFlowProgrammerService {
 
 }

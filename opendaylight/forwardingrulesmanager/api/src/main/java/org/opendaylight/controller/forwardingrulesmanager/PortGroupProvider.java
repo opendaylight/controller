@@ -70,8 +70,7 @@ public interface PortGroupProvider {
      * @return PortGroup data for a given Openflow switch.
      * @see PortGroup
      */
-    public PortGroup getPortGroupData(PortGroupConfig config,
-            long matrixSwitchId);
+    public PortGroup getPortGroupData(PortGroupConfig config, long matrixSwitchId);
 
     /**
      * Registers a Listener for Port Group membership changes based on Custom

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -19,15 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Utility class containing the common utility functions needed
- * for operating on networking data structures
- *
- *
- *
+ * Utility class containing the common utility functions needed for operating on
+ * networking data structures
  */
 public abstract class NetUtils {
-    protected static final Logger logger = LoggerFactory
-    .getLogger(NetUtils.class);
+    protected static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
     /**
      * Constant holding the number of bits in a byte
      */
@@ -36,59 +31,61 @@ public abstract class NetUtils {
     /**
      * Converts a 4 bytes array into an integer number
      *
-     * @param ba    the 4 bytes long byte array
-     * @return      the integer number
+     * @param ba
+     *            the 4 bytes long byte array
+     * @return the integer number
      */
     public static int byteArray4ToInt(byte[] ba) {
         if (ba == null || ba.length != 4) {
             return 0;
         }
-        return (0xff & ba[0]) << 24 | (0xff & ba[1]) << 16
-                | (0xff & ba[2]) << 8 | (0xff & ba[3]);
+        return (0xff & ba[0]) << 24 | (0xff & ba[1]) << 16 | (0xff & ba[2]) << 8 | (0xff & ba[3]);
     }
 
     /**
      * Converts an integer number into a 4 bytes array
      *
-     * @param i the integer number
-     * @return  the byte array
+     * @param i
+     *            the integer number
+     * @return the byte array
      */
     public static byte[] intToByteArray4(int i) {
-        return new byte[] { (byte) ((i >> 24) & 0xff),
-                (byte) ((i >> 16) & 0xff), (byte) ((i >> 8) & 0xff),
+        return new byte[] { (byte) ((i >> 24) & 0xff), (byte) ((i >> 16) & 0xff), (byte) ((i >> 8) & 0xff),
                 (byte) (i & 0xff) };
     }
 
     /**
-     * Converts an IP address passed as integer value into the
-     * respective InetAddress object
+     * Converts an IP address passed as integer value into the respective
+     * InetAddress object
      *
-     * @param address   the IP address in integer form
-     * @return          the IP address in InetAddress form
+     * @param address
+     *            the IP address in integer form
+     * @return the IP address in InetAddress form
      */
     public static InetAddress getInetAddress(int address) {
         InetAddress ip = null;
         try {
             ip = InetAddress.getByAddress(NetUtils.intToByteArray4(address));
         } catch (UnknownHostException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         return ip;
     }
 
     /**
-     * Return the InetAddress Network Mask given the length of the prefix bit mask.
-     * The prefix bit mask indicates the contiguous leading bits that are NOT masked out.
-     * Example: A prefix bit mask length of 8 will give an InetAddress Network Mask of 255.0.0.0
+     * Return the InetAddress Network Mask given the length of the prefix bit
+     * mask. The prefix bit mask indicates the contiguous leading bits that are
+     * NOT masked out. Example: A prefix bit mask length of 8 will give an
+     * InetAddress Network Mask of 255.0.0.0
      *
-     * @param prefixMaskLength  integer representing the length of the prefix network mask
-     * @param isV6              boolean representing the IP version of the returned address
+     * @param prefixMaskLength
+     *            integer representing the length of the prefix network mask
+     * @param isV6
+     *            boolean representing the IP version of the returned address
      * @return
      */
-    public static InetAddress getInetNetworkMask(int prefixMaskLength,
-            boolean isV6) {
-        if (prefixMaskLength < 0 || (!isV6 && prefixMaskLength > 32)
-                || (isV6 && prefixMaskLength > 128)) {
+    public static InetAddress getInetNetworkMask(int prefixMaskLength, boolean isV6) {
+        if (prefixMaskLength < 0 || (!isV6 && prefixMaskLength > 32) || (isV6 && prefixMaskLength > 128)) {
             return null;
         }
         byte v4Address[] = { 0, 0, 0, 0 };
@@ -111,19 +108,20 @@ public abstract class NetUtils {
         try {
             return InetAddress.getByAddress(address);
         } catch (UnknownHostException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         return null;
     }
 
     /**
-     * Returns the number of contiguous bits belonging to the subnet, that have to be masked out
-     * Example: A prefix network byte mask of ff.ff.ff.00 will give a subnet mask length of 8,
-     * while ff.00.00.00 will return a subnet mask length of 24.
-     * If the passed prefixMask object is null, 0 is returned
+     * Returns the number of contiguous bits belonging to the subnet, that have
+     * to be masked out Example: A prefix network byte mask of ff.ff.ff.00 will
+     * give a subnet mask length of 8, while ff.00.00.00 will return a subnet
+     * mask length of 24. If the passed prefixMask object is null, 0 is returned
      *
-     * @param prefixMask    the prefix mask as byte array
-     * @return              the length of the prefix network mask
+     * @param prefixMask
+     *            the prefix mask as byte array
+     * @return the length of the prefix network mask
      */
     public static int getSubnetMaskLength(byte[] prefixMask) {
         int maskLength = 0;
@@ -145,27 +143,29 @@ public abstract class NetUtils {
     }
 
     /**
-     * Returns the number of contiguous bits belonging to the subnet, that have to be masked out
-     * Example: A prefix network byte mask of ff.ff.ff.00 will give a subnet mask length of 8,
-     * while ff.00.00.00 will return a subnet mask length of 24
-     * If the passed prefixMask object is null, 0 is returned
+     * Returns the number of contiguous bits belonging to the subnet, that have
+     * to be masked out Example: A prefix network byte mask of ff.ff.ff.00 will
+     * give a subnet mask length of 8, while ff.00.00.00 will return a subnet
+     * mask length of 24 If the passed prefixMask object is null, 0 is returned
      *
-     * @param prefixMask    the prefix mask as InetAddress
-     * @return              the length of the prefix network mask
+     * @param prefixMask
+     *            the prefix mask as InetAddress
+     * @return the length of the prefix network mask
      */
     public static int getSubnetMaskLength(InetAddress prefixMask) {
-        return (prefixMask == null) ? 0 : NetUtils
-                .getSubnetMaskLength(prefixMask.getAddress());
+        return (prefixMask == null) ? 0 : NetUtils.getSubnetMaskLength(prefixMask.getAddress());
     }
 
     /**
-     * Given an IP address and a prefix network mask length, it returns
-     * the equivalent subnet prefix IP address
-     * Example: for ip = "172.28.30.254" and maskLen = 25 it will return "172.28.30.128"
+     * Given an IP address and a prefix network mask length, it returns the
+     * equivalent subnet prefix IP address Example: for ip = "172.28.30.254" and
+     * maskLen = 25 it will return "172.28.30.128"
      *
-     * @param ip        the IP address in InetAddress form
-     * @param maskLen   the length of the prefix network mask
-     * @return          the subnet prefix IP address in InetAddress form
+     * @param ip
+     *            the IP address in InetAddress form
+     * @param maskLen
+     *            the length of the prefix network mask
+     * @return the subnet prefix IP address in InetAddress form
      */
     public static InetAddress getSubnetPrefix(InetAddress ip, int maskLen) {
         int bytes = maskLen / 8;
@@ -188,17 +188,14 @@ public abstract class NetUtils {
     }
 
     /**
-     * Checks if the test address and mask conflicts with
-     * the filter address and mask
+     * Checks if the test address and mask conflicts with the filter address and
+     * mask
      *
-     * For example:
-     * testAddress: 172.28.2.23 testMask: 255.255.255.0
-     * filtAddress: 172.28.1.10 testMask: 255.255.255.0
-     * conflict
+     * For example: testAddress: 172.28.2.23 testMask: 255.255.255.0
+     * filtAddress: 172.28.1.10 testMask: 255.255.255.0 conflict
      *
-     * testAddress: 172.28.2.23 testMask: 255.255.255.0
-     * filtAddress: 172.28.1.10 testMask: 255.255.0.0
-     * do not conflict
+     * testAddress: 172.28.2.23 testMask: 255.255.255.0 filtAddress: 172.28.1.10
+     * testMask: 255.255.0.0 do not conflict
      *
      * Null parameters are permitted
      *
@@ -208,8 +205,7 @@ public abstract class NetUtils {
      * @param filterMask
      * @return
      */
-    public static boolean inetAddressConflict(InetAddress testAddress,
-            InetAddress filterAddress, InetAddress testMask,
+    public static boolean inetAddressConflict(InetAddress testAddress, InetAddress filterAddress, InetAddress testMask,
             InetAddress filterMask) {
         // Sanity check
         if ((testAddress == null) || (filterAddress == null)) {
@@ -241,8 +237,9 @@ public abstract class NetUtils {
     /**
      * Returns true if the passed MAC address is all zero
      *
-     * @param mac   the byte array representing the MAC address
-     * @return      true if all MAC bytes are zero
+     * @param mac
+     *            the byte array representing the MAC address
+     * @return true if all MAC bytes are zero
      */
     public static boolean isZeroMAC(byte[] mac) {
         for (short i = 0; i < 6; i++) {
@@ -256,8 +253,9 @@ public abstract class NetUtils {
     /**
      * Returns true if the passed InetAddress contains all zero
      *
-     * @param ip    the IP address to test
-     * @return      true if the address is all zero
+     * @param ip
+     *            the IP address to test
+     * @return true if the address is all zero
      */
     public static boolean isAny(InetAddress ip) {
         for (byte b : ip.getAddress()) {
@@ -280,16 +278,17 @@ public abstract class NetUtils {
         try {
             address = InetAddress.getByName(addressString);
         } catch (UnknownHostException e) {
-            logger.error("",e);
+            logger.error("", e);
         }
         return address;
     }
 
     /**
-     * Checks if the passed IP v4 address in string form is valid
-     * The address may specify a mask at the end as "/MM"
+     * Checks if the passed IP v4 address in string form is valid The address
+     * may specify a mask at the end as "/MM"
      *
-     * @param cidr the v4 address as A.B.C.D/MM
+     * @param cidr
+     *            the v4 address as A.B.C.D/MM
      * @return
      */
     public static boolean isIPv4AddressValid(String cidr) {
@@ -314,10 +313,11 @@ public abstract class NetUtils {
     }
 
     /**
-     * Checks if the passed IP v6 address in string form is valid
-     * The address may specify a mask at the end as "/MMM"
+     * Checks if the passed IP v6 address in string form is valid The address
+     * may specify a mask at the end as "/MMM"
      *
-     * @param cidr the v6 address as A::1/MMM
+     * @param cidr
+     *            the v6 address as A::1/MMM
      * @return
      */
     public static boolean isIPv6AddressValid(String cidr) {
@@ -327,7 +327,8 @@ public abstract class NetUtils {
 
         String values[] = cidr.split("/");
         try {
-            //when given an IP address, InetAddress.getByName validates the ip address
+            // when given an IP address, InetAddress.getByName validates the ip
+            // address
             InetAddress addr = InetAddress.getByName(values[0]);
             if (!(addr instanceof Inet6Address)) {
                 return false;
@@ -354,32 +355,48 @@ public abstract class NetUtils {
      * @return
      */
     public static boolean isIPAddressValid(String cidr) {
-        return NetUtils.isIPv4AddressValid(cidr)
-                || NetUtils.isIPv6AddressValid(cidr);
+        return NetUtils.isIPv4AddressValid(cidr) || NetUtils.isIPv6AddressValid(cidr);
     }
 
     /*
-     * Following utilities are useful when you need to
-     * compare or bit shift java primitive type variable
-     * which are inerently signed
+     * Following utilities are useful when you need to compare or bit shift java
+     * primitive type variable which are inerently signed
      */
     /**
      * Returns the unsigned value of the passed byte variable
      *
-     * @param b the byte value
+     * @param b
+     *            the byte value
      * @return the int variable containing the unsigned byte value
      */
     public static int getUnsignedByte(byte b) {
-        return (b > 0)? (int)b : (b & 0x7F | 0x80);
+        return (b > 0) ? (int) b : (b & 0x7F | 0x80);
     }
 
     /**
      * Return the unsigned value of the passed short variable
      *
-     * @param s the short value
+     * @param s
+     *            the short value
      * @return the int variable containing the unsigned short value
      */
     public static int getUnsignedShort(short s) {
-        return (s > 0)? (int)s : (s & 0x7FFF | 0x8000);
+        return (s > 0) ? (int) s : (s & 0x7FFF | 0x8000);
+    }
+
+    /**
+     * Returns the highest v4 or v6 InetAddress
+     *
+     * @param v6
+     *            true for IPv6, false for Ipv4
+     * @return The highest IPv4 or IPv6 address
+     */
+    public static InetAddress gethighestIP(boolean v6) {
+        try {
+            return (v6) ? InetAddress.getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff") : InetAddress
+                    .getByName("255.255.255.255");
+        } catch (UnknownHostException e) {
+            return null;
+        }
     }
 }

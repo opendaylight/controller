@@ -202,6 +202,7 @@ public class Match implements Cloneable, Serializable {
         Match cloned = null;
         try {
             cloned = (Match) super.clone();
+            cloned.matches = matches;
             cloned.fields = new HashMap<MatchType, MatchField>();
             for (Entry<MatchType, MatchField> entry : this.fields.entrySet()) {
                 cloned.fields.put(entry.getKey(), entry.getValue().clone());
@@ -345,20 +346,26 @@ public class Match implements Cloneable, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Match other = (Match) obj;
         if (fields == null) {
-            if (other.fields != null)
+            if (other.fields != null) {
                 return false;
-        } else if (!fields.equals(other.fields))
+            }
+        } else if (!fields.equals(other.fields)) {
             return false;
-        if (matches != other.matches)
+        }
+        if (matches != other.matches) {
             return false;
+        }
         return true;
     }
 

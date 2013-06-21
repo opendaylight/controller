@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.forwardingrulesmanager;
 
+import java.io.Serializable;
+
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Node;
 
@@ -20,59 +22,54 @@ import org.opendaylight.controller.sal.core.Node;
  *
  * Note: If the container flow is null, the install entry will be a clone of the
  * original entry
- *
  */
-public class FlowEntryInstall {
-    private FlowEntry original;
-    private ContainerFlow cFlow;
-    private FlowEntry install;
+public class FlowEntryInstall implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private final FlowEntry original;
+    private final ContainerFlow cFlow;
+    private final FlowEntry install;
     transient private long requestId; // async request id
     transient private boolean deletePending;
 
     public FlowEntryInstall(FlowEntry original, ContainerFlow cFlow) {
         this.original = original;
         this.cFlow = cFlow;
-        this.install = (cFlow == null) ? original.clone() : original
-                .mergeWith(cFlow);
+        this.install = (cFlow == null) ? original.clone() : original.mergeWith(cFlow);
         deletePending = false;
         requestId = 0;
     }
 
+    /*
+     * Given FlowEntryInstall is used as key for FRM map which contains the
+     * software view of installed entries, having its hashcode tied to the one
+     * of the installed FlowEntry which takes into account the fields which
+     * uniquely identify a flow from switch point of view: node, match and
+     * priority.
+     */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((cFlow == null) ? 0 : cFlow.hashCode());
-        result = prime * result + ((install == null) ? 0 : install.hashCode());
-        result = prime * result
-                + ((original == null) ? 0 : original.hashCode());
-        return result;
+        return install.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         FlowEntryInstall other = (FlowEntryInstall) obj;
-        if (cFlow == null) {
-            if (other.cFlow != null)
-                return false;
-        } else if (!cFlow.equals(other.cFlow))
-            return false;
         if (install == null) {
-            if (other.install != null)
+            if (other.install != null) {
                 return false;
-        } else if (!install.equals(other.install))
+            }
+        } else if (!install.equals(other.install)) {
             return false;
-        if (original == null) {
-            if (other.original != null)
-                return false;
-        } else if (!original.equals(other.original))
-            return false;
+        }
         return true;
     }
 
@@ -120,9 +117,18 @@ public class FlowEntryInstall {
         return requestId;
     }
 
+    /**
+     * Returns whether this entry is the result of an internal generated static
+     * flow
+     *
+     * @return true if internal generated static flow, false otherwise
+     */
+    public boolean isInternal() {
+        return original.isInternal();
+    }
+
     @Override
     public String toString() {
-        return "[Install = " + install + " Original = " + original + " cFlow = "
-                + cFlow + " rid = " + requestId + "]";
+        return "[Install = " + install + " Original = " + original + " cFlow = " + cFlow + " rid = " + requestId + "]";
     }
 }

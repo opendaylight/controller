@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -19,14 +18,15 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class SetVlanPcp extends Action {
-        @XmlElement
+    private static final long serialVersionUID = 1L;
+    @XmlElement
     private int pcp;
 
-        private SetVlanPcp() {
+    @SuppressWarnings("unused")
+    private SetVlanPcp() {
 
-        }
+    }
 
     public SetVlanPcp(int pcp) {
         type = ActionType.SET_VLAN_PCP;
@@ -36,6 +36,7 @@ public class SetVlanPcp extends Action {
 
     /**
      * Returns the value of the vlan PCP this action will set
+     *
      * @return int
      */
     public int getPcp() {
@@ -44,15 +45,19 @@ public class SetVlanPcp extends Action {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SetVlanPcp other = (SetVlanPcp) obj;
-        if (pcp != other.pcp)
+        if (pcp != other.pcp) {
             return false;
+        }
         return true;
     }
 
