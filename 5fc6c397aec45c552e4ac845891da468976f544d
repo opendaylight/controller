@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///7g\u003d",
+        "filename": "opendaylight/hosttracker_new/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/DeviceManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1479,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-21T00:00:23Z",
+      "side": 1,
+      "message": "Can you please use a new sa.NetUtils method to achieve this.",
+      "revId": "5fc6c397aec45c552e4ac845891da468976f544d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///7k\u003d",
+        "filename": "opendaylight/hosttracker_new/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/DeviceManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2043,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-06-21T00:00:23Z",
+      "side": 1,
+      "message": "Can you please add thins function to NetUtils as static method.",
+      "revId": "5fc6c397aec45c552e4ac845891da468976f544d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
