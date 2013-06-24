@@ -20,4 +20,6 @@ public interface AugmentationTargetBuilder {
      */
     void addAugmentation(AugmentationSchemaBuilder augment);
 
+    void rebuild();
+
 }

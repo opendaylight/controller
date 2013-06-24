@@ -20,10 +20,8 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 
-public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
-        implements SchemaNodeBuilder, DataSchemaNodeBuilder {
+public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder implements DataSchemaNodeBuilder {
     private boolean isBuilt;
     private final LeafListSchemaNodeImpl instance;
     private final int line;
@@ -33,6 +31,7 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
+    private List<UnknownSchemaNode> unknownNodes;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     // DataSchemaNode args
     private boolean augmenting;
@@ -67,9 +66,11 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
             }
 
             // UNKNOWN NODES
-            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-                unknownNodes.add(b.build());
+            if (unknownNodes == null) {
+                unknownNodes = new ArrayList<UnknownSchemaNode>();
+                for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                    unknownNodes.add(b.build());
+                }
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
@@ -164,6 +165,10 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
     @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
+    }
+
+    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
+        this.unknownNodes = unknownNodes;
     }
 
     private final class LeafListSchemaNodeImpl implements LeafListSchemaNode {
@@ -320,16 +325,9 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    LeafListSchemaNodeImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(LeafListSchemaNodeImpl.class.getSimpleName());
             sb.append("[");
-            sb.append("qname=" + qname);
-            sb.append(", path=" + path);
-            sb.append(", augmenting=" + augmenting);
-            sb.append(", configuration=" + configuration);
-            sb.append(", constraints=" + constraintsDef);
-            sb.append(", type=" + type);
-            sb.append(", userOrdered=" + userOrdered);
+            sb.append(qname);
             sb.append("]");
             return sb.toString();
         }

@@ -25,6 +25,7 @@ import java.util.Set;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.ModuleImport;
+import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
@@ -67,6 +68,25 @@ final class TestUtils {
                 parser.parseYangModelsFromStreams(input));
         stream.close();
         return modules.iterator().next();
+    }
+
+    public static Module loadModuleWithContext(final InputStream stream, final SchemaContext context) throws IOException {
+        final YangModelParser parser = new YangParserImpl();
+        final List<InputStream> input = Collections.singletonList(stream);
+        final Set<Module> modules = new HashSet<Module>(parser.parseYangModelsFromStreams(input, context));
+        stream.close();
+        return modules.iterator().next();
+    }
+
+    public static Set<Module> loadModulesWithContext(final List<InputStream> input, final SchemaContext context) throws IOException {
+        final YangModelParser parser = new YangParserImpl();
+        final Set<Module> modules = new HashSet<Module>(parser.parseYangModelsFromStreams(input, context));
+        for(InputStream is : input) {
+            if(is != null) {
+                is.close();
+            }
+        }
+        return modules;
     }
 
     public static Module findModule(Set<Module> modules, String moduleName) {
