@@ -24,9 +24,15 @@ public interface SchemaNodeBuilder extends Builder {
 
     void setPath(SchemaPath schemaPath);
 
+    String getDescription();
+
     void setDescription(String description);
 
+    String getReference();
+
     void setReference(String reference);
+
+    Status getStatus();
 
     void setStatus(Status status);
 

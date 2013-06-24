@@ -24,6 +24,9 @@ public final class FeatureBuilder implements SchemaNodeBuilder {
     private final int line;
     private final QName qname;
     private SchemaPath schemaPath;
+    private String description;
+    private String reference;
+    private Status status = Status.CURRENT;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     FeatureBuilder(final QName qname, final int line) {
@@ -36,6 +39,9 @@ public final class FeatureBuilder implements SchemaNodeBuilder {
     public FeatureDefinitionImpl build() {
         if(!isBuilt) {
             instance.setPath(schemaPath);
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
 
             // UNKNOWN NODES
             final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
@@ -70,18 +76,33 @@ public final class FeatureBuilder implements SchemaNodeBuilder {
     }
 
     @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
     public void setDescription(final String description) {
-        instance.setDescription(description);
+        this.description = description;
+    }
+
+    @Override
+    public String getReference() {
+        return reference;
     }
 
     @Override
     public void setReference(final String reference) {
-        instance.setReference(reference);
+        this.reference = reference;
+    }
+
+    @Override
+    public Status getStatus() {
+        return status;
     }
 
     @Override
     public void setStatus(final Status status) {
-        instance.setStatus(status);
+        this.status = status;
     }
 
     @Override

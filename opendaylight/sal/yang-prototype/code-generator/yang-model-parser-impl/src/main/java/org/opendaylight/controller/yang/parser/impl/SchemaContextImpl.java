@@ -75,8 +75,7 @@ final class SchemaContextImpl implements SchemaContext {
                     if (module.getName().equals(name)) {
                         return module;
                     }
-                } else if (module.getName().equals(name)
-                        && module.getRevision().equals(revision)) {
+                } else if (module.getName().equals(name) && module.getRevision().equals(revision)) {
                     return module;
                 }
             }

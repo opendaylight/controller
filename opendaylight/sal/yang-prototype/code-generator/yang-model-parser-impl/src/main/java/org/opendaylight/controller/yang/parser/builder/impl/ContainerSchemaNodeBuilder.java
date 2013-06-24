@@ -49,10 +49,13 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
     private boolean presence;
     private boolean augmenting;
     private boolean configuration;
-
+    private Set<TypeDefinition<?>> typedefs;
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
+    private Set<UsesNode> usesNodes;
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
+    private Set<AugmentationSchema> augmentations;
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
+    private List<UnknownSchemaNode> unknownNodes;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     public ContainerSchemaNodeBuilder(final QName qname, final int line) {
@@ -75,43 +78,59 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
 
             // CHILD NODES
             final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
-            for (DataSchemaNodeBuilder node : childNodes) {
-                childs.put(node.getQName(), node.build());
+            if(childNodes == null) {
+                for (DataSchemaNodeBuilder node : addedChildNodes) {
+                    childs.put(node.getQName(), node.build());
+                }
+            } else {
+                for(DataSchemaNode node : childNodes) {
+                    childs.put(node.getQName(), node);
+                }
             }
             instance.setChildNodes(childs);
 
             // GROUPINGS
-            final Set<GroupingDefinition> groupingDefs = new HashSet<GroupingDefinition>();
-            for (GroupingBuilder builder : groupings) {
-                groupingDefs.add(builder.build());
+            if(groupings == null) {
+                groupings = new HashSet<GroupingDefinition>();
+                for (GroupingBuilder builder : addedGroupings) {
+                    groupings.add(builder.build());
+                }
             }
-            instance.setGroupings(groupingDefs);
+            instance.setGroupings(groupings);
 
             // TYPEDEFS
-            final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
-            for (TypeDefinitionBuilder entry : addedTypedefs) {
-                typedefs.add(entry.build());
+            if(typedefs == null) {
+                typedefs = new HashSet<TypeDefinition<?>>();
+                for (TypeDefinitionBuilder entry : addedTypedefs) {
+                    typedefs.add(entry.build());
+                }
             }
             instance.setTypeDefinitions(typedefs);
 
             // USES
-            final Set<UsesNode> uses = new HashSet<UsesNode>();
-            for (UsesNodeBuilder builder : addedUsesNodes) {
-                uses.add(builder.build());
+            if(usesNodes == null) {
+                usesNodes = new HashSet<UsesNode>();
+                for (UsesNodeBuilder builder : addedUsesNodes) {
+                    usesNodes.add(builder.build());
+                }
             }
-            instance.setUses(uses);
+            instance.setUses(usesNodes);
 
             // AUGMENTATIONS
-            final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
-            for (AugmentationSchemaBuilder builder : addedAugmentations) {
-                augmentations.add(builder.build());
+            if(augmentations == null) {
+                augmentations = new HashSet<AugmentationSchema>();
+                for (AugmentationSchemaBuilder builder : addedAugmentations) {
+                    augmentations.add(builder.build());
+                }
             }
             instance.setAvailableAugmentations(augmentations);
 
             // UNKNOWN NODES
-            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-                unknownNodes.add(b.build());
+            if(unknownNodes == null) {
+                unknownNodes = new ArrayList<UnknownSchemaNode>();
+                for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                    unknownNodes.add(b.build());
+                }
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
@@ -121,6 +140,12 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
             isBuilt = true;
         }
         return instance;
+    }
+
+    @Override
+    public void rebuild() {
+        isBuilt = false;
+        build();
     }
 
     @Override
@@ -138,6 +163,10 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
         addedTypedefs.add(type);
     }
 
+    public void setTypedefs(final Set<TypeDefinition<?>> typedefs) {
+        this.typedefs = typedefs;
+    }
+
     public Set<AugmentationSchemaBuilder> getAugmentations() {
         return addedAugmentations;
     }
@@ -145,6 +174,10 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
     @Override
     public void addAugmentation(AugmentationSchemaBuilder augment) {
         addedAugmentations.add(augment);
+    }
+
+    public void setAugmentations(final Set<AugmentationSchema> augmentations) {
+        this.augmentations = augmentations;
     }
 
     public SchemaPath getPath() {
@@ -156,6 +189,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
         this.schemaPath = schemaPath;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
@@ -165,6 +199,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
         this.description = description;
     }
 
+    @Override
     public String getReference() {
         return reference;
     }
@@ -174,6 +209,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
         this.reference = reference;
     }
 
+    @Override
     public Status getStatus() {
         return status;
     }
@@ -185,6 +221,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
         }
     }
 
+    @Override
     public boolean isAugmenting() {
         return augmenting;
     }
@@ -194,6 +231,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
         this.augmenting = augmenting;
     }
 
+    @Override
     public boolean isConfiguration() {
         return configuration;
     }
@@ -217,6 +255,10 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
         addedUsesNodes.add(usesNodeBuilder);
     }
 
+    public void setUsesnodes(final Set<UsesNode> usesNodes) {
+        this.usesNodes = usesNodes;
+    }
+
     public boolean isPresence() {
         return presence;
     }
@@ -234,12 +276,16 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
         addedUnknownNodes.add(unknownNode);
     }
 
+    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
+        this.unknownNodes = unknownNodes;
+    }
+
     @Override
     public String toString() {
         return "container " + getQName().getLocalName();
     }
 
-    private final class ContainerSchemaNodeImpl implements ContainerSchemaNode {
+    public final class ContainerSchemaNodeImpl implements ContainerSchemaNode {
         private final QName qname;
         private SchemaPath path;
         private String description;
@@ -422,6 +468,10 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
             if (unknownSchemaNodes != null) {
                 this.unknownNodes = unknownSchemaNodes;
             }
+        }
+
+        public ContainerSchemaNodeBuilder toBuilder() {
+            return ContainerSchemaNodeBuilder.this;
         }
 
         @Override
