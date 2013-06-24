@@ -1,0 +1,32 @@
+module test3 {
+
+    yang-version 1;
+    namespace "urn:simple.demo.test3";
+    prefix "t3";
+    
+    import custom-types-test {
+        prefix "custom";
+    }
+    
+    organization "opendaylight";
+    contact "WILL-BE-DEFINED-LATER";
+        revision 2013-06-18 {
+    }
+
+    identity pt {
+        base custom:service-type;
+    }
+    
+    container network {
+        custom:mountpoint point {
+            mnt:target-ref target;
+        }
+        
+        description "network-description";
+        reference "network-reference";
+        status obsolete;
+        config true;
+        presence "some presence text";
+    }
+
+}

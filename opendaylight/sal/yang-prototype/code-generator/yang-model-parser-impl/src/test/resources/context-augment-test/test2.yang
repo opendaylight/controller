@@ -1,0 +1,41 @@
+module test2 {
+
+    yang-version 1;
+    namespace "urn:simple.demo.test2";
+    prefix "t2";
+
+    import test3 {
+        prefix "t3";
+        revision-date 2013-06-18;
+    }
+
+    import test4 {
+        prefix "t4";
+        revision-date 2013-06-18;
+    }
+
+    organization "opendaylight";
+    contact "WILL-BE-DEFINED-LATER";
+        revision 2013-06-18 {
+    }
+
+    augment "/t4:interfaces/t4:ifEntry/t3:augment-holder" {
+        when "if:ifType='ds0'";
+        leaf ds0ChannelNumber {
+            type string;
+        }
+        leaf interface-id {
+            type leafref {
+                path "/if:interfaces/if:interface/if:name";
+            }
+        }
+        leaf-list higher-layer-if {
+            type leafref {
+                path "/if:interfaces/if:interface/if:higher-layer-if";
+            }
+        }
+        container schemas {
+        }
+    }
+
+}

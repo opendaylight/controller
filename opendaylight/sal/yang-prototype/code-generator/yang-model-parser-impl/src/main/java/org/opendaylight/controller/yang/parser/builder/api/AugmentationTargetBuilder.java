@@ -20,4 +20,15 @@ public interface AugmentationTargetBuilder {
      */
     void addAugmentation(AugmentationSchemaBuilder augment);
 
+    /**
+     * Build again already built data node.
+     *
+     * In general, when Builder.build is called first time, it creates YANG data
+     * model node instance. With every other call it just return this instance
+     * without checking for properties change. This method causes that builder
+     * object process again all its properties and return an updated instance of
+     * YANG data node.
+     */
+    void rebuild();
+
 }

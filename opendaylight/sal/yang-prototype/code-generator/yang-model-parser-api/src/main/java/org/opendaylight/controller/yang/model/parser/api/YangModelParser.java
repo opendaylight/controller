@@ -26,7 +26,7 @@ public interface YangModelParser {
 
     /**
      * Parse one or more Yang model files and return the definitions of Yang
-     * modules defined in *.Yang files; <br>
+     * modules defined in *.yang files; <br>
      * This method SHOULD be used if user need to parse multiple yang models
      * that are referenced either through import or include statements.
      *
@@ -35,6 +35,21 @@ public interface YangModelParser {
      * @return Set of Yang Modules
      */
     Set<Module> parseYangModels(final List<File> yangFiles);
+
+    /**
+     * Parse one or more Yang model files and return the definitions of Yang
+     * modules defined in *.yang files. <br>
+     * This method SHOULD be used if user has already parsed context and need to
+     * parse additinal yang models which can have dependencies on models in this
+     * context.
+     *
+     * @param yangFiles
+     *            yang files to parse
+     * @param context
+     *            SchemaContext containing already parsed yang models
+     * @return Set of Yang Modules
+     */
+    Set<Module> parseYangModels(final List<File> yangFiles, final SchemaContext context);
 
     /**
      * Equivalent to {@link #parseYangModels(List)} that returns parsed modules
@@ -46,11 +61,42 @@ public interface YangModelParser {
      */
     Map<File, Module> parseYangModelsMapped(final List<File> yangFiles);
 
-    Set<Module> parseYangModelsFromStreams(
-            final List<InputStream> yangModelStreams);
+    /**
+     * Parse one or more Yang model streams and return the definitions of Yang
+     * modules defined in *.yang files; <br>
+     * This method SHOULD be used if user need to parse multiple yang models
+     * that are referenced either through import or include statements.
+     *
+     * @param yangModelStreams
+     *            yang streams to parse
+     * @return Set of Yang Modules
+     */
+    Set<Module> parseYangModelsFromStreams(final List<InputStream> yangModelStreams);
 
-    Map<InputStream, Module> parseYangModelsFromStreamsMapped(
-            final List<InputStream> yangModelStreams);
+    /**
+     * Parse one or more Yang model streams and return the definitions of Yang
+     * modules defined in *.yang files. <br>
+     * This method SHOULD be used if user has already parsed context and need to
+     * parse additinal yang models which can have dependencies on models in this
+     * context.
+     *
+     * @param yangModelStreams
+     *            yang streams to parse
+     * @param context
+     *            SchemaContext containing already parsed yang models
+     * @return Set of Yang Modules
+     */
+    Set<Module> parseYangModelsFromStreams(final List<InputStream> yangModelStreams, final SchemaContext context);
+
+    /**
+     * Equivalent to {@link #parseYangModels(List)} that returns parsed modules
+     * mapped to IputStreams from which they were parsed.
+     *
+     * @param yangModelStreams
+     *            yang streams to parse
+     * @return Map of Yang Modules
+     */
+    Map<InputStream, Module> parseYangModelsFromStreamsMapped(final List<InputStream> yangModelStreams);
 
     /**
      * Creates {@link SchemaContext} from specified Modules. The modules SHOULD

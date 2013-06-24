@@ -48,4 +48,6 @@ public interface Module extends DataNodeContainer {
 
     List<ExtensionDefinition> getExtensionSchemaNodes();
 
+    List<UnknownSchemaNode> getUnknownSchemaNodes();
+
 }

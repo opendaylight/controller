@@ -24,6 +24,9 @@ public final class ExtensionBuilder implements SchemaNodeBuilder {
     private final int line;
     private final QName qname;
     private SchemaPath schemaPath;
+    private String description;
+    private String reference;
+    private Status status = Status.CURRENT;
     private final List<UnknownSchemaNodeBuilder> addedExtensions = new ArrayList<UnknownSchemaNodeBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
@@ -37,6 +40,9 @@ public final class ExtensionBuilder implements SchemaNodeBuilder {
     public ExtensionDefinition build() {
         if(!isBuilt) {
             instance.setPath(schemaPath);
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
 
             // UNKNOWN NODES
             final List<UnknownSchemaNode> extensions = new ArrayList<UnknownSchemaNode>();
@@ -84,22 +90,37 @@ public final class ExtensionBuilder implements SchemaNodeBuilder {
     }
 
     @Override
-    public void setDescription(String description) {
-        instance.setDescription(description);
+    public String getDescription() {
+        return description;
     }
 
     @Override
-    public void setReference(String reference) {
-        instance.setReference(reference);
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
     @Override
-    public void setStatus(Status status) {
+    public String getReference() {
+        return reference;
+    }
+
+    @Override
+    public void setReference(final String reference) {
+        this.reference = reference;
+    }
+
+    @Override
+    public Status getStatus() {
+        return status;
+    }
+
+    @Override
+    public void setStatus(final Status status) {
         instance.setStatus(status);
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
     }
 

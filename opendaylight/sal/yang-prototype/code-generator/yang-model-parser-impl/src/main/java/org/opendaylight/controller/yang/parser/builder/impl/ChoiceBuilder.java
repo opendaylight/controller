@@ -26,7 +26,7 @@ import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBui
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 
 public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationTargetBuilder {
-    private boolean built;
+    private boolean isBuilt;
     private final ChoiceNodeImpl instance;
     private final int line;
     // SchemaNode args
@@ -35,6 +35,7 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
+    private List<UnknownSchemaNode> unknownNodes;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     // DataSchemaNode args
     private boolean augmenting;
@@ -43,7 +44,8 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
     // AugmentationTarget args
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
     // ChoiceNode args
-    private final Set<ChoiceCaseBuilder> cases = new HashSet<ChoiceCaseBuilder>();
+    private Set<ChoiceCaseNode> cases;
+    private final Set<ChoiceCaseBuilder> addedCases = new HashSet<ChoiceCaseBuilder>();
     private String defaultCase;
 
     public ChoiceBuilder(final QName qname, final int line) {
@@ -55,7 +57,7 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
 
     @Override
     public ChoiceNode build() {
-        if (!built) {
+        if (!isBuilt) {
             instance.setPath(schemaPath);
             instance.setDescription(description);
             instance.setReference(reference);
@@ -66,11 +68,13 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
             instance.setDefaultCase(defaultCase);
 
             // CASES
-            final Set<ChoiceCaseNode> choiceCases = new HashSet<ChoiceCaseNode>();
-            for (ChoiceCaseBuilder caseBuilder : cases) {
-                choiceCases.add(caseBuilder.build());
+            if(cases == null) {
+                cases = new HashSet<ChoiceCaseNode>();
+                for (ChoiceCaseBuilder caseBuilder : addedCases) {
+                    cases.add(caseBuilder.build());
+                }
             }
-            instance.setCases(choiceCases);
+            instance.setCases(cases);
 
             // AUGMENTATIONS
             final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
@@ -80,15 +84,23 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
             instance.setAvailableAugmentations(augmentations);
 
             // UNKNOWN NODES
-            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-                unknownNodes.add(b.build());
+            if(unknownNodes == null) {
+                unknownNodes = new ArrayList<UnknownSchemaNode>();
+                for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                    unknownNodes.add(b.build());
+                }
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
-            built = true;
+            isBuilt = true;
         }
         return instance;
+    }
+
+    @Override
+    public void rebuild() {
+        isBuilt = false;
+        build();
     }
 
     @Override
@@ -97,17 +109,21 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
     }
 
     public Set<ChoiceCaseBuilder> getCases() {
-        return cases;
+        return addedCases;
     }
 
     public void addChildNode(DataSchemaNodeBuilder childNode) {
         if (!(childNode instanceof ChoiceCaseBuilder)) {
             ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(childNode.getQName(), childNode.getLine());
             caseBuilder.addChildNode(childNode);
-            cases.add(caseBuilder);
+            addedCases.add(caseBuilder);
         } else {
-            cases.add((ChoiceCaseBuilder) childNode);
+            addedCases.add((ChoiceCaseBuilder) childNode);
         }
+    }
+
+    public void setCases(Set<ChoiceCaseNode> cases) {
+        this.cases = cases;
     }
 
     @Override
@@ -176,10 +192,6 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
         return constraints;
     }
 
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
-        return addedUnknownNodes;
-    }
-
     public Set<AugmentationSchemaBuilder> getAugmentations() {
         return addedAugmentations;
     }
@@ -189,9 +201,17 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
         addedAugmentations.add(augment);
     }
 
+    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+        return addedUnknownNodes;
+    }
+
     @Override
     public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
+    }
+
+    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
+        this.unknownNodes = unknownNodes;
     }
 
     public String getDefaultCase() {
@@ -202,7 +222,7 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
         this.defaultCase = defaultCase;
     }
 
-    private final class ChoiceNodeImpl implements ChoiceNode {
+    public final class ChoiceNodeImpl implements ChoiceNode {
         private final QName qname;
         private SchemaPath path;
         private String description;
@@ -330,6 +350,10 @@ public final class ChoiceBuilder implements DataSchemaNodeBuilder, AugmentationT
 
         private void setDefaultCase(String defaultCase) {
             this.defaultCase = defaultCase;
+        }
+
+        public ChoiceBuilder toBuilder() {
+            return ChoiceBuilder.this;
         }
 
         @Override

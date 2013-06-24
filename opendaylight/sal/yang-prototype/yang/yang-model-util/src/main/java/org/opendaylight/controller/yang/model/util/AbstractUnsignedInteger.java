@@ -19,7 +19,7 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  * interface which represents UNSIGNED Integer values defined in Yang language. <br>
  * The integer built-in types in Yang are uint8, uint16, uint32, and uint64.
  * They represent unsigned integers of different sizes:
- * 
+ *
  * <ul>
  * <li>uint8 - represents integer values between 0 and 255, inclusively.</li>
  * <li>uint16 - represents integer values between 0 and 65535, inclusively.</li>
@@ -28,7 +28,7 @@ import org.opendaylight.controller.yang.model.api.type.UnsignedIntegerTypeDefini
  * <li>uint64 - represents integer values between 0 and 18446744073709551615,
  * inclusively.</li>
  * </ul>
- * 
+ *
  */
 public abstract class AbstractUnsignedInteger implements UnsignedIntegerTypeDefinition {
     private static final long MIN_VALUE = 0;
@@ -40,7 +40,7 @@ public abstract class AbstractUnsignedInteger implements UnsignedIntegerTypeDefi
     private final List<RangeConstraint> rangeStatements;
 
     /**
-     * 
+     *
      * @param actualPath
      * @param namespace
      * @param revision

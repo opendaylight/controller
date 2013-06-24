@@ -32,6 +32,9 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefini
     private final int line;
     private final QName qname;
     private SchemaPath schemaPath;
+    private String description;
+    private String reference;
+    private Status status = Status.CURRENT;
     private ContainerSchemaNodeBuilder inputBuilder;
     private ContainerSchemaNodeBuilder outputBuilder;
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
@@ -47,6 +50,10 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefini
     @Override
     public RpcDefinition build() {
         if (!isBuilt) {
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
+
             final ContainerSchemaNode input = inputBuilder == null ? null : inputBuilder.build();
             final ContainerSchemaNode output = outputBuilder == null ? null : outputBuilder.build();
             instance.setInput(input);
@@ -121,18 +128,35 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefini
     }
 
     @Override
-    public void setDescription(final String description) {
-        instance.setDescription(description);
+    public String getDescription() {
+        return description;
     }
 
     @Override
-    public void setReference(final String reference) {
-        instance.setReference(reference);
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    @Override
+    public String getReference() {
+        return reference;
+    }
+
+    @Override
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    @Override
+    public Status getStatus() {
+        return status;
     }
 
     @Override
     public void setStatus(final Status status) {
-        instance.setStatus(status);
+        if (status != null) {
+            this.status = status;
+        }
     }
 
     @Override
@@ -147,7 +171,11 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefini
 
     @Override
     public int hashCode() {
-        return qname.hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((qname == null) ? 0 : qname.hashCode());
+        result = prime * result + ((schemaPath == null) ? 0 : schemaPath.hashCode());
+        return result;
     }
 
     @Override
@@ -164,6 +192,13 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefini
                 return false;
             }
         } else if (!other.qname.equals(this.qname)) {
+            return false;
+        }
+        if (other.schemaPath == null) {
+            if (this.schemaPath != null) {
+                return false;
+            }
+        } else if (!other.schemaPath.equals(this.schemaPath)) {
             return false;
         }
         return true;

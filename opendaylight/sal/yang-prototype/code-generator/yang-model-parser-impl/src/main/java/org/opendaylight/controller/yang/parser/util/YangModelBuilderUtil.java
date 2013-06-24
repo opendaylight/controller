@@ -672,16 +672,13 @@ public final class YangModelBuilderUtil {
     private static List<PatternConstraint> getPatternConstraint(final Type_body_stmtsContext ctx) {
         List<PatternConstraint> patterns = new ArrayList<PatternConstraint>();
 
-        outer: for (int j = 0; j < ctx.getChildCount(); j++) {
+        for (int j = 0; j < ctx.getChildCount(); j++) {
             ParseTree stringRestrChild = ctx.getChild(j);
             if (stringRestrChild instanceof String_restrictionsContext) {
                 for (int k = 0; k < stringRestrChild.getChildCount(); k++) {
                     ParseTree lengthChild = stringRestrChild.getChild(k);
                     if (lengthChild instanceof Pattern_stmtContext) {
                         patterns.add(parsePatternConstraint((Pattern_stmtContext) lengthChild));
-                        if (k == lengthChild.getChildCount() - 1) {
-                            break outer;
-                        }
                     }
                 }
             }
