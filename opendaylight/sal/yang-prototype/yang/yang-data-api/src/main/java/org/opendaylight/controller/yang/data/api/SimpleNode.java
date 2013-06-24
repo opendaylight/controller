@@ -21,6 +21,10 @@ package org.opendaylight.controller.yang.data.api;
  * 
  * @param <T>
  */
-public interface SimpleNode<T> extends Node<T> {
+public interface SimpleNode<T> extends Node<T>, NodeModification {
 
+    /**
+     * @return cast self to mutable, if possible 
+     */
+    MutableSimpleNode<T> asMutable();
 }

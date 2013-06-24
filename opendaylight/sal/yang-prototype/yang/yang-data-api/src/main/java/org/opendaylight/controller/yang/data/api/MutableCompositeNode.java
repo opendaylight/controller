@@ -20,4 +20,9 @@ public interface MutableCompositeNode extends MutableNode<List<Node<?>>>, Compos
      * update internal map
      */
     public void init();
+    
+    /**
+     * @return original node, if available
+     */
+    CompositeNode getOriginal();
 }

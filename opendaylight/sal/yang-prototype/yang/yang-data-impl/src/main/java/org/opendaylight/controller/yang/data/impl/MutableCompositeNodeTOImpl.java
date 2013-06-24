@@ -20,10 +20,11 @@ import org.opendaylight.controller.yang.data.api.Node;
  * @author michal.rehak
  * 
  */
-public class MutableCompositeNodeTOImpl extends CompositeNodeModificationTOImpl
+public class MutableCompositeNodeTOImpl extends CompositeNodeTOImpl
         implements MutableCompositeNode {
 
     private Map<QName, List<Node<?>>> nodeMap;
+    private CompositeNode original;
 
     /**
      * @param qname
@@ -41,7 +42,9 @@ public class MutableCompositeNodeTOImpl extends CompositeNodeModificationTOImpl
      */
     @Override
     public void init() {
-        nodeMap = NodeUtils.buildNodeMap(getChildren());
+        if (!getChildren().isEmpty()) {
+            nodeMap = NodeUtils.buildNodeMap(getChildren());
+        }
     }
 
     @Override
@@ -57,5 +60,22 @@ public class MutableCompositeNodeTOImpl extends CompositeNodeModificationTOImpl
     @Override
     protected Map<QName, List<Node<?>>> getNodeMap() {
         return nodeMap;
+    }
+    
+    @Override
+    public MutableCompositeNode asMutable() {
+        return this;
+    }
+    
+    @Override
+    public CompositeNode getOriginal() {
+        return original;
+    }
+    
+    /**
+     * @param original the original to set
+     */
+    public void setOriginal(CompositeNode original) {
+        this.original = original;
     }
 }
