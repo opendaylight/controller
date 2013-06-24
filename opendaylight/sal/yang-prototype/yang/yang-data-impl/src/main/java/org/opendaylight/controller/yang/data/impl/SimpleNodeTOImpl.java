@@ -9,6 +9,8 @@ package org.opendaylight.controller.yang.data.impl;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.controller.yang.data.api.ModifyAction;
+import org.opendaylight.controller.yang.data.api.MutableSimpleNode;
 import org.opendaylight.controller.yang.data.api.SimpleNode;
 
 /**
@@ -27,5 +29,25 @@ public class SimpleNodeTOImpl<T> extends AbstractNodeTO<T> implements
     public SimpleNodeTOImpl(QName qname, CompositeNode parent, T value) {
         super(qname, parent, value);
     }
+    
+    /**
+     * @param qname
+     * @param parent
+     * @param value
+     * @param modifyAction 
+     */
+    public SimpleNodeTOImpl(QName qname, CompositeNode parent, T value, ModifyAction modifyAction) {
+        super(qname, parent, value, modifyAction);
+    }
 
+    
+    @Override
+    public MutableSimpleNode<T> asMutable() {
+        throw new IllegalAccessError("cast to mutable is not supported - "+getClass().getSimpleName());
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString() + ", value = "+getValue();
+    }
 }

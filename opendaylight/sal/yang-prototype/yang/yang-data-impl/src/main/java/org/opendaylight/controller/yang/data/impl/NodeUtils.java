@@ -36,10 +36,10 @@ import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 
 /**
@@ -48,11 +48,12 @@ import com.google.common.base.Joiner;
  */
 public abstract class NodeUtils {
     
+    private static final Logger LOG = LoggerFactory.getLogger(NodeUtils.class);
+    
     /**
      * 
      */
     private static final String USER_KEY_NODE = "node";
-    private static final Logger LOG = LoggerFactory.getLogger(NodeUtils.class);
     
     /**
      * @param node
@@ -75,9 +76,9 @@ public abstract class NodeUtils {
      * @return dom tree, containing same node structure, yang nodes are associated 
      * to dom nodes as user data
      */
-    public static Document buildShadowDomTree(CompositeNode treeRootNode) {
+    public static org.w3c.dom.Document buildShadowDomTree(CompositeNode treeRootNode) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        Document doc = null;
+        org.w3c.dom.Document doc = null;
         try {
             DocumentBuilder bob = dbf.newDocumentBuilder();
             doc = bob.newDocument();
@@ -86,6 +87,7 @@ public abstract class NodeUtils {
             return null;
         }
         
+        
         Stack<SimpleEntry<org.w3c.dom.Node, Node<?>>> jobQueue = new Stack<>();
         jobQueue.push(new SimpleEntry<org.w3c.dom.Node, Node<?>>(doc, treeRootNode));
         
@@ -93,12 +95,14 @@ public abstract class NodeUtils {
             SimpleEntry<org.w3c.dom.Node, Node<?>> job = jobQueue.pop();
             org.w3c.dom.Node jointPlace = job.getKey();
             Node<?> item = job.getValue();
-            Element itemEl = doc.createElement(item.getNodeType().getLocalName());
+            QName nodeType = item.getNodeType();
+            Element itemEl = doc.createElementNS(nodeType.getNamespace().toString(), 
+                    item.getNodeType().getLocalName());
             itemEl.setUserData(USER_KEY_NODE, item, null);
             if (item instanceof SimpleNode<?>) {
                 Object value = ((SimpleNode<?>) item).getValue();
                 itemEl.setTextContent(String.valueOf(value));
-                itemEl.setAttribute("type", value.getClass().getSimpleName());
+                //itemEl.setAttribute("type", value.getClass().getSimpleName());
             }
             if (item instanceof NodeModification) {
                 ModifyAction modificationAction = ((NodeModification) item).getModificationAction();
@@ -126,7 +130,7 @@ public abstract class NodeUtils {
      * @throws XPathExpressionException
      */
     @SuppressWarnings("unchecked")
-    public static <T> T findNodeByXpath(Document doc, String xpathEx) 
+    public static <T> T findNodeByXpath(org.w3c.dom.Document doc, String xpathEx) 
             throws XPathExpressionException {
         T userNode = null;
         XPathFactory xPathfactory = XPathFactory.newInstance();
@@ -190,8 +194,7 @@ public abstract class NodeUtils {
         
         return mapOfLists;
     }
-
-
+    
     /**
      * @param path
      * @return
@@ -203,4 +206,56 @@ public abstract class NodeUtils {
         }
         return Joiner.on(".").join(pathSeed);
     }
+
+    /**
+     * add given node to it's parent's list of children
+     * @param newNode
+     */
+    public static void fixParentRelation(Node<?> newNode) {
+        if (newNode.getParent() != null) {
+            List<Node<?>> siblings = newNode.getParent().getChildren();
+            if (!siblings.contains(newNode)) {
+                siblings.add(newNode);
+            }
+        }
+    }
+    
+    /**
+     * crawl all children of given node and assign it as their parent
+     * @param parentNode
+     */
+    public static void fixChildrenRelation(CompositeNode parentNode) {
+        if (parentNode.getChildren() != null) {
+            for (Node<?> child : parentNode.getChildren()) {
+                if (child instanceof AbstractNodeTO<?>) {
+                    ((AbstractNodeTO<?>) child).setParent(parentNode);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * @param keys
+     * @param dataMap
+     * @return list of values of map, found by given keys 
+     */
+    public static <T, K> List<K> collectMapValues(List<T> keys,
+            Map<T, K> dataMap) {
+        List<K> valueSubList = new ArrayList<>();
+        for (T key : keys) {
+            valueSubList.add(dataMap.get(key));
+        }
+        
+        return valueSubList;
+    }
+    
+    /**
+     * @param nodes
+     * @return list of children in list of appropriate type
+     */
+    public static List<Node<?>> buildChildrenList(Node<?>...nodes) {
+        return Lists.newArrayList(nodes);
+    }
+
 }

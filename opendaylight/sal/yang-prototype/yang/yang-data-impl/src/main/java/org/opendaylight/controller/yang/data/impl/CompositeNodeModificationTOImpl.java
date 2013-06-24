@@ -1,5 +1,9 @@
-/**
- * 
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.controller.yang.data.impl;
 
@@ -9,16 +13,12 @@ import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
 import org.opendaylight.controller.yang.data.api.ModifyAction;
 import org.opendaylight.controller.yang.data.api.Node;
-import org.opendaylight.controller.yang.data.api.NodeModification;
 
 /**
  * @author michal.rehak
  * 
  */
-public class CompositeNodeModificationTOImpl extends CompositeNodeTOImpl
-        implements NodeModification {
-
-    private ModifyAction modifyAction;
+public class CompositeNodeModificationTOImpl extends CompositeNodeTOImpl {
 
     /**
      * @param qname
@@ -29,24 +29,6 @@ public class CompositeNodeModificationTOImpl extends CompositeNodeTOImpl
     public CompositeNodeModificationTOImpl(QName qname, CompositeNode parent,
             List<Node<?>> value, ModifyAction modifyAction) {
         super(qname, parent, value);
-        this.modifyAction = modifyAction;
+        super.setModificationAction(modifyAction);
     }
-
-    /**
-     * @return modification action
-     * @see org.opendaylight.controller.yang.data.impl.NodeModificationSupport#getModificationAction()
-     */
-    @Override
-    public ModifyAction getModificationAction() {
-        return modifyAction;
-    }
-
-    /**
-     * @param modifyAction
-     *            the modifyAction to set
-     */
-    protected void setModificationAction(ModifyAction modifyAction) {
-        this.modifyAction = modifyAction;
-    }
-
 }
