@@ -14,6 +14,9 @@ import java.util.Map;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.controller.yang.data.api.ModifyAction;
+import org.opendaylight.controller.yang.data.api.MutableCompositeNode;
+import org.opendaylight.controller.yang.data.api.MutableSimpleNode;
 import org.opendaylight.controller.yang.data.api.Node;
 import org.opendaylight.controller.yang.data.api.SimpleNode;
 
@@ -71,6 +74,16 @@ public class Nodes {
 
             return nodeMap;
         }
+
+        /* (non-Javadoc)
+         * @see org.opendaylight.controller.yang.data.api.CompositeNode#asMutable()
+         */
+        @Override
+        public MutableCompositeNode asMutable() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
     }
 
     private static class SimpleNodeTO<T> extends AbstractNode<T> implements
@@ -87,6 +100,15 @@ public class Nodes {
         @Override
         public T getValue() {
             return value;
+        }
+
+        /* (non-Javadoc)
+         * @see org.opendaylight.controller.yang.data.api.SimpleNode#asMutable()
+         */
+        @Override
+        public MutableSimpleNode<T> asMutable() {
+            // TODO Auto-generated method stub
+            return null;
         }
 
     }

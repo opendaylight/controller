@@ -9,6 +9,7 @@ package org.opendaylight.controller.yang.data.util;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.controller.yang.data.api.ModifyAction;
 import org.opendaylight.controller.yang.data.api.Node;
 
 public abstract class AbstractNode<T> implements Node<T> {
@@ -27,5 +28,15 @@ public abstract class AbstractNode<T> implements Node<T> {
 
     public CompositeNode getParent() {
         return parent;
+    }
+    
+    /* (non-Javadoc)
+     */
+    /**
+     * @see org.opendaylight.controller.yang.data.api.NodeModification#getModificationAction()
+     */
+    public ModifyAction getModificationAction() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

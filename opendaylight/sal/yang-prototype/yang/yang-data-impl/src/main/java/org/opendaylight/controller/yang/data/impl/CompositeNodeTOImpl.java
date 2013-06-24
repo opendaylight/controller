@@ -13,6 +13,8 @@ import java.util.Map;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.controller.yang.data.api.ModifyAction;
+import org.opendaylight.controller.yang.data.api.MutableCompositeNode;
 import org.opendaylight.controller.yang.data.api.Node;
 import org.opendaylight.controller.yang.data.api.SimpleNode;
 
@@ -36,6 +38,19 @@ public class CompositeNodeTOImpl extends AbstractNodeTO<List<Node<?>>>
         if (value != null) {
             nodeMap = NodeUtils.buildNodeMap(getValue());
         }
+        init();
+    }
+
+    /**
+     * @param qname
+     * @param parent use null to create top composite node (without parent)
+     * @param value
+     * @param modifyAction 
+     */
+    public CompositeNodeTOImpl(QName qname, CompositeNode parent,
+            List<Node<?>> value, ModifyAction modifyAction) {
+        super(qname, parent, value, modifyAction);
+        init();
     }
     
 
@@ -105,16 +120,34 @@ public class CompositeNodeTOImpl extends AbstractNodeTO<List<Node<?>>>
 
     @Override
     public List<CompositeNode> getCompositesByName(String children) {
-        return getCompositesByName(localQName(children));
+        return getCompositesByName(new QName(getNodeType(), children));
     }
     
     @Override
     public List<SimpleNode<?>> getSimpleNodesByName(String children) {
-        return getSimpleNodesByName(localQName(children));
+        return getSimpleNodesByName(new QName(getNodeType(), children));
     }
 
-    private QName localQName(String str) {
-        return new QName(getNodeType(), str);
+    /**
+     * @param value
+     */
+    protected void init() {
+        if (getValue() != null) {
+            nodeMap = NodeUtils.buildNodeMap(getValue());
+        }
     }
+    
+    @Override
+    public MutableCompositeNode asMutable() {
+        throw new IllegalAccessError("cast to mutable is not supported - "+getClass().getSimpleName());
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString() + ", children.size = " 
+                + (getChildren() != null ? getChildren().size() : "n/a");
+    }
+    
+    
 
 }

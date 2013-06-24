@@ -11,14 +11,17 @@ import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
 import org.opendaylight.controller.yang.data.api.ModifyAction;
 import org.opendaylight.controller.yang.data.api.MutableSimpleNode;
+import org.opendaylight.controller.yang.data.api.SimpleNode;
 
 /**
  * @author michal.rehak
  * @param <T> type of simple node value
  * 
  */
-public class MutableSimpleNodeTOImpl<T> extends SimpleNodeModificationTOImpl<T> 
+public class MutableSimpleNodeTOImpl<T> extends SimpleNodeTOImpl<T> 
         implements MutableSimpleNode<T> {
+
+    private SimpleNode<T> original;
 
     /**
      * @param qname
@@ -39,5 +42,22 @@ public class MutableSimpleNodeTOImpl<T> extends SimpleNodeModificationTOImpl<T>
     @Override
     public void setModifyAction(ModifyAction action) {
         super.setModificationAction(action);
+    }
+    
+    @Override
+    public MutableSimpleNode<T> asMutable() {
+        return this;
+    }
+    
+    @Override
+    public SimpleNode<T> getOriginal() {
+        return original;
+    }
+    
+    /**
+     * @param original the original to set
+     */
+    public void setOriginal(SimpleNode<T> original) {
+        this.original = original;
     }
 }

@@ -15,6 +15,9 @@ package org.opendaylight.controller.yang.data.api;
  */
 public interface MutableSimpleNode<T> extends MutableNode<T>, SimpleNode<T> {
     
-   // nothing
+    /**
+     * @return original node, if available
+     */
+    SimpleNode<T> getOriginal();
     
 }

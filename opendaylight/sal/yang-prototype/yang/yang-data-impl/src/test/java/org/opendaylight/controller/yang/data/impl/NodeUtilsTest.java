@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.yang.data.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,6 +23,8 @@ import org.opendaylight.controller.yang.data.api.Node;
 import org.opendaylight.controller.yang.data.api.SimpleNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 /**
@@ -31,16 +33,23 @@ import org.w3c.dom.Document;
  */
 public class NodeUtilsTest {
     
+    private static final Logger LOG = LoggerFactory
+            .getLogger(NodeUtilsTest.class);
+    
     private QName qName;
     private CompositeNode network;
+
+    private String ns;
+
 
     /**
      * @throws Exception
      */
     @Before
     public void setUp() throws Exception {
+        ns = "urn:ietf:params:xml:ns:netconf:base:1.0";
         qName = new QName(
-                new URI("urn:ietf:params:xml:ns:netconf:base:1.0"), 
+                new URI(ns), 
                 new Date(42), "yang-data-impl-mutableTest");
         network = NodeHelper.buildTestConfigTree(qName);
     }
@@ -65,11 +74,30 @@ public class NodeUtilsTest {
      */
     @Test
     public void testBuildShadowDomTree() throws Exception {
-        Document networkShadow = NodeUtils.buildShadowDomTree(network);
-        ByteArrayOutputStream actual = new ByteArrayOutputStream();
-        NodeHelper.dumpDoc(networkShadow, new PrintStream(actual));
+        MemoryConsumption mc = new MemoryConsumption();
+        mc.startObserving();
         
-        Assert.assertEquals(2760, new String(actual.toByteArray()).length());
+        Document networkShadow = NodeUtils.buildShadowDomTree(network);
+        
+        LOG.debug("After dom built: "+mc.finishObserving());
+        NodeHelper.compareXmlTree(networkShadow, "./config02-shadow.xml", getClass());
+    }
+    
+    /**
+     * Test method for {@link org.opendaylight.controller.yang.data.impl.NodeUtils#buildShadowDomTree(org.opendaylight.controller.yang.data.api.CompositeNode)}.
+     * @throws Exception 
+     */
+    @Test
+    public void testBuildShadowDomTreeBig() throws Exception {
+        CompositeNode treeRoot = NodeHelper.loadConfigByGroovy("./configBig.groovy");
+        LOG.debug("nodeTree created");
+        MemoryConsumption mc = new MemoryConsumption();
+        mc.startObserving();
+        
+        Document networkShadow = NodeUtils.buildShadowDomTree(treeRoot);
+        
+        LOG.debug("After dom built: "+mc.finishObserving());
+        NodeHelper.compareXmlTree(networkShadow, "./configBig-shadow.xml", getClass());
     }
 
     /**
@@ -79,12 +107,19 @@ public class NodeUtilsTest {
     @Test
     public void testFindNodeByXpath() throws Exception {
         Document networkShadow = NodeUtils.buildShadowDomTree(network);
+        MemoryConsumption mc = new MemoryConsumption();
+        mc.startObserving();
+        
         SimpleNode<String> needle = NodeUtils.findNodeByXpath(networkShadow, 
-                "//node[node-id='nodeId_19']//termination-point[2]/tp-id");
+                NodeHelper.AddNamespaceToPattern(
+                        "//{0}node[{0}node-id='nodeId_19']//{0}termination-point[2]/{0}tp-id", ns));
+        
+        LOG.debug("After xpath executed: "+mc.finishObserving());
+        
         Assert.assertNotNull(needle);
         Assert.assertEquals("tpId_18", needle.getValue());
     }
-
+    
     /**
      * Test method for {@link org.opendaylight.controller.yang.data.impl.NodeUtils#buildNodeMap(java.util.List)}.
      */
@@ -107,4 +142,41 @@ public class NodeUtilsTest {
         Assert.assertEquals(5, mapOfLists.size());
     }
 
+    /**
+     * Test method for {@link org.opendaylight.controller.yang.data.impl.NodeUtils#buildMapOfListNodes(org.opendaylight.controller.yang.model.api.SchemaContext)}.
+     * @throws Exception 
+     * @throws IOException 
+     */
+    @Test
+    public void testLoadConfigByGroovy() throws IOException, Exception {
+    	CompositeNode treeRoot = NodeHelper.loadConfigByGroovy("/config02.groovy");
+    	Document shadowTree = NodeUtils.buildShadowDomTree(treeRoot);
+    	try {
+            checkFamilyBinding(treeRoot);
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw e;
+        }
+    	
+    	NodeHelper.compareXmlTree(shadowTree, "/config02g-shadow.xml", getClass());
+    }
+
+    private static void checkFamilyBinding(CompositeNode treeRoot) throws Exception {
+        Stack<CompositeNode> jobQueue = new Stack<>();
+        jobQueue.push(treeRoot);
+        
+        while (!jobQueue.isEmpty()) {
+            CompositeNode job = jobQueue.pop();
+            for (Node<?> child : job.getChildren()) {
+                if (child instanceof CompositeNode) {
+                    jobQueue.push((CompositeNode) child);
+                }
+                
+                if (job != child.getParent()) {
+                    throw new Exception("binding mismatch occured: \nPARENT["+job+"]\n CHILD[" + child+"]\n  +->  "+child.getParent());
+                }
+            }
+        }
+    }
+    
 }
