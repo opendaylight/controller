@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <top>
+        <interface>
+            <mtu modifyAction="REMOVE">1501</mtu>
+            <name>Ethernet1/0</name>
+        </interface>
+        <interface modifyAction="DELETE">
+            <mtu>1500</mtu>
+            <name>Ethernet0/0</name>
+        </interface>
+    </top>
+</config>
