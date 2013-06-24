@@ -18,7 +18,11 @@ public interface DataSchemaNodeBuilder extends SchemaNodeBuilder {
 
     DataSchemaNode build();
 
+    boolean isAugmenting();
+
     void setAugmenting(boolean augmenting);
+
+    boolean isConfiguration();
 
     void setConfiguration(boolean configuration);
 

@@ -1,0 +1,24 @@
+module test3 {
+
+	yang-version 1;
+    namespace "urn:simple.demo.test3";
+    prefix "t3";
+
+    import test4 {
+        prefix "t4";
+        revision-date 2013-06-18;
+    }
+
+    organization "opendaylight";
+    contact "WILL-BE-DEFINED-LATER";
+        revision 2013-06-18 {
+    }
+
+    augment "/t4:interfaces/t4:ifEntry" {
+        when "if:ifType='ds0'";
+        container augment-holder {
+            description "Description for augment holder";
+        }
+    }
+
+}

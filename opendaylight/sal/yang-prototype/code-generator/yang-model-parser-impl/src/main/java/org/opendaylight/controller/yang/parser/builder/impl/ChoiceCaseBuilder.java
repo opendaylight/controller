@@ -20,13 +20,16 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractDataNodeContainerBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder implements
-        DataSchemaNodeBuilder {
+        DataSchemaNodeBuilder, AugmentationTargetBuilder {
+    private boolean isBuilt;
     private final ChoiceCaseNodeImpl instance;
     private final int line;
     private SchemaPath schemaPath;
@@ -37,7 +40,7 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     private boolean augmenting;
     private final ConstraintsBuilder constraints;
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
-    private final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
+    private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
 
     ChoiceCaseBuilder(final QName qname, final int line) {
         super(qname);
@@ -48,36 +51,52 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
 
     @Override
     public ChoiceCaseNode build() {
-        instance.setConstraints(constraints.build());
-        instance.setPath(schemaPath);
-        instance.setDescription(description);
-        instance.setReference(reference);
-        instance.setStatus(status);
-        instance.setAugmenting(augmenting);
-        instance.setAvailableAugmentations(augmentations);
+        if(!isBuilt) {
+            instance.setConstraints(constraints.build());
+            instance.setPath(schemaPath);
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
+            instance.setAugmenting(augmenting);
 
-        // CHILD NODES
-        final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
-        for (DataSchemaNodeBuilder node : childNodes) {
-            childs.put(node.getQName(), node.build());
-        }
-        instance.setChildNodes(childs);
+            // CHILD NODES
+            final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+            for (DataSchemaNodeBuilder node : addedChildNodes) {
+                childs.put(node.getQName(), node.build());
+            }
+            instance.setChildNodes(childs);
 
-        // USES
-        final Set<UsesNode> uses = new HashSet<UsesNode>();
-        for (UsesNodeBuilder builder : addedUsesNodes) {
-            uses.add(builder.build());
-        }
-        instance.setUses(uses);
+            // USES
+            final Set<UsesNode> uses = new HashSet<UsesNode>();
+            for (UsesNodeBuilder builder : addedUsesNodes) {
+                uses.add(builder.build());
+            }
+            instance.setUses(uses);
 
-        // UNKNOWN NODES
-        final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-            unknownNodes.add(b.build());
+            // UNKNOWN NODES
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                unknownNodes.add(b.build());
+            }
+            instance.setUnknownSchemaNodes(unknownNodes);
+
+            // AUGMENTATIONS
+            final Set<AugmentationSchema> augmentations = new HashSet<AugmentationSchema>();
+            for (AugmentationSchemaBuilder builder : addedAugmentations) {
+                augmentations.add(builder.build());
+            }
+            instance.setAvailableAugmentations(augmentations);
+
+            isBuilt = true;
         }
-        instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
+    }
+
+    @Override
+    public void rebuild() {
+        isBuilt = false;
+        build();
     }
 
     @Override
@@ -162,6 +181,11 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     }
 
     @Override
+    public boolean isConfiguration() {
+        return false;
+    }
+
+    @Override
     public void setConfiguration(boolean configuration) {
         throw new YangParseException(line,
                 "Can not add config definition to choice case.");
@@ -172,11 +196,12 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
         return constraints;
     }
 
-    public Set<AugmentationSchema> getAugmentations() {
-        return augmentations;
+    @Override
+    public void addAugmentation(AugmentationSchemaBuilder augment) {
+        addedAugmentations.add(augment);
     }
 
-    private final class ChoiceCaseNodeImpl implements ChoiceCaseNode {
+    public final class ChoiceCaseNodeImpl implements ChoiceCaseNode {
         private final QName qname;
         private SchemaPath path;
         private String description;
@@ -333,6 +358,10 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
             if (augmentations != null) {
                 this.augmentations = augmentations;
             }
+        }
+
+        public ChoiceCaseBuilder toBuilder() {
+            return ChoiceCaseBuilder.this;
         }
 
         @Override

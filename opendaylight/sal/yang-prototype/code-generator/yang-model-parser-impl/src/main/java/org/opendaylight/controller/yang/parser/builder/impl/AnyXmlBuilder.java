@@ -26,6 +26,8 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
     private SchemaPath path;
     private final AnyXmlSchemaNodeImpl instance;
     private final ConstraintsBuilder constraints;
+
+    private List<UnknownSchemaNode> unknownNodes;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     private String description;
@@ -53,9 +55,11 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
             instance.setAugmenting(augmenting);
 
             // UNKNOWN NODES
-            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-                unknownNodes.add(b.build());
+            if(unknownNodes == null) {
+                unknownNodes = new ArrayList<UnknownSchemaNode>();
+                for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                    unknownNodes.add(b.build());
+                }
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
@@ -97,6 +101,10 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
         return addedUnknownNodes;
     }
 
+    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
+        this.unknownNodes = unknownNodes;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -124,6 +132,11 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
         if (status != null) {
             this.status = status;
         }
+    }
+
+    @Override
+    public boolean isAugmenting() {
+        return augmenting;
     }
 
     @Override
