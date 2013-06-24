@@ -48,6 +48,21 @@ public abstract class NetUtils {
     }
 
     /**
+     * Converts a long to 6 bytes array for mac addresses
+     * @param addr
+     * @return
+     */
+
+    public static byte[] longToByteArray6(long addr){
+        byte[] mac = new byte[6];
+        for(int i = 0; i < 6; i++){
+            mac[i] = (byte) (addr >> (i*8));
+        }
+        return mac;
+    }
+
+
+    /**
      * Converts an integer number into a 4 bytes array
      *
      * @param i the integer number
