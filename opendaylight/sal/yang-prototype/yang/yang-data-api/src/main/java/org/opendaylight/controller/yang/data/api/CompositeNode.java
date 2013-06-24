@@ -29,7 +29,7 @@ import org.opendaylight.controller.yang.common.QName;
  * 
  * 
  */
-public interface CompositeNode extends Node<List<Node<?>>> {
+public interface CompositeNode extends Node<List<Node<?>>>, NodeModification {
 
     List<Node<?>> getChildren();
 
@@ -45,4 +45,8 @@ public interface CompositeNode extends Node<List<Node<?>>> {
 
     SimpleNode<?> getFirstSimpleByName(QName leaf);
 
+    /**
+     * @return cast self to mutable, if possible 
+     */
+    MutableCompositeNode asMutable();
 }

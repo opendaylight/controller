@@ -10,16 +10,15 @@
     <artifactId>yang-data-impl</artifactId>
 
     <properties>
-        <groovy.version>2.1.5</groovy.version>
+        <groovy.version>2.1.6</groovy.version>
     </properties>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-Dlog4j.configuration=log4j-test.xml</argLine>
+                    <argLine>-Dlog4j.configuration=log4j-test.xml -Xmx1500m ${jConsole4test}</argLine>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
             </plugin>
@@ -39,12 +38,19 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>yang-model-parser-impl</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>14.0.1</version>
         </dependency>
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -66,6 +72,12 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-xml</artifactId>
             <version>${groovy.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <version>1.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

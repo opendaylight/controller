@@ -1,14 +1,16 @@
-/**
- * 
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.controller.yang.data.impl;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.data.api.CompositeNode;
@@ -30,9 +32,7 @@ public class NodeModificationBuilderImpl implements NodeModificationBuilder {
     private SchemaContext context;
     
     private Set<MutableNode<?>> changeLog;
-    private Map<Node<?>, Node<?>> originalToMutable;
-
-    private MutableCompositeNode mutableRoot;
+    private LazyNodeToNodeMap originalToMutable;
 
     /**
      * @param originalTreeRootNode 
@@ -40,22 +40,8 @@ public class NodeModificationBuilderImpl implements NodeModificationBuilder {
      */
     public NodeModificationBuilderImpl(CompositeNode originalTreeRootNode, SchemaContext context) {
         this.context = context;
-        originalToMutable = new HashMap<>();
-        mutableRoot = NodeFactory.copyDeepNode(originalTreeRootNode, originalToMutable);
+        originalToMutable = new LazyNodeToNodeMap();
         changeLog = new HashSet<>();
-    }
-
-    /**
-     * add given node to it's parent's list of children
-     * @param newNode
-     */
-    private static void fixParentRelation(Node<?> newNode) {
-        if (newNode.getParent() != null) {
-            List<Node<?>> siblings = newNode.getParent().getChildren();
-            if (!siblings.contains(newNode)) {
-                siblings.add(newNode);
-            }
-        }
     }
 
     /**
@@ -69,13 +55,13 @@ public class NodeModificationBuilderImpl implements NodeModificationBuilder {
 
     @Override
     public void addNode(MutableSimpleNode<?> newNode) {
-        fixParentRelation(newNode);
+        NodeUtils.fixParentRelation(newNode);
         addModificationToLog(newNode, ModifyAction.CREATE);
     }
     
     @Override
     public void addNode(MutableCompositeNode newNode) {
-        fixParentRelation(newNode);
+        NodeUtils.fixParentRelation(newNode);
         addModificationToLog(newNode, ModifyAction.CREATE);
     }
     
@@ -126,9 +112,8 @@ public class NodeModificationBuilderImpl implements NodeModificationBuilder {
             wanted.addAll(collectSelfAndAllParents(mutant));
         }
         
-        // TODO:: walk wanted and add relevant keys
+        // walk wanted and add relevant keys
         Map<String, ListSchemaNode>  mapOfLists = NodeUtils.buildMapOfListNodes(context);
-        Set<Node<?>> wantedKeys = new HashSet<>();
         for (Node<?> outlaw : wanted) {
             if (outlaw instanceof CompositeNode) {
                 String path = NodeUtils.buildPath(outlaw);
@@ -137,54 +122,27 @@ public class NodeModificationBuilderImpl implements NodeModificationBuilder {
                     if (listSchema.getQName().equals(outlaw.getNodeType())) {
                         // try to add key subnode to wanted list
                         List<QName> supportedKeys = listSchema.getKeyDefinition();
-                        for (Node<?> outlawChildren : ((CompositeNode) outlaw).getChildren()) {
-                            if (supportedKeys.contains(outlawChildren.getNodeType())) {
-                                wantedKeys.add(outlawChildren);
+                        CompositeNode outlawOriginal = ((MutableCompositeNode) outlaw).getOriginal();
+                        for (Node<?> outlawOriginalChild : outlawOriginal.getChildren()) {
+                            if (supportedKeys.contains(outlawOriginalChild.getNodeType())) {
+                                originalToMutable.getMutableEquivalent(outlawOriginalChild);
                             }
                         }
                     }
                 }
             }
         }
-        wanted.addAll(wantedKeys);
         
-        // remove all unwanted nodes from tree
-        removeUnrelevantNodes(mutableRoot, wanted);
-        
-        return mutableRoot;
+        return originalToMutable.getMutableRoot();
     }
 
     /**
-     * @param mutableRoot2
-     * @param wanted
-     */
-    private static void removeUnrelevantNodes(MutableCompositeNode mutRoot,
-            Set<Node<?>> wanted) {
-        Stack<MutableNode<?>> jobQueue = new Stack<>();
-        jobQueue.push(mutRoot);
-        while (!jobQueue.isEmpty()) {
-            MutableNode<?> mutNode = jobQueue.pop();
-            if (!wanted.contains(mutNode)) {
-                if (mutNode.getParent() != null) {
-                    mutNode.getParent().getChildren().remove(mutNode);
-                }
-            } else {
-                if (mutNode instanceof MutableCompositeNode) {
-                    for (Node<?> mutChild : ((MutableCompositeNode) mutNode).getChildren()) {
-                        jobQueue.push((MutableNode<?>) mutChild);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @param focusedAncestor
+     * @param focusedDescendant
      * @return set of parents and focusedAncestor itself
      */
-    private static Set<Node<?>> collectSelfAndAllParents(Node<?> focusedAncestor) {
+    private static Set<Node<?>> collectSelfAndAllParents(Node<?> focusedDescendant) {
         Set<Node<?>> family = new HashSet<>();
-        Node<?> tmpNode = focusedAncestor;
+        Node<?> tmpNode = focusedDescendant;
         while (tmpNode != null) {
             family.add(tmpNode);
             tmpNode = tmpNode.getParent();
@@ -198,7 +156,7 @@ public class NodeModificationBuilderImpl implements NodeModificationBuilder {
      */
     @Override
     public Node<?> getMutableEquivalent(Node<?> originalNode) {
-        return originalToMutable.get(originalNode);
+        return originalToMutable.getMutableEquivalent(originalNode);
     }
 
 }
