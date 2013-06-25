@@ -248,7 +248,7 @@ public class Flows implements IDaylightWeb {
                 .getDescription();
     }
 
-    @RequestMapping(value = "/flow/{nodeId}/{name}", method = RequestMethod.POST)
+    @RequestMapping(value = "/flow/{nodeId}/{name:.*}", method = RequestMethod.POST)
     @ResponseBody
     public String removeFlow(@PathVariable("nodeId") String nodeId,
             @PathVariable("name") String name,
