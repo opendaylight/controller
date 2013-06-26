@@ -455,7 +455,7 @@ public class IPv4 extends Packet {
         int end = start + getHeaderLen();
         short checkSum = (short) 0;
         int sum = 0, carry = 0, finalSum = 0;
-        int parsedHex = 0;
+        int wordData;
         int checksumStart = start
                 + (getfieldOffset(CHECKSUM) / NetUtils.NumBitsInAByte);
 
@@ -464,14 +464,8 @@ public class IPv4 extends Packet {
             if (i == checksumStart) {
                 continue;
             }
-            StringBuffer sbuffer = new StringBuffer();
-            sbuffer.append(String.format("%02X", data[i]));
-            if (i < (data.length - 1)) {
-                sbuffer.append(String.format("%02X", data[i + 1]));
-            }
-
-            parsedHex = Integer.valueOf(sbuffer.toString(), 16);
-            sum += parsedHex;
+            wordData = ((data[i] << 8) & 0xFF00) + (data[i + 1] & 0xFF);
+            sum = sum + wordData;
         }
         carry = (sum >> 16) & 0xFF;
         finalSum = (sum & 0xFFFF) + carry;

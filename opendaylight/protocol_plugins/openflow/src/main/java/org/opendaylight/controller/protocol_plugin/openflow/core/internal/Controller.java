@@ -50,6 +50,7 @@ public class Controller implements IController, CommandProvider {
     // only 1 switch state listener
     private ISwitchStateListener switchStateListener;
     private AtomicInteger switchInstanceNumber;
+    private int MAXQUEUESIZE = 50000;
 
     /*
      * this thread monitors the switchEvents queue for new incoming events from
@@ -112,7 +113,7 @@ public class Controller implements IController, CommandProvider {
     public void init() {
         logger.debug("Initializing!");
         this.switches = new ConcurrentHashMap<Long, ISwitch>();
-        this.switchEvents = new LinkedBlockingQueue<SwitchEvent>();
+        this.switchEvents = new LinkedBlockingQueue<SwitchEvent>(MAXQUEUESIZE);
         this.messageListeners = new ConcurrentHashMap<OFType, IMessageListener>();
         this.switchStateListener = null;
         this.switchInstanceNumber = new AtomicInteger(0);
