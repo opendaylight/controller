@@ -9,33 +9,34 @@
 
 package org.opendaylight.controller.forwarding.staticrouting;
 
+import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.packet.BitBufferHelper;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
-
-import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class defines a static route object.
  */
-public class StaticRoute {
+public class StaticRoute implements Serializable{
+    private static final long serialVersionUID = 1L;
     protected static final Logger logger = LoggerFactory
     .getLogger(StaticRoute.class);
 
     /**
      * This Enum defines the possible types for the next hop address.
      */
-    public enum NextHopType {
+    public enum NextHopType implements Serializable {
         IPADDRESS("nexthop-ip"), SWITCHPORT("nexthop-interface");
         private NextHopType(String name) {
             this.name = name;
