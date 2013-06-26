@@ -12,21 +12,17 @@ import java.util.*;
 
 public final class BindingGeneratorUtil {
 
-    private static final String[] SET_VALUES = new String[]{"abstract",
-            "assert", "boolean", "break", "byte", "case", "catch", "char",
-            "class", "const", "continue", "default", "double", "do", "else",
-            "enum", "extends", "false", "final", "finally", "float", "for",
-            "goto", "if", "implements", "import", "instanceof", "int",
-            "interface", "long", "native", "new", "null", "package", "private",
-            "protected", "public", "return", "short", "static", "strictfp",
-            "super", "switch", "synchronized", "this", "throw", "throws",
-            "transient", "true", "try", "void", "volatile", "while"};
+    private static final String[] SET_VALUES = new String[] { "abstract", "assert", "boolean", "break", "byte", "case",
+            "catch", "char", "class", "const", "continue", "default", "double", "do", "else", "enum", "extends",
+            "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
+            "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "return",
+            "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient",
+            "true", "try", "void", "volatile", "while" };
 
     private BindingGeneratorUtil() {
     }
 
-    public static final Set<String> JAVA_RESERVED_WORDS = new HashSet<String>(
-            Arrays.asList(SET_VALUES));
+    public static final Set<String> JAVA_RESERVED_WORDS = new HashSet<String>(Arrays.asList(SET_VALUES));
 
     public static String validateJavaPackage(final String packageName) {
         if (packageName != null) {
@@ -57,16 +53,12 @@ public final class BindingGeneratorUtil {
         return parameterName;
     }
 
-    public static GeneratedTOBuilder schemaNodeToTransferObjectBuilder(
-            final String packageName, final SchemaNode schemaNode,
-            final String transObjectName) {
-        if (packageName != null && schemaNode != null
-                && transObjectName != null) {
+    public static GeneratedTOBuilder schemaNodeToTransferObjectBuilder(final String packageName,
+            final SchemaNode schemaNode, final String transObjectName) {
+        if (packageName != null && schemaNode != null && transObjectName != null) {
 
-            final String genTOName = BindingGeneratorUtil
-                    .parseToClassName(transObjectName);
-            final GeneratedTOBuilder newType = new GeneratedTOBuilderImpl(
-                    packageName, genTOName);
+            final String genTOName = BindingGeneratorUtil.parseToClassName(transObjectName);
+            final GeneratedTOBuilder newType = new GeneratedTOBuilderImpl(packageName, genTOName);
 
             return newType;
 
@@ -74,14 +66,12 @@ public final class BindingGeneratorUtil {
         return null;
     }
 
-    public static String moduleNamespaceToPackageName(
-            final Module module) {
+    public static String moduleNamespaceToPackageName(final Module module) {
         final StringBuilder packageNameBuilder = new StringBuilder();
 
         final Calendar calendar = Calendar.getInstance();
         if (module.getRevision() == null) {
-            throw new IllegalArgumentException("Module " + module.getName()
-                    + " does not specify revision date!");
+            throw new IllegalArgumentException("Module " + module.getName() + " does not specify revision date!");
         }
         packageNameBuilder.append("org.opendaylight.yang.gen.v");
         packageNameBuilder.append(module.getYangVersion());
@@ -112,11 +102,9 @@ public final class BindingGeneratorUtil {
         return validateJavaPackage(packageNameBuilder.toString());
     }
 
-    public static String packageNameForGeneratedType(
-            final String basePackageName, final SchemaPath schemaPath) {
+    public static String packageNameForGeneratedType(final String basePackageName, final SchemaPath schemaPath) {
         if (basePackageName == null) {
-            throw new IllegalArgumentException("Base Package Name cannot be " +
-                    "NULL!");
+            throw new IllegalArgumentException("Base Package Name cannot be " + "NULL!");
         }
         if (schemaPath == null) {
             throw new IllegalArgumentException("Schema Path cannot be NULL!");
@@ -137,15 +125,13 @@ public final class BindingGeneratorUtil {
         return validateJavaPackage(builder.toString());
     }
 
-    public static String packageNameForTypeDefinition(
-            final String basePackageName, final TypeDefinition<?> typeDefinition) {
+    public static String packageNameForTypeDefinition(final String basePackageName,
+            final TypeDefinition<?> typeDefinition) {
         if (basePackageName == null) {
-            throw new IllegalArgumentException("Base Package Name cannot be " +
-                    "NULL!");
+            throw new IllegalArgumentException("Base Package Name cannot be " + "NULL!");
         }
         if (typeDefinition == null) {
-            throw new IllegalArgumentException("Type Definition reference " +
-                    "cannot be NULL!");
+            throw new IllegalArgumentException("Type Definition reference " + "cannot be NULL!");
         }
 
         final StringBuilder builder = new StringBuilder();
@@ -171,6 +157,13 @@ public final class BindingGeneratorUtil {
         char first = Character.toLowerCase(correctStr.charAt(0));
         correctStr = first + correctStr.substring(1);
         return validateParameterName(correctStr);
+    }
+
+    public static String convertToCapitalLetters(final String token) {
+        String convertedStr = token.replace(" ", "_");
+        convertedStr = convertedStr.replace(".", "_");
+        convertedStr = convertedStr.toUpperCase();
+        return convertedStr;
     }
 
     private static String parseToCamelCase(String token) {
@@ -199,11 +192,9 @@ public final class BindingGeneratorUtil {
             // check if 'toBeRemoved' character is not the only character in
             // 'text'
             if (sb.length() == 0) {
-                throw new IllegalArgumentException("Name can not be '"
-                        + toBeRemoved + "'");
+                throw new IllegalArgumentException("Name can not be '" + toBeRemoved + "'");
             }
-            String replacement = String.valueOf(sb.charAt(toBeRemovedPos))
-                    .toUpperCase();
+            String replacement = String.valueOf(sb.charAt(toBeRemovedPos)).toUpperCase();
             sb.setCharAt(toBeRemovedPos, replacement.charAt(0));
             toBeRemovedPos = sb.indexOf(toBeRemoved);
         }
