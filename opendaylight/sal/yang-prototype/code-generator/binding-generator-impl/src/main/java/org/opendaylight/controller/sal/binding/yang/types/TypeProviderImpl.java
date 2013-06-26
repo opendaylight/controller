@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.binding.yang.types;
 
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
+import org.opendaylight.controller.binding.generator.util.TypeConstants;
 import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.EnumerationBuilderImpl;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
@@ -26,6 +27,7 @@ import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -456,6 +458,23 @@ public final class TypeProviderImpl implements TypeProvider {
             genTOBuilder.addEqualsIdentity(genPropBuilder);
             genTOBuilder.addHashIdentity(genPropBuilder);
             genTOBuilder.addToStringProperty(genPropBuilder);
+            if (javaType == BaseYangTypes.STRING_TYPE) {
+                if (typedef instanceof ExtendedType) {
+                    List<PatternConstraint> patternConstraints = ((ExtendedType) typedef).getPatterns();
+                    List<String> regularExpressions = new ArrayList<String>();
+                    String regEx;
+                    String modifiedRegEx;
+                    for (PatternConstraint ptrnCons : patternConstraints) {
+                        regEx = ptrnCons.getRegularExpression();
+                        modifiedRegEx = doubleBackslash(regEx);
+                        regularExpressions.add(modifiedRegEx);
+                    }                   
+                    
+                    genTOBuilder.addConstant(Types.listTypeFor(BaseYangTypes.STRING_TYPE),
+                            TypeConstants.PATTERN_CONSTANT_NAME, regularExpressions);
+                }
+            }            
+            
             return genTOBuilder.toInstance();
         }
         return null;
@@ -595,5 +614,10 @@ public final class TypeProviderImpl implements TypeProvider {
             genTOBuilder.addToStringProperty(genPropertyBuilder);
         }
         return genTOBuilder.toInstance();
+    }
+    
+    
+    private String doubleBackslash(final String str) {
+        return str.replace("\\", "\\\\");        
     }
 }

@@ -1,5 +1,7 @@
 package org.opendaylight.controller.sal.binding.generator.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -20,10 +22,9 @@ import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
 
-public class GeneretedTypesBitsTest {
+public class GeneratedTypesBitsTest {
 
-    private SchemaContext resolveSchemaContextFromFiles(
-            final String... yangFiles) {
+    private SchemaContext resolveSchemaContextFromFiles(final String... yangFiles) {
         final YangModelParser parser = new YangParserImpl();
 
         final List<File> inputFiles = new ArrayList<File>();
@@ -37,8 +38,7 @@ public class GeneretedTypesBitsTest {
 
     @Test
     public void testGeneretedTypesBitsTest() {
-        final String yangTypesPath = getClass().getResource(
-                "/simple-bits-demo.yang").getPath();
+        final String yangTypesPath = getClass().getResource("/simple-bits-demo.yang").getPath();
 
         final SchemaContext context = resolveSchemaContextFromFiles(yangTypesPath);
         assertTrue(context != null);
@@ -65,12 +65,11 @@ public class GeneretedTypesBitsTest {
 
         for (final Type type : genTypes) {
             if (type instanceof GeneratedTransferObject) { // searching for
-                                                            // ByteType
+                                                           // ByteType
                 final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
                 if (genTO.getName().equals("ByteType")) {
                     byteTypeFound = true;
-                    List<GeneratedProperty> genProperties = genTO
-                            .getProperties();
+                    List<GeneratedProperty> genProperties = genTO.getProperties();
                     classPropertiesNumb = genProperties.size();
 
                     genProperties = null;
@@ -90,31 +89,26 @@ public class GeneretedTypesBitsTest {
                                                         // interface
                                                         // LeafParameterContainer
                 final GeneratedType genType = (GeneratedType) type;
-                if (genType.getName().compareTo("LeafParentContainer") == 0) {
+                if (genType.getName().equals("LeafParentContainer")) {
                     leafParentFound = true;
                     // check of methods
                     methodSignaturesList = genType.getMethodDefinitions();
                     if (methodSignaturesList != null) {
                         for (MethodSignature methodSignature : methodSignaturesList) { // loop
-                                                                                        // through
-                                                                                        // all
-                                                                                        // methods
-                            if (methodSignature.getName().compareTo(
-                                    "getByteLeaf") == 0) {
+                                                                                       // through
+                                                                                       // all
+                                                                                       // methods
+                            if (methodSignature.getName().equals("getByteLeaf")) {
                                 getByteLeafMethodFound = true;
 
-                                nameReturnParamType = methodSignature
-                                        .getReturnType().getName();
-                            } else if (methodSignature.getName().compareTo(
-                                    "setByteLeaf") == 0) {
+                                nameReturnParamType = methodSignature.getReturnType().getName();
+                            } else if (methodSignature.getName().equals("setByteLeaf")) {
                                 setByteLeafMethodFound = true;
 
-                                List<Parameter> parameters = methodSignature
-                                        .getParameters();
+                                List<Parameter> parameters = methodSignature.getParameters();
                                 setByteLeafMethodParamNum = parameters.size();
                                 for (Parameter parameter : parameters) {
-                                    nameMethodeParamType = parameter.getType()
-                                            .getName();
+                                    nameMethodeParamType = parameter.getType().getName();
                                 }
 
                             }
@@ -126,33 +120,23 @@ public class GeneretedTypesBitsTest {
 
         }
 
-        assertTrue("type >ByteType< wasn't in YANG file", byteTypeFound == true);
+        assertTrue(byteTypeFound);
 
-        assertTrue("Incorrect number of bit properties in class",
-                classPropertiesNumb == 8);
+        assertEquals(classPropertiesNumb,8);
 
-        assertTrue("Incorrect number of properties in toString method",
-                toStringPropertiesNum == 8);
-        assertTrue("Incorrect number of properties in equals method",
-                equalPropertiesNum == 8);
-        assertTrue("Incorrect number of properties in hash method",
-                hashPropertiesNum == 8);
-        assertTrue("LeafParameterContainer container wasn't found",
-                leafParentFound == true);
+        assertEquals(toStringPropertiesNum,8);
+        assertEquals(equalPropertiesNum,8);
+        assertEquals(hashPropertiesNum,8);
+        assertTrue(leafParentFound);
 
-        assertTrue("No methods were generated", methodSignaturesList != null);
+        assertNotNull(methodSignaturesList);
 
-        assertTrue("Method getByteLeaf wasn't generated.",
-                getByteLeafMethodFound == true);
-        assertTrue("Wrong returning parameter type of method getByteLeaf",
-                nameReturnParamType.compareTo("ByteType") == 0);
+        assertTrue(getByteLeafMethodFound);
+        assertEquals(nameReturnParamType,"ByteType");
 
-        assertTrue("Method setByteLeaf wasn't generated.",
-                setByteLeafMethodFound == true);
-        assertTrue("Incorrect number of input parameters for setByteLeaf",
-                setByteLeafMethodParamNum == 1);
-        assertTrue("Wrong input parameter type",
-                nameMethodeParamType.compareTo("ByteType") == 0);
+        assertTrue(setByteLeafMethodFound);
+        assertEquals(setByteLeafMethodParamNum,1);
+        assertEquals(nameMethodeParamType,"ByteType");
 
     }
 
