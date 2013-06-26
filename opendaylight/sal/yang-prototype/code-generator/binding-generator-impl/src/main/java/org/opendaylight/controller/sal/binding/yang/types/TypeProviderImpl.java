@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.binding.yang.types;
 
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
+import org.opendaylight.controller.binding.generator.util.TypeConstants;
 import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.EnumerationBuilderImpl;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
@@ -26,6 +27,7 @@ import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -456,6 +458,19 @@ public final class TypeProviderImpl implements TypeProvider {
             genTOBuilder.addEqualsIdentity(genPropBuilder);
             genTOBuilder.addHashIdentity(genPropBuilder);
             genTOBuilder.addToStringProperty(genPropBuilder);
+            if (javaType == BaseYangTypes.STRING_TYPE) {
+                if (typedef instanceof ExtendedType) {
+                    List<PatternConstraint> patternConstraints = ((ExtendedType) typedef).getPatterns();
+                    List<String> regularExpressions = new ArrayList<String>();
+                    for (PatternConstraint ptrnCons : patternConstraints) {                        
+                        regularExpressions.add(ptrnCons.getRegularExpression());
+                    }                   
+                    
+                    genTOBuilder.addConstant(Types.listTypeFor(BaseYangTypes.STRING_TYPE),
+                            TypeConstants.PATTERN_CONSTANT_NAME, regularExpressions);
+                }
+            }            
+            
             return genTOBuilder.toInstance();
         }
         return null;
