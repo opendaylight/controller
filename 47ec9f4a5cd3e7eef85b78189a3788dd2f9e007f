@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///2s\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-impl/src/test/java/org/opendaylight/controller/sal/binding/generator/impl/GeneratedTypesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-06-26T13:29:47Z",
+      "side": 1,
+      "message": "Fix test",
+      "revId": "47ec9f4a5cd3e7eef85b78189a3788dd2f9e007f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///24\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-impl/src/test/resources/simple-string-demo.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-06-26T13:29:47Z",
+      "side": 1,
+      "message": "Replace tabs for spaces",
+      "revId": "47ec9f4a5cd3e7eef85b78189a3788dd2f9e007f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///2w\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/samples/maven-code-gen-sample/src/main/yang/simple-string-demo.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-06-26T13:29:47Z",
+      "side": 1,
+      "message": "Replace TABS for Spaces",
+      "revId": "47ec9f4a5cd3e7eef85b78189a3788dd2f9e007f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
