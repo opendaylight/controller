@@ -146,6 +146,7 @@ public class ICMP extends Packet {
      */
     short computeChecksum(byte[] data, int start) {
         int sum = 0, carry = 0, finalSum = 0;
+        int wordData;
         int end = start + this.getHeaderSize() / NetUtils.NumBitsInAByte
                 + rawPayload.length;
         int checksumStartByte = start + getfieldOffset(CHECKSUM)
@@ -156,12 +157,8 @@ public class ICMP extends Packet {
             if (i == checksumStartByte) {
                 continue;
             }
-            StringBuffer sbuffer = new StringBuffer();
-            sbuffer.append(String.format("%02X", data[i]));
-            if (i < (data.length - 1)) {
-                sbuffer.append(String.format("%02X", data[i + 1]));
-            }
-            sum += Integer.valueOf(sbuffer.toString(), 16);
+            wordData = ((data[i] << 8) & 0xFF00) + (data[i + 1] & 0xFF);
+            sum = sum + wordData;
         }
         carry = (sum >> 16) & 0xFF;
         finalSum = (sum & 0xFFFF) + carry;

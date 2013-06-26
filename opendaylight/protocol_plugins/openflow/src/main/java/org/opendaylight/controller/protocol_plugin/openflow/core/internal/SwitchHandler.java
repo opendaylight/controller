@@ -771,7 +771,7 @@ public class SwitchHandler implements ISwitch {
             running = true;
             while (running) {
                 try {
-                    if (!transmitQ.isEmpty()) {
+                    while (!transmitQ.isEmpty()) {
                         PriorityMessage pmsg = transmitQ.poll();
                         msgReadWriteService.asyncSend(pmsg.msg);
                         logger.trace("Message sent: {}", pmsg);
