@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///4A\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/yang-model-parser-impl/src/main/java/org/opendaylight/controller/yang/parser/builder/api/SchemaNodeBuilder.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-06-26T08:31:52Z",
+      "side": 1,
+      "message": "Why this interface rather not extends SchemaNode with already defined getQName, getDescription, getReference and getStatus methods?",
+      "revId": "9cfb843ff682bd747519e00d81b1e91c672bfab9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
