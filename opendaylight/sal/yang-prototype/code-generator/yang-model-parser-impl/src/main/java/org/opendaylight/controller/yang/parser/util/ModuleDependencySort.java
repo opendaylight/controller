@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.yang.parser.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import java.util.Set;
 
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.ModuleImport;
+import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.parser.impl.YangParserListenerImpl;
 import org.opendaylight.controller.yang.parser.util.TopologicalSort.Node;
@@ -54,6 +57,26 @@ public final class ModuleDependencySort {
             @Override
             public ModuleBuilder apply(Node input) {
                 return (ModuleBuilder) ((ModuleNodeImpl) input).getReference();
+            }
+        });
+    }
+
+    public static List<ModuleBuilder> sortWithContext(SchemaContext context, ModuleBuilder... builders) {
+        List<Object> modules = new ArrayList<Object>();
+        Collections.addAll(modules, builders);
+        modules.addAll(context.getModules());
+
+        List<Node> sorted = sortInternal(modules);
+        // Cast to ModuleBuilder from Node if possible and return
+        return Lists.transform(sorted, new Function<Node, ModuleBuilder>() {
+
+            @Override
+            public ModuleBuilder apply(Node input) {
+                if(((ModuleNodeImpl) input).getReference() instanceof ModuleBuilder) {
+                    return (ModuleBuilder) ((ModuleNodeImpl) input).getReference();
+                } else {
+                    return null;
+                }
             }
         });
     }

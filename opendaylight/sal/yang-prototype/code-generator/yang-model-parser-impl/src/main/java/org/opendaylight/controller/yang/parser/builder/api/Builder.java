@@ -12,6 +12,15 @@ package org.opendaylight.controller.yang.parser.builder.api;
  */
 public interface Builder {
 
+    /**
+     * Build YANG data model node.
+     *
+     * This method should create an instance of YANG data model node. After
+     * creating an instance, this instance should be returned for each call
+     * without repeating build process.
+     *
+     * @return YANG data model node
+     */
     Object build();
 
     int getLine();

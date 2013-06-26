@@ -16,16 +16,18 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.AugmentationSchema;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 import org.opendaylight.controller.yang.model.api.NotificationDefinition;
-import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractDataNodeContainerBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
@@ -34,13 +36,18 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 
 public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
-        implements TypeDefinitionAwareBuilder, SchemaNodeBuilder {
+        implements TypeDefinitionAwareBuilder, SchemaNodeBuilder, AugmentationTargetBuilder {
     private boolean isBuilt;
     private final NotificationDefinitionImpl instance;
     private final int line;
     private SchemaPath schemaPath;
+    private String description;
+    private String reference;
+    private Status status = Status.CURRENT;
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
+    private Set<AugmentationSchema> augmentations;
+    private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     NotificationBuilder(final QName qname, final int line) {
@@ -50,20 +57,23 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
     }
 
     @Override
-    public SchemaNode build() {
+    public NotificationDefinition build() {
         if (!isBuilt) {
             instance.setPath(schemaPath);
+            instance.setDescription(description);
+            instance.setReference(reference);
+            instance.setStatus(status);
 
             // CHILD NODES
             final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
-            for (DataSchemaNodeBuilder node : childNodes) {
+            for (DataSchemaNodeBuilder node : addedChildNodes) {
                 childs.put(node.getQName(), node.build());
             }
             instance.setChildNodes(childs);
 
             // GROUPINGS
             final Set<GroupingDefinition> groupingDefs = new HashSet<GroupingDefinition>();
-            for (GroupingBuilder builder : groupings) {
+            for (GroupingBuilder builder : addedGroupings) {
                 groupingDefs.add(builder.build());
             }
             instance.setGroupings(groupingDefs);
@@ -82,6 +92,15 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
             }
             instance.setUses(uses);
 
+            // AUGMENTATIONS
+            if(augmentations == null) {
+                augmentations = new HashSet<AugmentationSchema>();
+                for (AugmentationSchemaBuilder builder : addedAugmentations) {
+                    augmentations.add(builder.build());
+                }
+            }
+            instance.setAvailableAugmentations(augmentations);
+
             // UNKNOWN NODES
             final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
             for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
@@ -93,6 +112,12 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
         }
 
         return instance;
+    }
+
+    @Override
+    public void rebuild() {
+        isBuilt = false;
+        build();
     }
 
     @Override
@@ -126,18 +151,48 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
     }
 
     @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
     public void setDescription(final String description) {
-        instance.setDescription(description);
+        this.description = description;
+    }
+
+    @Override
+    public String getReference() {
+        return reference;
     }
 
     @Override
     public void setReference(final String reference) {
-        instance.setReference(reference);
+        this.reference = reference;
+    }
+
+    @Override
+    public Status getStatus() {
+        return status;
     }
 
     @Override
     public void setStatus(final Status status) {
-        instance.setStatus(status);
+        if(status != null) {
+            this.status = status;
+        }
+    }
+
+    public Set<AugmentationSchemaBuilder> getAugmentations() {
+        return addedAugmentations;
+    }
+
+    @Override
+    public void addAugmentation(AugmentationSchemaBuilder augment) {
+        addedAugmentations.add(augment);
+    }
+
+    public void setAugmentations(final Set<AugmentationSchema> augmentations) {
+        this.augmentations = augmentations;
     }
 
     @Override
@@ -150,7 +205,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
         return "notification " + getQName().getLocalName();
     }
 
-    private final class NotificationDefinitionImpl implements NotificationDefinition {
+    public final class NotificationDefinitionImpl implements NotificationDefinition {
         private final QName qname;
         private SchemaPath path;
         private String description;
@@ -160,6 +215,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
         private Set<GroupingDefinition> groupings = Collections.emptySet();
         private Set<TypeDefinition<?>> typeDefinitions = Collections.emptySet();
         private Set<UsesNode> uses = Collections.emptySet();
+        private Set<AugmentationSchema> augmentations = Collections.emptySet();
         private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
         private NotificationDefinitionImpl(final QName qname) {
@@ -255,6 +311,18 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
         }
 
         @Override
+        public Set<AugmentationSchema> getAvailableAugmentations() {
+            return augmentations;
+        }
+
+        private void setAvailableAugmentations(
+                Set<AugmentationSchema> augmentations) {
+            if (augmentations != null) {
+                this.augmentations = augmentations;
+            }
+        }
+
+        @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
             return unknownNodes;
         }
@@ -281,6 +349,10 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
                 }
             }
             return result;
+        }
+
+        public NotificationBuilder toBuilder() {
+            return NotificationBuilder.this;
         }
 
         @Override

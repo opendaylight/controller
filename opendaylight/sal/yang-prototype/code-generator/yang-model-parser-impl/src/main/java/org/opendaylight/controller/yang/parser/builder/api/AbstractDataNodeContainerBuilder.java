@@ -11,12 +11,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.DataSchemaNode;
+import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 
 public abstract class AbstractDataNodeContainerBuilder implements DataNodeContainerBuilder {
 
     private final QName qname;
-    protected final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
-    protected final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
+
+    protected Set<DataSchemaNode> childNodes;
+    protected final Set<DataSchemaNodeBuilder> addedChildNodes = new HashSet<DataSchemaNodeBuilder>();
+
+    protected Set<GroupingDefinition> groupings;
+    protected final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
 
     protected AbstractDataNodeContainerBuilder(QName qname) {
         this.qname = qname;
@@ -29,21 +35,29 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
 
     @Override
     public Set<DataSchemaNodeBuilder> getChildNodes() {
-        return childNodes;
+        return addedChildNodes;
     }
 
     @Override
     public void addChildNode(DataSchemaNodeBuilder childNode) {
-        childNodes.add(childNode);
+        addedChildNodes.add(childNode);
+    }
+
+    public void setChildNodes(Set<DataSchemaNode> childNodes) {
+        this.childNodes = childNodes;
     }
 
     public Set<GroupingBuilder> getGroupings() {
-        return groupings;
+        return addedGroupings;
     }
 
     @Override
     public void addGrouping(GroupingBuilder grouping) {
-        groupings.add(grouping);
+        addedGroupings.add(grouping);
+    }
+
+    public void setGroupings(final Set<GroupingDefinition> groupings) {
+        this.groupings = groupings;
     }
 
 }
