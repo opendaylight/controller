@@ -35,7 +35,7 @@ public final class CodeGeneratorImpl implements CodeGenerator {
             File outputBaseDir, Set<Module> yangModules) throws IOException {
 
 		final BindingGenerator bindingGenerator = new BindingGeneratorImpl();
-		final List<Type> types = bindingGenerator.generateTypes(context);
+		final List<Type> types = bindingGenerator.generateTypes(context,yangModules);
 		final Set<GeneratedType> typesToGenerate = new HashSet<>();
 		final Set<GeneratedTransferObject> tosToGenerate = new HashSet<>();
 		final Set<Enumeration> enumsToGenerate = new HashSet<>();
