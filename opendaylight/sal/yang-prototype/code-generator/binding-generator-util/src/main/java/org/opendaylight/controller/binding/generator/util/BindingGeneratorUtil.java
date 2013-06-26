@@ -159,6 +159,13 @@ public final class BindingGeneratorUtil {
         return validateParameterName(correctStr);
     }
 
+    public static String convertToCapitalLetters(final String token) {
+        String convertedStr = token.replace(" ", "_");
+        convertedStr = convertedStr.replace(".", "_");
+        convertedStr = convertedStr.toUpperCase();
+        return convertedStr;
+    }
+
     private static String parseToCamelCase(String token) {
         if (token == null) {
             throw new NullPointerException("Name can not be null");
