@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
-import java.util.Set;
-
 import org.opendaylight.controller.yang.model.api.AugmentationSchema;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
@@ -17,6 +15,8 @@ import org.opendaylight.controller.yang.model.api.Status;
  * Interface for builders of 'augment' statement.
  */
 public interface AugmentationSchemaBuilder extends DataNodeContainerBuilder {
+
+    Builder getParent();
 
     String getWhenCondition();
 
@@ -33,8 +33,6 @@ public interface AugmentationSchemaBuilder extends DataNodeContainerBuilder {
     SchemaPath getTargetPath();
 
     void setTargetPath(SchemaPath path);
-
-    Set<DataSchemaNodeBuilder> getChildNodes();
 
     AugmentationSchema build();
 

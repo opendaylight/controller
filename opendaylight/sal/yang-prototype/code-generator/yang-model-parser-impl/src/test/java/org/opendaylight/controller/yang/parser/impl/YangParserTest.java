@@ -17,7 +17,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -29,26 +28,21 @@ import org.opendaylight.controller.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.controller.yang.model.api.ChoiceNode;
 import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.Deviation;
 import org.opendaylight.controller.yang.model.api.Deviation.Deviate;
 import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.FeatureDefinition;
-import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.ModuleImport;
-import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.NotificationDefinition;
 import org.opendaylight.controller.yang.model.api.RpcDefinition;
-import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
@@ -64,7 +58,6 @@ import org.opendaylight.controller.yang.model.util.UnionType;
 
 public class YangParserTest {
     private final DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
     private Set<Module> modules;
 
     @Before
@@ -121,7 +114,7 @@ public class YangParserTest {
         assertEquals(0, interfaces.getUnknownSchemaNodes().size());
         // test DataSchemaNode args
         assertFalse(interfaces.isAugmenting());
-        assertFalse(interfaces.isConfiguration());
+        assertTrue(interfaces.isConfiguration());
         ConstraintDefinition constraints = interfaces.getConstraints();
         assertNull(constraints.getWhenCondition());
         assertEquals(0, constraints.getMustConstraints().size());
@@ -164,7 +157,7 @@ public class YangParserTest {
         assertEquals(0, ifEntry.getUnknownSchemaNodes().size());
         // test DataSchemaNode args
         assertFalse(ifEntry.isAugmenting());
-        assertFalse(ifEntry.isConfiguration());
+        assertTrue(ifEntry.isConfiguration());
         ConstraintDefinition constraints = ifEntry.getConstraints();
         assertNull(constraints.getWhenCondition());
         assertEquals(0, constraints.getMustConstraints().size());
@@ -566,88 +559,25 @@ public class YangParserTest {
     }
 
     @Test
-    public void testRefine() {
-        Module testModule = TestUtils.findModule(modules, "types2");
-
-        ContainerSchemaNode peer = (ContainerSchemaNode) testModule.getDataChildByName("peer");
-        ContainerSchemaNode destination = (ContainerSchemaNode) peer.getDataChildByName("destination");
-        Set<UsesNode> usesNodes = destination.getUses();
-        assertEquals(1, usesNodes.size());
-        UsesNode usesNode = usesNodes.iterator().next();
-        Map<SchemaPath, SchemaNode> refines = usesNode.getRefines();
-        assertEquals(5, refines.size());
-
-        LeafSchemaNode refineLeaf = null;
-        ContainerSchemaNode refineContainer = null;
-        ListSchemaNode refineList = null;
-        GroupingDefinition refineGrouping = null;
-        TypeDefinition<?> typedef = null;
-        for (Map.Entry<SchemaPath, SchemaNode> entry : refines.entrySet()) {
-            SchemaNode value = entry.getValue();
-            if (value instanceof LeafSchemaNode) {
-                refineLeaf = (LeafSchemaNode) value;
-            } else if (value instanceof ContainerSchemaNode) {
-                refineContainer = (ContainerSchemaNode) value;
-            } else if (value instanceof ListSchemaNode) {
-                refineList = (ListSchemaNode) value;
-            } else if (value instanceof GroupingDefinition) {
-                refineGrouping = (GroupingDefinition) value;
-            } else if (value instanceof TypeDefinition<?>) {
-                typedef = (TypeDefinition<?>) value;
-            }
-        }
-
-        // leaf address
-        assertNotNull(refineLeaf);
-        assertEquals("address", refineLeaf.getQName().getLocalName());
-        assertEquals("description of address defined by refine", refineLeaf.getDescription());
-        assertEquals("address reference added by refine", refineLeaf.getReference());
-        assertFalse(refineLeaf.isConfiguration());
-        assertTrue(refineLeaf.getConstraints().isMandatory());
-        Set<MustDefinition> leafMustConstraints = refineLeaf.getConstraints().getMustConstraints();
-        assertEquals(1, leafMustConstraints.size());
-        MustDefinition leafMust = leafMustConstraints.iterator().next();
-        assertEquals("\"ifType != 'ethernet' or (ifType = 'ethernet' and ifMTU = 1500)\"", leafMust.toString());
-
-        // container port
-        assertNotNull(refineContainer);
-        Set<MustDefinition> mustConstraints = refineContainer.getConstraints().getMustConstraints();
-        assertTrue(mustConstraints.isEmpty());
-        assertEquals("description of port defined by refine", refineContainer.getDescription());
-        assertEquals("port reference added by refine", refineContainer.getReference());
-        assertFalse(refineContainer.isConfiguration());
-        assertTrue(refineContainer.isPresenceContainer());
-
-        // list addresses
-        assertNotNull(refineList);
-        assertEquals("description of addresses defined by refine", refineList.getDescription());
-        assertEquals("addresses reference added by refine", refineList.getReference());
-        assertFalse(refineList.isConfiguration());
-        assertEquals(2, (int) refineList.getConstraints().getMinElements());
-        assertEquals(12, (int) refineList.getConstraints().getMaxElements());
-
-        // grouping target-inner
-        assertNotNull(refineGrouping);
-        Set<DataSchemaNode> refineGroupingChildren = refineGrouping.getChildNodes();
-        assertEquals(1, refineGroupingChildren.size());
-        LeafSchemaNode refineGroupingLeaf = (LeafSchemaNode) refineGroupingChildren.iterator().next();
-        assertEquals("inner-grouping-id", refineGroupingLeaf.getQName().getLocalName());
-        assertEquals("new target-inner grouping description", refineGrouping.getDescription());
-
-        // typedef group-type
-        assertNotNull(typedef);
-        assertEquals("new group-type description", typedef.getDescription());
-        assertEquals("new group-type reference", typedef.getReference());
-        assertTrue(typedef.getBaseType() instanceof ExtendedType);
-    }
-
-    @Test
     public void testChoice() {
         Module testModule = TestUtils.findModule(modules, "types1");
         ContainerSchemaNode peer = (ContainerSchemaNode) testModule.getDataChildByName("transfer");
         ChoiceNode how = (ChoiceNode) peer.getDataChildByName("how");
         Set<ChoiceCaseNode> cases = how.getCases();
-        assertEquals(3, cases.size());
+        assertEquals(5, cases.size());
+        ChoiceCaseNode input = null;
+        ChoiceCaseNode output = null;
+        for(ChoiceCaseNode caseNode : cases) {
+            if("input".equals(caseNode.getQName().getLocalName())) {
+                input = caseNode;
+            } else if("output".equals(caseNode.getQName().getLocalName())) {
+                output = caseNode;
+            }
+        }
+        assertNotNull(input);
+        assertNotNull(input.getPath());
+        assertNotNull(output);
+        assertNotNull(output.getPath());
     }
 
     @Test
@@ -748,16 +678,6 @@ public class YangParserTest {
         assertNotNull(input.getDataChildByName("filter"));
         ContainerSchemaNode output = rpc.getOutput();
         assertNotNull(output.getDataChildByName("data"));
-    }
-
-    @Test
-    public void testGrouping() {
-        Module testModule = TestUtils.findModule(modules, "types2");
-        Set<GroupingDefinition> groupings = testModule.getGroupings();
-        assertEquals(1, groupings.size());
-        GroupingDefinition grouping = groupings.iterator().next();
-        Set<DataSchemaNode> children = grouping.getChildNodes();
-        assertEquals(5, children.size());
     }
 
     @Test

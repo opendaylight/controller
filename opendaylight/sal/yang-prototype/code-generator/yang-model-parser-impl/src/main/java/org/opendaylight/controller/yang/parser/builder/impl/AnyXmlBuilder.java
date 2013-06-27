@@ -17,30 +17,45 @@ import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 
-public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
+public final class AnyXmlBuilder extends AbstractSchemaNodeBuilder implements DataSchemaNodeBuilder, GroupingMember,
+        ConfigNode {
     private boolean built;
-    private final int line;
-    private final QName qname;
-    private SchemaPath path;
     private final AnyXmlSchemaNodeImpl instance;
     private final ConstraintsBuilder constraints;
 
     private List<UnknownSchemaNode> unknownNodes;
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    private String description;
-    private String reference;
-    private Status status = Status.CURRENT;
-    private boolean configuration;
+    private Boolean configuration;
     private boolean augmenting;
+    private boolean addedByUses;
 
-    public AnyXmlBuilder(final QName qname, final int line) {
-        this.qname = qname;
-        this.line = line;
+    public AnyXmlBuilder(final QName qname, final SchemaPath schemaPath, final int line) {
+        super(qname, line);
+        this.path = schemaPath;
         instance = new AnyXmlSchemaNodeImpl(qname);
         constraints = new ConstraintsBuilder(line);
+    }
+
+    public AnyXmlBuilder(final AnyXmlBuilder builder) {
+        super(builder.qname, builder.line);
+        instance = new AnyXmlSchemaNodeImpl(qname);
+        constraints = builder.constraints;
+        path = builder.path;
+        unknownNodes = builder.unknownNodes;
+        for (UnknownSchemaNodeBuilder un : builder.addedUnknownNodes) {
+            addedUnknownNodes.add(un);
+        }
+        description = builder.description;
+        reference = builder.reference;
+        status = builder.status;
+        configuration = builder.configuration;
+        augmenting = builder.augmenting;
+        addedByUses = builder.addedByUses;
     }
 
     @Override
@@ -53,9 +68,10 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
             instance.setStatus(status);
             instance.setConfiguration(configuration);
             instance.setAugmenting(augmenting);
+            instance.setAddedByUses(addedByUses);
 
             // UNKNOWN NODES
-            if(unknownNodes == null) {
+            if (unknownNodes == null) {
                 unknownNodes = new ArrayList<UnknownSchemaNode>();
                 for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                     unknownNodes.add(b.build());
@@ -69,32 +85,8 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
     }
 
     @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public QName getQName() {
-        return qname;
-    }
-
-    public SchemaPath getPath() {
-        return path;
-    }
-
-    @Override
-    public void setPath(final SchemaPath path) {
-        this.path = path;
-    }
-
-    @Override
     public ConstraintsBuilder getConstraints() {
         return constraints;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
     }
 
     public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
@@ -103,35 +95,6 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
 
     public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
         this.unknownNodes = unknownNodes;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    public String getReference() {
-        return reference;
-    }
-
-    @Override
-    public void setReference(final String reference) {
-        this.reference = reference;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(final Status status) {
-        if (status != null) {
-            this.status = status;
-        }
     }
 
     @Override
@@ -144,13 +107,24 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
         this.augmenting = augmenting;
     }
 
-    public boolean isConfiguration() {
+    @Override
+    public boolean isAddedByUses() {
+        return addedByUses;
+    }
+
+    @Override
+    public void setAddedByUses(final boolean addedByUses) {
+        this.addedByUses = addedByUses;
+    }
+
+    @Override
+    public Boolean isConfiguration() {
         return configuration;
     }
 
     @Override
-    public void setConfiguration(final boolean configuration) {
-        instance.setConfiguration(configuration);
+    public void setConfiguration(final Boolean configuration) {
+        this.configuration = configuration;
     }
 
     private final class AnyXmlSchemaNodeImpl implements AnyXmlSchemaNode {
@@ -162,6 +136,7 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
         private boolean configuration;
         private ConstraintDefinition constraintsDef;
         private boolean augmenting;
+        private boolean addedByUses;
         private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
         private AnyXmlSchemaNodeImpl(final QName qname) {
@@ -218,6 +193,15 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
 
         private void setAugmenting(boolean augmenting) {
             this.augmenting = augmenting;
+        }
+
+        @Override
+        public boolean isAddedByUses() {
+            return addedByUses;
+        }
+
+        private void setAddedByUses(boolean addedByUses) {
+            this.addedByUses = addedByUses;
         }
 
         @Override
@@ -289,8 +273,7 @@ public final class AnyXmlBuilder implements DataSchemaNodeBuilder {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    AnyXmlSchemaNodeImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(AnyXmlSchemaNodeImpl.class.getSimpleName());
             sb.append("[");
             sb.append("qname=" + qname);
             sb.append(", path=" + path);

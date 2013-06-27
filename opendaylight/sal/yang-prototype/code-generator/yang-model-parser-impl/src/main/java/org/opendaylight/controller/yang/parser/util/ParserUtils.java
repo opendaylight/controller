@@ -17,7 +17,6 @@ import java.util.TreeMap;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.AnyXmlSchemaNode;
-import org.opendaylight.controller.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.controller.yang.model.api.ChoiceNode;
 import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
@@ -36,6 +35,7 @@ import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.BinaryTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.BooleanTypeDefinition;
@@ -80,6 +80,7 @@ import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.DataNodeContainerBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
@@ -104,11 +105,29 @@ import org.opendaylight.controller.yang.parser.builder.impl.RpcDefinitionBuilder
 import org.opendaylight.controller.yang.parser.builder.impl.TypeDefinitionBuilderImpl;
 import org.opendaylight.controller.yang.parser.builder.impl.UnionTypeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
-import org.opendaylight.controller.yang.parser.builder.impl.UsesNodeBuilderImpl;
 
 public final class ParserUtils {
 
     private ParserUtils() {
+    }
+
+    /**
+     * Create new SchemaPath from given path and name.
+     *
+     * Append new qname to schema path created from name argument. New QName
+     * gets namespace, revision and prefix same as last qname in current schema
+     * path.
+     *
+     * @param schemaPath
+     * @param name
+     * @return
+     */
+    public static SchemaPath createSchemaPath(SchemaPath schemaPath, String name) {
+        List<QName> path = new ArrayList<QName>(schemaPath.getPath());
+        QName last = path.get(path.size() - 1);
+        QName newQName = new QName(last.getNamespace(), last.getRevision(), last.getPrefix(), name);
+        path.add(newQName);
+        return new SchemaPath(path, schemaPath.isAbsolute());
     }
 
     /**
@@ -319,6 +338,24 @@ public final class ParserUtils {
     }
 
     /**
+     * Check if node is present in refine nodes.
+     *
+     * @param nodeQName
+     *            qname of node
+     * @param refineNodes
+     *            collections of refined nodes
+     * @return true, if node with given qname was found, false otherwise
+     */
+    public static SchemaNodeBuilder getRefined(QName nodeQName, List<SchemaNodeBuilder> refineNodes) {
+        for (SchemaNodeBuilder rn : refineNodes) {
+            if (rn.getQName().equals(nodeQName)) {
+                return rn;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Pull restriction from type and add them to constraints.
      *
      * @param type
@@ -353,7 +390,7 @@ public final class ParserUtils {
         Builder result = grouping.getChildNode(refineNodeName);
         // search groupings
         if (result == null) {
-            Set<GroupingBuilder> grps = grouping.getGroupings();
+            Set<GroupingBuilder> grps = grouping.getGroupingBuilders();
             for (GroupingBuilder gr : grps) {
                 if (gr.getQName().getLocalName().equals(refineNodeName)) {
                     result = gr;
@@ -363,7 +400,7 @@ public final class ParserUtils {
         }
         // search typedefs
         if (result == null) {
-            Set<TypeDefinitionBuilder> typedefs = grouping.getTypeDefinitions();
+            Set<TypeDefinitionBuilder> typedefs = grouping.getTypeDefinitionBuilders();
             for (TypeDefinitionBuilder typedef : typedefs) {
                 if (typedef.getQName().getLocalName().equals(refineNodeName)) {
                     result = typedef;
@@ -415,8 +452,14 @@ public final class ParserUtils {
      *            augmentation target node
      */
     public static void fillAugmentTarget(final AugmentationSchemaBuilder augment, final DataNodeContainerBuilder target) {
-        for (DataSchemaNodeBuilder builder : augment.getChildNodes()) {
+        boolean usesAugment = augment.getParent() instanceof UsesNodeBuilder;
+        for (DataSchemaNodeBuilder builder : augment.getChildNodeBuilders()) {
             builder.setAugmenting(true);
+            if (usesAugment) {
+                if (builder instanceof GroupingMember) {
+                    ((GroupingMember) builder).setAddedByUses(true);
+                }
+            }
             correctAugmentChildPath(builder, target.getPath());
             target.addChildNode(builder);
         }
@@ -431,8 +474,14 @@ public final class ParserUtils {
      *            augmentation target choice node
      */
     public static void fillAugmentTarget(final AugmentationSchemaBuilder augment, final ChoiceBuilder target) {
-        for (DataSchemaNodeBuilder builder : augment.getChildNodes()) {
+        boolean usesAugment = augment.getParent() instanceof UsesNodeBuilder;
+        for (DataSchemaNodeBuilder builder : augment.getChildNodeBuilders()) {
             builder.setAugmenting(true);
+            if (usesAugment) {
+                if (builder instanceof GroupingMember) {
+                    ((GroupingMember) builder).setAddedByUses(true);
+                }
+            }
             correctAugmentChildPath(builder, target.getPath());
             target.addChildNode(builder);
         }
@@ -447,7 +496,7 @@ public final class ParserUtils {
         // set correct path for all child nodes
         if (childNode instanceof DataNodeContainerBuilder) {
             DataNodeContainerBuilder dataNodeContainer = (DataNodeContainerBuilder) childNode;
-            for (DataSchemaNodeBuilder child : dataNodeContainer.getChildNodes()) {
+            for (DataSchemaNodeBuilder child : dataNodeContainer.getChildNodeBuilders()) {
                 correctAugmentChildPath(child, childNode.getPath());
             }
         }
@@ -684,211 +733,6 @@ public final class ParserUtils {
         return new SchemaPath(newPath, schemaPath.isAbsolute());
     }
 
-    public static LeafSchemaNodeBuilder copyLeafBuilder(final LeafSchemaNodeBuilder old) {
-        final LeafSchemaNodeBuilder copy = new LeafSchemaNodeBuilder(old.getQName(), old.getLine());
-        final TypeDefinition<?> type = old.getType();
-        if (type == null) {
-            copy.setTypedef(old.getTypedef());
-        } else {
-            copy.setType(type);
-        }
-        copyDataSchemaNodeArgs(old, copy);
-        copyConstraintsFromBuilder(old, copy);
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
-        copy.setDefaultStr(old.getDefaultStr());
-        copy.setUnits(old.getUnits());
-        return copy;
-    }
-
-    public static ContainerSchemaNodeBuilder copyContainerBuilder(final ContainerSchemaNodeBuilder old) {
-        final ContainerSchemaNodeBuilder copy = new ContainerSchemaNodeBuilder(old.getQName(), old.getLine());
-        copyDataSchemaNodeArgs(old, copy);
-        copyConstraintsFromBuilder(old, copy);
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
-        for (DataSchemaNodeBuilder child : old.getChildNodes()) {
-            copy.addChildNode(child);
-        }
-        for (GroupingBuilder grouping : old.getGroupings()) {
-            copy.addGrouping(grouping);
-        }
-        for (TypeDefinitionBuilder typedef : old.getTypeDefinitions()) {
-            copy.addTypedef(typedef);
-        }
-        for (AugmentationSchemaBuilder augment : old.getAugmentations()) {
-            copy.addAugmentation(augment);
-        }
-        for (UsesNodeBuilder use : old.getUsesNodes()) {
-            copy.addUsesNode(use);
-        }
-        copy.setPresence(old.isPresence());
-        return copy;
-    }
-
-    public static ListSchemaNodeBuilder copyListBuilder(final ListSchemaNodeBuilder old) {
-        final ListSchemaNodeBuilder copy = new ListSchemaNodeBuilder(old.getQName(), old.getLine());
-        copyDataSchemaNodeArgs(old, copy);
-        copyConstraintsFromBuilder(old, copy);
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
-        for (DataSchemaNodeBuilder child : old.getChildNodes()) {
-            copy.addChildNode(child);
-        }
-        for (GroupingBuilder grouping : old.getGroupings()) {
-            copy.addGrouping(grouping);
-        }
-        for (TypeDefinitionBuilder typedef : old.getTypeDefinitions()) {
-            copy.addTypedef(typedef);
-        }
-        for (AugmentationSchemaBuilder augment : old.getAugmentations()) {
-            copy.addAugmentation(augment);
-        }
-        for (UsesNodeBuilder use : old.getUsesNodes()) {
-            copy.addUsesNode(use);
-        }
-        copy.setUserOrdered(old.isUserOrdered());
-        return copy;
-    }
-
-    public static LeafListSchemaNodeBuilder copyLeafListBuilder(final LeafListSchemaNodeBuilder old) {
-        final LeafListSchemaNodeBuilder copy = new LeafListSchemaNodeBuilder(old.getQName(), old.getLine());
-        copyDataSchemaNodeArgs(old, copy);
-        copyConstraintsFromBuilder(old, copy);
-        final TypeDefinition<?> type = old.getType();
-        if (type == null) {
-            copy.setTypedef(old.getTypedef());
-        } else {
-            copy.setType(type);
-        }
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
-        copy.setUserOrdered(old.isUserOrdered());
-        return copy;
-    }
-
-    public static ChoiceBuilder copyChoiceBuilder(final ChoiceBuilder old) {
-        final ChoiceBuilder copy = new ChoiceBuilder(old.getQName(), old.getLine());
-        copyDataSchemaNodeArgs(old, copy);
-        copyConstraintsFromBuilder(old, copy);
-        for (ChoiceCaseBuilder caseBuilder : old.getCases()) {
-            copy.addChildNode(caseBuilder);
-        }
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
-        copy.setDefaultCase(old.getDefaultCase());
-        return copy;
-    }
-
-    public static AnyXmlBuilder copyAnyXmlBuilder(final AnyXmlBuilder old) {
-        final AnyXmlBuilder copy = new AnyXmlBuilder(old.getQName(), old.getLine());
-        copyDataSchemaNodeArgs(old, copy);
-        copyConstraintsFromBuilder(old, copy);
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
-        return copy;
-    }
-
-    public static GroupingBuilder copyGroupingBuilder(final GroupingBuilder old) {
-        final GroupingBuilder copy = new GroupingBuilderImpl(old.getQName(), old.getLine());
-        copy.setPath(old.getPath());
-        for (DataSchemaNodeBuilder child : old.getChildNodes()) {
-            copy.addChildNode(child);
-        }
-        for (GroupingBuilder grouping : old.getGroupings()) {
-            copy.addGrouping(grouping);
-        }
-        for (TypeDefinitionBuilder typedef : old.getTypeDefinitions()) {
-            copy.addTypedef(typedef);
-        }
-        for (UsesNodeBuilder use : old.getUses()) {
-            copy.addUsesNode(use);
-        }
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
-        copy.setDescription(old.getDescription());
-        copy.setReference(old.getReference());
-        copy.setStatus(old.getStatus());
-        return copy;
-    }
-
-    public static TypeDefinitionBuilderImpl copyTypedefBuilder(final TypeDefinitionBuilderImpl old) {
-        final TypeDefinitionBuilderImpl copy = new TypeDefinitionBuilderImpl(old.getQName(), old.getLine());
-        copy.setPath(old.getPath());
-        copy.setDefaultValue(old.getDefaultValue());
-        copy.setUnits(old.getUnits());
-        copy.setDescription(old.getDescription());
-        copy.setReference(old.getReference());
-        copy.setStatus(old.getStatus());
-
-        copy.setRanges(old.getRanges());
-        copy.setLengths(old.getLengths());
-        copy.setPatterns(old.getPatterns());
-        copy.setFractionDigits(old.getFractionDigits());
-
-        TypeDefinition<?> type = old.getType();
-        if (type == null) {
-            copy.setTypedef(old.getTypedef());
-        } else {
-            copy.setType(old.getType());
-        }
-        copy.setUnits(old.getUnits());
-        for (UnknownSchemaNodeBuilder unknown : old.getUnknownNodes()) {
-            copy.addUnknownSchemaNode(unknown);
-        }
-        return copy;
-    }
-
-    public static UsesNodeBuilder copyUsesNodeBuilder(final UsesNodeBuilder old) {
-        final UsesNodeBuilder copy = new UsesNodeBuilderImpl(old.getGroupingName(), old.getLine());
-        for (AugmentationSchemaBuilder augment : old.getAugmentations()) {
-            copy.addAugment(augment);
-        }
-        copy.setAugmenting(old.isAugmenting());
-        for (SchemaNodeBuilder refineNode : old.getRefineNodes()) {
-            copy.addRefineNode(refineNode);
-        }
-        return copy;
-    }
-
-    private static void copyDataSchemaNodeArgs(final DataSchemaNodeBuilder oldBuilder,
-            final DataSchemaNodeBuilder newBuilder) {
-        newBuilder.setPath(oldBuilder.getPath());
-        newBuilder.setDescription(oldBuilder.getDescription());
-        newBuilder.setReference(oldBuilder.getReference());
-        newBuilder.setStatus(oldBuilder.getStatus());
-        newBuilder.setAugmenting(oldBuilder.isAugmenting());
-        if (!(oldBuilder instanceof ChoiceCaseNode)) {
-            newBuilder.setConfiguration(oldBuilder.isConfiguration());
-        }
-    }
-
-    /**
-     * Copy constraints from old builder to new builder.
-     *
-     * @param oldBuilder
-     * @param newBuilder
-     */
-    private static void copyConstraintsFromBuilder(final DataSchemaNodeBuilder oldBuilder,
-            final DataSchemaNodeBuilder newBuilder) {
-        final ConstraintsBuilder oldConstraints = oldBuilder.getConstraints();
-        final ConstraintsBuilder newConstraints = newBuilder.getConstraints();
-        newConstraints.addWhenCondition(oldConstraints.getWhenCondition());
-        for (MustDefinition must : oldConstraints.getMustDefinitions()) {
-            newConstraints.addMustDefinition(must);
-        }
-        newConstraints.setMandatory(oldConstraints.isMandatory());
-        newConstraints.setMinElements(oldConstraints.getMinElements());
-        newConstraints.setMaxElements(oldConstraints.getMaxElements());
-    }
-
     /**
      * Create LeafSchemaNodeBuilder from given LeafSchemaNode.
      *
@@ -899,8 +743,9 @@ public final class ParserUtils {
      * @return builder object from leaf
      */
     public static LeafSchemaNodeBuilder createLeafBuilder(LeafSchemaNode leaf, int line) {
-        final LeafSchemaNodeBuilder builder = new LeafSchemaNodeBuilder(leaf.getQName(), line);
+        final LeafSchemaNodeBuilder builder = new LeafSchemaNodeBuilder(leaf.getQName(), leaf.getPath(), line);
         convertDataSchemaNode(leaf, builder);
+        builder.setConfiguration(leaf.isConfiguration());
         final TypeDefinition<?> type = leaf.getType();
         builder.setType(type);
         builder.setPath(leaf.getPath());
@@ -911,8 +756,10 @@ public final class ParserUtils {
     }
 
     public static ContainerSchemaNodeBuilder createContainer(ContainerSchemaNode container, int line) {
-        final ContainerSchemaNodeBuilder builder = new ContainerSchemaNodeBuilder(container.getQName(), line);
+        final ContainerSchemaNodeBuilder builder = new ContainerSchemaNodeBuilder(container.getQName(),
+                container.getPath(), line);
         convertDataSchemaNode(container, builder);
+        builder.setConfiguration(container.isConfiguration());
         builder.setUnknownNodes(container.getUnknownSchemaNodes());
         builder.setChildNodes(container.getChildNodes());
         builder.setGroupings(container.getGroupings());
@@ -924,8 +771,9 @@ public final class ParserUtils {
     }
 
     public static ListSchemaNodeBuilder createList(ListSchemaNode list, int line) {
-        ListSchemaNodeBuilder builder = new ListSchemaNodeBuilder(list.getQName(), line);
+        ListSchemaNodeBuilder builder = new ListSchemaNodeBuilder(list.getQName(), list.getPath(), line);
         convertDataSchemaNode(list, builder);
+        builder.setConfiguration(list.isConfiguration());
         builder.setUnknownNodes(list.getUnknownSchemaNodes());
         builder.setTypedefs(list.getTypeDefinitions());
         builder.setChildNodes(list.getChildNodes());
@@ -937,8 +785,10 @@ public final class ParserUtils {
     }
 
     public static LeafListSchemaNodeBuilder createLeafList(LeafListSchemaNode leafList, int line) {
-        final LeafListSchemaNodeBuilder builder = new LeafListSchemaNodeBuilder(leafList.getQName(), line);
+        final LeafListSchemaNodeBuilder builder = new LeafListSchemaNodeBuilder(leafList.getQName(),
+                leafList.getPath(), line);
         convertDataSchemaNode(leafList, builder);
+        builder.setConfiguration(leafList.isConfiguration());
         builder.setType(leafList.getType());
         builder.setUnknownNodes(leafList.getUnknownSchemaNodes());
         builder.setUserOrdered(leafList.isUserOrdered());
@@ -948,6 +798,7 @@ public final class ParserUtils {
     public static ChoiceBuilder createChoice(ChoiceNode choice, int line) {
         final ChoiceBuilder builder = new ChoiceBuilder(choice.getQName(), line);
         convertDataSchemaNode(choice, builder);
+        builder.setConfiguration(choice.isConfiguration());
         builder.setCases(choice.getCases());
         builder.setUnknownNodes(choice.getUnknownSchemaNodes());
         builder.setDefaultCase(choice.getDefaultCase());
@@ -955,8 +806,9 @@ public final class ParserUtils {
     }
 
     public static AnyXmlBuilder createAnyXml(AnyXmlSchemaNode anyxml, int line) {
-        final AnyXmlBuilder builder = new AnyXmlBuilder(anyxml.getQName(), line);
+        final AnyXmlBuilder builder = new AnyXmlBuilder(anyxml.getQName(), anyxml.getPath(), line);
         convertDataSchemaNode(anyxml, builder);
+        builder.setConfiguration(anyxml.isConfiguration());
         builder.setUnknownNodes(anyxml.getUnknownSchemaNodes());
         return builder;
     }
@@ -994,6 +846,19 @@ public final class ParserUtils {
         return builder;
     }
 
+    public static UnknownSchemaNodeBuilder createUnknownSchemaNode(UnknownSchemaNode grouping, int line) {
+        final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(grouping.getQName(), line);
+        builder.setPath(grouping.getPath());
+        builder.setUnknownNodes(grouping.getUnknownSchemaNodes());
+        builder.setDescription(grouping.getDescription());
+        builder.setReference(grouping.getReference());
+        builder.setStatus(grouping.getStatus());
+        builder.setAddedByUses(grouping.isAddedByUses());
+        builder.setNodeType(grouping.getNodeType());
+        builder.setNodeParameter(grouping.getNodeParameter());
+        return builder;
+    }
+
     /**
      * Set DataSchemaNode arguments to builder object
      *
@@ -1008,9 +873,6 @@ public final class ParserUtils {
         builder.setReference(node.getReference());
         builder.setStatus(node.getStatus());
         builder.setAugmenting(node.isAugmenting());
-        if (!(node instanceof ChoiceCaseNode)) {
-            builder.setConfiguration(node.isConfiguration());
-        }
         copyConstraintsFromDefinition(node.getConstraints(), builder.getConstraints());
     }
 
@@ -1132,7 +994,7 @@ public final class ParserUtils {
     public static void processAugmentation(final AugmentationSchemaBuilder augmentBuilder, final List<QName> path,
             final ModuleBuilder module, final QName qname, final ModuleBuilder dependentModuleBuilder) {
         DataSchemaNodeBuilder currentParent = null;
-        for (DataSchemaNodeBuilder child : dependentModuleBuilder.getChildNodes()) {
+        for (DataSchemaNodeBuilder child : dependentModuleBuilder.getChildNodeBuilders()) {
             final QName childQName = child.getQName();
             if (childQName.getLocalName().equals(qname.getLocalName())) {
                 currentParent = child;
@@ -1147,7 +1009,7 @@ public final class ParserUtils {
         for (int i = 1; i < path.size(); i++) {
             final QName currentQName = path.get(i);
             DataSchemaNodeBuilder newParent = null;
-            for (DataSchemaNodeBuilder child : ((DataNodeContainerBuilder) currentParent).getChildNodes()) {
+            for (DataSchemaNodeBuilder child : ((DataNodeContainerBuilder) currentParent).getChildNodeBuilders()) {
                 final QName childQName = child.getQName();
                 if (childQName.getLocalName().equals(currentQName.getLocalName())) {
                     newParent = child;
@@ -1395,7 +1257,7 @@ public final class ParserUtils {
                 if (currentNode instanceof RpcDefinitionBuilder) {
                     typedefs = ((RpcDefinitionBuilder) currentNode).getTypeDefinitions();
                 } else if (currentNode instanceof DataNodeContainerBuilder) {
-                    typedefs = ((DataNodeContainerBuilder) currentNode).getTypeDefinitions();
+                    typedefs = ((DataNodeContainerBuilder) currentNode).getTypeDefinitionBuilders();
                 } else {
                     typedefs = Collections.emptySet();
                 }

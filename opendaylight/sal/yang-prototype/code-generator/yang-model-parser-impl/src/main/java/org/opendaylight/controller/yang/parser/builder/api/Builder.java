@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
+import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
+
 /**
  * Parent interface for all builder interfaces.
  */
@@ -24,5 +26,7 @@ public interface Builder {
     Object build();
 
     int getLine();
+
+    void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode);
 
 }

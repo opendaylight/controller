@@ -37,6 +37,7 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
+    private boolean addedByUses;
 
     private Set<DataSchemaNode> childNodes;
     private final Set<DataSchemaNodeBuilder> addedChildNodes = new HashSet<DataSchemaNodeBuilder>();
@@ -55,8 +56,25 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
 
     public GroupingBuilderImpl(final QName qname, final int line) {
         this.qname = qname;
-        this.instance = new GroupingDefinitionImpl(qname);
+        instance = new GroupingDefinitionImpl(qname);
         this.line = line;
+    }
+
+    public GroupingBuilderImpl(GroupingBuilder builder) {
+        qname = builder.getQName();
+        instance = new GroupingDefinitionImpl(qname);
+        line = builder.getLine();
+        schemaPath = builder.getPath();
+        description = builder.getDescription();
+        reference = builder.getReference();
+        status = builder.getStatus();
+        addedByUses = builder.isAddedByUses();
+        childNodes = builder.getChildNodes();
+        addedChildNodes.addAll(builder.getChildNodeBuilders());
+        groupings = builder.getGroupings();
+        addedGroupings.addAll(builder.getGroupingBuilders());
+        addedUsesNodes.addAll(builder.getUses());
+        addedUnknownNodes.addAll(builder.getUnknownNodes());
     }
 
     @Override
@@ -66,15 +84,16 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
             instance.setDescription(description);
             instance.setReference(reference);
             instance.setStatus(status);
+            instance.setAddedByUses(addedByUses);
 
             // CHILD NODES
             final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
-            if(childNodes == null) {
+            if (childNodes == null) {
                 for (DataSchemaNodeBuilder node : addedChildNodes) {
                     childs.put(node.getQName(), node.build());
                 }
             } else {
-                for(DataSchemaNode node : childNodes) {
+                for (DataSchemaNode node : childNodes) {
                     childs.put(node.getQName(), node);
                 }
             }
@@ -133,7 +152,7 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
     }
 
     @Override
-    public Set<TypeDefinitionBuilder> getTypeDefinitions() {
+    public Set<TypeDefinitionBuilder> getTypeDefinitionBuilders() {
         return addedTypedefs;
     }
 
@@ -187,6 +206,16 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
     }
 
     @Override
+    public boolean isAddedByUses() {
+        return addedByUses;
+    }
+
+    @Override
+    public void setAddedByUses(final boolean addedByUses) {
+        this.addedByUses = addedByUses;
+    }
+
+    @Override
     public DataSchemaNodeBuilder getChildNode(String name) {
         DataSchemaNodeBuilder result = null;
         for (DataSchemaNodeBuilder node : addedChildNodes) {
@@ -199,12 +228,17 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
     }
 
     @Override
+    public Set<DataSchemaNode> getChildNodes() {
+        return childNodes;
+    }
+
+    @Override
     public void addChildNode(final DataSchemaNodeBuilder childNode) {
         addedChildNodes.add(childNode);
     }
 
     @Override
-    public Set<DataSchemaNodeBuilder> getChildNodes() {
+    public Set<DataSchemaNodeBuilder> getChildNodeBuilders() {
         return addedChildNodes;
     }
 
@@ -213,7 +247,12 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
     }
 
     @Override
-    public Set<GroupingBuilder> getGroupings() {
+    public Set<GroupingDefinition> getGroupings() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<GroupingBuilder> getGroupingBuilders() {
         return addedGroupings;
     }
 
@@ -261,6 +300,7 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
         private String description;
         private String reference;
         private Status status;
+        private boolean addedByUses;
         private Map<QName, DataSchemaNode> childNodes = Collections.emptyMap();
         private Set<GroupingDefinition> groupings = Collections.emptySet();
         private Set<TypeDefinition<?>> typeDefinitions = Collections.emptySet();
@@ -310,6 +350,15 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
 
         private void setStatus(Status status) {
             this.status = status;
+        }
+
+        @Override
+        public boolean isAddedByUses() {
+            return addedByUses;
+        }
+
+        private void setAddedByUses(final boolean addedByUses) {
+            this.addedByUses = addedByUses;
         }
 
         @Override

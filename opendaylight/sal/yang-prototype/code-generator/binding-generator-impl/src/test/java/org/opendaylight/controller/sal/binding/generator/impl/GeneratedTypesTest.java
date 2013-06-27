@@ -253,8 +253,8 @@ public class GeneratedTypesTest {
 
         assertEquals("SimpleContainer", simpleContainer.getName());
         assertEquals("NestedContainer", nestedContainer.getName());
-        assertEquals(5, simpleContainer.getMethodDefinitions().size());
-        assertEquals(4, nestedContainer.getMethodDefinitions().size());
+        assertEquals(3, simpleContainer.getMethodDefinitions().size());
+        assertEquals(2, nestedContainer.getMethodDefinitions().size());
 
         int setFooMethodCounter = 0;
         int getFooMethodCounter = 0;
@@ -293,9 +293,10 @@ public class GeneratedTypesTest {
         assertEquals(getFooMethodCounter, 1);
         assertEquals(getFooMethodReturnTypeName, "Integer");
 
-        assertEquals(setFooMethodCounter, 1);
-        assertEquals(setFooMethodInputParamName, "foo");
-        assertEquals(setFooMethodInputParamTypeName, "Integer");
+        // TODO no setter methods, because 'config' is default true
+        // assertEquals(setFooMethodCounter, 1);
+        // assertEquals(setFooMethodInputParamName, "foo");
+        // assertEquals(setFooMethodInputParamTypeName, "Integer");
 
         assertEquals(getBarMethodCounter, 1);
         assertEquals(getBarMethodReturnTypeName, "String");
@@ -345,16 +346,18 @@ public class GeneratedTypesTest {
         assertEquals(1, getFooMethodCounter);
         assertEquals(getFooMethodReturnTypeName, "Short");
 
-        assertEquals(1, setFooMethodCounter);
-        assertEquals(setFooMethodInputParamName, "foo");
-        assertEquals(setFooMethodInputParamTypeName, "Short");
+        // TODO no setter methods, because 'config' is default true
+        // assertEquals(1, setFooMethodCounter);
+        // assertEquals(setFooMethodInputParamName, "foo");
+        // assertEquals(setFooMethodInputParamTypeName, "Short");
 
         assertEquals(1, getBarMethodCounter);
         assertEquals(getBarMethodReturnTypeName, "String");
 
-        assertEquals(1, setBarMethodCounter);
-        assertEquals(setBarMethodInputParamName, "bar");
-        assertEquals(setBarMethodInputParamTypeName, "String");
+        // TODO no setter methods, because 'config' is default true
+        // assertEquals(1, setBarMethodCounter);
+        // assertEquals(setBarMethodInputParamName, "bar");
+        // assertEquals(setBarMethodInputParamTypeName, "String");
     }
 
     @Test
@@ -374,8 +377,8 @@ public class GeneratedTypesTest {
 
         assertEquals("SimpleContainer", simpleContainer.getName());
         assertEquals("NestedContainer", nestedContainer.getName());
-        assertEquals(5, simpleContainer.getMethodDefinitions().size());
-        assertEquals(3, nestedContainer.getMethodDefinitions().size());
+        assertEquals(3, simpleContainer.getMethodDefinitions().size());
+        assertEquals(2, nestedContainer.getMethodDefinitions().size());
 
         int setFooMethodCounter = 0;
         int getFooMethodCounter = 0;
@@ -414,9 +417,10 @@ public class GeneratedTypesTest {
         assertEquals(1, getFooMethodCounter);
         assertEquals(getFooMethodReturnTypeName, "List");
 
-        assertEquals(1, setFooMethodCounter);
-        assertEquals(setFooMethodInputParamName, "foo");
-        assertEquals(setFooMethodInputParamTypeName, "List");
+        // TODO no setter methods, because 'config' is default true
+        // assertEquals(1, setFooMethodCounter);
+        // assertEquals(setFooMethodInputParamName, "foo");
+        // assertEquals(setFooMethodInputParamTypeName, "List");
 
         assertEquals(1, getBarMethodCounter);
         assertEquals(getBarMethodReturnTypeName, "String");
@@ -455,9 +459,10 @@ public class GeneratedTypesTest {
         assertEquals(1, getFooMethodCounter);
         assertEquals(getFooMethodReturnTypeName, "Short");
 
-        assertEquals(1, setFooMethodCounter);
-        assertEquals(setFooMethodInputParamName, "foo");
-        assertEquals(setFooMethodInputParamTypeName, "Short");
+        // TODO no setter methods, because 'config' is default true
+        // assertEquals(1, setFooMethodCounter);
+        // assertEquals(setFooMethodInputParamName, "foo");
+        // assertEquals(setFooMethodInputParamTypeName, "Short");
 
         assertEquals(1, getBarMethodCounter);
         assertEquals(getBarMethodReturnTypeName, "List");
@@ -564,8 +569,8 @@ public class GeneratedTypesTest {
             }
         }
 
-        assertEquals(2, listParentContainerMethodsCount);
-        assertEquals(2, listChildContainerMethodsCount);
+        assertEquals(1, listParentContainerMethodsCount);
+        assertEquals(1, listChildContainerMethodsCount);
         assertEquals(1, getSimpleListKeyMethodCount);
         assertEquals(1, listKeyClassCount);
 
@@ -585,12 +590,12 @@ public class GeneratedTypesTest {
         assertEquals(1, getListChildContainerMethodCount);
         assertEquals("ListChildContainer", getListChildContainerMethodReturnTypeName);
         assertEquals(1, getFooMethodCount);
-        assertEquals(1, setFooMethodCount);
+        assertEquals(0, setFooMethodCount);
         assertEquals(1, getSimpleLeafListMethodCount);
-        assertEquals(1, setSimpleLeafListMethodCount);
+        assertEquals(0, setSimpleLeafListMethodCount);
         assertEquals(1, getBarMethodCount);
 
-        assertEquals(8, simpleListMethodsCount);
+        assertEquals(5, simpleListMethodsCount);
     }
 
     @Test

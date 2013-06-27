@@ -22,10 +22,6 @@ public interface DataSchemaNodeBuilder extends SchemaNodeBuilder {
 
     void setAugmenting(boolean augmenting);
 
-    boolean isConfiguration();
-
-    void setConfiguration(boolean configuration);
-
     ConstraintsBuilder getConstraints();
 
 }

@@ -7,9 +7,14 @@
  */
 package org.opendaylight.controller.yang.parser.builder.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.opendaylight.controller.yang.model.api.Deviation;
 import org.opendaylight.controller.yang.model.api.Deviation.Deviate;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
@@ -17,6 +22,7 @@ import org.opendaylight.controller.yang.parser.util.YangParseException;
 public final class DeviationBuilder implements Builder {
     private final DeviationImpl instance;
     private final int line;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     DeviationBuilder(final String targetPathStr, final int line) {
         this.line = line;
@@ -27,12 +33,24 @@ public final class DeviationBuilder implements Builder {
 
     @Override
     public Deviation build() {
+        // UNKNOWN NODES
+        List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+        for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+            unknownNodes.add(b.build());
+        }
+        instance.setUnknownSchemaNodes(unknownNodes);
+
         return instance;
     }
 
     @Override
     public int getLine() {
         return line;
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
     }
 
     public void setDeviate(final String deviate) {
@@ -58,6 +76,7 @@ public final class DeviationBuilder implements Builder {
         private final SchemaPath targetPath;
         private Deviate deviate;
         private String reference;
+        private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
 
         private DeviationImpl(final SchemaPath targetPath) {
             this.targetPath = targetPath;
@@ -84,6 +103,16 @@ public final class DeviationBuilder implements Builder {
 
         private void setReference(final String reference) {
             this.reference = reference;
+        }
+
+        public List<UnknownSchemaNode> getUnknownSchemaNodes() {
+            return unknownNodes;
+        }
+
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
+            if (unknownSchemaNodes != null) {
+                this.unknownNodes = unknownSchemaNodes;
+            }
         }
 
         @Override

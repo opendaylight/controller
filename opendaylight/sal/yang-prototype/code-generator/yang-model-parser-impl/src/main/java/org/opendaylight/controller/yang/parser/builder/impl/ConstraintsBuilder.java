@@ -16,6 +16,7 @@ import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class ConstraintsBuilder implements Builder {
     private final ConstraintDefinitionImpl instance;
@@ -51,6 +52,11 @@ public final class ConstraintsBuilder implements Builder {
     @Override
     public int getLine() {
         return line;
+    }
+
+    @Override
+    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+        throw new YangParseException(line, "Can not add unknown node to constraints.");
     }
 
     public Integer getMinElements() {
@@ -93,8 +99,7 @@ public final class ConstraintsBuilder implements Builder {
         this.mandatory = mandatory;
     }
 
-    private final class ConstraintDefinitionImpl implements
-            ConstraintDefinition {
+    private final class ConstraintDefinitionImpl implements ConstraintDefinition {
         private RevisionAwareXPath whenCondition;
         private Set<MustDefinition> mustConstraints;
         private boolean mandatory;
@@ -156,16 +161,10 @@ public final class ConstraintsBuilder implements Builder {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result
-                    + ((whenCondition == null) ? 0 : whenCondition.hashCode());
-            result = prime
-                    * result
-                    + ((mustConstraints == null) ? 0 : mustConstraints
-                            .hashCode());
-            result = prime * result
-                    + ((minElements == null) ? 0 : minElements.hashCode());
-            result = prime * result
-                    + ((maxElements == null) ? 0 : maxElements.hashCode());
+            result = prime * result + ((whenCondition == null) ? 0 : whenCondition.hashCode());
+            result = prime * result + ((mustConstraints == null) ? 0 : mustConstraints.hashCode());
+            result = prime * result + ((minElements == null) ? 0 : minElements.hashCode());
+            result = prime * result + ((maxElements == null) ? 0 : maxElements.hashCode());
             result = prime * result + (mandatory ? 1231 : 1237);
             return result;
         }
@@ -218,8 +217,7 @@ public final class ConstraintsBuilder implements Builder {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    ConstraintDefinitionImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(ConstraintDefinitionImpl.class.getSimpleName());
             sb.append("[");
             sb.append("whenCondition=" + whenCondition);
             sb.append(", mustConstraints=" + mustConstraints);

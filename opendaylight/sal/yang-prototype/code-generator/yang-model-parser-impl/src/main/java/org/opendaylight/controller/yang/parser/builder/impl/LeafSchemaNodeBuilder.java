@@ -19,9 +19,12 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 
-public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements DataSchemaNodeBuilder {
+public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements DataSchemaNodeBuilder,
+        GroupingMember, ConfigNode {
     private boolean isBuilt;
     private final LeafSchemaNodeImpl instance;
     private final int line;
@@ -35,17 +38,42 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     // DataSchemaNode args
     private boolean augmenting;
-    private boolean configuration;
+    private boolean addedByUses;
+    private Boolean configuration;
     private final ConstraintsBuilder constraints;
     // leaf args
     private String defaultStr;
     private String unitsStr;
 
-    public LeafSchemaNodeBuilder(final QName qname, final int line) {
+    public LeafSchemaNodeBuilder(final QName qname, final SchemaPath schemaPath, final int line) {
         this.qname = qname;
+        this.path = schemaPath;
         this.line = line;
         instance = new LeafSchemaNodeImpl(qname);
         constraints = new ConstraintsBuilder(line);
+    }
+
+    public LeafSchemaNodeBuilder(final LeafSchemaNodeBuilder b) {
+        qname = b.getQName();
+        line = b.getLine();
+        instance = new LeafSchemaNodeImpl(qname);
+        constraints = b.getConstraints();
+        path = b.getPath();
+
+        type = b.getType();
+        typedef = b.getTypedef();
+
+        description = b.getDescription();
+        reference = b.getReference();
+        status = b.getStatus();
+        augmenting = b.isAugmenting();
+        addedByUses = b.isAddedByUses();
+        configuration = b.isConfiguration();
+        unknownNodes = b.unknownNodes;
+        addedUnknownNodes.addAll(b.getUnknownNodes());
+
+        defaultStr = b.getDefaultStr();
+        unitsStr = b.getUnits();
     }
 
     @Override
@@ -57,6 +85,7 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
             instance.setReference(reference);
             instance.setStatus(status);
             instance.setAugmenting(augmenting);
+            instance.setAddedByUses(addedByUses);
             instance.setConfiguration(configuration);
             instance.setDefault(defaultStr);
             instance.setUnits(unitsStr);
@@ -157,13 +186,23 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
         this.augmenting = augmenting;
     }
 
-    public boolean isConfiguration() {
+    @Override
+    public boolean isAddedByUses() {
+        return addedByUses;
+    }
+
+    @Override
+    public void setAddedByUses(final boolean addedByUses) {
+        this.addedByUses = addedByUses;
+    }
+
+    public Boolean isConfiguration() {
         return configuration;
     }
 
     @Override
-    public void setConfiguration(final boolean configuration) {
-        instance.setConfiguration(configuration);
+    public void setConfiguration(final Boolean configuration) {
+        this.configuration = configuration;
     }
 
     public String getDefaultStr() {
@@ -194,6 +233,7 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
         private String reference;
         private Status status = Status.CURRENT;
         private boolean augmenting;
+        private boolean addedByUses;
         private boolean configuration;
         private ConstraintDefinition constraintsDef;
         private TypeDefinition<?> type;
@@ -255,6 +295,15 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
 
         private void setAugmenting(boolean augmenting) {
             this.augmenting = augmenting;
+        }
+
+        @Override
+        public boolean isAddedByUses() {
+            return addedByUses;
+        }
+
+        private void setAddedByUses(final boolean addedByUses) {
+            this.addedByUses = addedByUses;
         }
 
         @Override

@@ -36,12 +36,21 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.opendaylight.controller.antlrv4.code.gen.YangLexer;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser;
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.AnyXmlSchemaNode;
+import org.opendaylight.controller.yang.model.api.ChoiceNode;
+import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 import org.opendaylight.controller.yang.model.api.IdentitySchemaNode;
+import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
+import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.IdentityrefType;
@@ -49,17 +58,29 @@ import org.opendaylight.controller.yang.model.util.UnknownType;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.DataNodeContainerBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.AnyXmlBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.ChoiceBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.GroupingBuilderImpl;
 import org.opendaylight.controller.yang.parser.builder.impl.IdentitySchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.IdentityrefTypeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.LeafListSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.LeafSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.ListSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.RpcDefinitionBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.TypeDefinitionBuilderImpl;
 import org.opendaylight.controller.yang.parser.builder.impl.UnionTypeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.UsesNodeBuilderImpl;
+import org.opendaylight.controller.yang.parser.builder.impl.UsesNodeBuilderImpl.UsesNodeImpl;
 import org.opendaylight.controller.yang.parser.util.ModuleDependencySort;
 import org.opendaylight.controller.yang.parser.util.RefineHolder;
 import org.opendaylight.controller.yang.parser.util.RefineUtils;
@@ -74,7 +95,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public final class YangParserImpl implements YangModelParser {
-
     private static final Logger logger = LoggerFactory.getLogger(YangParserImpl.class);
 
     @Override
@@ -471,9 +491,10 @@ public final class YangParserImpl implements YangModelParser {
 
                 nodeToResolve.setTypedef(newType);
             } else {
-                if(nodeToResolve instanceof TypeDefinitionBuilder) {
-                    TypeDefinitionBuilder tdb = (TypeDefinitionBuilder)nodeToResolve;
-                    TypeConstraints tc = findConstraintsFromTypeBuilder(nodeToResolve, new TypeConstraints(module.getName(), nodeToResolve.getLine()), modules, module, context);
+                if (nodeToResolve instanceof TypeDefinitionBuilder) {
+                    TypeDefinitionBuilder tdb = (TypeDefinitionBuilder) nodeToResolve;
+                    TypeConstraints tc = findConstraintsFromTypeBuilder(nodeToResolve,
+                            new TypeConstraints(module.getName(), nodeToResolve.getLine()), modules, module, context);
                     tdb.setLengths(tc.getLength());
                     tdb.setPatterns(tc.getPatterns());
                     tdb.setRanges(tc.getRange());
@@ -673,8 +694,8 @@ public final class YangParserImpl implements YangModelParser {
 
     /**
      * Go through all augment definitions and resolve them. This method works in
-     * same way as {@link #resolveAugments(Map)} except that if target node is not
-     * found in loaded modules, it search for target node in given context.
+     * same way as {@link #resolveAugments(Map)} except that if target node is
+     * not found in loaded modules, it search for target node in given context.
      *
      * @param modules
      *            all loaded modules
@@ -804,7 +825,7 @@ public final class YangParserImpl implements YangModelParser {
      *            SchemaContext containing already resolved modules
      */
     private void resolveIdentitiesWithContext(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            final ModuleBuilder module, SchemaContext context) {
+            final ModuleBuilder module, final SchemaContext context) {
         final Set<IdentitySchemaNodeBuilder> identities = module.getIdentities();
         for (IdentitySchemaNodeBuilder identity : identities) {
             final String baseIdentityName = identity.getBaseIdentityName();
@@ -856,6 +877,7 @@ public final class YangParserImpl implements YangModelParser {
     private void resolveUsesRefine(final Map<String, TreeMap<Date, ModuleBuilder>> modules, final ModuleBuilder module) {
         final Map<List<String>, UsesNodeBuilder> moduleUses = module.getUsesNodes();
         for (Map.Entry<List<String>, UsesNodeBuilder> entry : moduleUses.entrySet()) {
+            // refine
             final UsesNodeBuilder usesNode = entry.getValue();
             final int line = usesNode.getLine();
             final GroupingBuilder targetGrouping = getTargetGroupingFromModules(usesNode, modules, module);
@@ -863,9 +885,15 @@ public final class YangParserImpl implements YangModelParser {
             for (RefineHolder refine : usesNode.getRefines()) {
                 final SchemaNodeBuilder nodeToRefine = RefineUtils.getRefineNodeFromGroupingBuilder(targetGrouping,
                         refine, module.getName());
+                if(nodeToRefine instanceof GroupingMember) {
+                    ((GroupingMember)nodeToRefine).setAddedByUses(true);
+                }
                 RefineUtils.performRefine(nodeToRefine, refine, line);
                 usesNode.addRefineNode(nodeToRefine);
             }
+
+            // child nodes
+            processUsesNode(usesNode, targetGrouping);
         }
     }
 
@@ -882,7 +910,7 @@ public final class YangParserImpl implements YangModelParser {
      *            SchemaContext containing already resolved modules
      */
     private void resolveUsesRefineWithContext(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            final ModuleBuilder module, SchemaContext context) {
+            final ModuleBuilder module, final SchemaContext context) {
         final Map<List<String>, UsesNodeBuilder> moduleUses = module.getUsesNodes();
         for (Map.Entry<List<String>, UsesNodeBuilder> entry : moduleUses.entrySet()) {
             final UsesNodeBuilder usesNode = entry.getValue();
@@ -895,17 +923,27 @@ public final class YangParserImpl implements YangModelParser {
                 for (RefineHolder refine : usesNode.getRefines()) {
                     final SchemaNodeBuilder nodeToRefine = RefineUtils.getRefineNodeFromGroupingDefinition(
                             targetGrouping, refine, module.getName());
+                    if(nodeToRefine instanceof GroupingMember) {
+                        ((GroupingMember)nodeToRefine).setAddedByUses(true);
+                    }
                     RefineUtils.performRefine(nodeToRefine, refine, line);
                     usesNode.addRefineNode(nodeToRefine);
                 }
+
+                processUsesNode(usesNode, targetGrouping);
             } else {
                 usesNode.setGroupingPath(targetGroupingBuilder.getPath());
                 for (RefineHolder refine : usesNode.getRefines()) {
                     final SchemaNodeBuilder nodeToRefine = RefineUtils.getRefineNodeFromGroupingBuilder(
                             targetGroupingBuilder, refine, module.getName());
+                    if(nodeToRefine instanceof GroupingMember) {
+                        ((GroupingMember)nodeToRefine).setAddedByUses(true);
+                    }
                     RefineUtils.performRefine(nodeToRefine, refine, line);
                     usesNode.addRefineNode(nodeToRefine);
                 }
+
+                processUsesNode(usesNode, targetGroupingBuilder);
             }
         }
     }
@@ -951,7 +989,7 @@ public final class YangParserImpl implements YangModelParser {
             return null;
         }
 
-        List<QName> path = usesBuilder.getPath().getPath();
+        List<QName> path = usesBuilder.getParent().getPath().getPath();
         GroupingBuilder result = null;
         Set<GroupingBuilder> groupings = dependentModule.getModuleGroupings();
         result = findGroupingBuilder(groupings, groupingName);
@@ -969,7 +1007,7 @@ public final class YangParserImpl implements YangModelParser {
                 if (currentNode instanceof RpcDefinitionBuilder) {
                     groupings = ((RpcDefinitionBuilder) currentNode).getGroupings();
                 } else if (currentNode instanceof DataNodeContainerBuilder) {
-                    groupings = ((DataNodeContainerBuilder) currentNode).getGroupings();
+                    groupings = ((DataNodeContainerBuilder) currentNode).getGroupingBuilders();
                 } else {
                     groupings = Collections.emptySet();
                 }
@@ -996,7 +1034,7 @@ public final class YangParserImpl implements YangModelParser {
      * @return grouping with given name if found, null otherwise
      */
     private GroupingDefinition getTargetGroupingFromContext(final UsesNodeBuilder usesBuilder,
-            final ModuleBuilder module, SchemaContext context) {
+            final ModuleBuilder module, final SchemaContext context) {
         final int line = usesBuilder.getLine();
         String groupingString = usesBuilder.getGroupingName();
         String groupingPrefix;
@@ -1016,6 +1054,135 @@ public final class YangParserImpl implements YangModelParser {
 
         Module dependentModule = findModuleFromContext(context, module, groupingPrefix, line);
         return findGroupingDefinition(dependentModule.getGroupings(), groupingName);
+    }
+
+    /**
+     * Add nodes defined in target grouping to current context.
+     *
+     * @param usesNode
+     * @param targetGrouping
+     */
+    private void processUsesNode(final UsesNodeBuilder usesNode, final GroupingBuilder targetGrouping) {
+        List<SchemaNodeBuilder> refineNodes = usesNode.getRefineNodes();
+        DataNodeContainerBuilder parent = usesNode.getParent();
+        SchemaPath parentPath = parent.getPath();
+        for (DataSchemaNodeBuilder child : targetGrouping.getChildNodeBuilders()) {
+            // if node is refined, take it from refined nodes and continue
+            SchemaNodeBuilder refined = getRefined(child.getQName(), refineNodes);
+            if(refined != null) {
+                refined.setPath(createSchemaPath(parentPath, refined.getQName().getLocalName()));
+                parent.addChildNode((DataSchemaNodeBuilder)refined);
+                continue;
+            }
+
+            DataSchemaNodeBuilder newChild = null;
+            if (child instanceof AnyXmlBuilder) {
+                newChild = new AnyXmlBuilder((AnyXmlBuilder) child);
+            } else if (child instanceof ChoiceBuilder) {
+                newChild = new ChoiceBuilder((ChoiceBuilder) child);
+            } else if (child instanceof ContainerSchemaNodeBuilder) {
+                newChild = new ContainerSchemaNodeBuilder((ContainerSchemaNodeBuilder) child);
+            } else if (child instanceof LeafListSchemaNodeBuilder) {
+                newChild = new LeafListSchemaNodeBuilder((LeafListSchemaNodeBuilder) child);
+            } else if (child instanceof LeafSchemaNodeBuilder) {
+                newChild = new LeafSchemaNodeBuilder((LeafSchemaNodeBuilder) child);
+            } else if (child instanceof ListSchemaNodeBuilder) {
+                newChild = new ListSchemaNodeBuilder((ListSchemaNodeBuilder) child);
+            }
+
+            if (newChild instanceof GroupingMember) {
+                ((GroupingMember) newChild).setAddedByUses(true);
+            }
+            newChild.setPath(createSchemaPath(parentPath, newChild.getQName().getLocalName()));
+            parent.addChildNode(newChild);
+        }
+        for (GroupingBuilder g : targetGrouping.getGroupingBuilders()) {
+            GroupingBuilder newGrouping = new GroupingBuilderImpl(g);
+            newGrouping.setAddedByUses(true);
+            newGrouping.setPath(createSchemaPath(parentPath, newGrouping.getQName().getLocalName()));
+            parent.addGrouping(newGrouping);
+        }
+        for (TypeDefinitionBuilder td : targetGrouping.getTypeDefinitionBuilders()) {
+            TypeDefinitionBuilder newType = new TypeDefinitionBuilderImpl(td);
+            newType.setAddedByUses(true);
+            newType.setPath(createSchemaPath(parentPath, newType.getQName().getLocalName()));
+            parent.addTypedef(newType);
+        }
+        for (UsesNodeBuilder un : targetGrouping.getUses()) {
+            UsesNodeBuilder newUses = new UsesNodeBuilderImpl(un);
+            newUses.setAddedByUses(true);
+            // uses has not path
+            parent.addUsesNode(newUses);
+        }
+        for (UnknownSchemaNodeBuilder un : targetGrouping.getUnknownNodes()) {
+            UnknownSchemaNodeBuilder newUn = new UnknownSchemaNodeBuilder(un);
+            newUn.setAddedByUses(true);
+            newUn.setPath(createSchemaPath(parentPath, un.getQName().getLocalName()));
+            parent.addUnknownSchemaNode(newUn);
+        }
+    }
+
+    private void processUsesNode(final UsesNodeBuilder usesNode, final GroupingDefinition targetGrouping) {
+        final int line = usesNode.getLine();
+        List<SchemaNodeBuilder> refineNodes = usesNode.getRefineNodes();
+        DataNodeContainerBuilder parent = usesNode.getParent();
+        SchemaPath parentPath = parent.getPath();
+        for (DataSchemaNode child : targetGrouping.getChildNodes()) {
+            // if node is refined, take it from refined nodes and continue
+            SchemaNodeBuilder refined = getRefined(child.getQName(), refineNodes);
+            if(refined != null) {
+                refined.setPath(createSchemaPath(parentPath, refined.getQName().getLocalName()));
+                parent.addChildNode((DataSchemaNodeBuilder)refined);
+                continue;
+            }
+
+            DataSchemaNodeBuilder newChild = null;
+            if (child instanceof AnyXmlSchemaNode) {
+                newChild = createAnyXml((AnyXmlSchemaNode) child, line);
+            } else if (child instanceof ChoiceNode) {
+                newChild = createChoice((ChoiceNode) child, line);
+            } else if (child instanceof ContainerSchemaNode) {
+                newChild = createContainer((ContainerSchemaNode) child, line);
+            } else if (child instanceof LeafListSchemaNode) {
+                newChild = createLeafList((LeafListSchemaNode) child, line);
+            } else if (child instanceof LeafSchemaNode) {
+                newChild = createLeafBuilder((LeafSchemaNode) child, line);
+            } else if (child instanceof ListSchemaNode) {
+                newChild = createList((ListSchemaNode) child, line);
+            }
+
+            if (newChild instanceof GroupingMember) {
+                ((GroupingMember) newChild).setAddedByUses(true);
+            }
+            newChild.setPath(createSchemaPath(parentPath, newChild.getQName().getLocalName()));
+            parent.addChildNode(newChild);
+        }
+        for (GroupingDefinition g : targetGrouping.getGroupings()) {
+            GroupingBuilder newGrouping = createGrouping(g, line);
+            newGrouping.setAddedByUses(true);
+            newGrouping.setPath(createSchemaPath(parentPath, newGrouping.getQName().getLocalName()));
+            parent.addGrouping(newGrouping);
+        }
+        for (TypeDefinition<?> td : targetGrouping.getTypeDefinitions()) {
+            TypeDefinitionBuilder newType = createTypedef((ExtendedType) td, line);
+            newType.setAddedByUses(true);
+            newType.setPath(createSchemaPath(parentPath, newType.getQName().getLocalName()));
+            parent.addTypedef(newType);
+        }
+        for (UsesNode un : targetGrouping.getUses()) {
+            if (un instanceof UsesNodeImpl) {
+                UsesNodeBuilder newUses = new UsesNodeBuilderImpl(((UsesNodeImpl) un).toBuilder());
+                newUses.setAddedByUses(true);
+                // uses has not path
+                parent.addUsesNode(newUses);
+            }
+        }
+        for (UnknownSchemaNode un : targetGrouping.getUnknownSchemaNodes()) {
+            UnknownSchemaNodeBuilder newNode = createUnknownSchemaNode(un, line);
+            newNode.setAddedByUses(true);
+            newNode.setPath(createSchemaPath(parentPath, un.getQName().getLocalName()));
+            parent.addUnknownSchemaNode(newNode);
+        }
     }
 
     private QName findFullQName(final Map<String, TreeMap<Date, ModuleBuilder>> modules, final ModuleBuilder module,

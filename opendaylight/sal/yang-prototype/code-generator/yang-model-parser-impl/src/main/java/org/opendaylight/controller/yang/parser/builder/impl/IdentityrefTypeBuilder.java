@@ -14,6 +14,7 @@ import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
@@ -28,8 +29,7 @@ import org.opendaylight.controller.yang.parser.util.YangParseException;
  * When build is called, types in builder form will be built and add to resolved
  * types.
  */
-public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder
-        implements TypeDefinitionBuilder {
+public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements TypeDefinitionBuilder {
     private static final String NAME = "identityref";
 
     private final int line;
@@ -37,8 +37,7 @@ public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder
     private final SchemaPath schemaPath;
     private QName baseQName;
 
-    IdentityrefTypeBuilder(final String baseString,
-            final SchemaPath schemaPath, final int line) {
+    IdentityrefTypeBuilder(final String baseString, final SchemaPath schemaPath, final int line) {
         this.line = line;
         this.baseString = baseString;
         this.schemaPath = schemaPath;
@@ -103,9 +102,23 @@ public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder
     }
 
     @Override
+    public boolean isAddedByUses() {
+        return false;
+    }
+
+    @Override
+    public void setAddedByUses(final boolean addedByUses) {
+        throw new YangParseException(line, "Identityref type can not be added by uses.");
+    }
+
+    @Override
+    public List<UnknownSchemaNode> getUnknownNodes() {
+        return Collections.emptyList();
+    }
+
+    @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        throw new YangParseException(line, "Can not add unknown node to "
-                + NAME);
+        throw new YangParseException(line, "Can not add unknown node to " + NAME);
     }
 
     @Override
@@ -170,12 +183,11 @@ public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder
 
     @Override
     public void setFractionDigits(Integer fractionDigits) {
-        throw new YangParseException(line, "Can not set fraction digits to "
-                + NAME);
+        throw new YangParseException(line, "Can not set fraction digits to " + NAME);
     }
 
     @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
         return Collections.emptyList();
     }
 
@@ -186,8 +198,7 @@ public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder
 
     @Override
     public void setDefaultValue(Object defaultValue) {
-        throw new YangParseException(line, "Can not set default value to "
-                + NAME);
+        throw new YangParseException(line, "Can not set default value to " + NAME);
     }
 
     @Override
@@ -202,8 +213,7 @@ public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder
 
     @Override
     public String toString() {
-        final StringBuilder result = new StringBuilder(
-                IdentityrefTypeBuilder.class.getSimpleName() + "[");
+        final StringBuilder result = new StringBuilder(IdentityrefTypeBuilder.class.getSimpleName() + "[");
         result.append(", base=" + baseQName);
         result.append("]");
         return result.toString();

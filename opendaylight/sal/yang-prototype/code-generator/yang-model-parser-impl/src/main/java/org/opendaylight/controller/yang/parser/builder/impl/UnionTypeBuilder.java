@@ -15,6 +15,7 @@ import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
@@ -29,8 +30,7 @@ import org.opendaylight.controller.yang.parser.util.YangParseException;
  * When build is called, types in builder form will be built and add to resolved
  * types.
  */
-public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
-        TypeDefinitionBuilder {
+public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements TypeDefinitionBuilder {
     private final static String NAME = "union";
 
     private final int line;
@@ -113,9 +113,23 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
     }
 
     @Override
+    public boolean isAddedByUses() {
+        return false;
+    }
+
+    @Override
+    public void setAddedByUses(final boolean addedByUses) {
+        throw new YangParseException(line, "Union type can not be added by uses.");
+    }
+
+    @Override
+    public List<UnknownSchemaNode> getUnknownNodes() {
+        return Collections.emptyList();
+    }
+
+    @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        throw new YangParseException(line, "Can not add unknown node to "
-                + NAME);
+        // not supported
     }
 
     @Override
@@ -180,12 +194,11 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setFractionDigits(Integer fractionDigits) {
-        throw new YangParseException(line, "Can not set fraction digits to "
-                + NAME);
+        throw new YangParseException(line, "Can not set fraction digits to " + NAME);
     }
 
     @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
         return Collections.emptyList();
     }
 
@@ -196,8 +209,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public void setDefaultValue(Object defaultValue) {
-        throw new YangParseException(line, "Can not set default value to "
-                + NAME);
+        throw new YangParseException(line, "Can not set default value to " + NAME);
     }
 
     @Override
@@ -212,8 +224,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements
 
     @Override
     public String toString() {
-        final StringBuilder result = new StringBuilder(
-                UnionTypeBuilder.class.getSimpleName() + "[");
+        final StringBuilder result = new StringBuilder(UnionTypeBuilder.class.getSimpleName() + "[");
         result.append(", types=" + types);
         result.append(", typedefs=" + typedefs);
         result.append("]");

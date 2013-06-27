@@ -7,6 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.junit.Test;
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
@@ -18,15 +25,6 @@ import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
 import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class GenEnumResolvingTest {
 
@@ -108,8 +106,8 @@ public class GenEnumResolvingTest {
         assertNotNull("Generated Interface cannot contain NULL reference for " +
                 "Method Signature Definitions!", methods);
 
-        assertEquals("Expected count of method signature definitions is 26",
-                26, methods.size());
+        assertEquals("Expected count of method signature definitions is 21",
+                21, methods.size());
         Enumeration ianaIfType = null;
         for (final MethodSignature method : methods) {
             if (method.getName().equals("getType")) {
@@ -186,8 +184,8 @@ public class GenEnumResolvingTest {
         final List<MethodSignature> methods = genInterface.getMethodDefinitions();
         assertNotNull("Generated Type Interface cannot contain NULL reference" +
                 " to Enumeration types!", methods);
-        assertEquals("Generated Type Interface MUST contain 7 Methods ",
-                7, methods.size());
+        assertEquals("Generated Type Interface MUST contain 4 Methods ",
+                4, methods.size());
         for (final MethodSignature method : methods) {
             if (method.getName().equals("getLinkUpDownTrapEnable")) {
                 linkUpDownTrapEnable = method.getReturnType();

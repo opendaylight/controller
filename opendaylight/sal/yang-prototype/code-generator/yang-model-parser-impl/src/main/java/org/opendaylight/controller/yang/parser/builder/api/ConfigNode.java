@@ -5,16 +5,17 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.yang.model.api;
+package org.opendaylight.controller.yang.parser.builder.api;
 
-import org.opendaylight.controller.yang.common.QName;
+/**
+ * Interface for all nodes which can have 'config' statement.
+ * [container, leaf, leaf-list, list, choice, anyxml, deviate]
+ *
+ */
+public interface ConfigNode {
 
-public interface UnknownSchemaNode extends SchemaNode {
+    Boolean isConfiguration();
 
-    QName getNodeType();
-
-    String getNodeParameter();
-
-    boolean isAddedByUses();
+    void setConfiguration(Boolean config);
 
 }

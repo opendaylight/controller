@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Stack;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.opendaylight.controller.antlrv4.code.gen.YangParser;
+import org.opendaylight.controller.antlrv4.code.gen.*;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Argument_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Base_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Bit_stmtContext;
@@ -108,16 +108,17 @@ import org.opendaylight.controller.yang.model.util.Uint64;
 import org.opendaylight.controller.yang.model.util.Uint8;
 import org.opendaylight.controller.yang.model.util.UnknownType;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
+import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.ChoiceBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.ChoiceCaseBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ConstraintsBuilder;
-import org.opendaylight.controller.yang.parser.builder.impl.ModuleBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.UnionTypeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class YangModelBuilderUtil {
-
     private static final Logger logger = LoggerFactory.getLogger(YangModelBuilderUtil.class);
 
     private YangModelBuilderUtil() {
@@ -216,23 +217,27 @@ public final class YangModelBuilderUtil {
     }
 
     /**
-     * Create SchemaPath object from given path list with namespace, revision
-     * and prefix based on given values.
+     * Create SchemaPath from actualPath and names.
      *
      * @param actualPath
      *            current position in model
      * @param namespace
      * @param revision
      * @param prefix
+     * @param names
      * @return SchemaPath object.
      */
     public static SchemaPath createActualSchemaPath(final List<String> actualPath, final URI namespace,
-            final Date revision, final String prefix) {
+            final Date revision, final String prefix, final String... names) {
         final List<QName> path = new ArrayList<QName>();
         QName qname;
         // start from index 1 - module name omited
         for (int i = 1; i < actualPath.size(); i++) {
             qname = new QName(namespace, revision, prefix, actualPath.get(i));
+            path.add(qname);
+        }
+        for (String name : names) {
+            qname = new QName(namespace, revision, prefix, name);
             path.add(qname);
         }
         return new SchemaPath(path, true);
@@ -867,11 +872,15 @@ public final class YangModelBuilderUtil {
     }
 
     /**
-     * Parse orderedby statement.
+     * Parse 'ordered-by' statement.
+     *
+     * The 'ordered-by' statement defines whether the order of entries within a
+     * list are determined by the user or the system. The argument is one of the
+     * strings "system" or "user". If not present, order defaults to "system".
      *
      * @param childNode
      *            Ordered_by_stmtContext
-     * @return true, if orderedby contains value 'user' or false otherwise
+     * @return true, if ordered-by contains value 'user', false otherwise
      */
     public static boolean parseUserOrdered(Ordered_by_stmtContext childNode) {
         boolean result = false;
@@ -891,16 +900,66 @@ public final class YangModelBuilderUtil {
         return result;
     }
 
+    public static Boolean getConfig(final ParseTree ctx, final Builder parent, final String moduleName, final int line) {
+        Boolean result = null;
+        // parse configuration statement
+        Boolean configuration = null;
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree child = ctx.getChild(i);
+            if (child instanceof Config_stmtContext) {
+                configuration = parseConfig((Config_stmtContext) child);
+                break;
+            }
+        }
+
+        // If 'config' is not specified, the default is the same as the parent
+        // schema node's 'config' value
+        if (configuration == null) {
+            if (parent instanceof ConfigNode) {
+                Boolean parentConfig = ((ConfigNode) parent).isConfiguration();
+                // If the parent node is a rpc input or output, it can has
+                // config set to null
+                result = parentConfig == null ? true : parentConfig;
+            } else if (parent instanceof ChoiceCaseBuilder) {
+                // If the parent node is a 'case' node, the value is the same as
+                // the 'case' node's parent 'choice' node
+                ChoiceCaseBuilder choiceCase = (ChoiceCaseBuilder) parent;
+                ChoiceBuilder choice = choiceCase.getParent();
+                Boolean parentConfig = null;
+                if (choice == null) {
+                    parentConfig = true;
+                } else {
+                    parentConfig = choice.isConfiguration();
+                }
+                result = parentConfig;
+            } else {
+                result = true;
+            }
+        } else {
+            // Check first: if a node has 'config' set to 'false', no node
+            // underneath it can have 'config' set to 'true'
+            if (parent instanceof ConfigNode) {
+                Boolean parentConfig = ((ConfigNode) parent).isConfiguration();
+                if (parentConfig == false && configuration == true) {
+                    throw new YangParseException(moduleName, line,
+                            "Can not set 'config' to 'true' if parent node has 'config' set to 'false'");
+                }
+            }
+            result = configuration;
+        }
+
+        return result;
+    }
+
     /**
-     * Parse given config context and return true if it contains string 'true',
-     * false otherwise.
+     * Parse config statement.
      *
      * @param ctx
      *            config context to parse.
      * @return true if given context contains string 'true', false otherwise
      */
-    public static boolean parseConfig(final Config_stmtContext ctx) {
-        boolean result = false;
+    private static Boolean parseConfig(final Config_stmtContext ctx) {
+        Boolean result = null;
         if (ctx != null) {
             for (int i = 0; i < ctx.getChildCount(); ++i) {
                 final ParseTree configContext = ctx.getChild(i);
@@ -909,6 +968,12 @@ public final class YangModelBuilderUtil {
                     if ("true".equals(value)) {
                         result = true;
                         break;
+                    } else if ("false".equals(value)) {
+                        result = false;
+                        break;
+                    } else {
+                        throw new YangParseException(ctx.getStart().getLine(),
+                                "Failed to parse 'config' statement value: '" + value + "'.");
                     }
                 }
             }
@@ -917,17 +982,22 @@ public final class YangModelBuilderUtil {
     }
 
     /**
-     * Parse given type body and creates UnknownType definition.
+     * Parse type body and create UnknownType definition.
      *
      * @param typedefQName
      *            qname of current type
      * @param ctx
      *            type body
+     * @param actualPath
+     * @param namespace
+     * @param revision
+     * @param prefix
+     * @param parent
      * @return UnknownType object with constraints from parsed type body
      */
-    public static TypeDefinition<?> parseUnknownTypeBody(QName typedefQName, Type_body_stmtsContext ctx,
-            final List<String> actualPath, final URI namespace, final Date revision, final String prefix,
-            Builder parent, ModuleBuilder moduleBuilder) {
+    public static TypeDefinition<?> parseUnknownTypeWithBody(final QName typedefQName,
+            final Type_body_stmtsContext ctx, final List<String> actualPath, final URI namespace, final Date revision,
+            final String prefix, final Builder parent) {
         String typeName = typedefQName.getLocalName();
 
         UnknownType.Builder unknownType = new UnknownType.Builder(typedefQName);
@@ -972,10 +1042,12 @@ public final class YangModelBuilderUtil {
     /**
      * Create TypeDefinition object based on given type name and type body.
      *
+     * @param moduleName
+     *            current module name
      * @param typeName
      *            name of type
      * @param typeBody
-     *            type body
+     *            type body context
      * @param actualPath
      *            current path in schema
      * @param namespace
@@ -984,19 +1056,19 @@ public final class YangModelBuilderUtil {
      *            current revision
      * @param prefix
      *            current prefix
+     * @param parent
+     *            parent builder
      * @return TypeDefinition object based on parsed values.
      */
-    public static TypeDefinition<?> parseTypeBody(final String moduleName, final String typeName,
+    public static TypeDefinition<?> parseTypeWithBody(final String moduleName, final String typeName,
             final Type_body_stmtsContext typeBody, final List<String> actualPath, final URI namespace,
-            final Date revision, final String prefix, Builder parent) {
+            final Date revision, final String prefix, final Builder parent) {
         TypeDefinition<?> baseType = null;
 
-        List<RangeConstraint> rangeStatements = getRangeConstraints(typeBody);
         Integer fractionDigits = getFractionDigits(typeBody);
         List<LengthConstraint> lengthStatements = getLengthConstraints(typeBody);
         List<PatternConstraint> patternStatements = getPatternConstraint(typeBody);
-        List<EnumTypeDefinition.EnumPair> enumConstants = getEnumConstants(typeBody, actualPath, namespace, revision,
-                prefix);
+        List<RangeConstraint> rangeStatements = getRangeConstraints(typeBody);
 
         TypeConstraints constraints = new TypeConstraints(moduleName, typeBody.getStart().getLine());
         constraints.addFractionDigits(fractionDigits);
@@ -1042,6 +1114,8 @@ public final class YangModelBuilderUtil {
             constraints.addRanges(uintType.getRangeStatements());
             baseType = uintType;
         } else if ("enumeration".equals(typeName)) {
+            List<EnumTypeDefinition.EnumPair> enumConstants = getEnumConstants(typeBody, actualPath, namespace,
+                    revision, prefix);
             return new EnumerationType(baseTypePathFinal, enumConstants);
         } else if ("string".equals(typeName)) {
             StringTypeDefinition stringType = new StringType(baseTypePath);
@@ -1154,10 +1228,10 @@ public final class YangModelBuilderUtil {
     }
 
     /**
-     * Parse given context and find require-instance value.
+     * Parse type body statement and find require-instance value.
      *
      * @param ctx
-     *            type body
+     *            type body context
      * @return require-instance value
      */
     private static boolean isRequireInstance(Type_body_stmtsContext ctx) {
@@ -1176,10 +1250,10 @@ public final class YangModelBuilderUtil {
     }
 
     /**
-     * Parse given context and find leafref path.
+     * Parse type body statement and find leafref path.
      *
      * @param ctx
-     *            type body
+     *            type body context
      * @return leafref path as String
      */
     private static String parseLeafrefPath(Type_body_stmtsContext ctx) {
@@ -1198,7 +1272,7 @@ public final class YangModelBuilderUtil {
     }
 
     /**
-     * Internal helper method for parsing Must_stmtContext.
+     * Internal helper method for parsing must statement.
      *
      * @param ctx
      *            Must_stmtContext
@@ -1247,10 +1321,10 @@ public final class YangModelBuilderUtil {
     }
 
     /**
-     * Parse given tree and set constraints to given builder.
+     * Parse given context and set constraints to constraints builder.
      *
      * @param ctx
-     *            context to search
+     *            context to parse
      * @param constraints
      *            ConstraintsBuilder to fill
      */
@@ -1423,8 +1497,8 @@ public final class YangModelBuilderUtil {
                 String reference = stringFromNode(refineArg);
                 refine.setReference(reference);
             } else if (refineArg instanceof Config_stmtContext) {
-                boolean config = parseConfig((Config_stmtContext) refineArg);
-                refine.setConfig(config);
+                Boolean config = parseConfig((Config_stmtContext) refineArg);
+                refine.setConfiguration(config);
             }
         }
     }

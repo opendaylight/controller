@@ -10,6 +10,8 @@ package org.opendaylight.controller.yang.parser.builder.api;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.DataSchemaNode;
+import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 
 /**
@@ -20,20 +22,24 @@ public interface DataNodeContainerBuilder extends Builder {
 
     QName getQName();
 
-    Set<DataSchemaNodeBuilder> getChildNodes();
+    SchemaPath getPath();
+
+    Set<DataSchemaNode> getChildNodes();
+
+    Set<DataSchemaNodeBuilder> getChildNodeBuilders();
 
     void addChildNode(DataSchemaNodeBuilder childNode);
 
-    Set<GroupingBuilder> getGroupings();
+    Set<GroupingDefinition> getGroupings();
+
+    Set<GroupingBuilder> getGroupingBuilders();
 
     void addGrouping(GroupingBuilder groupingBuilder);
 
     void addUsesNode(UsesNodeBuilder usesBuilder);
 
-    Set<TypeDefinitionBuilder> getTypeDefinitions();
+    Set<TypeDefinitionBuilder> getTypeDefinitionBuilders();
 
     void addTypedef(TypeDefinitionBuilder typedefBuilder);
-
-    SchemaPath getPath();
 
 }
