@@ -11,10 +11,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.opendaylight.controller.binding.generator.util.AbstractBaseType;
 import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.AnnotationTypeBuilder;
 
-final class AnnotationTypeBuilderImpl implements AnnotationTypeBuilder {
+final class AnnotationTypeBuilderImpl extends AbstractBaseType implements AnnotationTypeBuilder {
     
     private final String packageName;
     private final String name;
@@ -22,26 +23,11 @@ final class AnnotationTypeBuilderImpl implements AnnotationTypeBuilder {
     private final List<AnnotationType.Parameter> parameters;
     
     public AnnotationTypeBuilderImpl(final String packageName, final String name) {
-        super();
+        super(packageName, name);
         this.packageName = packageName;
         this.name = name;
         annotationBuilders = new ArrayList<>();
         parameters = new ArrayList<>();
-    }
-
-    @Override
-    public String getPackageName() {
-        return packageName;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getFullyQualifiedName() {
-        return packageName + "." + name;
     }
 
     @Override

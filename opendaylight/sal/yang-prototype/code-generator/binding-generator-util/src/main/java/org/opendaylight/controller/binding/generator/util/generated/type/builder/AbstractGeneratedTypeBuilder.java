@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.binding.generator.util.generated.type.builder;
 
+import org.opendaylight.controller.binding.generator.util.AbstractBaseType;
 import org.opendaylight.controller.sal.binding.model.api.AccessModifier;
 import org.opendaylight.controller.sal.binding.model.api.Constant;
 import org.opendaylight.controller.sal.binding.model.api.Type;
@@ -15,7 +16,7 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.*;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract class AbstractGeneratedTypeBuilder implements GeneratedTypeBuilder {
+abstract class AbstractGeneratedTypeBuilder extends AbstractBaseType implements GeneratedTypeBuilder {
 
     private final String packageName;
     private String comment = "";
@@ -31,6 +32,7 @@ abstract class AbstractGeneratedTypeBuilder implements GeneratedTypeBuilder {
     private boolean isAbstract;
 
     public AbstractGeneratedTypeBuilder(final String packageName, final String name) {
+        super(packageName, name);
         if (packageName == null) {
             throw new IllegalArgumentException("Package Name for Generated Type cannot be null!");
         }
@@ -40,22 +42,6 @@ abstract class AbstractGeneratedTypeBuilder implements GeneratedTypeBuilder {
         this.packageName = packageName;
         this.name = name;
     }
-
-    @Override
-    public String getPackageName() {
-        return packageName;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getFullyQualifiedName() {
-        return packageName + "." + name;
-    }
-
 
     protected String getComment() {
         return comment;

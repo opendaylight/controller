@@ -20,6 +20,7 @@ final class GeneratedPropertyBuilderImpl extends AbstractTypeMemberBuilder imple
 
     public GeneratedPropertyBuilderImpl(String name) {
         super(name);
+        this.isReadOnly = true;
     }
 
     @Override
