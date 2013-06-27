@@ -6,7 +6,7 @@
 		<artifactId>yang-prototype</artifactId>
 		<version>0.5-SNAPSHOT</version>
 	</parent>
-	<version>0.5.2-SNAPSHOT</version>
+	<version>0.5.3-SNAPSHOT</version>
 	<artifactId>yang</artifactId>
 	<packaging>pom</packaging>
 

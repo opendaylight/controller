@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.opendaylight.controller</groupId>
 		<artifactId>binding-generator</artifactId>
-		<version>0.5.1-SNAPSHOT</version>
+		<version>0.5.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>binding-java-api-generator</artifactId>
 	<dependencies>
