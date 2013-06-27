@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.hosttracker.hostAware;
 
+import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -26,7 +27,7 @@ import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 
 @XmlRootElement(name = "host")
 @XmlAccessorType(XmlAccessType.NONE)
-public class HostNodeConnector extends Host {
+public class HostNodeConnector extends Host implements Serializable {
     private static final long serialVersionUID = 1L;
     @XmlElement
     private NodeConnector nodeConnector;
