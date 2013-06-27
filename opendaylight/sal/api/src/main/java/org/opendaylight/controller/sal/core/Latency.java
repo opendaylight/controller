@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.sal.core;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -21,7 +22,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Latency extends Property {
     private static final long serialVersionUID = 1L;
-    private long latency;
+
+    @XmlElement
+    private long latencyValue;
 
     public static final long LATENCYUNK = 0;
     public static final long LATENCY1ns = (long) Math.pow(10, 3);
@@ -40,37 +43,37 @@ public class Latency extends Property {
      */
     private Latency() {
         super(LatencyPropName);
-        this.latency = LATENCYUNK;
+        this.latencyValue = LATENCYUNK;
     }
 
     public Latency(long latency) {
         super(LatencyPropName);
-        this.latency = latency;
+        this.latencyValue = latency;
     }
 
     public Latency(int latency) {
         super(LatencyPropName);
-        this.latency = (long) latency;
+        this.latencyValue = (long) latency;
     }
 
     public Latency(short latency) {
         super(LatencyPropName);
-        this.latency = (long) latency;
+        this.latencyValue = (long) latency;
     }
 
     public Latency clone() {
-        return new Latency(this.latency);
+        return new Latency(this.latencyValue);
     }
 
     public long getValue() {
-        return this.latency;
+        return this.latencyValue;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + (int) (latency ^ (latency >>> 32));
+        result = prime * result + (int) (latencyValue ^ (latencyValue >>> 32));
         return result;
     }
 
@@ -83,7 +86,7 @@ public class Latency extends Property {
         if (getClass() != obj.getClass())
             return false;
         Latency other = (Latency) obj;
-        if (latency != other.latency)
+        if (latencyValue != other.latencyValue)
             return false;
         return true;
     }
@@ -93,16 +96,16 @@ public class Latency extends Property {
         StringBuffer sb = new StringBuffer();
 
         sb.append("Latency[");
-        if (this.latency == 0) {
+        if (this.latencyValue == 0) {
             sb.append("UnKnown");
-        } else if (this.latency < LATENCY1ns) {
-            sb.append(this.latency + "psec");
-        } else if (this.latency < LATENCY1us) {
-            sb.append(Long.toString(this.latency / LATENCY1ns) + "nsec");
-        } else if (this.latency < LATENCY1ms) {
-            sb.append(Long.toString(this.latency / LATENCY1us) + "usec");
-        } else if (this.latency < LATENCY1s) {
-            sb.append(Long.toString(this.latency / LATENCY1ms) + "msec");
+        } else if (this.latencyValue < LATENCY1ns) {
+            sb.append(this.latencyValue + "psec");
+        } else if (this.latencyValue < LATENCY1us) {
+            sb.append(Long.toString(this.latencyValue / LATENCY1ns) + "nsec");
+        } else if (this.latencyValue < LATENCY1ms) {
+            sb.append(Long.toString(this.latencyValue / LATENCY1us) + "usec");
+        } else if (this.latencyValue < LATENCY1s) {
+            sb.append(Long.toString(this.latencyValue / LATENCY1ms) + "msec");
         }
 
         sb.append("]");
