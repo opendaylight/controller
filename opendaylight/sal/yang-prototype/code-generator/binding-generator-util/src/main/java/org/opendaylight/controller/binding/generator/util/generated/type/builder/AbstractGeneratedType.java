@@ -43,7 +43,7 @@ abstract class AbstractGeneratedType extends AbstractBaseType implements Generat
         this.comment = comment;
         this.annotations = toUnmodifiableAnnotations(annotationBuilders);
         this.implementsTypes = Collections.unmodifiableList(implementsTypes);
-        this.constants = toUnmodifiableConstants(constants);
+        this.constants = Collections.unmodifiableList(constants);
         this.enumerations = toUnmodifiableEnumerations(enumBuilders);
         this.methodSignatures = toUnmodifiableMethods(methodBuilders);
         this.enclosedTypes = toUnmodifiableEnclosedTypes(enclosedGenTypeBuilders, enclosedGenTOBuilders);
@@ -92,15 +92,6 @@ abstract class AbstractGeneratedType extends AbstractBaseType implements Generat
             enums.add(enumBuilder.toInstance(this));
         }
         return Collections.unmodifiableList(enums);
-    }
-
-    protected List<Constant> toUnmodifiableConstants(
-            List<Constant> constants) {
-        for (final Constant constant : constants) {
-            constants.add(new ConstantImpl(this, constant.getType(),
-                    constant.getName(), constant.getValue()));
-        }
-        return Collections.unmodifiableList(constants);
     }
 
     @Override

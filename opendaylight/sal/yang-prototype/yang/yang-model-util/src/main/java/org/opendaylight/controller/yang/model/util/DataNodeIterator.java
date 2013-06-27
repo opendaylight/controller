@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.yang.model.util;
 
 import java.util.ArrayList;
@@ -5,39 +12,28 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.controller.yang.model.api.DataNodeContainer;
-import org.opendaylight.controller.yang.model.api.DataSchemaNode;
-import org.opendaylight.controller.yang.model.api.GroupingDefinition;
-import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
-import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
-import org.opendaylight.controller.yang.model.api.ListSchemaNode;
+import org.opendaylight.controller.yang.model.api.*;
 
 public class DataNodeIterator implements Iterator<DataSchemaNode> {
 
     private final DataNodeContainer container;
-    private List<ListSchemaNode> allLists;
-    private List<ContainerSchemaNode> allContainers;
-    private List<LeafSchemaNode> allLeafs;
-    private List<LeafListSchemaNode> allLeafLists;
-    private List<DataSchemaNode> allChilds;
+    private final List<ListSchemaNode> allLists;
+    private final List<ContainerSchemaNode> allContainers;
+    private final List<ChoiceNode> allChoices;
+    private final List<DataSchemaNode> allChilds;
 
     public DataNodeIterator(final DataNodeContainer container) {
         if (container == null) {
             throw new IllegalArgumentException("Data Node Container MUST be specified and cannot be NULL!");
         }
 
-        init();
+        this.allContainers = new ArrayList<>();
+        this.allLists = new ArrayList<>();
+        this.allChilds = new ArrayList<>();
+        this.allChoices = new ArrayList<>();
+
         this.container = container;
         traverse(this.container);
-    }
-
-    private void init() {
-        this.allContainers = new ArrayList<ContainerSchemaNode>();
-        this.allLists = new ArrayList<ListSchemaNode>();
-        this.allLeafs = new ArrayList<LeafSchemaNode>();
-        this.allLeafLists = new ArrayList<LeafListSchemaNode>();
-        this.allChilds = new ArrayList<DataSchemaNode>();
     }
 
     public List<ContainerSchemaNode> allContainers() {
@@ -48,12 +44,8 @@ public class DataNodeIterator implements Iterator<DataSchemaNode> {
         return allLists;
     }
 
-    public List<LeafSchemaNode> allLeafs() {
-        return allLeafs;
-    }
-
-    public List<LeafListSchemaNode> allLeafLists() {
-        return allLeafLists;
+    public List<ChoiceNode> allChoices() {
+        return allChoices;
     }
 
     private void traverse(final DataNodeContainer dataNode) {
@@ -61,9 +53,9 @@ public class DataNodeIterator implements Iterator<DataSchemaNode> {
             return;
         }
 
-        final Set<DataSchemaNode> childs = dataNode.getChildNodes();
-        if (childs != null) {
-            for (DataSchemaNode childNode : childs) {
+        final Set<DataSchemaNode> childNodes = dataNode.getChildNodes();
+        if (childNodes != null) {
+            for (DataSchemaNode childNode : childNodes) {
                 if (childNode.isAugmenting()) {
                     continue;
                 }
@@ -76,19 +68,22 @@ public class DataNodeIterator implements Iterator<DataSchemaNode> {
                     final ListSchemaNode list = (ListSchemaNode) childNode;
                     allLists.add(list);
                     traverse(list);
-                } else if (childNode instanceof LeafSchemaNode) {
-                    final LeafSchemaNode leaf = (LeafSchemaNode) childNode;
-                    allLeafs.add(leaf);
-                } else if (childNode instanceof LeafListSchemaNode) {
-                    final LeafListSchemaNode leafList = (LeafListSchemaNode) childNode;
-                    allLeafLists.add(leafList);
+                } else if (childNode instanceof ChoiceNode) {
+                    final ChoiceNode choiceNode = (ChoiceNode) childNode;
+                    allChoices.add(choiceNode);
+                    final Set<ChoiceCaseNode> cases = choiceNode.getCases();
+                    if (cases != null) {
+                        for (final ChoiceCaseNode caseNode : cases) {
+                            traverse(caseNode);
+                        }
+                    }
                 }
             }
         }
 
         final Set<GroupingDefinition> groupings = dataNode.getGroupings();
-        if(groupings != null) {
-            for(GroupingDefinition grouping : groupings) {
+        if (groupings != null) {
+            for (GroupingDefinition grouping : groupings) {
                 traverse(grouping);
             }
         }
@@ -97,10 +92,10 @@ public class DataNodeIterator implements Iterator<DataSchemaNode> {
     @Override
     public boolean hasNext() {
         if (container.getChildNodes() != null) {
-            Set<DataSchemaNode> childs = container.getChildNodes();
+            final Set<DataSchemaNode> childNodes = container.getChildNodes();
 
-            if ((childs != null) && !childs.isEmpty()) {
-                return childs.iterator().hasNext();
+            if ((childNodes != null) && !childNodes.isEmpty()) {
+                return childNodes.iterator().hasNext();
             }
         }
         return false;
