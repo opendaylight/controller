@@ -17,4 +17,6 @@ package org.opendaylight.controller.yang.model.api;
  */
 public interface GroupingDefinition extends DataNodeContainer, SchemaNode {
 
+    boolean isAddedByUses();
+
 }

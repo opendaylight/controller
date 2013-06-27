@@ -16,29 +16,21 @@ import org.opendaylight.controller.yang.model.api.FeatureDefinition;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
 
-public final class FeatureBuilder implements SchemaNodeBuilder {
+public final class FeatureBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
     private final FeatureDefinitionImpl instance;
-    private final int line;
-    private final QName qname;
-    private SchemaPath schemaPath;
-    private String description;
-    private String reference;
-    private Status status = Status.CURRENT;
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     FeatureBuilder(final QName qname, final int line) {
-        this.qname = qname;
-        this.line = line;
+        super(qname, line);
         instance = new FeatureDefinitionImpl(qname);
     }
 
     @Override
     public FeatureDefinitionImpl build() {
-        if(!isBuilt) {
-            instance.setPath(schemaPath);
+        if (!isBuilt) {
+            instance.setPath(path);
             instance.setDescription(description);
             instance.setReference(reference);
             instance.setStatus(status);
@@ -53,61 +45,6 @@ public final class FeatureBuilder implements SchemaNodeBuilder {
             isBuilt = true;
         }
         return instance;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public QName getQName() {
-        return qname;
-    }
-
-    @Override
-    public SchemaPath getPath() {
-        return schemaPath;
-    }
-
-    @Override
-    public void setPath(SchemaPath schemaPath) {
-        this.schemaPath = schemaPath;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    @Override
-    public String getReference() {
-        return reference;
-    }
-
-    @Override
-    public void setReference(final String reference) {
-        this.reference = reference;
-    }
-
-    @Override
-    public Status getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(final Status status) {
-        this.status = status;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
     }
 
     private final class FeatureDefinitionImpl implements FeatureDefinition {
@@ -170,8 +107,7 @@ public final class FeatureBuilder implements SchemaNodeBuilder {
             return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(
-                final List<UnknownSchemaNode> unknownNodes) {
+        private void setUnknownSchemaNodes(final List<UnknownSchemaNode> unknownNodes) {
             if (unknownNodes != null) {
                 this.unknownNodes = unknownNodes;
             }
@@ -217,8 +153,7 @@ public final class FeatureBuilder implements SchemaNodeBuilder {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    FeatureDefinitionImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(FeatureDefinitionImpl.class.getSimpleName());
             sb.append("[name=" + qname + "]");
             return sb.toString();
         }

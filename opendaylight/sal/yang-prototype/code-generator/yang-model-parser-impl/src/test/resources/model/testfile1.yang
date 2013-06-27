@@ -76,6 +76,13 @@ module types1 {
     container transfer {
         choice how {
             default interval;
+            container input {
+            }
+            list output {
+                leaf id {
+                    type string;
+                }
+            }
             case interval {
                 leaf interval {
                     type uint16;

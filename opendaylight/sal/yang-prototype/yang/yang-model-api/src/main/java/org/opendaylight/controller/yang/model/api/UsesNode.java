@@ -31,6 +31,8 @@ public interface UsesNode {
      */
     boolean isAugmenting();
 
+    boolean isAddedByUses();
+
     /**
      * Some of the properties of each node in the grouping can be refined with
      * the "refine" statement.

@@ -12,9 +12,10 @@ import java.util.List;
 
 import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
+import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 
-public final class RefineHolder implements Builder {
+public final class RefineHolder implements Builder, ConfigNode {
     private final String name;
     private final int line;
     private String defaultStr;
@@ -62,11 +63,13 @@ public final class RefineHolder implements Builder {
         this.reference = reference;
     }
 
-    public Boolean isConfig() {
+    @Override
+    public Boolean isConfiguration() {
         return config;
     }
 
-    public void setConfig(final Boolean config) {
+    @Override
+    public void setConfiguration(final Boolean config) {
         this.config = config;
     }
 

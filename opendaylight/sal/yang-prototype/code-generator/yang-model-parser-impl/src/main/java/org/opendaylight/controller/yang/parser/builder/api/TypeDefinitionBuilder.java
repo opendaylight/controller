@@ -9,8 +9,8 @@ package org.opendaylight.controller.yang.parser.builder.api;
 
 import java.util.List;
 
-import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
@@ -19,16 +19,9 @@ import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBui
 /**
  * Interface for builders of 'typedef' statement.
  */
-public interface TypeDefinitionBuilder extends TypeAwareBuilder,
-        SchemaNodeBuilder {
+public interface TypeDefinitionBuilder extends TypeAwareBuilder, SchemaNodeBuilder, GroupingMember {
 
     TypeDefinition<?> build();
-
-    String getDescription();
-
-    String getReference();
-
-    Status getStatus();
 
     List<RangeConstraint> getRanges();
 
@@ -46,7 +39,9 @@ public interface TypeDefinitionBuilder extends TypeAwareBuilder,
 
     void setFractionDigits(Integer fractionDigits);
 
-    List<UnknownSchemaNodeBuilder> getUnknownNodes();
+    List<UnknownSchemaNode> getUnknownNodes();
+
+    List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders();
 
     Object getDefaultValue();
 

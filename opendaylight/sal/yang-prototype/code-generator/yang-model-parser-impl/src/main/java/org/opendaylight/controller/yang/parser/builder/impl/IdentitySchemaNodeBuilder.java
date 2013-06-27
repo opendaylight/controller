@@ -16,32 +16,24 @@ import org.opendaylight.controller.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
 
-public final class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
+public final class IdentitySchemaNodeBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
     private final IdentitySchemaNodeImpl instance;
-    private final int line;
-    private final QName qname;
-    private SchemaPath schemaPath;
-    private String description;
-    private String reference;
-    private Status status = Status.CURRENT;
     private IdentitySchemaNodeBuilder baseIdentityBuilder;
     private IdentitySchemaNode baseIdentity;
     private String baseIdentityName;
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     IdentitySchemaNodeBuilder(final QName qname, final int line) {
-        this.qname = qname;
-        this.line = line;
+        super(qname, line);
         instance = new IdentitySchemaNodeImpl(qname);
     }
 
     @Override
     public IdentitySchemaNode build() {
-        if(!isBuilt) {
-            instance.setPath(schemaPath);
+        if (!isBuilt) {
+            instance.setPath(path);
             instance.setDescription(description);
             instance.setReference(reference);
             instance.setStatus(status);
@@ -65,63 +57,6 @@ public final class IdentitySchemaNodeBuilder implements SchemaNodeBuilder {
         }
 
         return instance;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public QName getQName() {
-        return qname;
-    }
-
-    @Override
-    public SchemaPath getPath() {
-        return schemaPath;
-    }
-
-    @Override
-    public void setPath(SchemaPath schemaPath) {
-        this.schemaPath = schemaPath;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    @Override
-    public String getReference() {
-        return reference;
-    }
-
-    @Override
-    public void setReference(final String reference) {
-        this.reference = reference;
-    }
-
-    @Override
-    public Status getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(final Status status) {
-        if (status != null) {
-            this.status = status;
-        }
-    }
-
-    @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
     }
 
     public String getBaseIdentityName() {

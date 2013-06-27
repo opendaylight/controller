@@ -35,8 +35,8 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBu
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 
-public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
-        implements TypeDefinitionAwareBuilder, SchemaNodeBuilder, AugmentationTargetBuilder {
+public final class NotificationBuilder extends AbstractDataNodeContainerBuilder implements TypeDefinitionAwareBuilder,
+        SchemaNodeBuilder, AugmentationTargetBuilder {
     private boolean isBuilt;
     private final NotificationDefinitionImpl instance;
     private final int line;
@@ -93,7 +93,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
             instance.setUses(uses);
 
             // AUGMENTATIONS
-            if(augmentations == null) {
+            if (augmentations == null) {
                 augmentations = new HashSet<AugmentationSchema>();
                 for (AugmentationSchemaBuilder builder : addedAugmentations) {
                     augmentations.add(builder.build());
@@ -126,7 +126,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
     }
 
     @Override
-    public Set<TypeDefinitionBuilder> getTypeDefinitions() {
+    public Set<TypeDefinitionBuilder> getTypeDefinitionBuilders() {
         return addedTypedefs;
     }
 
@@ -177,7 +177,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
 
     @Override
     public void setStatus(final Status status) {
-        if(status != null) {
+        if (status != null) {
             this.status = status;
         }
     }
@@ -303,8 +303,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
             return typeDefinitions;
         }
 
-        private void setTypeDefinitions(
-                final Set<TypeDefinition<?>> typeDefinitions) {
+        private void setTypeDefinitions(final Set<TypeDefinition<?>> typeDefinitions) {
             if (typeDefinitions != null) {
                 this.typeDefinitions = typeDefinitions;
             }
@@ -315,8 +314,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
             return augmentations;
         }
 
-        private void setAvailableAugmentations(
-                Set<AugmentationSchema> augmentations) {
+        private void setAvailableAugmentations(Set<AugmentationSchema> augmentations) {
             if (augmentations != null) {
                 this.augmentations = augmentations;
             }
@@ -327,8 +325,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
             return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(
-                final List<UnknownSchemaNode> unknownNodes) {
+        private void setUnknownSchemaNodes(final List<UnknownSchemaNode> unknownNodes) {
             if (unknownNodes != null) {
                 this.unknownNodes = unknownNodes;
             }
@@ -395,8 +392,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    NotificationDefinitionImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(NotificationDefinitionImpl.class.getSimpleName());
             sb.append("[qname=" + qname + ", path=" + path + "]");
             return sb.toString();
         }

@@ -1,8 +1,6 @@
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -134,10 +132,8 @@ public class GeneratedTypesBitsTest {
         assertTrue(getByteLeafMethodFound);
         assertEquals(nameReturnParamType,"ByteType");
 
-        assertTrue(setByteLeafMethodFound);
-        assertEquals(setByteLeafMethodParamNum,1);
-        assertEquals(nameMethodeParamType,"ByteType");
-
+        assertFalse(setByteLeafMethodFound);
+        assertEquals(0, setByteLeafMethodParamNum);
     }
 
 }

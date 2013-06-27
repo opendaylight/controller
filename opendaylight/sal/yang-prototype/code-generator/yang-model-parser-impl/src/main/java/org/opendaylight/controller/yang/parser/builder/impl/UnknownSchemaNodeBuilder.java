@@ -15,41 +15,52 @@ import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
 
-public final class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
+public final class UnknownSchemaNodeBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
     private final UnknownSchemaNodeImpl instance;
-    private final int line;
-    private final QName qname;
-    private SchemaPath schemaPath;
-    private String description;
-    private String reference;
-    private Status status = Status.CURRENT;
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    private boolean addedByUses;
+    private List<UnknownSchemaNode> unknownNodes;
     private QName nodeType;
     private String nodeParameter;
 
-    UnknownSchemaNodeBuilder(final QName qname, final int line) {
-        this.qname = qname;
-        this.line = line;
+    public UnknownSchemaNodeBuilder(final QName qname, final int line) {
+        super(qname, line);
         instance = new UnknownSchemaNodeImpl(qname);
+    }
+
+    public UnknownSchemaNodeBuilder(UnknownSchemaNodeBuilder b) {
+        super(b.getQName(), b.getLine());
+        instance = new UnknownSchemaNodeImpl(qname);
+        path = b.getPath();
+        description = b.getDescription();
+        reference = b.getReference();
+        status = b.getStatus();
+        addedByUses = b.isAddedByUses();
+        unknownNodes = b.unknownNodes;
+        addedUnknownNodes.addAll(b.addedUnknownNodes);
+        nodeType = b.getNodeType();
+        nodeParameter = b.getNodeParameter();
     }
 
     @Override
     public UnknownSchemaNode build() {
         if (!isBuilt) {
-            instance.setPath(schemaPath);
+            instance.setPath(path);
             instance.setNodeType(nodeType);
             instance.setNodeParameter(nodeParameter);
             instance.setDescription(description);
             instance.setReference(reference);
             instance.setStatus(status);
+            instance.setAddedByUses(addedByUses);
 
             // UNKNOWN NODES
-            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-                unknownNodes.add(b.build());
+            if (unknownNodes == null) {
+                unknownNodes = new ArrayList<UnknownSchemaNode>();
+                for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                    unknownNodes.add(b.build());
+                }
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
@@ -59,61 +70,16 @@ public final class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
         return instance;
     }
 
-    @Override
-    public int getLine() {
-        return line;
+    public boolean isAddedByUses() {
+        return addedByUses;
     }
 
-    @Override
-    public QName getQName() {
-        return qname;
+    public void setAddedByUses(final boolean addedByUses) {
+        this.addedByUses = addedByUses;
     }
 
-    @Override
-    public SchemaPath getPath() {
-        return schemaPath;
-    }
-
-    @Override
-    public void setPath(SchemaPath schemaPath) {
-        this.schemaPath = schemaPath;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    @Override
-    public String getReference() {
-        return reference;
-    }
-
-    @Override
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
-
-    @Override
-    public Status getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Status status) {
-        if (status != null) {
-            this.status = status;
-        }
-    }
-
-    @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
+    public void setUnknownNodes(final List<UnknownSchemaNode> unknownNodes) {
+        this.unknownNodes = unknownNodes;
     }
 
     public QName getNodeType() {
@@ -141,6 +107,7 @@ public final class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
         private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
         private QName nodeType;
         private String nodeParameter;
+        private boolean addedByUses;
 
         private UnknownSchemaNodeImpl(final QName qname) {
             this.qname = qname;
@@ -190,6 +157,15 @@ public final class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
         }
 
         @Override
+        public boolean isAddedByUses() {
+            return addedByUses;
+        }
+
+        private void setAddedByUses(final boolean addedByUses) {
+            this.addedByUses = addedByUses;
+        }
+
+        @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
             return unknownNodes;
         }
@@ -216,6 +192,15 @@ public final class UnknownSchemaNodeBuilder implements SchemaNodeBuilder {
 
         private void setNodeParameter(final String nodeParameter) {
             this.nodeParameter = nodeParameter;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(UnknownSchemaNodeImpl.class.getSimpleName());
+            sb.append("[");
+            sb.append(qname);
+            sb.append("]");
+            return sb.toString();
         }
     }
 

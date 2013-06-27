@@ -25,14 +25,13 @@ import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuil
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder
-        implements TypeDefinitionBuilder {
+public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder implements TypeDefinitionBuilder {
     private final int line;
     private final QName qname;
     private SchemaPath schemaPath;
 
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private List<UnknownSchemaNode> unknownNodes;
+    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private List<RangeConstraint> ranges = Collections.emptyList();
     private List<LengthConstraint> lengths = Collections.emptyList();
     private List<PatternConstraint> patterns = Collections.emptyList();
@@ -43,10 +42,36 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder
     private Status status = Status.CURRENT;
     private String units;
     private Object defaultValue;
+    private boolean addedByUses;
 
     public TypeDefinitionBuilderImpl(final QName qname, final int line) {
         this.qname = qname;
         this.line = line;
+    }
+
+    public TypeDefinitionBuilderImpl(TypeDefinitionBuilder tdb) {
+        qname = tdb.getQName();
+        line = tdb.getLine();
+        schemaPath = tdb.getPath();
+
+        type = tdb.getType();
+        typedef = tdb.getTypedef();
+
+        unknownNodes = tdb.getUnknownNodes();
+        for (UnknownSchemaNodeBuilder usnb : tdb.getUnknownNodeBuilders()) {
+            addedUnknownNodes.add(usnb);
+        }
+        ranges = tdb.getRanges();
+        lengths = tdb.getLengths();
+        patterns = tdb.getPatterns();
+        fractionDigits = tdb.getFractionDigits();
+
+        description = tdb.getDescription();
+        reference = tdb.getReference();
+        status = tdb.getStatus();
+        units = tdb.getUnits();
+        defaultValue = tdb.getDefaultValue();
+        addedByUses = tdb.isAddedByUses();
     }
 
     @Override
@@ -54,19 +79,18 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder
         TypeDefinition<?> result = null;
         ExtendedType.Builder typeBuilder = null;
         if ((type == null || type instanceof UnknownType) && typedef == null) {
-            throw new YangParseException("Unresolved type: '"
-                    + qname.getLocalName() + "'.");
+            throw new YangParseException("Unresolved type: '" + qname.getLocalName() + "'.");
         }
         if (type == null || type instanceof UnknownType) {
             type = typedef.build();
         }
 
-        typeBuilder = new ExtendedType.Builder(qname, type, description,
-                reference, schemaPath);
+        typeBuilder = new ExtendedType.Builder(qname, type, description, reference, schemaPath);
 
         typeBuilder.status(status);
         typeBuilder.units(units);
         typeBuilder.defaultValue(defaultValue);
+        typeBuilder.addedByUses(addedByUses);
 
         typeBuilder.ranges(ranges);
         typeBuilder.lengths(lengths);
@@ -138,6 +162,16 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder
     }
 
     @Override
+    public boolean isAddedByUses() {
+        return addedByUses;
+    }
+
+    @Override
+    public void setAddedByUses(final boolean addedByUses) {
+        this.addedByUses = addedByUses;
+    }
+
+    @Override
     public String getUnits() {
         return units;
     }
@@ -158,7 +192,12 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder
     }
 
     @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+    public List<UnknownSchemaNode> getUnknownNodes() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
         return addedUnknownNodes;
     }
 
@@ -219,8 +258,7 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder
 
     @Override
     public String toString() {
-        final StringBuilder result = new StringBuilder("TypedefBuilder["
-                + qname.getLocalName());
+        final StringBuilder result = new StringBuilder("TypedefBuilder[" + qname.getLocalName());
         result.append(", type=");
         if (type == null) {
             result.append(typedef);

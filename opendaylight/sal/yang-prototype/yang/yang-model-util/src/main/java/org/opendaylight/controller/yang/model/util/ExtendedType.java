@@ -38,6 +38,7 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
     private Status status;
     private String units;
     private Object defaultValue;
+    private boolean addedByUses;
 
     public static class Builder {
         private final QName typeName;
@@ -52,6 +53,7 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
         private Status status = Status.CURRENT;
         private String units = "";
         private Object defaultValue = null;
+        private boolean addedByUses;
 
         private List<RangeConstraint> ranges = Collections.emptyList();
         private List<LengthConstraint> lengths = Collections.emptyList();
@@ -91,6 +93,11 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
 
         public Builder defaultValue(final Object defaultValue) {
             this.defaultValue = defaultValue;
+            return this;
+        }
+
+        public Builder addedByUses(final boolean addedByUses) {
+            this.addedByUses = addedByUses;
             return this;
         }
 
@@ -141,6 +148,7 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
         this.status = builder.status;
         this.units = builder.units;
         this.defaultValue = builder.defaultValue;
+        this.addedByUses = builder.addedByUses;
 
         this.ranges = builder.ranges;
         this.lengths = builder.lengths;
@@ -161,6 +169,10 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
     @Override
     public Object getDefaultValue() {
         return defaultValue;
+    }
+
+    public boolean isAddedByUses() {
+        return addedByUses;
     }
 
     @Override
