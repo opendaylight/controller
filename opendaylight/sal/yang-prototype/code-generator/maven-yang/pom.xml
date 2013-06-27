@@ -4,7 +4,7 @@
     <parent>
         <artifactId>yang</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.5.2-SNAPSHOT</version>
+        <version>0.5.3-SNAPSHOT</version>
         <relativePath>../../yang/pom.xml</relativePath>
     </parent>
     <artifactId>yang-maven-plugin-spi</artifactId>

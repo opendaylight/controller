@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opendaylight.controller</groupId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5.3-SNAPSHOT</version>
 
     <artifactId>test</artifactId>
 
@@ -12,7 +12,7 @@
             <plugin>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>0.5.2-SNAPSHOT</version>
+                <version>0.5.3-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <goals>
@@ -36,7 +36,7 @@
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>yang-maven-plugin-spi</artifactId>
-                        <version>0.5.2-SNAPSHOT</version>
+                        <version>0.5.3-SNAPSHOT</version>
                         <type>test-jar</type>
                     </dependency>
                 </dependencies>
