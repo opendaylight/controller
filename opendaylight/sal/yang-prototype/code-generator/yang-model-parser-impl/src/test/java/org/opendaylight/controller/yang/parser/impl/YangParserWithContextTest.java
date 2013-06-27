@@ -21,6 +21,8 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.controller.yang.model.api.AnyXmlSchemaNode;
+import org.opendaylight.controller.yang.model.api.ChoiceNode;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
@@ -81,11 +83,111 @@ public class YangParserWithContextTest {
         RangeConstraint range = ranges.get(0);
         assertEquals(0L, range.getMin());
         assertEquals(63L, range.getMax());
-
     }
 
     @Test
-    public void testUsesGroupingFromContext() throws Exception {
+    public void testUsesFromContext() throws Exception {
+        SchemaContext context = null;
+        try (InputStream stream = new FileInputStream(getClass().getResource("/model/testfile2.yang").getPath())) {
+            context = parser.resolveSchemaContext(TestUtils.loadModules(Lists.newArrayList(stream)));
+        }
+        Module testModule = null;
+        try (InputStream stream = new FileInputStream(getClass().getResource("/context-test/test2.yang").getPath())) {
+            testModule = TestUtils.loadModuleWithContext(stream, context);
+        }
+        assertNotNull(testModule);
+
+        // suffix _u = added by uses
+        // suffix _g = defined in grouping from context
+
+        // get grouping
+        Module contextModule = context.findModuleByNamespace(URI.create("urn:simple.types.data.demo"));
+        assertNotNull(contextModule);
+        Set<GroupingDefinition> groupings = contextModule.getGroupings();
+        assertEquals(1, groupings.size());
+        GroupingDefinition grouping = groupings.iterator().next();
+
+        // get node containing uses
+        ContainerSchemaNode peer = (ContainerSchemaNode)testModule.getDataChildByName("peer");
+        ContainerSchemaNode destination = (ContainerSchemaNode)peer.getDataChildByName("destination");
+
+        // check uses
+        Set<UsesNode> uses = destination.getUses();
+        assertEquals(1, uses.size());
+
+        // check uses process
+        AnyXmlSchemaNode data_u = (AnyXmlSchemaNode)destination.getDataChildByName("data");
+        assertNotNull(data_u);
+        assertTrue(data_u.isAddedByUses());
+
+        AnyXmlSchemaNode data_g = (AnyXmlSchemaNode)grouping.getDataChildByName("data");
+        assertNotNull(data_g);
+        assertFalse(data_g.isAddedByUses());
+        assertFalse(data_u.equals(data_g));
+
+        ChoiceNode how_u = (ChoiceNode)destination.getDataChildByName("how");
+        assertNotNull(how_u);
+        assertTrue(how_u.isAddedByUses());
+
+        ChoiceNode how_g = (ChoiceNode)grouping.getDataChildByName("how");
+        assertNotNull(how_g);
+        assertFalse(how_g.isAddedByUses());
+        assertFalse(how_u.equals(how_g));
+
+        LeafSchemaNode address_u = (LeafSchemaNode)destination.getDataChildByName("address");
+        assertNotNull(address_u);
+        assertTrue(address_u.isAddedByUses());
+
+        LeafSchemaNode address_g = (LeafSchemaNode)grouping.getDataChildByName("address");
+        assertNotNull(address_g);
+        assertFalse(address_g.isAddedByUses());
+        assertFalse(address_u.equals(address_g));
+
+        ContainerSchemaNode port_u = (ContainerSchemaNode)destination.getDataChildByName("port");
+        assertNotNull(port_u);
+        assertTrue(port_u.isAddedByUses());
+
+        ContainerSchemaNode port_g = (ContainerSchemaNode)grouping.getDataChildByName("port");
+        assertNotNull(port_g);
+        assertFalse(port_g.isAddedByUses());
+        assertFalse(port_u.equals(port_g));
+
+        ListSchemaNode addresses_u = (ListSchemaNode)destination.getDataChildByName("addresses");
+        assertNotNull(addresses_u);
+        assertTrue(addresses_u.isAddedByUses());
+
+        ListSchemaNode addresses_g = (ListSchemaNode)grouping.getDataChildByName("addresses");
+        assertNotNull(addresses_g);
+        assertFalse(addresses_g.isAddedByUses());
+        assertFalse(addresses_u.equals(addresses_g));
+
+        // grouping defined by 'uses'
+        Set<GroupingDefinition> groupings_u = destination.getGroupings();
+        assertEquals(1, groupings_u.size());
+        GroupingDefinition grouping_u = groupings_u.iterator().next();
+        assertTrue(grouping_u.isAddedByUses());
+
+        // grouping defined in 'grouping' node
+        Set<GroupingDefinition> groupings_g = grouping.getGroupings();
+        assertEquals(1, groupings_g.size());
+        GroupingDefinition grouping_g = groupings_g.iterator().next();
+        assertFalse(grouping_g.isAddedByUses());
+        assertFalse(grouping_u.equals(grouping_g));
+
+        List<UnknownSchemaNode> nodes_u = destination.getUnknownSchemaNodes();
+        assertEquals(1, nodes_u.size());
+        UnknownSchemaNode node_u = nodes_u.get(0);
+        assertTrue(node_u.isAddedByUses());
+
+        List<UnknownSchemaNode> nodes_g = grouping.getUnknownSchemaNodes();
+        assertEquals(1, nodes_g.size());
+        UnknownSchemaNode node_g = nodes_g.get(0);
+        assertFalse(node_g.isAddedByUses());
+        assertFalse(node_u.equals(node_g));
+    }
+
+    @Test
+    public void testUsesRefineFromContext() throws Exception {
         SchemaContext context = null;
         try (InputStream stream = new FileInputStream(getClass().getResource("/model/testfile2.yang").getPath())) {
             context = parser.resolveSchemaContext(TestUtils.loadModules(Lists.newArrayList(stream)));

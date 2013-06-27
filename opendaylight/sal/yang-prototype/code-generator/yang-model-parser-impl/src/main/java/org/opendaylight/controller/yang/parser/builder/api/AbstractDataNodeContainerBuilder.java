@@ -15,7 +15,6 @@ import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 
 public abstract class AbstractDataNodeContainerBuilder implements DataNodeContainerBuilder {
-
     private final QName qname;
 
     protected Set<DataSchemaNode> childNodes;
@@ -34,7 +33,12 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
     }
 
     @Override
-    public Set<DataSchemaNodeBuilder> getChildNodes() {
+    public Set<DataSchemaNode> getChildNodes() {
+        return childNodes;
+    }
+
+    @Override
+    public Set<DataSchemaNodeBuilder> getChildNodeBuilders() {
         return addedChildNodes;
     }
 
@@ -47,7 +51,12 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
         this.childNodes = childNodes;
     }
 
-    public Set<GroupingBuilder> getGroupings() {
+    @Override
+    public Set<GroupingDefinition> getGroupings() {
+        return groupings;
+    }
+
+    public Set<GroupingBuilder> getGroupingBuilders() {
         return addedGroupings;
     }
 

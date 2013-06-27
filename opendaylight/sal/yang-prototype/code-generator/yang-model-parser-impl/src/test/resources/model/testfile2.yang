@@ -11,7 +11,7 @@ module types2 {
     revision "2013-02-27" {
         reference " WILL BE DEFINED LATER";
     }
-    
+
     typedef my-base-int32-type {
         type int32 {
             range "2..20";
@@ -25,14 +25,14 @@ module types2 {
         units "mile";
         default "11";
     }
-    
+
     typedef my-custom-string {
         type string {
             pattern "[a-k]*";
             length "5..11";
         }
     }
-    
+
     typedef my-string-type {
         type my-custom-string {
             length "6..10";
@@ -56,25 +56,25 @@ module types2 {
             range "10..20";
         }
     }
-    
+
     typedef my-int-type2 {
         type my-int-type {
             range "12..18";
         }
     }
-    
+
     typedef my-int-type-ext {
         type my-int-type2 {
             range "14..16";
         }
     }
-    
+
     typedef my-decimal-type {
         type decimal64 {
             fraction-digits 6;
         }
     }
-    
+
     typedef my-decimal-type-ext {
         type decimal64 {
             fraction-digits 5;
@@ -110,21 +110,21 @@ module types2 {
             path "/interface/name";
         }
     }
-     
+
     leaf name {
         type string;
     }
-    
+
     leaf count {
         type int8 {
             range "1..10";
         }
     }
-     
+
     leaf nested-type-leaf {
         type my-type1;
     }
-    
+
     extension c-define {
         description
         "Takes as argument a name string.
@@ -134,13 +134,13 @@ module types2 {
             yin-element "true";
         }
     }
-    
+
     container system {
         leaf user {
             type string;
         }
     }
-    
+
     grouping target {
         anyxml data {
             config true;
@@ -194,6 +194,8 @@ module types2 {
         typedef group-type {
             type my-decimal-type;
         }
+        
+        opendaylight;
     }
 
     container peer {
@@ -201,7 +203,7 @@ module types2 {
             uses target {
                 refine address {
                     default "1.2.3.4";
-                    description "description of address defined by refine";
+                    description "IP address of target node";
                     reference "address reference added by refine";
                     config false;
                     mandatory true;
@@ -233,7 +235,7 @@ module types2 {
             }
         }
     }
-    
+
     container interfaces {
          list ifEntry {
              key "ifIndex";
@@ -242,11 +244,11 @@ module types2 {
                  type uint32;
                  units minutes;
              }
-             
+
              leaf ifMtu {
                  type int32;
              }
-             
+
              min-elements 1;
              max-elements 11;
          }

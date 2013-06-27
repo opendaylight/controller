@@ -1,10 +1,10 @@
 /*
-  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
-  *
-  * This program and the accompanying materials are made available under the
-  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  * and is available at http://www.eclipse.org/legal/epl-v10.html
-  */
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.yang.model.util;
 
 import java.util.Collections;
@@ -18,24 +18,31 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition;
 
 /**
- * The <code>default</code> implementation of Instance Identifier Type Definition interface.
+ * The <code>default</code> implementation of Instance Identifier Type
+ * Definition interface.
  *
  * @see InstanceIdentifierTypeDefinition
  */
 public final class InstanceIdentifier implements InstanceIdentifierTypeDefinition {
-    private static final QName name = BaseTypes
-            .constructQName("instance-identifier");
-    private static final String description = "The instance-identifier built-in type is used to " +
-    		"uniquely identify a particular instance node in the data tree.";
+    private static final QName name = BaseTypes.constructQName("instance-identifier");
+    private static final String description = "The instance-identifier built-in type is used to "
+            + "uniquely identify a particular instance node in the data tree.";
     private static final String reference = "https://tools.ietf.org/html/rfc6020#section-9.13";
 
     private final transient SchemaPath path;
     private final RevisionAwareXPath xpath;
     private final String units = "";
     private final InstanceIdentifierTypeDefinition baseType;
-    private final boolean requireInstance;
+    private boolean requireInstance = true;
 
-    public InstanceIdentifier(final SchemaPath path, RevisionAwareXPath xpath, boolean requireInstance) {
+    public InstanceIdentifier(final SchemaPath path, final RevisionAwareXPath xpath) {
+        super();
+        this.path = path;
+        this.xpath = xpath;
+        this.baseType = this;
+    }
+
+    public InstanceIdentifier(final SchemaPath path, final RevisionAwareXPath xpath, final boolean requireInstance) {
         super();
         this.path = path;
         this.xpath = xpath;
@@ -46,7 +53,8 @@ public final class InstanceIdentifier implements InstanceIdentifierTypeDefinitio
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getBaseType()
      */
     @Override
     public InstanceIdentifierTypeDefinition getBaseType() {
@@ -66,7 +74,9 @@ public final class InstanceIdentifier implements InstanceIdentifierTypeDefinitio
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue()
+     * @see
+     * org.opendaylight.controller.yang.model.api.TypeDefinition#getDefaultValue
+     * ()
      */
     @Override
     public Object getDefaultValue() {
@@ -96,7 +106,8 @@ public final class InstanceIdentifier implements InstanceIdentifierTypeDefinitio
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
+     * @see
+     * org.opendaylight.controller.yang.model.api.SchemaNode#getDescription()
      */
     @Override
     public String getDescription() {
@@ -126,7 +137,9 @@ public final class InstanceIdentifier implements InstanceIdentifierTypeDefinitio
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.SchemaNode#getExtensionSchemaNodes()
+     * @see
+     * org.opendaylight.controller.yang.model.api.SchemaNode#getExtensionSchemaNodes
+     * ()
      */
     @Override
     public List<UnknownSchemaNode> getUnknownSchemaNodes() {
@@ -136,8 +149,8 @@ public final class InstanceIdentifier implements InstanceIdentifierTypeDefinitio
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition#
-     * getPathStatement()
+     * @see org.opendaylight.controller.yang.model.api.type.
+     * InstanceIdentifierTypeDefinition# getPathStatement()
      */
     @Override
     public RevisionAwareXPath getPathStatement() {
@@ -147,8 +160,8 @@ public final class InstanceIdentifier implements InstanceIdentifierTypeDefinitio
     /*
      * (non-Javadoc)
      *
-     * @see org.opendaylight.controller.yang.model.api.type.InstanceIdentifierTypeDefinition#
-     * requireInstance()
+     * @see org.opendaylight.controller.yang.model.api.type.
+     * InstanceIdentifierTypeDefinition# requireInstance()
      */
     @Override
     public boolean requireInstance() {

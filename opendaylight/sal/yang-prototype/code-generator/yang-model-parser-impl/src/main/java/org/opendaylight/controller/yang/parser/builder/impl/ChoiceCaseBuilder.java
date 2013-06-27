@@ -27,23 +27,29 @@ import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder implements
-        DataSchemaNodeBuilder, AugmentationTargetBuilder {
+public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder implements DataSchemaNodeBuilder,
+        AugmentationTargetBuilder {
     private boolean isBuilt;
     private final ChoiceCaseNodeImpl instance;
+    private final ChoiceBuilder parent;
     private final int line;
+    // SchemaNode args
     private SchemaPath schemaPath;
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
+    // DataSchemaNode args
     private boolean augmenting;
     private final ConstraintsBuilder constraints;
+    // DataNodeContainer args
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
+    // AugmentationTarget args
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
 
-    ChoiceCaseBuilder(final QName qname, final int line) {
+    ChoiceCaseBuilder(final ChoiceBuilder parent, final QName qname, final int line) {
         super(qname);
+        this.parent = parent;
         this.line = line;
         instance = new ChoiceCaseNodeImpl(qname);
         constraints = new ConstraintsBuilder(line);
@@ -51,7 +57,7 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
 
     @Override
     public ChoiceCaseNode build() {
-        if(!isBuilt) {
+        if (!isBuilt) {
             instance.setConstraints(constraints.build());
             instance.setPath(schemaPath);
             instance.setDescription(description);
@@ -102,6 +108,10 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     @Override
     public int getLine() {
         return line;
+    }
+
+    public ChoiceBuilder getParent() {
+        return parent;
     }
 
     public SchemaPath getPath() {
@@ -170,25 +180,13 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     }
 
     @Override
-    public Set<TypeDefinitionBuilder> getTypeDefinitions() {
+    public Set<TypeDefinitionBuilder> getTypeDefinitionBuilders() {
         return Collections.emptySet();
     }
 
     @Override
     public void addTypedef(TypeDefinitionBuilder typedefBuilder) {
-        throw new YangParseException(line,
-                "Can not add type definition to choice case.");
-    }
-
-    @Override
-    public boolean isConfiguration() {
-        return false;
-    }
-
-    @Override
-    public void setConfiguration(boolean configuration) {
-        throw new YangParseException(line,
-                "Can not add config definition to choice case.");
+        throw new YangParseException(line, "Can not add type definition to choice case.");
     }
 
     @Override
@@ -285,6 +283,11 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
         }
 
         @Override
+        public boolean isAddedByUses() {
+            return false;
+        }
+
+        @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
             return unknownNodes;
         }
@@ -353,8 +356,7 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
             return augmentations;
         }
 
-        private void setAvailableAugmentations(
-                Set<AugmentationSchema> augmentations) {
+        private void setAvailableAugmentations(Set<AugmentationSchema> augmentations) {
             if (augmentations != null) {
                 this.augmentations = augmentations;
             }
@@ -404,8 +406,7 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    ChoiceCaseNodeImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(ChoiceCaseNodeImpl.class.getSimpleName());
             sb.append("[");
             sb.append("qname=" + qname);
             sb.append("]");

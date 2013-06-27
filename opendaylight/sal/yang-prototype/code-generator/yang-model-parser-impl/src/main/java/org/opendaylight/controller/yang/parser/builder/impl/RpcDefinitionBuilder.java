@@ -21,29 +21,21 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 
-public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefinitionAwareBuilder {
+public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder implements TypeDefinitionAwareBuilder {
     private boolean isBuilt;
     private final RpcDefinitionImpl instance;
-    private final int line;
-    private final QName qname;
-    private SchemaPath schemaPath;
-    private String description;
-    private String reference;
-    private Status status = Status.CURRENT;
     private ContainerSchemaNodeBuilder inputBuilder;
     private ContainerSchemaNodeBuilder outputBuilder;
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     RpcDefinitionBuilder(final QName qname, final int line) {
-        this.qname = qname;
-        this.line = line;
+        super(qname, line);
         this.instance = new RpcDefinitionImpl(qname);
     }
 
@@ -59,7 +51,7 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefini
             instance.setInput(input);
             instance.setOutput(output);
 
-            instance.setPath(schemaPath);
+            instance.setPath(path);
 
             // TYPEDEFS
             final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
@@ -85,11 +77,6 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefini
             isBuilt = true;
         }
         return instance;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
     }
 
     void setInput(final ContainerSchemaNodeBuilder inputBuilder) {
@@ -118,63 +105,11 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefini
     }
 
     @Override
-    public SchemaPath getPath() {
-        return schemaPath;
-    }
-
-    @Override
-    public void setPath(SchemaPath schemaPath) {
-        this.schemaPath = schemaPath;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    @Override
-    public String getReference() {
-        return reference;
-    }
-
-    @Override
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
-
-    @Override
-    public Status getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(final Status status) {
-        if (status != null) {
-            this.status = status;
-        }
-    }
-
-    @Override
-    public QName getQName() {
-        return null;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((qname == null) ? 0 : qname.hashCode());
-        result = prime * result + ((schemaPath == null) ? 0 : schemaPath.hashCode());
+        result = prime * result + ((path == null) ? 0 : path.hashCode());
         return result;
     }
 
@@ -194,11 +129,11 @@ public final class RpcDefinitionBuilder implements SchemaNodeBuilder, TypeDefini
         } else if (!other.qname.equals(this.qname)) {
             return false;
         }
-        if (other.schemaPath == null) {
-            if (this.schemaPath != null) {
+        if (other.path == null) {
+            if (this.path != null) {
                 return false;
             }
-        } else if (!other.schemaPath.equals(this.schemaPath)) {
+        } else if (!other.path.equals(this.path)) {
             return false;
         }
         return true;

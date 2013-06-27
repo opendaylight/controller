@@ -30,6 +30,7 @@ import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.AnyXmlBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ChoiceBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.GroupingBuilderImpl;
 import org.opendaylight.controller.yang.parser.builder.impl.LeafListSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ListSchemaNodeBuilder;
@@ -66,21 +67,21 @@ public class RefineUtils {
         Builder result = null;
         final Builder lookedUpBuilder = findRefineTargetBuilder(targetGrouping, refine.getName());
         if (lookedUpBuilder instanceof LeafSchemaNodeBuilder) {
-            result = copyLeafBuilder((LeafSchemaNodeBuilder) lookedUpBuilder);
+            result = new LeafSchemaNodeBuilder((LeafSchemaNodeBuilder) lookedUpBuilder);
         } else if (lookedUpBuilder instanceof ContainerSchemaNodeBuilder) {
-            result = copyContainerBuilder((ContainerSchemaNodeBuilder) lookedUpBuilder);
+            result = new ContainerSchemaNodeBuilder((ContainerSchemaNodeBuilder) lookedUpBuilder);
         } else if (lookedUpBuilder instanceof ListSchemaNodeBuilder) {
-            result = copyListBuilder((ListSchemaNodeBuilder) lookedUpBuilder);
+            result = new ListSchemaNodeBuilder((ListSchemaNodeBuilder) lookedUpBuilder);
         } else if (lookedUpBuilder instanceof LeafListSchemaNodeBuilder) {
-            result = copyLeafListBuilder((LeafListSchemaNodeBuilder) lookedUpBuilder);
+            result = new LeafListSchemaNodeBuilder((LeafListSchemaNodeBuilder) lookedUpBuilder);
         } else if (lookedUpBuilder instanceof ChoiceBuilder) {
-            result = copyChoiceBuilder((ChoiceBuilder) lookedUpBuilder);
+            result = new ChoiceBuilder((ChoiceBuilder) lookedUpBuilder);
         } else if (lookedUpBuilder instanceof AnyXmlBuilder) {
-            result = copyAnyXmlBuilder((AnyXmlBuilder) lookedUpBuilder);
+            result = new AnyXmlBuilder((AnyXmlBuilder) lookedUpBuilder);
         } else if (lookedUpBuilder instanceof GroupingBuilder) {
-            result = copyGroupingBuilder((GroupingBuilder) lookedUpBuilder);
+            result = new GroupingBuilderImpl((GroupingBuilder) lookedUpBuilder);
         } else if (lookedUpBuilder instanceof TypeDefinitionBuilder) {
-            result = copyTypedefBuilder((TypeDefinitionBuilderImpl) lookedUpBuilder);
+            result = new TypeDefinitionBuilderImpl((TypeDefinitionBuilder) lookedUpBuilder);
         } else {
             throw new YangParseException(moduleName, refine.getLine(), "Target '" + refine.getName()
                     + "' can not be refined");
@@ -368,10 +369,10 @@ public class RefineUtils {
             }
         }
 
-        Boolean config = refine.isConfig();
+        Boolean config = refine.isConfiguration();
         if (config != null) {
             try {
-                Method method = cls.getDeclaredMethod("setConfiguration", Boolean.TYPE);
+                Method method = cls.getDeclaredMethod("setConfiguration", Boolean.class);
                 method.invoke(node, config);
             } catch (Exception e) {
                 throw new YangParseException(line, "Cannot refine config in " + cls.getName(), e);

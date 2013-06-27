@@ -17,15 +17,15 @@ import org.opendaylight.controller.yang.parser.util.RefineHolder;
 /**
  * Interface for builders of 'uses' statement.
  */
-public interface UsesNodeBuilder extends Builder {
+public interface UsesNodeBuilder extends GroupingMember, Builder {
+
+    DataNodeContainerBuilder getParent();
 
     String getGroupingName();
 
+    SchemaPath getGroupingPath();
+
     void setGroupingPath(SchemaPath groupingPath);
-
-    SchemaPath getPath();
-
-    void setPath(SchemaPath path);
 
     Set<AugmentationSchemaBuilder> getAugmentations();
 

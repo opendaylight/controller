@@ -19,9 +19,12 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 
-public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder implements DataSchemaNodeBuilder {
+public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder implements DataSchemaNodeBuilder,
+        GroupingMember, ConfigNode {
     private boolean isBuilt;
     private final LeafListSchemaNodeImpl instance;
     private final int line;
@@ -35,16 +38,39 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder im
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     // DataSchemaNode args
     private boolean augmenting;
-    private boolean configuration;
+    private boolean addedByUses;
+    private Boolean configuration;
     private final ConstraintsBuilder constraints;
     // LeafListSchemaNode args
     private boolean userOrdered;
 
-    public LeafListSchemaNodeBuilder(final QName qname, final int line) {
+    public LeafListSchemaNodeBuilder(final QName qname, final SchemaPath schemaPath, final int line) {
         this.qname = qname;
+        this.schemaPath = schemaPath;
         this.line = line;
         instance = new LeafListSchemaNodeImpl(qname);
         constraints = new ConstraintsBuilder(line);
+    }
+
+    public LeafListSchemaNodeBuilder(final LeafListSchemaNodeBuilder b) {
+        qname = b.getQName();
+        line = b.getLine();
+        instance = new LeafListSchemaNodeImpl(qname);
+
+        type = b.getType();
+        typedef = b.getTypedef();
+
+        constraints = b.getConstraints();
+        schemaPath = b.getPath();
+        description = b.getDescription();
+        reference = b.getReference();
+        status = b.getStatus();
+        augmenting = b.isAugmenting();
+        addedByUses = b.isAddedByUses();
+        configuration = b.isConfiguration();
+        userOrdered = b.isUserOrdered();
+        unknownNodes = b.unknownNodes;
+        addedUnknownNodes.addAll(b.getUnknownNodes());
     }
 
     @Override
@@ -56,6 +82,7 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder im
             instance.setReference(reference);
             instance.setStatus(status);
             instance.setAugmenting(augmenting);
+            instance.setAddedByUses(addedByUses);
             instance.setConfiguration(configuration);
             instance.setUserOrdered(userOrdered);
 
@@ -136,12 +163,22 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder im
         this.augmenting = augmenting;
     }
 
-    public boolean isConfiguration() {
+    @Override
+    public boolean isAddedByUses() {
+        return addedByUses;
+    }
+
+    @Override
+    public void setAddedByUses(final boolean addedByUses) {
+        this.addedByUses = addedByUses;
+    }
+
+    public Boolean isConfiguration() {
         return configuration;
     }
 
     @Override
-    public void setConfiguration(boolean configuration) {
+    public void setConfiguration(Boolean configuration) {
         this.configuration = configuration;
     }
 
@@ -178,6 +215,7 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder im
         private String reference;
         private Status status = Status.CURRENT;
         private boolean augmenting;
+        private boolean addedByUses;
         private boolean configuration;
         private ConstraintDefinition constraintsDef;
         private TypeDefinition<?> type;
@@ -236,6 +274,15 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder im
 
         private void setAugmenting(boolean augmenting) {
             this.augmenting = augmenting;
+        }
+
+        @Override
+        public boolean isAddedByUses() {
+            return addedByUses;
+        }
+
+        private void setAddedByUses(final boolean addedByUses) {
+            this.addedByUses = addedByUses;
         }
 
         @Override
