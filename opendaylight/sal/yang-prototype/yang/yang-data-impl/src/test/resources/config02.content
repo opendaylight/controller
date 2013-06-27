@@ -1,0 +1,73 @@
+xmlDoc.network(xmlns: 'urn:opendaylight:controller:network') {
+    topologies {
+      topology {
+        'topology-id'('topId_'+cnt.get())
+        
+        types()
+        nodes {
+          node {
+            'node-id'('nodeId_'+cnt.get())
+            'supporting-ne'('networkId_'+cnt.get())
+            'termination-points' {
+              'termination-point' {
+                'tp-id'('tpId_'+cnt.get())
+              }
+            }
+          }
+          node {
+            'node-id'('nodeId_'+cnt.get())
+            'supporting-ne'('networkId_'+cnt.get())
+            'termination-points' {
+              'termination-point' {
+                'tp-id'('tpId_'+cnt.get())
+              }
+            }
+          }
+          node {
+            'node-id'('nodeId_'+cnt.get())
+            'supporting-ne'('networkId_'+cnt.get())
+            'termination-points' {
+              'termination-point' {
+                'tp-id'('tpId_'+cnt.get())
+              }
+              'termination-point' {
+                'tp-id'('tpId_'+cnt.get())
+              }
+            }
+          }
+        }
+        links {
+          link {
+            'link-id'('linkId_'+cnt.get())
+            source {
+              'source-node'('nodeId_'+cnt.get())
+              'source-tp'('tpId_'+cnt.get(false))
+            }
+            destination {
+              'dest-node'('nodeId_'+cnt.get())
+              'dest-tp'('tpId_'+cnt.get(false))
+            }
+          }
+          link {
+            'link-id'('linkId_'+cnt.get())
+            source {
+              'source-node'('nodeId_'+cnt.get())
+              'source-tp'('tpId_'+cnt.get(false))
+            }
+            destination {
+              'dest-node'('nodeId_'+cnt.get())
+              'dest-tp'('tpId_'+cnt.get(false))
+            }
+          }
+        }
+      }
+    }
+    'network-elements' {
+      'network-element' {
+        'element-id'('ntElementId_'+cnt.get())
+      }
+      'network-element' {
+        'element-id'('ntElementId_'+cnt.get())
+      }
+    }
+  }
