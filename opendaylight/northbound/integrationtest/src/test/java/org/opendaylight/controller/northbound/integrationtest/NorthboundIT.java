@@ -24,7 +24,11 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -34,10 +38,17 @@ import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONTokener;
 
 import org.opendaylight.controller.hosttracker.IfIptoHost;
+import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.controller.sal.core.Latency;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
+import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.usermanager.IUserManager;
 
@@ -49,6 +60,9 @@ public class NorthboundIT {
     private BundleContext bc;
     private IUserManager users = null;
     private IInventoryListener invtoryListener = null;
+    private IListenTopoUpdates topoUpdates = null;
+
+    private Boolean debugMsg = false;
 
     private String stateToString(int state) {
         switch (state) {
@@ -73,20 +87,17 @@ public class NorthboundIT {
         for (int i = 0; i < b.length; i++) {
             int state = b[i].getState();
             if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
-                log.debug("Bundle:" + b[i].getSymbolicName() + " state:"
-                        + stateToString(state));
+                log.debug("Bundle:" + b[i].getSymbolicName() + " state:" + stateToString(state));
                 debugit = true;
             }
         }
         if (debugit) {
-            log.debug("Do some debugging because some bundle is "
-                    + "unresolved");
+            log.debug("Do some debugging because some bundle is " + "unresolved");
         }
         // Assert if true, if false we are good to go!
         assertFalse(debugit);
 
-        ServiceReference r = bc.getServiceReference(IUserManager.class
-                .getName());
+        ServiceReference r = bc.getServiceReference(IUserManager.class.getName());
         if (r != null) {
             this.users = (IUserManager) bc.getService(r);
         }
@@ -100,6 +111,14 @@ public class NorthboundIT {
 
         // If inventoryListener is null, cannot run hosttracker tests.
         assertNotNull(this.invtoryListener);
+
+        r = bc.getServiceReference(IListenTopoUpdates.class.getName());
+        if (r != null) {
+            this.topoUpdates = (IListenTopoUpdates) bc.getService(r);
+        }
+
+        // If topologyManager is null, cannot run topology North tests.
+        assertNotNull(this.topoUpdates);
 
     }
 
@@ -118,6 +137,12 @@ public class NorthboundIT {
         // initialize response code to indicate error
         httpResponseCode = 400;
 
+        if (debugMsg) {
+            System.out.println("HTTP method: " + method + " url: " + restUrl.toString());
+            if (body != null)
+                System.out.println("body: " + body);
+        }
+
         try {
             URL url = new URL(restUrl);
             this.users.getAuthorizationList();
@@ -126,18 +151,15 @@ public class NorthboundIT {
             byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
             String authStringEnc = new String(authEncBytes);
 
-            HttpURLConnection connection = (HttpURLConnection) url
-                    .openConnection();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod(method);
-            connection.setRequestProperty("Authorization", "Basic "
-                    + authStringEnc);
+            connection.setRequestProperty("Authorization", "Basic " + authStringEnc);
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Accept", "application/json");
 
             if (body != null) {
                 connection.setDoOutput(true);
-                OutputStreamWriter wr = new OutputStreamWriter(
-                        connection.getOutputStream());
+                OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
                 wr.write(body);
                 wr.flush();
             }
@@ -149,9 +171,13 @@ public class NorthboundIT {
             if (httpResponseCode > 299)
                 return httpResponseCode.toString();
 
+            if (debugMsg) {
+                System.out.println("HTTP response code: " + connection.getResponseCode());
+                System.out.println("HTTP response message: " + connection.getResponseMessage());
+            }
+
             InputStream is = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is,
-                    Charset.forName("UTF-8")));
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
             StringBuilder sb = new StringBuilder();
             int cp;
             while ((cp = rd.read()) != -1) {
@@ -165,10 +191,9 @@ public class NorthboundIT {
         }
     }
 
-    private void testNodeProperties(JSONObject node, Integer nodeId,
-            String nodeType, Integer timestamp, String timestampName,
-            Integer actionsValue, Integer capabilitiesValue,
-            Integer tablesValue, Integer buffersValue) throws JSONException {
+    private void testNodeProperties(JSONObject node, Integer nodeId, String nodeType, Integer timestamp,
+            String timestampName, Integer actionsValue, Integer capabilitiesValue, Integer tablesValue,
+            Integer buffersValue) throws JSONException {
 
         JSONObject nodeInfo = node.getJSONObject("node");
         Assert.assertEquals(nodeId, (Integer) nodeInfo.getInt("@id"));
@@ -179,51 +204,39 @@ public class NorthboundIT {
         if (timestamp == null || timestampName == null) {
             Assert.assertFalse(properties.has("timeStamp"));
         } else {
-            Assert.assertEquals(
-                    timestamp,
-                    (Integer) properties.getJSONObject("timeStamp").getInt(
-                            "timestamp"));
-            Assert.assertEquals(
-                    timestampName,
-                    properties.getJSONObject("timeStamp").getString(
-                            "timestampName"));
+            Assert.assertEquals(timestamp, (Integer) properties.getJSONObject("timeStamp").getInt("timestamp"));
+            Assert.assertEquals(timestampName, properties.getJSONObject("timeStamp").getString("timestampName"));
         }
         if (actionsValue == null) {
             Assert.assertFalse(properties.has("actions"));
         } else {
-            Assert.assertEquals(actionsValue, (Integer) properties
-                    .getJSONObject("actions").getInt("actionsValue"));
+            Assert.assertEquals(actionsValue, (Integer) properties.getJSONObject("actions").getInt("actionsValue"));
         }
         if (capabilitiesValue == null) {
             Assert.assertFalse(properties.has("capabilities"));
         } else {
-            Assert.assertEquals(capabilitiesValue, (Integer) properties
-                    .getJSONObject("capabilities").getInt("capabilitiesValue"));
+            Assert.assertEquals(capabilitiesValue,
+                    (Integer) properties.getJSONObject("capabilities").getInt("capabilitiesValue"));
         }
         if (tablesValue == null) {
             Assert.assertFalse(properties.has("tables"));
         } else {
-            Assert.assertEquals(tablesValue, (Integer) properties
-                    .getJSONObject("tables").getInt("tablesValue"));
+            Assert.assertEquals(tablesValue, (Integer) properties.getJSONObject("tables").getInt("tablesValue"));
         }
         if (buffersValue == null) {
             Assert.assertFalse(properties.has("buffers"));
         } else {
-            Assert.assertEquals(buffersValue, (Integer) properties
-                    .getJSONObject("buffers").getInt("buffersValue"));
+            Assert.assertEquals(buffersValue, (Integer) properties.getJSONObject("buffers").getInt("buffersValue"));
         }
     }
 
-    private void testNodeConnectorProperties(
-            JSONObject nodeConnectorProperties, Integer ncId, String ncType,
-            Integer nodeId, String nodeType, Integer state,
-            Integer capabilities, Integer bandwidth) throws JSONException {
+    private void testNodeConnectorProperties(JSONObject nodeConnectorProperties, Integer ncId, String ncType,
+            Integer nodeId, String nodeType, Integer state, Integer capabilities, Integer bandwidth)
+            throws JSONException {
 
-        JSONObject nodeConnector = nodeConnectorProperties
-                .getJSONObject("nodeconnector");
+        JSONObject nodeConnector = nodeConnectorProperties.getJSONObject("nodeconnector");
         JSONObject node = nodeConnector.getJSONObject("node");
-        JSONObject properties = nodeConnectorProperties
-                .getJSONObject("properties");
+        JSONObject properties = nodeConnectorProperties.getJSONObject("properties");
 
         Assert.assertEquals(ncId, (Integer) nodeConnector.getInt("@id"));
         Assert.assertEquals(ncType, nodeConnector.getString("@type"));
@@ -232,30 +245,25 @@ public class NorthboundIT {
         if (state == null) {
             Assert.assertFalse(properties.has("state"));
         } else {
-            Assert.assertEquals(
-                    state,
-                    (Integer) properties.getJSONObject("state").getInt(
-                            "stateValue"));
+            Assert.assertEquals(state, (Integer) properties.getJSONObject("state").getInt("stateValue"));
         }
         if (capabilities == null) {
             Assert.assertFalse(properties.has("capabilities"));
         } else {
-            Assert.assertEquals(capabilities, (Integer) properties
-                    .getJSONObject("capabilities").getInt("capabilitiesValue"));
+            Assert.assertEquals(capabilities,
+                    (Integer) properties.getJSONObject("capabilities").getInt("capabilitiesValue"));
         }
         if (bandwidth == null) {
             Assert.assertFalse(properties.has("bandwidth"));
         } else {
-            Assert.assertEquals(
-                    bandwidth,
-                    (Integer) properties.getJSONObject("bandwidth").getInt(
-                            "bandwidthValue"));
+            Assert.assertEquals(bandwidth, (Integer) properties.getJSONObject("bandwidth").getInt("bandwidthValue"));
         }
 
     }
 
     @Test
     public void testSubnetsNorthbound() throws JSONException {
+        System.out.println("Starting Subnets JAXB client.");
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/subnet/";
 
         String name1 = "testSubnet1";
@@ -274,10 +282,8 @@ public class NorthboundIT {
         Assert.assertEquals(404, httpResponseCode.intValue());
 
         // Test POST subnet1
-        String queryParameter = new QueryParameter("subnetName", name1).add(
-                "subnet", subnet1).getString();
-        result = getJsonResult(baseURL + "default/" + name1 + queryParameter,
-                "POST");
+        String queryParameter = new QueryParameter("subnetName", name1).add("subnet", subnet1).getString();
+        result = getJsonResult(baseURL + "default/" + name1 + queryParameter, "POST");
         Assert.assertEquals(201, httpResponseCode.intValue());
 
         // Test GET subnet1
@@ -289,10 +295,8 @@ public class NorthboundIT {
         Assert.assertEquals(subnet1, json.getString("@subnet"));
 
         // Test POST subnet2
-        queryParameter = new QueryParameter("subnetName", name2).add("subnet",
-                subnet2).getString();
-        result = getJsonResult(baseURL + "default/" + name2 + queryParameter,
-                "POST");
+        queryParameter = new QueryParameter("subnetName", name2).add("subnet", subnet2).getString();
+        result = getJsonResult(baseURL + "default/" + name2 + queryParameter, "POST");
         Assert.assertEquals(201, httpResponseCode.intValue());
 
         // Test GET all subnets in default container
@@ -326,6 +330,7 @@ public class NorthboundIT {
 
     @Test
     public void testStaticRoutingNorthbound() throws JSONException {
+        System.out.println("Starting StaticRouting JAXB client.");
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/staticroute/";
 
         String name1 = "testRoute1";
@@ -342,16 +347,13 @@ public class NorthboundIT {
         Assert.assertEquals("{}", result);
 
         // Test insert static route
-        String requestBody = "{\"name\":\"" + name1 + "\", \"prefix\":\""
-                + prefix1 + "\", \"nextHop\":\"" + nextHop1 + "\"}";
-        result = getJsonResult(baseURL + "default/" + name1, "POST",
-                requestBody);
+        String requestBody = "{\"name\":\"" + name1 + "\", \"prefix\":\"" + prefix1 + "\", \"nextHop\":\"" + nextHop1
+                + "\"}";
+        result = getJsonResult(baseURL + "default/" + name1, "POST", requestBody);
         Assert.assertEquals(201, httpResponseCode.intValue());
 
-        requestBody = "{\"name\":\"" + name2 + "\", \"prefix\":\"" + prefix2
-                + "\", \"nextHop\":\"" + nextHop2 + "\"}";
-        result = getJsonResult(baseURL + "default/" + name2, "POST",
-                requestBody);
+        requestBody = "{\"name\":\"" + name2 + "\", \"prefix\":\"" + prefix2 + "\", \"nextHop\":\"" + nextHop2 + "\"}";
+        result = getJsonResult(baseURL + "default/" + name2, "POST", requestBody);
         Assert.assertEquals(201, httpResponseCode.intValue());
 
         // Test Get all static routes
@@ -406,6 +408,7 @@ public class NorthboundIT {
 
     @Test
     public void testSwitchManager() throws JSONException {
+        System.out.println("Starting SwitchManager JAXB client.");
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/switch/default/";
 
         // define Node/NodeConnector attributes for test
@@ -436,22 +439,19 @@ public class NorthboundIT {
         // Test for first node
         JSONObject node = getJsonInstance(json, "nodeProperties", nodeId_1);
         Assert.assertNotNull(node);
-        testNodeProperties(node, nodeId_1, nodeType, timestamp_1,
-                timestampName_1, actionsValue_1, capabilitiesValue_1,
+        testNodeProperties(node, nodeId_1, nodeType, timestamp_1, timestampName_1, actionsValue_1, capabilitiesValue_1,
                 tablesValue_1, buffersValue_1);
 
         // Test 2nd node, properties of 2nd node same as first node
         node = getJsonInstance(json, "nodeProperties", nodeId_2);
         Assert.assertNotNull(node);
-        testNodeProperties(node, nodeId_2, nodeType, timestamp_1,
-                timestampName_1, actionsValue_1, capabilitiesValue_1,
+        testNodeProperties(node, nodeId_2, nodeType, timestamp_1, timestampName_1, actionsValue_1, capabilitiesValue_1,
                 tablesValue_1, buffersValue_1);
 
         // Test 3rd node, properties of 3rd node same as first node
         node = getJsonInstance(json, "nodeProperties", nodeId_3);
         Assert.assertNotNull(node);
-        testNodeProperties(node, nodeId_3, nodeType, timestamp_1,
-                timestampName_1, actionsValue_1, capabilitiesValue_1,
+        testNodeProperties(node, nodeId_3, nodeType, timestamp_1, timestampName_1, actionsValue_1, capabilitiesValue_1,
                 tablesValue_1, buffersValue_1);
 
         // Test GET nodeConnectors of a node
@@ -459,12 +459,10 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
-        JSONObject nodeConnectorProperties = json
-                .getJSONObject("nodeConnectorProperties");
+        JSONObject nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
 
-        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1,
-                ncType, nodeId_1, nodeType, ncState, ncCapabilities,
-                ncBandwidth);
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1, ncType, nodeId_1, nodeType, ncState,
+                ncCapabilities, ncBandwidth);
 
         // Test second node
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
@@ -472,9 +470,8 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
 
-        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_2,
-                ncType, nodeId_2, nodeType, ncState, ncCapabilities,
-                ncBandwidth);
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_2, ncType, nodeId_2, nodeType, ncState,
+                ncCapabilities, ncBandwidth);
 
         // Test third node
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_3);
@@ -482,14 +479,12 @@ public class NorthboundIT {
         json = new JSONObject(jt);
 
         nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
-        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_3,
-                ncType, nodeId_3, nodeType, ncState, ncCapabilities,
-                ncBandwidth);
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_3, ncType, nodeId_3, nodeType, ncState,
+                ncCapabilities, ncBandwidth);
 
         // Test delete node property
         // Delete timestamp property from node1
-        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
-                + "/property/timeStamp", "DELETE");
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1 + "/property/timeStamp", "DELETE");
         Assert.assertEquals(200, httpResponseCode.intValue());
 
         // Check node1
@@ -498,13 +493,11 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         node = getJsonInstance(json, "nodeProperties", nodeId_1);
         Assert.assertNotNull(node);
-        testNodeProperties(node, nodeId_1, nodeType, null, null,
-                actionsValue_1, capabilitiesValue_1, tablesValue_1,
+        testNodeProperties(node, nodeId_1, nodeType, null, null, actionsValue_1, capabilitiesValue_1, tablesValue_1,
                 buffersValue_1);
 
         // Delete actions property from node2
-        result = getJsonResult(baseURL + "node/STUB/" + nodeId_2
-                + "/property/actions", "DELETE");
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_2 + "/property/actions", "DELETE");
         Assert.assertEquals(200, httpResponseCode.intValue());
 
         // Check node2
@@ -513,17 +506,14 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         node = getJsonInstance(json, "nodeProperties", nodeId_2);
         Assert.assertNotNull(node);
-        testNodeProperties(node, nodeId_2, nodeType, timestamp_1,
-                timestampName_1, null, capabilitiesValue_1, tablesValue_1,
-                buffersValue_1);
+        testNodeProperties(node, nodeId_2, nodeType, timestamp_1, timestampName_1, null, capabilitiesValue_1,
+                tablesValue_1, buffersValue_1);
 
         // Test add property to node
         // Add Tier and Bandwidth property to node1
-        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
-                + "/property/tier/1001", "PUT");
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1 + "/property/tier/1001", "PUT");
         Assert.assertEquals(201, httpResponseCode.intValue());
-        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1
-                + "/property/bandwidth/1002", "PUT");
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1 + "/property/bandwidth/1002", "PUT");
         Assert.assertEquals(201, httpResponseCode.intValue());
 
         // Test for first node
@@ -532,15 +522,13 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         node = getJsonInstance(json, "nodeProperties", nodeId_1);
         Assert.assertNotNull(node);
-        Assert.assertEquals(1001, node.getJSONObject("properties")
-                .getJSONObject("tier").getInt("tierValue"));
-        Assert.assertEquals(1002, node.getJSONObject("properties")
-                .getJSONObject("bandwidth").getInt("bandwidthValue"));
+        Assert.assertEquals(1001, node.getJSONObject("properties").getJSONObject("tier").getInt("tierValue"));
+        Assert.assertEquals(1002, node.getJSONObject("properties").getJSONObject("bandwidth").getInt("bandwidthValue"));
 
         // Test delete nodeConnector property
         // Delete state property of nodeconnector1
-        result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_1
-                + "/STUB/" + nodeConnectorId_1 + "/property/state", "DELETE");
+        result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_1 + "/STUB/" + nodeConnectorId_1
+                + "/property/state", "DELETE");
         Assert.assertEquals(200, httpResponseCode.intValue());
 
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
@@ -548,13 +536,12 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
 
-        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1,
-                ncType, nodeId_1, nodeType, null, ncCapabilities, ncBandwidth);
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1, ncType, nodeId_1, nodeType, null,
+                ncCapabilities, ncBandwidth);
 
         // Delete capabilities property of nodeconnector2
-        result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_2
-                + "/STUB/" + nodeConnectorId_2 + "/property/capabilities",
-                "DELETE");
+        result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_2 + "/STUB/" + nodeConnectorId_2
+                + "/property/capabilities", "DELETE");
         Assert.assertEquals(200, httpResponseCode.intValue());
 
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
@@ -562,16 +549,15 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
 
-        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_2,
-                ncType, nodeId_2, nodeType, ncState, null, ncBandwidth);
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_2, ncType, nodeId_2, nodeType, ncState,
+                null, ncBandwidth);
 
         // Test PUT nodeConnector property
         int newBandwidth = 1001;
 
         // Add Name/Bandwidth property to nodeConnector1
-        result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_1
-                + "/STUB/" + nodeConnectorId_1 + "/property/bandwidth/"
-                + newBandwidth, "PUT");
+        result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_1 + "/STUB/" + nodeConnectorId_1
+                + "/property/bandwidth/" + newBandwidth, "PUT");
         Assert.assertEquals(201, httpResponseCode.intValue());
 
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
@@ -581,18 +567,16 @@ public class NorthboundIT {
 
         // Check for new bandwidth value, state value removed from previous
         // test
-        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1,
-                ncType, nodeId_1, nodeType, null, ncCapabilities, newBandwidth);
+        testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1, ncType, nodeId_1, nodeType, null,
+                ncCapabilities, newBandwidth);
 
     }
 
     @Test
     public void testStatistics() throws JSONException {
-        String actionTypes[] = { "drop", "loopback", "flood", "floodAll",
-                "controller", "swPath", "hwPath", "output", "setDlSrc",
-                "setDlDst", "setDlType", "setVlanId", "setVlanPcp",
-                "setVlanCfi", "popVlan", "pushVlan", "setNwSrc", "setNwDst",
-                "setNwTos", "setTpSrc", "setTpDst" };
+        String actionTypes[] = { "drop", "loopback", "flood", "floodAll", "controller", "swPath", "hwPath", "output",
+                "setDlSrc", "setDlDst", "setDlType", "setVlanId", "setVlanPcp", "setVlanCfi", "popVlan", "pushVlan",
+                "setNwSrc", "setNwDst", "setNwTos", "setTpSrc", "setTpDst" };
         System.out.println("Starting Statistics JAXB client.");
 
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/statistics/default/";
@@ -600,8 +584,7 @@ public class NorthboundIT {
         String result = getJsonResult(baseURL + "flowstats");
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
-        JSONObject flowStatistics = getJsonInstance(json, "flowStatistics",
-                0xCAFE);
+        JSONObject flowStatistics = getJsonInstance(json, "flowStatistics", 0xCAFE);
         JSONObject node = flowStatistics.getJSONObject("node");
         // test that node was returned properly
         Assert.assertTrue(node.getInt("@id") == 0xCAFE);
@@ -620,8 +603,7 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "portstats");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
-        JSONObject portStatistics = getJsonInstance(json, "portStatistics",
-                0xCAFE);
+        JSONObject portStatistics = getJsonInstance(json, "portStatistics", 0xCAFE);
         JSONObject node2 = portStatistics.getJSONObject("node");
         // test that node was returned properly
         Assert.assertTrue(node2.getInt("@id") == 0xCAFE);
@@ -682,8 +664,7 @@ public class NorthboundIT {
         Assert.assertTrue(portStat.getInt("collisionCount") == 4);
     }
 
-    private void testFlowStat(JSONObject flowStat, String actionType)
-            throws JSONException {
+    private void testFlowStat(JSONObject flowStat, String actionType) throws JSONException {
         Assert.assertTrue(flowStat.getInt("tableId") == 1);
         Assert.assertTrue(flowStat.getInt("durationSeconds") == 40);
         Assert.assertTrue(flowStat.getInt("durationNanoseconds") == 400);
@@ -697,8 +678,7 @@ public class NorthboundIT {
         Assert.assertTrue(flow.getInt("hardTimeout") == 2000);
         Assert.assertTrue(flow.getInt("id") == 12345);
 
-        JSONObject match = (flow.getJSONObject("match")
-                .getJSONObject("matchField"));
+        JSONObject match = (flow.getJSONObject("match").getJSONObject("matchField"));
         Assert.assertTrue(match.getString("type").equals("NW_DST"));
         Assert.assertTrue(match.getString("value").equals("1.1.1.1"));
 
@@ -715,8 +695,7 @@ public class NorthboundIT {
         }
 
         if (act.getString("@type").equals("setDlSrc")) {
-            byte srcMatch[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2,
-                    (byte) 1 };
+            byte srcMatch[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1 };
             String src = act.getString("address");
             byte srcBytes[] = new byte[5];
             srcBytes[0] = Byte.parseByte(src.substring(0, 2));
@@ -728,8 +707,7 @@ public class NorthboundIT {
         }
 
         if (act.getString("@type").equals("setDlDst")) {
-            byte dstMatch[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4,
-                    (byte) 5 };
+            byte dstMatch[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5 };
             String dst = act.getString("address");
             byte dstBytes[] = new byte[5];
             dstBytes[0] = Byte.parseByte(dst.substring(0, 2));
@@ -775,6 +753,7 @@ public class NorthboundIT {
 
     @Test
     public void testFlowProgrammer() throws JSONException {
+        System.out.println("Starting FlowProgrammer JAXB client.");
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/flow/default/";
         // Attempt to get a flow that doesn't exit. Should return 404
         // status.
@@ -844,8 +823,7 @@ public class NorthboundIT {
     // This is specifically written for statistics manager northbound REST
     // interface
     // array_name should be either "flowStatistics" or "portStatistics"
-    private JSONObject getJsonInstance(JSONObject json, String array_name,
-            Integer nodeId) throws JSONException {
+    private JSONObject getJsonInstance(JSONObject json, String array_name, Integer nodeId) throws JSONException {
         JSONObject result = null;
         if (json.get(array_name) instanceof JSONArray) {
             JSONArray json_array = json.getJSONArray(array_name);
@@ -914,28 +892,20 @@ public class NorthboundIT {
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/host/default";
 
         // test POST method: addHost()
-        String queryParameter = new QueryParameter("dataLayerAddress",
-                dataLayerAddress_1).add("nodeType", nodeType_1)
-                .add("nodeId", nodeId_1.toString())
-                .add("nodeConnectorType", nodeConnectorType_1)
-                .add("nodeConnectorId", nodeConnectorId_1.toString())
-                .add("vlan", vlan_1).getString();
+        String queryParameter = new QueryParameter("dataLayerAddress", dataLayerAddress_1).add("nodeType", nodeType_1)
+                .add("nodeId", nodeId_1.toString()).add("nodeConnectorType", nodeConnectorType_1)
+                .add("nodeConnectorId", nodeConnectorId_1.toString()).add("vlan", vlan_1).getString();
 
-        String result = getJsonResult(baseURL + "/" + networkAddress_1
-                + queryParameter, "POST");
+        String result = getJsonResult(baseURL + "/" + networkAddress_1 + queryParameter, "POST");
         Assert.assertTrue(httpResponseCode.intValue() == (Integer) 201);
 
         // vlan is not passed through query parameter but should be
         // defaulted to "0"
-        queryParameter = new QueryParameter("dataLayerAddress",
-                dataLayerAddress_2).add("nodeType", nodeType_2)
-                .add("nodeId", nodeId_2.toString())
-                .add("nodeConnectorType", nodeConnectorType_2)
-                .add("nodeConnectorId", nodeConnectorId_2.toString())
-                .getString();
+        queryParameter = new QueryParameter("dataLayerAddress", dataLayerAddress_2).add("nodeType", nodeType_2)
+                .add("nodeId", nodeId_2.toString()).add("nodeConnectorType", nodeConnectorType_2)
+                .add("nodeConnectorId", nodeConnectorId_2.toString()).getString();
 
-        result = getJsonResult(baseURL + "/" + networkAddress_2
-                + queryParameter, "POST");
+        result = getJsonResult(baseURL + "/" + networkAddress_2 + queryParameter, "POST");
         Assert.assertTrue(httpResponseCode.intValue() == (Integer) 201);
 
         // define variables for decoding returned strings
@@ -963,27 +933,19 @@ public class NorthboundIT {
 
             networkAddress = host_jo.getString("networkAddress");
             if (networkAddress.equalsIgnoreCase(networkAddress_1)) {
-                Assert.assertTrue(dl_jo.getString("macAddress")
-                        .equalsIgnoreCase(dataLayerAddress_1));
-                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(
-                        nodeConnectorType_1));
+                Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_1));
+                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_1));
                 Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
-                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(
-                        nodeType_1));
+                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(nodeType_1));
                 Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
-                Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(
-                        vlan_1));
+                Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(vlan_1));
             } else if (networkAddress.equalsIgnoreCase(networkAddress_2)) {
-                Assert.assertTrue(dl_jo.getString("macAddress")
-                        .equalsIgnoreCase(dataLayerAddress_2));
-                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(
-                        nodeConnectorType_2));
+                Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_2));
+                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_2));
                 Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_2);
-                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(
-                        nodeType_2));
+                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(nodeType_2));
                 Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_2);
-                Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(
-                        vlan_2));
+                Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(vlan_2));
             } else {
                 Assert.assertTrue(false);
             }
@@ -1004,8 +966,7 @@ public class NorthboundIT {
         try {
             nd = new Node(nodeType_1, nodeId_1);
             ndc = new NodeConnector(nodeConnectorType_1, nodeConnectorId_1, nd);
-            this.invtoryListener.notifyNodeConnector(ndc, UpdateType.ADDED,
-                    null);
+            this.invtoryListener.notifyNodeConnector(ndc, UpdateType.ADDED, null);
         } catch (ConstructionException e) {
             ndc = null;
             nd = null;
@@ -1035,15 +996,11 @@ public class NorthboundIT {
         nc_jo = json.getJSONObject("nodeConnector");
         node_jo = nc_jo.getJSONObject("node");
 
-        Assert.assertTrue(json.getString("networkAddress").equalsIgnoreCase(
-                networkAddress_1));
-        Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(
-                dataLayerAddress_1));
-        Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(
-                nodeConnectorType_1));
+        Assert.assertTrue(json.getString("networkAddress").equalsIgnoreCase(networkAddress_1));
+        Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_1));
+        Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_1));
         Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
-        Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(
-                nodeType_1));
+        Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(nodeType_1));
         Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
         Assert.assertTrue(json.getString("vlan").equalsIgnoreCase(vlan_1));
 
@@ -1065,8 +1022,7 @@ public class NorthboundIT {
 
     }
 
-    private Boolean hostInJson(JSONObject json, String hostIp)
-            throws JSONException {
+    private Boolean hostInJson(JSONObject json, String hostIp) throws JSONException {
         // input JSONObject may be empty
         if (json.length() == 0) {
             return false;
@@ -1085,19 +1041,202 @@ public class NorthboundIT {
         }
     }
 
+    @Test
+    public void testTopology() throws JSONException, ConstructionException {
+        System.out.println("Starting Topology JAXB client.");
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/topology/default";
+
+        // === test GET method for getTopology()
+        short state_1 = State.EDGE_UP, state_2 = State.EDGE_DOWN;
+        long bw_1 = Bandwidth.BW10Gbps, bw_2 = Bandwidth.BW100Mbps;
+        long lat_1 = Latency.LATENCY100ns, lat_2 = Latency.LATENCY1ms;
+        String nodeType = "STUB";
+        String nodeConnType = "STUB";
+        int headNC1_nodeId = 1, headNC1_nodeConnId = 11;
+        int tailNC1_nodeId = 2, tailNC1_nodeConnId = 22;
+        int headNC2_nodeId = 2, headNC2_nodeConnId = 21;
+        int tailNC2_nodeId = 1, tailNC2_nodeConnId = 12;
+
+        List<TopoEdgeUpdate> topoedgeupdateList = new ArrayList<TopoEdgeUpdate>();
+        NodeConnector headnc1 = new NodeConnector(nodeConnType, headNC1_nodeConnId, new Node(nodeType, headNC1_nodeId));
+        NodeConnector tailnc1 = new NodeConnector(nodeConnType, tailNC1_nodeConnId, new Node(nodeType, tailNC1_nodeId));
+        Edge e1 = new Edge(tailnc1, headnc1);
+        Set<Property> props_1 = new HashSet<Property>();
+        props_1.add(new State(state_1));
+        props_1.add(new Bandwidth(bw_1));
+        props_1.add(new Latency(lat_1));
+        TopoEdgeUpdate teu1 = new TopoEdgeUpdate(e1, props_1, UpdateType.ADDED);
+        topoedgeupdateList.add(teu1);
+
+        NodeConnector headnc2 = new NodeConnector(nodeConnType, headNC2_nodeConnId, new Node(nodeType, headNC2_nodeId));
+        NodeConnector tailnc2 = new NodeConnector(nodeConnType, tailNC2_nodeConnId, new Node(nodeType, tailNC2_nodeId));
+        Edge e2 = new Edge(tailnc2, headnc2);
+        Set<Property> props_2 = new HashSet<Property>();
+        props_2.add(new State(state_2));
+        props_2.add(new Bandwidth(bw_2));
+        props_2.add(new Latency(lat_2));
+
+        TopoEdgeUpdate teu2 = new TopoEdgeUpdate(e2, props_2, UpdateType.ADDED);
+        topoedgeupdateList.add(teu2);
+
+        topoUpdates.edgeUpdate(topoedgeupdateList);
+
+        // HTTP request
+        String result = getJsonResult(baseURL, "GET");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
+        if (debugMsg) {
+            System.out.println("Get Topology: " + result);
+        }
+
+        // returned data must be an array of edges
+        JSONTokener jt = new JSONTokener(result);
+        JSONObject json = new JSONObject(jt);
+        Assert.assertTrue(json.get("edgeProperties") instanceof JSONArray);
+        JSONArray ja = json.getJSONArray("edgeProperties");
+
+        for (int i = 0; i < ja.length(); i++) {
+            JSONObject edgeProp = ja.getJSONObject(i);
+            JSONObject edge = edgeProp.getJSONObject("edge");
+            JSONObject tailNC = edge.getJSONObject("tailNodeConnector");
+            JSONObject tailNode = tailNC.getJSONObject("node");
+
+            JSONObject headNC = edge.getJSONObject("headNodeConnector");
+            JSONObject headNode = headNC.getJSONObject("node");
+            JSONObject Props = edgeProp.getJSONObject("properties");
+            JSONObject bandw = Props.getJSONObject("bandwidth");
+            JSONObject stt = Props.getJSONObject("state");
+            JSONObject ltc = Props.getJSONObject("latency");
+
+            if (headNC.getInt("@id") == headNC1_nodeConnId) {
+                Assert.assertTrue(headNode.getString("@type").equals(nodeType));
+                Assert.assertTrue(headNode.getLong("@id") == headNC1_nodeId);
+                Assert.assertTrue(headNC.getString("@type").equals(nodeConnType));
+                Assert.assertTrue(tailNode.getString("@type").equals(nodeType));
+                Assert.assertTrue(tailNode.getString("@type").equals(nodeConnType));
+                Assert.assertTrue(tailNC.getLong("@id") == tailNC1_nodeConnId);
+                Assert.assertTrue(bandw.getLong("bandwidthValue") == bw_1);
+                Assert.assertTrue((short) stt.getInt("stateValue") == state_1);
+                Assert.assertTrue(ltc.getLong("latencyValue") == lat_1);
+            } else if (headNC.getInt("@id") == headNC2_nodeConnId) {
+                Assert.assertTrue(headNode.getString("@type").equals(nodeType));
+                Assert.assertTrue(headNode.getLong("@id") == headNC2_nodeId);
+                Assert.assertTrue(headNC.getString("@type").equals(nodeConnType));
+                Assert.assertTrue(tailNode.getString("@type").equals(nodeType));
+                Assert.assertTrue(tailNode.getInt("@id") == tailNC2_nodeId);
+                Assert.assertTrue(tailNC.getString("@type").equals(nodeConnType));
+                Assert.assertTrue(tailNC.getLong("@id") == tailNC2_nodeConnId);
+                Assert.assertTrue(bandw.getLong("bandwidthValue") == bw_2);
+                Assert.assertTrue((short) stt.getInt("stateValue") == state_2);
+                Assert.assertTrue(ltc.getLong("latencyValue") == lat_2);
+            }
+        }
+
+        // === test POST method for addUserLink()
+        // define 2 sample nodeConnectors for user link configuration tests
+        String nodeType_1 = "STUB";
+        Integer nodeId_1 = 3366;
+        String nodeConnectorType_1 = "STUB";
+        Integer nodeConnectorId_1 = 12;
+
+        String nodeType_2 = "STUB";
+        Integer nodeId_2 = 4477;
+        String nodeConnectorType_2 = "STUB";
+        Integer nodeConnectorId_2 = 34;
+
+        JSONObject jo = new JSONObject()
+                .append("name", "userLink_1")
+                .append("srcNodeConnector",
+                        nodeConnectorType_1 + "|" + nodeConnectorId_1 + "@" + nodeType_1 + "|" + nodeId_1)
+                .append("dstNodeConnector",
+                        nodeConnectorType_2 + "|" + nodeConnectorId_2 + "@" + nodeType_2 + "|" + nodeId_2);
+        // execute HTTP request and verify response code
+        result = getJsonResult(baseURL + "/userLink", "POST", jo.toString());
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 201);
+
+        // === test GET method for getUserLinks()
+        result = getJsonResult(baseURL + "/userLink", "GET");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
+        if (debugMsg) {
+            System.out.println("result:" + result);
+        }
+
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+
+        // should have at least one object returned
+        Assert.assertFalse(json.length() == 0);
+        JSONObject userlink = new JSONObject();
+
+        if (json.get("userLinks") instanceof JSONArray) {
+            ja = json.getJSONArray("userLinks");
+            int i;
+            for (i = 0; i < ja.length(); i++) {
+                userlink = ja.getJSONObject(i);
+                if (userlink.getString("name").equalsIgnoreCase("userLink_1"))
+                    break;
+            }
+            Assert.assertFalse(i == ja.length());
+        } else {
+            userlink = json.getJSONObject("userLinks");
+            Assert.assertTrue(userlink.getString("name").equalsIgnoreCase("userLink_1"));
+        }
+
+        String[] level_1, level_2;
+        level_1 = userlink.getString("srcNodeConnector").split("\\@");
+        level_2 = level_1[0].split("\\|");
+        Assert.assertTrue(level_2[0].equalsIgnoreCase(nodeConnectorType_1));
+        Assert.assertTrue(Integer.parseInt(level_2[1]) == nodeConnectorId_1);
+        level_2 = level_1[1].split("\\|");
+        Assert.assertTrue(level_2[0].equalsIgnoreCase(nodeType_1));
+        Assert.assertTrue(Integer.parseInt(level_2[1]) == nodeId_1);
+        level_1 = userlink.getString("dstNodeConnector").split("\\@");
+        level_2 = level_1[0].split("\\|");
+        Assert.assertTrue(level_2[0].equalsIgnoreCase(nodeConnectorType_2));
+        Assert.assertTrue(Integer.parseInt(level_2[1]) == nodeConnectorId_2);
+        level_2 = level_1[1].split("\\|");
+        Assert.assertTrue(level_2[0].equalsIgnoreCase(nodeType_2));
+        Assert.assertTrue(Integer.parseInt(level_2[1]) == nodeId_2);
+
+        // === test DELETE method for deleteUserLink()
+        String userName = "userLink_1";
+        result = getJsonResult(baseURL + "/userLink/" + userName, "DELETE");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
+
+        // execute another getUserLinks() request to verify that userLink_1 is
+        // removed
+        result = getJsonResult(baseURL + "/userLink", "GET");
+        Assert.assertTrue(httpResponseCode.intValue() == (Integer) 200);
+        if (debugMsg) {
+            System.out.println("result:" + result);
+        }
+        jt = new JSONTokener(result);
+        json = new JSONObject(jt);
+
+        if (json.length() != 0) {
+            if (json.get("userLinks") instanceof JSONArray) {
+                ja = json.getJSONArray("userLinks");
+                for (int i = 0; i < ja.length(); i++) {
+                    userlink = ja.getJSONObject(i);
+                    Assert.assertFalse(userlink.getString("name").equalsIgnoreCase("userLink_1"));
+                }
+            } else {
+                userlink = json.getJSONObject("userLinks");
+                Assert.assertFalse(userlink.getString("name").equalsIgnoreCase("userLink_1"));
+            }
+        }
+    }
+
     // Configure the OSGi container
     @Configuration
     public Option[] config() {
         return options(
                 //
                 systemProperty("logback.configurationFile").value(
-                        "file:" + PathUtils.getBaseDir()
-                                + "/src/test/resources/logback.xml"),
+                        "file:" + PathUtils.getBaseDir() + "/src/test/resources/logback.xml"),
                 // To start OSGi console for inspection remotely
                 systemProperty("osgi.console").value("2401"),
-                systemProperty("org.eclipse.gemini.web.tomcat.config.path")
-                        .value(PathUtils.getBaseDir()
-                                + "/src/test/resources/tomcat-server.xml"),
+                systemProperty("org.eclipse.gemini.web.tomcat.config.path").value(
+                        PathUtils.getBaseDir() + "/src/test/resources/tomcat-server.xml"),
 
                 // setting default level. Jersey bundles will need to be started
                 // earlier.
@@ -1113,90 +1252,52 @@ public class NorthboundIT {
                 mavenBundle("ch.qos.logback", "logback-core", "1.0.9"),
                 mavenBundle("ch.qos.logback", "logback-classic", "1.0.9"),
                 mavenBundle("org.apache.commons", "commons-lang3", "3.1"),
-                mavenBundle("org.apache.felix",
-                        "org.apache.felix.dependencymanager", "3.1.0"),
+                mavenBundle("org.apache.felix", "org.apache.felix.dependencymanager", "3.1.0"),
 
                 // the plugin stub to get data for the tests
-                mavenBundle("org.opendaylight.controller",
-                        "protocol_plugins.stub", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "protocol_plugins.stub", "0.4.0-SNAPSHOT"),
 
                 // List all the opendaylight modules
-                mavenBundle("org.opendaylight.controller", "security",
-                        "0.4.0-SNAPSHOT").noStart(),
-                mavenBundle("org.opendaylight.controller", "sal",
-                        "0.5.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "sal.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "statisticsmanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "statisticsmanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "containermanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "containermanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "forwardingrulesmanager", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "forwardingrulesmanager.implementation",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "arphandler",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "clustering.services", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "clustering.services-implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "switchmanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "switchmanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "configuration.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "hosttracker",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "hosttracker.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "arphandler",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "routing.dijkstra_implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "topologymanager",
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "security", "0.4.0-SNAPSHOT").noStart(),
+                mavenBundle("org.opendaylight.controller", "sal", "0.5.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "sal.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "containermanager", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "containermanager.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "arphandler", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "clustering.services", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "clustering.services-implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "switchmanager", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "switchmanager.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "configuration", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "configuration.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "hosttracker", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "hosttracker.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "arphandler", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "routing.dijkstra_implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "topologymanager", "0.4.0-SNAPSHOT"),
 
-                mavenBundle("org.opendaylight.controller", "usermanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "usermanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "logging.bridge",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "clustering.test",
-                        "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "usermanager", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "usermanager.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "logging.bridge", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "clustering.test", "0.4.0-SNAPSHOT"),
 
-                mavenBundle("org.opendaylight.controller",
-                        "forwarding.staticrouting", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "forwarding.staticrouting", "0.4.0-SNAPSHOT"),
 
                 // Northbound bundles
-                mavenBundle("org.opendaylight.controller",
-                        "commons.northbound", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "forwarding.staticrouting.northbound", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "statistics.northbound", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "topology.northbound", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "hosttracker.northbound", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "switchmanager.northbound", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "flowprogrammer.northbound", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "subnets.northbound", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "commons.northbound", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "forwarding.staticrouting.northbound", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "statistics.northbound", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "topology.northbound", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "hosttracker.northbound", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "switchmanager.northbound", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "flowprogrammer.northbound", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "subnets.northbound", "0.4.0-SNAPSHOT"),
 
-                mavenBundle("org.codehaus.jackson", "jackson-mapper-asl",
-                        "1.9.8"),
+                mavenBundle("org.codehaus.jackson", "jackson-mapper-asl", "1.9.8"),
                 mavenBundle("org.codehaus.jackson", "jackson-core-asl", "1.9.8"),
                 mavenBundle("org.codehaus.jackson", "jackson-jaxrs", "1.9.8"),
                 mavenBundle("org.codehaus.jettison", "jettison", "1.3.3"),
@@ -1205,154 +1306,93 @@ public class NorthboundIT {
 
                 mavenBundle("commons-fileupload", "commons-fileupload", "1.2.2"),
 
-                mavenBundle("equinoxSDK381", "javax.servlet",
-                        "3.0.0.v201112011016"),
-                mavenBundle("equinoxSDK381", "javax.servlet.jsp",
-                        "2.2.0.v201112011158"),
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.ds",
-                        "1.4.0.v20120522-1841"),
+                mavenBundle("equinoxSDK381", "javax.servlet", "3.0.0.v201112011016"),
+                mavenBundle("equinoxSDK381", "javax.servlet.jsp", "2.2.0.v201112011158"),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.ds", "1.4.0.v20120522-1841"),
                 mavenBundle("orbit", "javax.xml.rpc", "1.1.0.v201005080400"),
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.util",
-                        "1.0.400.v20120522-2049"),
-                mavenBundle("equinoxSDK381", "org.eclipse.osgi.services",
-                        "3.3.100.v20120522-1822"),
-                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.command",
-                        "0.8.0.v201108120515"),
-                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.runtime",
-                        "0.8.0.v201108120515"),
-                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell",
-                        "0.8.0.v201110170705"),
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.cm",
-                        "1.0.400.v20120522-1841"),
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.console",
-                        "1.0.0.v20120522-1841"),
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.launcher",
-                        "1.3.0.v20120522-1813"),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.util", "1.0.400.v20120522-2049"),
+                mavenBundle("equinoxSDK381", "org.eclipse.osgi.services", "3.3.100.v20120522-1822"),
+                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.command", "0.8.0.v201108120515"),
+                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.runtime", "0.8.0.v201108120515"),
+                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell", "0.8.0.v201110170705"),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.cm", "1.0.400.v20120522-1841"),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.console", "1.0.0.v20120522-1841"),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.launcher", "1.3.0.v20120522-1813"),
 
-                mavenBundle("geminiweb", "org.eclipse.gemini.web.core",
-                        "2.2.0.RELEASE"),
-                mavenBundle("geminiweb", "org.eclipse.gemini.web.extender",
-                        "2.2.0.RELEASE"),
-                mavenBundle("geminiweb", "org.eclipse.gemini.web.tomcat",
-                        "2.2.0.RELEASE"),
-                mavenBundle("geminiweb",
-                        "org.eclipse.virgo.kernel.equinox.extensions",
-                        "3.6.0.RELEASE").noStart(),
-                mavenBundle("geminiweb", "org.eclipse.virgo.util.common",
-                        "3.6.0.RELEASE"),
-                mavenBundle("geminiweb", "org.eclipse.virgo.util.io",
-                        "3.6.0.RELEASE"),
-                mavenBundle("geminiweb", "org.eclipse.virgo.util.math",
-                        "3.6.0.RELEASE"),
-                mavenBundle("geminiweb", "org.eclipse.virgo.util.osgi",
-                        "3.6.0.RELEASE"),
-                mavenBundle("geminiweb",
-                        "org.eclipse.virgo.util.osgi.manifest", "3.6.0.RELEASE"),
-                mavenBundle("geminiweb",
-                        "org.eclipse.virgo.util.parser.manifest",
-                        "3.6.0.RELEASE"),
+                mavenBundle("geminiweb", "org.eclipse.gemini.web.core", "2.2.0.RELEASE"),
+                mavenBundle("geminiweb", "org.eclipse.gemini.web.extender", "2.2.0.RELEASE"),
+                mavenBundle("geminiweb", "org.eclipse.gemini.web.tomcat", "2.2.0.RELEASE"),
+                mavenBundle("geminiweb", "org.eclipse.virgo.kernel.equinox.extensions", "3.6.0.RELEASE").noStart(),
+                mavenBundle("geminiweb", "org.eclipse.virgo.util.common", "3.6.0.RELEASE"),
+                mavenBundle("geminiweb", "org.eclipse.virgo.util.io", "3.6.0.RELEASE"),
+                mavenBundle("geminiweb", "org.eclipse.virgo.util.math", "3.6.0.RELEASE"),
+                mavenBundle("geminiweb", "org.eclipse.virgo.util.osgi", "3.6.0.RELEASE"),
+                mavenBundle("geminiweb", "org.eclipse.virgo.util.osgi.manifest", "3.6.0.RELEASE"),
+                mavenBundle("geminiweb", "org.eclipse.virgo.util.parser.manifest", "3.6.0.RELEASE"),
 
-                mavenBundle("org.apache.felix",
-                        "org.apache.felix.dependencymanager", "3.1.0"),
-                mavenBundle("org.apache.felix",
-                        "org.apache.felix.dependencymanager.shell", "3.0.1"),
+                mavenBundle("org.apache.felix", "org.apache.felix.dependencymanager", "3.1.0"),
+                mavenBundle("org.apache.felix", "org.apache.felix.dependencymanager.shell", "3.0.1"),
 
                 mavenBundle("com.google.code.gson", "gson", "2.1"),
-                mavenBundle("org.jboss.spec.javax.transaction",
-                        "jboss-transaction-api_1.1_spec", "1.0.1.Final"),
-                mavenBundle("org.apache.felix", "org.apache.felix.fileinstall",
-                        "3.1.6"),
+                mavenBundle("org.jboss.spec.javax.transaction", "jboss-transaction-api_1.1_spec", "1.0.1.Final"),
+                mavenBundle("org.apache.felix", "org.apache.felix.fileinstall", "3.1.6"),
                 mavenBundle("org.apache.commons", "commons-lang3", "3.1"),
                 mavenBundle("commons-codec", "commons-codec"),
-                mavenBundle("virgomirror",
-                        "org.eclipse.jdt.core.compiler.batch",
-                        "3.8.0.I20120518-2145"),
-                mavenBundle("eclipselink", "javax.persistence",
-                        "2.0.4.v201112161009"),
+                mavenBundle("virgomirror", "org.eclipse.jdt.core.compiler.batch", "3.8.0.I20120518-2145"),
+                mavenBundle("eclipselink", "javax.persistence", "2.0.4.v201112161009"),
 
                 mavenBundle("orbit", "javax.activation", "1.1.0.v201211130549"),
                 mavenBundle("orbit", "javax.annotation", "1.1.0.v201209060031"),
                 mavenBundle("orbit", "javax.ejb", "3.1.1.v201204261316"),
                 mavenBundle("orbit", "javax.el", "2.2.0.v201108011116"),
-                mavenBundle("orbit", "javax.mail.glassfish",
-                        "1.4.1.v201108011116"),
+                mavenBundle("orbit", "javax.mail.glassfish", "1.4.1.v201108011116"),
                 mavenBundle("orbit", "javax.xml.rpc", "1.1.0.v201005080400"),
-                mavenBundle("orbit", "org.apache.catalina",
-                        "7.0.32.v201211201336"),
+                mavenBundle("orbit", "org.apache.catalina", "7.0.32.v201211201336"),
                 // these are bundle fragments that can't be started on its own
-                mavenBundle("orbit", "org.apache.catalina.ha",
-                        "7.0.32.v201211201952").noStart(),
-                mavenBundle("orbit", "org.apache.catalina.tribes",
-                        "7.0.32.v201211201952").noStart(),
-                mavenBundle("orbit", "org.apache.coyote",
-                        "7.0.32.v201211201952").noStart(),
-                mavenBundle("orbit", "org.apache.jasper",
-                        "7.0.32.v201211201952").noStart(),
+                mavenBundle("orbit", "org.apache.catalina.ha", "7.0.32.v201211201952").noStart(),
+                mavenBundle("orbit", "org.apache.catalina.tribes", "7.0.32.v201211201952").noStart(),
+                mavenBundle("orbit", "org.apache.coyote", "7.0.32.v201211201952").noStart(),
+                mavenBundle("orbit", "org.apache.jasper", "7.0.32.v201211201952").noStart(),
 
                 mavenBundle("orbit", "org.apache.el", "7.0.32.v201211081135"),
-                mavenBundle("orbit", "org.apache.juli.extras",
-                        "7.0.32.v201211081135"),
-                mavenBundle("orbit", "org.apache.tomcat.api",
-                        "7.0.32.v201211081135"),
-                mavenBundle("orbit", "org.apache.tomcat.util",
-                        "7.0.32.v201211201952").noStart(),
-                mavenBundle("orbit", "javax.servlet.jsp.jstl",
-                        "1.2.0.v201105211821"),
-                mavenBundle("orbit", "javax.servlet.jsp.jstl.impl",
-                        "1.2.0.v201210211230"),
+                mavenBundle("orbit", "org.apache.juli.extras", "7.0.32.v201211081135"),
+                mavenBundle("orbit", "org.apache.tomcat.api", "7.0.32.v201211081135"),
+                mavenBundle("orbit", "org.apache.tomcat.util", "7.0.32.v201211201952").noStart(),
+                mavenBundle("orbit", "javax.servlet.jsp.jstl", "1.2.0.v201105211821"),
+                mavenBundle("orbit", "javax.servlet.jsp.jstl.impl", "1.2.0.v201210211230"),
 
                 mavenBundle("org.ops4j.pax.exam", "pax-exam-container-native"),
                 mavenBundle("org.ops4j.pax.exam", "pax-exam-junit4"),
                 mavenBundle("org.ops4j.pax.exam", "pax-exam-link-mvn"),
                 mavenBundle("org.ops4j.pax.url", "pax-url-aether"),
 
-                mavenBundle("org.springframework", "org.springframework.asm",
-                        "3.1.3.RELEASE"),
-                mavenBundle("org.springframework", "org.springframework.aop",
-                        "3.1.3.RELEASE"),
-                mavenBundle("org.springframework",
-                        "org.springframework.context", "3.1.3.RELEASE"),
-                mavenBundle("org.springframework",
-                        "org.springframework.context.support", "3.1.3.RELEASE"),
-                mavenBundle("org.springframework", "org.springframework.core",
-                        "3.1.3.RELEASE"),
-                mavenBundle("org.springframework", "org.springframework.beans",
-                        "3.1.3.RELEASE"),
-                mavenBundle("org.springframework",
-                        "org.springframework.expression", "3.1.3.RELEASE"),
-                mavenBundle("org.springframework", "org.springframework.web",
-                        "3.1.3.RELEASE"),
+                mavenBundle("org.springframework", "org.springframework.asm", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework", "org.springframework.aop", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework", "org.springframework.context", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework", "org.springframework.context.support", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework", "org.springframework.core", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework", "org.springframework.beans", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework", "org.springframework.expression", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework", "org.springframework.web", "3.1.3.RELEASE"),
 
-                mavenBundle("org.aopalliance",
-                        "com.springsource.org.aopalliance", "1.0.0"),
-                mavenBundle("org.springframework",
-                        "org.springframework.web.servlet", "3.1.3.RELEASE"),
-                mavenBundle("org.springframework.security",
-                        "spring-security-config", "3.1.3.RELEASE"),
-                mavenBundle("org.springframework.security",
-                        "spring-security-core", "3.1.3.RELEASE"),
-                mavenBundle("org.springframework.security",
-                        "spring-security-web", "3.1.3.RELEASE"),
-                mavenBundle("org.springframework.security",
-                        "spring-security-taglibs", "3.1.3.RELEASE"),
-                mavenBundle("org.springframework",
-                        "org.springframework.transaction", "3.1.3.RELEASE"),
+                mavenBundle("org.aopalliance", "com.springsource.org.aopalliance", "1.0.0"),
+                mavenBundle("org.springframework", "org.springframework.web.servlet", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework.security", "spring-security-config", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework.security", "spring-security-core", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework.security", "spring-security-web", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework.security", "spring-security-taglibs", "3.1.3.RELEASE"),
+                mavenBundle("org.springframework", "org.springframework.transaction", "3.1.3.RELEASE"),
 
-                mavenBundle("org.ow2.chameleon.management", "chameleon-mbeans",
-                        "1.0.0"),
-                mavenBundle("org.opendaylight.controller.thirdparty",
-                        "net.sf.jung2", "2.0.1-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller.thirdparty",
-                        "com.sun.jersey.jersey-servlet", "1.17-SNAPSHOT"),
+                mavenBundle("org.ow2.chameleon.management", "chameleon-mbeans", "1.0.0"),
+                mavenBundle("org.opendaylight.controller.thirdparty", "net.sf.jung2", "2.0.1-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller.thirdparty", "com.sun.jersey.jersey-servlet", "1.17-SNAPSHOT"),
 
                 // Jersey needs to be started before the northbound application
                 // bundles, using a lower start level
                 mavenBundle("com.sun.jersey", "jersey-client", "1.17"),
-                mavenBundle("com.sun.jersey", "jersey-server", "1.17")
-                        .startLevel(2),
-                mavenBundle("com.sun.jersey", "jersey-core", "1.17")
-                        .startLevel(2),
-                mavenBundle("com.sun.jersey", "jersey-json", "1.17")
-                        .startLevel(2), junitBundles());
+                mavenBundle("com.sun.jersey", "jersey-server", "1.17").startLevel(2),
+                mavenBundle("com.sun.jersey", "jersey-core", "1.17").startLevel(2),
+                mavenBundle("com.sun.jersey", "jersey-json", "1.17").startLevel(2), junitBundles());
     }
+
 }
