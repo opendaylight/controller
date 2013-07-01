@@ -1444,7 +1444,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
         }
 
         // Program the network node
-        Status status = this.removeEntry(config.getFlowEntry(), false);
+        Status status = this.uninstallFlowEntry(config.getFlowEntry());
 
         // Update configuration database if programming was successful
         if (status.isSuccess()) {
@@ -1543,7 +1543,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
         // If flow is installed, program the network node
         status = new Status(StatusCode.SUCCESS, "Saved in config");
         if (oldFlowConfig.installInHw()) {
-            status = this.modifyEntry(oldFlowConfig.getFlowEntry(), newFlowConfig.getFlowEntry(), false);
+            status = this.modifyFlowEntry(oldFlowConfig.getFlowEntry(), newFlowConfig.getFlowEntry());
         }
 
         // Update configuration database if programming was successful
@@ -1588,16 +1588,14 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
         }
         if (target != null) {
             // Program the network node
-            Status status;
-            if (target.installInHw()) {
-                status = this.removeEntry(target.getFlowEntry(), false);
-            } else {
-                status = this.addEntry(target.getFlowEntry(), false);
+            Status status = (target.installInHw()) ? this.uninstallFlowEntry(target.getFlowEntry()) : this
+                    .installFlowEntry(target.getFlowEntry());
+            if (status.isSuccess()) {
+                // Update Configuration database
+                target.setStatus(SUCCESS);
+                target.toggleInstallation();
+                staticFlows.put(key, target);
             }
-            // Update Configuration database
-            target.setStatus(SUCCESS);
-            target.toggleInstallation();
-            staticFlows.put(key, target);
             return status;
         }
 
