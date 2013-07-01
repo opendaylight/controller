@@ -50,11 +50,14 @@ import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.samples.simpleforwarding.HostNodePair;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
 
 public class SimpleForwardingImpl implements IfNewHostNotify,
         IListenRoutingUpdates, IInventoryListener {
