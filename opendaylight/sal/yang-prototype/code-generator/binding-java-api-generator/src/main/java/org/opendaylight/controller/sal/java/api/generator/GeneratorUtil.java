@@ -10,25 +10,15 @@ package org.opendaylight.controller.sal.java.api.generator;
 import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.controller.binding.generator.util.TypeConstants;
+import org.opendaylight.controller.sal.binding.model.api.*;
 import org.opendaylight.controller.binding.generator.util.Types;
-import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
-import org.opendaylight.controller.sal.binding.model.api.Constant;
-import org.opendaylight.controller.sal.binding.model.api.Enumeration;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration.Pair;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
-import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature.Parameter;
-import org.opendaylight.controller.sal.binding.model.api.ParameterizedType;
-import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.sal.binding.model.api.WildcardType;
 
 public final class GeneratorUtil {
 
@@ -36,12 +26,12 @@ public final class GeneratorUtil {
     }
 
     public static String createIfcDeclaration(final GeneratedType genType, final String indent,
-            final Map<String, LinkedHashMap<String, Integer>> availableImports) {
+            final Map<String, String> availableImports) {
         return createFileDeclaration(IFC, genType, indent, availableImports, false);
     }
 
     public static String createClassDeclaration(final GeneratedTransferObject genTransferObject, final String indent,
-            final Map<String, LinkedHashMap<String, Integer>> availableImports, boolean isIdentity) {
+            final Map<String, String> availableImports, boolean isIdentity) {
         return createFileDeclaration(CLASS, genTransferObject, indent, availableImports, isIdentity);
     }
 
@@ -50,7 +40,7 @@ public final class GeneratorUtil {
     }
 
     private static String createFileDeclaration(final String type, final GeneratedType genType, final String indent,
-            final Map<String, LinkedHashMap<String, Integer>> availableImports, boolean isIdentity) {
+            final Map<String, String> availableImports, boolean isIdentity) {
         final StringBuilder builder = new StringBuilder();
         final String currentPkg = genType.getPackageName();
 
@@ -95,7 +85,6 @@ public final class GeneratorUtil {
                 builder.append(getExplicitType(genImplements.get(i), availableImports, currentPkg));
             }
         }
-
         builder.append(GAP + LCB);
         return builder.toString();
     }
@@ -153,7 +142,7 @@ public final class GeneratorUtil {
     }
 
     public static String createConstant(final Constant constant, final String indent,
-            final Map<String, LinkedHashMap<String, Integer>> availableImports, final String currentPkg) {
+            final Map<String, String> availableImports, final String currentPkg) {
         final StringBuilder builder = new StringBuilder();
         if (constant == null)
             throw new IllegalArgumentException();
@@ -189,7 +178,7 @@ public final class GeneratorUtil {
     }
 
     public static String createField(final GeneratedProperty property, final String indent,
-            Map<String, LinkedHashMap<String, Integer>> availableImports, final String currentPkg) {
+            final Map<String, String> availableImports, final String currentPkg) {
         final StringBuilder builder = new StringBuilder();
         if (!property.getAnnotations().isEmpty()) {
             final List<AnnotationType> annotations = property.getAnnotations();
@@ -211,7 +200,7 @@ public final class GeneratorUtil {
      * @return
      */
     public static String createMethodDeclaration(final MethodSignature method, final String indent,
-            Map<String, LinkedHashMap<String, Integer>> availableImports, final String currentPkg) {
+            Map<String, String> availableImports, final String currentPkg) {
         final StringBuilder builder = new StringBuilder();
 
         if (method == null) {
@@ -258,7 +247,7 @@ public final class GeneratorUtil {
     }
 
     public static String createConstructor(GeneratedTransferObject genTransferObject, final String indent,
-            Map<String, LinkedHashMap<String, Integer>> availableImports, boolean isIdentity) {
+            final Map<String, String> availableImports, boolean isIdentity) {
         final StringBuilder builder = new StringBuilder();
 
         final String currentPkg = genTransferObject.getPackageName();
@@ -333,7 +322,7 @@ public final class GeneratorUtil {
     }
 
     public static String createGetter(final GeneratedProperty property, final String indent,
-            Map<String, LinkedHashMap<String, Integer>> availableImports, final String currentPkg) {
+            final Map<String, String> availableImports, final String currentPkg) {
         final StringBuilder builder = new StringBuilder();
 
         final Type type = property.getReturnType();
@@ -353,7 +342,7 @@ public final class GeneratorUtil {
     }
 
     public static String createSetter(final GeneratedProperty property, final String indent,
-            Map<String, LinkedHashMap<String, Integer>> availableImports, String currentPkg) {
+            final Map<String, String> availableImports, final String currentPkg) {
         final StringBuilder builder = new StringBuilder();
 
         final Type type = property.getReturnType();
@@ -388,7 +377,7 @@ public final class GeneratorUtil {
 
     public static String createEquals(final GeneratedTransferObject type, final List<GeneratedProperty> properties,
             final String indent) {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         final String indent1 = indent + TAB;
         final String indent2 = indent1 + TAB;
         final String indent3 = indent2 + TAB;
@@ -407,7 +396,7 @@ public final class GeneratorUtil {
         String typeStr = type.getName();
         builder.append(indent1 + typeStr + " other = (" + typeStr + ") obj;" + NL);
 
-        for (GeneratedProperty property : properties) {
+        for (final GeneratedProperty property : properties) {
             String fieldName = property.getName();
             builder.append(indent1 + "if (" + fieldName + " == null) {" + NL);
             builder.append(indent2 + "if (other." + fieldName + " != null) {" + NL);
@@ -419,7 +408,6 @@ public final class GeneratorUtil {
         }
 
         builder.append(indent1 + "return true;" + NL);
-
         builder.append(indent + RCB + NL);
         return builder.toString();
     }
@@ -441,7 +429,7 @@ public final class GeneratorUtil {
         builder.append(" [");
 
         boolean first = true;
-        for (GeneratedProperty property : properties) {
+        for (final GeneratedProperty property : properties) {
             if (first) {
                 builder.append(property.getName());
                 builder.append("=\");");
@@ -514,22 +502,30 @@ public final class GeneratorUtil {
         return builder.toString();
     }
 
-    private static String getExplicitType(final Type type,
-            Map<String, LinkedHashMap<String, Integer>> availableImports, final String currentPkg) {
+    private static String getExplicitType(final Type type, final Map<String, String> imports, final String currentPkg) {
         if (type == null) {
             throw new IllegalArgumentException("Type parameter MUST be specified and cannot be NULL!");
         }
-        String packageName = type.getPackageName();
+        if (type.getName() == null) {
+            throw new IllegalArgumentException("Type name cannot be NULL!");
+        }
+        if (type.getPackageName() == null) {
+            throw new IllegalArgumentException("Type cannot have Package Name referenced as NULL!");
+        }
+        if (imports == null) {
+            throw new IllegalArgumentException("Imports Map cannot be NULL!");
+        }
 
-        LinkedHashMap<String, Integer> imports = availableImports.get(type.getName());
-
-        if ((imports != null && packageName.equals(findMaxValue(imports).get(0))) || packageName.equals(currentPkg)) {
+        final String typePackageName = type.getPackageName();
+        final String typeName = type.getName();
+        final String importedPackageName = imports.get(typeName);
+        if (typePackageName.equals(importedPackageName) || typePackageName.equals(currentPkg)) {
             final StringBuilder builder = new StringBuilder(type.getName());
             if (type instanceof ParameterizedType) {
-                ParameterizedType pType = (ParameterizedType) type;
-                Type[] pTypes = pType.getActualTypeArguments();
+                final ParameterizedType pType = (ParameterizedType) type;
+                final Type[] pTypes = pType.getActualTypeArguments();
                 builder.append("<");
-                builder.append(getParameters(pTypes, availableImports, currentPkg));
+                builder.append(getParameters(pTypes, imports, currentPkg));
                 builder.append(">");
             }
             if (builder.toString().equals("Void")) {
@@ -538,21 +534,20 @@ public final class GeneratorUtil {
             return builder.toString();
         } else {
             final StringBuilder builder = new StringBuilder();
-            if (packageName.startsWith("java.lang")) {
+            if (typePackageName.startsWith("java.lang")) {
                 builder.append(type.getName());
             } else {
-                if (!packageName.isEmpty()) {
-                    builder.append(packageName + "." + type.getName());
+                if (!typePackageName.isEmpty()) {
+                    builder.append(typePackageName + "." + type.getName());
                 } else {
                     builder.append(type.getName());
                 }
-
             }
             if (type instanceof ParameterizedType) {
-                ParameterizedType pType = (ParameterizedType) type;
-                Type[] pTypes = pType.getActualTypeArguments();
+                final ParameterizedType pType = (ParameterizedType) type;
+                final Type[] pTypes = pType.getActualTypeArguments();
                 builder.append("<");
-                builder.append(getParameters(pTypes, availableImports, currentPkg));
+                builder.append(getParameters(pTypes, imports, currentPkg));
                 builder.append(">");
             }
             if (builder.toString().equals("Void")) {
@@ -562,14 +557,13 @@ public final class GeneratorUtil {
         }
     }
 
-    private static String getParameters(final Type[] pTypes,
-            Map<String, LinkedHashMap<String, Integer>> availableImports, String currentPkg) {
+    private static String getParameters(final Type[] pTypes, Map<String, String> availableImports, String currentPkg) {
         final StringBuilder builder = new StringBuilder();
         for (int i = 0; i < pTypes.length; i++) {
-            Type t = pTypes[i];
+            final Type t = pTypes[i];
 
             String separator = COMMA;
-            if (i + 1 == pTypes.length) {
+            if (i == (pTypes.length - 1)) {
                 separator = "";
             }
 
@@ -577,28 +571,9 @@ public final class GeneratorUtil {
             if (t instanceof WildcardType) {
                 wildcardParam = "? extends ";
             }
-
             builder.append(wildcardParam + getExplicitType(t, availableImports, currentPkg) + separator);
         }
         return builder.toString();
-    }
-
-    private static List<String> findMaxValue(LinkedHashMap<String, Integer> imports) {
-        final List<String> result = new ArrayList<String>();
-
-        int maxValue = 0;
-        int currentValue = 0;
-        for (Map.Entry<String, Integer> entry : imports.entrySet()) {
-            currentValue = entry.getValue();
-            if (currentValue > maxValue) {
-                result.clear();
-                result.add(entry.getKey());
-                maxValue = currentValue;
-            } else if (currentValue == maxValue) {
-                result.add(entry.getKey());
-            }
-        }
-        return result;
     }
 
     private static void createComment(final StringBuilder builder, final String comment, final String indent) {
@@ -609,104 +584,115 @@ public final class GeneratorUtil {
         }
     }
 
-    public static Map<String, LinkedHashMap<String, Integer>> createImports(GeneratedType genType) {
-        final Map<String, LinkedHashMap<String, Integer>> imports = new HashMap<String, LinkedHashMap<String, Integer>>();
-        final String genTypePkg = genType.getPackageName();
+    public static Map<String, String> createImports(final GeneratedType genType) {
+        if (genType == null) {
+            throw new IllegalArgumentException("Generated Type cannot be NULL!");
+        }
 
+        final Map<String, String> imports = new LinkedHashMap<>();
         final List<Constant> constants = genType.getConstantDefinitions();
         final List<MethodSignature> methods = genType.getMethodDefinitions();
-        List<Type> impl = genType.getImplements();
+        final List<Type> impl = genType.getImplements();
 
         // IMPLEMENTATIONS
         if (impl != null) {
-            for (Type t : impl) {
-                addTypeToImports(t, imports, genTypePkg);
+            for (final Type type : impl) {
+                putTypeIntoImports(genType, type, imports);
             }
         }
 
         // CONSTANTS
         if (constants != null) {
-            for (Constant c : constants) {
-                Type ct = c.getType();
-                addTypeToImports(ct, imports, genTypePkg);
-            }
-        }
-
-        // METHODS
-        if (methods != null) {
-            for (MethodSignature m : methods) {
-                Type ct = m.getReturnType();
-                addTypeToImports(ct, imports, genTypePkg);
-                for (MethodSignature.Parameter p : m.getParameters()) {
-                    addTypeToImports(p.getType(), imports, genTypePkg);
-                }
-            }
-        }
-
-        // PROPERTIES
-        if (genType instanceof GeneratedTransferObject) {
-            GeneratedTransferObject genTO = (GeneratedTransferObject) genType;
-
-            List<GeneratedProperty> props = genTO.getProperties();
-            if (props != null) {
-                for (GeneratedProperty prop : props) {
-                    Type pt = prop.getReturnType();
-                    addTypeToImports(pt, imports, genTypePkg);
-                }
+            for (final Constant constant : constants) {
+                final Type constantType = constant.getType();
+                putTypeIntoImports(genType, constantType, imports);
             }
         }
 
         // REGULAR EXPRESSION
         if (genType instanceof GeneratedTransferObject) {
             if (isConstantInTO(TypeConstants.PATTERN_CONSTANT_NAME, (GeneratedTransferObject) genType)) {
-                addTypeToImports(Types.typeForClass(java.util.regex.Pattern.class), imports, genTypePkg);
-                addTypeToImports(Types.typeForClass(java.util.Arrays.class), imports, genTypePkg);
-                addTypeToImports(Types.typeForClass(java.util.ArrayList.class), imports, genTypePkg);
+                putTypeIntoImports(genType, Types.typeForClass(java.util.regex.Pattern.class), imports);
+                putTypeIntoImports(genType, Types.typeForClass(java.util.Arrays.class), imports);
+                putTypeIntoImports(genType, Types.typeForClass(java.util.ArrayList.class), imports);
+            }
+        }
+
+        // METHODS
+        if (methods != null) {
+            for (final MethodSignature method : methods) {
+                final Type methodReturnType = method.getReturnType();
+                putTypeIntoImports(genType, methodReturnType, imports);
+                for (final MethodSignature.Parameter methodParam : method.getParameters()) {
+                    putTypeIntoImports(genType, methodParam.getType(), imports);
+                }
+            }
+        }
+
+        // PROPERTIES
+        if (genType instanceof GeneratedTransferObject) {
+            final GeneratedTransferObject genTO = (GeneratedTransferObject) genType;
+            final List<GeneratedProperty> properties = genTO.getProperties();
+            if (properties != null) {
+                for (GeneratedProperty property : properties) {
+                    final Type propertyType = property.getReturnType();
+                    putTypeIntoImports(genType, propertyType, imports);
+                }
             }
         }
 
         return imports;
     }
 
-    private static void addTypeToImports(Type type, Map<String, LinkedHashMap<String, Integer>> importedTypes,
-            String genTypePkg) {
-        String typeName = type.getName();
-        String typePkg = type.getPackageName();
-        if (typePkg.startsWith("java.lang") || typePkg.equals(genTypePkg) || typePkg.isEmpty()) {
-            return;
+    private static void putTypeIntoImports(final GeneratedType parentGenType, final Type type,
+            final Map<String, String> imports) {
+        if (parentGenType == null) {
+            throw new IllegalArgumentException("Parent Generated Type parameter MUST be specified and cannot be "
+                    + "NULL!");
         }
-        LinkedHashMap<String, Integer> packages = importedTypes.get(typeName);
-        if (packages == null) {
-            packages = new LinkedHashMap<String, Integer>();
-            packages.put(typePkg, 1);
-            importedTypes.put(typeName, packages);
-        } else {
-            Integer occurrence = packages.get(typePkg);
-            if (occurrence == null) {
-                packages.put(typePkg, 1);
-            } else {
-                occurrence++;
-                packages.put(typePkg, occurrence);
-            }
+        if (parentGenType.getName() == null) {
+            throw new IllegalArgumentException("Parent Generated Type name cannot be NULL!");
+        }
+        if (parentGenType.getPackageName() == null) {
+            throw new IllegalArgumentException("Parent Generated Type cannot have Package Name referenced as NULL!");
+        }
+        if (type == null) {
+            throw new IllegalArgumentException("Type parameter MUST be specified and cannot be NULL!");
+        }
+        if (type.getName() == null) {
+            throw new IllegalArgumentException("Type name cannot be NULL!");
+        }
+        if (type.getPackageName() == null) {
+            throw new IllegalArgumentException("Type cannot have Package Name referenced as NULL!");
         }
 
+        final String typeName = type.getName();
+        final String typePackageName = type.getPackageName();
+        final String parentTypeName = parentGenType.getName();
+        final String parentTypePackageName = parentGenType.getPackageName();
+        if (typeName.equals(parentTypeName) || typePackageName.startsWith("java.lang")
+                || typePackageName.equals(parentTypePackageName) || typePackageName.isEmpty()) {
+            return;
+        }
+        if (!imports.containsKey(typeName)) {
+            imports.put(typeName, typePackageName);
+        }
         if (type instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType) type;
-            Type[] params = pt.getActualTypeArguments();
+            final ParameterizedType paramType = (ParameterizedType) type;
+            final Type[] params = paramType.getActualTypeArguments();
             for (Type param : params) {
-                addTypeToImports(param, importedTypes, genTypePkg);
+                putTypeIntoImports(parentGenType, param, imports);
             }
         }
     }
 
-    public static List<String> createImportLines(Map<String, LinkedHashMap<String, Integer>> imports) {
-        List<String> importLines = new ArrayList<String>();
+    public static List<String> createImportLines(final Map<String, String> imports) {
+        final List<String> importLines = new ArrayList<>();
 
-        for (Map.Entry<String, LinkedHashMap<String, Integer>> entry : imports.entrySet()) {
-            String typeName = entry.getKey();
-            LinkedHashMap<String, Integer> typePkgMap = entry.getValue();
-            String typePkg = typePkgMap.keySet().iterator().next();
-            importLines.add("import " + typePkg + "." + typeName + SC);
+        for (Map.Entry<String, String> entry : imports.entrySet()) {
+            final String typeName = entry.getKey();
+            final String packageName = entry.getValue();
+            importLines.add("import " + packageName + "." + typeName + SC);
         }
         return importLines;
     }
@@ -723,5 +709,4 @@ public final class GeneratorUtil {
         }
         return false;
     }
-
 }

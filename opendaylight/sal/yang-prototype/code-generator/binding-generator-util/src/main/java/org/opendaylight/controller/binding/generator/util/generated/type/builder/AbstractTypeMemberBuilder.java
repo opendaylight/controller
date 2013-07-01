@@ -87,7 +87,7 @@ abstract class AbstractTypeMemberBuilder implements TypeMemberBuilder {
     @Override
     public void setComment(String comment) {
         if (comment == null) {
-            throw new IllegalArgumentException("Comment string cannot be null!");
+            this.comment = "";
         }
         this.comment = comment;
     }

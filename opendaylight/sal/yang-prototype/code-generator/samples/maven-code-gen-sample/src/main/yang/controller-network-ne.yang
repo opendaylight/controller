@@ -1,54 +1,54 @@
 module controller-openflow-ne {
-	yang-version 1;
-	namespace "urn:opendaylight:controller:network:openflow";
-	prefix "of";
-	
-	import controller-network {
-		prefix cn;
-	}
-	import ietf-inet-types { prefix "inet"; }
-	
-	revision 2013-06-07 {
-	   description "Initial demo";
-	}
+    yang-version 1;
+    namespace "urn:opendaylight:controller:network:openflow";
+    prefix "of";
+    
+    import controller-network {
+        prefix cn;
+    }
+    import ietf-inet-types { prefix "inet"; }
+    
+    revision 2013-06-07 {
+       description "Initial demo";
+    }
 
-	augment "/cn:network/cn:network-elements/cn:network-element" {
+    augment "/cn:network/cn:network-elements/cn:network-element" {
 
-		container flow-tables {
-			list flow-table {
+        container flow-tables {
+            list flow-table {
 
-				key "id";
-				leaf id {
-					type int32;
-				}
+                key "id";
+                leaf id {
+                    type int32;
+                }
 
-				container flows {
-					list flow {
-						key "name";
-						leaf name {
-							type string;
-						}
-						container match {
-							leaf input-port {
-								type cn:tp-ref;
-							}
-							leaf nl-src {
-								type inet:ipv4-address;
-							}
-							leaf nl-dst {
-								type inet:ipv4-address;
-							}
-						}
-						container actions {
-							list action {
-								leaf type {
-									type string;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+                container flows {
+                    list flow {
+                        key "name";
+                        leaf name {
+                            type string;
+                        }
+                        container match {
+                            leaf input-port {
+                                type cn:tp-ref;
+                            }
+                            leaf nl-src {
+                                type inet:ipv4-address;
+                            }
+                            leaf nl-dst {
+                                type inet:ipv4-address;
+                            }
+                        }
+                        container actions {
+                            list action {
+                                leaf type {
+                                    type string;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
