@@ -730,8 +730,8 @@ public class FlowConfig implements Serializable {
                 Short port = Short.decode(ingressPort);
                 if (isPortValid(sw, port) == false) {
                     String msg = String.format("Ingress port %d is not valid for the Switch", port);
-                    if ((container != null) && !container.getName().equals(GlobalConstants.DEFAULT.toString())) {
-                        msg += " in Container " + container.getName();
+                    if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                        msg += " in Container " + containerName;
                     }
                     return new Status(StatusCode.BADREQUEST, msg);
                 }
@@ -841,9 +841,8 @@ public class FlowConfig implements Serializable {
                                     Short port = Short.parseShort(n.group(1));
                                     if (isPortValid(sw, port) == false) {
                                         String msg = String.format("Output port %d is not valid for this switch", port);
-                                        if ((container != null)
-                                                && !container.getName().equals(GlobalConstants.DEFAULT.toString())) {
-                                            msg += " in Container " + container.getName();
+                                        if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                                            msg += " in Container " + containerName;
                                         }
                                         return new Status(StatusCode.BADREQUEST, msg);
                                     }
@@ -855,9 +854,9 @@ public class FlowConfig implements Serializable {
                     // Check src IP
                     sstr = Pattern.compile(ActionType.FLOOD.toString()).matcher(actiongrp);
                     if (sstr.matches()) {
-                        if (container != null) {
+                        if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
                             return new Status(StatusCode.BADREQUEST, String.format(
-                                    "flood is not allowed in container %s", container.getName()));
+                                    "flood is not allowed in container %s", containerName));
                         }
                         continue;
                     }
@@ -955,7 +954,7 @@ public class FlowConfig implements Serializable {
             }
             // Check against the container flow
             Status status;
-            if ((container != null) && !(status = conflictWithContainerFlow(container)).isSuccess()) {
+            if (!containerName.equals(GlobalConstants.DEFAULT.toString()) && !(status = conflictWithContainerFlow(container)).isSuccess()) {
                 return status;
             }
         } catch (NumberFormatException e) {
