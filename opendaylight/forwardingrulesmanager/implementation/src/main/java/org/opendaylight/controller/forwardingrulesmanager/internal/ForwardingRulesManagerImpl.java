@@ -2191,11 +2191,10 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
-     *
      */
     void stop() {
-        // Set graceful stop flag
         stopping = true;
+        uninstallAllFlowEntries();
     }
 
     public void setFlowProgrammerService(IFlowProgrammerService service) {
