@@ -863,7 +863,6 @@ CommandProvider {
                 addNodeProps(node, null);
             }
 
-            // check if span is configed
             addSpanPort(nodeConnector);
             break;
         case REMOVED:
@@ -1670,10 +1669,10 @@ CommandProvider {
     /*
      * Add span configuration to local cache and notify clients
      */
-    private void addSpanPorts(Node node, List<NodeConnector> nodeConncetors) {
+    private void addSpanPorts(Node node, List<NodeConnector> nodeConnectors) {
         List<NodeConnector> ncLists = new ArrayList<NodeConnector>();
 
-        for (NodeConnector nodeConnector : nodeConncetors) {
+        for (NodeConnector nodeConnector : nodeConnectors) {
             if (!spanNodeConnectors.contains(nodeConnector)) {
                 ncLists.add(nodeConnector);
             }
@@ -1691,19 +1690,25 @@ CommandProvider {
         }
     }
 
-    private void addSpanPort(NodeConnector nodeConncetor) {
-        List<NodeConnector> ncLists = new ArrayList<NodeConnector>();
-        ncLists.add(nodeConncetor);
-        addSpanPorts(nodeConncetor.getNode(), ncLists);
+    private void addSpanPort(NodeConnector nodeConnector) {
+        // only add if span is configured on this nodeConnector
+        for (SpanConfig conf : getSpanConfigList(nodeConnector.getNode())) {
+            if (conf.getPortArrayList().contains(nodeConnector)) {
+                List<NodeConnector> ncLists = new ArrayList<NodeConnector>();
+                ncLists.add(nodeConnector);
+                addSpanPorts(nodeConnector.getNode(), ncLists);
+                return;
+            }
+        }
     }
 
     /*
      * Remove span configuration to local cache and notify clients
      */
-    private void removeSpanPorts(Node node, List<NodeConnector> nodeConncetors) {
+    private void removeSpanPorts(Node node, List<NodeConnector> nodeConnectors) {
         List<NodeConnector> ncLists = new ArrayList<NodeConnector>();
 
-        for (NodeConnector nodeConnector : nodeConncetors) {
+        for (NodeConnector nodeConnector : nodeConnectors) {
             if (spanNodeConnectors.contains(nodeConnector)) {
                 ncLists.add(nodeConnector);
             }
@@ -1721,10 +1726,12 @@ CommandProvider {
         }
     }
 
-    private void removeSpanPort(NodeConnector nodeConncetor) {
-        List<NodeConnector> ncLists = new ArrayList<NodeConnector>();
-        ncLists.add(nodeConncetor);
-        removeSpanPorts(nodeConncetor.getNode(), ncLists);
+    private void removeSpanPort(NodeConnector nodeConnector) {
+        if (spanNodeConnectors.contains(nodeConnector)) {
+            List<NodeConnector> ncLists = new ArrayList<NodeConnector>();
+            ncLists.add(nodeConnector);
+            removeSpanPorts(nodeConnector.getNode(), ncLists);
+        }
     }
 
     private void addNodeProps(Node node, Map<String, Property> propMap) {
