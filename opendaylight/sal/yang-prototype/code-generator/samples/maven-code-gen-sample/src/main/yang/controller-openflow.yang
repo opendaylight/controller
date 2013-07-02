@@ -3,15 +3,10 @@ module controller-openflow {
     namespace "urn:opendaylight:controller:openflow";
     prefix "of";
     import controller-network {prefix cn;}
-    
-    
+
     revision 2013-05-20 {
        description "Initial demo";
     }
-
-   
-
-
 
     typedef datapath-id {
         type string {

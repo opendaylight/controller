@@ -1009,13 +1009,24 @@ public final class ParserUtils {
         for (int i = 1; i < path.size(); i++) {
             final QName currentQName = path.get(i);
             DataSchemaNodeBuilder newParent = null;
-            for (DataSchemaNodeBuilder child : ((DataNodeContainerBuilder) currentParent).getChildNodeBuilders()) {
-                final QName childQName = child.getQName();
-                if (childQName.getLocalName().equals(currentQName.getLocalName())) {
-                    newParent = child;
-                    break;
+            if(currentParent instanceof DataNodeContainerBuilder) {
+                for (DataSchemaNodeBuilder child : ((DataNodeContainerBuilder) currentParent).getChildNodeBuilders()) {
+                    final QName childQName = child.getQName();
+                    if (childQName.getLocalName().equals(currentQName.getLocalName())) {
+                        newParent = child;
+                        break;
+                    }
+                }
+            } else if(currentParent instanceof ChoiceBuilder) {
+                for(ChoiceCaseBuilder caseBuilder : ((ChoiceBuilder)currentParent).getCases()) {
+                    final QName caseQName = caseBuilder.getQName();
+                    if (caseQName.getLocalName().equals(currentQName.getLocalName())) {
+                        newParent = caseBuilder;
+                        break;
+                    }
                 }
             }
+
             if (newParent == null) {
                 break; // node not found, quit search
             } else {

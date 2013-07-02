@@ -12,20 +12,6 @@ module controller-openflow-ipv6 {
 	revision 2013-06-07 {
 	   description "Initial demo";
 	}
-
-
-
-	augment "/cn:network/cn:network-elements/cn:network-element/of:flow-tables/of:flow-table/of:flows/of:flow/of:match" {
-
-	    	leaf nl-src {
-	    		type inet:ipv6-prefix;
-	    	}
-
-	    	leaf nl-dst {
-	    		type inet:ipv6-prefix;
-	    	}
-	    } 
-
 }
 
 	

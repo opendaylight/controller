@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.java.api.generator;
 
-import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
+import static org.opendaylight.controller.sal.java.api.generator.Constants.NL;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -19,30 +19,29 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 
 public class EnumGenerator implements CodeGenerator {
 
-	@Override
-	public Writer generate(Type type) throws IOException {
-		final Writer writer = new StringWriter();
+    @Override
+    public Writer generate(Type type) throws IOException {
+        final Writer writer = new StringWriter();
 
-		if (type instanceof Enumeration) {
-			Enumeration enums = (Enumeration) type;
-			writer.write(GeneratorUtil.createPackageDeclaration(enums
-					.getPackageName()));
-			writer.write(NL + NL);
-			writer.write(GeneratorUtil.createEnum(enums, ""));
-		}
+        if (type instanceof Enumeration) {
+            Enumeration enums = (Enumeration) type;
+            writer.write(GeneratorUtil.createPackageDeclaration(enums.getPackageName()));
+            writer.write(NL + NL);
+            writer.write(GeneratorUtil.createEnum(enums, ""));
+        }
 
-		return writer;
-	}
+        return writer;
+    }
 
-	public Writer generateInnerEnumeration(Type type, String indent) throws IOException {
-		final Writer writer = new StringWriter();
+    public Writer generateInnerEnumeration(Type type, String indent) throws IOException {
+        final Writer writer = new StringWriter();
 
-		if (type instanceof Enumeration) {
-			Enumeration enums = (Enumeration) type;
-			writer.write(GeneratorUtil.createEnum(enums, indent));
-		}
+        if (type instanceof Enumeration) {
+            Enumeration enums = (Enumeration) type;
+            writer.write(GeneratorUtil.createEnum(enums, indent));
+        }
 
-		return writer;
-	}
+        return writer;
+    }
 
 }

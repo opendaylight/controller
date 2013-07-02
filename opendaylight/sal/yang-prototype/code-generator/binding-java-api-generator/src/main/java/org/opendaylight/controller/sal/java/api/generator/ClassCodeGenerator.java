@@ -12,22 +12,15 @@ import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.controller.binding.generator.util.TypeConstants;
-import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
-import org.opendaylight.controller.sal.binding.model.api.Constant;
-import org.opendaylight.controller.sal.binding.model.api.Enumeration;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferIdentityObject;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
-import org.opendaylight.controller.sal.binding.model.api.Type;
+import org.opendaylight.controller.sal.binding.model.api.*;
 
 public final class ClassCodeGenerator implements CodeGenerator {
 
-    private Map<String, LinkedHashMap<String, Integer>> imports;
+    private Map<String, String> imports;
 
     @Override
     public Writer generate(Type type) throws IOException {
@@ -93,26 +86,24 @@ public final class ClassCodeGenerator implements CodeGenerator {
                             writer.write(GeneratorUtil.createSetter(field, TAB, imports, currentPkg) + NL);
                         }
                     }
+                    writer.write(NL);
+
+                    if (!genTO.getHashCodeIdentifiers().isEmpty()) {
+                        writer.write(GeneratorUtil.createHashCode(genTO.getHashCodeIdentifiers(), TAB) + NL);
+                    }
+
+                    if (!genTO.getEqualsIdentifiers().isEmpty()) {
+                        writer.write(GeneratorUtil.createEquals(genTO, genTO.getEqualsIdentifiers(), TAB) + NL);
+                    }
+
+                    if (!genTO.getToStringIdentifiers().isEmpty()) {
+                        writer.write(GeneratorUtil.createToString(genTO, genTO.getToStringIdentifiers(), TAB) + NL);
+                    }
+
+                    writer.write(RCB);
                 }
-                writer.write(NL);
-
-                if (!genTO.getHashCodeIdentifiers().isEmpty()) {
-                    writer.write(GeneratorUtil.createHashCode(genTO.getHashCodeIdentifiers(), TAB) + NL);
-                }
-
-                if (!genTO.getEqualsIdentifiers().isEmpty()) {
-                    writer.write(GeneratorUtil.createEquals(genTO, genTO.getEqualsIdentifiers(), TAB) + NL);
-                }
-
-                if (!genTO.getToStringIdentifiers().isEmpty()) {
-                    writer.write(GeneratorUtil.createToString(genTO, genTO.getToStringIdentifiers(), TAB) + NL);
-
-                }
-
-                writer.write(RCB);
             }
         }
         return writer;
     }
-
 }
