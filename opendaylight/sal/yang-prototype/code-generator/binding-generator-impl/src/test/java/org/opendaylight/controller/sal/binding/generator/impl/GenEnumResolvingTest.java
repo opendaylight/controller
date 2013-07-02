@@ -106,8 +106,8 @@ public class GenEnumResolvingTest {
         assertNotNull("Generated Interface cannot contain NULL reference for " +
                 "Method Signature Definitions!", methods);
 
-        assertEquals("Expected count of method signature definitions is 21",
-                21, methods.size());
+        assertEquals("Expected count of method signature definitions is 14",
+                14, methods.size());
         Enumeration ianaIfType = null;
         for (final MethodSignature method : methods) {
             if (method.getName().equals("getType")) {
