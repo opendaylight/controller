@@ -150,4 +150,9 @@ public class SpanConfig implements Serializable {
     public boolean matchNode(String nodeId) {
         return this.nodeId.equals(nodeId);
     }
+
+    @Override
+    public String toString() {
+        return ("Span Config [nodeId=" + nodeId + " spanPort=" + spanPort + "]");
+    }
 }

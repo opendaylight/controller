@@ -52,14 +52,14 @@ import org.opendaylight.controller.sal.core.Tier;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IInventoryService;
 import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
-import org.opendaylight.controller.sal.utils.HexEncode;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISpanAware;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
@@ -174,7 +174,7 @@ CommandProvider {
 
     public void startUp() {
         // Initialize configuration file names
-        subnetFileName = ROOT + "subnets" + this.getContainerName() + ".conf";
+        subnetFileName = ROOT + "subnets_" + this.getContainerName() + ".conf";
         spanFileName = ROOT + "spanPorts_" + this.getContainerName() + ".conf";
         switchConfigFileName = ROOT + "switchConfig_" + this.getContainerName()
                 + ".conf";
@@ -201,7 +201,6 @@ CommandProvider {
     }
 
     public void shutDown() {
-        destroyCaches(this.getContainerName());
     }
 
     @SuppressWarnings("deprecation")
@@ -499,11 +498,13 @@ CommandProvider {
         }
 
         conf.addNodeConnectors(switchPorts);
+        subnetsConfigList.put(name, conf);
 
         // Update Database
         Subnet sub = subnets.get(conf.getIPnum());
         Set<NodeConnector> sp = conf.getNodeConnectors(switchPorts);
         sub.addNodeConnectors(sp);
+        subnets.put(conf.getIPnum(), sub);
         return new Status(StatusCode.SUCCESS, null);
     }
 
@@ -515,11 +516,13 @@ CommandProvider {
             return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
         }
         conf.removeNodeConnectors(switchPorts);
+        subnetsConfigList.put(name, conf);
 
         // Update Database
         Subnet sub = subnets.get(conf.getIPnum());
         Set<NodeConnector> sp = conf.getNodeConnectors(switchPorts);
         sub.deleteNodeConnectors(sp);
+        subnets.put(conf.getIPnum(), sub);
         return new Status(StatusCode.SUCCESS, null);
     }
 
@@ -554,7 +557,7 @@ CommandProvider {
     @SuppressWarnings("unchecked")
     private void loadSubnetConfiguration() {
         ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<Integer, SubnetConfig> confList = (ConcurrentMap<Integer, SubnetConfig>) objReader
+        ConcurrentMap<String, SubnetConfig> confList = (ConcurrentMap<String, SubnetConfig>) objReader
                 .read(this, subnetFileName);
 
         if (confList == null) {
@@ -598,6 +601,11 @@ CommandProvider {
 
     @Override
     public void updateSwitchConfig(SwitchConfig cfgObject) {
+        // update default container only
+        if (!isDefaultContainer) {
+            return;
+        }
+
         boolean modeChange = false;
 
         SwitchConfig sc = nodeConfigList.get(cfgObject.getNodeId());
@@ -607,28 +615,25 @@ CommandProvider {
 
         nodeConfigList.put(cfgObject.getNodeId(), cfgObject);
         try {
-            // update default container only
-            if (isDefaultContainer) {
-                String nodeId = cfgObject.getNodeId();
-                Node node = Node.fromString(nodeId);
-                Map<String, Property> propMap;
-                if (nodeProps.get(node) != null) {
-                    propMap = nodeProps.get(node);
-                } else {
-                    propMap = new HashMap<String, Property>();
-                }
-                Property desc = new Description(cfgObject.getNodeDescription());
-                propMap.put(desc.getName(), desc);
-                Property tier = new Tier(Integer.parseInt(cfgObject.getTier()));
-                propMap.put(tier.getName(), tier);
-                addNodeProps(node, propMap);
+            String nodeId = cfgObject.getNodeId();
+            Node node = Node.fromString(nodeId);
+            Map<String, Property> propMap;
+            if (nodeProps.get(node) != null) {
+                propMap = nodeProps.get(node);
+            } else {
+                propMap = new HashMap<String, Property>();
+            }
+            Property desc = new Description(cfgObject.getNodeDescription());
+            propMap.put(desc.getName(), desc);
+            Property tier = new Tier(Integer.parseInt(cfgObject.getTier()));
+            propMap.put(tier.getName(), tier);
+            addNodeProps(node, propMap);
 
-                log.info("Set Node {}'s Mode to {}", nodeId,
-                        cfgObject.getMode());
+            log.info("Set Node {}'s Mode to {}", nodeId,
+                    cfgObject.getMode());
 
-                if (modeChange) {
-                    notifyModeChange(node, cfgObject.isProactive());
-                }
+            if (modeChange) {
+                notifyModeChange(node, cfgObject.isProactive());
             }
         } catch (Exception e) {
             log.debug("updateSwitchConfig: {}", e.getMessage());
@@ -1333,17 +1338,26 @@ CommandProvider {
             return;
         }
 
-        nodeProps = this.inventoryService.getNodeProps();
-        Set<Node> nodeSet = nodeProps.keySet();
-        if (nodeSet != null) {
-            for (Node node : nodeSet) {
-                log.debug("getInventories: {} added for container {}",
-                        new Object[] { node, containerName });
-                addNode(node, null);
+        Map<Node, Map<String, Property>> nodeProp = this.inventoryService.getNodeProps();
+        for(Map.Entry<Node, Map<String, Property>> entry : nodeProp.entrySet()) {
+            Node node = entry.getKey();
+            log.debug("getInventories: {} added for container {}",
+                    new Object[] { node, containerName });
+            Map<String, Property> propMap = entry.getValue();
+            Set<Property> props = new HashSet<Property>();
+            for(Property property : propMap.values()) {
+                props.add(property);
             }
+            addNode(node, props);
         }
 
-        nodeConnectorProps = inventoryService.getNodeConnectorProps();
+        Map<NodeConnector, Map<String, Property>> nodeConnectorProp = this.inventoryService.getNodeConnectorProps();
+        for(Map.Entry<NodeConnector, Map<String, Property>> entry : nodeConnectorProp.entrySet()) {
+            Map<String, Property> propMap = entry.getValue();
+            for(Property property : propMap.values()) {
+                addNodeConnectorProp(entry.getKey(), property);
+            }
+        }
     }
 
     private void clearInventories() {
