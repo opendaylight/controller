@@ -48,7 +48,7 @@ module binary-type-test {
             type bin:restricted-binary;
         }
 
-        leaf-list binary-list {
+        leaf-list binary-leaf-list {
             type binary {
                 length 256;
             }

@@ -15,6 +15,28 @@ import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBui
 public interface Builder {
 
     /**
+     * Get current line in yang file.
+     *
+     * @return current line in yang file
+     */
+    int getLine();
+
+    /**
+     * Get parent node of this node.
+     *
+     * @return parent node builder or null if this is top level node
+     */
+    Builder getParent();
+
+    /**
+     * Set parent of this node.
+     *
+     * @param parent
+     *            parent node builder
+     */
+    void setParent(Builder parent);
+
+    /**
      * Build YANG data model node.
      *
      * This method should create an instance of YANG data model node. After
@@ -24,8 +46,6 @@ public interface Builder {
      * @return YANG data model node
      */
     Object build();
-
-    int getLine();
 
     void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode);
 

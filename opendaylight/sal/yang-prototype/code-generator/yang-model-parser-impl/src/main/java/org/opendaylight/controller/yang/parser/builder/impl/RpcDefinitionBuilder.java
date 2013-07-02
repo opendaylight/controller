@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
@@ -23,10 +24,10 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
-public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder implements TypeDefinitionAwareBuilder {
+public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
     private final RpcDefinitionImpl instance;
     private ContainerSchemaNodeBuilder inputBuilder;
@@ -34,8 +35,8 @@ public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder implem
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
 
-    RpcDefinitionBuilder(final QName qname, final int line) {
-        super(qname, line);
+    RpcDefinitionBuilder(final int line, final QName qname) {
+        super(line, qname);
         this.instance = new RpcDefinitionImpl(qname);
     }
 
@@ -51,17 +52,17 @@ public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder implem
             instance.setInput(input);
             instance.setOutput(output);
 
-            instance.setPath(path);
+            instance.setPath(schemaPath);
 
             // TYPEDEFS
-            final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
+            final Set<TypeDefinition<?>> typedefs = new TreeSet<TypeDefinition<?>>(Comparators.SCHEMA_NODE_COMP);
             for (TypeDefinitionBuilder entry : addedTypedefs) {
                 typedefs.add(entry.build());
             }
             instance.setTypeDefinitions(typedefs);
 
             // GROUPINGS
-            final Set<GroupingDefinition> groupings = new HashSet<GroupingDefinition>();
+            final Set<GroupingDefinition> groupings = new TreeSet<GroupingDefinition>(Comparators.SCHEMA_NODE_COMP);
             for (GroupingBuilder entry : addedGroupings) {
                 groupings.add(entry.build());
             }
@@ -72,6 +73,7 @@ public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder implem
             for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                 unknownNodes.add(b.build());
             }
+            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             instance.setUnknownSchemaNodes(unknownNodes);
 
             isBuilt = true;
@@ -91,7 +93,6 @@ public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder implem
         return addedTypedefs;
     }
 
-    @Override
     public void addTypedef(final TypeDefinitionBuilder type) {
         addedTypedefs.add(type);
     }
@@ -109,7 +110,7 @@ public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder implem
         final int prime = 31;
         int result = 1;
         result = prime * result + ((qname == null) ? 0 : qname.hashCode());
-        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + ((schemaPath == null) ? 0 : schemaPath.hashCode());
         return result;
     }
 
@@ -129,11 +130,11 @@ public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder implem
         } else if (!other.qname.equals(this.qname)) {
             return false;
         }
-        if (other.path == null) {
-            if (this.path != null) {
+        if (other.schemaPath == null) {
+            if (this.schemaPath != null) {
                 return false;
             }
-        } else if (!other.path.equals(this.path)) {
+        } else if (!other.schemaPath.equals(this.schemaPath)) {
             return false;
         }
         return true;

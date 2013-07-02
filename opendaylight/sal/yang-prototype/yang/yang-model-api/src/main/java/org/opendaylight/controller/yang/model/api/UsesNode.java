@@ -31,6 +31,13 @@ public interface UsesNode {
      */
     boolean isAugmenting();
 
+    /**
+     * Returns <code>true</code> if the data node was added by uses statement,
+     * otherwise returns <code>false</code>
+     *
+     * @return <code>true</code> if the data node was added by uses statement,
+     *         otherwise returns <code>false</code>
+     */
     boolean isAddedByUses();
 
     /**

@@ -17,17 +17,23 @@ import org.opendaylight.controller.yang.common.QName;
 public interface DataNodeContainer {
 
     /**
-     * @return Set of all newly defined types within this DataNodeContainer
+     * Returns set of all newly defined types within this DataNodeContainer.
+     *
+     * @return typedef statements in lexicographical order
      */
     Set<TypeDefinition<?>> getTypeDefinitions();
 
     /**
-     * Set of all child nodes defined within this DataNodeContainer
+     * Returns set of all child nodes defined within this DataNodeContainer.
+     *
+     * @return child nodes in lexicographical order
      */
     Set<DataSchemaNode> getChildNodes();
 
     /**
-     * Set of all groupings defined within this DataNodeContainer
+     * Returns set of all groupings defined within this DataNodeContainer.
+     *
+     * @return grouping statements in lexicographical order
      */
     Set<GroupingDefinition> getGroupings();
 

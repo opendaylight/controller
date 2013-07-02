@@ -16,8 +16,9 @@ import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 public final class RefineHolder implements Builder, ConfigNode {
-    private final String name;
+    private Builder parent;
     private final int line;
+    private final String name;
     private String defaultStr;
     private String description;
     private String reference;
@@ -29,7 +30,7 @@ public final class RefineHolder implements Builder, ConfigNode {
     private Integer maxElements;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    public RefineHolder(final String name, final int line) {
+    public RefineHolder(final int line, final String name) {
         this.name = name;
         this.line = line;
     }
@@ -37,6 +38,16 @@ public final class RefineHolder implements Builder, ConfigNode {
     @Override
     public int getLine() {
         return line;
+    }
+
+    @Override
+    public Builder getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(final Builder parent) {
+        this.parent = parent;
     }
 
     public String getDefaultStr() {
@@ -128,6 +139,102 @@ public final class RefineHolder implements Builder, ConfigNode {
     @Override
     public Object build() {
         return null;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((addedUnknownNodes == null) ? 0 : addedUnknownNodes.hashCode());
+        result = prime * result + ((config == null) ? 0 : config.hashCode());
+        result = prime * result + ((defaultStr == null) ? 0 : defaultStr.hashCode());
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((mandatory == null) ? 0 : mandatory.hashCode());
+        result = prime * result + ((maxElements == null) ? 0 : maxElements.hashCode());
+        result = prime * result + ((minElements == null) ? 0 : minElements.hashCode());
+        result = prime * result + ((must == null) ? 0 : must.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((parent == null) ? 0 : parent.hashCode());
+        result = prime * result + ((presence == null) ? 0 : presence.hashCode());
+        result = prime * result + ((reference == null) ? 0 : reference.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RefineHolder other = (RefineHolder) obj;
+        if (addedUnknownNodes == null) {
+            if (other.addedUnknownNodes != null)
+                return false;
+        } else if (!addedUnknownNodes.equals(other.addedUnknownNodes))
+            return false;
+        if (config == null) {
+            if (other.config != null)
+                return false;
+        } else if (!config.equals(other.config))
+            return false;
+        if (defaultStr == null) {
+            if (other.defaultStr != null)
+                return false;
+        } else if (!defaultStr.equals(other.defaultStr))
+            return false;
+        if (description == null) {
+            if (other.description != null)
+                return false;
+        } else if (!description.equals(other.description))
+            return false;
+        if (mandatory == null) {
+            if (other.mandatory != null)
+                return false;
+        } else if (!mandatory.equals(other.mandatory))
+            return false;
+        if (maxElements == null) {
+            if (other.maxElements != null)
+                return false;
+        } else if (!maxElements.equals(other.maxElements))
+            return false;
+        if (minElements == null) {
+            if (other.minElements != null)
+                return false;
+        } else if (!minElements.equals(other.minElements))
+            return false;
+        if (must == null) {
+            if (other.must != null)
+                return false;
+        } else if (!must.equals(other.must))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (parent == null) {
+            if (other.parent != null)
+                return false;
+        } else if (!parent.equals(other.parent))
+            return false;
+        if (presence == null) {
+            if (other.presence != null)
+                return false;
+        } else if (!presence.equals(other.presence))
+            return false;
+        if (reference == null) {
+            if (other.reference != null)
+                return false;
+        } else if (!reference.equals(other.reference))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "revine " + name;
     }
 
 }

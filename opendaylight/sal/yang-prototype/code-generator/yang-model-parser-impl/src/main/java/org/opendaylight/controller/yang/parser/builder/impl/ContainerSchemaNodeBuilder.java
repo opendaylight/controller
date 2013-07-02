@@ -9,11 +9,12 @@ package org.opendaylight.controller.yang.parser.builder.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.AugmentationSchema;
@@ -33,15 +34,14 @@ import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
-import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerBuilder implements
-        TypeDefinitionAwareBuilder, AugmentationTargetBuilder, DataSchemaNodeBuilder, GroupingMember, ConfigNode {
+        AugmentationTargetBuilder, DataSchemaNodeBuilder, GroupingMember, ConfigNode {
     private boolean isBuilt;
     private final ContainerSchemaNodeImpl instance;
-    private final int line;
 
     // SchemaNode args
     private SchemaPath schemaPath;
@@ -66,17 +66,15 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
     // ContainerSchemaNode args
     private boolean presence;
 
-    public ContainerSchemaNodeBuilder(final QName qname, final SchemaPath schemaPath, final int line) {
-        super(qname);
+    public ContainerSchemaNodeBuilder(final int line, final QName qname, final SchemaPath schemaPath) {
+        super(line, qname);
         this.schemaPath = schemaPath;
-        this.line = line;
         instance = new ContainerSchemaNodeImpl(qname);
         constraints = new ConstraintsBuilder(line);
     }
 
     public ContainerSchemaNodeBuilder(final ContainerSchemaNodeBuilder b) {
-        super(b.getQName());
-        line = b.getLine();
+        super(b.getLine(), b.getQName());
         instance = new ContainerSchemaNodeImpl(b.getQName());
         constraints = b.getConstraints();
         schemaPath = b.getPath();
@@ -112,14 +110,15 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
             instance.setAugmenting(augmenting);
             instance.setAddedByUses(addedByUses);
 
-            // if this builder represents rpc input or output, it can has configuration value set to null
-            if(configuration == null) {
+            // if this builder represents rpc input or output, it can has
+            // configuration value set to null
+            if (configuration == null) {
                 configuration = false;
             }
             instance.setConfiguration(configuration);
 
             // CHILD NODES
-            final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+            final Map<QName, DataSchemaNode> childs = new TreeMap<QName, DataSchemaNode>(Comparators.QNAME_COMP);
             if (childNodes == null) {
                 for (DataSchemaNodeBuilder node : addedChildNodes) {
                     childs.put(node.getQName(), node.build());
@@ -133,7 +132,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
 
             // GROUPINGS
             if (groupings == null) {
-                groupings = new HashSet<GroupingDefinition>();
+                groupings = new TreeSet<GroupingDefinition>(Comparators.SCHEMA_NODE_COMP);
                 for (GroupingBuilder builder : addedGroupings) {
                     groupings.add(builder.build());
                 }
@@ -142,7 +141,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
 
             // TYPEDEFS
             if (typedefs == null) {
-                typedefs = new HashSet<TypeDefinition<?>>();
+                typedefs = new TreeSet<TypeDefinition<?>>(Comparators.SCHEMA_NODE_COMP);
                 for (TypeDefinitionBuilder entry : addedTypedefs) {
                     typedefs.add(entry.build());
                 }
@@ -173,6 +172,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
                 for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                     unknownNodes.add(b.build());
                 }
+                Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
@@ -188,11 +188,6 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
     public void rebuild() {
         isBuilt = false;
         build();
-    }
-
-    @Override
-    public int getLine() {
-        return line;
     }
 
     @Override
@@ -333,8 +328,45 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((schemaPath == null) ? 0 : schemaPath.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ContainerSchemaNodeBuilder other = (ContainerSchemaNodeBuilder) obj;
+        if (schemaPath == null) {
+            if (other.schemaPath != null) {
+                return false;
+            }
+        } else if (!schemaPath.equals(other.schemaPath)) {
+            return false;
+        }
+        if (parent == null) {
+            if (other.parent != null) {
+                return false;
+            }
+        } else if (!parent.equals(other.parent)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
-        return "container " + getQName().getLocalName();
+        return "container " + qname.getLocalName();
     }
 
     public final class ContainerSchemaNodeImpl implements ContainerSchemaNode {

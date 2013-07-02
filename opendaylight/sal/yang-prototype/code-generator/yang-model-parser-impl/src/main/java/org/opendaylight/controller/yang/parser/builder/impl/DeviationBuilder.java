@@ -16,12 +16,14 @@ import org.opendaylight.controller.yang.model.api.Deviation.Deviate;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 import org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class DeviationBuilder implements Builder {
-    private final DeviationImpl instance;
     private final int line;
+    private Builder parent;
+    private final DeviationImpl instance;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     DeviationBuilder(final String targetPathStr, final int line) {
@@ -38,6 +40,7 @@ public final class DeviationBuilder implements Builder {
         for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
             unknownNodes.add(b.build());
         }
+        Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
         instance.setUnknownSchemaNodes(unknownNodes);
 
         return instance;
@@ -46,6 +49,16 @@ public final class DeviationBuilder implements Builder {
     @Override
     public int getLine() {
         return line;
+    }
+
+    @Override
+    public Builder getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(final Builder parent) {
+        this.parent = parent;
     }
 
     @Override

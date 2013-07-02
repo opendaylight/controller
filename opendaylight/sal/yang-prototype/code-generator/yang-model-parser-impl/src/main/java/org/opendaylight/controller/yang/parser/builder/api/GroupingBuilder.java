@@ -16,7 +16,7 @@ import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBui
 /**
  * Interface for builders of 'grouping' statement.
  */
-public interface GroupingBuilder extends DataNodeContainerBuilder, SchemaNodeBuilder, TypeDefinitionAwareBuilder, GroupingMember {
+public interface GroupingBuilder extends DataNodeContainerBuilder, SchemaNodeBuilder, GroupingMember {
 
     GroupingDefinition build();
 

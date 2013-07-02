@@ -22,14 +22,13 @@ import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuil
 import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder implements DataSchemaNodeBuilder,
         GroupingMember, ConfigNode {
     private boolean isBuilt;
     private final LeafListSchemaNodeImpl instance;
-    private final int line;
     // SchemaNode args
-    private final QName qname;
     private SchemaPath schemaPath;
     private String description;
     private String reference;
@@ -44,17 +43,15 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder im
     // LeafListSchemaNode args
     private boolean userOrdered;
 
-    public LeafListSchemaNodeBuilder(final QName qname, final SchemaPath schemaPath, final int line) {
-        this.qname = qname;
+    public LeafListSchemaNodeBuilder(final int line, final QName qname, final SchemaPath schemaPath) {
+        super(line, qname);
         this.schemaPath = schemaPath;
-        this.line = line;
         instance = new LeafListSchemaNodeImpl(qname);
         constraints = new ConstraintsBuilder(line);
     }
 
     public LeafListSchemaNodeBuilder(final LeafListSchemaNodeBuilder b) {
-        qname = b.getQName();
-        line = b.getLine();
+        super(b.getLine(), b.getQName());
         instance = new LeafListSchemaNodeImpl(qname);
 
         type = b.getType();
@@ -98,22 +95,13 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder im
                 for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                     unknownNodes.add(b.build());
                 }
+                Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
             isBuilt = true;
         }
         return instance;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public QName getQName() {
-        return qname;
     }
 
     public SchemaPath getPath() {
@@ -206,6 +194,48 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder im
 
     public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
         this.unknownNodes = unknownNodes;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((schemaPath == null) ? 0 : schemaPath.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        LeafListSchemaNodeBuilder other = (LeafListSchemaNodeBuilder) obj;
+        if (schemaPath == null) {
+            if (other.schemaPath != null) {
+                return false;
+            }
+        } else if (!schemaPath.equals(other.schemaPath)) {
+            return false;
+        }
+        if (parent == null) {
+            if (other.parent != null) {
+                return false;
+            }
+        } else if (!parent.equals(other.parent)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "leaf-list " + qname.getLocalName();
     }
 
     private final class LeafListSchemaNodeImpl implements LeafListSchemaNode {
