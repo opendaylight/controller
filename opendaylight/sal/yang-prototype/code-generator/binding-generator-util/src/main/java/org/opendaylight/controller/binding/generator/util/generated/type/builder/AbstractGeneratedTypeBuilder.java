@@ -100,6 +100,14 @@ abstract class AbstractGeneratedTypeBuilder extends AbstractBaseType implements 
     }
 
     @Override
+    public void addEnclosingTransferObject(final GeneratedTOBuilder genTOBuilder) {
+        if (genTOBuilder == null) {
+            throw new IllegalArgumentException("Parameter genTOBuilder cannot be null!");
+        }
+        enclosingTransferObjects.add(genTOBuilder);
+    }
+
+    @Override
     public void addComment(String comment) {
         this.comment = comment;
     }
@@ -118,12 +126,12 @@ abstract class AbstractGeneratedTypeBuilder extends AbstractBaseType implements 
         return builder;
     }
 
-     @Override
-     public void setAbstract(boolean isAbstract) {
-         this.isAbstract = isAbstract;
-     }
+    @Override
+    public void setAbstract(boolean isAbstract) {
+        this.isAbstract = isAbstract;
+    }
 
-     @Override
+    @Override
     public boolean addImplementsType(Type genType) {
         if (genType == null) {
             throw new IllegalArgumentException("Type cannot be null");
@@ -150,8 +158,7 @@ abstract class AbstractGeneratedTypeBuilder extends AbstractBaseType implements 
         if (name == null) {
             throw new IllegalArgumentException("Name of enumeration cannot be null!");
         }
-        final EnumBuilder builder = new EnumerationBuilderImpl(
-                getFullyQualifiedName(), name);
+        final EnumBuilder builder = new EnumerationBuilderImpl(getFullyQualifiedName(), name);
         enumDefinitions.add(builder);
         return builder;
     }
@@ -173,8 +180,7 @@ abstract class AbstractGeneratedTypeBuilder extends AbstractBaseType implements 
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
-        result = prime * result
-                + ((getPackageName() == null) ? 0 : getPackageName().hashCode());
+        result = prime * result + ((getPackageName() == null) ? 0 : getPackageName().hashCode());
         return result;
     }
 

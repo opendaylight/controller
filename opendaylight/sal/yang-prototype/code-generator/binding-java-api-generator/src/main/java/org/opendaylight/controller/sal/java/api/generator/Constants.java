@@ -45,6 +45,11 @@ final class Constants {
     public static final String STRING_PATTERN_LIST = "STRING_PATTERNS";
     public static final String MEMBER_PATTERN_LIST = "patterns";
 
+    public static final boolean INNER_CLASS = true;
+    public static final boolean OUTER_CLASS = false;
+
+    public static final String NO_INDENT = "";
+
     private Constants() {
     }
 }

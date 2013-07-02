@@ -10,9 +10,11 @@ package org.opendaylight.controller.sal.java.api.generator;
 import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.opendaylight.controller.binding.generator.util.TypeConstants;
 import org.opendaylight.controller.sal.binding.model.api.*;
@@ -27,12 +29,12 @@ public final class GeneratorUtil {
 
     public static String createIfcDeclaration(final GeneratedType genType, final String indent,
             final Map<String, String> availableImports) {
-        return createFileDeclaration(IFC, genType, indent, availableImports, false);
+        return createFileDeclaration(IFC, genType, indent, availableImports, false, OUTER_CLASS);
     }
 
     public static String createClassDeclaration(final GeneratedTransferObject genTransferObject, final String indent,
-            final Map<String, String> availableImports, boolean isIdentity) {
-        return createFileDeclaration(CLASS, genTransferObject, indent, availableImports, isIdentity);
+            final Map<String, String> availableImports, boolean isIdentity, boolean isInnerClass) {
+        return createFileDeclaration(CLASS, genTransferObject, indent, availableImports, isIdentity, isInnerClass);
     }
 
     public static String createPackageDeclaration(final String packageName) {
@@ -40,7 +42,7 @@ public final class GeneratorUtil {
     }
 
     private static String createFileDeclaration(final String type, final GeneratedType genType, final String indent,
-            final Map<String, String> availableImports, boolean isIdentity) {
+            final Map<String, String> availableImports, boolean isIdentity, boolean innerClass) {
         final StringBuilder builder = new StringBuilder();
         final String currentPkg = genType.getPackageName();
 
@@ -52,13 +54,15 @@ public final class GeneratorUtil {
             builder.append(NL);
         }
 
-        if (isIdentity) {
+        if (innerClass) {
+            builder.append(indent + PUBLIC + GAP + STATIC + GAP + FINAL + GAP + type + GAP + genType.getName() + GAP);
+        } else if (isIdentity) {
             if (!(CLASS.equals(type))) {
                 throw new IllegalArgumentException("'identity' has to be generated as a class");
             }
-            builder.append(PUBLIC + GAP + ABSTRACT + GAP + type + GAP + genType.getName() + GAP);
+            builder.append(indent + PUBLIC + GAP + ABSTRACT + GAP + type + GAP + genType.getName() + GAP);
         } else {
-            builder.append(PUBLIC + GAP + type + GAP + genType.getName() + GAP);
+            builder.append(indent + PUBLIC + GAP + type + GAP + genType.getName() + GAP);
         }
 
         if (genType instanceof GeneratedTransferObject) {
@@ -222,9 +226,9 @@ public final class GeneratorUtil {
 
         createComment(builder, comment, indent);
         builder.append(NL);
-        builder.append(indent);
 
         if (!method.getAnnotations().isEmpty()) {
+            builder.append(indent);
             final List<AnnotationType> annotations = method.getAnnotations();
             appendAnnotations(builder, annotations);
             builder.append(NL);
@@ -584,12 +588,18 @@ public final class GeneratorUtil {
         }
     }
 
-    public static Map<String, String> createImports(final GeneratedType genType) {
+    public static Map<String, String> createImports(GeneratedType genType) {
         if (genType == null) {
             throw new IllegalArgumentException("Generated Type cannot be NULL!");
         }
-
         final Map<String, String> imports = new LinkedHashMap<>();
+        List<GeneratedType> childGeneratedTypes = genType.getEnclosedTypes();
+        if (childGeneratedTypes.size() != 0) {
+            for (GeneratedType genTypeChild : childGeneratedTypes) {
+                imports.putAll(createImports(genTypeChild));
+            }
+        }
+
         final List<Constant> constants = genType.getConstantDefinitions();
         final List<MethodSignature> methods = genType.getMethodDefinitions();
         final List<Type> impl = genType.getImplements();
@@ -644,6 +654,18 @@ public final class GeneratorUtil {
         return imports;
     }
 
+    public static Map<String, String> createChildImports(GeneratedType genType) {
+        Map<String, String> childImports = new LinkedHashMap<>();
+        List<GeneratedType> childGeneratedTypes = genType.getEnclosedTypes();
+        if (childGeneratedTypes.size() != 0) {
+            for (GeneratedType genTypeChild : childGeneratedTypes) {
+                createChildImports(genTypeChild);
+                childImports.put(genTypeChild.getName(), genTypeChild.getPackageName());
+            }
+        }
+        return childImports;
+    }
+
     private static void putTypeIntoImports(final GeneratedType parentGenType, final Type type,
             final Map<String, String> imports) {
         if (parentGenType == null) {
@@ -686,12 +708,20 @@ public final class GeneratorUtil {
         }
     }
 
-    public static List<String> createImportLines(final Map<String, String> imports) {
+    public static List<String> createImportLines(final Map<String, String> imports,
+            final Map<String, String> unwantedImports) {
         final List<String> importLines = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : imports.entrySet()) {
             final String typeName = entry.getKey();
             final String packageName = entry.getValue();
+            if (unwantedImports != null) {
+                String unwantedPackageName = unwantedImports.get(typeName);
+                if (unwantedPackageName != null) {
+                    if (unwantedPackageName.equals(packageName))
+                        continue;
+                }
+            }
             importLines.add("import " + packageName + "." + typeName + SC);
         }
         return importLines;
