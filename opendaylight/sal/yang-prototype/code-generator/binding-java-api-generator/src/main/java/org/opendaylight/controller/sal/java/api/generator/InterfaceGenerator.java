@@ -20,6 +20,7 @@ import org.opendaylight.controller.sal.binding.model.api.*;
 public final class InterfaceGenerator implements CodeGenerator {
 
     private Map<String, String> imports;
+    private Map<String, String> unwantedTypes;
 
     private String generateEnums(List<Enumeration> enums) {
         String result = "";
@@ -59,21 +60,40 @@ public final class InterfaceGenerator implements CodeGenerator {
         return result;
     }
 
+    public String generateInnerClasses(final List<GeneratedType> generatedTypes) throws IOException {
+        String result = "";
+
+        if (generatedTypes != null) {
+            ClassCodeGenerator classCodeGenerator = new ClassCodeGenerator();
+            for (GeneratedType genType : generatedTypes) {
+                if (genType instanceof GeneratedTransferObject) {
+                    result = result + classCodeGenerator.generateOnlyClass(genType, imports).toString();
+                    result = result + NL + NL;
+                }
+            }
+        }
+
+        return result;
+    }
+
     public Writer generate(Type type) throws IOException {
         Writer writer = new StringWriter();
         if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
             final GeneratedType genType = (GeneratedType) type;
             imports = GeneratorUtil.createImports(genType);
+            unwantedTypes = GeneratorUtil.createChildImports(genType);
 
             final String currentPkg = genType.getPackageName();
             final List<Constant> constants = genType.getConstantDefinitions();
             final List<MethodSignature> methods = genType.getMethodDefinitions();
             final List<Enumeration> enums = genType.getEnumerations();
+            final List<GeneratedType> enclosedGeneratedTypes = genType.getEnclosedTypes();
 
             writer.write(GeneratorUtil.createPackageDeclaration(genType.getPackageName()));
             writer.write(NL);
 
-            final List<String> importLines = GeneratorUtil.createImportLines(imports);
+            List<String> importLines = GeneratorUtil.createImportLines(imports, unwantedTypes);
+
             for (String line : importLines) {
                 writer.write(line + NL);
             }
@@ -81,6 +101,7 @@ public final class InterfaceGenerator implements CodeGenerator {
             writer.write(GeneratorUtil.createIfcDeclaration(genType, "", imports));
             writer.write(NL);
 
+            writer.write(generateInnerClasses(enclosedGeneratedTypes));
             writer.write(generateEnums(enums));
             writer.write(generateConstants(constants, currentPkg));
             writer.write(generateMethods(methods, currentPkg));

@@ -10,9 +10,11 @@ package org.opendaylight.controller.sal.java.api.generator;
 import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.opendaylight.controller.binding.generator.util.TypeConstants;
 import org.opendaylight.controller.sal.binding.model.api.*;
@@ -56,9 +58,9 @@ public final class GeneratorUtil {
             if (!(CLASS.equals(type))) {
                 throw new IllegalArgumentException("'identity' has to be generated as a class");
             }
-            builder.append(PUBLIC + GAP + ABSTRACT + GAP + type + GAP + genType.getName() + GAP);
+            builder.append(indent + PUBLIC + GAP + ABSTRACT + GAP + type + GAP + genType.getName() + GAP);
         } else {
-            builder.append(PUBLIC + GAP + type + GAP + genType.getName() + GAP);
+            builder.append(indent + PUBLIC + GAP + type + GAP + genType.getName() + GAP);
         }
 
         if (genType instanceof GeneratedTransferObject) {
@@ -222,9 +224,9 @@ public final class GeneratorUtil {
 
         createComment(builder, comment, indent);
         builder.append(NL);
-        builder.append(indent);
 
         if (!method.getAnnotations().isEmpty()) {
+            builder.append(indent);
             final List<AnnotationType> annotations = method.getAnnotations();
             appendAnnotations(builder, annotations);
             builder.append(NL);
@@ -584,12 +586,18 @@ public final class GeneratorUtil {
         }
     }
 
-    public static Map<String, String> createImports(final GeneratedType genType) {
+    public static Map<String, String> createImports(GeneratedType genType) {
         if (genType == null) {
             throw new IllegalArgumentException("Generated Type cannot be NULL!");
         }
-
         final Map<String, String> imports = new LinkedHashMap<>();
+        List<GeneratedType> childGeneratedTypes = genType.getEnclosedTypes();
+        if (childGeneratedTypes.size() != 0) {
+            for (GeneratedType genTypeChild : childGeneratedTypes) {
+                imports.putAll(createImports(genTypeChild));
+            }
+        }
+
         final List<Constant> constants = genType.getConstantDefinitions();
         final List<MethodSignature> methods = genType.getMethodDefinitions();
         final List<Type> impl = genType.getImplements();
@@ -644,6 +652,18 @@ public final class GeneratorUtil {
         return imports;
     }
 
+    public static Map<String, String> createChildImports(GeneratedType genType) {
+        Map<String, String> childImports = new LinkedHashMap<>();
+        List<GeneratedType> childGeneratedTypes = genType.getEnclosedTypes();
+        if (childGeneratedTypes.size() != 0) {
+            for (GeneratedType genTypeChild : childGeneratedTypes) {
+                createChildImports(genTypeChild);
+                childImports.put(genTypeChild.getName(), genTypeChild.getPackageName());
+            }
+        }
+        return childImports;
+    }
+
     private static void putTypeIntoImports(final GeneratedType parentGenType, final Type type,
             final Map<String, String> imports) {
         if (parentGenType == null) {
@@ -686,12 +706,20 @@ public final class GeneratorUtil {
         }
     }
 
-    public static List<String> createImportLines(final Map<String, String> imports) {
+    public static List<String> createImportLines(final Map<String, String> imports,
+            final Map<String, String> unwantedImports) {
         final List<String> importLines = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : imports.entrySet()) {
             final String typeName = entry.getKey();
             final String packageName = entry.getValue();
+            if (unwantedImports != null) {
+                String unwantedPackageName = unwantedImports.get(typeName);
+                if (unwantedPackageName != null) {
+                    if (unwantedPackageName.equals(packageName))
+                        continue;
+                }
+            }
             importLines.add("import " + packageName + "." + typeName + SC);
         }
         return importLines;
