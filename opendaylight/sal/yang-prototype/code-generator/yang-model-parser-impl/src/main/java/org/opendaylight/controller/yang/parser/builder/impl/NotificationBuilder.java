@@ -9,11 +9,12 @@ package org.opendaylight.controller.yang.parser.builder.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.AugmentationSchema;
@@ -31,12 +32,12 @@ import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBui
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
-public final class NotificationBuilder extends AbstractDataNodeContainerBuilder implements TypeDefinitionAwareBuilder,
-        SchemaNodeBuilder, AugmentationTargetBuilder {
+public final class NotificationBuilder extends AbstractDataNodeContainerBuilder implements SchemaNodeBuilder,
+        AugmentationTargetBuilder {
     private boolean isBuilt;
     private final NotificationDefinitionImpl instance;
     private final int line;
@@ -50,8 +51,8 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder 
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    NotificationBuilder(final QName qname, final int line) {
-        super(qname);
+    NotificationBuilder(final int line, final QName qname) {
+        super(line, qname);
         this.line = line;
         instance = new NotificationDefinitionImpl(qname);
     }
@@ -65,21 +66,21 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder 
             instance.setStatus(status);
 
             // CHILD NODES
-            final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+            final Map<QName, DataSchemaNode> childs = new TreeMap<QName, DataSchemaNode>(Comparators.QNAME_COMP);
             for (DataSchemaNodeBuilder node : addedChildNodes) {
                 childs.put(node.getQName(), node.build());
             }
             instance.setChildNodes(childs);
 
             // GROUPINGS
-            final Set<GroupingDefinition> groupingDefs = new HashSet<GroupingDefinition>();
+            final Set<GroupingDefinition> groupingDefs = new TreeSet<GroupingDefinition>(Comparators.SCHEMA_NODE_COMP);
             for (GroupingBuilder builder : addedGroupings) {
                 groupingDefs.add(builder.build());
             }
             instance.setGroupings(groupingDefs);
 
             // TYPEDEFS
-            final Set<TypeDefinition<?>> typedefs = new HashSet<TypeDefinition<?>>();
+            final Set<TypeDefinition<?>> typedefs = new TreeSet<TypeDefinition<?>>(Comparators.SCHEMA_NODE_COMP);
             for (TypeDefinitionBuilder entry : addedTypedefs) {
                 typedefs.add(entry.build());
             }
@@ -106,6 +107,7 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder 
             for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                 unknownNodes.add(b.build());
             }
+            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             instance.setUnknownSchemaNodes(unknownNodes);
 
             isBuilt = true;
@@ -118,11 +120,6 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder 
     public void rebuild() {
         isBuilt = false;
         build();
-    }
-
-    @Override
-    public int getLine() {
-        return line;
     }
 
     @Override

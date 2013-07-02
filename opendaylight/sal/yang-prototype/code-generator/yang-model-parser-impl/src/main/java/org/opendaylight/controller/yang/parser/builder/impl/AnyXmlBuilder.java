@@ -21,47 +21,46 @@ import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBui
 import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class AnyXmlBuilder extends AbstractSchemaNodeBuilder implements DataSchemaNodeBuilder, GroupingMember,
         ConfigNode {
     private boolean built;
     private final AnyXmlSchemaNodeImpl instance;
     private final ConstraintsBuilder constraints;
-
     private List<UnknownSchemaNode> unknownNodes;
 
     private Boolean configuration;
     private boolean augmenting;
     private boolean addedByUses;
 
-    public AnyXmlBuilder(final QName qname, final SchemaPath schemaPath, final int line) {
-        super(qname, line);
-        this.path = schemaPath;
+    public AnyXmlBuilder(final int line, final QName qname, final SchemaPath schemaPath) {
+        super(line, qname);
+        this.schemaPath = schemaPath;
         instance = new AnyXmlSchemaNodeImpl(qname);
         constraints = new ConstraintsBuilder(line);
     }
 
     public AnyXmlBuilder(final AnyXmlBuilder builder) {
-        super(builder.qname, builder.line);
+        super(builder.getLine(), builder.getQName());
+        parent = builder.getParent();
         instance = new AnyXmlSchemaNodeImpl(qname);
-        constraints = builder.constraints;
-        path = builder.path;
+        constraints = builder.getConstraints();
+        schemaPath = builder.getPath();
         unknownNodes = builder.unknownNodes;
-        for (UnknownSchemaNodeBuilder un : builder.addedUnknownNodes) {
-            addedUnknownNodes.add(un);
-        }
-        description = builder.description;
-        reference = builder.reference;
-        status = builder.status;
-        configuration = builder.configuration;
-        augmenting = builder.augmenting;
-        addedByUses = builder.addedByUses;
+        addedUnknownNodes.addAll(builder.getUnknownNodes());
+        description = builder.getDescription();
+        reference = builder.getReference();
+        status = builder.getStatus();
+        configuration = builder.isConfiguration();
+        augmenting = builder.isAugmenting();
+        addedByUses = builder.isAddedByUses();
     }
 
     @Override
     public AnyXmlSchemaNode build() {
         if (!built) {
-            instance.setPath(path);
+            instance.setPath(schemaPath);
             instance.setConstraints(constraints.build());
             instance.setDescription(description);
             instance.setReference(reference);
@@ -77,6 +76,7 @@ public final class AnyXmlBuilder extends AbstractSchemaNodeBuilder implements Da
                     unknownNodes.add(b.build());
                 }
             }
+            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             instance.setUnknownSchemaNodes(unknownNodes);
 
             built = true;
@@ -125,6 +125,48 @@ public final class AnyXmlBuilder extends AbstractSchemaNodeBuilder implements Da
     @Override
     public void setConfiguration(final Boolean configuration) {
         this.configuration = configuration;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((schemaPath == null) ? 0 : schemaPath.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AnyXmlBuilder other = (AnyXmlBuilder) obj;
+        if (schemaPath == null) {
+            if (other.schemaPath != null) {
+                return false;
+            }
+        } else if (!schemaPath.equals(other.schemaPath)) {
+            return false;
+        }
+        if (parent == null) {
+            if (other.parent != null) {
+                return false;
+            }
+        } else if (!parent.equals(other.parent)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "anyxml " + qname.getLocalName();
     }
 
     private final class AnyXmlSchemaNodeImpl implements AnyXmlSchemaNode {

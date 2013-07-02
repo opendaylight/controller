@@ -21,16 +21,18 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.DataNodeContainerBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.RefineHolder;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     private boolean isBuilt;
     private UsesNodeImpl instance;
     private final int line;
-    private final DataNodeContainerBuilder parent;
+    private DataNodeContainerBuilder parent;
     private final String groupingName;
     private SchemaPath groupingPath;
     private boolean augmenting;
@@ -40,10 +42,9 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     private final List<RefineHolder> refines = new ArrayList<RefineHolder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    public UsesNodeBuilderImpl(final String groupingName, final int line, final DataNodeContainerBuilder parent) {
+    public UsesNodeBuilderImpl(final int line, final String groupingName) {
         this.groupingName = groupingName;
         this.line = line;
-        this.parent = parent;
     }
 
     public UsesNodeBuilderImpl(UsesNodeBuilder b) {
@@ -100,6 +101,14 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     @Override
     public DataNodeContainerBuilder getParent() {
         return parent;
+    }
+
+    @Override
+    public void setParent(Builder parent) {
+        if (!(parent instanceof DataNodeContainerBuilder)) {
+            throw new YangParseException(line, "Unresolved parent of uses '" + groupingName + "'.");
+        }
+        this.parent = (DataNodeContainerBuilder) parent;
     }
 
     @Override
@@ -174,6 +183,47 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     @Override
     public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((groupingName == null) ? 0 : groupingName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        UsesNodeBuilderImpl other = (UsesNodeBuilderImpl) obj;
+        if (groupingName == null) {
+            if (other.groupingName != null)
+                return false;
+        } else if (!groupingName.equals(other.groupingName))
+            return false;
+
+        if (parent == null) {
+            if (other.parent != null)
+                return false;
+        } else if (!parent.equals(other.parent))
+            return false;
+        if (refines == null) {
+            if (other.refines != null)
+                return false;
+        } else if (!refines.equals(other.refines))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "uses '" + groupingName + "'";
     }
 
     public final class UsesNodeImpl implements UsesNode {
@@ -296,4 +346,5 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
             return sb.toString();
         }
     }
+
 }

@@ -17,6 +17,13 @@ package org.opendaylight.controller.yang.model.api;
  */
 public interface GroupingDefinition extends DataNodeContainer, SchemaNode {
 
+    /**
+     * Returns <code>true</code> if the data node was added by uses statement,
+     * otherwise returns <code>false</code>
+     *
+     * @return <code>true</code> if the data node was added by uses statement,
+     *         otherwise returns <code>false</code>
+     */
     boolean isAddedByUses();
 
 }

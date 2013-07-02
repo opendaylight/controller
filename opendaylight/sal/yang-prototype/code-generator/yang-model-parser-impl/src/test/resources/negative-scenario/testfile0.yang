@@ -1,9 +1,9 @@
 module test0 {
     yang-version 1;
     namespace "urn:simple.container.demo";
-    prefix "t1";
-    
+    prefix "t0";
+
     container interfaces {
-    
     }
+
 }

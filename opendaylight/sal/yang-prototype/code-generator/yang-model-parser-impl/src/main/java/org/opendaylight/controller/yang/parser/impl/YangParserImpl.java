@@ -436,8 +436,8 @@ public final class YangParserImpl implements YangModelParser {
         final ModuleBuilder dependentModule = findDependentModuleBuilder(modules, module, unknownTypeQName.getPrefix(),
                 line);
 
-        final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(nodeToResolve.getPath(),
-                dependentModule, unknownTypeQName.getLocalName(), module.getName(), line);
+        final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(nodeToResolve, dependentModule,
+                unknownTypeQName.getLocalName(), module.getName(), line);
 
         if (nodeToResolveType instanceof ExtendedType) {
             final ExtendedType extType = (ExtendedType) nodeToResolveType;
@@ -504,7 +504,7 @@ public final class YangParserImpl implements YangModelParser {
             }
 
         } else {
-            final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(nodeToResolve.getPath(),
+            final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(nodeToResolve,
                     dependentModuleBuilder, unknownTypeQName.getLocalName(), module.getName(), line);
 
             if (nodeToResolveType instanceof ExtendedType) {
@@ -535,8 +535,8 @@ public final class YangParserImpl implements YangModelParser {
                 final UnknownType ut = (UnknownType) unionType;
                 final ModuleBuilder dependentModule = findDependentModuleBuilder(modules, builder, ut.getQName()
                         .getPrefix(), union.getLine());
-                final TypeDefinitionBuilder resolvedType = findTypeDefinitionBuilder(union.getPath(), dependentModule,
-                        ut.getQName().getLocalName(), builder.getName(), union.getLine());
+                final TypeDefinitionBuilder resolvedType = findTypeDefinitionBuilder(union, dependentModule, ut
+                        .getQName().getLocalName(), builder.getName(), union.getLine());
                 union.setTypedef(resolvedType);
                 toRemove.add(ut);
             } else if (unionType instanceof ExtendedType) {
@@ -546,8 +546,8 @@ public final class YangParserImpl implements YangModelParser {
                     final UnknownType ut = (UnknownType) extTypeBase;
                     final ModuleBuilder dependentModule = findDependentModuleBuilder(modules, builder, ut.getQName()
                             .getPrefix(), union.getLine());
-                    final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(union.getPath(),
-                            dependentModule, ut.getQName().getLocalName(), builder.getName(), union.getLine());
+                    final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(union, dependentModule,
+                            ut.getQName().getLocalName(), builder.getName(), union.getLine());
 
                     final TypeDefinitionBuilder newType = extendedTypeWithNewBaseTypeBuilder(targetTypeBuilder,
                             extType, modules, builder, union.getLine());
@@ -581,8 +581,8 @@ public final class YangParserImpl implements YangModelParser {
                     union.setType(type);
                     toRemove.add(ut);
                 } else {
-                    final TypeDefinitionBuilder resolvedType = findTypeDefinitionBuilder(union.getPath(),
-                            dependentModuleBuilder, utQName.getLocalName(), builder.getName(), union.getLine());
+                    final TypeDefinitionBuilder resolvedType = findTypeDefinitionBuilder(union, dependentModuleBuilder,
+                            utQName.getLocalName(), builder.getName(), union.getLine());
                     union.setTypedef(resolvedType);
                     toRemove.add(ut);
                 }
@@ -606,7 +606,7 @@ public final class YangParserImpl implements YangModelParser {
                         union.setTypedef(newType);
                         toRemove.add(extType);
                     } else {
-                        final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(union.getPath(),
+                        final TypeDefinitionBuilder targetTypeBuilder = findTypeDefinitionBuilder(union,
                                 dependentModuleBuilder, utQName.getLocalName(), builder.getName(), union.getLine());
 
                         final TypeDefinitionBuilder newType = extendedTypeWithNewBaseTypeBuilder(targetTypeBuilder,
@@ -645,7 +645,7 @@ public final class YangParserImpl implements YangModelParser {
             resolveAugment(modules, module);
             // while all augments are not resolved
             final Iterator<ModuleBuilder> allModulesIterator = allModulesSet.iterator();
-            while (!(module.getAugmentsResolved() == module.getAugments().size())) {
+            while (!(module.getAugmentsResolved() == module.getAllAugments().size())) {
                 ModuleBuilder nextModule = null;
                 // try resolve other module augments
                 try {
@@ -670,8 +670,8 @@ public final class YangParserImpl implements YangModelParser {
      *            current module
      */
     private void resolveAugment(final Map<String, TreeMap<Date, ModuleBuilder>> modules, final ModuleBuilder module) {
-        if (module.getAugmentsResolved() < module.getAugments().size()) {
-            for (AugmentationSchemaBuilder augmentBuilder : module.getAugments()) {
+        if (module.getAugmentsResolved() < module.getAllAugments().size()) {
+            for (AugmentationSchemaBuilder augmentBuilder : module.getAllAugments()) {
 
                 if (!augmentBuilder.isResolved()) {
                     final SchemaPath augmentTargetSchemaPath = augmentBuilder.getTargetPath();
@@ -685,7 +685,7 @@ public final class YangParserImpl implements YangModelParser {
 
                     final ModuleBuilder dependentModule = findDependentModuleBuilder(modules, module, prefix,
                             augmentBuilder.getLine());
-                    processAugmentation(augmentBuilder, path, module, qname, dependentModule);
+                    processAugmentation(augmentBuilder, path, module, dependentModule);
                 }
 
             }
@@ -719,7 +719,7 @@ public final class YangParserImpl implements YangModelParser {
             resolveAugmentWithContext(modules, module, context);
             // while all augments are not resolved
             final Iterator<ModuleBuilder> allModulesIterator = allModulesSet.iterator();
-            while (!(module.getAugmentsResolved() == module.getAugments().size())) {
+            while (!(module.getAugmentsResolved() == module.getAllAugments().size())) {
                 ModuleBuilder nextModule = null;
                 // try resolve other module augments
                 try {
@@ -745,9 +745,9 @@ public final class YangParserImpl implements YangModelParser {
      */
     private void resolveAugmentWithContext(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module, final SchemaContext context) {
-        if (module.getAugmentsResolved() < module.getAugments().size()) {
+        if (module.getAugmentsResolved() < module.getAllAugments().size()) {
 
-            for (AugmentationSchemaBuilder augmentBuilder : module.getAugments()) {
+            for (AugmentationSchemaBuilder augmentBuilder : module.getAllAugments()) {
                 final int line = augmentBuilder.getLine();
 
                 if (!augmentBuilder.isResolved()) {
@@ -767,7 +767,7 @@ public final class YangParserImpl implements YangModelParser {
                         processAugmentationOnContext(augmentBuilder, path, module, prefix, line, context);
                         continue;
                     } else {
-                        processAugmentation(augmentBuilder, path, module, qname, dependentModuleBuilder);
+                        processAugmentation(augmentBuilder, path, module, dependentModuleBuilder);
                     }
                 }
 
@@ -875,18 +875,17 @@ public final class YangParserImpl implements YangModelParser {
      *            module being resolved
      */
     private void resolveUsesRefine(final Map<String, TreeMap<Date, ModuleBuilder>> modules, final ModuleBuilder module) {
-        final Map<List<String>, UsesNodeBuilder> moduleUses = module.getUsesNodes();
-        for (Map.Entry<List<String>, UsesNodeBuilder> entry : moduleUses.entrySet()) {
+        final List<UsesNodeBuilder> allModuleUses = module.getAllUsesNodes();
+        for (UsesNodeBuilder usesNode : allModuleUses) {
             // refine
-            final UsesNodeBuilder usesNode = entry.getValue();
             final int line = usesNode.getLine();
             final GroupingBuilder targetGrouping = getTargetGroupingFromModules(usesNode, modules, module);
             usesNode.setGroupingPath(targetGrouping.getPath());
             for (RefineHolder refine : usesNode.getRefines()) {
                 final SchemaNodeBuilder nodeToRefine = RefineUtils.getRefineNodeFromGroupingBuilder(targetGrouping,
                         refine, module.getName());
-                if(nodeToRefine instanceof GroupingMember) {
-                    ((GroupingMember)nodeToRefine).setAddedByUses(true);
+                if (nodeToRefine instanceof GroupingMember) {
+                    ((GroupingMember) nodeToRefine).setAddedByUses(true);
                 }
                 RefineUtils.performRefine(nodeToRefine, refine, line);
                 usesNode.addRefineNode(nodeToRefine);
@@ -911,9 +910,8 @@ public final class YangParserImpl implements YangModelParser {
      */
     private void resolveUsesRefineWithContext(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module, final SchemaContext context) {
-        final Map<List<String>, UsesNodeBuilder> moduleUses = module.getUsesNodes();
-        for (Map.Entry<List<String>, UsesNodeBuilder> entry : moduleUses.entrySet()) {
-            final UsesNodeBuilder usesNode = entry.getValue();
+        final List<UsesNodeBuilder> moduleUses = module.getAllUsesNodes();
+        for (UsesNodeBuilder usesNode : moduleUses) {
             final int line = usesNode.getLine();
 
             final GroupingBuilder targetGroupingBuilder = getTargetGroupingFromModules(usesNode, modules, module);
@@ -923,8 +921,8 @@ public final class YangParserImpl implements YangModelParser {
                 for (RefineHolder refine : usesNode.getRefines()) {
                     final SchemaNodeBuilder nodeToRefine = RefineUtils.getRefineNodeFromGroupingDefinition(
                             targetGrouping, refine, module.getName());
-                    if(nodeToRefine instanceof GroupingMember) {
-                        ((GroupingMember)nodeToRefine).setAddedByUses(true);
+                    if (nodeToRefine instanceof GroupingMember) {
+                        ((GroupingMember) nodeToRefine).setAddedByUses(true);
                     }
                     RefineUtils.performRefine(nodeToRefine, refine, line);
                     usesNode.addRefineNode(nodeToRefine);
@@ -936,8 +934,8 @@ public final class YangParserImpl implements YangModelParser {
                 for (RefineHolder refine : usesNode.getRefines()) {
                     final SchemaNodeBuilder nodeToRefine = RefineUtils.getRefineNodeFromGroupingBuilder(
                             targetGroupingBuilder, refine, module.getName());
-                    if(nodeToRefine instanceof GroupingMember) {
-                        ((GroupingMember)nodeToRefine).setAddedByUses(true);
+                    if (nodeToRefine instanceof GroupingMember) {
+                        ((GroupingMember) nodeToRefine).setAddedByUses(true);
                     }
                     RefineUtils.performRefine(nodeToRefine, refine, line);
                     usesNode.addRefineNode(nodeToRefine);
@@ -989,36 +987,33 @@ public final class YangParserImpl implements YangModelParser {
             return null;
         }
 
-        List<QName> path = usesBuilder.getParent().getPath().getPath();
         GroupingBuilder result = null;
-        Set<GroupingBuilder> groupings = dependentModule.getModuleGroupings();
+        Set<GroupingBuilder> groupings = dependentModule.getGroupingBuilders();
         result = findGroupingBuilder(groupings, groupingName);
+        if (result != null) {
+            return result;
+        }
 
-        if (result == null) {
-            Builder currentNode = null;
-            final List<String> currentPath = new ArrayList<String>();
-            currentPath.add(dependentModule.getName());
+        Builder parent = usesBuilder.getParent();
 
-            for (int i = 0; i < path.size(); i++) {
-                QName qname = path.get(i);
-                currentPath.add(qname.getLocalName());
-                currentNode = dependentModule.getModuleNode(currentPath);
-
-                if (currentNode instanceof RpcDefinitionBuilder) {
-                    groupings = ((RpcDefinitionBuilder) currentNode).getGroupings();
-                } else if (currentNode instanceof DataNodeContainerBuilder) {
-                    groupings = ((DataNodeContainerBuilder) currentNode).getGroupingBuilders();
-                } else {
-                    groupings = Collections.emptySet();
-                }
-
-                result = findGroupingBuilder(groupings, groupingName);
-                if (result != null) {
-                    break;
-                }
+        while (parent != null) {
+            if (parent instanceof DataNodeContainerBuilder) {
+                groupings = ((DataNodeContainerBuilder) parent).getGroupingBuilders();
+            } else if (parent instanceof RpcDefinitionBuilder) {
+                groupings = ((RpcDefinitionBuilder) parent).getGroupings();
+            }
+            result = findGroupingBuilder(groupings, groupingName);
+            if (result == null) {
+                parent = parent.getParent();
+            } else {
+                break;
             }
         }
 
+        if (result == null) {
+            throw new YangParseException(module.getName(), line, "Referenced grouping '" + groupingName
+                    + "' not found.");
+        }
         return result;
     }
 
@@ -1069,9 +1064,9 @@ public final class YangParserImpl implements YangModelParser {
         for (DataSchemaNodeBuilder child : targetGrouping.getChildNodeBuilders()) {
             // if node is refined, take it from refined nodes and continue
             SchemaNodeBuilder refined = getRefined(child.getQName(), refineNodes);
-            if(refined != null) {
+            if (refined != null) {
                 refined.setPath(createSchemaPath(parentPath, refined.getQName().getLocalName()));
-                parent.addChildNode((DataSchemaNodeBuilder)refined);
+                parent.addChildNode((DataSchemaNodeBuilder) refined);
                 continue;
             }
 
@@ -1130,9 +1125,9 @@ public final class YangParserImpl implements YangModelParser {
         for (DataSchemaNode child : targetGrouping.getChildNodes()) {
             // if node is refined, take it from refined nodes and continue
             SchemaNodeBuilder refined = getRefined(child.getQName(), refineNodes);
-            if(refined != null) {
+            if (refined != null) {
                 refined.setPath(createSchemaPath(parentPath, refined.getQName().getLocalName()));
-                parent.addChildNode((DataSchemaNodeBuilder)refined);
+                parent.addChildNode((DataSchemaNodeBuilder) refined);
                 continue;
             }
 

@@ -135,6 +135,11 @@ module types1 {
         }
         container schemas {
         }
+        choice odl {
+            leaf id {
+                type int8;
+            }
+        }
     }
     
     container mycont {

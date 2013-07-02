@@ -40,8 +40,7 @@ import com.google.common.collect.Sets;
 public final class ModuleDependencySort {
 
     private static final Date DEFAULT_REVISION = new Date(0);
-    private static final Logger logger = LoggerFactory
-            .getLogger(ModuleDependencySort.class);
+    private static final Logger logger = LoggerFactory.getLogger(ModuleDependencySort.class);
 
     /**
      * Topological sort of module builder dependency graph.
@@ -72,7 +71,7 @@ public final class ModuleDependencySort {
 
             @Override
             public ModuleBuilder apply(Node input) {
-                if(((ModuleNodeImpl) input).getReference() instanceof ModuleBuilder) {
+                if (((ModuleNodeImpl) input).getReference() instanceof ModuleBuilder) {
                     return (ModuleBuilder) ((ModuleNodeImpl) input).getReference();
                 } else {
                     return null;
@@ -113,8 +112,7 @@ public final class ModuleDependencySort {
     }
 
     @VisibleForTesting
-    static Map<String, Map<Date, ModuleNodeImpl>> createModuleGraph(
-            List<?> builders) {
+    static Map<String, Map<Date, ModuleNodeImpl>> createModuleGraph(List<?> builders) {
         Map<String, Map<Date, ModuleNodeImpl>> moduleGraph = Maps.newHashMap();
 
         processModules(moduleGraph, builders);
@@ -126,8 +124,7 @@ public final class ModuleDependencySort {
     /**
      * Extract module:revision from module builders
      */
-    private static void processDependencies(
-            Map<String, Map<Date, ModuleNodeImpl>> moduleGraph, List<?> builders) {
+    private static void processDependencies(Map<String, Map<Date, ModuleNodeImpl>> moduleGraph, List<?> builders) {
         Map<String, Date> imported = Maps.newHashMap();
 
         // Create edges in graph
@@ -154,26 +151,24 @@ public final class ModuleDependencySort {
 
             for (ModuleImport imprt : imports) {
                 String toName = imprt.getModuleName();
-                Date toRevision = imprt.getRevision() == null ? DEFAULT_REVISION
-                        : imprt.getRevision();
+                Date toRevision = imprt.getRevision() == null ? DEFAULT_REVISION : imprt.getRevision();
 
-                ModuleNodeImpl from = moduleGraph.get(fromName).get(
-                        fromRevision);
+                ModuleNodeImpl from = moduleGraph.get(fromName).get(fromRevision);
 
-                ModuleNodeImpl to = getModuleByNameAndRevision(moduleGraph,
-                        fromName, fromRevision, toName, toRevision);
+                ModuleNodeImpl to = getModuleByNameAndRevision(moduleGraph, fromName, fromRevision, toName, toRevision);
 
                 /*
                  * Check imports: If module is imported twice with different
                  * revisions then throw exception
                  */
-                if (imported.get(toName) != null
-                        && !imported.get(toName).equals(toRevision))
-                    ex(String
-                            .format("Module:%s imported twice with different revisions:%s, %s",
-                                    toName,
-                                    formatRevDate(imported.get(toName)),
-                                    formatRevDate(toRevision)));
+                if (imported.get(toName) != null && !imported.get(toName).equals(toRevision)) {
+                    if (!imported.get(toName).equals(DEFAULT_REVISION) && !toRevision.equals(DEFAULT_REVISION)) {
+                        ex(String.format("Module:%s imported twice with different revisions:%s, %s", toName,
+                                formatRevDate(imported.get(toName)), formatRevDate(toRevision)));
+                    }
+
+                }
+
                 imported.put(toName, toRevision);
 
                 from.addEdge(to);
@@ -184,28 +179,23 @@ public final class ModuleDependencySort {
     /**
      * Get imported module by its name and revision from moduleGraph
      */
-    private static ModuleNodeImpl getModuleByNameAndRevision(
-            Map<String, Map<Date, ModuleNodeImpl>> moduleGraph,
+    private static ModuleNodeImpl getModuleByNameAndRevision(Map<String, Map<Date, ModuleNodeImpl>> moduleGraph,
             String fromName, Date fromRevision, String toName, Date toRevision) {
         ModuleNodeImpl to = null;
 
-        if (moduleGraph.get(toName) == null
-                || !moduleGraph.get(toName).containsKey(toRevision)) {
+        if (moduleGraph.get(toName) == null || !moduleGraph.get(toName).containsKey(toRevision)) {
             // If revision is not specified in import, but module exists
             // with different revisions, take first
-            if (moduleGraph.get(toName) != null
-                    && !moduleGraph.get(toName).isEmpty()
+            if (moduleGraph.get(toName) != null && !moduleGraph.get(toName).isEmpty()
                     && toRevision.equals(DEFAULT_REVISION)) {
                 to = moduleGraph.get(toName).values().iterator().next();
                 logger.warn(String
                         .format("Import:%s:%s by module:%s:%s does not specify revision, using:%s:%s for module dependency sort",
-                                toName, formatRevDate(toRevision), fromName,
-                                formatRevDate(fromRevision), to.getName(),
+                                toName, formatRevDate(toRevision), fromName, formatRevDate(fromRevision), to.getName(),
                                 formatRevDate(to.getRevision())));
             } else
-                ex(String.format("Not existing module imported:%s:%s by:%s:%s",
-                        toName, formatRevDate(toRevision), fromName,
-                        formatRevDate(fromRevision)));
+                ex(String.format("Not existing module imported:%s:%s by:%s:%s", toName, formatRevDate(toRevision),
+                        fromName, formatRevDate(fromRevision)));
         } else {
             to = moduleGraph.get(toName).get(toRevision);
         }
@@ -220,8 +210,7 @@ public final class ModuleDependencySort {
      * Extract dependencies from module builders or modules to fill dependency
      * graph
      */
-    private static void processModules(
-            Map<String, Map<Date, ModuleNodeImpl>> moduleGraph, List<?> builders) {
+    private static void processModules(Map<String, Map<Date, ModuleNodeImpl>> moduleGraph, List<?> builders) {
 
         // Process nodes
         for (Object mb : builders) {
@@ -236,11 +225,9 @@ public final class ModuleDependencySort {
                 name = ((ModuleBuilder) mb).getName();
                 rev = ((ModuleBuilder) mb).getRevision();
             } else {
-                throw new IllegalStateException(
-                        String.format(
-                                "Unexpected type of node for sort, expected only:%s, %s, got:%s",
-                                Module.class, ModuleBuilder.class,
-                                mb.getClass()));
+                throw new IllegalStateException(String.format(
+                        "Unexpected type of node for sort, expected only:%s, %s, got:%s", Module.class,
+                        ModuleBuilder.class, mb.getClass()));
             }
 
             if (rev == null)
@@ -250,16 +237,14 @@ public final class ModuleDependencySort {
                 moduleGraph.put(name, Maps.<Date, ModuleNodeImpl> newHashMap());
 
             if (moduleGraph.get(name).get(rev) != null)
-                ex(String.format("Module:%s with revision:%s declared twice",
-                        name, formatRevDate(rev)));
+                ex(String.format("Module:%s with revision:%s declared twice", name, formatRevDate(rev)));
 
             moduleGraph.get(name).put(rev, new ModuleNodeImpl(name, rev, mb));
         }
     }
 
     private static String formatRevDate(Date rev) {
-        return rev == DEFAULT_REVISION ? "default"
-                : YangParserListenerImpl.simpleDateFormat.format(rev);
+        return rev == DEFAULT_REVISION ? "default" : YangParserListenerImpl.simpleDateFormat.format(rev);
     }
 
     @VisibleForTesting
@@ -287,8 +272,7 @@ public final class ModuleDependencySort {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((name == null) ? 0 : name.hashCode());
-            result = prime * result
-                    + ((revision == null) ? 0 : revision.hashCode());
+            result = prime * result + ((revision == null) ? 0 : revision.hashCode());
             return result;
         }
 
@@ -316,8 +300,7 @@ public final class ModuleDependencySort {
 
         @Override
         public String toString() {
-            return "Module [name=" + name + ", revision="
-                    + formatRevDate(revision) + "]";
+            return "Module [name=" + name + ", revision=" + formatRevDate(revision) + "]";
         }
 
         public Object getReference() {

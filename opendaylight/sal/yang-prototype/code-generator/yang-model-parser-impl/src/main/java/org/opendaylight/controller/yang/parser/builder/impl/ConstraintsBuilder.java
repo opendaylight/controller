@@ -21,6 +21,7 @@ import org.opendaylight.controller.yang.parser.util.YangParseException;
 public final class ConstraintsBuilder implements Builder {
     private final ConstraintDefinitionImpl instance;
     private final int line;
+    private Builder parent;
     private final Set<MustDefinition> mustDefinitions;
     private String whenCondition;
     private boolean mandatory;
@@ -52,6 +53,16 @@ public final class ConstraintsBuilder implements Builder {
     @Override
     public int getLine() {
         return line;
+    }
+
+    @Override
+    public Builder getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(final Builder parent) {
+        this.parent = parent;
     }
 
     @Override
@@ -98,6 +109,7 @@ public final class ConstraintsBuilder implements Builder {
     public void setMandatory(boolean mandatory) {
         this.mandatory = mandatory;
     }
+
 
     private final class ConstraintDefinitionImpl implements ConstraintDefinition {
         private RevisionAwareXPath whenCondition;
@@ -227,7 +239,6 @@ public final class ConstraintsBuilder implements Builder {
             sb.append("]");
             return sb.toString();
         }
-
     }
 
 }

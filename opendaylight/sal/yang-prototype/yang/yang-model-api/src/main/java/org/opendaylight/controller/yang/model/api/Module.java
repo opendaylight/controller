@@ -34,20 +34,60 @@ public interface Module extends DataNodeContainer {
 
     Set<ModuleImport> getImports();
 
+    /**
+     * Returns feature statements defined in module.
+     *
+     * @return feature statements in lexicographical order
+     */
     Set<FeatureDefinition> getFeatures();
 
+    /**
+     * Returns notification statements defined in module.
+     *
+     * @return notification statements in lexicographical order
+     */
     Set<NotificationDefinition> getNotifications();
 
+    /**
+     * Returns augment statements defined in module.
+     *
+     * @return augment statements
+     */
     Set<AugmentationSchema> getAugmentations();
 
+    /**
+     * Returns rpc statements defined in module.
+     *
+     * @return rpc statements in lexicographical order
+     */
     Set<RpcDefinition> getRpcs();
 
+    /**
+     * Returns deviation statements defined in module.
+     *
+     * @return deviation statements
+     */
     Set<Deviation> getDeviations();
 
+    /**
+     * Returns identity statements defined in module.
+     *
+     * @return identity statements in lexicographical order
+     */
     Set<IdentitySchemaNode> getIdentities();
 
+    /**
+     * Returns extension statements defined in module.
+     *
+     * @return extension statements in lexicographical order
+     */
     List<ExtensionDefinition> getExtensionSchemaNodes();
 
+    /**
+     * Returns unknown nodes defined in module.
+     *
+     * @return unknown nodes in lexicographical order
+     */
     List<UnknownSchemaNode> getUnknownSchemaNodes();
 
 }
