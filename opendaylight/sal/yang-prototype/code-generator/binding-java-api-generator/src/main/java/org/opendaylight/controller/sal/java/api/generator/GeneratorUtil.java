@@ -10,15 +10,16 @@ package org.opendaylight.controller.sal.java.api.generator;
 import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.controller.binding.generator.util.TypeConstants;
 import org.opendaylight.controller.sal.binding.model.api.*;
-import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration.Pair;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature.Parameter;
+import org.opendaylight.controller.binding.generator.util.Types;
 
 public final class GeneratorUtil {
 
@@ -27,12 +28,12 @@ public final class GeneratorUtil {
 
     public static String createIfcDeclaration(final GeneratedType genType, final String indent,
             final Map<String, String> availableImports) {
-        return createFileDeclaration(IFC, genType, indent, availableImports, false);
+        return createFileDeclaration(IFC, genType, indent, availableImports, false, false);
     }
 
     public static String createClassDeclaration(final GeneratedTransferObject genTransferObject, final String indent,
-            final Map<String, String> availableImports, boolean isIdentity) {
-        return createFileDeclaration(CLASS, genTransferObject, indent, availableImports, isIdentity);
+            final Map<String, String> availableImports, boolean isIdentity, boolean isInnerClass) {
+        return createFileDeclaration(CLASS, genTransferObject, indent, availableImports, isIdentity, isInnerClass);
     }
 
     public static String createPackageDeclaration(final String packageName) {
@@ -40,7 +41,7 @@ public final class GeneratorUtil {
     }
 
     private static String createFileDeclaration(final String type, final GeneratedType genType, final String indent,
-            final Map<String, String> availableImports, boolean isIdentity) {
+            final Map<String, String> availableImports, boolean isIdentity, boolean innerClass) {
         final StringBuilder builder = new StringBuilder();
         final String currentPkg = genType.getPackageName();
 
@@ -52,13 +53,15 @@ public final class GeneratorUtil {
             builder.append(NL);
         }
 
-        if (isIdentity) {
+        if (innerClass) {
+            builder.append(indent + PUBLIC + GAP + STATIC + GAP + FINAL + GAP + type + GAP + genType.getName() + GAP);
+        } else if (isIdentity) {
             if (!(CLASS.equals(type))) {
                 throw new IllegalArgumentException("'identity' has to be generated as a class");
             }
-            builder.append(PUBLIC + GAP + ABSTRACT + GAP + type + GAP + genType.getName() + GAP);
+            builder.append(indent + PUBLIC + GAP + ABSTRACT + GAP + type + GAP + genType.getName() + GAP);
         } else {
-            builder.append(PUBLIC + GAP + type + GAP + genType.getName() + GAP);
+            builder.append(indent + PUBLIC + GAP + type + GAP + genType.getName() + GAP);
         }
 
         if (genType instanceof GeneratedTransferObject) {
@@ -149,26 +152,9 @@ public final class GeneratorUtil {
         builder.append(indent + PUBLIC + GAP + STATIC + GAP + FINAL + GAP);
         builder.append(getExplicitType(constant.getType(), availableImports, currentPkg) + GAP + constant.getName());
         builder.append(GAP + "=" + GAP);
-        final Object constValue = constant.getValue();
 
         if (constant.getName().equals(TypeConstants.PATTERN_CONSTANT_NAME)) {
-            if (constant.getName() == null || constant.getType() == null || constant.getValue() == null)
-                throw new IllegalArgumentException();
-            if (constValue instanceof List) {
-                builder.append("Arrays.asList" + LB);
-                final List<?> constantValues = (List<?>) constValue;
-                int stringsCount = 0;
-                for (Object value : constantValues) {
-                    if (value instanceof String) {
-                        if (stringsCount > 0) {
-                            builder.append(COMMA);
-                        }
-                        stringsCount++;
-                        builder.append(DOUBLE_QUOTE + (String) value + DOUBLE_QUOTE);
-                    }
-                }
-                builder.append(RB);
-            }
+            return "";
         } else {
             builder.append(constant.getValue());
         }
@@ -222,9 +208,9 @@ public final class GeneratorUtil {
 
         createComment(builder, comment, indent);
         builder.append(NL);
-        builder.append(indent);
 
         if (!method.getAnnotations().isEmpty()) {
+            builder.append(indent);
             final List<AnnotationType> annotations = method.getAnnotations();
             appendAnnotations(builder, annotations);
             builder.append(NL);
@@ -248,6 +234,42 @@ public final class GeneratorUtil {
 
     public static String createConstructor(GeneratedTransferObject genTransferObject, final String indent,
             final Map<String, String> availableImports, boolean isIdentity) {
+        StringBuilder builder = new StringBuilder();
+
+        final String currentPkg = genTransferObject.getPackageName();
+        final List<GeneratedProperty> properties = genTransferObject.getProperties();
+        final List<GeneratedProperty> ctorParams = new ArrayList<GeneratedProperty>();
+        if (properties != null) {
+            for (final GeneratedProperty property : properties) {
+                if (property.isReadOnly()) {
+                    ctorParams.add(property);
+                }
+            }
+        }
+
+        builder.append(createConstructorDeclarationToLeftParenthesis(genTransferObject, indent, isIdentity));
+
+        final String parameterSeparator = COMMA + GAP;
+        for (final GeneratedProperty ctorParam : ctorParams) {
+            builder.append(createMethodParamDeclaration(ctorParam, availableImports, currentPkg));
+            builder.append(parameterSeparator);
+        }
+        if (!ctorParams.isEmpty()) {
+            builder = builder.delete(builder.length() - parameterSeparator.length(), builder.length());
+        }
+        builder.append(createConstructorDeclarationFromRightParenthesis());
+        builder.append(createConstructorSuperCalling(indent));
+
+        for (final GeneratedProperty ctorParam : ctorParams) {
+            builder.append(createClassAttributeInitialization(indent, ctorParam));
+        }
+
+        builder.append(createConstructorClosingPart(indent));
+        return builder.toString();
+    }
+
+    public static String createConstructors(GeneratedTransferObject genTransferObject, final String indent,
+            final Map<String, String> availableImports, boolean isIdentity) {
         final StringBuilder builder = new StringBuilder();
 
         final String currentPkg = genTransferObject.getPackageName();
@@ -261,63 +283,82 @@ public final class GeneratorUtil {
             }
         }
 
+        GeneratedProperty ctorParam;
+        Iterator<GeneratedProperty> iteratorCtorParams = ctorParams.iterator();
+
+        do {
+            ctorParam = null;
+            if (iteratorCtorParams.hasNext()) {
+                ctorParam = iteratorCtorParams.next();
+            }
+            builder.append(createConstructorDeclarationToLeftParenthesis(genTransferObject, indent, isIdentity));
+
+            if (ctorParam != null) {
+                builder.append(createMethodParamDeclaration(ctorParam, availableImports, currentPkg));
+            }
+            builder.append(createConstructorDeclarationFromRightParenthesis());
+            builder.append(createConstructorSuperCalling(indent));
+
+            if (ctorParam != null) {
+                builder.append(createClassAttributeInitialization(indent, ctorParam));
+            }
+
+            builder.append(createConstructorClosingPart(indent));
+        } while (iteratorCtorParams.hasNext());
+
+        return builder.toString();
+    }
+
+    private static String createConstructorDeclarationToLeftParenthesis(GeneratedTransferObject genTransferObject,
+            final String indent, boolean isIdentity) {
+        final StringBuilder builder = new StringBuilder();
         builder.append(indent);
         builder.append(isIdentity ? PROTECTED : PUBLIC);
         builder.append(GAP);
         builder.append(genTransferObject.getName());
         builder.append(LB);
+        return builder.toString();
+    }
 
-        if (!ctorParams.isEmpty()) {
-            builder.append(getExplicitType(ctorParams.get(0).getReturnType(), availableImports, currentPkg));
-            builder.append(" ");
-            builder.append(ctorParams.get(0).getName());
-            for (int i = 1; i < ctorParams.size(); ++i) {
-                final GeneratedProperty param = ctorParams.get(i);
-                builder.append(", ");
-                builder.append(getExplicitType(param.getReturnType(), availableImports, currentPkg));
-                builder.append(GAP);
-                builder.append(param.getName());
-            }
-        }
-        builder.append(RB + GAP + LCB + NL + indent + TAB + "super();" + NL);
-        if (!ctorParams.isEmpty()) {
-            for (final GeneratedProperty property : ctorParams) {
-                builder.append(indent);
-                builder.append(TAB);
-                builder.append("this.");
-                builder.append(property.getName());
-                builder.append(" = ");
-                builder.append(property.getName());
-                builder.append(SC);
-                builder.append(NL);
-            }
-        }
-        List<Constant> consts = genTransferObject.getConstantDefinitions();
-        for (Constant con : consts) {
-            if (con.getName() == null || con.getType() == null || con.getValue() == null)
-                continue;
-            if (con.getName().equals(TypeConstants.PATTERN_CONSTANT_NAME)) {
-                Object values = con.getValue();
-                if (values instanceof List) {
-                    for (Object regEx : (List<?>) values) {
-                        if (regEx instanceof String) {
-                            builder.append(indent + TAB + "for (String regEx : " + TypeConstants.PATTERN_CONSTANT_NAME
-                                    + ") {" + NL);
-                            builder.append(indent + TAB + TAB + "this." + MEMBER_PATTERN_LIST
-                                    + ".add(Pattern.compile(regEx))" + SC + NL);
-                            builder.append(indent + TAB + RCB + NL);
+    private static String createConstructorDeclarationFromRightParenthesis() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(RB + GAP + LCB + NL);
+        return builder.toString();
+    }
 
-                            break;
-                        }
-                    }
+    private static String createConstructorSuperCalling(String indent) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(indent + TAB + "super();" + NL);
+        return builder.toString();
+    }
 
-                }
-            }
-
-        }
-
+    private static String createConstructorClosingPart(String indent) {
+        final StringBuilder builder = new StringBuilder();
         builder.append(indent);
         builder.append(RCB);
+        builder.append(NL + NL);
+        return builder.toString();
+    }
+
+    private static String createClassAttributeInitialization(String indent, GeneratedProperty methodParameter) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(indent);
+        builder.append(TAB);
+        builder.append("this.");
+        builder.append(methodParameter.getName());
+        builder.append(" = ");
+        builder.append(methodParameter.getName());
+        builder.append(SC);
+        builder.append(NL);
+        return builder.toString();
+    }
+
+    private static String createMethodParamDeclaration(GeneratedProperty methodParameter,
+            final Map<String, String> availableImports, String currentPkg) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(getExplicitType(methodParameter.getReturnType(), availableImports, currentPkg));
+        builder.append(GAP);
+        builder.append(methodParameter.getName());
         return builder.toString();
     }
 
@@ -584,12 +625,18 @@ public final class GeneratorUtil {
         }
     }
 
-    public static Map<String, String> createImports(final GeneratedType genType) {
+    public static Map<String, String> createImports(GeneratedType genType) {
         if (genType == null) {
             throw new IllegalArgumentException("Generated Type cannot be NULL!");
         }
-
         final Map<String, String> imports = new LinkedHashMap<>();
+        List<GeneratedType> childGeneratedTypes = genType.getEnclosedTypes();
+        if (!childGeneratedTypes.isEmpty()) {
+            for (GeneratedType genTypeChild : childGeneratedTypes) {
+                imports.putAll(createImports(genTypeChild));
+            }
+        }
+
         final List<Constant> constants = genType.getConstantDefinitions();
         final List<MethodSignature> methods = genType.getMethodDefinitions();
         final List<Type> impl = genType.getImplements();
@@ -644,6 +691,18 @@ public final class GeneratorUtil {
         return imports;
     }
 
+    public static Map<String, String> createChildImports(GeneratedType genType) {
+        Map<String, String> childImports = new LinkedHashMap<>();
+        List<GeneratedType> childGeneratedTypes = genType.getEnclosedTypes();
+        if (!childGeneratedTypes.isEmpty()) {
+            for (GeneratedType genTypeChild : childGeneratedTypes) {
+                createChildImports(genTypeChild);
+                childImports.put(genTypeChild.getName(), genTypeChild.getPackageName());
+            }
+        }
+        return childImports;
+    }
+
     private static void putTypeIntoImports(final GeneratedType parentGenType, final Type type,
             final Map<String, String> imports) {
         if (parentGenType == null) {
@@ -686,12 +745,20 @@ public final class GeneratorUtil {
         }
     }
 
-    public static List<String> createImportLines(final Map<String, String> imports) {
+    public static List<String> createImportLines(final Map<String, String> imports,
+            final Map<String, String> innerTypeImports) {
         final List<String> importLines = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : imports.entrySet()) {
             final String typeName = entry.getKey();
             final String packageName = entry.getValue();
+            if (innerTypeImports != null) {
+                String innerTypePackageName = innerTypeImports.get(typeName);
+                if (innerTypePackageName != null) {
+                    if (innerTypePackageName.equals(packageName))
+                        continue;
+                }
+            }
             importLines.add("import " + packageName + "." + typeName + SC);
         }
         return importLines;
@@ -708,5 +775,51 @@ public final class GeneratorUtil {
 
         }
         return false;
+    }
+
+    public static String createStaticInicializationBlock(GeneratedTransferObject genTransferObject, String indent) {
+
+        final StringBuilder builder = new StringBuilder();
+
+        List<Constant> constants = genTransferObject.getConstantDefinitions();
+        for (Constant constant : constants) {
+            if (constant.getName() == null || constant.getType() == null || constant.getValue() == null) {
+                continue;
+            }
+            if (constant.getName().equals(TypeConstants.PATTERN_CONSTANT_NAME)) {
+                final Object constValue = constant.getValue();
+                List<String> regularExpressions = new ArrayList<>();
+                if (constValue instanceof List) {
+                    builder.append(indent + PUBLIC + GAP + STATIC + GAP + FINAL + GAP + "List<String>" + GAP
+                            + TypeConstants.PATTERN_CONSTANT_NAME + GAP + "=" + GAP + "Arrays.asList" + LB);
+                    final List<?> constantValues = (List<?>) constValue;
+                    int stringsCount = 0;
+                    for (Object value : constantValues) {
+                        if (value instanceof String) {
+                            if (stringsCount > 0) {
+                                builder.append(COMMA);
+                            }
+                            stringsCount++;
+                            regularExpressions.add((String) value);
+                            builder.append(DOUBLE_QUOTE + (String) value + DOUBLE_QUOTE);
+                        }
+                    }
+                    builder.append(RB + SC + NL);
+                }
+                builder.append(indent + PRIVATE + GAP + STATIC + GAP + FINAL + GAP + "List<Pattern>" + GAP
+                        + MEMBER_PATTERN_LIST + GAP + ASSIGN + GAP + "new ArrayList<Pattern>()" + GAP + SC + NL + NL);
+
+                if (!regularExpressions.isEmpty()) {
+                    builder.append(indent + STATIC + LCB + NL);
+                    builder.append(indent + TAB + "for (String regEx : " + TypeConstants.PATTERN_CONSTANT_NAME + ") {"
+                            + NL);
+                    builder.append(indent + TAB + TAB + MEMBER_PATTERN_LIST + ".add(Pattern.compile(regEx))" + SC + NL);
+                    builder.append(indent + TAB + RCB + NL);
+                    builder.append(indent + RCB + NL + NL);
+                }
+
+            }
+        }
+        return builder.toString();
     }
 }
