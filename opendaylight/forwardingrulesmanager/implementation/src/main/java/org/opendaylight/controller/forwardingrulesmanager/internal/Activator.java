@@ -22,7 +22,6 @@ import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
@@ -41,6 +40,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * are done by the ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
 
     }
@@ -50,6 +50,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
 
     }
@@ -63,6 +64,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *         instantiated in order to get an fully working implementation
      *         Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { ForwardingRulesManagerImpl.class };
         return res;
@@ -83,26 +85,20 @@ public class Activator extends ComponentActivatorAbstractBase {
      *            per-container different behavior if needed, usually should not
      *            be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(ForwardingRulesManagerImpl.class)) {
             String interfaces[] = null;
             Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
             Set<String> propSet = new HashSet<String>();
-            propSet.add("staticFlows");
+            propSet.add("frm.flowsSaveEvent");
             props.put("cachenames", propSet);
 
             // export the service
-            if (containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                interfaces = new String[] { IContainerListener.class.getName(), ISwitchManagerAware.class.getName(),
-                        IForwardingRulesManager.class.getName(), IInventoryListener.class.getName(),
-                        ICacheUpdateAware.class.getName(), IConfigurationContainerAware.class.getName(),
-                        IFlowProgrammerListener.class.getName() };
-            } else {
-                interfaces = new String[] { ISwitchManagerAware.class.getName(),
-                        IForwardingRulesManager.class.getName(), IInventoryListener.class.getName(),
-                        ICacheUpdateAware.class.getName(), IConfigurationContainerAware.class.getName(),
-                        IFlowProgrammerListener.class.getName() };
-            }
+            interfaces = new String[] { IContainerListener.class.getName(), ISwitchManagerAware.class.getName(),
+                    IForwardingRulesManager.class.getName(), IInventoryListener.class.getName(),
+                    ICacheUpdateAware.class.getName(), IConfigurationContainerAware.class.getName(),
+                    IFlowProgrammerListener.class.getName() };
 
             c.setInterface(interfaces, props);
 
