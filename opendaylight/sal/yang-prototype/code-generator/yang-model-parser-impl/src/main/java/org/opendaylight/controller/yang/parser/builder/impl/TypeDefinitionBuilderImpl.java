@@ -23,13 +23,11 @@ import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.UnknownType;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder implements TypeDefinitionBuilder {
-    private final int line;
-    private final QName qname;
     private SchemaPath schemaPath;
-
     private List<UnknownSchemaNode> unknownNodes;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private List<RangeConstraint> ranges = Collections.emptyList();
@@ -45,13 +43,11 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder im
     private boolean addedByUses;
 
     public TypeDefinitionBuilderImpl(final QName qname, final int line) {
-        this.qname = qname;
-        this.line = line;
+        super(line, qname);
     }
 
     public TypeDefinitionBuilderImpl(TypeDefinitionBuilder tdb) {
-        qname = tdb.getQName();
-        line = tdb.getLine();
+        super(tdb.getLine(), tdb.getQName());
         schemaPath = tdb.getPath();
 
         type = tdb.getType();
@@ -103,20 +99,11 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder im
             for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                 unknownNodes.add(b.build());
             }
+            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
         }
         typeBuilder.unknownSchemaNodes(unknownNodes);
         result = typeBuilder.build();
         return result;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public QName getQName() {
-        return qname;
     }
 
     @Override

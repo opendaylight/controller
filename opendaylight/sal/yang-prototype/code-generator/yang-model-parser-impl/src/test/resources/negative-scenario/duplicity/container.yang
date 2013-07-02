@@ -1,0 +1,14 @@
+module container {
+    yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+
+    container foo {
+        description "foo 1";
+    }
+
+    container foo {
+        description "foo 2";
+    }
+
+}

@@ -92,7 +92,6 @@ public class YangParserNegativeTest {
         } catch (YangParseException e) {
             assertTrue(e.getMessage().contains("Invalid length constraint: <4, 10>"));
         }
-
     }
 
     @Test
@@ -106,7 +105,61 @@ public class YangParserNegativeTest {
         } catch (YangParseException e) {
             assertTrue(e.getMessage().contains("Invalid range constraint: <5, 20>"));
         }
+    }
 
+    @Test
+    public void testDuplicateContainer() throws IOException {
+        try {
+            try (InputStream stream = new FileInputStream(getClass().getResource(
+                    "/negative-scenario/duplicity/container.yang").getPath())) {
+                TestUtils.loadModule(stream);
+                fail("YangParseException should by thrown");
+            }
+        } catch (YangParseException e) {
+            assertTrue(e.getMessage()
+                    .contains("Error in module 'container' on line 10: Duplicate node found at line 6"));
+        }
+    }
+
+    @Test
+    public void testDuplicateContainerList() throws IOException {
+        try {
+            try (InputStream stream = new FileInputStream(getClass().getResource(
+                    "/negative-scenario/duplicity/container-list.yang").getPath())) {
+                TestUtils.loadModule(stream);
+                fail("YangParseException should by thrown");
+            }
+        } catch (YangParseException e) {
+            assertTrue(e.getMessage().contains(
+                    "Error in module 'container-list' on line 10: Duplicate node found at line 6"));
+        }
+    }
+
+    @Test
+    public void testDuplicateContainerLeaf() throws IOException {
+        try {
+            try (InputStream stream = new FileInputStream(getClass().getResource(
+                    "/negative-scenario/duplicity/container-leaf.yang").getPath())) {
+                TestUtils.loadModule(stream);
+                fail("YangParseException should by thrown");
+            }
+        } catch (YangParseException e) {
+            assertTrue(e.getMessage().contains(
+                    "Error in module 'container-leaf' on line 10: Duplicate node found at line 6"));
+        }
+    }
+
+    @Test
+    public void testDuplicateTypedef() throws IOException {
+        try {
+            try (InputStream stream = new FileInputStream(getClass().getResource(
+                    "/negative-scenario/duplicity/typedef.yang").getPath())) {
+                TestUtils.loadModule(stream);
+                fail("YangParseException should by thrown");
+            }
+        } catch (YangParseException e) {
+            assertTrue(e.getMessage().contains("Error in module 'typedef' on line 10: Duplicate node found at line 6"));
+        }
     }
 
 }

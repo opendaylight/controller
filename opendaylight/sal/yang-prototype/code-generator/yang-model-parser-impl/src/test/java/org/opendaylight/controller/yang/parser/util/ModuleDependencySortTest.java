@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.yang.parser.util;
 
-import static org.hamcrest.core.AnyOf.*;
-import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.*;
+import static org.hamcrest.core.AnyOf.anyOf;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
@@ -49,8 +49,7 @@ public class ModuleDependencySortTest {
 
         List<ModuleBuilder> l = ModuleDependencySort.sort(builders);
 
-        assertDependencyGraph(ModuleDependencySort.createModuleGraph(Arrays
-                .asList(builders)));
+        assertDependencyGraph(ModuleDependencySort.createModuleGraph(Arrays.asList(builders)));
 
         @SuppressWarnings("unchecked")
         Matcher<String> cOrD = anyOf(is(c.getName()), is(d.getName()));
@@ -90,9 +89,7 @@ public class ModuleDependencySortTest {
         try {
             ModuleDependencySort.sort(builders);
         } catch (YangValidationException e) {
-            assertThat(
-                    e.getMessage(),
-                    containsString("Module:a with revision:default declared twice"));
+            assertThat(e.getMessage(), containsString("Module:a with revision:default declared twice"));
             throw e;
         }
     }
@@ -105,9 +102,7 @@ public class ModuleDependencySortTest {
         try {
             ModuleDependencySort.sort(builders);
         } catch (YangValidationException e) {
-            assertThat(
-                    e.getMessage(),
-                    containsString("Not existing module imported:b:default by:a:default"));
+            assertThat(e.getMessage(), containsString("Not existing module imported:b:default by:a:default"));
             throw e;
         }
     }
@@ -123,8 +118,10 @@ public class ModuleDependencySortTest {
 
     @Test(expected = YangValidationException.class)
     public void testImportTwiceDifferentRevision() throws Exception {
-        Date date = new Date();
-        ModuleBuilder b2 = mockModuleBuilder("b", date);
+        Date date1 = new Date(463846463486L);
+        Date date2 = new Date(364896446683L);
+        b = mockModuleBuilder("b", date1);
+        ModuleBuilder b2 = mockModuleBuilder("b", date2);
 
         mockDependency(a, b);
         mockDependency(c, b2);
@@ -133,11 +130,9 @@ public class ModuleDependencySortTest {
         try {
             ModuleDependencySort.sort(builders);
         } catch (YangValidationException e) {
-            assertThat(
-                    e.getMessage(),
-                    containsString("Module:b imported twice with different revisions:default, "
-                            + YangParserListenerImpl.simpleDateFormat
-                                    .format(date)));
+            assertThat(e.getMessage(), containsString("Module:b imported twice with different revisions:"
+                    + YangParserListenerImpl.simpleDateFormat.format(date1) + ", "
+                    + YangParserListenerImpl.simpleDateFormat.format(date2)));
             throw e;
         }
     }
@@ -161,24 +156,19 @@ public class ModuleDependencySortTest {
             ModuleDependencySort.sort(builders);
         } catch (YangValidationException e) {
             assertThat(e.getMessage(), containsString("Module:a with revision:"
-                    + YangParserListenerImpl.simpleDateFormat.format(rev)
-                    + " declared twice"));
+                    + YangParserListenerImpl.simpleDateFormat.format(rev) + " declared twice"));
             throw e;
         }
     }
 
-    private void assertDependencyGraph(
-            Map<String, Map<Date, ModuleNodeImpl>> moduleGraph) {
-        for (Entry<String, Map<Date, ModuleNodeImpl>> node : moduleGraph
-                .entrySet()) {
+    private void assertDependencyGraph(Map<String, Map<Date, ModuleNodeImpl>> moduleGraph) {
+        for (Entry<String, Map<Date, ModuleNodeImpl>> node : moduleGraph.entrySet()) {
             String name = node.getKey();
 
             // Expects only one module revision
 
-            Set<Edge> inEdges = node.getValue().values().iterator().next()
-                    .getInEdges();
-            Set<Edge> outEdges = node.getValue().values().iterator().next()
-                    .getOutEdges();
+            Set<Edge> inEdges = node.getValue().values().iterator().next().getInEdges();
+            Set<Edge> outEdges = node.getValue().values().iterator().next().getOutEdges();
 
             if (name.equals("a")) {
                 assertEdgeCount(inEdges, 0, outEdges, 1);
@@ -190,8 +180,7 @@ public class ModuleDependencySortTest {
         }
     }
 
-    private void assertEdgeCount(Set<Edge> inEdges, int i, Set<Edge> outEdges,
-            int j) {
+    private void assertEdgeCount(Set<Edge> inEdges, int i, Set<Edge> outEdges, int j) {
         assertThat(inEdges.size(), is(i));
         assertThat(outEdges.size(), is(j));
     }

@@ -15,7 +15,9 @@ import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 
 public abstract class AbstractDataNodeContainerBuilder implements DataNodeContainerBuilder {
-    private final QName qname;
+    protected final int line;
+    protected final QName qname;
+    protected Builder parent;
 
     protected Set<DataSchemaNode> childNodes;
     protected final Set<DataSchemaNodeBuilder> addedChildNodes = new HashSet<DataSchemaNodeBuilder>();
@@ -23,8 +25,24 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
     protected Set<GroupingDefinition> groupings;
     protected final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
 
-    protected AbstractDataNodeContainerBuilder(QName qname) {
+    protected AbstractDataNodeContainerBuilder(final int line, final QName qname) {
+        this.line = line;
         this.qname = qname;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
+    }
+
+    @Override
+    public Builder getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(final Builder parent) {
+        this.parent = parent;
     }
 
     @Override
@@ -37,6 +55,10 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
         return childNodes;
     }
 
+    public void setChildNodes(Set<DataSchemaNode> childNodes) {
+        this.childNodes = childNodes;
+    }
+
     @Override
     public Set<DataSchemaNodeBuilder> getChildNodeBuilders() {
         return addedChildNodes;
@@ -47,13 +69,13 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
         addedChildNodes.add(childNode);
     }
 
-    public void setChildNodes(Set<DataSchemaNode> childNodes) {
-        this.childNodes = childNodes;
-    }
-
     @Override
     public Set<GroupingDefinition> getGroupings() {
         return groupings;
+    }
+
+    public void setGroupings(final Set<GroupingDefinition> groupings) {
+        this.groupings = groupings;
     }
 
     public Set<GroupingBuilder> getGroupingBuilders() {
@@ -63,10 +85,6 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
     @Override
     public void addGrouping(GroupingBuilder grouping) {
         addedGroupings.add(grouping);
-    }
-
-    public void setGroupings(final Set<GroupingDefinition> groupings) {
-        this.groupings = groupings;
     }
 
 }

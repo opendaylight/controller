@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
+import java.util.List;
+
 /**
  * AugmentationSchema represents augment definition. The "augment" statement
  * allows a module or submodule to add to the schema tree defined in an external
@@ -44,5 +46,10 @@ public interface AugmentationSchema extends DataNodeContainer {
      *         child nodes of this AugmentationSchema.
      */
     SchemaPath getTargetPath();
+
+    /**
+     * @return collection of all unknown nodes defined in this augmentation
+     */
+    public List<UnknownSchemaNode> getUnknownSchemaNodes();
 
 }

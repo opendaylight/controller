@@ -17,20 +17,21 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class FeatureBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
     private final FeatureDefinitionImpl instance;
 
-    FeatureBuilder(final QName qname, final int line) {
-        super(qname, line);
+    FeatureBuilder(final int line, final QName qname) {
+        super(line, qname);
         instance = new FeatureDefinitionImpl(qname);
     }
 
     @Override
     public FeatureDefinitionImpl build() {
         if (!isBuilt) {
-            instance.setPath(path);
+            instance.setPath(schemaPath);
             instance.setDescription(description);
             instance.setReference(reference);
             instance.setStatus(status);
@@ -40,6 +41,7 @@ public final class FeatureBuilder extends AbstractSchemaNodeBuilder {
             for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                 unknownNodes.add(b.build());
             }
+            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             instance.setUnknownSchemaNodes(unknownNodes);
 
             isBuilt = true;

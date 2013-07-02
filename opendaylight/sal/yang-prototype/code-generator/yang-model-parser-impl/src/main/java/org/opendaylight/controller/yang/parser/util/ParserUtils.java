@@ -8,7 +8,6 @@
 package org.opendaylight.controller.yang.parser.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -501,6 +500,14 @@ public final class ParserUtils {
             }
         }
 
+        // set correct path for all cases
+        if(childNode instanceof ChoiceBuilder) {
+            ChoiceBuilder choiceBuilder = (ChoiceBuilder) childNode;
+            for (ChoiceCaseBuilder choiceCaseBuilder : choiceBuilder.getCases()) {
+                correctAugmentChildPath(choiceCaseBuilder, childNode.getPath());
+            }
+        }
+
         // if node can contains type, correct path for this type too
         if (childNode instanceof TypeAwareBuilder) {
             TypeAwareBuilder nodeBuilder = (TypeAwareBuilder) childNode;
@@ -756,8 +763,8 @@ public final class ParserUtils {
     }
 
     public static ContainerSchemaNodeBuilder createContainer(ContainerSchemaNode container, int line) {
-        final ContainerSchemaNodeBuilder builder = new ContainerSchemaNodeBuilder(container.getQName(),
-                container.getPath(), line);
+        final ContainerSchemaNodeBuilder builder = new ContainerSchemaNodeBuilder(line, container.getQName(),
+                container.getPath());
         convertDataSchemaNode(container, builder);
         builder.setConfiguration(container.isConfiguration());
         builder.setUnknownNodes(container.getUnknownSchemaNodes());
@@ -771,7 +778,7 @@ public final class ParserUtils {
     }
 
     public static ListSchemaNodeBuilder createList(ListSchemaNode list, int line) {
-        ListSchemaNodeBuilder builder = new ListSchemaNodeBuilder(list.getQName(), list.getPath(), line);
+        ListSchemaNodeBuilder builder = new ListSchemaNodeBuilder(line, list.getQName(), list.getPath());
         convertDataSchemaNode(list, builder);
         builder.setConfiguration(list.isConfiguration());
         builder.setUnknownNodes(list.getUnknownSchemaNodes());
@@ -785,8 +792,8 @@ public final class ParserUtils {
     }
 
     public static LeafListSchemaNodeBuilder createLeafList(LeafListSchemaNode leafList, int line) {
-        final LeafListSchemaNodeBuilder builder = new LeafListSchemaNodeBuilder(leafList.getQName(),
-                leafList.getPath(), line);
+        final LeafListSchemaNodeBuilder builder = new LeafListSchemaNodeBuilder(line, leafList.getQName(),
+                leafList.getPath());
         convertDataSchemaNode(leafList, builder);
         builder.setConfiguration(leafList.isConfiguration());
         builder.setType(leafList.getType());
@@ -796,7 +803,7 @@ public final class ParserUtils {
     }
 
     public static ChoiceBuilder createChoice(ChoiceNode choice, int line) {
-        final ChoiceBuilder builder = new ChoiceBuilder(choice.getQName(), line);
+        final ChoiceBuilder builder = new ChoiceBuilder(line, choice.getQName());
         convertDataSchemaNode(choice, builder);
         builder.setConfiguration(choice.isConfiguration());
         builder.setCases(choice.getCases());
@@ -806,7 +813,7 @@ public final class ParserUtils {
     }
 
     public static AnyXmlBuilder createAnyXml(AnyXmlSchemaNode anyxml, int line) {
-        final AnyXmlBuilder builder = new AnyXmlBuilder(anyxml.getQName(), anyxml.getPath(), line);
+        final AnyXmlBuilder builder = new AnyXmlBuilder(line, anyxml.getQName(), anyxml.getPath());
         convertDataSchemaNode(anyxml, builder);
         builder.setConfiguration(anyxml.isConfiguration());
         builder.setUnknownNodes(anyxml.getUnknownSchemaNodes());
@@ -846,16 +853,16 @@ public final class ParserUtils {
         return builder;
     }
 
-    public static UnknownSchemaNodeBuilder createUnknownSchemaNode(UnknownSchemaNode grouping, int line) {
-        final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(grouping.getQName(), line);
-        builder.setPath(grouping.getPath());
-        builder.setUnknownNodes(grouping.getUnknownSchemaNodes());
-        builder.setDescription(grouping.getDescription());
-        builder.setReference(grouping.getReference());
-        builder.setStatus(grouping.getStatus());
-        builder.setAddedByUses(grouping.isAddedByUses());
-        builder.setNodeType(grouping.getNodeType());
-        builder.setNodeParameter(grouping.getNodeParameter());
+    public static UnknownSchemaNodeBuilder createUnknownSchemaNode(UnknownSchemaNode unknownNode, int line) {
+        final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(line, unknownNode.getQName());
+        builder.setPath(unknownNode.getPath());
+        builder.setUnknownNodes(unknownNode.getUnknownSchemaNodes());
+        builder.setDescription(unknownNode.getDescription());
+        builder.setReference(unknownNode.getReference());
+        builder.setStatus(unknownNode.getStatus());
+        builder.setAddedByUses(unknownNode.isAddedByUses());
+        builder.setNodeType(unknownNode.getNodeType());
+        builder.setNodeParameter(unknownNode.getNodeParameter());
         return builder;
     }
 
@@ -992,11 +999,11 @@ public final class ParserUtils {
     }
 
     public static void processAugmentation(final AugmentationSchemaBuilder augmentBuilder, final List<QName> path,
-            final ModuleBuilder module, final QName qname, final ModuleBuilder dependentModuleBuilder) {
+            final ModuleBuilder module, final ModuleBuilder dependentModuleBuilder) {
         DataSchemaNodeBuilder currentParent = null;
         for (DataSchemaNodeBuilder child : dependentModuleBuilder.getChildNodeBuilders()) {
             final QName childQName = child.getQName();
-            if (childQName.getLocalName().equals(qname.getLocalName())) {
+            if (childQName.getLocalName().equals(path.get(0).getLocalName())) {
                 currentParent = child;
                 break;
             }
@@ -1009,7 +1016,7 @@ public final class ParserUtils {
         for (int i = 1; i < path.size(); i++) {
             final QName currentQName = path.get(i);
             DataSchemaNodeBuilder newParent = null;
-            if(currentParent instanceof DataNodeContainerBuilder) {
+            if (currentParent instanceof DataNodeContainerBuilder) {
                 for (DataSchemaNodeBuilder child : ((DataNodeContainerBuilder) currentParent).getChildNodeBuilders()) {
                     final QName childQName = child.getQName();
                     if (childQName.getLocalName().equals(currentQName.getLocalName())) {
@@ -1017,8 +1024,8 @@ public final class ParserUtils {
                         break;
                     }
                 }
-            } else if(currentParent instanceof ChoiceBuilder) {
-                for(ChoiceCaseBuilder caseBuilder : ((ChoiceBuilder)currentParent).getCases()) {
+            } else if (currentParent instanceof ChoiceBuilder) {
+                for (ChoiceCaseBuilder caseBuilder : ((ChoiceBuilder) currentParent).getCases()) {
                     final QName caseQName = caseBuilder.getQName();
                     if (caseQName.getLocalName().equals(currentQName.getLocalName())) {
                         newParent = caseBuilder;
@@ -1201,8 +1208,8 @@ public final class ParserUtils {
                         return constraints;
                     }
                 } else {
-                    TypeDefinitionBuilder tdb = findTypeDefinitionBuilder(nodeToResolve.getPath(),
-                            dependentModuleBuilder, qname.getLocalName(), builder.getName(), nodeToResolve.getLine());
+                    TypeDefinitionBuilder tdb = findTypeDefinitionBuilder(nodeToResolve, dependentModuleBuilder,
+                            qname.getLocalName(), builder.getName(), nodeToResolve.getLine());
                     return findConstraintsFromTypeBuilder(tdb, constraints, modules, dependentModuleBuilder, context);
                 }
             } else if (type instanceof ExtendedType) {
@@ -1216,8 +1223,8 @@ public final class ParserUtils {
                 if (base instanceof UnknownType) {
                     ModuleBuilder dependentModule = findDependentModuleBuilder(modules, builder, base.getQName()
                             .getPrefix(), nodeToResolve.getLine());
-                    TypeDefinitionBuilder tdb = findTypeDefinitionBuilder(nodeToResolve.getPath(), dependentModule,
-                            base.getQName().getLocalName(), builder.getName(), nodeToResolve.getLine());
+                    TypeDefinitionBuilder tdb = findTypeDefinitionBuilder(nodeToResolve, dependentModule, base
+                            .getQName().getLocalName(), builder.getName(), nodeToResolve.getLine());
                     return findConstraintsFromTypeBuilder(tdb, constraints, modules, dependentModule, context);
                 } else {
                     // it has to be base yang type
@@ -1247,43 +1254,36 @@ public final class ParserUtils {
      *            current line in yang model
      * @return
      */
-    public static TypeDefinitionBuilder findTypeDefinitionBuilder(final SchemaPath dirtyNodeSchemaPath,
+    public static TypeDefinitionBuilder findTypeDefinitionBuilder(final TypeAwareBuilder nodeToResolve,
             final ModuleBuilder dependentModule, final String typeName, final String currentModuleName, final int line) {
-        final List<QName> path = dirtyNodeSchemaPath.getPath();
+
         TypeDefinitionBuilder result = null;
 
-        Set<TypeDefinitionBuilder> typedefs = dependentModule.getModuleTypedefs();
+        Set<TypeDefinitionBuilder> typedefs = dependentModule.getTypeDefinitionBuilders();
         result = findTypedefBuilderByName(typedefs, typeName);
-
-        if (result == null) {
-            Builder currentNode = null;
-            final List<String> currentPath = new ArrayList<String>();
-            currentPath.add(dependentModule.getName());
-
-            for (int i = 0; i < path.size(); i++) {
-                QName qname = path.get(i);
-                currentPath.add(qname.getLocalName());
-                currentNode = dependentModule.getModuleNode(currentPath);
-
-                if (currentNode instanceof RpcDefinitionBuilder) {
-                    typedefs = ((RpcDefinitionBuilder) currentNode).getTypeDefinitions();
-                } else if (currentNode instanceof DataNodeContainerBuilder) {
-                    typedefs = ((DataNodeContainerBuilder) currentNode).getTypeDefinitionBuilders();
-                } else {
-                    typedefs = Collections.emptySet();
-                }
-
-                result = findTypedefBuilderByName(typedefs, typeName);
-                if (result != null) {
-                    break;
-                }
-            }
-        }
-
         if (result != null) {
             return result;
         }
-        throw new YangParseException(currentModuleName, line, "Referenced type '" + typeName + "' not found.");
+
+        Builder parent = nodeToResolve.getParent();
+        while (parent != null) {
+            if (parent instanceof DataNodeContainerBuilder) {
+                typedefs = ((DataNodeContainerBuilder) parent).getTypeDefinitionBuilders();
+            } else if (parent instanceof RpcDefinitionBuilder) {
+                typedefs = ((RpcDefinitionBuilder) parent).getTypeDefinitions();
+            }
+            result = findTypedefBuilderByName(typedefs, typeName);
+            if (result == null) {
+                parent = parent.getParent();
+            } else {
+                break;
+            }
+        }
+
+        if (result == null) {
+            throw new YangParseException(currentModuleName, line, "Referenced type '" + typeName + "' not found.");
+        }
+        return result;
     }
 
 }

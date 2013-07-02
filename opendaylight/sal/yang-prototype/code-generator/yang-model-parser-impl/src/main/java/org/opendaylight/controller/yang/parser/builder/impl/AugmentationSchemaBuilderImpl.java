@@ -9,11 +9,12 @@ package org.opendaylight.controller.yang.parser.builder.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.AugmentationSchema;
@@ -32,6 +33,7 @@ import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 import org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
@@ -39,7 +41,7 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
     private boolean built;
     private final AugmentationSchemaImpl instance;
     private final int line;
-    private final Builder parent;
+    private Builder parent;
 
     private String whenCondition;
     private String description;
@@ -56,12 +58,10 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private boolean resolved;
 
-    AugmentationSchemaBuilderImpl(final String augmentTargetStr, final int line, final Builder parent) {
+    AugmentationSchemaBuilderImpl(final int line, final String augmentTargetStr) {
         this.augmentTargetStr = augmentTargetStr;
         this.line = line;
-        this.parent = parent;
-        final SchemaPath targetPath = YangModelBuilderUtil
-                .parseAugmentPath(augmentTargetStr);
+        final SchemaPath targetPath = YangModelBuilderUtil.parseAugmentPath(augmentTargetStr);
         dirtyAugmentTarget = targetPath;
         instance = new AugmentationSchemaImpl(targetPath);
     }
@@ -76,6 +76,10 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
         return parent;
     }
 
+    @Override
+    public void setParent(final Builder parent) {
+        this.parent = parent;
+    }
 
     @Override
     public void addChildNode(DataSchemaNodeBuilder childNode) {
@@ -145,14 +149,15 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
             instance.setWhenCondition(whenStmt);
 
             // CHILD NODES
-            final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+            final Map<QName, DataSchemaNode> childs = new TreeMap<QName, DataSchemaNode>(Comparators.QNAME_COMP);
             for (DataSchemaNodeBuilder node : childNodes) {
                 childs.put(node.getQName(), node.build());
             }
             instance.setChildNodes(childs);
 
             // GROUPINGS
-            final Set<GroupingDefinition> groupingDefinitions = new HashSet<GroupingDefinition>();
+            final Set<GroupingDefinition> groupingDefinitions = new TreeSet<GroupingDefinition>(
+                    Comparators.SCHEMA_NODE_COMP);
             for (GroupingBuilder builder : groupings) {
                 groupingDefinitions.add(builder.build());
             }
@@ -170,6 +175,7 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
             for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                 unknownNodes.add(b.build());
             }
+            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             instance.setUnknownSchemaNodes(unknownNodes);
 
             built = true;
@@ -202,8 +208,7 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
 
     @Override
     public void addTypedef(TypeDefinitionBuilder type) {
-        throw new YangParseException(line,
-                "Augmentation can not contains typedef statement.");
+        throw new YangParseException(line, "Augmentation can not contains typedef statement.");
     }
 
     @Override
@@ -218,7 +223,7 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
 
     @Override
     public void setStatus(Status status) {
-        if(status != null) {
+        if (status != null) {
             this.status = status;
         }
     }
@@ -251,13 +256,9 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
     public int hashCode() {
         final int prime = 17;
         int result = 1;
-        result = prime
-                * result
-                + ((augmentTargetStr == null) ? 0 : augmentTargetStr.hashCode());
-        result = prime * result
-                + ((whenCondition == null) ? 0 : whenCondition.hashCode());
-        result = prime * result
-                + ((childNodes == null) ? 0 : childNodes.hashCode());
+        result = prime * result + ((augmentTargetStr == null) ? 0 : augmentTargetStr.hashCode());
+        result = prime * result + ((whenCondition == null) ? 0 : whenCondition.hashCode());
+        result = prime * result + ((childNodes == null) ? 0 : childNodes.hashCode());
         return result;
     }
 
@@ -297,6 +298,10 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
         return true;
     }
 
+    public String toString() {
+        return "augment " + augmentTargetStr;
+    }
+
     private final class AugmentationSchemaImpl implements AugmentationSchema {
         private SchemaPath targetPath;
         private RevisionAwareXPath whenCondition;
@@ -332,7 +337,9 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
 
         @Override
         public Set<DataSchemaNode> getChildNodes() {
-            return new HashSet<DataSchemaNode>(childNodes.values());
+            final Set<DataSchemaNode> result = new TreeSet<DataSchemaNode>(Comparators.SCHEMA_NODE_COMP);
+            result.addAll(childNodes.values());
+            return result;
         }
 
         private void setChildNodes(Map<QName, DataSchemaNode> childNodes) {
@@ -399,12 +406,12 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
             this.status = status;
         }
 
+        @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
             return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(
-                List<UnknownSchemaNode> unknownSchemaNodes) {
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownSchemaNodes) {
             if (unknownSchemaNodes != null) {
                 this.unknownNodes = unknownSchemaNodes;
             }
@@ -431,12 +438,9 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
         public int hashCode() {
             final int prime = 17;
             int result = 1;
-            result = prime * result
-                    + ((targetPath == null) ? 0 : targetPath.hashCode());
-            result = prime * result
-                    + ((whenCondition == null) ? 0 : whenCondition.hashCode());
-            result = prime * result
-                    + ((childNodes == null) ? 0 : childNodes.hashCode());
+            result = prime * result + ((targetPath == null) ? 0 : targetPath.hashCode());
+            result = prime * result + ((whenCondition == null) ? 0 : whenCondition.hashCode());
+            result = prime * result + ((childNodes == null) ? 0 : childNodes.hashCode());
             return result;
         }
 
@@ -478,8 +482,7 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    AugmentationSchemaImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(AugmentationSchemaImpl.class.getSimpleName());
             sb.append("[");
             sb.append("targetPath=" + targetPath);
             sb.append(", when=" + whenCondition);

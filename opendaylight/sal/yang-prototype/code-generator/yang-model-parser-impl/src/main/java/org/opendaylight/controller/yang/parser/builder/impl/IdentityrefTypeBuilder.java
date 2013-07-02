@@ -32,13 +32,12 @@ import org.opendaylight.controller.yang.parser.util.YangParseException;
 public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder implements TypeDefinitionBuilder {
     private static final String NAME = "identityref";
 
-    private final int line;
     private final String baseString;
     private final SchemaPath schemaPath;
     private QName baseQName;
 
     IdentityrefTypeBuilder(final String baseString, final SchemaPath schemaPath, final int line) {
-        this.line = line;
+        super(line, null);
         this.baseString = baseString;
         this.schemaPath = schemaPath;
     }
@@ -54,11 +53,6 @@ public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder imple
 
     public void setBaseQName(QName baseQName) {
         this.baseQName = baseQName;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
     }
 
     @Override

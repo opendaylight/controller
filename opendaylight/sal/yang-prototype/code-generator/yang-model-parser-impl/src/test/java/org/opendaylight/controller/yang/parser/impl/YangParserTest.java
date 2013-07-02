@@ -28,10 +28,12 @@ import org.opendaylight.controller.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.controller.yang.model.api.ChoiceNode;
 import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.Deviation;
 import org.opendaylight.controller.yang.model.api.Deviation.Deviate;
 import org.opendaylight.controller.yang.model.api.ExtensionDefinition;
 import org.opendaylight.controller.yang.model.api.FeatureDefinition;
+import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
@@ -92,6 +94,59 @@ public class YangParserTest {
         Date expectedRevision = TestUtils.createDate("2013-02-27");
         assertEquals(expectedRevision, test.getRevision());
         assertEquals(" WILL BE DEFINED LATER", test.getReference());
+    }
+
+    @Test
+    public void testOrderingTypedef() {
+        Module test = TestUtils.findModule(modules, "types2");
+        Set<TypeDefinition<?>> typedefs = test.getTypeDefinitions();
+        String[] expectedOrder = new String[] { "my-base-int32-type", "my-custom-string", "my-decimal-type",
+                "my-decimal-type-ext", "my-int-type", "my-int-type-ext", "my-int-type2", "my-string-type",
+                "my-string-type-ext", "my-string-type2", "my-type1", "my-union", "my-union-ext", "nested-union1",
+                "nested-union2" };
+        String[] actualOrder = new String[typedefs.size()];
+
+        int i = 0;
+        for (TypeDefinition<?> type : typedefs) {
+            actualOrder[i] = type.getQName().getLocalName();
+            i++;
+        }
+        assertArrayEquals(expectedOrder, actualOrder);
+    }
+
+    @Test
+    public void testOrderingChildNodes() {
+        Module test = TestUtils.findModule(modules, "types2");
+        Set<DataSchemaNode> childNodes = test.getChildNodes();
+        String[] expectedOrder = new String[] { "count", "if-name", "interfaces", "name", "nested-type-leaf", "peer",
+                "system" };
+        String[] actualOrder = new String[childNodes.size()];
+
+        int i = 0;
+        for (DataSchemaNode child : childNodes) {
+            actualOrder[i] = child.getQName().getLocalName();
+            i++;
+        }
+        assertArrayEquals(expectedOrder, actualOrder);
+    }
+
+    @Test
+    public void testOrderingNestedChildNodes() {
+        Module test = TestUtils.findModule(modules, "types2");
+        Set<GroupingDefinition> groupings = test.getGroupings();
+        assertEquals(1, groupings.size());
+        GroupingDefinition target = groupings.iterator().next();
+
+        Set<DataSchemaNode> childNodes = target.getChildNodes();
+        String[] expectedOrder = new String[] { "address", "addresses", "data", "how", "port" };
+        String[] actualOrder = new String[childNodes.size()];
+
+        int i = 0;
+        for (DataSchemaNode child : childNodes) {
+            actualOrder[i] = child.getQName().getLocalName();
+            i++;
+        }
+        assertArrayEquals(expectedOrder, actualOrder);
     }
 
     @Test
@@ -567,10 +622,10 @@ public class YangParserTest {
         assertEquals(5, cases.size());
         ChoiceCaseNode input = null;
         ChoiceCaseNode output = null;
-        for(ChoiceCaseNode caseNode : cases) {
-            if("input".equals(caseNode.getQName().getLocalName())) {
+        for (ChoiceCaseNode caseNode : cases) {
+            if ("input".equals(caseNode.getQName().getLocalName())) {
                 input = caseNode;
-            } else if("output".equals(caseNode.getQName().getLocalName())) {
+            } else if ("output".equals(caseNode.getQName().getLocalName())) {
                 output = caseNode;
             }
         }

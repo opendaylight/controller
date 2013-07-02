@@ -2,11 +2,11 @@ package org.opendaylight.controller.yang.parser.builder.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.AugmentationSchema;
@@ -25,14 +25,13 @@ import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBui
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder implements DataSchemaNodeBuilder,
         AugmentationTargetBuilder {
     private boolean isBuilt;
     private final ChoiceCaseNodeImpl instance;
-    private final ChoiceBuilder parent;
-    private final int line;
     // SchemaNode args
     private SchemaPath schemaPath;
     private String description;
@@ -47,10 +46,8 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     // AugmentationTarget args
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
 
-    ChoiceCaseBuilder(final ChoiceBuilder parent, final QName qname, final int line) {
-        super(qname);
-        this.parent = parent;
-        this.line = line;
+    ChoiceCaseBuilder(final int line, final QName qname) {
+        super(line, qname);
         instance = new ChoiceCaseNodeImpl(qname);
         constraints = new ConstraintsBuilder(line);
     }
@@ -66,7 +63,7 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
             instance.setAugmenting(augmenting);
 
             // CHILD NODES
-            final Map<QName, DataSchemaNode> childs = new HashMap<QName, DataSchemaNode>();
+            final Map<QName, DataSchemaNode> childs = new TreeMap<QName, DataSchemaNode>(Comparators.QNAME_COMP);
             for (DataSchemaNodeBuilder node : addedChildNodes) {
                 childs.put(node.getQName(), node.build());
             }
@@ -84,6 +81,7 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
             for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                 unknownNodes.add(b.build());
             }
+            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             instance.setUnknownSchemaNodes(unknownNodes);
 
             // AUGMENTATIONS
@@ -103,15 +101,6 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     public void rebuild() {
         isBuilt = false;
         build();
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    public ChoiceBuilder getParent() {
-        return parent;
     }
 
     public SchemaPath getPath() {
@@ -197,6 +186,48 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     @Override
     public void addAugmentation(AugmentationSchemaBuilder augment) {
         addedAugmentations.add(augment);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((schemaPath == null) ? 0 : schemaPath.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ChoiceCaseBuilder other = (ChoiceCaseBuilder) obj;
+        if (schemaPath == null) {
+            if (other.schemaPath != null) {
+                return false;
+            }
+        } else if (!schemaPath.equals(other.schemaPath)) {
+            return false;
+        }
+        if (parent == null) {
+            if (other.parent != null) {
+                return false;
+            }
+        } else if (!parent.equals(other.parent)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "case " + getQName().getLocalName();
     }
 
     public final class ChoiceCaseNodeImpl implements ChoiceCaseNode {

@@ -17,41 +17,37 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class ExtensionBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
     private final ExtensionDefinitionImpl instance;
-    private final List<UnknownSchemaNodeBuilder> addedExtensions = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    ExtensionBuilder(final QName qname, final int line) {
-        super(qname, line);
+    ExtensionBuilder(final int line, final QName qname) {
+        super(line, qname);
         instance = new ExtensionDefinitionImpl(qname);
     }
 
     @Override
     public ExtensionDefinition build() {
-        if(!isBuilt) {
-            instance.setPath(path);
+        if (!isBuilt) {
+            instance.setPath(schemaPath);
             instance.setDescription(description);
             instance.setReference(reference);
             instance.setStatus(status);
 
             // UNKNOWN NODES
-            final List<UnknownSchemaNode> extensions = new ArrayList<UnknownSchemaNode>();
-            for (UnknownSchemaNodeBuilder e : addedExtensions) {
-                extensions.add(e.build());
+            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
+            for (UnknownSchemaNodeBuilder un : addedUnknownNodes) {
+                unknownNodes.add(un.build());
             }
-            instance.setUnknownSchemaNodes(extensions);
+            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
+            instance.setUnknownSchemaNodes(unknownNodes);
 
             isBuilt = true;
         }
 
         return instance;
-    }
-
-
-    public void addExtension(UnknownSchemaNodeBuilder extension) {
-        addedExtensions.add(extension);
     }
 
     public void setYinElement(boolean yin) {
@@ -62,7 +58,6 @@ public final class ExtensionBuilder extends AbstractSchemaNodeBuilder {
         instance.setArgument(argument);
     }
 
-
     private final class ExtensionDefinitionImpl implements ExtensionDefinition {
         private final QName qname;
         private String argument;
@@ -70,8 +65,7 @@ public final class ExtensionBuilder extends AbstractSchemaNodeBuilder {
         private String description;
         private String reference;
         private Status status = Status.CURRENT;
-        private List<UnknownSchemaNode> unknownNodes = Collections
-                .emptyList();
+        private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
         private boolean yin;
 
         private ExtensionDefinitionImpl(QName qname) {
@@ -126,9 +120,8 @@ public final class ExtensionBuilder extends AbstractSchemaNodeBuilder {
             return unknownNodes;
         }
 
-        private void setUnknownSchemaNodes(
-                List<UnknownSchemaNode> unknownNodes) {
-            if(unknownNodes != null) {
+        private void setUnknownSchemaNodes(List<UnknownSchemaNode> unknownNodes) {
+            if (unknownNodes != null) {
                 this.unknownNodes = unknownNodes;
             }
         }
@@ -156,8 +149,7 @@ public final class ExtensionBuilder extends AbstractSchemaNodeBuilder {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
-            result = prime * result
-                    + ((schemaPath == null) ? 0 : schemaPath.hashCode());
+            result = prime * result + ((schemaPath == null) ? 0 : schemaPath.hashCode());
             return result;
         }
 
@@ -192,10 +184,9 @@ public final class ExtensionBuilder extends AbstractSchemaNodeBuilder {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    ExtensionDefinitionImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(ExtensionDefinitionImpl.class.getSimpleName());
             sb.append("[");
-            sb.append("argument="+ argument);
+            sb.append("argument=" + argument);
             sb.append(", qname=" + qname);
             sb.append(", schemaPath=" + schemaPath);
             sb.append(", extensionSchemaNodes=" + unknownNodes);
