@@ -40,6 +40,9 @@
               org.slf4j,
               org.apache.felix.dm
             </Import-Package>
+            <Export-Package>
+              org.opendaylight.controller.sample.simpleforwarding
+            </Export-Package>
             <Bundle-Activator>
               org.opendaylight.controller.samples.simpleforwarding.internal.Activator
             </Bundle-Activator>

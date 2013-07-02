@@ -18,7 +18,8 @@ import org.junit.Assert;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.samples.simpleforwarding.internal.HostNodePair;
+import org.opendaylight.controller.samples.simpleforwarding.HostNodePair;
+
 
 public class HostSwitchTest {
     @Test
