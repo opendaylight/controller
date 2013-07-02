@@ -62,7 +62,7 @@ module augment-abstract-topology {
     augment "at:topology/at:network-links/at:network-link" {
         leaf interface {
             type leafref {
-                path "../../../atp:interfaces/atp:interface/atp:interface-id";
+                path "../atp:interfaces/atp:interface/atp:interface-id";
             }
         }
     }

@@ -1,0 +1,55 @@
+module bit-and-union-in-leaf {
+    
+    namespace "urn:bit:union:in:leaf";
+    prefix "sbd";
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    revision 2013-06-26 {
+        
+    }
+    
+    typedef union-typedef {
+        type union {
+            type string {
+                pattern "[a-g]";
+            };
+            type int16;
+        }
+    }
+    
+    typedef union-typedef2 {
+        type union {
+            type string; 
+            type int16;
+        }
+    }    
+    
+    container parent-container {
+        leaf bit-leaf {
+            type bits {
+                bit first-bit;
+                bit second-bit;
+                bit third-bit;
+            }
+        }
+        
+        leaf union-leaf {
+            type union {
+                type int32;
+                type string {
+                    pattern "[a-z]";
+                };
+                type string {
+                    pattern "[0-9]*"
+                };
+                type string {
+                    pattern "[a-d]*";
+                    pattern "[0-5]*";
+                };
+                type uint8;
+            }
+        }
+    }
+}
