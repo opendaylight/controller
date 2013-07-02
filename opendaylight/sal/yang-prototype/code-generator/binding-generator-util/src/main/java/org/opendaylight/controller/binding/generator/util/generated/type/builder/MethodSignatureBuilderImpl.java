@@ -13,7 +13,6 @@ import java.util.List;
 import org.opendaylight.controller.sal.binding.model.api.AnnotationType;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.sal.binding.model.api.type.builder.AnnotationTypeBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 
 final class MethodSignatureBuilderImpl extends AbstractTypeMemberBuilder implements MethodSignatureBuilder {
@@ -39,19 +38,17 @@ final class MethodSignatureBuilderImpl extends AbstractTypeMemberBuilder impleme
     @Override
     public MethodSignature toInstance(Type definingType) {
         final List<AnnotationType> annotations = toAnnotationTypes();
-        return new MethodSignatureImpl(definingType, getName(), annotations,
-                getComment(), getAccessModifier(), getReturnType(), parameters, isFinal(), isAbstract);
+        return new MethodSignatureImpl(definingType, getName(), annotations, getComment(), getAccessModifier(),
+                getReturnType(), parameters, isFinal(), isAbstract);
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
-        result = prime * result
-                + ((parameters == null) ? 0 : parameters.hashCode());
-        result = prime * result
-                + ((getReturnType() == null) ? 0 : getReturnType().hashCode());
+        result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
+        result = prime * result + ((getReturnType() == null) ? 0 : getReturnType().hashCode());
         return result;
     }
 

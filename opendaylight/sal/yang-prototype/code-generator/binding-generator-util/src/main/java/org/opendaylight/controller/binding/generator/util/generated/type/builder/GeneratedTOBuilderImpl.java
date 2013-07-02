@@ -21,6 +21,7 @@ public final class GeneratedTOBuilderImpl extends AbstractGeneratedTypeBuilder i
     private final List<GeneratedPropertyBuilder> equalsProperties = new ArrayList<>();
     private final List<GeneratedPropertyBuilder> hashProperties = new ArrayList<>();
     private final List<GeneratedPropertyBuilder> toStringProperties = new ArrayList<>();
+    private boolean isUnionType = false;
 
     public GeneratedTOBuilderImpl(String packageName, String name) {
         super(packageName, name);
@@ -43,18 +44,31 @@ public final class GeneratedTOBuilderImpl extends AbstractGeneratedTypeBuilder i
         return builder;
     }
 
+    @Override
+    public boolean containsProperty(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Parameter name can't be null");
+        }
+        for (GeneratedPropertyBuilder property : properties) {
+            if (name.equals(property.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Add new Method Signature definition for Generated Type Builder and
-     * returns Method Signature Builder for specifying all Method parameters.
-     * <br>
-     * Name of Method cannot be <code>null</code>,
-     * if it is <code>null</code> the method SHOULD throw {@link IllegalArgumentException}
-     * <br>
+     * returns Method Signature Builder for specifying all Method parameters. <br>
+     * Name of Method cannot be <code>null</code>, if it is <code>null</code>
+     * the method SHOULD throw {@link IllegalArgumentException} <br>
      * By <i>Default</i> the MethodSignatureBuilder SHOULD be pre-set as
-     * {@link MethodSignatureBuilder#setAbstract(false)}, {@link MethodSignatureBuilder#setFinal(false)} and
+     * {@link MethodSignatureBuilder#setAbstract(false)},
+     * {@link MethodSignatureBuilder#setFinal(false)} and
      * {@link MethodSignatureBuilder#setAccessModifier(PUBLIC)}
-     *
-     * @param name Name of Method
+     * 
+     * @param name
+     *            Name of Method
      * @return <code>new</code> instance of Method Signature Builder.
      */
     @Override
@@ -81,10 +95,10 @@ public final class GeneratedTOBuilderImpl extends AbstractGeneratedTypeBuilder i
 
     @Override
     public GeneratedTransferObject toInstance() {
-        return new GeneratedTransferObjectImpl(null, getPackageName(), getName(), getComment(),
-                getAnnotations(), isAbstract(), extendsType, getImplementsTypes(), getEnclosedTypes(),
-                getEnclosedTransferObjects(), getConstants(), getEnumerations(), getMethodDefinitions(), properties,
-                equalsProperties, hashProperties, toStringProperties);
+        return new GeneratedTransferObjectImpl(null, getPackageName(), getName(), getComment(), getAnnotations(),
+                isAbstract(), extendsType, getImplementsTypes(), getEnclosedTypes(), getEnclosedTransferObjects(),
+                getConstants(), getEnumerations(), getMethodDefinitions(), properties, equalsProperties,
+                hashProperties, toStringProperties, isUnionType);
     }
 
     @Override
@@ -116,6 +130,11 @@ public final class GeneratedTOBuilderImpl extends AbstractGeneratedTypeBuilder i
         return builder.toString();
     }
 
+    @Override
+    public void setIsUnion(boolean isUnion) {
+        this.isUnionType = isUnion;
+    }
+
     private static final class GeneratedTransferObjectImpl extends AbstractGeneratedType implements
             GeneratedTransferObject {
 
@@ -124,35 +143,33 @@ public final class GeneratedTOBuilderImpl extends AbstractGeneratedTypeBuilder i
         private final List<GeneratedProperty> hashCodeProperties;
         private final List<GeneratedProperty> stringProperties;
         private final GeneratedTransferObject extendsType;
+        private final boolean isUnionType;
 
-        GeneratedTransferObjectImpl(final Type parent,
-                    final String packageName,
-                                           final String name, final String comment,
-                                           final List<AnnotationTypeBuilder> annotationBuilders,
-                                           final boolean isAbstract,
-                                           final GeneratedTransferObject extendsType,
-                                           final List<Type> implementsTypes,
-                                           final List<GeneratedTypeBuilder> enclosedGenTypeBuilders,
-                                           final List<GeneratedTOBuilder> enclosedGenTOBuilders,
-                                           final List<Constant> constants,
-                                           final List<EnumBuilder> enumBuilders,
-                                           final List<MethodSignatureBuilder> methodBuilders,
-                                           final List<GeneratedPropertyBuilder> propBuilders,
-                                           final List<GeneratedPropertyBuilder> equalsBuilders,
-                                           final List<GeneratedPropertyBuilder> hashCodeBuilders,
-                                           final List<GeneratedPropertyBuilder> stringBuilders) {
+        GeneratedTransferObjectImpl(final Type parent, final String packageName, final String name,
+                final String comment, final List<AnnotationTypeBuilder> annotationBuilders, final boolean isAbstract,
+                final GeneratedTransferObject extendsType, final List<Type> implementsTypes,
+                final List<GeneratedTypeBuilder> enclosedGenTypeBuilders,
+                final List<GeneratedTOBuilder> enclosedGenTOBuilders, final List<Constant> constants,
+                final List<EnumBuilder> enumBuilders, final List<MethodSignatureBuilder> methodBuilders,
+                final List<GeneratedPropertyBuilder> propBuilders, final List<GeneratedPropertyBuilder> equalsBuilders,
+                final List<GeneratedPropertyBuilder> hashCodeBuilders,
+                final List<GeneratedPropertyBuilder> stringBuilders, final boolean isUnionType) {
             super(parent, packageName, name, comment, annotationBuilders, isAbstract, implementsTypes,
-                    enclosedGenTypeBuilders,
-                    enclosedGenTOBuilders, enumBuilders, constants, methodBuilders);
+                    enclosedGenTypeBuilders, enclosedGenTOBuilders, enumBuilders, constants, methodBuilders);
             this.extendsType = extendsType;
             this.properties = toUnmodifiableProperties(propBuilders);
             this.equalsProperties = toUnmodifiableProperties(equalsBuilders);
             this.hashCodeProperties = toUnmodifiableProperties(hashCodeBuilders);
             this.stringProperties = toUnmodifiableProperties(stringBuilders);
+            this.isUnionType = isUnionType;
         }
 
-        private List<GeneratedProperty> toUnmodifiableProperties(
-                final List<GeneratedPropertyBuilder> propBuilders) {
+        @Override
+        public boolean isUnionType() {
+            return isUnionType;
+        }
+
+        private List<GeneratedProperty> toUnmodifiableProperties(final List<GeneratedPropertyBuilder> propBuilders) {
             final List<GeneratedProperty> properties = new ArrayList<>();
             for (final GeneratedPropertyBuilder builder : propBuilders) {
                 properties.add(builder.toInstance(this));
