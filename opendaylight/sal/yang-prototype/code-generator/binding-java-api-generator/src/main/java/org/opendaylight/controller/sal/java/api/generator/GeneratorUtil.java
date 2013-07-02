@@ -10,9 +10,11 @@ package org.opendaylight.controller.sal.java.api.generator;
 import static org.opendaylight.controller.sal.java.api.generator.Constants.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.opendaylight.controller.binding.generator.util.TypeConstants;
 import org.opendaylight.controller.sal.binding.model.api.*;
@@ -56,9 +58,9 @@ public final class GeneratorUtil {
             if (!(CLASS.equals(type))) {
                 throw new IllegalArgumentException("'identity' has to be generated as a class");
             }
-            builder.append(PUBLIC + GAP + ABSTRACT + GAP + type + GAP + genType.getName() + GAP);
+            builder.append(indent + PUBLIC + GAP + ABSTRACT + GAP + type + GAP + genType.getName() + GAP);
         } else {
-            builder.append(PUBLIC + GAP + type + GAP + genType.getName() + GAP);
+            builder.append(indent + PUBLIC + GAP + type + GAP + genType.getName() + GAP);
         }
 
         if (genType instanceof GeneratedTransferObject) {
@@ -222,9 +224,9 @@ public final class GeneratorUtil {
 
         createComment(builder, comment, indent);
         builder.append(NL);
-        builder.append(indent);
 
         if (!method.getAnnotations().isEmpty()) {
+            builder.append(indent);
             final List<AnnotationType> annotations = method.getAnnotations();
             appendAnnotations(builder, annotations);
             builder.append(NL);
@@ -584,12 +586,18 @@ public final class GeneratorUtil {
         }
     }
 
-    public static Map<String, String> createImports(final GeneratedType genType) {
+    public static Map<String, String> createImports(GeneratedType genType) {
         if (genType == null) {
             throw new IllegalArgumentException("Generated Type cannot be NULL!");
         }
-
         final Map<String, String> imports = new LinkedHashMap<>();
+        List<GeneratedType> childGeneratedTypes = genType.getEnclosedTypes();
+        if (childGeneratedTypes.size() != 0) {
+            for (GeneratedType genTypeChild : childGeneratedTypes) {
+                imports.putAll(createImports(genTypeChild));
+            }
+        }
+
         final List<Constant> constants = genType.getConstantDefinitions();
         final List<MethodSignature> methods = genType.getMethodDefinitions();
         final List<Type> impl = genType.getImplements();
@@ -708,5 +716,29 @@ public final class GeneratorUtil {
 
         }
         return false;
+    }
+
+    public static void removeImportsForEnclosedTypes(GeneratedType genType, Map<String, String> imports) {
+        List<GeneratedType> genTypes = genType.getEnclosedTypes();
+        if (genTypes.size() > 0) {
+            for (GeneratedType genT : genTypes) {
+                removeImportsForEnclosedTypes(genT, imports);
+            }
+        } else {
+            imports.remove(genType.getName());
+        }
+    }
+
+    public static Map<String, String> cloneImports(Map<String, String> imports) {
+        Map<String, String> clonedImports = new LinkedHashMap<String, String>();
+
+        Set<String> typeNames = imports.keySet();
+
+        for (String typeName : typeNames) {
+            String packageNameClonned = new String(imports.get(typeName));
+            String typeNameClonned = new String(typeName);
+            clonedImports.put(typeNameClonned, packageNameClonned);
+        }
+        return clonedImports;
     }
 }
