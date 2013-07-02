@@ -14,6 +14,16 @@ import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.find
 import java.util.*;
 import java.util.concurrent.Future;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
+
+import org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
@@ -23,17 +33,40 @@ import org.opendaylight.controller.sal.binding.generator.spi.TypeProvider;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.sal.binding.model.api.type.builder.*;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.EnumBuilder;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedPropertyBuilder;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTypeBuilder;
+import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 import org.opendaylight.controller.sal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.controller.yang.binding.Notification;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.common.RpcResult;
-import org.opendaylight.controller.yang.model.api.*;
+import org.opendaylight.controller.yang.model.api.AugmentationSchema;
+import org.opendaylight.controller.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.controller.yang.model.api.ChoiceNode;
+import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.controller.yang.model.api.DataNodeContainer;
+import org.opendaylight.controller.yang.model.api.DataSchemaNode;
+import org.opendaylight.controller.yang.model.api.GroupingDefinition;
+import org.opendaylight.controller.yang.model.api.IdentitySchemaNode;
+import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
+import org.opendaylight.controller.yang.model.api.ListSchemaNode;
+import org.opendaylight.controller.yang.model.api.Module;
+import org.opendaylight.controller.yang.model.api.NotificationDefinition;
+import org.opendaylight.controller.yang.model.api.RpcDefinition;
+import org.opendaylight.controller.yang.model.api.SchemaContext;
+import org.opendaylight.controller.yang.model.api.SchemaNode;
+import org.opendaylight.controller.yang.model.api.SchemaPath;
+import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
 import org.opendaylight.controller.yang.model.util.DataNodeIterator;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
 import org.opendaylight.controller.yang.model.util.SchemaContextUtil;
+import org.opendaylight.controller.yang.model.util.UnionType;
 
 public final class BindingGeneratorImpl implements BindingGenerator {
 
@@ -807,9 +840,8 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                 final TypeDefinition<?> typeDef = leaf.getType();
 
                 Type returnType = null;
-                if (!(typeDef instanceof EnumTypeDefinition)) {
+                if (typeDef instanceof EnumTypeDefinition) {
                     returnType = typeProvider.javaTypeForSchemaDefinitionType(typeDef);
-                } else {
                     final EnumTypeDefinition enumTypeDef = enumTypeDefFromExtendedType(typeDef);
                     final EnumBuilder enumBuilder = resolveInnerEnumFromTypeDefinition(enumTypeDef, leafName,
                             typeBuilder);
@@ -818,12 +850,17 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                         returnType = new ReferencedTypeImpl(enumBuilder.getPackageName(), enumBuilder.getName());
                     }
                     ((TypeProviderImpl) typeProvider).putReferencedType(leaf.getPath(), returnType);
+                } else if (typeDef instanceof UnionType) {
+                    GeneratedTOBuilder genTOBuilder = addEnclosingTOToTypeBuilder(typeBuilder, leafName, typeDef);
+                    returnType = new ReferencedTypeImpl(genTOBuilder.getPackageName(), genTOBuilder.getName());
+                } else if (typeDef instanceof BitsTypeDefinition) {
+                    GeneratedTOBuilder genTOBuilder = addEnclosingTOToTypeBuilder(typeBuilder, leafName, typeDef);
+                    returnType = new ReferencedTypeImpl(genTOBuilder.getPackageName(), genTOBuilder.getName());
+                } else {
+                    returnType = typeProvider.javaTypeForSchemaDefinitionType(typeDef);
                 }
                 if (returnType != null) {
                     constructGetter(typeBuilder, leafName, leafDesc, returnType);
-                    if (!leaf.isConfiguration()) {
-                        constructSetter(typeBuilder, leafName, leafDesc, returnType);
-                    }
                     return true;
                 }
             }
@@ -877,9 +914,6 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                 final Type listType = Types.listTypeFor(typeProvider.javaTypeForSchemaDefinitionType(type));
 
                 constructGetter(typeBuilder, nodeName, nodeDesc, listType);
-                if (!node.isConfiguration()) {
-                    constructSetter(typeBuilder, nodeName, nodeDesc, listType);
-                }
                 return true;
             }
         }
@@ -912,9 +946,6 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                 final String packageName = packageNameForGeneratedType(basePackageName, schemaNode.getPath());
                 final GeneratedTypeBuilder rawGenType = addDefaultInterfaceDefinition(packageName, schemaNode);
                 constructGetter(typeBuilder, listName, schemaNode.getDescription(), Types.listTypeFor(rawGenType));
-                if (!schemaNode.isConfiguration()) {
-                    constructSetter(typeBuilder, listName, schemaNode.getDescription(), Types.listTypeFor(rawGenType));
-                }
                 return true;
             }
         }
@@ -1146,5 +1177,32 @@ public final class BindingGeneratorImpl implements BindingGenerator {
             genTOBuilder = resolveListKey(packageName, list);
         }
         return genTOBuilder;
+    }
+
+    private GeneratedTOBuilder addEnclosingTOToTypeBuilder(final GeneratedTypeBuilder typeBuilder,
+            final String leafName, final TypeDefinition<?> leafTypeDef) {
+        if (typeBuilder == null) {
+            throw new IllegalArgumentException("Parameter typeBuilder can't be null.");
+        }
+        if (leafName == null) {
+            throw new IllegalArgumentException("Parameter leafName can't be null.");
+        }
+        if (leafTypeDef == null) {
+            throw new IllegalArgumentException("Parameter leafTypeDef can't be null.");
+        }        
+        String className = parseToClassName(leafName);
+        GeneratedTOBuilder genTOBuilder = null;
+        if (leafTypeDef instanceof UnionType) {
+            genTOBuilder = ((TypeProviderImpl) typeProvider).addUnionGeneratedTypeDefinition(
+                    typeBuilder.getPackageName(), leafTypeDef, className);
+        } else if (leafTypeDef instanceof BitsTypeDefinition) {
+            genTOBuilder = ((TypeProviderImpl) typeProvider).bitsTypedefToTransferObject(typeBuilder.getPackageName(),
+                    leafTypeDef, className);
+        }
+        if (genTOBuilder != null) {
+            typeBuilder.addEnclosingTransferObject(genTOBuilder);
+        }
+        return genTOBuilder;
+
     }
 }
