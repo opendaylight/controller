@@ -14,21 +14,12 @@ import java.util.Queue;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.controller.yang.model.api.DataNodeContainer;
-import org.opendaylight.controller.yang.model.api.DataSchemaNode;
-import org.opendaylight.controller.yang.model.api.ListSchemaNode;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.ModuleImport;
-import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
-import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.api.SchemaNode;
-import org.opendaylight.controller.yang.model.api.SchemaPath;
-import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.*;
 
 public final class SchemaContextUtil {
 
-    private SchemaContextUtil() {}
+    private SchemaContextUtil() {
+    }
 
     public static DataSchemaNode findDataSchemaNode(final SchemaContext context, final SchemaPath schemaPath) {
         if (schemaPath != null) {
@@ -52,11 +43,9 @@ public final class SchemaContextUtil {
                     // TODO: function to escape conditions in path
                 }
                 if (nonCondXPath.isAbsolute()) {
-                    final Queue<QName> qnamedPath = xpathToQNamePath(context, module,
-                            strXPath);
+                    final Queue<QName> qnamedPath = xpathToQNamePath(context, module, strXPath);
                     if (qnamedPath != null) {
-                        final DataSchemaNode dataNode = findSchemaNodeForGivenPath(context,
-                                module, qnamedPath);
+                        final DataSchemaNode dataNode = findSchemaNodeForGivenPath(context, module, qnamedPath);
                         return dataNode;
                     }
                 }
@@ -65,20 +54,16 @@ public final class SchemaContextUtil {
         return null;
     }
 
-    public static DataSchemaNode findDataSchemaNodeForRelativeXPath(final SchemaContext context,
-            final Module module, final SchemaNode actualSchemaNode,
-            final RevisionAwareXPath relativeXPath) {
-        if ((actualSchemaNode != null) && (relativeXPath != null)
-                && !relativeXPath.isAbsolute()) {
+    public static DataSchemaNode findDataSchemaNodeForRelativeXPath(final SchemaContext context, final Module module,
+            final SchemaNode actualSchemaNode, final RevisionAwareXPath relativeXPath) {
+        if ((actualSchemaNode != null) && (relativeXPath != null) && !relativeXPath.isAbsolute()) {
 
             final SchemaPath actualNodePath = actualSchemaNode.getPath();
             if (actualNodePath != null) {
-                final Queue<QName> qnamePath = resolveRelativeXPath(context, module,
-                        relativeXPath, actualNodePath);
+                final Queue<QName> qnamePath = resolveRelativeXPath(context, module, relativeXPath, actualNodePath);
 
                 if (qnamePath != null) {
-                    final DataSchemaNode dataNode = findSchemaNodeForGivenPath(context,
-                            module, qnamePath);
+                    final DataSchemaNode dataNode = findSchemaNodeForGivenPath(context, module, qnamePath);
                     return dataNode;
                 }
             }
@@ -87,8 +72,7 @@ public final class SchemaContextUtil {
         return null;
     }
 
-    private static Module resolveModuleFromSchemaPath(final SchemaContext
-        context, final SchemaPath schemaPath) {
+    private static Module resolveModuleFromSchemaPath(final SchemaContext context, final SchemaPath schemaPath) {
         if ((schemaPath != null) && (schemaPath.getPath() != null)) {
             final List<QName> path = schemaPath.getPath();
             if (!path.isEmpty()) {
@@ -102,11 +86,10 @@ public final class SchemaContextUtil {
         return null;
     }
 
-    public static Module findParentModuleForTypeDefinition(
-            final SchemaContext context, final TypeDefinition<?> type) {
+    public static Module findParentModuleForTypeDefinition(final SchemaContext context, final TypeDefinition<?> type) {
         final SchemaPath schemaPath = type.getPath();
         if ((schemaPath != null) && (schemaPath.getPath() != null)) {
-            if(type instanceof ExtendedType) {
+            if (type instanceof ExtendedType) {
                 List<QName> path = schemaPath.getPath();
                 final QName qname = path.get(path.size() - 1);
 
@@ -136,14 +119,14 @@ public final class SchemaContextUtil {
 
         final SchemaPath schemaPath = schemaNode.getPath();
         if (schemaPath == null) {
-            throw new IllegalStateException("Schema Path for Schema Node is not " +
-                    "set properly (Schema Path is NULL)");
+            throw new IllegalStateException("Schema Path for Schema Node is not "
+                    + "set properly (Schema Path is NULL)");
         }
         final List<QName> qnamedPath = schemaPath.getPath();
         if (qnamedPath == null || qnamedPath.isEmpty()) {
-            throw new IllegalStateException("Schema Path contains invalid state of path parts." +
-                    "The Schema Path MUST contain at least ONE QName which defines namespace and Local name" +
-                    "of path.");
+            throw new IllegalStateException("Schema Path contains invalid state of path parts."
+                    + "The Schema Path MUST contain at least ONE QName which defines namespace and Local name"
+                    + "of path.");
         }
         final QName qname = qnamedPath.get(qnamedPath.size() - 1);
         return context.findModuleByNamespace(qname.getNamespace());
@@ -151,12 +134,11 @@ public final class SchemaContextUtil {
 
     private static DataSchemaNode findSchemaNodeForGivenPath(final SchemaContext context, final Module module,
             final Queue<QName> qnamedPath) {
-        if ((module != null) && (module.getNamespace() != null)
-                && (qnamedPath != null)) {
+        if ((module != null) && (module.getNamespace() != null) && (qnamedPath != null)) {
             DataNodeContainer nextNode = module;
             final URI moduleNamespace = module.getNamespace();
 
-            QName childNodeQName = null;
+            QName childNodeQName;
             DataSchemaNode schemaNode = null;
             while ((nextNode != null) && !qnamedPath.isEmpty()) {
                 childNodeQName = qnamedPath.peek();
@@ -169,14 +151,20 @@ public final class SchemaContextUtil {
                             nextNode = (ContainerSchemaNode) schemaNode;
                         } else if (schemaNode instanceof ListSchemaNode) {
                             nextNode = (ListSchemaNode) schemaNode;
+                        } else if (schemaNode instanceof ChoiceNode) {
+                            final ChoiceNode choice = (ChoiceNode) schemaNode;
+                            qnamedPath.poll();
+                            if (!qnamedPath.isEmpty()) {
+                                childNodeQName = qnamedPath.peek();
+                                nextNode = choice.getCaseNodeByName(childNodeQName);
+                                schemaNode = (DataSchemaNode)nextNode;
+                            }
                         } else {
                             nextNode = null;
                         }
                     } else if (!childNodeNamespace.equals(moduleNamespace)) {
-                        final Module nextModule = context
-                                .findModuleByNamespace(childNodeNamespace);
-                        schemaNode = findSchemaNodeForGivenPath(context, nextModule,
-                                qnamedPath);
+                        final Module nextModule = context.findModuleByNamespace(childNodeNamespace);
+                        schemaNode = findSchemaNodeForGivenPath(context, nextModule, qnamedPath);
                         return schemaNode;
                     }
                     qnamedPath.poll();
@@ -207,22 +195,18 @@ public final class SchemaContextUtil {
         if (parentModule != null && prefixedPathPart != null) {
             if (prefixedPathPart.contains(":")) {
                 final String[] prefixedName = prefixedPathPart.split(":");
-                final Module module = resolveModuleForPrefix(context, parentModule,
-                        prefixedName[0]);
+                final Module module = resolveModuleForPrefix(context, parentModule, prefixedName[0]);
                 if (module != null) {
-                    return new QName(module.getNamespace(), module
-                            .getRevision(), prefixedName[1]);
+                    return new QName(module.getNamespace(), module.getRevision(), prefixedName[1]);
                 }
             } else {
-                return new QName(parentModule.getNamespace(),
-                        parentModule.getRevision(), prefixedPathPart);
+                return new QName(parentModule.getNamespace(), parentModule.getRevision(), prefixedPathPart);
             }
         }
         return null;
     }
 
-    private static Module resolveModuleForPrefix(final SchemaContext context, final Module module,
-            final String prefix) {
+    private static Module resolveModuleForPrefix(final SchemaContext context, final Module module, final String prefix) {
         if ((module != null) && (prefix != null)) {
             if (prefix.equals(module.getPrefix())) {
                 return module;
@@ -232,8 +216,7 @@ public final class SchemaContextUtil {
 
             for (final ModuleImport mi : imports) {
                 if (prefix.equals(mi.getPrefix())) {
-                    return context.findModuleByName(mi.getModuleName(),
-                            mi.getRevision());
+                    return context.findModuleByName(mi.getModuleName(), mi.getRevision());
                 }
             }
         }
@@ -241,12 +224,10 @@ public final class SchemaContextUtil {
     }
 
     private static Queue<QName> resolveRelativeXPath(final SchemaContext context, final Module module,
-            final RevisionAwareXPath relativeXPath,
-            final SchemaPath leafrefSchemaPath) {
+            final RevisionAwareXPath relativeXPath, final SchemaPath leafrefSchemaPath) {
         final Queue<QName> absolutePath = new LinkedList<>();
 
-        if ((module != null) && (relativeXPath != null) && !relativeXPath.isAbsolute()
-                && (leafrefSchemaPath != null)) {
+        if ((module != null) && (relativeXPath != null) && !relativeXPath.isAbsolute() && (leafrefSchemaPath != null)) {
             final String strXPath = relativeXPath.toString();
             if (strXPath != null) {
                 final String[] xpaths = strXPath.split("/");

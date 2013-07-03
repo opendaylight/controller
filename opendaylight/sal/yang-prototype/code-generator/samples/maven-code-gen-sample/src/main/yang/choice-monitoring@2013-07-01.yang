@@ -1,0 +1,129 @@
+module choice-monitoring {
+  yang-version 1;
+  namespace "urn:ietf:params:xml:ns:yang:choice-monitoring";
+  prefix "ncm";
+
+  import ietf-yang-types { prefix yang; }
+  import ietf-inet-types { prefix inet; }
+
+  organization "OPEN DAYLIGHT";
+  contact "http://www.opendaylight.org/";
+
+  description
+    "Test model for testing of resolving choice, case nodes and generation types from them.";
+
+  revision 2013-07-01 {
+
+  }
+
+  typedef tls-fingerprint-type {
+    type string {
+      pattern '([0-9a-fA-F]){2}(:([0-9a-fA-F]){2})*';
+    }
+  }
+
+  typedef netconf-datastore-type {
+    type enumeration {
+      enum running;
+      enum candidate;
+      enum startup;
+    }
+  }
+
+  container netconf-state {
+    config false;
+
+    container datastores {
+      list datastore {
+        key name;
+
+        leaf name {
+          type netconf-datastore-type;
+        }
+        container locks {
+          choice lock-type {
+
+            case global-lock {
+                container global-lock {
+
+                leaf locked-by-session {
+                  type uint32;
+                  mandatory true;
+                }
+
+                leaf locked-time {
+                  type yang:date-and-time;
+                  mandatory true;
+                }
+
+                container capabilities {
+                  leaf-list capability {
+                      type inet:uri;
+                  }
+                }
+              }
+            }
+
+            case partial-lock {
+              list partial-lock {
+                  key lock-id;
+
+                  leaf lock-id {
+                    type uint32;
+                  }
+                  leaf-list select {
+                    type yang:xpath1.0;
+                    min-elements 1;
+                  }
+                  leaf-list locked-node {
+                    type string;
+                  }
+              }
+            }
+
+            case fingerprint {
+              choice algorithm-and-hash {
+                  mandatory true;
+                  case md5 {
+                    leaf md5 {
+                      type tls-fingerprint-type;
+                    }
+                  }
+
+                  case sha1 {
+                    leaf sha1 {
+                      type tls-fingerprint-type;
+                    }
+                  }
+                  
+                  case sha224 {
+                    leaf sha224 {
+                      type tls-fingerprint-type;
+                    }
+                  }
+                  
+                  case sha256 {
+                    leaf sha256 {
+                      type tls-fingerprint-type;
+                    }
+                  }
+                  
+                  case sha384 {
+                    leaf sha384 {
+                      type tls-fingerprint-type;
+                    }
+                  }                
+                  
+                  case sha512 {
+                    leaf sha512 {
+                      type tls-fingerprint-type;
+                    }
+                  }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

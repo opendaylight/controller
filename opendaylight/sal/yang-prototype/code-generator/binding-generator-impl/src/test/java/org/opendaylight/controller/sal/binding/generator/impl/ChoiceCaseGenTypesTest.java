@@ -52,9 +52,5 @@ public class ChoiceCaseGenTypesTest {
 
         assertNotNull("genTypes is null", genTypes);
         assertFalse("genTypes is empty", genTypes.isEmpty());
-
-        //Expected 23 types from ietf-netconf-monitoring
-        //Expected 14 types from ietf-yang-types
-        //Expected 14 types from ietf-inet-types
     }
 }

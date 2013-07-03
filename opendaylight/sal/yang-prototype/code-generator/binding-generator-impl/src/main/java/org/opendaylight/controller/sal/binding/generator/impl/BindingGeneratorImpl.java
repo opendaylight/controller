@@ -523,20 +523,38 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         if ((targetSchemaNode != null) && (targetSchemaNode.getQName() != null)
                 && (targetSchemaNode.getQName().getLocalName() != null)) {
             final Module targetModule = findParentModule(schemaContext, targetSchemaNode);
-
             final String targetBasePackage = moduleNamespaceToPackageName(targetModule);
             final String targetPackageName = packageNameForGeneratedType(targetBasePackage, targetSchemaNode.getPath());
-
             final String targetSchemaNodeName = targetSchemaNode.getQName().getLocalName();
             final Set<DataSchemaNode> augChildNodes = augSchema.getChildNodes();
-            final GeneratedTypeBuilder augTypeBuilder = addRawAugmentGenTypeDefinition(augmentPackageName,
-                    targetPackageName, targetSchemaNodeName, augSchema);
-            if (augTypeBuilder != null) {
-                genTypes.add(augTypeBuilder.toInstance());
+
+            if (!(targetSchemaNode instanceof ChoiceNode)) {
+                final GeneratedTypeBuilder augTypeBuilder = addRawAugmentGenTypeDefinition(augmentPackageName,
+                        targetPackageName, targetSchemaNodeName, augSchema);
+                final GeneratedType augType = augTypeBuilder.toInstance();
+                genTypes.add(augType);
+            } else {
+                final Type refChoiceType = new ReferencedTypeImpl(targetPackageName,
+                        parseToClassName(targetSchemaNodeName));
+                final ChoiceNode choiceTarget = (ChoiceNode) targetSchemaNode;
+                final Set<ChoiceCaseNode> choiceCaseNodes = choiceTarget.getCases();
+                genTypes.addAll(augmentCasesToGenTypes(augmentPackageName, refChoiceType, choiceCaseNodes));
             }
             genTypes.addAll(augmentationBodyToGenTypes(augmentPackageName, augChildNodes));
-
         }
+        return genTypes;
+    }
+
+    private List<GeneratedType> augmentCasesToGenTypes(final String augmentPackageName, final Type refChoiceType,
+            final Set<ChoiceCaseNode> choiceCaseNodes) {
+        if (augmentPackageName == null) {
+            throw new IllegalArgumentException("Augment Package Name string cannot be NULL!");
+        }
+        if (choiceCaseNodes == null) {
+            throw new IllegalArgumentException("Set of Choice Case Nodes cannot be NULL!");
+        }
+        final List<GeneratedType> genTypes = generateTypesFromAugmentedChoiceCases(augmentPackageName, refChoiceType,
+                choiceCaseNodes);
         return genTypes;
     }
 
@@ -576,21 +594,33 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                 } else if (childNode instanceof ListSchemaNode) {
                     genTypes.addAll(listToGenType(augBasePackageName, (ListSchemaNode) childNode));
                 }
+            } else if (childNode instanceof ChoiceNode) {
+                final ChoiceNode choice = (ChoiceNode) childNode;
+                for (final ChoiceCaseNode caseNode : choice.getCases()) {
+                    augSchemaIts.add(new DataNodeIterator(caseNode));
+                }
+                genTypes.addAll(choiceToGeneratedType(augBasePackageName, (ChoiceNode) childNode));
             }
         }
 
         for (final DataNodeIterator it : augSchemaIts) {
             final List<ContainerSchemaNode> augContainers = it.allContainers();
             final List<ListSchemaNode> augLists = it.allLists();
+            final List<ChoiceNode> augChoices = it.allChoices();
 
-            if ((augContainers != null) && !augContainers.isEmpty()) {
+            if (augContainers != null) {
                 for (final ContainerSchemaNode container : augContainers) {
                     genTypes.add(containerToGenType(augBasePackageName, container));
                 }
             }
-            if ((augLists != null) && !augLists.isEmpty()) {
+            if (augLists != null) {
                 for (final ListSchemaNode list : augLists) {
                     genTypes.addAll(listToGenType(augBasePackageName, list));
+                }
+            }
+            if (augChoices != null) {
+                for (final ChoiceNode choice : augChoices) {
+                    genTypes.addAll(choiceToGeneratedType(augBasePackageName, choice));
                 }
             }
         }
@@ -719,7 +749,37 @@ public final class BindingGeneratorImpl implements BindingGenerator {
 
         final List<GeneratedType> generatedTypes = new ArrayList<>();
         for (final ChoiceCaseNode caseNode : caseNodes) {
-            if (caseNode != null) {
+            if (caseNode != null && !caseNode.isAddedByUses()) {
+                final String packageName = packageNameForGeneratedType(basePackageName, caseNode.getPath());
+                final GeneratedTypeBuilder caseTypeBuilder = addDefaultInterfaceDefinition(packageName, caseNode);
+                caseTypeBuilder.addImplementsType(refChoiceType);
+
+                final Set<DataSchemaNode> childNodes = caseNode.getChildNodes();
+                if (childNodes != null) {
+                    resolveDataSchemaNodes(basePackageName, caseTypeBuilder, childNodes);
+                }
+                generatedTypes.add(caseTypeBuilder.toInstance());
+            }
+        }
+
+        return generatedTypes;
+    }
+
+    private List<GeneratedType> generateTypesFromAugmentedChoiceCases(final String basePackageName,
+            final Type refChoiceType, final Set<ChoiceCaseNode> caseNodes) {
+        if (basePackageName == null) {
+            throw new IllegalArgumentException("Base Package Name cannot be NULL!");
+        }
+        if (refChoiceType == null) {
+            throw new IllegalArgumentException("Referenced Choice Type cannot be NULL!");
+        }
+        if (caseNodes == null) {
+            throw new IllegalArgumentException("Set of Choice Case Nodes cannot be NULL!");
+        }
+
+        final List<GeneratedType> generatedTypes = new ArrayList<>();
+        for (final ChoiceCaseNode caseNode : caseNodes) {
+            if (caseNode != null && caseNode.isAugmenting()) {
                 final String packageName = packageNameForGeneratedType(basePackageName, caseNode.getPath());
                 final GeneratedTypeBuilder caseTypeBuilder = addDefaultInterfaceDefinition(packageName, caseNode);
                 caseTypeBuilder.addImplementsType(refChoiceType);
@@ -862,11 +922,13 @@ public final class BindingGeneratorImpl implements BindingGenerator {
     }
 
     /**
-     * Method instantiates new Generated Type Builder and sets the implements definitions of Data Object and
-     * Augmentable.
-     *
-     * @param packageName Generated Type Package Name
-     * @param schemaNode Schema Node definition
+     * Method instantiates new Generated Type Builder and sets the implements
+     * definitions of Data Object and Augmentable.
+     * 
+     * @param packageName
+     *            Generated Type Package Name
+     * @param schemaNode
+     *            Schema Node definition
      * @return Generated Type Builder instance for Schema Node definition
      */
     private GeneratedTypeBuilder addDefaultInterfaceDefinition(final String packageName, final SchemaNode schemaNode) {
@@ -877,7 +939,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
     }
 
     /**
-     *
+     * 
      * @param packageName
      * @param schemaNode
      * @return

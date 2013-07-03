@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
+import org.opendaylight.controller.yang.common.QName;
+
 import java.util.Set;
 
 /**
@@ -19,6 +21,22 @@ public interface ChoiceNode extends DataSchemaNode, AugmentationTarget {
      * @return ChoiceCaseNode objects defined in this node
      */
     Set<ChoiceCaseNode> getCases();
+
+    /**
+     * @param name
+     *            QName of seeked Choice Case Node
+     * @return child case node of this Choice if child with given name is
+     *         present, <code>null</code> otherwise
+     */
+    ChoiceCaseNode getCaseNodeByName(QName name);
+
+    /**
+     * @param name
+     *            name of seeked child as String
+     * @return child case node (or local name of case node) of this Choice if child with given name is
+     *         present, <code>null</code> otherwise
+     */
+    ChoiceCaseNode getCaseNodeByName(String name);
 
     String getDefaultCase();
 
