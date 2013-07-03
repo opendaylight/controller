@@ -1,0 +1,14 @@
+module typedef {
+    yang-version 1;
+    namespace "urn:simple.container.demo";
+    prefix "t1";
+
+    typedef int-ext {
+        type int32;
+    }
+
+    typedef int-ext {
+        type int16;
+    }
+
+}

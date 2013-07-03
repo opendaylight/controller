@@ -924,12 +924,12 @@ public final class YangModelBuilderUtil {
                 // If the parent node is a 'case' node, the value is the same as
                 // the 'case' node's parent 'choice' node
                 ChoiceCaseBuilder choiceCase = (ChoiceCaseBuilder) parent;
-                ChoiceBuilder choice = choiceCase.getParent();
+                Builder choice = choiceCase.getParent();
                 Boolean parentConfig = null;
-                if (choice == null) {
-                    parentConfig = true;
+                if(choice instanceof ChoiceBuilder) {
+                    parentConfig = ((ChoiceBuilder)choice).isConfiguration();
                 } else {
-                    parentConfig = choice.isConfiguration();
+                    parentConfig = true;
                 }
                 result = parentConfig;
             } else {
@@ -1460,7 +1460,7 @@ public final class YangModelBuilderUtil {
      */
     public static RefineHolder parseRefine(Refine_stmtContext refineCtx) {
         final String refineTarget = stringFromNode(refineCtx);
-        final RefineHolder refine = new RefineHolder(refineTarget, refineCtx.getStart().getLine());
+        final RefineHolder refine = new RefineHolder(refineCtx.getStart().getLine(), refineTarget);
         for (int j = 0; j < refineCtx.getChildCount(); j++) {
             ParseTree refinePom = refineCtx.getChild(j);
             if (refinePom instanceof Refine_pomContext) {

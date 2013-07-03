@@ -17,6 +17,7 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class IdentitySchemaNodeBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
@@ -25,15 +26,15 @@ public final class IdentitySchemaNodeBuilder extends AbstractSchemaNodeBuilder {
     private IdentitySchemaNode baseIdentity;
     private String baseIdentityName;
 
-    IdentitySchemaNodeBuilder(final QName qname, final int line) {
-        super(qname, line);
+    IdentitySchemaNodeBuilder(final int line, final QName qname) {
+        super(line, qname);
         instance = new IdentitySchemaNodeImpl(qname);
     }
 
     @Override
     public IdentitySchemaNode build() {
         if (!isBuilt) {
-            instance.setPath(path);
+            instance.setPath(schemaPath);
             instance.setDescription(description);
             instance.setReference(reference);
             instance.setStatus(status);
@@ -51,6 +52,7 @@ public final class IdentitySchemaNodeBuilder extends AbstractSchemaNodeBuilder {
             for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                 unknownNodes.add(b.build());
             }
+            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             instance.setUnknownSchemaNodes(unknownNodes);
 
             isBuilt = true;

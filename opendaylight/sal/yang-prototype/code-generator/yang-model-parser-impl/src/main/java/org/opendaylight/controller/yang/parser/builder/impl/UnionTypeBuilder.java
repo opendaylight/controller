@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
@@ -33,7 +32,6 @@ import org.opendaylight.controller.yang.parser.util.YangParseException;
 public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements TypeDefinitionBuilder {
     private final static String NAME = "union";
 
-    private final int line;
     private final List<TypeDefinition<?>> types;
     private final List<TypeDefinitionBuilder> typedefs;
     private UnionType instance;
@@ -42,15 +40,11 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
     private SchemaPath path;
 
     public UnionTypeBuilder(final int line) {
-        this.line = line;
+        super(line, null);
         types = new ArrayList<TypeDefinition<?>>();
         typedefs = new ArrayList<TypeDefinitionBuilder>();
     }
 
-    @Override
-    public int getLine() {
-        return line;
-    }
 
     public List<TypeDefinition<?>> getTypes() {
         return types;
@@ -129,12 +123,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     @Override
     public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        // not supported
-    }
-
-    @Override
-    public QName getQName() {
-        return null;
+        // not yet supported
     }
 
     @Override

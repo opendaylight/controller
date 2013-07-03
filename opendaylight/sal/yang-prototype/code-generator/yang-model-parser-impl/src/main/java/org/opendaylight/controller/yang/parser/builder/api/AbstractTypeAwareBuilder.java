@@ -7,15 +7,43 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
+import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 
 /**
  * Basic implementation for TypeAwareBuilder builders.
  */
 public abstract class AbstractTypeAwareBuilder implements TypeAwareBuilder {
-
+    protected final int line;
+    protected final QName qname;
+    protected Builder parent;
     protected TypeDefinition<?> type;
     protected TypeDefinitionBuilder typedef;
+
+    public AbstractTypeAwareBuilder(final int line, final QName qname) {
+        this.line = line;
+        this.qname = qname;
+    }
+
+    @Override
+    public int getLine() {
+        return line;
+    }
+
+    @Override
+    public Builder getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(final Builder parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public QName getQName() {
+        return qname;
+    }
 
     @Override
     public TypeDefinition<?> getType() {

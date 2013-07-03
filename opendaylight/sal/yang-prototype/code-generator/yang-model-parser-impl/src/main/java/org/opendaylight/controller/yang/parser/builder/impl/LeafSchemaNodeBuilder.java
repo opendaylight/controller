@@ -22,15 +22,14 @@ import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuil
 import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements DataSchemaNodeBuilder,
         GroupingMember, ConfigNode {
     private boolean isBuilt;
     private final LeafSchemaNodeImpl instance;
-    private final int line;
     // SchemaNode args
-    private final QName qname;
-    private SchemaPath path;
+    private SchemaPath schemaPath;
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
@@ -46,19 +45,17 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
     private String unitsStr;
 
     public LeafSchemaNodeBuilder(final QName qname, final SchemaPath schemaPath, final int line) {
-        this.qname = qname;
-        this.path = schemaPath;
-        this.line = line;
+        super(line, qname);
+        this.schemaPath = schemaPath;
         instance = new LeafSchemaNodeImpl(qname);
         constraints = new ConstraintsBuilder(line);
     }
 
     public LeafSchemaNodeBuilder(final LeafSchemaNodeBuilder b) {
-        qname = b.getQName();
-        line = b.getLine();
+        super(b.getLine(), b.getQName());
         instance = new LeafSchemaNodeImpl(qname);
         constraints = b.getConstraints();
-        path = b.getPath();
+        schemaPath = b.getPath();
 
         type = b.getType();
         typedef = b.getTypedef();
@@ -79,7 +76,7 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
     @Override
     public LeafSchemaNode build() {
         if (!isBuilt) {
-            instance.setPath(path);
+            instance.setPath(schemaPath);
             instance.setConstraints(constraints.build());
             instance.setDescription(description);
             instance.setReference(reference);
@@ -103,6 +100,7 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
                 for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                     unknownNodes.add(b.build());
                 }
+                Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
@@ -111,23 +109,13 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
         return instance;
     }
 
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public QName getQName() {
-        return qname;
-    }
-
     public SchemaPath getPath() {
-        return path;
+        return schemaPath;
     }
 
     @Override
     public void setPath(final SchemaPath path) {
-        this.path = path;
+        this.schemaPath = path;
     }
 
     @Override
@@ -219,6 +207,43 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
 
     public void setUnits(String unitsStr) {
         this.unitsStr = unitsStr;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((schemaPath == null) ? 0 : schemaPath.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        LeafSchemaNodeBuilder other = (LeafSchemaNodeBuilder) obj;
+        if (schemaPath == null) {
+            if (other.schemaPath != null) {
+                return false;
+            }
+        } else if (!schemaPath.equals(other.schemaPath)) {
+            return false;
+        }
+        if (parent == null) {
+            if (other.parent != null) {
+                return false;
+            }
+        } else if (!parent.equals(other.parent)) {
+            return false;
+        }
+        return true;
     }
 
     @Override

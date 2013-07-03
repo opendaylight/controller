@@ -21,15 +21,16 @@ import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBui
 public abstract class AbstractSchemaNodeBuilder implements SchemaNodeBuilder {
     protected final int line;
     protected final QName qname;
-    protected SchemaPath path;
+    protected Builder parent;
+    protected SchemaPath schemaPath;
     protected String description;
     protected String reference;
     protected Status status = Status.CURRENT;
     protected final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    protected AbstractSchemaNodeBuilder(final QName qname, final int line) {
-        this.qname = qname;
+    protected AbstractSchemaNodeBuilder(final int line, final QName qname) {
         this.line = line;
+        this.qname = qname;
     }
 
     @Override
@@ -41,12 +42,22 @@ public abstract class AbstractSchemaNodeBuilder implements SchemaNodeBuilder {
         return qname;
     }
 
+    @Override
+    public Builder getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(final Builder parent) {
+        this.parent = parent;
+    }
+
     public SchemaPath getPath() {
-        return path;
+        return schemaPath;
     }
 
     public void setPath(SchemaPath schemaPath) {
-        this.path = schemaPath;
+        this.schemaPath = schemaPath;
     }
 
     public String getDescription() {

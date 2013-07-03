@@ -16,6 +16,7 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class UnknownSchemaNodeBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
@@ -25,15 +26,15 @@ public final class UnknownSchemaNodeBuilder extends AbstractSchemaNodeBuilder {
     private QName nodeType;
     private String nodeParameter;
 
-    public UnknownSchemaNodeBuilder(final QName qname, final int line) {
-        super(qname, line);
+    public UnknownSchemaNodeBuilder(final int line, final QName qname) {
+        super(line, qname);
         instance = new UnknownSchemaNodeImpl(qname);
     }
 
     public UnknownSchemaNodeBuilder(UnknownSchemaNodeBuilder b) {
-        super(b.getQName(), b.getLine());
+        super(b.getLine(), b.getQName());
         instance = new UnknownSchemaNodeImpl(qname);
-        path = b.getPath();
+        schemaPath = b.getPath();
         description = b.getDescription();
         reference = b.getReference();
         status = b.getStatus();
@@ -47,7 +48,7 @@ public final class UnknownSchemaNodeBuilder extends AbstractSchemaNodeBuilder {
     @Override
     public UnknownSchemaNode build() {
         if (!isBuilt) {
-            instance.setPath(path);
+            instance.setPath(schemaPath);
             instance.setNodeType(nodeType);
             instance.setNodeParameter(nodeParameter);
             instance.setDescription(description);
@@ -61,6 +62,7 @@ public final class UnknownSchemaNodeBuilder extends AbstractSchemaNodeBuilder {
                 for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
                     unknownNodes.add(b.build());
                 }
+                Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             }
             instance.setUnknownSchemaNodes(unknownNodes);
 
