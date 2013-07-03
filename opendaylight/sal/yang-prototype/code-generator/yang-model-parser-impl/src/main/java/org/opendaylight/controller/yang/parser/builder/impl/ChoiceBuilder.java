@@ -376,6 +376,36 @@ public final class ChoiceBuilder extends AbstractSchemaNodeBuilder implements Da
             return cases;
         }
 
+        @Override
+        public ChoiceCaseNode getCaseNodeByName(final QName name) {
+            if (name == null) {
+                throw new IllegalArgumentException("Choice Case QName cannot be NULL!");
+            }
+            for (final ChoiceCaseNode caseNode : cases) {
+                if (caseNode != null) {
+                    if (name.equals(caseNode.getQName())) {
+                        return caseNode;
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public ChoiceCaseNode getCaseNodeByName(final String name) {
+            if (name == null) {
+                throw new IllegalArgumentException("Choice Case string Name cannot be NULL!");
+            }
+            for (final ChoiceCaseNode caseNode : cases) {
+                if (caseNode != null && (caseNode.getQName() != null)) {
+                    if (name.equals(caseNode.getQName().getLocalName())) {
+                        return caseNode;
+                    }
+                }
+            }
+            return null;
+        }
+
         private void setCases(Set<ChoiceCaseNode> cases) {
             if (cases != null) {
                 this.cases = cases;
