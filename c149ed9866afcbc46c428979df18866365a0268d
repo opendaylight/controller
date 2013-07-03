@@ -1,0 +1,378 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///rk\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-api/src/main/java/org/opendaylight/controller/yang/data/api/MutableCompositeNode.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///ro\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-api/src/main/java/org/opendaylight/controller/yang/data/api/MutableSimpleNode.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///rs\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-api/src/main/java/org/opendaylight/controller/yang/data/api/NodeModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///rw\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-api/src/main/java/org/opendaylight/controller/yang/data/api/NodeModificationBuilder.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///r0\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "please reformat and replace tabs for spaces",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///r4\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/AbstractNodeTO.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///r8\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/CompositeNodeModificationTOImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sA\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/CompositeNodeTOImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sE\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/MutableCompositeNodeTOImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sI\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/MutableSimpleNodeTOImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sM\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/NodeFactory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sQ\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/NodeModificationBuilderImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sU\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/NodeUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sY\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/SimpleNodeModificationTOImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sc\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/main/java/org/opendaylight/controller/yang/data/impl/SimpleNodeTOImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sg\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/test/java/org/opendaylight/controller/yang/data/impl/NodeFactoryTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sk\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/test/java/org/opendaylight/controller/yang/data/impl/NodeHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///so\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/test/java/org/opendaylight/controller/yang/data/impl/NodeModificationBuilderImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///ss\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/test/java/org/opendaylight/controller/yang/data/impl/NodeUtilsTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Cisco header is missing.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///sw\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/test/resources/config01.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "please reformat and replace tabs for spaces.",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///s0\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/test/resources/controller-network.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "Please reformat code and replace tabs for spaces",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///s4\u003d",
+        "filename": "opendaylight/sal/yang-prototype/yang/yang-data-impl/src/test/resources/generateXml.groovy",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-03T11:42:45Z",
+      "side": 1,
+      "message": "why is this long code block commented?",
+      "revId": "c149ed9866afcbc46c428979df18866365a0268d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
