@@ -34,7 +34,7 @@ public class FlowEntryInstall implements Serializable {
     public FlowEntryInstall(FlowEntry original, ContainerFlow cFlow) {
         this.original = original;
         this.cFlow = cFlow;
-        this.install = (cFlow == null) ? original.clone() : original.mergeWith(cFlow);
+        this.install = (cFlow == null) ? original.clone() : original.clone().mergeWith(cFlow);
         deletePending = false;
         requestId = 0;
     }

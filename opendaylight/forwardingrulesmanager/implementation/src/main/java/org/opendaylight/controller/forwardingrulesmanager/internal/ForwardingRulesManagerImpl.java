@@ -929,16 +929,21 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
      * on the network node
      */
     private void updateFlowsContainerFlow() {
+        Set<FlowEntry> toReInstall = new HashSet<FlowEntry>();
+        // First remove all installed entries
         for (ConcurrentMap.Entry<FlowEntryInstall, FlowEntryInstall> entry : installedSwView.entrySet()) {
             FlowEntryInstall current = entry.getValue();
-            FlowEntry reInstall = current.getOriginal();
+            // Store the original entry
+            toReInstall.add(current.getOriginal());
             // Remove the old couples. No validity checks to be run, use the
             // internal remove
             this.removeEntryInternal(current, false);
-
+        }
+        // Then reinstall the original entries
+        for (FlowEntry entry : toReInstall) {
             // Reinstall the original flow entries, via the regular path: new
             // cFlow merge + validations
-            this.installFlowEntry(reInstall);
+            this.installFlowEntry(entry);
         }
     }
 
@@ -1131,7 +1136,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
             return;
         }
 
-        log.debug("FRM allocateCaches for Container {}", container);
+        log.debug("Allocating caches for Container {}", container.getName());
 
         try {
             clusterContainerService.createCache("frm.originalSwView",
@@ -1165,9 +1170,9 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
 
         } catch (CacheConfigException cce) {
-            log.error("FRM CacheConfigException");
+            log.error("CacheConfigException");
         } catch (CacheExistException cce) {
-            log.error("FRM CacheExistException");
+            log.error("CacheExistException");
         }
     }
 
@@ -1180,76 +1185,76 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
             return;
         }
 
-        log.debug("FRM retrieveCaches for Container {}", container);
+        log.debug("Retrieving Caches for Container {}", container.getName());
 
         map = clusterContainerService.getCache("frm.originalSwView");
         if (map != null) {
             originalSwView = (ConcurrentMap<FlowEntry, FlowEntry>) map;
         } else {
-            log.error("FRM Cache frm.originalSwView allocation failed for Container {}", container.getName());
+            log.error("Retrieval of frm.originalSwView cache failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.installedSwView");
         if (map != null) {
             installedSwView = (ConcurrentMap<FlowEntryInstall, FlowEntryInstall>) map;
         } else {
-            log.error("FRM Cache frm.installedSwView allocation failed for Container {}", container.getName());
+            log.error("Retrieval of frm.installedSwView cache failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.nodeFlows");
         if (map != null) {
             nodeFlows = (ConcurrentMap<Node, List<FlowEntryInstall>>) map;
         } else {
-            log.error("FRM Cache frm.nodeFlows allocation failed for Container {}", container.getName());
+            log.error("Retrieval of cache failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.groupFlows");
         if (map != null) {
             groupFlows = (ConcurrentMap<String, List<FlowEntryInstall>>) map;
         } else {
-            log.error("FRM Cache frm.groupFlows allocation failed for Container {}", container.getName());
+            log.error("Retrieval of frm.groupFlows cache failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.staticFlows");
         if (map != null) {
             staticFlows = (ConcurrentMap<Integer, FlowConfig>) map;
         } else {
-            log.error("FRM Cache frm.staticFlows allocation failed for Container {}", container.getName());
+            log.error("Retrieval of frm.staticFlows cache failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.flowsSaveEvent");
         if (map != null) {
             flowsSaveEvent = (ConcurrentMap<Long, String>) map;
         } else {
-            log.error("FRM Cache frm.flowsSaveEvent allocation failed for Container {}", container.getName());
+            log.error("Retrieval of frm.flowsSaveEvent cache failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.staticFlowsOrdinal");
         if (map != null) {
             staticFlowsOrdinal = (ConcurrentMap<Integer, Integer>) map;
         } else {
-            log.error("FRM Cache frm.staticFlowsOrdinal allocation failed for Container {}", container.getName());
+            log.error("Retrieval of frm.staticFlowsOrdinal cache failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.portGroupConfigs");
         if (map != null) {
             portGroupConfigs = (ConcurrentMap<String, PortGroupConfig>) map;
         } else {
-            log.error("FRM Cache frm.portGroupConfigs allocation failed for Container {}", container.getName());
+            log.error("Retrieval of frm.portGroupConfigs cache failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.portGroupData");
         if (map != null) {
             portGroupData = (ConcurrentMap<PortGroupConfig, Map<Node, PortGroup>>) map;
         } else {
-            log.error("FRM Cache frm.portGroupData allocation failed for Container {}", container.getName());
+            log.error("Retrieval of frm.portGroupData allocation failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.TSPolicies");
         if (map != null) {
             TSPolicies = (ConcurrentMap<String, Object>) map;
         } else {
-            log.error("FRM Cache frm.TSPolicies allocation failed for Container {}", container.getName());
+            log.error("Retrieval of frm.TSPolicies cache failed for Container {}", container.getName());
         }
 
     }
@@ -2217,12 +2222,19 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
 
     @Override
     public void tagUpdated(String containerName, Node n, short oldTag, short newTag, UpdateType t) {
-
+        if (!container.getName().equals(containerName)) {
+            return;
+        }
     }
 
     @Override
-    public void containerFlowUpdated(String containerName, ContainerFlow previousFlow, ContainerFlow currentFlow,
+    public void containerFlowUpdated(String containerName, ContainerFlow previous, ContainerFlow current,
             UpdateType t) {
+        if (!container.getName().equals(containerName)) {
+            return;
+        }
+        log.trace("Container {}: Updating installed flows because of container flow change: {} {}",
+                container.getName(), t, current);
         /*
          * Whether it is an addition or removal, we have to recompute the merged
          * flows entries taking into account all the current container flows
@@ -2233,11 +2245,17 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
 
     @Override
     public void nodeConnectorUpdated(String containerName, NodeConnector p, UpdateType t) {
-        // No action
+        if (!container.getName().equals(containerName)) {
+            return;
+        }
     }
 
     @Override
     public void containerModeUpdated(UpdateType update) {
+        // Only default container instance reacts on this event
+        if (!container.getName().equals(GlobalConstants.DEFAULT.toString())) {
+            return;
+        }
         switch (update) {
         case ADDED:
             this.inContainerMode = true;
