@@ -29,6 +29,16 @@ public abstract class NetUtils {
     public static final int NumBitsInAByte = 8;
 
     /**
+     * Constant holding the number of bytes in MAC Address
+     */
+    public static final int MACAddrLengthInBytes = 6;
+
+    /**
+     * Constant holding the number of words in MAC Address
+     */
+    public static final int MACAddrLengthInWords = 3;
+
+    /**
      * Converts a 4 bytes array into an integer number
      *
      * @param ba
