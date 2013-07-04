@@ -15,6 +15,7 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +26,8 @@ import org.opendaylight.controller.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.controller.yang.model.api.ChoiceNode;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
+import org.opendaylight.controller.yang.model.api.Deviation;
+import org.opendaylight.controller.yang.model.api.Deviation.Deviate;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 import org.opendaylight.controller.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
@@ -77,7 +80,7 @@ public class YangParserWithContextTest {
         assertEquals("inet", qname.getPrefix());
         assertEquals("port-number", qname.getLocalName());
 
-        ExtendedType dscpExt = (ExtendedType)TestUtils.findTypedef(module.getTypeDefinitions(), "dscp-ext");
+        ExtendedType dscpExt = (ExtendedType) TestUtils.findTypedef(module.getTypeDefinitions(), "dscp-ext");
         List<RangeConstraint> ranges = dscpExt.getRanges();
         assertEquals(1, ranges.size());
         RangeConstraint range = ranges.get(0);
@@ -88,8 +91,10 @@ public class YangParserWithContextTest {
     @Test
     public void testUsesFromContext() throws Exception {
         SchemaContext context = null;
-        try (InputStream stream = new FileInputStream(getClass().getResource("/model/testfile2.yang").getPath())) {
-            context = parser.resolveSchemaContext(TestUtils.loadModules(Lists.newArrayList(stream)));
+        try (InputStream stream1 = new FileInputStream(getClass().getResource("/model/custom.yang").getPath());
+                InputStream stream2 = new FileInputStream(getClass().getResource("/model/types.yang").getPath());
+                InputStream stream3 = new FileInputStream(getClass().getResource("/model/nodes.yang").getPath())) {
+            context = parser.resolveSchemaContext(TestUtils.loadModules(Lists.newArrayList(stream1, stream2, stream3)));
         }
         Module testModule = null;
         try (InputStream stream = new FileInputStream(getClass().getResource("/context-test/test2.yang").getPath())) {
@@ -101,62 +106,62 @@ public class YangParserWithContextTest {
         // suffix _g = defined in grouping from context
 
         // get grouping
-        Module contextModule = context.findModuleByNamespace(URI.create("urn:simple.types.data.demo"));
+        Module contextModule = context.findModuleByNamespace(URI.create("urn:custom.nodes.test"));
         assertNotNull(contextModule);
         Set<GroupingDefinition> groupings = contextModule.getGroupings();
         assertEquals(1, groupings.size());
         GroupingDefinition grouping = groupings.iterator().next();
 
         // get node containing uses
-        ContainerSchemaNode peer = (ContainerSchemaNode)testModule.getDataChildByName("peer");
-        ContainerSchemaNode destination = (ContainerSchemaNode)peer.getDataChildByName("destination");
+        ContainerSchemaNode peer = (ContainerSchemaNode) testModule.getDataChildByName("peer");
+        ContainerSchemaNode destination = (ContainerSchemaNode) peer.getDataChildByName("destination");
 
         // check uses
         Set<UsesNode> uses = destination.getUses();
         assertEquals(1, uses.size());
 
         // check uses process
-        AnyXmlSchemaNode data_u = (AnyXmlSchemaNode)destination.getDataChildByName("data");
+        AnyXmlSchemaNode data_u = (AnyXmlSchemaNode) destination.getDataChildByName("data");
         assertNotNull(data_u);
         assertTrue(data_u.isAddedByUses());
 
-        AnyXmlSchemaNode data_g = (AnyXmlSchemaNode)grouping.getDataChildByName("data");
+        AnyXmlSchemaNode data_g = (AnyXmlSchemaNode) grouping.getDataChildByName("data");
         assertNotNull(data_g);
         assertFalse(data_g.isAddedByUses());
         assertFalse(data_u.equals(data_g));
 
-        ChoiceNode how_u = (ChoiceNode)destination.getDataChildByName("how");
+        ChoiceNode how_u = (ChoiceNode) destination.getDataChildByName("how");
         assertNotNull(how_u);
         assertTrue(how_u.isAddedByUses());
 
-        ChoiceNode how_g = (ChoiceNode)grouping.getDataChildByName("how");
+        ChoiceNode how_g = (ChoiceNode) grouping.getDataChildByName("how");
         assertNotNull(how_g);
         assertFalse(how_g.isAddedByUses());
         assertFalse(how_u.equals(how_g));
 
-        LeafSchemaNode address_u = (LeafSchemaNode)destination.getDataChildByName("address");
+        LeafSchemaNode address_u = (LeafSchemaNode) destination.getDataChildByName("address");
         assertNotNull(address_u);
         assertTrue(address_u.isAddedByUses());
 
-        LeafSchemaNode address_g = (LeafSchemaNode)grouping.getDataChildByName("address");
+        LeafSchemaNode address_g = (LeafSchemaNode) grouping.getDataChildByName("address");
         assertNotNull(address_g);
         assertFalse(address_g.isAddedByUses());
         assertFalse(address_u.equals(address_g));
 
-        ContainerSchemaNode port_u = (ContainerSchemaNode)destination.getDataChildByName("port");
+        ContainerSchemaNode port_u = (ContainerSchemaNode) destination.getDataChildByName("port");
         assertNotNull(port_u);
         assertTrue(port_u.isAddedByUses());
 
-        ContainerSchemaNode port_g = (ContainerSchemaNode)grouping.getDataChildByName("port");
+        ContainerSchemaNode port_g = (ContainerSchemaNode) grouping.getDataChildByName("port");
         assertNotNull(port_g);
         assertFalse(port_g.isAddedByUses());
         assertFalse(port_u.equals(port_g));
 
-        ListSchemaNode addresses_u = (ListSchemaNode)destination.getDataChildByName("addresses");
+        ListSchemaNode addresses_u = (ListSchemaNode) destination.getDataChildByName("addresses");
         assertNotNull(addresses_u);
         assertTrue(addresses_u.isAddedByUses());
 
-        ListSchemaNode addresses_g = (ListSchemaNode)grouping.getDataChildByName("addresses");
+        ListSchemaNode addresses_g = (ListSchemaNode) grouping.getDataChildByName("addresses");
         assertNotNull(addresses_g);
         assertFalse(addresses_g.isAddedByUses());
         assertFalse(addresses_u.equals(addresses_g));
@@ -189,8 +194,10 @@ public class YangParserWithContextTest {
     @Test
     public void testUsesRefineFromContext() throws Exception {
         SchemaContext context = null;
-        try (InputStream stream = new FileInputStream(getClass().getResource("/model/testfile2.yang").getPath())) {
-            context = parser.resolveSchemaContext(TestUtils.loadModules(Lists.newArrayList(stream)));
+        try (InputStream stream1 = new FileInputStream(getClass().getResource("/model/custom.yang").getPath());
+                InputStream stream2 = new FileInputStream(getClass().getResource("/model/types.yang").getPath());
+                InputStream stream3 = new FileInputStream(getClass().getResource("/model/nodes.yang").getPath())) {
+            context = parser.resolveSchemaContext(TestUtils.loadModules(Lists.newArrayList(stream1, stream2, stream3)));
         }
         Module module = null;
         try (InputStream stream = new FileInputStream(getClass().getResource("/context-test/test2.yang").getPath())) {
@@ -206,7 +213,7 @@ public class YangParserWithContextTest {
 
         // test grouping path
         List<QName> path = new ArrayList<QName>();
-        QName qname = new QName(URI.create("urn:simple.types.data.demo"), simpleDateFormat.parse("2013-02-27"), "t2",
+        QName qname = new QName(URI.create("urn:custom.nodes.test"), simpleDateFormat.parse("2013-02-27"), "c",
                 "target");
         path.add(qname);
         SchemaPath expectedPath = new SchemaPath(path, true);
@@ -314,7 +321,8 @@ public class YangParserWithContextTest {
     @Test
     public void testUnknownNodes() throws Exception {
         SchemaContext context = null;
-        try (InputStream stream = new FileInputStream(getClass().getResource("/types/custom-types-test@2012-4-4.yang").getPath())) {
+        try (InputStream stream = new FileInputStream(getClass().getResource("/types/custom-types-test@2012-4-4.yang")
+                .getPath())) {
             context = parser.resolveSchemaContext(TestUtils.loadModules(Lists.newArrayList(stream)));
         }
 
@@ -380,6 +388,45 @@ public class YangParserWithContextTest {
         // test augment target after augmentation: check if it is same instance
         ListSchemaNode ifEntryAfterAugment = (ListSchemaNode) interfaces.getDataChildByName("ifEntry");
         assertTrue(ifEntry == ifEntryAfterAugment);
+    }
+
+    @Test
+    public void testDeviation() throws Exception {
+        // load first module
+        SchemaContext context = null;
+        String resource = "/model/types.yang";
+
+        try (InputStream stream = new FileInputStream(getClass().getResource(resource).getPath())) {
+            context = parser.resolveSchemaContext(TestUtils.loadModules(Lists.newArrayList(stream)));
+        }
+
+        // load another modules and parse them against already existing context
+        Set<Module> modules = null;
+        try (InputStream stream = new FileInputStream(getClass().getResource("/context-test/deviation-test.yang")
+                .getPath())) {
+            List<InputStream> input = Lists.newArrayList(stream);
+            modules = TestUtils.loadModulesWithContext(input, context);
+        }
+        assertNotNull(modules);
+
+        // test deviation
+        Module testModule = TestUtils.findModule(modules, "deviation-test");
+        Set<Deviation> deviations = testModule.getDeviations();
+        assertEquals(1, deviations.size());
+        Deviation dev = deviations.iterator().next();
+
+        assertEquals("system/user ref", dev.getReference());
+
+        URI expectedNS = URI.create("urn:simple.types.test");
+        DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date expectedRev = simpleDateFormat.parse("2013-07-03");
+        List<QName> path = new ArrayList<QName>();
+        path.add(new QName(expectedNS, expectedRev, "t", "interfaces"));
+        path.add(new QName(expectedNS, expectedRev, "t", "ifEntry"));
+        SchemaPath expectedPath = new SchemaPath(path, true);
+
+        assertEquals(expectedPath, dev.getTargetPath());
+        assertEquals(Deviate.ADD, dev.getDeviate());
     }
 
 }

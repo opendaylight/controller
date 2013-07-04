@@ -258,6 +258,16 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
         return addedChildNodes;
     }
 
+    @Override
+    public DataSchemaNodeBuilder getDataChildByName(final String name) {
+        for(DataSchemaNodeBuilder child : addedChildNodes) {
+            if(child.getQName().getLocalName().equals(name)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
     public void setChildNodes(final Set<DataSchemaNode> childNodes) {
         this.childNodes = childNodes;
     }

@@ -65,6 +65,16 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
     }
 
     @Override
+    public DataSchemaNodeBuilder getDataChildByName(final String name) {
+        for(DataSchemaNodeBuilder child : addedChildNodes) {
+            if(child.getQName().getLocalName().equals(name)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public void addChildNode(DataSchemaNodeBuilder childNode) {
         addedChildNodes.add(childNode);
     }
