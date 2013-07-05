@@ -42,9 +42,9 @@ public class SubnetConfig implements Serializable {
 
     // Order matters: JSP file expects following fields in the
     // following order
-    @XmlAttribute
+    @XmlElement
     private String name;
-    @XmlAttribute
+    @XmlElement
     private String subnet; // A.B.C.D/MM  Where A.B.C.D is the Default
                            // Gateway IP (L3) or ARP Querier IP (L2
     @XmlElement

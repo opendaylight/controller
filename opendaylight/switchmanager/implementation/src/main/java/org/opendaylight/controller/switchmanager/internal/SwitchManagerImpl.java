@@ -449,7 +449,7 @@ CommandProvider {
                 return new Status(StatusCode.CONFLICT,
                         "Same subnet config already exists");
             }
-            // Semantyc check
+            // Semantic check
             Status rc = semanticCheck(conf);
             if (!rc.isSuccess()) {
                 return rc;

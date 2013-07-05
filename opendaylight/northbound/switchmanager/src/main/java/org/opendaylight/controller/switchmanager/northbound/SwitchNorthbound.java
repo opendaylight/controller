@@ -26,6 +26,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -46,6 +47,7 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
+import org.opendaylight.controller.switchmanager.SubnetConfig;
 
 /**
  * The class provides Northbound REST APIs to access the nodes, node connectors
@@ -479,6 +481,202 @@ public class SwitchNorthbound {
             return Response.ok().build();
         }
         throw new ResourceNotFoundException(ret.getDescription());
+    }
+
+    /**
+     * Returns the set of {@link SubnetConfig}s currently installed in the
+     * specified container.
+     *
+     * @param containerName
+     *            Name of the Container
+     * @return List of {@link SubnetConfig}s
+     */
+    @Path("/{containerName}/subnets")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @TypeHint(Subnets.class)
+    @StatusCodes({
+            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 404, condition = "The containerName is not found"),
+            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public Subnets getSubnets(@PathParam("containerName") String containerName) {
+
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                                          Privilege.READ, this)) {
+            throw new UnauthorizedException(
+                "User is not authorized to perform this operation on container " + containerName);
+        }
+
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
+        if (switchManager == null) {
+            throw new ServiceUnavailableException(
+                "Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        List<SubnetConfig> ret = switchManager.getSubnetsConfigList();
+
+        if(ret == null){
+            ret = new ArrayList<SubnetConfig>();
+        }
+
+        return new Subnets(ret);
+    }
+
+    /**
+     * Add a subnet.
+     *
+     * @param containerName
+     *            Name of the Container
+     * @param subnetConfigData
+     *            the {@link SubnetConfig} structure in JSON passed as a POST
+     *            parameter
+     * @return If the operation was successful
+     */
+    @Path("/{containerName}/subnets")
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @StatusCodes({
+            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 404, condition = "The containerName is not found"),
+            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public Response addSubnet(@PathParam("containerName") String containerName,
+                              @TypeHint(SubnetConfig.class) JAXBElement<SubnetConfig> subnetConfigData) {
+
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                                          Privilege.WRITE, this)) {
+            throw new UnauthorizedException(
+                "User is not authorized to perform this operation on container " + containerName);
+        }
+
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
+        if (switchManager == null) {
+            throw new ServiceUnavailableException(
+                "Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        SubnetConfig subnetConf = subnetConfigData.getValue();
+        if(subnetConf.getNodePorts() == null){
+            subnetConf = new SubnetConfig(subnetConf.getName(), subnetConf.getSubnet(), new ArrayList<String>());
+        }
+
+        Status s = switchManager.addSubnet(subnetConf);
+
+        if(s.isSuccess()){
+            return Response.status(Response.Status.CREATED).build();
+        }else{
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
+
+    /**
+     * Modify a subnet. For now only changing the port list is allowed.
+     *
+     * @param containerName
+     *            Name of the Container
+     * @param name
+     *            Name of the SubnetConfig to be modified
+     * @param subnetConfigData
+     *            the {@link SubnetConfig} structure in JSON passed as a POST
+     *            parameter
+     * @return If the operation is successful or not
+     */
+    @Path("/{containerName}/subnets/{name}")
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @StatusCodes({
+            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 404, condition = "The containerName is not found"),
+            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public Response modifySubnet(@PathParam("containerName") String containerName,
+                                 @PathParam("name") String name,
+                                 @TypeHint(SubnetConfig.class) JAXBElement<SubnetConfig> subnetConfigData) {
+
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                                          Privilege.WRITE, this)) {
+            throw new UnauthorizedException(
+                "User is not authorized to perform this operation on container " + containerName);
+        }
+
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
+        if (switchManager == null) {
+            throw new ServiceUnavailableException(
+                "Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        SubnetConfig subnetConf = subnetConfigData.getValue();
+        SubnetConfig existingConf = switchManager.getSubnetConfig(name);
+
+        boolean successful = true;
+
+        // make sure that the name matches an existing subnet and we're not
+        // changing the name or subnet IP/mask
+        if (existingConf == null
+            || !existingConf.getName().equals(subnetConf.getName())
+            || !existingConf.getSubnet().equals(subnetConf.getSubnet())) {
+
+            successful = false;
+
+        }else{
+            // create a set for fast lookups
+            Set<String> newPorts = new HashSet<String>(subnetConf.getNodePorts());
+
+            // go through the current ports and (1) remove ports that aren't
+            // there anymore and (2) remove ports that are still there from the
+            // set of ports to add
+            for(String s : existingConf.getNodePorts()){
+                if(newPorts.contains(s)){
+                    newPorts.remove(s);
+                }else{
+                    Status st = switchManager.removePortsFromSubnet(name, s);
+                    successful = successful && st.isSuccess();
+                }
+            }
+
+            // add any remaining ports
+            for(String s : newPorts){
+                Status st = switchManager.addPortsToSubnet(name, s);
+                successful = successful && st.isSuccess();
+            }
+        }
+
+        return Response.status(Response.Status.ACCEPTED).build();
+    }
+
+    /**
+     * Remove a subnet.
+     *
+     * @param containerName
+     *            Name of the Container
+     * @return List of {@link SubnetConfig}s
+     */
+    @Path("/{containerName}/subnets/{name}")
+    @DELETE
+    @StatusCodes({
+            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 404, condition = "The containerName is not found"),
+            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public Response removeSubnet(@PathParam("containerName") String containerName,
+                                 @PathParam("name") String name) {
+
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                                          Privilege.WRITE, this)) {
+            throw new UnauthorizedException(
+                "User is not authorized to perform this operation on container " + containerName);
+        }
+
+        ISwitchManager switchManager = getIfSwitchManagerService(containerName);
+        if (switchManager == null) {
+            throw new ServiceUnavailableException(
+                "Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        Status s = switchManager.removeSubnet(name);
+
+        if(s.isSuccess()){
+            return Response.status(Response.Status.ACCEPTED).build();
+        }else{
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
     }
 
     /*    *//**
