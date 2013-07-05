@@ -10,8 +10,8 @@ package org.opendaylight.controller.hosttracker.northbound;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.security.Principal;
 import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -40,6 +40,7 @@ import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailab
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
 import org.opendaylight.controller.northbound.commons.exception.UnsupportedMediaTypeException;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
+import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
@@ -47,8 +48,6 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
-
-import org.opendaylight.controller.sal.authorization.Privilege;
 
 /**
  * Host Tracker Northbound REST APIs.<br>
@@ -261,7 +260,7 @@ public class HostTrackerNorthbound {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
-            @ResponseCode(code = 201, condition = "Flow Config processed successfully"),
+            @ResponseCode(code = 201, condition = "Static Host created successfully"),
             @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
             @ResponseCode(code = 415, condition = "Invalid IP Address passed in networkAddress parameter"),

@@ -1031,7 +1031,6 @@ public class HostTracker implements IfIptoHost, IfHostListener,
         if (dataLayerAddress.length != 6) {
             return new Status(StatusCode.BADREQUEST, "Invalid MAC address");
         }
-
         HostNodeConnector host = null;
         try {
             host = new HostNodeConnector(dataLayerAddress, networkAddr, nc,
@@ -1044,6 +1043,18 @@ public class HostTracker implements IfIptoHost, IfHostListener,
                 return new Status(StatusCode.SUCCESS, null);
             }
             host.setStaticHost(true);
+            /*
+             * Check if a host is already attached to nc or if the nc is an ISL
+             * port
+             */
+            if (topologyManager != null) {
+                if (topologyManager.getHostAttachedToNodeConnector(nc) != null) {
+                    return new Status(StatusCode.BADREQUEST, "A host is already attached to this port");
+                }
+                if (topologyManager.isInternal(nc)) {
+                    return new Status(StatusCode.BADREQUEST, "Cannot add host on ISL port");
+                }
+            }
             /*
              * Before adding host, Check if the switch and the port have already
              * come up

@@ -18,9 +18,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -33,25 +33,22 @@ import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
-import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
 import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
@@ -429,6 +426,8 @@ CommandProvider {
         if (this.hostsDB == null) {
             return null;
         }
+        if (this.hostsDB.get(p) == null)
+            return null;
 
         return (this.hostsDB.get(p).getLeft());
     }
