@@ -25,6 +25,8 @@ public class Ethernet extends Packet {
     private static final String SMAC = "SourceMACAddress";
     private static final String ETHT = "EtherType";
 
+    public static byte[] BROADCAST_MAC_ADDRESS = {-1, -1, -1, -1, -1, -1};
+
     // TODO: This has to be outside and it should be possible for osgi
     // to add new coming packet classes
     public static final Map<Short, Class<? extends Packet>> etherTypeClassMap;
@@ -102,6 +104,14 @@ public class Ethernet extends Packet {
         return BitBufferHelper.getShort(fieldValues.get(ETHT));
     }
 
+    public boolean isBroadcast(){
+        return isBroadcast(getDestinationMACAddress());
+    }
+
+    public boolean isMulticast(){
+        return isMulticast(getDestinationMACAddress());
+    }
+
     /**
      * Sets the destination MAC address for the current Ethernet object instance
      * @param byte[] - the destinationMACAddress to set
@@ -130,4 +140,44 @@ public class Ethernet extends Packet {
         return this;
     }
 
+    /*
+     * helper functions for dealing with MAC addresses
+     */
+
+    /**
+     * Returns true if the MAC address is the broadcast MAC address and false
+     * otherwise.
+     *
+     * @param MACAddress
+     * @return
+     */
+    public static boolean isBroadcast(byte[] MACAddress) {
+        if (MACAddress.length == 6) {
+            for (int i = 0; i < 6; i++) {
+                if (MACAddress[i] != BROADCAST_MAC_ADDRESS[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the MAC address is a multicast MAC address and false
+     * otherwise. Note that this explicitly returns false for the broadcast MAC
+     * address.
+     *
+     * @param MACAddress
+     * @return
+     */
+    public static boolean isMulticast(byte[] MACAddress) {
+        if (MACAddress.length == 6 && !isBroadcast(MACAddress)) {
+            if (MACAddress[0] % 2 == 1) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
