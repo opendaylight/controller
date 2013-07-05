@@ -306,6 +306,7 @@
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <sourceDirectory>${project.basedir}</sourceDirectory>
           <includes>**\/*.java,**\/*.xml,**\/*.ini,**\/*.sh,**\/*.bat</includes>
+          <excludes>target\/</excludes>
         </configuration>
       </plugin>
       <plugin>
