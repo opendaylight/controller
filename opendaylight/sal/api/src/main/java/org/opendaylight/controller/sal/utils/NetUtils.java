@@ -39,6 +39,11 @@ public abstract class NetUtils {
     public static final int MACAddrLengthInWords = 3;
 
     /**
+     * Constant holding the broadcast MAC address
+     */
+    public static byte[] BroadcastMACAddr = {-1, -1, -1, -1, -1, -1};
+
+    /**
      * Converts a 4 bytes array into an integer number
      *
      * @param ba
@@ -273,6 +278,43 @@ public abstract class NetUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * Returns true if the MAC address is the broadcast MAC address and false
+     * otherwise.
+     *
+     * @param MACAddress
+     * @return
+     */
+    public static boolean isBroadcastMACAddr(byte[] MACAddress) {
+        if (MACAddress.length == MACAddrLengthInBytes) {
+            for (int i = 0; i < 6; i++) {
+                if (MACAddress[i] != BroadcastMACAddr[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the MAC address is a multicast MAC address and false
+     * otherwise. Note that this explicitly returns false for the broadcast MAC
+     * address.
+     *
+     * @param MACAddress
+     * @return
+     */
+    public static boolean isMulticastMACAddr(byte[] MACAddress) {
+        if (MACAddress.length == MACAddrLengthInBytes && !isBroadcastMACAddr(MACAddress)) {
+            if (MACAddress[0] % 2 == 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

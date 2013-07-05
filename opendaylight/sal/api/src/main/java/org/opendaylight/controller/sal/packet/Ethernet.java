@@ -16,6 +16,7 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.sal.utils.EtherTypes;
+import org.opendaylight.controller.sal.utils.NetUtils;
 
 /**
  * Class that represents the Ethernet frame objects
@@ -100,6 +101,14 @@ public class Ethernet extends Packet {
      */
     public short getEtherType() {
         return BitBufferHelper.getShort(fieldValues.get(ETHT));
+    }
+
+    public boolean isBroadcast(){
+        return NetUtils.isBroadcastMACAddr(getDestinationMACAddress());
+    }
+
+    public boolean isMulticast(){
+        return NetUtils.isMulticastMACAddr(getDestinationMACAddress());
     }
 
     /**
