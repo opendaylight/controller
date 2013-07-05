@@ -9,7 +9,13 @@
 
 package org.opendaylight.controller.configuration.internal;
 
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
+
 import org.apache.felix.dm.Component;
+import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.configuration.IConfigurationAware;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
@@ -84,8 +90,8 @@ public class Activator extends ComponentActivatorAbstractBase {
 
             c.add(createContainerServiceDependency(containerName).setService(
                     IConfigurationContainerAware.class).setCallbacks(
-                    "addConfigurationContainerAware",
-                    "removeConfigurationContainerAware").setRequired(false));
+                            "addConfigurationContainerAware",
+                            "removeConfigurationContainerAware").setRequired(false));
         }
     }
 
@@ -117,21 +123,26 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     protected void configureGlobalInstance(Component c, Object imp) {
         if (imp.equals(ConfigurationImpl.class)) {
+            Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
+            Set<String> propSet = new HashSet<String>();
+            propSet.add("config.event.save");
+            props.put("cachenames", propSet);
 
             // export the service
             c.setInterface(
-                    new String[] { IConfigurationService.class.getName() },
-                    null);
+                    new String[] { IConfigurationService.class.getName(),
+                            ICacheUpdateAware.class.getName()},
+                            props);
 
             c.add(createServiceDependency().setService(
                     IClusterGlobalServices.class).setCallbacks(
-                    "setClusterServices", "unsetClusterServices").setRequired(
-                    true));
+                            "setClusterServices", "unsetClusterServices").setRequired(
+                                    true));
 
             c.add(createServiceDependency().setService(
                     IConfigurationAware.class).setCallbacks(
-                    "addConfigurationAware", "removeConfigurationAware")
-                    .setRequired(false));
+                            "addConfigurationAware", "removeConfigurationAware")
+                            .setRequired(false));
         }
     }
 }
