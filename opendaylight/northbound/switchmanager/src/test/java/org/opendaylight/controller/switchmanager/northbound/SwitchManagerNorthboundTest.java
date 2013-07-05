@@ -15,6 +15,7 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.opendaylight.controller.switchmanager.SubnetConfig;
 
 public class SwitchManagerNorthboundTest extends TestCase {
 
@@ -55,15 +56,13 @@ public class SwitchManagerNorthboundTest extends TestCase {
         @Test
         public void testNodeConnectorProperties() {
                 Node node = NodeCreator.createOFNode(1L);
-        NodeConnector port = NodeConnectorCreator.createOFNodeConnector(
-                (short) 24, node);
+                NodeConnector port = NodeConnectorCreator.createOFNodeConnector((short) 24, node);
 
-        NodeConnectorProperties ncp= new NodeConnectorProperties(port, null);
+                NodeConnectorProperties ncp= new NodeConnectorProperties(port, null);
                 Assert.assertTrue(ncp.getProperties() == null);
                 Assert.assertTrue(ncp.getNodeConnector().equals(port));
 
-        NodeConnector port2 = NodeConnectorCreator.createOFNodeConnector(
-                (short) 33, node);
+                NodeConnector port2 = NodeConnectorCreator.createOFNodeConnector((short) 33, node);
                 ncp.setNodeConnector(port2);
                 Assert.assertTrue(ncp.getNodeConnector().equals(port2));
 
@@ -72,4 +71,20 @@ public class SwitchManagerNorthboundTest extends TestCase {
                 Assert.assertTrue(ncp.getProperties().equals(props));
         }
 
+        @Test
+        public void testSubnets() {
+            List<String> ports1 = new ArrayList<String>();
+            ports1.add("OF|00:00:00:00:00:00:00:01/1");
+            SubnetConfig sc1 = new SubnetConfig("test1", "10.0.0.1/8", ports1);
+            SubnetConfig sc2 = new SubnetConfig("test2", "8.8.8.8/8", ports1);
+            List<SubnetConfig> l = new ArrayList<SubnetConfig>();
+            l.add(sc1);
+            l.add(sc2);
+            Subnets s = new Subnets(l);
+
+            Assert.assertTrue(s.getSubnetConfigs().size() == 2);
+
+            Assert.assertTrue(s.getSubnetConfigs().contains(sc1));
+            Assert.assertTrue(s.getSubnetConfigs().contains(sc2));
+        }
 }
