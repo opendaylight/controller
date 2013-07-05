@@ -1018,7 +1018,6 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         if (nc == null) {
             return new Status(StatusCode.BADREQUEST, "Invalid NodeConnector");
         }
-
         HostNodeConnector host = null;
         try {
             host = new HostNodeConnector(dataLayerAddress, networkAddr, nc, vlan);
@@ -1036,6 +1035,14 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 return new Status(StatusCode.CONFLICT, "Existing IP, Use PUT to update");
             }
             host.setStaticHost(true);
+            /*
+             * Check if the nc is an ISL port
+             */
+            if (topologyManager != null) {
+                if (topologyManager.isInternal(nc)) {
+                    return new Status(StatusCode.BADREQUEST, "Cannot add host on ISL port");
+                }
+            }
             /*
              * Before adding host, Check if the switch and the port have already
              * come up
