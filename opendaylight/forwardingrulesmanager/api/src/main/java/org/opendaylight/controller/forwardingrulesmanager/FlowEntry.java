@@ -187,6 +187,7 @@ public class FlowEntry implements Cloneable, Serializable {
      * @return true if internal generated static flow, false otherwise
      */
     public boolean isInternal() {
-        return flowName.startsWith(FlowConfig.internalStaticFlowBegin);
+        return flowName.startsWith(FlowConfig.INTERNALSTATICFLOWBEGIN)
+                && flowName.endsWith(FlowConfig.INTERNALSTATICFLOWEND);
     }
 }

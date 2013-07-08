@@ -138,7 +138,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginInFlowProgrammerService.class)
                     .setCallbacks("setService", "unsetService")
                     .setRequired(false));
-            c.add(createServiceDependency()
+            c.add(createContainerServiceDependency(containerName)
                     .setService(IFlowProgrammerListener.class)
                     .setCallbacks("setListener", "unsetListener")
                     .setRequired(false));
