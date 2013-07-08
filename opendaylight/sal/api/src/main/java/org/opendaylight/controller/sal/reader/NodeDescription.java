@@ -9,11 +9,15 @@
 
 package org.opendaylight.controller.sal.reader;
 
+import java.io.Serializable;
+
 
 /**
  * Represents the network node description information
  */
-public class NodeDescription {
+public class NodeDescription implements Serializable, Cloneable{
+    private static final long serialVersionUID = 1L;
+
     private String manufacturer;
     private String hardware;
     private String software;
@@ -69,5 +73,16 @@ public class NodeDescription {
         return "HwDescription[manufacturer=" + manufacturer + ", hardware="
                         + hardware + ", software=" + software + ", serialNumber="
                         + serialNumber + ", description=" + description + "]";
+    }
+    @Override
+    public NodeDescription clone() {
+        NodeDescription nd = new NodeDescription();
+        nd.setDescription(description);
+        nd.setHardware(hardware);
+        nd.setManufacturer(manufacturer);
+        nd.setSerialNumber(serialNumber);
+        nd.setSoftware(software);
+
+        return nd;
     }
 }

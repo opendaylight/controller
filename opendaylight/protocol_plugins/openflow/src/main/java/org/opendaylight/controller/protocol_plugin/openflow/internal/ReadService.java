@@ -11,12 +11,12 @@ package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.felix.dm.Component;
-import org.opendaylight.controller.protocol_plugin.openflow.IPluginReadServiceFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.opendaylight.controller.protocol_plugin.openflow.IReadFilterInternalListener;
+import org.opendaylight.controller.protocol_plugin.openflow.IReadServiceFilter;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -24,20 +24,21 @@ import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.IPluginInReadService;
+import org.opendaylight.controller.sal.reader.IPluginOutReadService;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Container Instance of IPluginInReadService implementation class
- *
- *
- *
  */
-public class ReadService implements IPluginInReadService {
+public class ReadService implements IPluginInReadService, IReadFilterInternalListener {
     private static final Logger logger = LoggerFactory
             .getLogger(ReadService.class);
-    private IPluginReadServiceFilter filter;
+    private IReadServiceFilter filter;
+    private Set<IPluginOutReadService> pluginOutReadServices;
     private String containerName;
 
     /**
@@ -50,6 +51,7 @@ public class ReadService implements IPluginInReadService {
         Dictionary<Object, Object> props = c.getServiceProperties();
         containerName = (props != null) ? (String) props.get("containerName")
                 : null;
+        pluginOutReadServices = new CopyOnWriteArraySet<IPluginOutReadService>();
     }
 
     /**
@@ -79,14 +81,28 @@ public class ReadService implements IPluginInReadService {
     void stop() {
     }
 
-    public void setService(IPluginReadServiceFilter filter) {
+    public void setService(IReadServiceFilter filter) {
         this.filter = filter;
     }
 
-    public void unsetService(IPluginReadServiceFilter filter) {
+    public void unsetService(IReadServiceFilter filter) {
         this.filter = null;
     }
 
+    public void setPluginOutReadServices(IPluginOutReadService service) {
+        logger.trace("Got a service set request {}", service);
+        if (this.pluginOutReadServices != null) {
+            this.pluginOutReadServices.add(service);
+        }
+    }
+
+    public void unsetPluginOutReadServices(
+            IPluginOutReadService service) {
+        logger.trace("Got a service UNset request");
+        if (this.pluginOutReadServices != null) {
+            this.pluginOutReadServices.remove(service);
+        }
+    }
     @Override
     public FlowOnNode readFlow(Node node, Flow flow, boolean cached) {
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
@@ -167,5 +183,33 @@ public class ReadService implements IPluginInReadService {
         }
 
         return filter.readAllNodeTable(containerName, node, cached);
+    }
+
+    @Override
+    public void nodeFlowStatisticsUpdated(Node node, List<FlowOnNode> flowStatsList) {
+        for (IPluginOutReadService service : pluginOutReadServices) {
+            service.nodeFlowStatisticsUpdated(node, flowStatsList);
+        }
+    }
+
+    @Override
+    public void nodeConnectorStatisticsUpdated(Node node, List<NodeConnectorStatistics> ncStatsList) {
+        for (IPluginOutReadService service : pluginOutReadServices) {
+            service.nodeConnectorStatisticsUpdated(node, ncStatsList);
+        }
+    }
+
+    @Override
+    public void nodeTableStatisticsUpdated(Node node, List<NodeTableStatistics> tableStatsList) {
+        for (IPluginOutReadService service : pluginOutReadServices) {
+            service.nodeTableStatisticsUpdated(node, tableStatsList);
+        }
+    }
+
+    @Override
+    public void nodeDescriptionStatisticsUpdated(Node node, NodeDescription nodeDescription) {
+        for (IPluginOutReadService service : pluginOutReadServices) {
+            service.descriptionStatisticsUpdated(node, nodeDescription);
+        }
     }
 }

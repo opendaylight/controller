@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.reader;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -22,7 +24,9 @@ import org.opendaylight.controller.sal.core.NodeTable;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class NodeTableStatistics {
+public class NodeTableStatistics implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @XmlElement
     private NodeTable nodeTable;
     @XmlElement

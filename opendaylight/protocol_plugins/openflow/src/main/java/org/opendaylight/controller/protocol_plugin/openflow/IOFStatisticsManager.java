@@ -32,9 +32,10 @@ public interface IOFStatisticsManager {
      *
      * @param switchId the openflow datapath id
      * @param ofMatch the openflow match to query. If null, the query is intended for all the flows
+     * @param priority Priority of the wanted flow
      * @return the list of openflow statistics
      */
-    List<OFStatistics> getOFFlowStatistics(Long switchId, OFMatch ofMatch);
+    List<OFStatistics> getOFFlowStatistics(Long switchId, OFMatch ofMatch, short priority);
 
     /**
      * Return the description statistics for the specified switch.
