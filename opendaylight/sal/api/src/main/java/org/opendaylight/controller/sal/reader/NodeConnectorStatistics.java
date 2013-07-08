@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -9,6 +8,8 @@
 
 package org.opendaylight.controller.sal.reader;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -18,46 +19,47 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 
 /**
  * Represents the statistics for the node conenctor
- *
- *
- *
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class NodeConnectorStatistics {
-        @XmlElement
+public class NodeConnectorStatistics implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @XmlElement
     private NodeConnector nodeConnector;
-        @XmlElement
+    @XmlElement
     private long receivePackets;
-        @XmlElement
+    @XmlElement
     private long transmitPackets;
-        @XmlElement
+    @XmlElement
     private long receiveBytes;
-        @XmlElement
+    @XmlElement
     private long transmitBytes;
-        @XmlElement
+    @XmlElement
     private long receiveDrops;
-        @XmlElement
+    @XmlElement
     private long transmitDrops;
-        @XmlElement
+    @XmlElement
     private long receiveErrors;
-        @XmlElement
+    @XmlElement
     private long transmitErrors;
-        @XmlElement
+    @XmlElement
     private long receiveFrameError;
-        @XmlElement
+    @XmlElement
     private long receiveOverRunError;
-        @XmlElement
+    @XmlElement
     private long receiveCrcError;
-        @XmlElement
+    @XmlElement
     private long collisionCount;
 
-        //To Satisfy JAXB
-        public NodeConnectorStatistics() {
+    // To Satisfy JAXB
+    public NodeConnectorStatistics() {
 
-        }
+    }
+
     /**
      * Set the node connector
+     *
      * @param port
      */
     public void setNodeConnector(NodeConnector port) {
@@ -66,6 +68,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Returns the node connector
+     *
      * @return
      */
     public NodeConnector getNodeConnector() {
@@ -74,6 +77,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the rx packet count's value
+     *
      * @param count
      */
     public void setReceivePacketCount(long count) {
@@ -82,6 +86,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Returns the rx packet count for the port
+     *
      * @return
      */
     public long getReceivePacketCount() {
@@ -90,6 +95,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the tx packet count's value
+     *
      * @param count
      */
     public void setTransmitPacketCount(long count) {
@@ -98,6 +104,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Returns the tx packet count for the port
+     *
      * @return
      */
     public long getTransmitPacketCount() {
@@ -106,6 +113,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the rx byte count's value
+     *
      * @param count
      */
     public void setReceiveByteCount(long count) {
@@ -114,6 +122,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Return the rx byte count for the port
+     *
      * @return
      */
     public long getReceiveByteCount() {
@@ -122,6 +131,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the tx byte count's value
+     *
      * @param count
      */
     public void setTransmitByteCount(long count) {
@@ -130,6 +140,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Return the tx byte count for the port
+     *
      * @return
      */
     public long getTransmitByteCount() {
@@ -138,6 +149,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the rx drop count's value
+     *
      * @param count
      */
     public void setReceiveDropCount(long count) {
@@ -146,6 +158,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Returns the rx drop count for the port
+     *
      * @return
      */
     public long getReceiveDropCount() {
@@ -154,6 +167,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the tx drop count's value
+     *
      * @param count
      */
     public void setTransmitDropCount(long count) {
@@ -162,6 +176,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Returns the tx drop count for the port
+     *
      * @return
      */
     public long getTransmitDropCount() {
@@ -170,6 +185,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the rx error count's value
+     *
      * @param count
      */
     public void setReceiveErrorCount(long count) {
@@ -178,6 +194,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Return the rx error count for the port
+     *
      * @return
      */
     public long getReceiveErrorCount() {
@@ -186,6 +203,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the tx error count's value
+     *
      * @param count
      */
     public void setTransmitErrorCount(long count) {
@@ -194,6 +212,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Return the tx error count for the port
+     *
      * @return
      */
     public long getTransmitErrorCount() {
@@ -202,6 +221,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the rx frame error value
+     *
      * @param count
      */
     public void setReceiveFrameErrorCount(long count) {
@@ -210,6 +230,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Returns the rx frame error for the port
+     *
      * @return
      */
     public long getReceiveFrameErrorCount() {
@@ -218,6 +239,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the rx overrun error value
+     *
      * @param count
      */
     public void setReceiveOverRunErrorCount(long count) {
@@ -226,6 +248,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Return the rx overrun error for the port
+     *
      * @return
      */
     public long getReceiveOverRunErrorCount() {
@@ -234,6 +257,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the rx CRC Error value
+     *
      * @param count
      */
     public void setReceiveCRCErrorCount(long count) {
@@ -242,6 +266,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Return the rx CRC error for the port
+     *
      * @return
      */
     public long getReceiveCRCErrorCount() {
@@ -250,6 +275,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Set the collisionCount count's value
+     *
      * @param count
      */
     public void setCollisionCount(long count) {
@@ -258,6 +284,7 @@ public class NodeConnectorStatistics {
 
     /**
      * Return the collisionCount count for the port
+     *
      * @return
      */
     public long getCollisionCount() {
@@ -267,16 +294,16 @@ public class NodeConnectorStatistics {
     @Override
     public String toString() {
         return "NodeConnectorStats[portNumber = " + nodeConnector
-                + ", receivePackets = " + receivePackets
-                + ", transmitPackets = " + transmitPackets
-                + ", receiveBytes = " + receiveBytes + ", transmitBytes = "
-                + transmitBytes + ", receiveDrops = " + receiveDrops
-                + ", transmitDrops = " + transmitDrops + ", receiveErrors = "
-                + receiveErrors + ", transmitErrors = " + transmitErrors
-                + ", receiveFrameError = " + receiveFrameError
-                + ", receiveOverRunError = " + receiveOverRunError
-                + ", receiveCrcError = " + receiveCrcError
-                + ", collisionCount = " + collisionCount + "]";
+            + ", receivePackets = " + receivePackets
+            + ", transmitPackets = " + transmitPackets
+            + ", receiveBytes = " + receiveBytes + ", transmitBytes = "
+            + transmitBytes + ", receiveDrops = " + receiveDrops
+            + ", transmitDrops = " + transmitDrops + ", receiveErrors = "
+            + receiveErrors + ", transmitErrors = " + transmitErrors
+            + ", receiveFrameError = " + receiveFrameError
+            + ", receiveOverRunError = " + receiveOverRunError
+            + ", receiveCrcError = " + receiveCrcError
+            + ", collisionCount = " + collisionCount + "]";
     }
 
 }

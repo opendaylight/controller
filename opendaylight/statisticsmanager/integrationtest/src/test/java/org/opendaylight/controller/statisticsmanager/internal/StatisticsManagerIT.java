@@ -1,20 +1,25 @@
 package org.opendaylight.controller.statisticsmanager.internal;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Bundle;
 import javax.inject.Inject;
 
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.sal.action.Action;
@@ -28,16 +33,16 @@ import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
-import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.statisticsmanager.*;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.osgi.framework.BundleContext;
-import static org.junit.Assert.*;
-import org.ops4j.pax.exam.junit.Configuration;
-import static org.ops4j.pax.exam.CoreOptions.*;
-
+import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.PathUtils;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 public class StatisticsManagerIT {
@@ -84,40 +89,39 @@ public class StatisticsManagerIT {
                         .versionAsInProject(),
                 mavenBundle("ch.qos.logback", "logback-classic")
                         .versionAsInProject(),
+                // needed by statisticsmanager
+                mavenBundle("org.opendaylight.controller", "containermanager")
+                    .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "containermanager.implementation")
+                    .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager")
+                    .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "clustering.services")
+                    .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "clustering.stub")
+                    .versionAsInProject(),
+                // needed by forwardingrulesmanager
+                mavenBundle("org.opendaylight.controller", "switchmanager")
+                    .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "switchmanager.implementation")
+                    .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration")
+                    .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration.implementation")
+                    .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "hosttracker")
+                    .versionAsInProject(),
+
                 // List all the bundles on which the test case depends
                 mavenBundle("org.opendaylight.controller", "sal")
                         .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "sal.implementation")
                         .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "protocol_plugins.stub")
+                    .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "statisticsmanager")
                         .versionAsInProject(),
-                mavenBundle("org.opendaylight.controller",
-                        "statisticsmanager.implementation")
-                        .versionAsInProject(),
-                mavenBundle("org.opendaylight.controller",
-                        "protocol_plugins.stub").versionAsInProject(),
-                // needed by statisticsmanager
-                mavenBundle("org.opendaylight.controller", "containermanager")
-                        .versionAsInProject(),
-                mavenBundle("org.opendaylight.controller",
-                        "containermanager.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller",
-                        "forwardingrulesmanager").versionAsInProject(),
-
-                mavenBundle("org.opendaylight.controller",
-                        "clustering.services").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "clustering.stub")
-                        .versionAsInProject(),
-
-                // needed by forwardingrulesmanager
-                mavenBundle("org.opendaylight.controller", "switchmanager")
-                        .versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "configuration")
-                        .versionAsInProject(),
-
-                mavenBundle("org.opendaylight.controller",
-                        "configuration.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "hosttracker")
+                mavenBundle("org.opendaylight.controller", "statisticsmanager.implementation")
                         .versionAsInProject(),
 
                 // needed by hosttracker
@@ -223,6 +227,11 @@ public class StatisticsManagerIT {
         List<Action> actions = new ArrayList<Action>();
         actions.add(action);
         flow.setActions(actions);
+        // as in stub
+        flow.setPriority((short) 3500);
+        flow.setIdleTimeout((short) 1000);
+        flow.setHardTimeout((short) 2000);
+        flow.setId(12345);
 
         try {
             Node node = new Node("STUB", 0xCAFE);

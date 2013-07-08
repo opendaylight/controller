@@ -1,22 +1,13 @@
 package org.opendaylight.controller.northbound.integrationtest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Bundle;
-import javax.inject.Inject;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.osgi.framework.BundleContext;
-import static org.junit.Assert.*;
-import org.ops4j.pax.exam.junit.Configuration;
-import static org.ops4j.pax.exam.CoreOptions.*;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.util.PathUtils;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,13 +21,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
+import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONTokener;
-
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.ConstructionException;
@@ -51,6 +46,15 @@ import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.usermanager.IUserManager;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.util.PathUtils;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 public class NorthboundIT {
@@ -58,7 +62,7 @@ public class NorthboundIT {
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
-    private IUserManager users = null;
+    private IUserManager userManager = null;
     private IInventoryListener invtoryListener = null;
     private IListenTopoUpdates topoUpdates = null;
 
@@ -99,10 +103,10 @@ public class NorthboundIT {
 
         ServiceReference r = bc.getServiceReference(IUserManager.class.getName());
         if (r != null) {
-            this.users = (IUserManager) bc.getService(r);
+            this.userManager = (IUserManager) bc.getService(r);
         }
         // If UserManager is null, cannot login to run tests.
-        assertNotNull(this.users);
+        assertNotNull(this.userManager);
 
         r = bc.getServiceReference(IfIptoHost.class.getName());
         if (r != null) {
@@ -145,8 +149,8 @@ public class NorthboundIT {
 
         try {
             URL url = new URL(restUrl);
-            this.users.getAuthorizationList();
-            this.users.authenticate("admin", "admin");
+            this.userManager.getAuthorizationList();
+            this.userManager.authenticate("admin", "admin");
             String authString = "admin:admin";
             byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
             String authStringEnc = new String(authEncBytes);
@@ -1258,33 +1262,31 @@ public class NorthboundIT {
                 mavenBundle("org.opendaylight.controller", "protocol_plugins.stub", "0.4.0-SNAPSHOT"),
 
                 // List all the opendaylight modules
+                mavenBundle("org.opendaylight.controller", "configuration", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "configuration.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "containermanager", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "containermanager.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "clustering.services", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "clustering.services-implementation", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "security", "0.4.0-SNAPSHOT").noStart(),
                 mavenBundle("org.opendaylight.controller", "sal", "0.5.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "sal.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "statisticsmanager", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "statisticsmanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "containermanager", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "containermanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "arphandler", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "clustering.services", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "clustering.services-implementation", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "switchmanager", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "switchmanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "arphandler", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "hosttracker", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "hosttracker.implementation", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "arphandler", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "routing.dijkstra_implementation", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "topologymanager", "0.4.0-SNAPSHOT"),
-
                 mavenBundle("org.opendaylight.controller", "usermanager", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "usermanager.implementation", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "logging.bridge", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "clustering.test", "0.4.0-SNAPSHOT"),
-
                 mavenBundle("org.opendaylight.controller", "forwarding.staticrouting", "0.4.0-SNAPSHOT"),
 
                 // Northbound bundles
