@@ -3,13 +3,7 @@ package org.opendaylight.controller.protocol_plugins.stub.internal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.List;
-
-import org.apache.felix.dm.Component;
-//import org.opendaylight.controller.protocol_plugin_stubs.IPluginReadServiceFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Controller;
@@ -45,6 +39,8 @@ import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Stub Implementation for IPluginInReadService used by SAL
  *
@@ -104,7 +100,7 @@ public class ReadService implements IPluginInReadService {
 
         ArrayList<FlowOnNode> list = new ArrayList<FlowOnNode>();
         ArrayList<Action> actionList = new ArrayList<Action>();
-        actionList.add(new Drop());
+        actionList.add(new Drop()); //IT assumes this is first element
         actionList.add(new Loopback());
         actionList.add(new Flood());
         actionList.add(new FloodAll());
@@ -139,6 +135,7 @@ public class ReadService implements IPluginInReadService {
         actionList.add(new SetTpSrc(4201));
         actionList.add(new SetTpDst(8080));
 
+        short priority = 3500; //IT assumes this value
         for (Action a : actionList) {
             Flow flow = new Flow();
             Match match = new Match();
@@ -152,7 +149,7 @@ public class ReadService implements IPluginInReadService {
             List<Action> actions = new ArrayList<Action>();
             actions.add(a);
             flow.setActions(actions);
-            flow.setPriority((short) 3500);
+            flow.setPriority(priority++);
             flow.setIdleTimeout((short) 1000);
             flow.setHardTimeout((short) 2000);
             flow.setId(12345);

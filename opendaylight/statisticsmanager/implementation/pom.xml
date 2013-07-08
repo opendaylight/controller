@@ -38,10 +38,16 @@
         <configuration>
           <instructions>
             <Import-Package>
+              org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.containermanager,
               org.opendaylight.controller.sal.core,
-              org.opendaylight.controller.sal.flowprogrammer, org.slf4j,
+              org.opendaylight.controller.sal.flowprogrammer,
               org.opendaylight.controller.sal.reader,
+              org.opendaylight.controller.sal.utils,
+              org.slf4j,
+              org.opendaylight.controller.sal.inventory,
+              org.opendaylight.controller.sal.match,
+              org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.statisticsmanager,
               org.opendaylight.controller.forwardingrulesmanager,
               org.apache.felix.dm

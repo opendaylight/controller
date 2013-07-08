@@ -19,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IStatisticsListener;
+import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
@@ -40,11 +40,13 @@ import org.opendaylight.controller.sal.core.Tables;
 import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFPortStatus;
 import org.openflow.protocol.OFPortStatus.OFPortReason;
 import org.openflow.protocol.OFType;
 import org.openflow.protocol.statistics.OFDescriptionStatistics;
+import org.openflow.protocol.statistics.OFStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +58,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class InventoryServiceShim implements IContainerListener,
-        IMessageListener, ISwitchStateListener, IStatisticsListener {
+        IMessageListener, ISwitchStateListener, IOFStatisticsListener {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryServiceShim.class);
     private IController controller = null;
@@ -178,7 +180,7 @@ public class InventoryServiceShim implements IContainerListener,
 
     protected void handlePortStatusMessage(ISwitch sw, OFPortStatus m)
             throws ConstructionException {
-        Node node = new Node(NodeIDType.OPENFLOW, sw.getId());
+        Node node = NodeCreator.createOFNode(sw.getId());
         NodeConnector nodeConnector = PortConverter.toNodeConnector(m.getDesc()
                 .getPortNumber(), node);
         UpdateType type = null;
@@ -391,14 +393,7 @@ public class InventoryServiceShim implements IContainerListener,
     }
 
     private void addNode(ISwitch sw) {
-        Node node;
-        try {
-            node = new Node(NodeIDType.OPENFLOW, sw.getId());
-        } catch (ConstructionException e) {
-            logger.error("{}", e.getMessage());
-            return;
-        }
-
+        Node node = NodeCreator.createOFNode(sw.getId());
         UpdateType type = UpdateType.ADDED;
 
         Set<Property> props = new HashSet<Property>();
@@ -460,19 +455,11 @@ public class InventoryServiceShim implements IContainerListener,
     }
 
     @Override
-    public void descriptionRefreshed(Long switchId,
-            OFDescriptionStatistics descriptionStats) {
-        Node node;
-        try {
-            node = new Node(NodeIDType.OPENFLOW, switchId);
-        } catch (ConstructionException e) {
-            logger.error("{}", e.getMessage());
-            return;
-        }
-
+    public void descriptionStatisticsRefreshed(Long switchId, List<OFStatistics> descriptionStats) {
+        Node node = NodeCreator.createOFNode(switchId);
         Set<Property> properties = new HashSet<Property>(1);
-        Description desc = new Description(
-                descriptionStats.getDatapathDescription());
+        OFDescriptionStatistics ofDesc = (OFDescriptionStatistics) descriptionStats.get(0);
+        Description desc = new Description(ofDesc.getDatapathDescription());
         properties.add(desc);
 
         // Notify all internal and external listeners
@@ -488,5 +475,20 @@ public class InventoryServiceShim implements IContainerListener,
         }
 
         return mac;
+    }
+
+    @Override
+    public void flowStatisticsRefreshed(Long switchId, List<OFStatistics> flows) {
+        // Nothing to do
+    }
+
+    @Override
+    public void portStatisticsRefreshed(Long switchId, List<OFStatistics> ports) {
+        // Nothing to do
+    }
+
+    @Override
+    public void tableStatisticsRefreshed(Long switchId, List<OFStatistics> tables) {
+        // Nothing to do
     }
 }
