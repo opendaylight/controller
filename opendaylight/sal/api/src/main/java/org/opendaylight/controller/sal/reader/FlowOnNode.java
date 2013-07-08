@@ -9,6 +9,8 @@
 
 package org.opendaylight.controller.sal.reader;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -23,7 +25,9 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
 
 @XmlRootElement (name="FlowStat")
 @XmlAccessorType(XmlAccessType.NONE)
-public class FlowOnNode {
+public class FlowOnNode implements Serializable{
+    private static final long serialVersionUID = 1L;
+
     @XmlElement
     private Flow flow; // Flow descriptor
     @XmlElement

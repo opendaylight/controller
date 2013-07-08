@@ -9,12 +9,14 @@
 
 package org.opendaylight.controller.sal.implementation.internal;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -25,15 +27,17 @@ import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.PopVlan;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeTable;
-import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.reader.IPluginInReadService;
+import org.opendaylight.controller.sal.reader.IPluginOutReadService;
 import org.opendaylight.controller.sal.reader.IReadService;
+import org.opendaylight.controller.sal.reader.IReadServiceListener;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
@@ -49,19 +53,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The SAL Read Service. It dispatches the read request to
- * the proper SDN protocol plugin
- *
- *
- *
+ * The SAL Read Service. Dispatches read requests to the proper SDN protocol
+ * plugin, and notifies any listeners on updates from any plugin readers
  */
-public class ReadService implements IReadService, CommandProvider {
+public class ReadService implements IReadService, CommandProvider, IPluginOutReadService {
 
-    protected static final Logger logger = LoggerFactory
-            .getLogger(ReadService.class);
-    private ConcurrentHashMap<String, IPluginInReadService>
-        pluginReader =
-        new ConcurrentHashMap<String, IPluginInReadService>();
+    protected static final Logger logger = LoggerFactory.getLogger(ReadService.class);
+    private ConcurrentHashMap<String, IPluginInReadService> pluginReader;
+    private Set<IReadServiceListener> readerListeners;
 
     /**
      * Function called by the dependency manager when all the required
@@ -69,6 +68,8 @@ public class ReadService implements IReadService, CommandProvider {
      *
      */
     void init() {
+        pluginReader = new ConcurrentHashMap<String, IPluginInReadService>();
+        readerListeners = new CopyOnWriteArraySet<IReadServiceListener>();
     }
 
     /**
@@ -103,7 +104,7 @@ public class ReadService implements IReadService, CommandProvider {
     }
 
     // Set the reference to the plugin flow Reader service
-    public void setService(Map props, IPluginInReadService s) {
+    public void setService(Map<?, ?> props, IPluginInReadService s) {
         if (this.pluginReader == null) {
             logger.error("pluginReader store null");
             return;
@@ -112,7 +113,7 @@ public class ReadService implements IReadService, CommandProvider {
         logger.trace("Got a service set request {}", s);
         String type = null;
         for (Object e : props.entrySet()) {
-            Map.Entry entry = (Map.Entry) e;
+            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
             logger.trace("Prop key:({}) value:({})", entry.getKey(),
                     entry.getValue());
         }
@@ -130,7 +131,7 @@ public class ReadService implements IReadService, CommandProvider {
         }
     }
 
-    public void unsetService(Map props, IPluginInReadService s) {
+    public void unsetService(Map<?, ?> props, IPluginInReadService s) {
         if (this.pluginReader == null) {
             logger.error("pluginReader store null");
             return;
@@ -139,7 +140,7 @@ public class ReadService implements IReadService, CommandProvider {
         String type = null;
         logger.debug("Received unsetpluginReader request");
         for (Object e : props.entrySet()) {
-            Map.Entry entry = (Map.Entry) e;
+            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
             logger.trace("Prop key:({}) value:({})", entry.getKey(),
                     entry.getValue());
         }
@@ -156,6 +157,15 @@ public class ReadService implements IReadService, CommandProvider {
             logger.debug("Removed the pluginReader for type: {}", type);
         }
     }
+    public void setReaderListener(IReadServiceListener service) {
+        logger.trace("Got a listener set request {}", service);
+        this.readerListeners.add(service);
+    }
+
+    public void unsetReaderListener(IReadServiceListener service) {
+        logger.trace("Got a listener Unset request");
+        this.readerListeners.remove(service);
+    }
 
     @Override
     public FlowOnNode readFlow(Node node, Flow flow) {
@@ -165,7 +175,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readFlow(node, flow, true);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -177,7 +187,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readFlow(node, flow, false);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -189,7 +199,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readAllFlow(node, true);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -201,7 +211,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readAllFlow(node, false);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -213,7 +223,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readDescription(node, true);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -225,7 +235,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readDescription(node, false);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -238,7 +248,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readNodeConnector(connector, true);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -252,7 +262,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readNodeConnector(connector, false);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -264,7 +274,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readAllNodeConnector(node, true);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -276,7 +286,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readAllNodeTable(node, true);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -290,7 +300,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readNodeTable(table, false);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -303,7 +313,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readNodeTable(table, true);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -315,7 +325,7 @@ public class ReadService implements IReadService, CommandProvider {
                         .readAllNodeConnector(node, false);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return null;
     }
 
@@ -328,8 +338,36 @@ public class ReadService implements IReadService, CommandProvider {
                         .getTransmitRate(connector);
             }
         }
-        logger.warn("Plugin unavailable");
+        logger.warn("Plugin {} unavailable", node.getType());
         return 0;
+    }
+
+    @Override
+    public void nodeFlowStatisticsUpdated(Node node, List<FlowOnNode> flowStatsList) {
+        for (IReadServiceListener l : readerListeners){
+            l.nodeFlowStatisticsUpdated(node, flowStatsList);
+        }
+    }
+
+    @Override
+    public void nodeConnectorStatisticsUpdated(Node node, List<NodeConnectorStatistics> ncStatsList) {
+        for (IReadServiceListener l : readerListeners){
+            l.nodeConnectorStatisticsUpdated(node, ncStatsList);
+        }
+    }
+
+    @Override
+    public void nodeTableStatisticsUpdated(Node node, List<NodeTableStatistics> tableStatsList) {
+        for (IReadServiceListener l : readerListeners){
+            l.nodeTableStatisticsUpdated(node, tableStatsList);
+        }
+    }
+
+    @Override
+    public void descriptionStatisticsUpdated(Node node, NodeDescription nodeDescription) {
+        for (IReadServiceListener l : readerListeners){
+            l.descriptionStatisticsUpdated(node, nodeDescription);
+        }
     }
 
     // ---------------- OSGI TEST CODE ------------------------------//
@@ -567,5 +605,4 @@ public class ReadService implements IReadService, CommandProvider {
         actions.add(new Controller());
         return new Flow(match, actions);
     }
-
 }

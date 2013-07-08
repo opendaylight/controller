@@ -23,7 +23,9 @@ import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.IPluginInDataPacketService;
 import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService;
 import org.opendaylight.controller.sal.reader.IPluginInReadService;
+import org.opendaylight.controller.sal.reader.IPluginOutReadService;
 import org.opendaylight.controller.sal.reader.IReadService;
+import org.opendaylight.controller.sal.reader.IReadServiceListener;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
@@ -145,14 +147,22 @@ public class Activator extends ComponentActivatorAbstractBase {
         }
 
         if (imp.equals(ReadService.class)) {
-            // It is the provider of IReadService
-            c.setInterface(IReadService.class.getName(), null);
+            // export services
+            c.setInterface(new String[] {
+                    IReadService.class.getName(),IPluginOutReadService.class.getName()}, null);
 
             // It is also the consumer of IPluginInReadService
             c.add(createContainerServiceDependency(containerName)
                     .setService(IPluginInReadService.class)
                     .setCallbacks("setService", "unsetService")
-                    .setRequired(true));
+                    .setRequired(false));
+
+            //consumes plugins' reader updates
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IReadServiceListener.class)
+                    .setCallbacks("setReaderListener", "unsetReaderListener")
+                    .setRequired(false));
+
         }
 
         /************************/

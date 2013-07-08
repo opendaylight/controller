@@ -31,6 +31,10 @@ public class DescStatisticsConverter {
         this.ofDesc = (statsList == null || statsList.isEmpty())?
                 null : (OFDescriptionStatistics) statsList.get(0);
     }
+    public DescStatisticsConverter(OFDescriptionStatistics desc) {
+        this.hwDesc = null;
+        this.ofDesc = desc;
+    }
 
     public NodeDescription getHwDescription() {
         if (hwDesc == null && ofDesc != null) {

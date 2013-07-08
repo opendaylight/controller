@@ -19,10 +19,11 @@ import org.opendaylight.controller.protocol_plugin.openflow.IFlowProgrammerNotif
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
+import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
-import org.opendaylight.controller.protocol_plugin.openflow.IPluginReadServiceFilter;
+import org.opendaylight.controller.protocol_plugin.openflow.IReadFilterInternalListener;
+import org.opendaylight.controller.protocol_plugin.openflow.IReadServiceFilter;
 import org.opendaylight.controller.protocol_plugin.openflow.IRefreshInternalProvider;
-import org.opendaylight.controller.protocol_plugin.openflow.IStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShimListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
@@ -37,6 +38,7 @@ import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.controller.sal.packet.IPluginInDataPacketService;
 import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService;
 import org.opendaylight.controller.sal.reader.IPluginInReadService;
+import org.opendaylight.controller.sal.reader.IPluginOutReadService;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
@@ -104,8 +106,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // export the service to be used by SAL
             c.setInterface(
                     new String[] { IPluginInTopologyService.class.getName(),
-                            ITopologyServiceShimListener.class.getName() },
-                    null);
+                            ITopologyServiceShimListener.class.getName() }, null);
             // Hook the services coming in from SAL, as optional in
             // case SAL is not yet there, could happen
             c.add(createContainerServiceDependency(containerName)
@@ -121,7 +122,8 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(InventoryService.class)) {
             // export the service
             c.setInterface(
-                    new String[] { IPluginInInventoryService.class.getName(),
+                    new String[] {
+                            IPluginInInventoryService.class.getName(),
                             IInventoryShimInternalListener.class.getName(),
                             IInventoryProvider.class.getName() }, null);
 
@@ -168,11 +170,19 @@ public class Activator extends ComponentActivatorAbstractBase {
             // Set the protocolPluginType property which will be used
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
-            c.setInterface(IPluginInReadService.class.getName(), props);
+            c.setInterface(new String[] {
+                    IReadFilterInternalListener.class.getName(),
+                    IPluginInReadService.class.getName() }, props);
+
             c.add(createServiceDependency()
-                    .setService(IPluginReadServiceFilter.class)
+                    .setService(IReadServiceFilter.class)
                     .setCallbacks("setService", "unsetService")
                     .setRequired(true));
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IPluginOutReadService.class)
+                    .setCallbacks("setPluginOutReadServices",
+                            "unsetPluginOutReadServices")
+                    .setRequired(false));
         }
 
         if (imp.equals(FlowProgrammerNotifier.class)) {
@@ -240,7 +250,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                             IMessageListener.class.getName(),
                             IContainerListener.class.getName(),
                             IInventoryShimExternalListener.class.getName() },
-                    props);
+                            props);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -257,9 +267,10 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(ReadServiceFilter.class)) {
 
-            c.setInterface(
-                    new String[] { IPluginReadServiceFilter.class.getName(),
-                            IContainerListener.class.getName() }, null);
+            c.setInterface(new String[] {
+                    IReadServiceFilter.class.getName(),
+                    IContainerListener.class.getName(),
+                    IOFStatisticsListener.class.getName() }, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -269,6 +280,12 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IOFStatisticsManager.class)
                     .setCallbacks("setService", "unsetService")
                     .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IReadFilterInternalListener.class)
+                    .setCallbacks("setReadFilterInternalListener",
+                            "unsetReadFilterInternalListener")
+                    .setRequired(false));
+
         }
 
         if (imp.equals(OFStatisticsManager.class)) {
@@ -281,7 +298,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setController", "unsetController")
                     .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(IStatisticsListener.class)
+                    .setService(IOFStatisticsListener.class)
                     .setCallbacks("setStatisticsListener",
                             "unsetStatisticsListener").setRequired(false));
         }
@@ -337,7 +354,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(InventoryServiceShim.class)) {
             c.setInterface(new String[] { IContainerListener.class.getName(),
-                    IStatisticsListener.class.getName()}, null);
+                    IOFStatisticsListener.class.getName()}, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")

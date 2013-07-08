@@ -21,8 +21,12 @@ import org.openflow.protocol.OFError.OFHelloFailedCode;
 import org.openflow.protocol.OFError.OFPortModFailedCode;
 import org.openflow.protocol.OFError.OFQueueOpFailedCode;
 
-public abstract class Utils {
-    public static String getOFErrorString(OFError error) {
+public final class Utils {
+
+    private Utils() { //prevent instantiation
+        throw new AssertionError();
+    }
+    static String getOFErrorString(OFError error) {
         // Handle VENDOR extension errors here
         if (error.getErrorType() == V6Error.NICIRA_VENDOR_ERRORTYPE) {
             V6Error er = new V6Error(error);
