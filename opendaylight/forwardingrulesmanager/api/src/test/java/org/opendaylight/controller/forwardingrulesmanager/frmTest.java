@@ -258,7 +258,10 @@ public class frmTest {
     public void testInternalFlow() {
         FlowConfig flowConfig = new FlowConfig();
         Assert.assertFalse(flowConfig.isInternalFlow());
-        flowConfig.setName("**Internal");
+        flowConfig.setName("__Internal__");
+        Status status = flowConfig.validate(null);
+        Assert.assertFalse(status.isSuccess());
+        Assert.assertTrue(status.getDescription().contains("name"));
         Assert.assertTrue(flowConfig.isInternalFlow());
         flowConfig.setName("External");
         Assert.assertFalse(flowConfig.isInternalFlow());

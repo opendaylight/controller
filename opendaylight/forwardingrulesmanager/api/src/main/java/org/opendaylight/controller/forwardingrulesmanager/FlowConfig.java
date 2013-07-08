@@ -71,9 +71,11 @@ import org.slf4j.LoggerFactory;
 public class FlowConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(FlowConfig.class);
-    public static final String staticFlowsGroup = "**StaticFlows";
-    public static final String internalStaticFlowsGroup = "**InternalStaticFlows";
-    public static final String internalStaticFlowBegin = "**";
+    private static final String NAMEREGEX = "^[a-zA-Z0-9]+$";
+    private static final String STATICFLOWGROUP = "__StaticFlows__";
+    public static final String INTERNALSTATICFLOWGROUP = "__InternalStaticFlows__";
+    public static final String INTERNALSTATICFLOWBEGIN = "__";
+    public static final String INTERNALSTATICFLOWEND = "__";
     private boolean dynamic;
     private String status;
 
@@ -200,8 +202,9 @@ public class FlowConfig implements Serializable {
     }
 
     public boolean isInternalFlow() {
-        // Controller generated static flows have name starting with "**"
-        return (this.name != null && this.name.startsWith(FlowConfig.internalStaticFlowBegin));
+        return (this.name != null &&
+                this.name.startsWith(FlowConfig.INTERNALSTATICFLOWBEGIN) &&
+                this.name.endsWith(FlowConfig.INTERNALSTATICFLOWEND));
     }
 
     public String getName() {
@@ -692,7 +695,7 @@ public class FlowConfig implements Serializable {
 
         Switch sw = null;
         try {
-            if (name == null || name.trim().isEmpty()) {
+            if (name == null || name.trim().isEmpty() || !name.matches(FlowConfig.NAMEREGEX)) {
                 return new Status(StatusCode.BADREQUEST, "Invalid name");
             }
 
@@ -965,7 +968,8 @@ public class FlowConfig implements Serializable {
     }
 
     public FlowEntry getFlowEntry() {
-        return new FlowEntry(FlowConfig.staticFlowsGroup, this.name, this.getFlow(), this.getNode());
+        String group = this.isInternalFlow() ? FlowConfig.INTERNALSTATICFLOWGROUP : FlowConfig.STATICFLOWGROUP;
+        return new FlowEntry(group, this.name, this.getFlow(), this.getNode());
     }
 
     public Flow getFlow() {

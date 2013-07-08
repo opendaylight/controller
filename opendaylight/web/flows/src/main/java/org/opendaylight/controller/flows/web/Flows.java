@@ -241,7 +241,7 @@ public class Flows implements IDaylightWeb {
         flow.setNode(node);
         Status result = new Status(StatusCode.BADREQUEST, "Invalid request");
         if (action.equals("add")) {
-            result = frm.addStaticFlow(flow, false);
+            result = frm.addStaticFlow(flow);
         }
 
         return (result.isSuccess()) ? StatusCode.SUCCESS.toString() : result

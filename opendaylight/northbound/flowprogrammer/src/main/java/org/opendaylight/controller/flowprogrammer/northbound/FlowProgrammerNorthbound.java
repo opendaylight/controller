@@ -321,7 +321,7 @@ public class FlowProgrammerNorthbound {
                     + RestMessages.RESOURCECONFLICT.toString());
         }
 
-        Status status = frm.addStaticFlow(flowConfig.getValue(), false);
+        Status status = frm.addStaticFlow(flowConfig.getValue());
         if (status.isSuccess()) {
             return Response.status(Response.Status.CREATED).build();
         }

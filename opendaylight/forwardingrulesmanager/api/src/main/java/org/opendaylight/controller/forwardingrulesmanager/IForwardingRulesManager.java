@@ -350,12 +350,9 @@ public interface IForwardingRulesManager {
      *
      * @param config
      *            the {@code FlowConfig} object representing the static flow
-     * @param restore
-     *            if set to true, the config object validation will be skipped.
-     *            Used only internally, always set it to false.
      * @return the {@code Status} object indicating the result of this action.
      */
-    public Status addStaticFlow(FlowConfig config, boolean restore);
+    public Status addStaticFlow(FlowConfig config);
 
     /**
      * Remove a flow specified by the {@code FlowConfig} object on the current
