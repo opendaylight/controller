@@ -21,14 +21,14 @@ import org.opendaylight.controller.sal.core.NodeConnector;
  * The class describes subnet information including L3 address, vlan and set of
  * ports associated with the subnet.
  */
-public class Subnet implements Serializable {
+public class Subnet implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
     // Key fields
     private InetAddress networkAddress;
     private short subnetMaskLength;
     // Property fields
     private short vlan;
-    private Set<NodeConnector> nodeConnectors;
+    private final Set<NodeConnector> nodeConnectors;
 
     public Subnet(InetAddress ip, short maskLen, short vlan) {
         this.networkAddress = ip;
@@ -41,6 +41,13 @@ public class Subnet implements Serializable {
         networkAddress = conf.getIPnum();
         subnetMaskLength = conf.getIPMaskLen();
         nodeConnectors = conf.getSubnetNodeConnectors();
+    }
+
+    public Subnet(Subnet subnet) {
+        networkAddress = subnet.networkAddress;
+        subnetMaskLength = subnet.subnetMaskLength;
+        vlan = subnet.vlan;
+        nodeConnectors = new HashSet<NodeConnector>(subnet.nodeConnectors);
     }
 
     /**
@@ -220,7 +227,7 @@ public class Subnet implements Serializable {
     public String toString() {
         return ("Subnet [networkAddress=" + networkAddress.getHostAddress()
                 + "/" + subnetMaskLength
-                + ((vlan == 0) ? "" : (" vlan=" + vlan)) + " "
+                + ((vlan == 0) ? "" : (", vlan=" + vlan)) + ", "
                 + ((isFlatLayer2()) ? "{[*, *]}" : nodeConnectors.toString()) + "]");
     }
 
@@ -246,4 +253,13 @@ public class Subnet implements Serializable {
         }
         return true;
     }
+
+    /**
+     * Implement clonable interface
+     */
+    @Override
+    public Subnet clone() {
+        return new Subnet(this);
+    }
+
 }

@@ -8,65 +8,48 @@
 
 package org.opendaylight.controller.switchmanager.internal;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Bundle;
+import java.net.UnknownHostException;
+import java.util.Map;
+
 import javax.inject.Inject;
 
-import org.eclipse.osgi.framework.console.CommandProvider;
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.Before;
-import org.junit.After;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
+import org.opendaylight.controller.sal.core.Capabilities.CapabilitiesType;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.TimeStamp;
-import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.Capabilities.CapabilitiesType;
-import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
-import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
-import org.opendaylight.controller.switchmanager.*;
-import org.opendaylight.controller.configuration.IConfigurationContainerAware;
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
-
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.util.Filter;
-import org.osgi.framework.BundleContext;
-import static org.junit.Assert.*;
-import org.ops4j.pax.exam.junit.Configuration;
-import static org.ops4j.pax.exam.CoreOptions.*;
-
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.PathUtils;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 public class SwitchManagerIT {
-    private Logger log = LoggerFactory.getLogger(SwitchManagerIT.class);
+    private final Logger log = LoggerFactory.getLogger(SwitchManagerIT.class);
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
@@ -107,29 +90,28 @@ public class SwitchManagerIT {
                         .versionAsInProject(),
                 mavenBundle("ch.qos.logback", "logback-classic")
                         .versionAsInProject(),
-
-                mavenBundle("org.opendaylight.controller", "switchmanager")
-                        .versionAsInProject(),
-                mavenBundle("org.opendaylight.controller",
-                        "switchmanager.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal")
-                        .versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal.implementation")
-                        .versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "containermanager")
-                        .versionAsInProject(),
-                mavenBundle("org.opendaylight.controller",
-                        "containermanager.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller",
-                        "clustering.services").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "clustering.stub")
                         .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "configuration")
                         .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
                         "configuration.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "containermanager")
+                        .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "protocol_plugins.stub").versionAsInProject(),
+                        "containermanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "clustering.services").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal.implementation")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                                "protocol_plugins.stub").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "switchmanager")
+                        .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "switchmanager.implementation").versionAsInProject(),
                 mavenBundle("org.jboss.spec.javax.transaction",
                         "jboss-transaction-api_1.1_spec").versionAsInProject(),
                 mavenBundle("org.apache.commons", "commons-lang3")
@@ -203,11 +185,11 @@ public class SwitchManagerIT {
 
         Assert.assertTrue(this.switchManager.getNodeProp(node,
                 Capabilities.CapabilitiesPropName).equals(
-                new Capabilities((int) 3)));
+                new Capabilities(3)));
         Assert.assertTrue(this.switchManager.getNodeProp(node,
-                Actions.ActionsPropName).equals(new Actions((int) 2)));
+                Actions.ActionsPropName).equals(new Actions(2)));
         Assert.assertTrue(this.switchManager.getNodeProp(node,
-                Buffers.BuffersPropName).equals(new Buffers((int) 1)));
+                Buffers.BuffersPropName).equals(new Buffers(1)));
         Assert.assertTrue(this.switchManager.getNodeProp(node,
                 TimeStamp.TimeStampPropName).equals(
                 new TimeStamp(100000L, "connectedSince")));

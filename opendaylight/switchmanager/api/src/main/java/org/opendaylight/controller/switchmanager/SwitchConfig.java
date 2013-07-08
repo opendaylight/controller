@@ -100,7 +100,7 @@ public class SwitchConfig implements Serializable {
 
     @Override
     public String toString() {
-        return ("Switch Config [Node=" + nodeId + " Description=" + description +
-                " Tier=" + tier + " Mode=" + mode + "]");
+        return ("SwitchConfig [Node=" + nodeId + ", Description=" + description +
+                ", Tier=" + tier + ", Mode=" + mode + "]");
     }
 }

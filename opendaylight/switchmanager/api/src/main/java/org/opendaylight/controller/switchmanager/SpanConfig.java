@@ -153,6 +153,6 @@ public class SpanConfig implements Serializable {
 
     @Override
     public String toString() {
-        return ("Span Config [nodeId=" + nodeId + " spanPort=" + spanPort + "]");
+        return ("SpanConfig [nodeId=" + nodeId + ", spanPort=" + spanPort + "]");
     }
 }
