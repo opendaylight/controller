@@ -45,7 +45,6 @@ import org.opendaylight.controller.forwardingrulesmanager.PortGroup;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupChangeListener;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupConfig;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupProvider;
-import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
@@ -131,7 +130,6 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
      */
     private List<FlowEntry> inactiveFlows;
 
-    private IfIptoHost hostFinder;
     private IContainer container;
     private Set<IForwardingRulesManagerAware> frmAware;
     private PortGroupProvider portGroupProvider;
@@ -744,13 +742,13 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
     @Override
     public Status installFlowEntry(FlowEntry flowEntry) {
         Status status;
-        if (inContainerMode) {
+        if (isContainerModeAllowed(flowEntry)) {
+            status = addEntry(flowEntry, false);
+        } else {
             String msg = "Controller in container mode: Install Refused";
             String logMsg = msg + ": {}";
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
             log.warn(logMsg, flowEntry);
-        } else {
-            status = addEntry(flowEntry, false);
         }
         return status;
     }
@@ -758,26 +756,26 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
     @Override
     public Status installFlowEntryAsync(FlowEntry flowEntry) {
         Status status;
-        if (inContainerMode) {
+        if (isContainerModeAllowed(flowEntry)) {
+            status = addEntry(flowEntry, true);
+        } else {
             String msg = "Controller in container mode: Install Refused";
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
             log.warn(msg);
-        } else {
-            status = addEntry(flowEntry, true);
         }
         return status;
     }
 
     @Override
-    public Status uninstallFlowEntry(FlowEntry entry) {
+    public Status uninstallFlowEntry(FlowEntry flowEntry) {
         Status status;
-        if (inContainerMode) {
+        if (isContainerModeAllowed(flowEntry)) {
+            status = removeEntry(flowEntry, false);
+        } else {
             String msg = "Controller in container mode: Uninstall Refused";
             String logMsg = msg + ": {}";
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
-            log.warn(logMsg, entry);
-        } else {
-            status = removeEntry(entry, false);
+            log.warn(logMsg, flowEntry);
         }
         return status;
     }
@@ -785,12 +783,12 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
     @Override
     public Status uninstallFlowEntryAsync(FlowEntry flowEntry) {
         Status status;
-        if (inContainerMode) {
+        if (isContainerModeAllowed(flowEntry)) {
+            status = removeEntry(flowEntry, true);
+        } else {
             String msg = "Controller in container mode: Uninstall Refused";
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
             log.warn(msg);
-        } else {
-            status = removeEntry(flowEntry, true);
         }
         return status;
     }
@@ -798,28 +796,51 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
     @Override
     public Status modifyFlowEntry(FlowEntry currentFlowEntry, FlowEntry newFlowEntry) {
         Status status = null;
-        if (inContainerMode) {
+        if (isContainerModeAllowed(currentFlowEntry)) {
+            status = modifyEntry(currentFlowEntry, newFlowEntry, false);
+        } else {
             String msg = "Controller in container mode: Modify Refused";
             String logMsg = msg + ": {}";
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
             log.warn(logMsg, newFlowEntry);
-        } else {
-            status = modifyEntry(currentFlowEntry, newFlowEntry, false);
         }
         return status;
     }
 
     @Override
-    public Status modifyFlowEntryAsync(FlowEntry current, FlowEntry newone) {
+    public Status modifyFlowEntryAsync(FlowEntry currentFlowEntry, FlowEntry newFlowEntry) {
         Status status = null;
-        if (inContainerMode) {
+        if (isContainerModeAllowed(currentFlowEntry)) {
+            status = modifyEntry(currentFlowEntry, newFlowEntry, true);
+        } else {
             String msg = "Controller in container mode: Modify Refused";
             status = new Status(StatusCode.NOTACCEPTABLE, msg);
             log.warn(msg);
-        } else {
-            status = modifyEntry(current, newone, true);
         }
         return status;
+    }
+
+    /**
+     * Returns whether the specified flow entry is allowed to be
+     * installed/removed/modified based on the current container mode status.
+     * This call always returns true in the container instance of forwarding
+     * rules manager. It is meant for the global instance only (default
+     * container) of forwarding rules manager. Idea is that for assuring
+     * container isolation of traffic, flow installation in default container is
+     * blocked when in container mode (containers are present). The only flows
+     * that are allowed in container mode in the default container are the
+     * proactive flows, the ones automatically installed on the network node
+     * which forwarding mode has been configured to "proactive". These flows are
+     * needed by controller to discover the nodes topology and to discover the
+     * attached hosts for some SDN switches.
+     *
+     * @param flowEntry
+     *            The flow entry to be installed/removed/modified
+     * @return true if not in container mode or if flowEntry is internally
+     *         generated
+     */
+    private boolean isContainerModeAllowed(FlowEntry flowEntry) {
+        return (!inContainerMode) ? true : flowEntry.isInternal();
     }
 
     @Override
@@ -1816,7 +1837,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
 
         FlowConfig allowARP = new FlowConfig();
         allowARP.setInstallInHw(true);
-        allowARP.setName("**Punt ARP Reply");
+        allowARP.setName(FlowConfig.internalStaticFlowBegin + "Punt ARP Reply");
         allowARP.setPriority("500");
         allowARP.setNode(node);
         allowARP.setEtherType("0x" + Integer.toHexString(EtherTypes.ARP.intValue()).toUpperCase());
@@ -1834,7 +1855,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
 
         FlowConfig allowARP = new FlowConfig();
         allowARP.setInstallInHw(true);
-        allowARP.setName("**Punt ARP");
+        allowARP.setName(FlowConfig.internalStaticFlowBegin + "Punt ARP");
         allowARP.setPriority("1");
         allowARP.setNode(node);
         allowARP.setEtherType("0x" + Integer.toHexString(EtherTypes.ARP.intValue()).toUpperCase());
@@ -1843,7 +1864,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
 
         FlowConfig allowLLDP = new FlowConfig();
         allowLLDP.setInstallInHw(true);
-        allowLLDP.setName("**Punt LLDP");
+        allowLLDP.setName(FlowConfig.internalStaticFlowBegin + "Punt LLDP");
         allowLLDP.setPriority("1");
         allowLLDP.setNode(node);
         allowLLDP.setEtherType("0x" + Integer.toHexString(EtherTypes.LLDP.intValue()).toUpperCase());
@@ -1855,21 +1876,21 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
 
         FlowConfig dropAllConfig = new FlowConfig();
         dropAllConfig.setInstallInHw(true);
-        dropAllConfig.setName("**Catch-All Drop");
+        dropAllConfig.setName(FlowConfig.internalStaticFlowBegin + "Catch-All Drop");
         dropAllConfig.setPriority("0");
         dropAllConfig.setNode(node);
         dropAllConfig.setActions(dropAction);
         defaultConfigs.add(dropAllConfig);
 
+        log.info("Forwarding mode for node {} set to {}", node, (proactive ? "proactive" : "reactive"));
         for (FlowConfig fc : defaultConfigs) {
-            if (proactive) {
-                addStaticFlow(fc, false);
+            Status status = (proactive) ? addStaticFlow(fc, false) : removeStaticFlow(fc);
+            if (status.isSuccess()) {
+                log.info("{} Proactive Static flow: {}", (proactive ? "Installed" : "Removed"), fc.getName());
             } else {
-                removeStaticFlow(fc);
+                log.warn("Failed to {} Proactive Static flow: {}", (proactive ? "install" : "remove"), fc.getName());
             }
         }
-
-        log.info("Set Switch {} Mode to {}", node, (proactive ? "proactive" : "reactive"));
     }
 
     /**
@@ -2053,16 +2074,6 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
         }
     }
 
-    public void setHostFinder(IfIptoHost hostFinder) {
-        this.hostFinder = hostFinder;
-    }
-
-    public void unsetHostFinder(IfIptoHost hostFinder) {
-        if (this.hostFinder == hostFinder) {
-            this.hostFinder = null;
-        }
-    }
-
     public void setFrmAware(IForwardingRulesManagerAware obj) {
         this.frmAware.add(obj);
     }
@@ -2228,8 +2239,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
     }
 
     @Override
-    public void containerFlowUpdated(String containerName, ContainerFlow previous, ContainerFlow current,
-            UpdateType t) {
+    public void containerFlowUpdated(String containerName, ContainerFlow previous, ContainerFlow current, UpdateType t) {
         if (!container.getName().equals(containerName)) {
             return;
         }
@@ -2501,7 +2511,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
         log.trace("Received flow removed notification on {} for {}", node, flow);
 
         // For flow entry identification, only node, match and priority matter
-        FlowEntryInstall test = new FlowEntryInstall(new FlowEntry("","",flow, node), null);
+        FlowEntryInstall test = new FlowEntryInstall(new FlowEntry("", "", flow, node), null);
         FlowEntryInstall installedEntry = this.installedSwView.get(test);
         if (installedEntry == null) {
             log.trace("Entry is not known to us");
