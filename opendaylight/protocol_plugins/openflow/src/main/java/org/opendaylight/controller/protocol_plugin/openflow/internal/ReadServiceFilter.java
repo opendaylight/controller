@@ -15,17 +15,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
+import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
-import org.opendaylight.controller.protocol_plugin.openflow.IPluginReadServiceFilter;
+import org.opendaylight.controller.protocol_plugin.openflow.IReadFilterInternalListener;
+import org.opendaylight.controller.protocol_plugin.openflow.IReadServiceFilter;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
-import org.openflow.protocol.OFMatch;
-import org.openflow.protocol.statistics.OFPortStatisticsReply;
-import org.openflow.protocol.statistics.OFStatistics;
-import org.openflow.protocol.statistics.OFStatisticsType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Output;
@@ -46,7 +44,14 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.NodeTableCreator;
+import org.openflow.protocol.OFMatch;
+import org.openflow.protocol.statistics.OFFlowStatisticsReply;
+import org.openflow.protocol.statistics.OFPortStatisticsReply;
+import org.openflow.protocol.statistics.OFStatistics;
+import org.openflow.protocol.statistics.OFStatisticsType;
 import org.openflow.protocol.statistics.OFTableStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Read Service shim layer which is in charge of filtering the flow statistics
  * based on container. It is a Global instance.
@@ -54,14 +59,15 @@ import org.openflow.protocol.statistics.OFTableStatistics;
  *
  *
  */
-public class ReadServiceFilter implements IPluginReadServiceFilter,
-        IContainerListener {
+public class ReadServiceFilter implements IReadServiceFilter, IContainerListener, IOFStatisticsListener {
     private static final Logger logger = LoggerFactory
             .getLogger(ReadServiceFilter.class);
     private IController controller = null;
     private IOFStatisticsManager statsMgr = null;
     private Map<String, Set<NodeConnector>> containerToNc;
+    private Map<String, Set<Node>> containerToNode;
     private Map<String, Set<NodeTable>> containerToNt;
+    private ConcurrentMap<String, IReadFilterInternalListener> readFilterInternalListeners;
 
     public void setController(IController core) {
         this.controller = core;
@@ -73,6 +79,39 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         }
     }
 
+    public void setReadFilterInternalListener(Map<?, ?> props, IReadFilterInternalListener s) {
+        if (props == null) {
+            logger.error("Failed setting Read Filter Listener, property map is null.");
+            return;
+        }
+        String containerName = (String) props.get("containerName");
+        if (containerName == null) {
+            logger.error("Failed setting Read Filter Listener, container name not supplied.");
+            return;
+        }
+        if ((this.readFilterInternalListeners != null) && !this.readFilterInternalListeners.containsValue(s)) {
+            this.readFilterInternalListeners.put(containerName, s);
+            logger.trace("Added Read Filter Listener for container {}", containerName);
+        }
+    }
+
+    public void unsetReadFilterInternalListener(Map<?, ?> props, IReadFilterInternalListener s) {
+        if (props == null) {
+            logger.error("Failed unsetting Read Filter Listener, property map is null.");
+            return;
+        }
+        String containerName = (String) props.get("containerName");
+        if (containerName == null) {
+            logger.error("Failed unsetting Read Filter Listener, containerName not supplied");
+            return;
+        }
+        if ((this.readFilterInternalListeners != null) && this.readFilterInternalListeners.get(containerName) != null
+                && this.readFilterInternalListeners.get(containerName).equals(s)) {
+            this.readFilterInternalListeners.remove(containerName);
+            logger.trace("Removed Read Filter Listener for container {}", containerName);
+        }
+    }
+
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
@@ -81,6 +120,8 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     void init() {
         containerToNc = new HashMap<String, Set<NodeConnector>>();
         containerToNt = new HashMap<String, Set<NodeTable>>();
+        containerToNode = new HashMap<String, Set<Node>>();
+        readFilterInternalListeners = new ConcurrentHashMap<String, IReadFilterInternalListener>();
     }
 
     /**
@@ -131,9 +172,20 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
         long sid = (Long) node.getID();
         OFMatch ofMatch = new FlowConverter(flow).getOFMatch();
-        List<OFStatistics> ofList = (cached == true) ? statsMgr
-                .getOFFlowStatistics(sid, ofMatch) : statsMgr.queryStatistics(
-                sid, OFStatisticsType.FLOW, ofMatch);
+        List<OFStatistics> ofList;
+        if (cached == true){
+            ofList = statsMgr.getOFFlowStatistics(sid, ofMatch, flow.getPriority());
+        } else {
+            ofList = statsMgr.queryStatistics(sid, OFStatisticsType.FLOW, ofMatch);
+            for (OFStatistics ofStat : ofList) {
+                if (((OFFlowStatisticsReply)ofStat).getPriority() == flow.getPriority()){
+                    ofList = new ArrayList<OFStatistics>(1);
+                    ofList.add(ofStat);
+                    break;
+                }
+            }
+        }
+
 
         /*
          * Convert and filter the statistics per container
@@ -212,7 +264,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     }
 
     /**
-     * Filters a list of FlowOnNode elements based on the container
+     * Filters a list of OFStatistics elements based on the container
      *
      * @param container
      * @param nodeId
@@ -333,8 +385,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
      * @param flow
      * @return
      */
-    private boolean flowVlanBelongsToContainer(String container, Node node,
-            Flow flow) {
+    private boolean flowVlanBelongsToContainer(String container, Node node, Flow flow) {
         return true; // Always true for now
     }
 
@@ -363,7 +414,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         // If an outgoing port is specified, it must belong to this container
         for (Action action : flow.getActions()) {
             if (action.getType() == ActionType.OUTPUT) {
-                NodeConnector outPort = (NodeConnector) ((Output) action)
+                NodeConnector outPort = ((Output) action)
                         .getPort();
                 if (!containerOwnsNodeConnector(container, outPort)) {
                     return false;
@@ -374,49 +425,69 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     }
 
     @Override
-    public void containerFlowUpdated(String containerName,
-            ContainerFlow previousFlow, ContainerFlow currentFlow, UpdateType t) {
-
+    public void containerFlowUpdated(String containerName, ContainerFlow previousFlow,
+            ContainerFlow currentFlow, UpdateType t) {
+        // TODO
     }
 
     @Override
     public void nodeConnectorUpdated(String containerName, NodeConnector p,
             UpdateType type) {
-        Set<NodeConnector> target = null;
 
         switch (type) {
         case ADDED:
             if (!containerToNc.containsKey(containerName)) {
-                containerToNc.put(containerName, new HashSet<NodeConnector>());
+                containerToNc.put(containerName, new ConcurrentSkipListSet<NodeConnector>());
             }
             containerToNc.get(containerName).add(p);
-            break;
-        case CHANGED:
+            if (!containerToNode.containsKey(containerName)) {
+                containerToNode.put(containerName, new HashSet<Node>());
+            }
+            containerToNode.get(containerName).add(p.getNode());
             break;
         case REMOVED:
-            target = containerToNc.get(containerName);
-            if (target != null) {
-                target.remove(p);
+            Set<NodeConnector> ncSet = containerToNc.get(containerName);
+            if (ncSet != null) {
+                //remove this nc from container map
+                ncSet.remove(p);
+
+                //check if there are still ports of this node in this container
+                //and if not, remove its mapping
+                boolean nodeInContainer = false;
+                Node node = p.getNode();
+                for (NodeConnector nodeConnector : ncSet) {
+                    if (nodeConnector.getNode().equals(node)){
+                        nodeInContainer = true;
+                        break;
+                    }
+                }
+                if (! nodeInContainer) {
+                    Set<Node> nodeSet = containerToNode.get(containerName);
+                    if (nodeSet != null) {
+                        nodeSet.remove(node);
+                    }
+                }
+
             }
             break;
+        case CHANGED:
         default:
         }
     }
 
     @Override
-    public void tagUpdated(String containerName, Node n, short oldTag,
-            short newTag, UpdateType t) {
+    public void tagUpdated(String containerName, Node n, short oldTag, short newTag, UpdateType t) {
         // Not interested in this event
     }
 
     @Override
     public void containerModeUpdated(UpdateType t) {
-        // do nothing
+        // Not interested in this event
     }
 
     @Override
-    public NodeConnectorStatistics readNodeConnector(String containerName,
-            NodeConnector connector, boolean cached) {
+    public NodeConnectorStatistics readNodeConnector(
+            String containerName, NodeConnector connector, boolean cached) {
         if (!containerOwnsNodeConnector(containerName, connector)) {
             return null;
         }
@@ -470,30 +541,93 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
         Node node = table.getNode();
         long sid = (Long) node.getID();
         Byte tableId = (Byte) table.getID();
-        List<OFStatistics> ofList = (cached == true) ? statsMgr
-                .getOFTableStatistics(sid, tableId) : statsMgr.queryStatistics(
-                        sid, OFStatisticsType.TABLE, tableId);
+        List<OFStatistics> ofList = (cached == true) ? statsMgr.getOFTableStatistics(sid, tableId) :
+            statsMgr.queryStatistics(sid, OFStatisticsType.TABLE, tableId);
 
-                List<NodeTableStatistics> ntStatistics = new TableStatisticsConverter(
-                        sid, ofList).getNodeTableStatsList();
+        List<NodeTableStatistics> ntStatistics =
+                new TableStatisticsConverter(sid, ofList).getNodeTableStatsList();
 
-                return (ntStatistics.isEmpty()) ? new NodeTableStatistics()
-                : ntStatistics.get(0);
+        return (ntStatistics.isEmpty()) ? new NodeTableStatistics() : ntStatistics.get(0);
     }
 
     @Override
-    public List<NodeTableStatistics> readAllNodeTable(String containerName,
-            Node node, boolean cached) {
+    public List<NodeTableStatistics> readAllNodeTable(String containerName, Node node, boolean cached) {
         long sid = (Long) node.getID();
-        List<OFStatistics> ofList = (cached == true) ? statsMgr
-                .getOFTableStatistics(sid) : statsMgr.queryStatistics(sid,
-                        OFStatisticsType.FLOW, null);
+        List<OFStatistics> ofList = (cached == true) ?
+                statsMgr.getOFTableStatistics(sid) : statsMgr.queryStatistics(sid, OFStatisticsType.FLOW, null);
 
-                List<OFStatistics> filteredList = filterTableListPerContainer(
-                        containerName, sid, ofList);
+        List<OFStatistics> filteredList = filterTableListPerContainer(containerName, sid, ofList);
 
-                return new TableStatisticsConverter(sid, filteredList)
-                .getNodeTableStatsList();
+        return new TableStatisticsConverter(sid, filteredList).getNodeTableStatsList();
     }
 
+    @Override
+    public void descriptionStatisticsRefreshed(Long switchId, List<OFStatistics> description) {
+        String container;
+        Node node = NodeCreator.createOFNode(switchId);
+        NodeDescription nodeDescription = new DescStatisticsConverter(description).getHwDescription();
+        for (Map.Entry<String, IReadFilterInternalListener> l : readFilterInternalListeners.entrySet()) {
+            container = l.getKey();
+            if (container == GlobalConstants.DEFAULT.toString()
+                    || (containerToNode.containsKey(container) && containerToNode.get(container).contains(node))) {
+                l.getValue().nodeDescriptionStatisticsUpdated(node, nodeDescription);
+            }
+        }
+    }
+
+    @Override
+    public void flowStatisticsRefreshed(Long switchId, List<OFStatistics> flows) {
+        String container;
+        Node node = NodeCreator.createOFNode(switchId);
+        for (Map.Entry<String, IReadFilterInternalListener> l : readFilterInternalListeners.entrySet()) {
+            container = l.getKey();
+
+            // Convert and filter the statistics per container
+            List<FlowOnNode> flowOnNodeList = new FlowStatisticsConverter(flows).getFlowOnNodeList(node);
+            flowOnNodeList = filterFlowListPerContainer(container, node, flowOnNodeList);
+
+            // notify listeners
+            if (!flowOnNodeList.isEmpty()) {
+                l.getValue().nodeFlowStatisticsUpdated(node, flowOnNodeList);
+            }
+        }
+    }
+
+    @Override
+    public void portStatisticsRefreshed(Long switchId, List<OFStatistics> ports) {
+        String container;
+        Node node = NodeCreator.createOFNode(switchId);
+        for (Map.Entry<String, IReadFilterInternalListener> l : readFilterInternalListeners.entrySet()) {
+            container = l.getKey();
+
+            // Convert and filter the statistics per container
+            List<OFStatistics> filteredPorts = filterPortListPerContainer(container, switchId, ports);
+            List<NodeConnectorStatistics> ncStatsList = new PortStatisticsConverter(switchId, filteredPorts)
+                    .getNodeConnectorStatsList();
+
+            // notify listeners
+            if (!ncStatsList.isEmpty()) {
+                l.getValue().nodeConnectorStatisticsUpdated(node, ncStatsList);
+            }
+        }
+    }
+
+    @Override
+    public void tableStatisticsRefreshed(Long switchId, List<OFStatistics> tables) {
+        String container;
+        Node node = NodeCreator.createOFNode(switchId);
+        for (Map.Entry<String, IReadFilterInternalListener> l : readFilterInternalListeners.entrySet()) {
+            container = l.getKey();
+
+            // Convert and filter the statistics per container
+            List<OFStatistics> filteredList = filterTableListPerContainer(container, switchId, tables);
+            List<NodeTableStatistics> tableStatsList = new TableStatisticsConverter(switchId, filteredList)
+                    .getNodeTableStatsList();
+
+            // notify listeners
+            if (!tableStatsList.isEmpty()) {
+                l.getValue().nodeTableStatisticsUpdated(node, tableStatsList);
+            }
+        }
+    }
 }

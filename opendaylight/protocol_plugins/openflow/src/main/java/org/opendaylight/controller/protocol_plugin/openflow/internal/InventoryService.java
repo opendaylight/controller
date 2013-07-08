@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
-import java.util.Collections;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,15 +15,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
-import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
@@ -47,8 +44,7 @@ public class InventoryService implements IInventoryShimInternalListener,
         IPluginInInventoryService, IInventoryProvider {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryService.class);
-    private Set<IPluginOutInventoryService> pluginOutInventoryServices = Collections
-            .synchronizedSet(new HashSet<IPluginOutInventoryService>());
+    private Set<IPluginOutInventoryService> pluginOutInventoryServices;
     private IController controller = null;
     private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in global container only
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in global container only
@@ -83,6 +79,7 @@ public class InventoryService implements IInventoryShimInternalListener,
 
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
+        pluginOutInventoryServices = new CopyOnWriteArraySet<IPluginOutInventoryService>();
     }
 
     /**
@@ -127,19 +124,6 @@ public class InventoryService implements IInventoryShimInternalListener,
         if (this.pluginOutInventoryServices != null) {
             this.pluginOutInventoryServices.remove(service);
         }
-    }
-
-    protected Node OFSwitchToNode(ISwitch sw) {
-        Node node = null;
-        Object id = sw.getId();
-
-        try {
-            node = new Node(NodeIDType.OPENFLOW, id);
-        } catch (ConstructionException e) {
-            logger.error("", e);
-        }
-
-        return node;
     }
 
     /**
@@ -206,11 +190,10 @@ public class InventoryService implements IInventoryShimInternalListener,
         }
 
         // update sal and discovery
-        synchronized (pluginOutInventoryServices) {
-            for (IPluginOutInventoryService service : pluginOutInventoryServices) {
-                service.updateNodeConnector(nodeConnector, type, props);
-            }
+        for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+            service.updateNodeConnector(nodeConnector, type, props);
         }
+
     }
 
     private void addNode(Node node, Set<Property> props) {
@@ -242,10 +225,8 @@ public class InventoryService implements IInventoryShimInternalListener,
         nodeProps.put(node, propMap);
 
         // update sal
-        synchronized (pluginOutInventoryServices) {
-            for (IPluginOutInventoryService service : pluginOutInventoryServices) {
-                service.updateNode(node, UpdateType.ADDED, props);
-            }
+        for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+            service.updateNode(node, UpdateType.ADDED, props);
         }
     }
 
@@ -268,10 +249,8 @@ public class InventoryService implements IInventoryShimInternalListener,
         }
 
         // update sal
-        synchronized (pluginOutInventoryServices) {
-            for (IPluginOutInventoryService service : pluginOutInventoryServices) {
-                service.updateNode(node, UpdateType.REMOVED, null);
-            }
+        for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+            service.updateNode(node, UpdateType.REMOVED, null);
         }
     }
 
@@ -296,10 +275,8 @@ public class InventoryService implements IInventoryShimInternalListener,
 
         // Update SAL if we got new properties
         if (!newProperties.isEmpty()) {
-            synchronized (pluginOutInventoryServices) {
-                for (IPluginOutInventoryService service : pluginOutInventoryServices) {
-                    service.updateNode(node, UpdateType.CHANGED, newProperties);
-                }
+            for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+                service.updateNode(node, UpdateType.CHANGED, newProperties);
             }
         }
     }

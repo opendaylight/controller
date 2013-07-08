@@ -25,7 +25,7 @@ import org.opendaylight.controller.sal.reader.NodeTableStatistics;
  * It is implemented by the respective OF1.0 plugin component
  *
  */
-public interface IPluginReadServiceFilter {
+public interface IReadServiceFilter {
     /**
      * Returns the hardware image for the specified flow
      * on the specified network node for the passed container
