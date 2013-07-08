@@ -34,7 +34,7 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-public class SubnetConfig implements Serializable {
+public class SubnetConfig implements Cloneable, Serializable {
     //static fields are by default excluded by Gson parser
     private static final long serialVersionUID = 1L;
     private static final String prettyFields[] = { GUIField.NAME.toString(),
@@ -58,6 +58,12 @@ public class SubnetConfig implements Serializable {
         name = desc;
         subnet = sub;
         nodePorts = sp;
+    }
+
+    public SubnetConfig(SubnetConfig subnetConfig) {
+        name = subnetConfig.name;
+        subnet = subnetConfig.subnet;
+        nodePorts = new ArrayList<String>(subnetConfig.nodePorts);
     }
 
     public String getName() {
@@ -233,7 +239,16 @@ public class SubnetConfig implements Serializable {
 
     @Override
     public String toString() {
-        return ("Subnet Config [Description=" + name + " Subnet=" + subnet
-                + " NodeConnectors=" + nodePorts + "]");
+        return ("SubnetConfig [Description=" + name + ", Subnet=" + subnet
+                + ", NodeConnectors=" + nodePorts + "]");
     }
+
+    /**
+     * Implement clonable interface
+     */
+    @Override
+    public SubnetConfig clone() {
+        return new SubnetConfig(this);
+    }
+
 }

@@ -31,7 +31,7 @@ public class SwitchManagerImplTest {
     @Test
     public void testSwitchManagerAddRemoveSubnet() {
         SwitchManagerImpl switchmgr = new SwitchManagerImpl();
-        switchmgr.nonClusterObjectCreate();
+        switchmgr.startUp();
 
         ArrayList<String> portList = new ArrayList<String>();
         portList.add("1/1");
@@ -56,7 +56,7 @@ public class SwitchManagerImplTest {
     @Test
     public void testSwitchManagerNodeConnectors() {
         SwitchManagerImpl switchmgr = new SwitchManagerImpl();
-        switchmgr.nonClusterObjectCreate();
+        switchmgr.startUp();
 
         State state;
         Bandwidth bw;
