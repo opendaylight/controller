@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.sal.implementation.internal;
 
+import org.apache.felix.dm.Component;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
@@ -22,14 +23,15 @@ import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.IPluginInDataPacketService;
 import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService;
 import org.opendaylight.controller.sal.reader.IPluginInReadService;
+import org.opendaylight.controller.sal.reader.IPluginOutReadService;
 import org.opendaylight.controller.sal.reader.IReadService;
+import org.opendaylight.controller.sal.reader.IReadServiceListener;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.felix.dm.Component;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -141,14 +143,22 @@ public class Activator extends ComponentActivatorAbstractBase {
         }
 
         if (imp.equals(ReadService.class)) {
-            // It is the provider of IReadService
-            c.setInterface(IReadService.class.getName(), null);
+            // export services
+            c.setInterface(new String[] {
+                    IReadService.class.getName(),IPluginOutReadService.class.getName()}, null);
 
             // It is also the consumer of IPluginInReadService
             c.add(createContainerServiceDependency(containerName)
                     .setService(IPluginInReadService.class)
                     .setCallbacks("setService", "unsetService")
-                    .setRequired(true));
+                    .setRequired(false));
+
+            //consumes plugins' reader updates
+            c.add(createContainerServiceDependency(containerName)
+                    .setService(IReadServiceListener.class)
+                    .setCallbacks("setReaderListener", "unsetReaderListener")
+                    .setRequired(false));
+
         }
 
         /************************/

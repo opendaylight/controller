@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class NodeCreator {
-    protected static final Logger logger = LoggerFactory
-    .getLogger(NodeCreator.class);
+    protected static final Logger logger = LoggerFactory.getLogger(NodeCreator.class);
+
     public static Node createOFNode(Long switchId) {
         try {
             return new Node(NodeIDType.OPENFLOW, switchId);
