@@ -144,11 +144,11 @@ class YangToSourcesProcessor {
                 throw new MojoFailureException(message, e);
             }
 
-            setResource(targetYangDir, META_INF_YANG_DIR.getPath(), project);
+            setResource(targetYangDir, META_INF_YANG_STRING_JAR, project);
 
             log.debug(Util.message(
                     "Yang files from: %s marked as resources: %s", LOG_PREFIX,
-                    yangFilesRootDir, META_INF_YANG_DIR.getPath()));
+                    yangFilesRootDir, META_INF_YANG_STRING_JAR));
         }
 
         private static void setResource(File targetYangDir, String targetPath,
