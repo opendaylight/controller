@@ -273,7 +273,7 @@ public class SimpleClient implements CommandProvider {
             ci.println("\nNo Clustering services available");
             return;
         }
-        String containerName = ci.nextArgument();
+        String containerName = ci.nextArgument().toLowerCase();
         if (containerName == null) {
             ci.println("containerName not supplied");
             return;
@@ -372,7 +372,7 @@ public class SimpleClient implements CommandProvider {
 
     public void _dumper(CommandInterpreter ci) {
         ConcurrentMap<Object, Object> c;
-        String containerName = ci.nextArgument();
+        String containerName = ci.nextArgument().toLowerCase();
         if (containerName == null) {
             ci.println("containerName not supplied");
             return;
@@ -490,6 +490,7 @@ public class SimpleClient implements CommandProvider {
     }
 
     class DoListenRoleChanged implements IListenRoleChange {
+        @Override
         public void newActiveAvailable() {
             logger.debug("New Active is available");
         }

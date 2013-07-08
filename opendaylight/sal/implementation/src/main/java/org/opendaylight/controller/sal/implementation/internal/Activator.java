@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.sal.implementation.internal;
 
+import org.apache.felix.dm.Component;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
@@ -29,7 +30,6 @@ import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.felix.dm.Component;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -40,6 +40,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * are done by the ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
 
     }
@@ -49,6 +50,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
 
     }
@@ -62,6 +64,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *         instantiated in order to get an fully working implementation
      *         Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { Topology.class, Inventory.class,
                 FlowProgrammerService.class, ReadService.class,
@@ -84,6 +87,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *            per-container different behavior if needed, usually should not
      *            be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(Topology.class)) {
             // export the service for Apps and Plugins
@@ -121,7 +125,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName)
                     .setService(IPluginInInventoryService.class)
                     .setCallbacks("setPluginService", "unsetPluginService")
-                    .setRequired(true));
+                    .setRequired(false));
         }
 
         if (imp.equals(FlowProgrammerService.class)) {

@@ -40,6 +40,7 @@ import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Config;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.MacAddress;
 import org.opendaylight.controller.sal.core.Name;
@@ -95,7 +96,7 @@ CommandProvider {
     private final List<NodeConnector> spanNodeConnectors = new CopyOnWriteArrayList<NodeConnector>();
     private ConcurrentMap<InetAddress, Subnet> subnets; // set of Subnets keyed by the InetAddress
     private ConcurrentMap<String, SubnetConfig> subnetsConfigList;
-    private ConcurrentMap<Integer, SpanConfig> spanConfigList;
+    private ConcurrentMap<SpanConfig, SpanConfig> spanConfigList;
     private ConcurrentMap<String, SwitchConfig> nodeConfigList; // manually configured parameters for the node like name and tier
     private ConcurrentMap<Long, String> configSaveEvent;
     private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in global container only
@@ -114,6 +115,7 @@ CommandProvider {
     private IClusterContainerServices clusterContainerService = null;
     private String containerName = null;
     private boolean isDefaultContainer = true;
+    private static final int REPLACE_RETRY = 1;
 
     public enum ReasonCode {
         SUCCESS("Success"), FAILURE("Failure"), INVALID_CONF(
@@ -206,6 +208,7 @@ CommandProvider {
     @SuppressWarnings("deprecation")
     private void allocateCaches() {
         if (this.clusterContainerService == null) {
+            this.nonClusterObjectCreate();
             log.warn("un-initialized clusterContainerService, can't create cache");
             return;
         }
@@ -251,7 +254,7 @@ CommandProvider {
             log.error("\nFailed to get cache for subnetsConfigList");
         }
 
-        spanConfigList = (ConcurrentMap<Integer, SpanConfig>) clusterContainerService
+        spanConfigList = (ConcurrentMap<SpanConfig, SpanConfig>) clusterContainerService
                 .getCache("switchmanager.spanConfigList");
         if (spanConfigList == null) {
             log.error("\nFailed to get cache for spanConfigList");
@@ -294,35 +297,15 @@ CommandProvider {
         }
     }
 
-    void nonClusterObjectCreate() {
+    private void nonClusterObjectCreate() {
         subnetsConfigList = new ConcurrentHashMap<String, SubnetConfig>();
-        spanConfigList = new ConcurrentHashMap<Integer, SpanConfig>();
+        spanConfigList = new ConcurrentHashMap<SpanConfig, SpanConfig>();
         nodeConfigList = new ConcurrentHashMap<String, SwitchConfig>();
         subnets = new ConcurrentHashMap<InetAddress, Subnet>();
         configSaveEvent = new ConcurrentHashMap<Long, String>();
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
         nodeConnectorNames = new ConcurrentHashMap<Node, Map<String, NodeConnector>>();
-    }
-
-    @SuppressWarnings("deprecation")
-    private void destroyCaches(String container) {
-        if (this.clusterContainerService == null) {
-            log.info("un-initialized clusterContainerService, can't create cache");
-            return;
-        }
-
-        clusterContainerService.destroyCache("switchmanager.subnetsConfigList");
-        clusterContainerService.destroyCache("switchmanager.spanConfigList");
-        clusterContainerService.destroyCache("switchmanager.nodeConfigList");
-        clusterContainerService.destroyCache("switchmanager.subnets");
-        clusterContainerService.destroyCache("switchmanager.configSaveEvent");
-        clusterContainerService.destroyCache("switchmanager.nodeProps");
-        clusterContainerService
-        .destroyCache("switchmanager.nodeConnectorProps");
-        clusterContainerService
-        .destroyCache("switchmanager.nodeConnectorNames");
-        nonClusterObjectCreate();
     }
 
     @Override
@@ -390,19 +373,26 @@ CommandProvider {
         return swList;
     }
 
-    private void updateConfig(SubnetConfig conf, boolean add) {
+    private Status updateConfig(SubnetConfig conf, boolean add) {
         if (add) {
-            subnetsConfigList.put(conf.getName(), conf);
+            if(subnetsConfigList.putIfAbsent(conf.getName(), conf) != null) {
+                String msg = "Cluster conflict: Subnet with name " + conf.getName() + "already exists.";
+                return new Status(StatusCode.CONFLICT, msg);
+            }
         } else {
             subnetsConfigList.remove(conf.getName());
         }
+        return new Status(StatusCode.SUCCESS);
     }
 
-    private void updateDatabase(SubnetConfig conf, boolean add) {
-        Subnet subnet = subnets.get(conf.getIPnum());
+    private Status updateDatabase(SubnetConfig conf, boolean add) {
         if (add) {
-            if (subnet == null) {
+            Subnet subnetCurr = subnets.get(conf.getIPnum());
+            Subnet subnet;
+            if (subnetCurr == null) {
                 subnet = new Subnet(conf);
+            } else {
+                subnet = subnetCurr.clone();
             }
             // In case of API3 call we may receive the ports along with the
             // subnet creation
@@ -410,29 +400,38 @@ CommandProvider {
                 Set<NodeConnector> sp = conf.getSubnetNodeConnectors();
                 subnet.addNodeConnectors(sp);
             }
-            subnets.put(conf.getIPnum(), subnet);
-        } else { // This is the deletion of the whole subnet
-            if (subnet == null) {
-                return;
+            boolean result = false;
+            if(subnetCurr == null) {
+                if(subnets.putIfAbsent(conf.getIPnum(), subnet) == null) {
+                    result = true;
+                }
+            } else {
+                result = subnets.replace(conf.getIPnum(), subnetCurr, subnet);
             }
+            if(!result) {
+                String msg = "Cluster conflict: Conflict while adding the subnet " + conf.getIPnum();
+                return new Status(StatusCode.CONFLICT, msg);
+            }
+        } else { // This is the deletion of the whole subnet
             subnets.remove(conf.getIPnum());
         }
+        return new Status(StatusCode.SUCCESS);
     }
 
     private Status semanticCheck(SubnetConfig conf) {
         Subnet newSubnet = new Subnet(conf);
         Set<InetAddress> IPs = subnets.keySet();
         if (IPs == null) {
-            return new Status(StatusCode.SUCCESS, null);
+            return new Status(StatusCode.SUCCESS);
         }
         for (InetAddress i : IPs) {
             Subnet existingSubnet = subnets.get(i);
             if ((existingSubnet != null)
                     && !existingSubnet.isMutualExclusive(newSubnet)) {
-                return new Status(StatusCode.CONFLICT, null);
+                return new Status(StatusCode.CONFLICT);
             }
         }
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     private Status addRemoveSubnet(SubnetConfig conf, boolean add) {
@@ -455,13 +454,19 @@ CommandProvider {
                 return rc;
             }
         }
-        // Update Configuration
-        updateConfig(conf, add);
 
         // Update Database
-        updateDatabase(conf, add);
+        Status rc = updateDatabase(conf, add);
 
-        return new Status(StatusCode.SUCCESS, null);
+        if (rc.isSuccess()) {
+            // Update Configuration
+            rc = updateConfig(conf, add);
+            if(!rc.isSuccess()) {
+                updateDatabase(conf, (!add));
+            }
+        }
+
+        return rc;
     }
 
     /**
@@ -488,42 +493,77 @@ CommandProvider {
 
     @Override
     public Status addPortsToSubnet(String name, String switchPorts) {
-        // Update Configuration
-        SubnetConfig conf = subnetsConfigList.get(name);
-        if (conf == null) {
+        SubnetConfig confCurr = subnetsConfigList.get(name);
+        if (confCurr == null) {
             return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
         }
-        if (!conf.isValidSwitchPort(switchPorts)) {
+        if (!confCurr.isValidSwitchPort(switchPorts)) {
             return new Status(StatusCode.BADREQUEST, "Invalid switchports");
         }
 
-        conf.addNodeConnectors(switchPorts);
-        subnetsConfigList.put(name, conf);
+        Subnet subCurr = subnets.get(confCurr.getIPnum());
+        if (subCurr == null) {
+            log.debug("Cluster conflict: Subnet entry {} is not present in the subnets cache.", confCurr.getIPnum());
+            return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
+        }
 
         // Update Database
-        Subnet sub = subnets.get(conf.getIPnum());
-        Set<NodeConnector> sp = conf.getNodeConnectors(switchPorts);
+        Subnet sub = subCurr.clone();
+        Set<NodeConnector> sp = confCurr.getNodeConnectors(switchPorts);
         sub.addNodeConnectors(sp);
-        subnets.put(conf.getIPnum(), sub);
-        return new Status(StatusCode.SUCCESS, null);
+        boolean subnetsReplace = subnets.replace(confCurr.getIPnum(), subCurr, sub);
+        if (!subnetsReplace) {
+            String msg = "Cluster conflict: Conflict while adding ports to the subnet " + name;
+            return new Status(StatusCode.CONFLICT, msg);
+        }
+
+        // Update Configuration
+        SubnetConfig conf = confCurr.clone();
+        conf.addNodeConnectors(switchPorts);
+        boolean result = subnetsConfigList.replace(name, confCurr, conf);
+        if (!result) {
+            // TODO: recovery using Transactionality
+            String msg = "Cluster conflict: Conflict while adding ports to the subnet " + name;
+            return new Status(StatusCode.CONFLICT, msg);
+        }
+
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
     public Status removePortsFromSubnet(String name, String switchPorts) {
-        // Update Configuration
-        SubnetConfig conf = subnetsConfigList.get(name);
-        if (conf == null) {
+        SubnetConfig confCurr = subnetsConfigList.get(name);
+        if (confCurr == null) {
             return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
         }
-        conf.removeNodeConnectors(switchPorts);
-        subnetsConfigList.put(name, conf);
+
+        Subnet subCurr = subnets.get(confCurr.getIPnum());
+        if (subCurr == null) {
+            log.debug("Cluster conflict: Subnet entry {} is not present in the subnets cache.", confCurr.getIPnum());
+            return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
+        }
 
         // Update Database
-        Subnet sub = subnets.get(conf.getIPnum());
-        Set<NodeConnector> sp = conf.getNodeConnectors(switchPorts);
+        Subnet sub = subCurr.clone();
+        Set<NodeConnector> sp = confCurr.getNodeConnectors(switchPorts);
         sub.deleteNodeConnectors(sp);
-        subnets.put(conf.getIPnum(), sub);
-        return new Status(StatusCode.SUCCESS, null);
+        boolean subnetsReplace = subnets.replace(confCurr.getIPnum(), subCurr, sub);
+        if (!subnetsReplace) {
+            String msg = "Cluster conflict: Conflict while removing ports from the subnet " + name;
+            return new Status(StatusCode.CONFLICT, msg);
+        }
+
+        // Update Configuration
+        SubnetConfig conf = confCurr.clone();
+        conf.removeNodeConnectors(switchPorts);
+        boolean result = subnetsConfigList.replace(name, confCurr, conf);
+        if (!result) {
+            // TODO: recovery using Transactionality
+            String msg = "Cluster conflict: Conflict while removing ports from " + conf;
+            return new Status(StatusCode.CONFLICT, msg);
+        }
+
+        return new Status(StatusCode.SUCCESS);
     }
 
     public String getContainerName() {
@@ -606,31 +646,51 @@ CommandProvider {
             return;
         }
 
+        SwitchConfig sc = nodeConfigList.get(cfgObject.getNodeId());
+        if (sc == null) {
+            if (nodeConfigList.putIfAbsent(cfgObject.getNodeId(), cfgObject) != null) {
+                return;
+            }
+        } else {
+            if (!nodeConfigList.replace(cfgObject.getNodeId(), sc, cfgObject)) {
+                return;
+            }
+        }
+
         boolean modeChange = false;
 
-        SwitchConfig sc = nodeConfigList.get(cfgObject.getNodeId());
         if ((sc == null) || !cfgObject.getMode().equals(sc.getMode())) {
             modeChange = true;
         }
 
-        nodeConfigList.put(cfgObject.getNodeId(), cfgObject);
         try {
             String nodeId = cfgObject.getNodeId();
             Node node = Node.fromString(nodeId);
-            Map<String, Property> propMap;
-            if (nodeProps.get(node) != null) {
-                propMap = nodeProps.get(node);
-            } else {
-                propMap = new HashMap<String, Property>();
+            Map<String, Property> propMapCurr = nodeProps.get(node);
+            Map<String, Property> propMap = new HashMap<String, Property>();
+            if (propMapCurr != null) {
+                for (String s : propMapCurr.keySet()) {
+                    propMap.put(s, propMapCurr.get(s).clone());
+                }
             }
             Property desc = new Description(cfgObject.getNodeDescription());
             propMap.put(desc.getName(), desc);
             Property tier = new Tier(Integer.parseInt(cfgObject.getTier()));
             propMap.put(tier.getName(), tier);
-            addNodeProps(node, propMap);
 
-            log.info("Set Node {}'s Mode to {}", nodeId,
-                    cfgObject.getMode());
+            if (propMapCurr == null) {
+                if (nodeProps.putIfAbsent(node, propMap) != null) {
+                    // TODO rollback using Transactionality
+                    return;
+                }
+            } else {
+                if (!nodeProps.replace(node, propMapCurr, propMap)) {
+                    // TODO rollback using Transactionality
+                    return;
+                }
+            }
+
+            log.info("Set Node {}'s Mode to {}", nodeId, cfgObject.getMode());
 
             if (modeChange) {
                 notifyModeChange(node, cfgObject.isProactive());
@@ -653,7 +713,7 @@ CommandProvider {
 
         retS = objWriter.write(new ConcurrentHashMap<String, SubnetConfig>(
                 subnetsConfigList), subnetFileName);
-        retP = objWriter.write(new ConcurrentHashMap<Integer, SpanConfig>(
+        retP = objWriter.write(new ConcurrentHashMap<SpanConfig, SpanConfig>(
                 spanConfigList), spanFileName);
         retS = objWriter.write(new ConcurrentHashMap<String, SwitchConfig>(
                 nodeConfigList), switchConfigFileName);
@@ -684,17 +744,17 @@ CommandProvider {
         }
 
         // Presence check
-        if (spanConfigList.containsKey(conf.hashCode())) {
+        if (spanConfigList.containsKey(conf)) {
             return new Status(StatusCode.CONFLICT, "Same span config exists");
         }
 
-        // Update database and notify clients
-        addSpanPorts(conf.getNode(), conf.getPortArrayList());
-
         // Update configuration
-        spanConfigList.put(conf.hashCode(), conf);
+        if (spanConfigList.putIfAbsent(conf, conf) == null) {
+            // Update database and notify clients
+            addSpanPorts(conf.getNode(), conf.getPortArrayList());
+        }
 
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
@@ -702,9 +762,9 @@ CommandProvider {
         removeSpanPorts(conf.getNode(), conf.getPortArrayList());
 
         // Update configuration
-        spanConfigList.remove(conf.hashCode());
+        spanConfigList.remove(conf);
 
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
@@ -739,11 +799,12 @@ CommandProvider {
             return;
         }
 
-        Map<String, Property> propMap;
-        if (nodeProps.get(node) != null) {
-            propMap = nodeProps.get(node);
-        } else {
-            propMap = new HashMap<String, Property>();
+        Map<String, Property> propMapCurr = nodeProps.get(node);
+        Map<String, Property> propMap = new HashMap<String, Property>();
+        if (propMapCurr != null) {
+            for (String s : propMapCurr.keySet()) {
+                propMap.put(s, propMapCurr.get(s).clone());
+            }
         }
 
         // copy node properties from plugin
@@ -759,8 +820,7 @@ CommandProvider {
             String nodeId = node.toString();
             for (SwitchConfig conf : nodeConfigList.values()) {
                 if (conf.getNodeId().equals(nodeId)) {
-                    Property description = new Description(
-                            conf.getNodeDescription());
+                    Property description = new Description(conf.getNodeDescription());
                     propMap.put(description.getName(), description);
                     Property tier = new Tier(Integer.parseInt(conf.getTier()));
                     propMap.put(tier.getName(), tier);
@@ -769,7 +829,22 @@ CommandProvider {
                 }
             }
         }
-        addNodeProps(node, propMap);
+
+        boolean result = false;
+        if (propMapCurr == null) {
+            if (nodeProps.putIfAbsent(node, propMap) == null) {
+                result = true;
+            }
+        } else {
+            result = nodeProps.replace(node, propMapCurr, propMap);
+        }
+
+        if (!result) {
+            log.debug(
+                    "Cluster conflict: Conflict while adding the node properties. Node: {}  Properties: {}",
+                    node.getID(), props);
+            addNodeProps(node, propMap);
+        }
 
         // check if span ports are configed
         addSpanPorts(node);
@@ -804,11 +879,12 @@ CommandProvider {
             return;
         }
 
-        Map<String, Property> propMap;
-        if (nodeProps.get(node) != null) {
-            propMap = nodeProps.get(node);
-        } else {
-            propMap = new HashMap<String, Property>();
+        Map<String, Property> propMapCurr = nodeProps.get(node);
+        Map<String, Property> propMap = new HashMap<String, Property>();
+        if (propMapCurr != null) {
+            for (String s : propMapCurr.keySet()) {
+                propMap.put(s, propMapCurr.get(s).clone());
+            }
         }
 
         // copy node properties from plugin
@@ -817,7 +893,20 @@ CommandProvider {
                 propMap.put(prop.getName(), prop);
             }
         }
-        addNodeProps(node, propMap);
+
+        if (propMapCurr == null) {
+            if (nodeProps.putIfAbsent(node, propMap) != null) {
+                log.debug("Cluster conflict: Conflict while updating the node. Node: {}  Properties: {}",
+                        node.getID(), props);
+                addNodeProps(node, propMap);
+            }
+        } else {
+            if (!nodeProps.replace(node, propMapCurr, propMap)) {
+                log.debug("Cluster conflict: Conflict while updating the node. Node: {}  Properties: {}",
+                        node.getID(), props);
+                addNodeProps(node, propMap);
+            }
+        }
 
         /* notify node listeners */
         notifyNode(node, UpdateType.CHANGED, propMap);
@@ -928,30 +1017,67 @@ CommandProvider {
 
     @Override
     public void setNodeProp(Node node, Property prop) {
-        /* Get a copy of the property map */
-        Map<String, Property> propMap = getNodeProps(node);
-        if (propMap == null) {
-            return;
-        }
 
-        propMap.put(prop.getName(), prop);
-        this.nodeProps.put(node, propMap);
+        for (int i = 0; i <= REPLACE_RETRY; i++) {
+            /* Get a copy of the property map */
+            Map<String, Property> propMapCurr = getNodeProps(node);
+            if (propMapCurr == null) {
+                return;
+            }
+
+            Map<String, Property> propMap = new HashMap<String, Property>();
+            for (String s : propMapCurr.keySet()) {
+                propMap.put(s, propMapCurr.get(s).clone());
+            }
+
+            propMap.put(prop.getName(), prop);
+
+            if (nodeProps.replace(node, propMapCurr, propMap)) {
+                return;
+            }
+            if (!propMapCurr.get(prop.getName()).equals(nodeProps.get(node).get(prop.getName()))) {
+                log.warn("Cluster conflict: Unable to add property {} to node {}.", prop.getName(), node.getID());
+                return;
+            }
+        }
+        log.warn("Cluster conflict: Unable to add property {} to node {}.", prop.getName(), node.getID());
     }
 
     @Override
     public Status removeNodeProp(Node node, String propName) {
-        Map<String, Property> propMap = getNodeProps(node);
-        if (propMap != null) {
-            propMap.remove(propName);
-            this.nodeProps.put(node, propMap);
+        for (int i = 0; i <= REPLACE_RETRY; i++) {
+            Map<String, Property> propMapCurr = getNodeProps(node);
+            if (propMapCurr != null) {
+                if (!propMapCurr.containsKey(propName)) {
+                    return new Status(StatusCode.SUCCESS);
+                }
+                Map<String, Property> propMap = new HashMap<String, Property>();
+                for (String s : propMapCurr.keySet()) {
+                    propMap.put(s, propMapCurr.get(s).clone());
+                }
+
+                propMap.remove(propName);
+                if (nodeProps.replace(node, propMapCurr, propMap)) {
+                    return new Status(StatusCode.SUCCESS);
+                }
+                if (!propMapCurr.get(propName).equals(nodeProps.get(node).get(propName))) {
+                    String msg = "Cluster conflict: Unable to remove property " + propName + " for node "
+                            + node.getID();
+                    return new Status(StatusCode.CONFLICT, msg);
+                }
+
+            } else {
+                return new Status(StatusCode.SUCCESS);
+            }
         }
-        return new Status(StatusCode.SUCCESS, null);
+        String msg = "Cluster conflict: Unable to remove property " + propName + " for node " + node.getID();
+        return new Status(StatusCode.CONFLICT, msg);
     }
 
     @Override
     public Status removeNodeAllProps(Node node) {
         this.nodeProps.remove(node);
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
@@ -1100,36 +1226,73 @@ CommandProvider {
     @Override
     public Status addNodeConnectorProp(NodeConnector nodeConnector,
             Property prop) {
-        Map<String, Property> propMap = getNodeConnectorProps(nodeConnector);
+        Map<String, Property> propMapCurr = getNodeConnectorProps(nodeConnector);
+        Map<String, Property> propMap = new HashMap<String, Property>();
 
-        if (propMap == null) {
-            propMap = new HashMap<String, Property>();
+        if (propMapCurr != null) {
+            for (String s : propMapCurr.keySet()) {
+                propMap.put(s, propMapCurr.get(s).clone());
+            }
         }
 
+        String msg = "Cluster conflict: Unable to add NodeConnector Property.";
         // Just add the nodeConnector if prop is not available (in a non-default
         // container)
         if (prop == null) {
-            nodeConnectorProps.put(nodeConnector, propMap);
-            return new Status(StatusCode.SUCCESS, null);
+            if (propMapCurr == null) {
+                if (nodeConnectorProps.putIfAbsent(nodeConnector, propMap) != null) {
+                    return new Status(StatusCode.CONFLICT, msg);
+                }
+            } else {
+                if (!nodeConnectorProps.replace(nodeConnector, propMapCurr, propMap)) {
+                    return new Status(StatusCode.CONFLICT, msg);
+                }
+            }
+            return new Status(StatusCode.SUCCESS);
         }
 
         propMap.put(prop.getName(), prop);
-        nodeConnectorProps.put(nodeConnector, propMap);
+        if (propMapCurr == null) {
+            if (nodeConnectorProps.putIfAbsent(nodeConnector, propMap) != null) {
+                return new Status(StatusCode.CONFLICT, msg);
+            }
+        } else {
+            if (!nodeConnectorProps.replace(nodeConnector, propMapCurr, propMap)) {
+                return new Status(StatusCode.CONFLICT, msg);
+            }
+        }
 
         if (prop.getName().equals(Name.NamePropName)) {
             if (nodeConnectorNames != null) {
                 Node node = nodeConnector.getNode();
-                Map<String, NodeConnector> map = nodeConnectorNames.get(node);
-                if (map == null) {
-                    map = new HashMap<String, NodeConnector>();
+                Map<String, NodeConnector> mapCurr = nodeConnectorNames.get(node);
+                Map<String, NodeConnector> map = new HashMap<String, NodeConnector>();
+                if (mapCurr != null) {
+                    for (String s : mapCurr.keySet()) {
+                        try {
+                            map.put(s, new NodeConnector(mapCurr.get(s)));
+                        } catch (ConstructionException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
                 map.put(((Name) prop).getValue(), nodeConnector);
-                nodeConnectorNames.put(node, map);
+                if (mapCurr == null) {
+                    if (nodeConnectorNames.putIfAbsent(node, map) != null) {
+                        // TODO: recovery using Transactionality
+                        return new Status(StatusCode.CONFLICT, msg);
+                    }
+                } else {
+                    if (!nodeConnectorNames.replace(node, mapCurr, map)) {
+                        // TODO: recovery using Transactionality
+                        return new Status(StatusCode.CONFLICT, msg);
+                    }
+                }
             }
         }
 
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     /**
@@ -1142,32 +1305,53 @@ CommandProvider {
      * @return success or failed reason
      */
     @Override
-    public Status removeNodeConnectorProp(NodeConnector nodeConnector,
-            String propName) {
-        Map<String, Property> propMap = getNodeConnectorProps(nodeConnector);
+    public Status removeNodeConnectorProp(NodeConnector nodeConnector, String propName) {
+        Map<String, Property> propMapCurr = getNodeConnectorProps(nodeConnector);
 
-        if (propMap == null) {
+        if (propMapCurr == null) {
             /* Nothing to remove */
-            return new Status(StatusCode.SUCCESS, null);
+            return new Status(StatusCode.SUCCESS);
+        }
+
+        Map<String, Property> propMap = new HashMap<String, Property>();
+
+        for (String s : propMapCurr.keySet()) {
+            propMap.put(s, propMapCurr.get(s).clone());
         }
 
         propMap.remove(propName);
-        nodeConnectorProps.put(nodeConnector, propMap);
+        boolean result = nodeConnectorProps.replace(nodeConnector, propMapCurr, propMap);
+        String msg = "Cluster conflict: Unable to remove NodeConnector property.";
+        if (!result) {
+            return new Status(StatusCode.CONFLICT, msg);
+        }
 
-        if (nodeConnectorNames != null) {
-            Name name = ((Name) getNodeConnectorProp(nodeConnector,
-                    Name.NamePropName));
-            if (name != null) {
-                Node node = nodeConnector.getNode();
-                Map<String, NodeConnector> map = nodeConnectorNames.get(node);
-                if (map != null) {
-                    map.remove(name.getValue());
-                    nodeConnectorNames.put(node, map);
+        if (propName.equals(Name.NamePropName)) {
+            if (nodeConnectorNames != null) {
+                Name name = ((Name) getNodeConnectorProp(nodeConnector, Name.NamePropName));
+                if (name != null) {
+                    Node node = nodeConnector.getNode();
+                    Map<String, NodeConnector> mapCurr = nodeConnectorNames.get(node);
+                    if (mapCurr != null) {
+                        Map<String, NodeConnector> map = new HashMap<String, NodeConnector>();
+                        for (String s : mapCurr.keySet()) {
+                            try {
+                                map.put(s, new NodeConnector(mapCurr.get(s)));
+                            } catch (ConstructionException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        map.remove(name.getValue());
+                        if (!nodeConnectorNames.replace(node, mapCurr, map)) {
+                            // TODO: recovery using Transactionality
+                            return new Status(StatusCode.CONFLICT, msg);
+                        }
+                    }
                 }
             }
         }
 
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     /**
@@ -1180,20 +1364,31 @@ CommandProvider {
     @Override
     public Status removeNodeConnectorAllProps(NodeConnector nodeConnector) {
         if (nodeConnectorNames != null) {
-            Name name = ((Name) getNodeConnectorProp(nodeConnector,
-                    Name.NamePropName));
+            Name name = ((Name) getNodeConnectorProp(nodeConnector, Name.NamePropName));
             if (name != null) {
                 Node node = nodeConnector.getNode();
-                Map<String, NodeConnector> map = nodeConnectorNames.get(node);
-                if (map != null) {
+                Map<String, NodeConnector> mapCurr = nodeConnectorNames.get(node);
+                if (mapCurr != null) {
+                    Map<String, NodeConnector> map = new HashMap<String, NodeConnector>();
+                    for (String s : mapCurr.keySet()) {
+                        try {
+                            map.put(s, new NodeConnector(mapCurr.get(s)));
+                        } catch (ConstructionException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     map.remove(name.getValue());
-                    nodeConnectorNames.put(node, map);
+                    if (!nodeConnectorNames.replace(node, mapCurr, map)) {
+                        log.warn("Cluster conflict: Unable remove Name property of nodeconnector {}, skip.",
+                                nodeConnector.getID());
+                    }
                 }
+
             }
         }
         nodeConnectorProps.remove(nodeConnector);
 
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     /**
@@ -1339,22 +1534,21 @@ CommandProvider {
         }
 
         Map<Node, Map<String, Property>> nodeProp = this.inventoryService.getNodeProps();
-        for(Map.Entry<Node, Map<String, Property>> entry : nodeProp.entrySet()) {
+        for (Map.Entry<Node, Map<String, Property>> entry : nodeProp.entrySet()) {
             Node node = entry.getKey();
-            log.debug("getInventories: {} added for container {}",
-                    new Object[] { node, containerName });
+            log.debug("getInventories: {} added for container {}", new Object[] { node, containerName });
             Map<String, Property> propMap = entry.getValue();
             Set<Property> props = new HashSet<Property>();
-            for(Property property : propMap.values()) {
+            for (Property property : propMap.values()) {
                 props.add(property);
             }
             addNode(node, props);
         }
 
         Map<NodeConnector, Map<String, Property>> nodeConnectorProp = this.inventoryService.getNodeConnectorProps();
-        for(Map.Entry<NodeConnector, Map<String, Property>> entry : nodeConnectorProp.entrySet()) {
+        for (Map.Entry<NodeConnector, Map<String, Property>> entry : nodeConnectorProp.entrySet()) {
             Map<String, Property> propMap = entry.getValue();
-            for(Property property : propMap.values()) {
+            for (Property property : propMap.values()) {
                 addNodeConnectorProp(entry.getKey(), property);
             }
         }
