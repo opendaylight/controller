@@ -49,8 +49,7 @@ public class YangToSourcesPluginTestIT {
         v.verifyTextInLog("[DEBUG] yang-to-sources: Additional configuration picked up for : org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl: {nm1=abcd=a.b.c.d, nm2=abcd2=a.b.c.d.2}");
         v.verifyTextInLog("[DEBUG] yang-to-sources: Additional configuration picked up for : org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl: {c1=config}");
         v.verifyTextInLog(File.separator
-                + "files marked as resources: META-INF" + File.separator
-                + "yang");
+                + "files marked as resources: META-INF/yang");
         v.verifyTextInLog("target"
                 + File.separator
                 + "generated-resources marked as resources for generator: org.opendaylight.controller.yang2sources.spi.CodeGeneratorTestImpl");
