@@ -19,7 +19,8 @@ public enum GlobalConstants {
     CONTAINERNAME("name"),
     STATICVLAN("staticvlan"),
     CLUSTERINGSERVICES("clusteringservices"),
-    STARTUPHOME("configuration/startup/");
+    STARTUPHOME("configuration/startup/"),
+    PROTOCOLPLUGINTYPE("protocolPluginType");
 
     private GlobalConstants(String name) {
         this.name = name;
