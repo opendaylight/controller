@@ -28,7 +28,6 @@ public final class AnyXmlBuilder extends AbstractSchemaNodeBuilder implements Da
     private boolean built;
     private final AnyXmlSchemaNodeImpl instance;
     private final ConstraintsBuilder constraints;
-    private List<UnknownSchemaNode> unknownNodes;
 
     private Boolean configuration;
     private boolean augmenting;
@@ -91,10 +90,6 @@ public final class AnyXmlBuilder extends AbstractSchemaNodeBuilder implements Da
 
     public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
         return addedUnknownNodes;
-    }
-
-    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
-        this.unknownNodes = unknownNodes;
     }
 
     @Override

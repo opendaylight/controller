@@ -40,7 +40,6 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder 
         AugmentationTargetBuilder {
     private boolean isBuilt;
     private final NotificationDefinitionImpl instance;
-    private final int line;
     private SchemaPath schemaPath;
     private String description;
     private String reference;
@@ -53,7 +52,6 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder 
 
     NotificationBuilder(final int line, final QName qname) {
         super(line, qname);
-        this.line = line;
         instance = new NotificationDefinitionImpl(qname);
     }
 

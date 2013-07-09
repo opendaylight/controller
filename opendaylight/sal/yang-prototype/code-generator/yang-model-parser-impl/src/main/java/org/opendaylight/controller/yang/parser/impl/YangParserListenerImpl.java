@@ -185,12 +185,10 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
     @Override
     public void enterRevision_stmts(Revision_stmtsContext ctx) {
         enterLog("revisions", "", ctx.getStart().getLine());
-        if (ctx != null) {
-            for (int i = 0; i < ctx.getChildCount(); ++i) {
-                final ParseTree treeNode = ctx.getChild(i);
-                if (treeNode instanceof Revision_stmtContext) {
-                    updateRevisionForRevisionStatement(treeNode);
-                }
+        for (int i = 0; i < ctx.getChildCount(); ++i) {
+            final ParseTree treeNode = ctx.getChild(i);
+            if (treeNode instanceof Revision_stmtContext) {
+                updateRevisionForRevisionStatement(treeNode);
             }
         }
     }
@@ -368,12 +366,12 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
             } else {
                 if ("union".equals(typeName)) {
                     SchemaPath p = createActualSchemaPath(actualPath, namespace, revision, yangModelPrefix, typeName);
-                    UnionTypeBuilder unionBuilder = moduleBuilder.addUnionType(actualPath, namespace, revision, line);
+                    UnionTypeBuilder unionBuilder = moduleBuilder.addUnionType(line, namespace, revision);
                     moduleBuilder.enterNode(unionBuilder);
                     unionBuilder.setPath(p);
                 } else if ("identityref".equals(typeName)) {
                     SchemaPath path = createActualSchemaPath(actualPath, namespace, revision, yangModelPrefix, typeName);
-                    moduleBuilder.addIdentityrefType(getIdentityrefBase(typeBody), actualPath, path, line);
+                    moduleBuilder.addIdentityrefType(line, path, getIdentityrefBase(typeBody));
                 } else {
                     type = parseTypeWithBody(moduleName, typeName, typeBody, actualPath, namespace, revision,
                             yangModelPrefix, moduleBuilder.getActualNode());
@@ -384,7 +382,7 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
             type = parseUnknownTypeWithBody(typeQName, typeBody, actualPath, namespace, revision, yangModelPrefix,
                     moduleBuilder.getActualNode());
             // add parent node of this type statement to dirty nodes
-            moduleBuilder.addDirtyNode(actualPath);
+            moduleBuilder.markActualNodeDirty();
             moduleBuilder.setType(type);
         }
 
@@ -744,7 +742,7 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
             qname = new QName(namespace, revision, yangModelPrefix, nodeParameter);
         }
 
-        UnknownSchemaNodeBuilder builder = moduleBuilder.addUnknownSchemaNode(qname, actualPath, line);
+        UnknownSchemaNodeBuilder builder = moduleBuilder.addUnknownSchemaNode(line, qname);
         builder.setNodeType(nodeType);
         builder.setNodeParameter(nodeParameter);
         actualPath.push(nodeParameter);

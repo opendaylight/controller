@@ -501,7 +501,7 @@ public final class ParserUtils {
         }
 
         // set correct path for all cases
-        if(childNode instanceof ChoiceBuilder) {
+        if (childNode instanceof ChoiceBuilder) {
             ChoiceBuilder choiceBuilder = (ChoiceBuilder) childNode;
             for (ChoiceCaseBuilder choiceCaseBuilder : choiceBuilder.getCases()) {
                 correctAugmentChildPath(choiceCaseBuilder, childNode.getPath());
@@ -601,11 +601,12 @@ public final class ParserUtils {
 
     private static TypeDefinition<?> createCorrectTypeDefinition(SchemaPath parentSchemaPath, QName nodeQName,
             TypeDefinition<?> nodeType) {
-        QName nodeTypeQName = nodeType.getQName();
-        SchemaPath newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, nodeTypeQName);
         TypeDefinition<?> result = null;
 
         if (nodeType != null) {
+            QName nodeTypeQName = nodeType.getQName();
+            SchemaPath newSchemaPath = createNewSchemaPath(parentSchemaPath, nodeQName, nodeTypeQName);
+
             if (nodeType instanceof BinaryTypeDefinition) {
                 BinaryTypeDefinition binType = (BinaryTypeDefinition) nodeType;
 

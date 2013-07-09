@@ -37,11 +37,13 @@ public final class ExtensionBuilder extends AbstractSchemaNodeBuilder {
             instance.setStatus(status);
 
             // UNKNOWN NODES
-            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-            for (UnknownSchemaNodeBuilder un : addedUnknownNodes) {
-                unknownNodes.add(un.build());
+            if (unknownNodes == null) {
+                unknownNodes = new ArrayList<UnknownSchemaNode>();
+                for (UnknownSchemaNodeBuilder un : addedUnknownNodes) {
+                    unknownNodes.add(un.build());
+                }
+                Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             }
-            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             instance.setUnknownSchemaNodes(unknownNodes);
 
             isBuilt = true;

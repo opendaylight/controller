@@ -381,11 +381,9 @@ public final class YangParserImpl implements YangModelParser {
      *            current module
      */
     private void resolveDirtyNodes(final Map<String, TreeMap<Date, ModuleBuilder>> modules, final ModuleBuilder module) {
-        final Map<List<String>, TypeAwareBuilder> dirtyNodes = module.getDirtyNodes();
+        final Set<TypeAwareBuilder> dirtyNodes = module.getDirtyNodes();
         if (!dirtyNodes.isEmpty()) {
-            for (Map.Entry<List<String>, TypeAwareBuilder> entry : dirtyNodes.entrySet()) {
-                final TypeAwareBuilder nodeToResolve = entry.getValue();
-
+            for (TypeAwareBuilder nodeToResolve : dirtyNodes) {
                 if (nodeToResolve instanceof UnionTypeBuilder) {
                     // special handling for union types
                     resolveTypeUnion((UnionTypeBuilder) nodeToResolve, modules, module);
@@ -402,11 +400,9 @@ public final class YangParserImpl implements YangModelParser {
 
     private void resolveDirtyNodesWithContext(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module, SchemaContext context) {
-        final Map<List<String>, TypeAwareBuilder> dirtyNodes = module.getDirtyNodes();
+        final Set<TypeAwareBuilder> dirtyNodes = module.getDirtyNodes();
         if (!dirtyNodes.isEmpty()) {
-            for (Map.Entry<List<String>, TypeAwareBuilder> entry : dirtyNodes.entrySet()) {
-                final TypeAwareBuilder nodeToResolve = entry.getValue();
-
+            for (TypeAwareBuilder nodeToResolve : dirtyNodes) {
                 if (nodeToResolve instanceof UnionTypeBuilder) {
                     // special handling for union types
                     resolveTypeUnionWithContext((UnionTypeBuilder) nodeToResolve, modules, module, context);
@@ -1067,34 +1063,42 @@ public final class YangParserImpl implements YangModelParser {
         DataNodeContainerBuilder parent = usesNode.getParent();
         SchemaPath parentPath = parent.getPath();
         for (DataSchemaNodeBuilder child : targetGrouping.getChildNodeBuilders()) {
-            // if node is refined, take it from refined nodes and continue
-            SchemaNodeBuilder refined = getRefined(child.getQName(), refineNodes);
-            if (refined != null) {
-                refined.setPath(createSchemaPath(parentPath, refined.getQName().getLocalName()));
-                parent.addChildNode((DataSchemaNodeBuilder) refined);
-                continue;
-            }
+            if (child != null) {
+                // if node is refined, take it from refined nodes and continue
+                SchemaNodeBuilder refined = getRefined(child.getQName(), refineNodes);
+                if (refined != null) {
+                    refined.setPath(createSchemaPath(parentPath, refined.getQName().getLocalName()));
+                    parent.addChildNode((DataSchemaNodeBuilder) refined);
+                    continue;
+                }
 
-            DataSchemaNodeBuilder newChild = null;
-            if (child instanceof AnyXmlBuilder) {
-                newChild = new AnyXmlBuilder((AnyXmlBuilder) child);
-            } else if (child instanceof ChoiceBuilder) {
-                newChild = new ChoiceBuilder((ChoiceBuilder) child);
-            } else if (child instanceof ContainerSchemaNodeBuilder) {
-                newChild = new ContainerSchemaNodeBuilder((ContainerSchemaNodeBuilder) child);
-            } else if (child instanceof LeafListSchemaNodeBuilder) {
-                newChild = new LeafListSchemaNodeBuilder((LeafListSchemaNodeBuilder) child);
-            } else if (child instanceof LeafSchemaNodeBuilder) {
-                newChild = new LeafSchemaNodeBuilder((LeafSchemaNodeBuilder) child);
-            } else if (child instanceof ListSchemaNodeBuilder) {
-                newChild = new ListSchemaNodeBuilder((ListSchemaNodeBuilder) child);
-            }
+                DataSchemaNodeBuilder newChild = null;
+                if (child instanceof AnyXmlBuilder) {
+                    newChild = new AnyXmlBuilder((AnyXmlBuilder) child);
+                } else if (child instanceof ChoiceBuilder) {
+                    newChild = new ChoiceBuilder((ChoiceBuilder) child);
+                } else if (child instanceof ContainerSchemaNodeBuilder) {
+                    newChild = new ContainerSchemaNodeBuilder((ContainerSchemaNodeBuilder) child);
+                } else if (child instanceof LeafListSchemaNodeBuilder) {
+                    newChild = new LeafListSchemaNodeBuilder((LeafListSchemaNodeBuilder) child);
+                } else if (child instanceof LeafSchemaNodeBuilder) {
+                    newChild = new LeafSchemaNodeBuilder((LeafSchemaNodeBuilder) child);
+                } else if (child instanceof ListSchemaNodeBuilder) {
+                    newChild = new ListSchemaNodeBuilder((ListSchemaNodeBuilder) child);
+                }
 
-            if (newChild instanceof GroupingMember) {
-                ((GroupingMember) newChild).setAddedByUses(true);
+                if (newChild == null) {
+                    throw new YangParseException(usesNode.getLine(),
+                            "Unknown member of target grouping while resolving uses node.");
+                }
+
+                if (newChild instanceof GroupingMember) {
+                    ((GroupingMember) newChild).setAddedByUses(true);
+                }
+
+                newChild.setPath(createSchemaPath(parentPath, newChild.getQName().getLocalName()));
+                parent.addChildNode(newChild);
             }
-            newChild.setPath(createSchemaPath(parentPath, newChild.getQName().getLocalName()));
-            parent.addChildNode(newChild);
         }
         for (GroupingBuilder g : targetGrouping.getGroupingBuilders()) {
             GroupingBuilder newGrouping = new GroupingBuilderImpl(g);
@@ -1128,34 +1132,41 @@ public final class YangParserImpl implements YangModelParser {
         DataNodeContainerBuilder parent = usesNode.getParent();
         SchemaPath parentPath = parent.getPath();
         for (DataSchemaNode child : targetGrouping.getChildNodes()) {
-            // if node is refined, take it from refined nodes and continue
-            SchemaNodeBuilder refined = getRefined(child.getQName(), refineNodes);
-            if (refined != null) {
-                refined.setPath(createSchemaPath(parentPath, refined.getQName().getLocalName()));
-                parent.addChildNode((DataSchemaNodeBuilder) refined);
-                continue;
-            }
+            if (child != null) {
+                // if node is refined, take it from refined nodes and continue
+                SchemaNodeBuilder refined = getRefined(child.getQName(), refineNodes);
+                if (refined != null) {
+                    refined.setPath(createSchemaPath(parentPath, refined.getQName().getLocalName()));
+                    parent.addChildNode((DataSchemaNodeBuilder) refined);
+                    continue;
+                }
 
-            DataSchemaNodeBuilder newChild = null;
-            if (child instanceof AnyXmlSchemaNode) {
-                newChild = createAnyXml((AnyXmlSchemaNode) child, line);
-            } else if (child instanceof ChoiceNode) {
-                newChild = createChoice((ChoiceNode) child, line);
-            } else if (child instanceof ContainerSchemaNode) {
-                newChild = createContainer((ContainerSchemaNode) child, line);
-            } else if (child instanceof LeafListSchemaNode) {
-                newChild = createLeafList((LeafListSchemaNode) child, line);
-            } else if (child instanceof LeafSchemaNode) {
-                newChild = createLeafBuilder((LeafSchemaNode) child, line);
-            } else if (child instanceof ListSchemaNode) {
-                newChild = createList((ListSchemaNode) child, line);
-            }
+                DataSchemaNodeBuilder newChild = null;
+                if (child instanceof AnyXmlSchemaNode) {
+                    newChild = createAnyXml((AnyXmlSchemaNode) child, line);
+                } else if (child instanceof ChoiceNode) {
+                    newChild = createChoice((ChoiceNode) child, line);
+                } else if (child instanceof ContainerSchemaNode) {
+                    newChild = createContainer((ContainerSchemaNode) child, line);
+                } else if (child instanceof LeafListSchemaNode) {
+                    newChild = createLeafList((LeafListSchemaNode) child, line);
+                } else if (child instanceof LeafSchemaNode) {
+                    newChild = createLeafBuilder((LeafSchemaNode) child, line);
+                } else if (child instanceof ListSchemaNode) {
+                    newChild = createList((ListSchemaNode) child, line);
+                }
 
-            if (newChild instanceof GroupingMember) {
-                ((GroupingMember) newChild).setAddedByUses(true);
+                if (newChild == null) {
+                    throw new YangParseException(usesNode.getLine(),
+                            "Unknown member of target grouping while resolving uses node.");
+                }
+
+                if (newChild instanceof GroupingMember) {
+                    ((GroupingMember) newChild).setAddedByUses(true);
+                }
+                newChild.setPath(createSchemaPath(parentPath, newChild.getQName().getLocalName()));
+                parent.addChildNode(newChild);
             }
-            newChild.setPath(createSchemaPath(parentPath, newChild.getQName().getLocalName()));
-            parent.addChildNode(newChild);
         }
         for (GroupingDefinition g : targetGrouping.getGroupings()) {
             GroupingBuilder newGrouping = createGrouping(g, line);
@@ -1206,7 +1217,7 @@ public final class YangParserImpl implements YangModelParser {
     }
 
     private void resolveUnknownNodes(final Map<String, TreeMap<Date, ModuleBuilder>> modules, final ModuleBuilder module) {
-        for (UnknownSchemaNodeBuilder usnb : module.getUnknownNodes()) {
+        for (UnknownSchemaNodeBuilder usnb : module.getAllUnknownNodes()) {
             QName nodeType = usnb.getNodeType();
             if (nodeType.getNamespace() == null || nodeType.getRevision() == null) {
                 try {
@@ -1224,7 +1235,7 @@ public final class YangParserImpl implements YangModelParser {
 
     private void resolveUnknownNodesWithContext(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
             final ModuleBuilder module, final SchemaContext context) {
-        for (UnknownSchemaNodeBuilder unknownNodeBuilder : module.getUnknownNodes()) {
+        for (UnknownSchemaNodeBuilder unknownNodeBuilder : module.getAllUnknownNodes()) {
             QName nodeType = unknownNodeBuilder.getNodeType();
             if (nodeType.getNamespace() == null || nodeType.getRevision() == null) {
                 try {

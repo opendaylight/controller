@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.yang.model.api;
 
+import java.util.List;
+
 /**
  * Interface describing YANG 'deviation' statement.
  * <p>
@@ -42,5 +44,10 @@ public interface Deviation {
      *         additional information relevant to this node.
      */
     String getReference();
+
+    /**
+     * @return collection of all unknown nodes defined under this schema node.
+     */
+    public List<UnknownSchemaNode> getUnknownSchemaNodes();
 
 }

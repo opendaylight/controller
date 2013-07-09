@@ -13,6 +13,7 @@ import java.util.List;
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 /**
@@ -26,6 +27,7 @@ public abstract class AbstractSchemaNodeBuilder implements SchemaNodeBuilder {
     protected String description;
     protected String reference;
     protected Status status = Status.CURRENT;
+    protected List<UnknownSchemaNode> unknownNodes;
     protected final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     protected AbstractSchemaNodeBuilder(final int line, final QName qname) {
@@ -52,34 +54,42 @@ public abstract class AbstractSchemaNodeBuilder implements SchemaNodeBuilder {
         this.parent = parent;
     }
 
+    @Override
     public SchemaPath getPath() {
         return schemaPath;
     }
 
+    @Override
     public void setPath(SchemaPath schemaPath) {
         this.schemaPath = schemaPath;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
+    @Override
     public void setDescription(String description) {
         this.description = description;
     }
 
+    @Override
     public String getReference() {
         return reference;
     }
 
+    @Override
     public void setReference(String reference) {
         this.reference = reference;
     }
 
+    @Override
     public Status getStatus() {
         return status;
     }
 
+    @Override
     public void setStatus(Status status) {
         if (status != null) {
             this.status = status;
@@ -89,6 +99,10 @@ public abstract class AbstractSchemaNodeBuilder implements SchemaNodeBuilder {
     @Override
     public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
+    }
+
+    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
+        this.unknownNodes = unknownNodes;
     }
 
 }

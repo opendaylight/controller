@@ -27,8 +27,8 @@ import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractDataNodeContainerBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
@@ -37,11 +37,10 @@ import org.opendaylight.controller.yang.parser.util.Comparators;
 import org.opendaylight.controller.yang.parser.util.ParserListenerUtils;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder {
+public final class AugmentationSchemaBuilderImpl extends AbstractDataNodeContainerBuilder implements
+        AugmentationSchemaBuilder {
     private boolean built;
     private final AugmentationSchemaImpl instance;
-    private final int line;
-    private Builder parent;
 
     private String whenCondition;
     private String description;
@@ -52,58 +51,16 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
     private SchemaPath dirtyAugmentTarget;
     private SchemaPath finalAugmentTarget;
 
-    private final Set<DataSchemaNodeBuilder> childNodes = new HashSet<DataSchemaNodeBuilder>();
-    private final Set<GroupingBuilder> groupings = new HashSet<GroupingBuilder>();
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private boolean resolved;
 
     AugmentationSchemaBuilderImpl(final int line, final String augmentTargetStr) {
+        super(line, null);
         this.augmentTargetStr = augmentTargetStr;
-        this.line = line;
         final SchemaPath targetPath = ParserListenerUtils.parseAugmentPath(augmentTargetStr);
         dirtyAugmentTarget = targetPath;
         instance = new AugmentationSchemaImpl(targetPath);
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public Builder getParent() {
-        return parent;
-    }
-
-    @Override
-    public void setParent(final Builder parent) {
-        this.parent = parent;
-    }
-
-    @Override
-    public void addChildNode(DataSchemaNodeBuilder childNode) {
-        childNodes.add(childNode);
-    }
-
-    @Override
-    public Set<DataSchemaNode> getChildNodes() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public DataSchemaNodeBuilder getDataChildByName(final String name) {
-        for(DataSchemaNodeBuilder child : childNodes) {
-            if(child.getQName().getLocalName().equals(name)) {
-                return child;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Set<DataSchemaNodeBuilder> getChildNodeBuilders() {
-        return childNodes;
     }
 
     @Override
@@ -113,25 +70,17 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
 
     @Override
     public Set<GroupingBuilder> getGroupingBuilders() {
-        return groupings;
+        return Collections.emptySet();
     }
 
     @Override
     public void addGrouping(GroupingBuilder grouping) {
-        groupings.add(grouping);
+        throw new YangParseException(line, "augment can not contains grouping statement");
     }
 
     @Override
     public void addUsesNode(UsesNodeBuilder usesBuilder) {
         usesNodes.add(usesBuilder);
-    }
-
-    /**
-     * Always returns null.
-     */
-    @Override
-    public QName getQName() {
-        return null;
     }
 
     /**
@@ -160,18 +109,10 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
 
             // CHILD NODES
             final Map<QName, DataSchemaNode> childs = new TreeMap<QName, DataSchemaNode>(Comparators.QNAME_COMP);
-            for (DataSchemaNodeBuilder node : childNodes) {
+            for (DataSchemaNodeBuilder node : addedChildNodes) {
                 childs.put(node.getQName(), node.build());
             }
             instance.setChildNodes(childs);
-
-            // GROUPINGS
-            final Set<GroupingDefinition> groupingDefinitions = new TreeSet<GroupingDefinition>(
-                    Comparators.SCHEMA_NODE_COMP);
-            for (GroupingBuilder builder : groupings) {
-                groupingDefinitions.add(builder.build());
-            }
-            instance.setGroupings(groupingDefinitions);
 
             // USES
             final Set<UsesNode> usesNodeDefinitions = new HashSet<UsesNode>();
@@ -316,7 +257,6 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
         private SchemaPath targetPath;
         private RevisionAwareXPath whenCondition;
         private Map<QName, DataSchemaNode> childNodes = Collections.emptyMap();
-        private Set<GroupingDefinition> groupings = Collections.emptySet();
         private Set<UsesNode> uses = Collections.emptySet();
         private String description;
         private String reference;
@@ -358,15 +298,13 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
             }
         }
 
+        /**
+         * Always returns an empty set, because augment can not contains
+         * grouping statement.
+         */
         @Override
         public Set<GroupingDefinition> getGroupings() {
-            return groupings;
-        }
-
-        private void setGroupings(Set<GroupingDefinition> groupings) {
-            if (groupings != null) {
-                this.groupings = groupings;
-            }
+            return Collections.emptySet();
         }
 
         @Override
@@ -381,8 +319,8 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
         }
 
         /**
-         * Always returns an empty set, because augmentation can not contains
-         * type definitions.
+         * Always returns an empty set, because augment can not contains type
+         * definitions.
          */
         @Override
         public Set<TypeDefinition<?>> getTypeDefinitions() {

@@ -48,11 +48,13 @@ public final class IdentitySchemaNodeBuilder extends AbstractSchemaNodeBuilder {
             }
 
             // UNKNOWN NODES
-            final List<UnknownSchemaNode> unknownNodes = new ArrayList<UnknownSchemaNode>();
-            for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
-                unknownNodes.add(b.build());
+            if (unknownNodes == null) {
+                unknownNodes = new ArrayList<UnknownSchemaNode>();
+                for (UnknownSchemaNodeBuilder b : addedUnknownNodes) {
+                    unknownNodes.add(b.build());
+                }
+                Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             }
-            Collections.sort(unknownNodes, Comparators.SCHEMA_NODE_COMP);
             instance.setUnknownSchemaNodes(unknownNodes);
 
             isBuilt = true;
