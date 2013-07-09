@@ -335,7 +335,7 @@ public class YangParserWithContextTest {
         List<UnknownSchemaNode> unknownNodes = network.getUnknownSchemaNodes();
         assertEquals(1, unknownNodes.size());
 
-        UnknownSchemaNode un = unknownNodes.iterator().next();
+        UnknownSchemaNode un = unknownNodes.get(0);
         QName unType = un.getNodeType();
         assertEquals(URI.create("urn:simple.container.demo"), unType.getNamespace());
         assertEquals(simpleDateFormat.parse("2012-04-16"), unType.getRevision());

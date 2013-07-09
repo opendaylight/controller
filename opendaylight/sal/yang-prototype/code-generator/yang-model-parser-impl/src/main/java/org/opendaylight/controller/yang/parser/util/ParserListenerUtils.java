@@ -1080,6 +1080,7 @@ public final class ParserListenerUtils {
     public static TypeDefinition<?> parseTypeWithBody(final String moduleName, final String typeName,
             final Type_body_stmtsContext typeBody, final List<String> actualPath, final URI namespace,
             final Date revision, final String prefix, final Builder parent) {
+        final int line = typeBody.getStart().getLine();
         TypeDefinition<?> baseType = null;
 
         Integer fractionDigits = getFractionDigits(typeBody);
@@ -1087,7 +1088,7 @@ public final class ParserListenerUtils {
         List<PatternConstraint> patternStatements = getPatternConstraint(typeBody);
         List<RangeConstraint> rangeStatements = getRangeConstraints(typeBody);
 
-        TypeConstraints constraints = new TypeConstraints(moduleName, typeBody.getStart().getLine());
+        TypeConstraints constraints = new TypeConstraints(moduleName, line);
         constraints.addFractionDigits(fractionDigits);
         constraints.addLengths(lengthStatements);
         constraints.addPatterns(patternStatements);
@@ -1115,6 +1116,9 @@ public final class ParserListenerUtils {
             } else if ("int64".equals(typeName)) {
                 intType = new Int64(baseTypePath);
             }
+            if(intType == null) {
+                throw new YangParseException(moduleName, line, "Unknown yang type "+ typeName);
+            }
             constraints.addRanges(intType.getRangeStatements());
             baseType = intType;
         } else if (typeName.startsWith("uint")) {
@@ -1127,6 +1131,9 @@ public final class ParserListenerUtils {
                 uintType = new Uint32(baseTypePath);
             } else if ("uint64".equals(typeName)) {
                 uintType = new Uint64(baseTypePath);
+            }
+            if(uintType == null) {
+                throw new YangParseException(moduleName, line, "Unknown yang type "+ typeName);
             }
             constraints.addRanges(uintType.getRangeStatements());
             baseType = uintType;

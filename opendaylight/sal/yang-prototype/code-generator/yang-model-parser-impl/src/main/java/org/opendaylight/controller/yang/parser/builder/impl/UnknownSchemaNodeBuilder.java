@@ -22,7 +22,6 @@ public final class UnknownSchemaNodeBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
     private final UnknownSchemaNodeImpl instance;
     private boolean addedByUses;
-    private List<UnknownSchemaNode> unknownNodes;
     private QName nodeType;
     private String nodeParameter;
 
@@ -78,10 +77,6 @@ public final class UnknownSchemaNodeBuilder extends AbstractSchemaNodeBuilder {
 
     public void setAddedByUses(final boolean addedByUses) {
         this.addedByUses = addedByUses;
-    }
-
-    public void setUnknownNodes(final List<UnknownSchemaNode> unknownNodes) {
-        this.unknownNodes = unknownNodes;
     }
 
     public QName getNodeType() {

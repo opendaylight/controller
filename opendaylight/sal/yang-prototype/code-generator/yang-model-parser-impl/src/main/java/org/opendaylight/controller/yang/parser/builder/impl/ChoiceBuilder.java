@@ -35,8 +35,6 @@ public final class ChoiceBuilder extends AbstractSchemaNodeBuilder implements Da
         AugmentationTargetBuilder, GroupingMember, ConfigNode {
     private boolean isBuilt;
     private final ChoiceNodeImpl instance;
-    // SchemaNode args
-    private List<UnknownSchemaNode> unknownNodes;
     // DataSchemaNode args
     private boolean augmenting;
     private boolean addedByUses;
@@ -195,10 +193,6 @@ public final class ChoiceBuilder extends AbstractSchemaNodeBuilder implements Da
 
     public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
         return addedUnknownNodes;
-    }
-
-    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
-        this.unknownNodes = unknownNodes;
     }
 
     public String getDefaultCase() {

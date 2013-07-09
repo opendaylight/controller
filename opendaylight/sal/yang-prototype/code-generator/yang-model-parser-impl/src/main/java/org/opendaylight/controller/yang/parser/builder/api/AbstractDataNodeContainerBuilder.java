@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public abstract class AbstractDataNodeContainerBuilder implements DataNodeContainerBuilder {
     protected final int line;
@@ -52,6 +54,9 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
 
     @Override
     public Set<DataSchemaNode> getChildNodes() {
+        if (childNodes == null) {
+            return Collections.emptySet();
+        }
         return childNodes;
     }
 
@@ -66,8 +71,8 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
 
     @Override
     public DataSchemaNodeBuilder getDataChildByName(final String name) {
-        for(DataSchemaNodeBuilder child : addedChildNodes) {
-            if(child.getQName().getLocalName().equals(name)) {
+        for (DataSchemaNodeBuilder child : addedChildNodes) {
+            if (child.getQName().getLocalName().equals(name)) {
                 return child;
             }
         }
@@ -75,12 +80,20 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
     }
 
     @Override
-    public void addChildNode(DataSchemaNodeBuilder childNode) {
-        addedChildNodes.add(childNode);
+    public void addChildNode(DataSchemaNodeBuilder child) {
+        for (DataSchemaNodeBuilder childNode : addedChildNodes) {
+            if (childNode.getQName().getLocalName().equals(child.getQName().getLocalName())) {
+                throw new YangParseException(child.getLine(), "Duplicate node found at line " + childNode.getLine());
+            }
+        }
+        addedChildNodes.add(child);
     }
 
     @Override
     public Set<GroupingDefinition> getGroupings() {
+        if (groupings == null) {
+            return Collections.emptySet();
+        }
         return groupings;
     }
 
@@ -93,8 +106,13 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
     }
 
     @Override
-    public void addGrouping(GroupingBuilder grouping) {
-        addedGroupings.add(grouping);
+    public void addGrouping(GroupingBuilder groupingBuilder) {
+        for (GroupingBuilder gb : addedGroupings) {
+            if (gb.getQName().getLocalName().equals(groupingBuilder.getQName().getLocalName())) {
+                throw new YangParseException(groupingBuilder.getLine(), "Duplicate node found at line " + gb.getLine());
+            }
+        }
+        addedGroupings.add(groupingBuilder);
     }
 
 }
