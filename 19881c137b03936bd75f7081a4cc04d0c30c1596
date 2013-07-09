@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///l4\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-util/src/main/java/org/opendaylight/controller/binding/generator/util/generated/type/builder/AbstractGeneratedTypeBuilder.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "null check possible null pointer exception!",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///l0\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-util/src/main/java/org/opendaylight/controller/binding/generator/util/generated/type/builder/GeneratedTOBuilderImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "possible null pointer exception, add check!",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///lw\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/Constants.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "BAD USE of constant! no INNER_CLASS or OUTER_CLASS constant!",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///ls\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/GeneratorUtil.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "Why do while cycle, not iterating through foreach loop?",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///lo\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/GeneratorUtil.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "use isEmpty() NOT !\u003d 0 !!!",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///lk\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/GeneratorUtil.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 677,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "use isEmpty() NOT !\u003d 0 !!!",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///lg\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/GeneratorUtil.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 736,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "innerTypePackage and innerTypeImports should be better :)",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///lc\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/InterfaceGenerator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "innerTypeImports",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///lY\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-model-api/src/main/java/org/opendaylight/controller/sal/binding/model/api/GeneratedTransferObject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "remove enum",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///lU\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-model-api/src/main/java/org/opendaylight/controller/sal/binding/model/api/GeneratedTransferObject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "add boolean isUnionType and mark it as @Deprecated",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///lQ\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-model-api/src/main/java/org/opendaylight/controller/sal/binding/model/api/type/builder/GeneratedTOBuilder.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:06:08Z",
+      "side": 1,
+      "message": "@Deprecated boolean isUnionType",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
