@@ -10,7 +10,6 @@
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-model-api</artifactId>
-          <version>1.0</version>
       </dependency>
   </dependencies>
 </project>
