@@ -38,6 +38,7 @@ import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerSe
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.EtherTypes;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.Status;
@@ -129,7 +130,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
                     entry.getValue());
         }
 
-        Object value = props.get("protocolPluginType");
+        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
         if (value instanceof String) {
             type = (String) value;
         }
@@ -156,7 +157,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
                     entry.getValue());
         }
 
-        Object value = props.get("protocoloPluginType");
+        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
         if (value instanceof String) {
             type = (String) value;
         }

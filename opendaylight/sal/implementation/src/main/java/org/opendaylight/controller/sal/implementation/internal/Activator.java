@@ -121,7 +121,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName)
                     .setService(IPluginInInventoryService.class)
                     .setCallbacks("setPluginService", "unsetPluginService")
-                    .setRequired(true));
+                    .setRequired(false));
         }
 
         if (imp.equals(FlowProgrammerService.class)) {
@@ -148,7 +148,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName)
                     .setService(IPluginInReadService.class)
                     .setCallbacks("setService", "unsetService")
-                    .setRequired(true));
+                    .setRequired(false));
         }
 
         /************************/
