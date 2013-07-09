@@ -38,6 +38,7 @@ import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 import org.opendaylight.controller.sal.utils.EtherTypes;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
@@ -116,7 +117,7 @@ public class ReadService implements IReadService, CommandProvider {
                     entry.getValue());
         }
 
-        Object value = props.get("protocolPluginType");
+        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
         if (value instanceof String) {
             type = (String) value;
         }
@@ -143,7 +144,7 @@ public class ReadService implements IReadService, CommandProvider {
                     entry.getValue());
         }
 
-        Object value = props.get("protocoloPluginType");
+        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
         if (value instanceof String) {
             type = (String) value;
         }

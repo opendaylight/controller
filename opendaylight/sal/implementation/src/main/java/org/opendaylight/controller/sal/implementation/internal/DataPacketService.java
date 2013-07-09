@@ -40,6 +40,7 @@ import org.opendaylight.controller.sal.packet.LinkEncap;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -217,7 +218,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
             logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
         }
 
-        Object value = props.get("protocolPluginType");
+        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
         if (value instanceof String) {
             type = (String) value;
         }
@@ -243,7 +244,7 @@ public class DataPacketService implements IPluginOutDataPacketService,
             logger.trace("Prop key:({}) value:({})",entry.getKey(), entry.getValue());
         }
 
-        Object value = props.get("protocoloPluginType");
+        Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
         if (value instanceof String) {
             type = (String) value;
         }

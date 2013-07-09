@@ -90,7 +90,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put("protocolPluginType", "STUB");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "STUB");
             c.setInterface(IPluginInReadService.class.getName(), props);
         }
 
@@ -99,7 +99,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put("protocolPluginType", "STUB");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "STUB");
             c.setInterface(IPluginInInventoryService.class.getName(), props);
         }
     }
@@ -115,7 +115,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put("protocolPluginType", "STUB");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "STUB");
             c.setInterface(IPluginInFlowProgrammerService.class.getName(), props);
         }
         if (imp.equals(StubNodeFactory.class)) {
@@ -123,7 +123,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put("protocolPluginType", "STUB");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "STUB");
             props.put("protocolName", "STUB");
             c.setInterface(INodeFactory.class.getName(), props);
         }
@@ -132,7 +132,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put("protocolPluginType", "STUB");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "STUB");
             props.put("protocolName", "STUB");
             c.setInterface(INodeConnectorFactory.class.getName(), props);
         }
