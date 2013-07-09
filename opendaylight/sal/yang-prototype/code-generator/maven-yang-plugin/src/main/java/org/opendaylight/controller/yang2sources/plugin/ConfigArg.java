@@ -23,10 +23,13 @@ public abstract class ConfigArg {
     private final File outputBaseDir;
 
     public ConfigArg(String outputBaseDir) {
-        this.outputBaseDir = new File(outputBaseDir);
+        this.outputBaseDir = outputBaseDir == null ? null : new File(outputBaseDir);
     }
 
     public File getOutputBaseDir(MavenProject project) {
+        if (outputBaseDir == null) {
+            return null;
+        }
         if (outputBaseDir.isAbsolute()) {
             return outputBaseDir;
         } else {
@@ -40,21 +43,19 @@ public abstract class ConfigArg {
      * Configuration argument for code generator class and output directory.
      */
     public static final class CodeGeneratorArg extends ConfigArg {
-        private static final String CODE_GEN_DEFAULT_DIR = "target"
-                + File.separator + "generated-sources";
-        private static final String CODE_GEN_DEFAULT_RESOURCE_DIR = "target"
-                + File.separator + "generated-resources";
+        private static final String CODE_GEN_DEFAULT_RESOURCE_DIR = "target" + File.separator + "generated-resources";
+
         private String codeGeneratorClass;
         private File resourceBaseDir = new File(CODE_GEN_DEFAULT_RESOURCE_DIR);
 
         private Map<String, String> additionalConfiguration = Maps.newHashMap();
 
         public CodeGeneratorArg() {
-            super(CODE_GEN_DEFAULT_DIR);
+            super(null);
         }
 
         public CodeGeneratorArg(String codeGeneratorClass) {
-            this(codeGeneratorClass, CODE_GEN_DEFAULT_DIR);
+            this(codeGeneratorClass, null);
         }
 
         public CodeGeneratorArg(String codeGeneratorClass, String outputBaseDir) {
@@ -62,8 +63,7 @@ public abstract class ConfigArg {
             this.codeGeneratorClass = codeGeneratorClass;
         }
 
-        public CodeGeneratorArg(String codeGeneratorClass,
-                String outputBaseDir, String resourceBaseDir) {
+        public CodeGeneratorArg(String codeGeneratorClass, String outputBaseDir, String resourceBaseDir) {
             super(outputBaseDir);
             this.codeGeneratorClass = codeGeneratorClass;
             this.resourceBaseDir = new File(resourceBaseDir);
@@ -71,8 +71,7 @@ public abstract class ConfigArg {
 
         @Override
         public void check() {
-            Preconditions.checkNotNull(codeGeneratorClass,
-                    "codeGeneratorClass for CodeGenerator cannot be null");
+            Preconditions.checkNotNull(codeGeneratorClass, "codeGeneratorClass for CodeGenerator cannot be null");
         }
 
         public String getCodeGeneratorClass() {

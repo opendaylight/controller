@@ -220,7 +220,9 @@ class YangToSourcesProcessor {
                 codeGeneratorCfg.getCodeGeneratorClass(),
                 codeGeneratorCfg.getAdditionalConfiguration()));
 
-        project.addCompileSourceRoot(outputDir.getAbsolutePath());
+        if(outputDir != null) {
+            project.addCompileSourceRoot(outputDir.getAbsolutePath());
+        }
         g.setLog(log);
         g.setMavenProject(project);
         g.setAdditionalConfig(codeGeneratorCfg.getAdditionalConfiguration());
