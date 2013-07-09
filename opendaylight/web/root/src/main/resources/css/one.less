@@ -7,6 +7,10 @@
 
 @topologyOffset: -4px; // ensure calibration
 
+@interface-admin-up: #46A040;
+@interface-admin-down: #C41230;
+@interface-edge-down: #F58025;
+
 // mixins
 .dash-size (@width, @height) {
 	width: @width;
@@ -257,6 +261,19 @@
 
 .table-cursor tr:hover {
 	cursor: pointer;
+}
+
+// interfaces
+table {
+	.admin-up {
+		color: @interface-admin-up;
+	}
+	.admin-down {
+		color: @interface-admin-down;
+	}
+	.edge-down {
+		color: @interface-edge-down;
+	}
 }
 
 // hide

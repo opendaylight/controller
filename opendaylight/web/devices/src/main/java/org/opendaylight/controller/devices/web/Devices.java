@@ -29,6 +29,7 @@ import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.Tier;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -136,6 +137,9 @@ public class Devices implements IDaylightWeb {
                         Config portStatus = ((Config) switchManager
                                 .getNodeConnectorProp(nodeConnector,
                                         Config.ConfigPropName));
+                        State portState = ((State) switchManager
+                                .getNodeConnectorProp(nodeConnector,
+                                        State.StatePropName));
 
                         String nodeConnectorName = (ncName != null) ? ncName
                                 .getValue() : "";
@@ -143,10 +147,15 @@ public class Devices implements IDaylightWeb {
 
                         if (portStatus != null) {
                             if (portStatus.getValue() == Config.ADMIN_UP) {
-                                nodeConnectorName = "<span style='color:green;'>"
-                                        + nodeConnectorName + "</span>";
+                                if (portState.getValue() == State.EDGE_UP) {
+                                    nodeConnectorName = "<span class='admin-up'>"
+                                            + nodeConnectorName + "</span>";
+                                } else if (portState.getValue() == State.EDGE_DOWN) {
+                                    nodeConnectorName = "<span class='edge-down'>"
+                                            + nodeConnectorName + "</span>";
+                                }
                             } else if (portStatus.getValue() == Config.ADMIN_DOWN) {
-                                nodeConnectorName = "<span style='color:red;'>"
+                                nodeConnectorName = "<span class='admin-down'>"
                                         + nodeConnectorName + "</span>";
                             }
                         }
