@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAE3///lI\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-impl/src/main/java/org/opendaylight/controller/sal/binding/generator/impl/BindingGeneratorImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-09T14:07:21Z",
+      "side": 1,
+      "message": "unnecessary complicated else if branching why not just if (typedef instanceof UnionType) { ... else if (typedef instanceof BitsType...",
+      "revId": "19881c137b03936bd75f7081a4cc04d0c30c1596",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAE3///l4\u003d",
         "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-util/src/main/java/org/opendaylight/controller/binding/generator/util/generated/type/builder/AbstractGeneratedTypeBuilder.java",
         "patchSetId": 5
