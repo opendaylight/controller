@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.yang.parser.impl;
 
-import static org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil.*;
+import static org.opendaylight.controller.yang.parser.util.ParserListenerUtils.*;
 
 import java.net.URI;
 import java.text.DateFormat;
@@ -331,6 +331,7 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
         builder.setPath(createActualSchemaPath(actualPath, namespace, revision, yangModelPrefix));
         parseSchemaNodeArgs(ctx, builder);
         builder.setUnits(parseUnits(ctx));
+        builder.setDefaultValue(parseDefault(ctx));
     }
 
     @Override
@@ -854,7 +855,7 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
 
         String reference = null;
         String deviate = null;
-        DeviationBuilder builder = moduleBuilder.addDeviation(targetPath, actualPath, line);
+        DeviationBuilder builder = moduleBuilder.addDeviation(line, targetPath);
         moduleBuilder.enterNode(builder);
         actualPath.push(targetPath);
 

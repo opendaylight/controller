@@ -1,0 +1,27 @@
+module deviation-test {
+    yang-version 1;
+    namespace "urn:simple.deviation.test";
+    prefix "dev";
+
+    import types {
+        prefix "t";
+        revision-date 2013-07-03;
+    }
+
+    organization "opendaylight";
+    contact "http://www.opendaylight.org/";
+
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+
+
+    deviation /t:interfaces/t:ifEntry {
+        deviate add {
+            default "admin"; // new users are 'admin' by default
+            config "true";
+        }
+        reference "system/user ref";
+    }
+
+}

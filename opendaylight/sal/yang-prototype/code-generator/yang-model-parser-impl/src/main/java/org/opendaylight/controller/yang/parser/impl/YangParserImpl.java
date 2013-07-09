@@ -39,6 +39,7 @@ import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.controller.yang.model.api.ChoiceNode;
 import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.controller.yang.model.api.DataNodeContainer;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
 import org.opendaylight.controller.yang.model.api.IdentitySchemaNode;
@@ -47,6 +48,7 @@ import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
 import org.opendaylight.controller.yang.model.api.ListSchemaNode;
 import org.opendaylight.controller.yang.model.api.Module;
 import org.opendaylight.controller.yang.model.api.SchemaContext;
+import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
@@ -68,6 +70,7 @@ import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.AnyXmlBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ChoiceBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.impl.DeviationBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.GroupingBuilderImpl;
 import org.opendaylight.controller.yang.parser.builder.impl.IdentitySchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.IdentityrefTypeBuilder;
@@ -305,6 +308,7 @@ public final class YangParserImpl implements YangModelParser {
             }
         }
         resolveAugments(modules);
+        resolveDeviations(modules);
 
         // build
         // LinkedHashMap MUST be used otherwise the values will not maintain
@@ -333,6 +337,7 @@ public final class YangParserImpl implements YangModelParser {
             }
         }
         resolveAugmentsWithContext(modules, context);
+        resolveDeviationsWithContext(modules, context);
 
         // build
         // LinkedHashMap MUST be used otherwise the values will not maintain
@@ -1218,7 +1223,7 @@ public final class YangParserImpl implements YangModelParser {
     }
 
     private void resolveUnknownNodesWithContext(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
-            final ModuleBuilder module, SchemaContext context) {
+            final ModuleBuilder module, final SchemaContext context) {
         for (UnknownSchemaNodeBuilder unknownNodeBuilder : module.getUnknownNodes()) {
             QName nodeType = unknownNodeBuilder.getNodeType();
             if (nodeType.getNamespace() == null || nodeType.getRevision() == null) {
@@ -1244,6 +1249,117 @@ public final class YangParserImpl implements YangModelParser {
                 }
             }
         }
+    }
+
+    private void resolveDeviations(final Map<String, TreeMap<Date, ModuleBuilder>> modules) {
+        for (Map.Entry<String, TreeMap<Date, ModuleBuilder>> entry : modules.entrySet()) {
+            for (Map.Entry<Date, ModuleBuilder> inner : entry.getValue().entrySet()) {
+                ModuleBuilder b = inner.getValue();
+                resolveDeviation(modules, b);
+            }
+        }
+    }
+
+    private void resolveDeviation(final Map<String, TreeMap<Date, ModuleBuilder>> modules, final ModuleBuilder module) {
+        for (DeviationBuilder dev : module.getDeviations()) {
+            int line = dev.getLine();
+            SchemaPath targetPath = dev.getTargetPath();
+            List<QName> path = targetPath.getPath();
+            QName q0 = path.get(0);
+            String prefix = q0.getPrefix();
+            if (prefix == null) {
+                prefix = module.getPrefix();
+            }
+
+            ModuleBuilder dependentModuleBuilder = findDependentModuleBuilder(modules, module, prefix, line);
+            processDeviation(dev, dependentModuleBuilder, path, module);
+        }
+    }
+
+    private void resolveDeviationsWithContext(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
+            final SchemaContext context) {
+        for (Map.Entry<String, TreeMap<Date, ModuleBuilder>> entry : modules.entrySet()) {
+            for (Map.Entry<Date, ModuleBuilder> inner : entry.getValue().entrySet()) {
+                ModuleBuilder b = inner.getValue();
+                resolveDeviationWithContext(modules, b, context);
+            }
+        }
+    }
+
+    private void resolveDeviationWithContext(final Map<String, TreeMap<Date, ModuleBuilder>> modules,
+            final ModuleBuilder module, final SchemaContext context) {
+        for (DeviationBuilder dev : module.getDeviations()) {
+            int line = dev.getLine();
+            SchemaPath targetPath = dev.getTargetPath();
+            List<QName> path = targetPath.getPath();
+            QName q0 = path.get(0);
+            String prefix = q0.getPrefix();
+            if (prefix == null) {
+                prefix = module.getPrefix();
+            }
+            String name = null;
+
+            ModuleBuilder dependentModuleBuilder = findDependentModuleBuilder(modules, module, prefix, line);
+            if (dependentModuleBuilder == null) {
+                Module dependentModule = findModuleFromContext(context, module, prefix, line);
+                Object currentParent = dependentModule;
+
+                for (int i = 0; i < path.size(); i++) {
+                    if (currentParent == null) {
+                        throw new YangParseException(module.getName(), line, "Failed to find deviation target.");
+                    }
+                    QName q = path.get(i);
+                    name = q.getLocalName();
+                    if (currentParent instanceof DataNodeContainer) {
+                        currentParent = ((DataNodeContainer) currentParent).getDataChildByName(name);
+                    }
+                }
+
+                if (currentParent == null) {
+                    throw new YangParseException(module.getName(), line, "Failed to find deviation target.");
+                }
+                if (currentParent instanceof SchemaNode) {
+                    dev.setTargetPath(((SchemaNode) currentParent).getPath());
+                }
+
+            } else {
+                processDeviation(dev, dependentModuleBuilder, path, module);
+            }
+        }
+    }
+
+    /**
+     * Correct deviation target path in deviation builder.
+     *
+     * @param dev
+     *            deviation
+     * @param dependentModuleBuilder
+     *            module containing deviation target
+     * @param path
+     *            current deviation target path
+     * @param module
+     *            current module
+     */
+    private void processDeviation(final DeviationBuilder dev, final ModuleBuilder dependentModuleBuilder,
+            final List<QName> path, final ModuleBuilder module) {
+        final int line = dev.getLine();
+        Builder currentParent = dependentModuleBuilder;
+
+        for (int i = 0; i < path.size(); i++) {
+            if (currentParent == null) {
+                throw new YangParseException(module.getName(), line, "Failed to find deviation target.");
+            }
+            QName q = path.get(i);
+            String name = q.getLocalName();
+            if (currentParent instanceof DataNodeContainerBuilder) {
+                currentParent = ((DataNodeContainerBuilder) currentParent).getDataChildByName(name);
+            }
+        }
+
+        if (currentParent == null || !(currentParent instanceof SchemaNodeBuilder)) {
+            throw new YangParseException(module.getName(), line, "Failed to find deviation target.");
+        }
+        dev.setTargetPath(((SchemaNodeBuilder) currentParent).getPath());
     }
 
 }

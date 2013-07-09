@@ -43,7 +43,7 @@ public class GroupingTest {
 
     @Test
     public void testRefine() {
-        Module testModule = TestUtils.findModule(modules, "types2");
+        Module testModule = TestUtils.findModule(modules, "nodes");
 
         ContainerSchemaNode peer = (ContainerSchemaNode) testModule.getDataChildByName("peer");
         ContainerSchemaNode destination = (ContainerSchemaNode) peer.getDataChildByName("destination");
@@ -119,7 +119,7 @@ public class GroupingTest {
 
     @Test
     public void testGrouping() {
-        Module testModule = TestUtils.findModule(modules, "types2");
+        Module testModule = TestUtils.findModule(modules, "custom");
         Set<GroupingDefinition> groupings = testModule.getGroupings();
         assertEquals(1, groupings.size());
         GroupingDefinition grouping = groupings.iterator().next();
@@ -132,12 +132,14 @@ public class GroupingTest {
         // suffix _u = added by uses
         // suffix _g = defined in grouping
 
-        Module testModule = TestUtils.findModule(modules, "types2");
+        Module testModule = TestUtils.findModule(modules, "custom");
 
         // get grouping
         Set<GroupingDefinition> groupings = testModule.getGroupings();
         assertEquals(1, groupings.size());
         GroupingDefinition grouping = groupings.iterator().next();
+
+        testModule = TestUtils.findModule(modules, "nodes");
 
         // get node containing uses
         ContainerSchemaNode peer = (ContainerSchemaNode) testModule.getDataChildByName("peer");

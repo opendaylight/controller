@@ -16,7 +16,7 @@ import java.util.Set;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Module_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Submodule_stmtContext;
-import org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil;
+import org.opendaylight.controller.yang.parser.util.ParserListenerUtils;
 import org.opendaylight.controller.yang.parser.util.YangValidationException;
 
 /**
@@ -60,7 +60,7 @@ final class ValidationUtil {
     }
 
     static String getName(ParseTree child) {
-        return YangModelBuilderUtil.stringFromNode(child);
+        return ParserListenerUtils.stringFromNode(child);
     }
 
     static String f(String base, Object... args) {

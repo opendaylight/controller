@@ -118,10 +118,10 @@ import org.opendaylight.controller.yang.parser.builder.impl.UnionTypeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class YangModelBuilderUtil {
-    private static final Logger logger = LoggerFactory.getLogger(YangModelBuilderUtil.class);
+public final class ParserListenerUtils {
+    private static final Logger logger = LoggerFactory.getLogger(ParserListenerUtils.class);
 
-    private YangModelBuilderUtil() {
+    private ParserListenerUtils() {
     }
 
     /**
@@ -214,6 +214,26 @@ public final class YangModelBuilderUtil {
             }
         }
         return units;
+    }
+
+    /**
+     * Parse given tree and returns default statement as string.
+     *
+     * @param ctx
+     *            context to parse
+     * @return value of default statement as string or null if there is no
+     *         default statement
+     */
+    public static String parseDefault(final ParseTree ctx) {
+        String defaultValue = null;
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree child = ctx.getChild(i);
+            if (child instanceof Default_stmtContext) {
+                defaultValue = stringFromNode(child);
+                break;
+            }
+        }
+        return defaultValue;
     }
 
     /**
@@ -926,8 +946,8 @@ public final class YangModelBuilderUtil {
                 ChoiceCaseBuilder choiceCase = (ChoiceCaseBuilder) parent;
                 Builder choice = choiceCase.getParent();
                 Boolean parentConfig = null;
-                if(choice instanceof ChoiceBuilder) {
-                    parentConfig = ((ChoiceBuilder)choice).isConfiguration();
+                if (choice instanceof ChoiceBuilder) {
+                    parentConfig = ((ChoiceBuilder) choice).isConfiguration();
                 } else {
                     parentConfig = true;
                 }
@@ -1019,17 +1039,14 @@ public final class YangModelBuilderUtil {
                 TypeDefinition<?> baseType = unknownType.build();
                 TypeDefinition<?> result = null;
                 QName qname = new QName(namespace, revision, prefix, typeName);
-                ExtendedType.Builder typeBuilder = null;
-
                 SchemaPath schemaPath = createTypeSchemaPath(actualPath, namespace, revision, prefix, typeName, false,
                         false);
-                typeBuilder = new ExtendedType.Builder(qname, baseType, "", "", schemaPath);
 
+                ExtendedType.Builder typeBuilder = new ExtendedType.Builder(qname, baseType, null, null, schemaPath);
                 typeBuilder.ranges(rangeStatements);
                 typeBuilder.lengths(lengthStatements);
                 typeBuilder.patterns(patternStatements);
                 typeBuilder.fractionDigits(fractionDigits);
-
                 result = typeBuilder.build();
 
                 return result;

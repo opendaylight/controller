@@ -81,7 +81,7 @@ public class ModuleBuilder implements DataNodeContainerBuilder {
     private final Set<NotificationBuilder> addedNotifications = new HashSet<NotificationBuilder>();
     private final Set<IdentitySchemaNodeBuilder> addedIdentities = new HashSet<IdentitySchemaNodeBuilder>();
     private final Set<FeatureBuilder> addedFeatures = new HashSet<FeatureBuilder>();
-    private final Map<List<String>, DeviationBuilder> addedDeviations = new HashMap<List<String>, DeviationBuilder>();
+    private final Set<DeviationBuilder> addedDeviations = new HashSet<DeviationBuilder>();
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Map<List<String>, UnionTypeBuilder> addedUnionTypes = new HashMap<List<String>, UnionTypeBuilder>();
     private final List<ExtensionBuilder> addedExtensions = new ArrayList<ExtensionBuilder>();
@@ -165,8 +165,8 @@ public class ModuleBuilder implements DataNodeContainerBuilder {
 
         // DEVIATIONS
         final Set<Deviation> deviations = new HashSet<Deviation>();
-        for (Map.Entry<List<String>, DeviationBuilder> entry : addedDeviations.entrySet()) {
-            deviations.add(entry.getValue().build());
+        for (DeviationBuilder entry : addedDeviations) {
+            deviations.add(entry.build());
         }
         instance.setDeviations(deviations);
 
@@ -265,6 +265,16 @@ public class ModuleBuilder implements DataNodeContainerBuilder {
         return childNodes;
     }
 
+    @Override
+    public DataSchemaNodeBuilder getDataChildByName(final String name) {
+        for(DataSchemaNodeBuilder child : childNodes) {
+            if(child.getQName().getLocalName().equals(name)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
     public Map<List<String>, TypeAwareBuilder> getDirtyNodes() {
         return dirtyNodes;
     }
@@ -279,6 +289,10 @@ public class ModuleBuilder implements DataNodeContainerBuilder {
 
     public List<UsesNodeBuilder> getAllUsesNodes() {
         return allUsesNodes;
+    }
+
+    public Set<DeviationBuilder> getDeviations() {
+        return addedDeviations;
     }
 
     public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
@@ -754,16 +768,14 @@ public class ModuleBuilder implements DataNodeContainerBuilder {
         }
     }
 
-    public DeviationBuilder addDeviation(final String targetPath, final List<String> parentPath, final int line) {
+    public DeviationBuilder addDeviation(final int line, final String targetPath) {
         Builder parent = getActualNode();
         if (parent != null) {
             throw new YangParseException(name, line, "deviation can be defined only in module or submodule");
         }
 
-        final List<String> pathToDeviation = new ArrayList<String>(parentPath);
-        pathToDeviation.add(targetPath);
-        final DeviationBuilder builder = new DeviationBuilder(targetPath, line);
-        addedDeviations.put(pathToDeviation, builder);
+        final DeviationBuilder builder = new DeviationBuilder(line, targetPath);
+        addedDeviations.add(builder);
         return builder;
     }
 

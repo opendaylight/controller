@@ -34,7 +34,7 @@ import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.Comparators;
-import org.opendaylight.controller.yang.parser.util.YangModelBuilderUtil;
+import org.opendaylight.controller.yang.parser.util.ParserListenerUtils;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBuilder {
@@ -61,7 +61,7 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
     AugmentationSchemaBuilderImpl(final int line, final String augmentTargetStr) {
         this.augmentTargetStr = augmentTargetStr;
         this.line = line;
-        final SchemaPath targetPath = YangModelBuilderUtil.parseAugmentPath(augmentTargetStr);
+        final SchemaPath targetPath = ParserListenerUtils.parseAugmentPath(augmentTargetStr);
         dirtyAugmentTarget = targetPath;
         instance = new AugmentationSchemaImpl(targetPath);
     }
@@ -89,6 +89,16 @@ public final class AugmentationSchemaBuilderImpl implements AugmentationSchemaBu
     @Override
     public Set<DataSchemaNode> getChildNodes() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public DataSchemaNodeBuilder getDataChildByName(final String name) {
+        for(DataSchemaNodeBuilder child : childNodes) {
+            if(child.getQName().getLocalName().equals(name)) {
+                return child;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -28,6 +28,8 @@ public interface DataNodeContainerBuilder extends Builder {
 
     Set<DataSchemaNodeBuilder> getChildNodeBuilders();
 
+    DataSchemaNodeBuilder getDataChildByName(String name);
+
     void addChildNode(DataSchemaNodeBuilder childNode);
 
     Set<GroupingDefinition> getGroupings();

@@ -4,7 +4,7 @@ module test2 {
     namespace "urn:simple.demo.test2";
     prefix "t2";
 
-    import types2 {
+    import custom {
         prefix "data";
     }
 

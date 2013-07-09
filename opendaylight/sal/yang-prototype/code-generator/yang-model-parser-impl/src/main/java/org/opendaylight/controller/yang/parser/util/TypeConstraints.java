@@ -24,7 +24,7 @@ public final class TypeConstraints {
     private final int line;
     private final List<List<RangeConstraint>> ranges = new ArrayList<List<RangeConstraint>>();
     private final List<List<LengthConstraint>> lengths = new ArrayList<List<LengthConstraint>>();
-    private final List<PatternConstraint> patterns = new ArrayList<PatternConstraint>();
+    private final List<List<PatternConstraint>> patterns = new ArrayList<List<PatternConstraint>>();
     private final List<Integer> fractionDigits = new ArrayList<Integer>();
 
     public TypeConstraints(final String moduleName, final int line) {
@@ -195,11 +195,14 @@ public final class TypeConstraints {
     }
 
     public List<PatternConstraint> getPatterns() {
-        return patterns;
+        if(patterns.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return patterns.get(0);
     }
 
     public void addPatterns(final List<PatternConstraint> patterns) {
-        this.patterns.addAll(patterns);
+        this.patterns.add(patterns);
     }
 
     public Integer getFractionDigits() {

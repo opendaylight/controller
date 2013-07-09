@@ -1,0 +1,97 @@
+module types {
+    yang-version 1;
+    namespace "urn:simple.types.test";
+    prefix "t";
+    
+    organization "opendaylight";
+    contact "http://www.opendaylight.org/";
+    description "This is types-data test description";
+
+    revision "2013-07-03" {
+        reference " WILL BE DEFINED LATER";
+    }
+
+    typedef int32-ext1 {
+        type int32 {
+            range "2..20";
+        }
+    }
+
+    typedef int32-ext2 {
+        type int32-ext1 {
+            range "3..9|11..max";
+        }
+        units "mile";
+        default "11";
+    }
+
+    typedef string-ext1 {
+        type string {
+            pattern "[a-k]*";
+            length "5..11";
+        }
+    }
+
+    typedef string-ext2 {
+        type string-ext1 {
+            length "6..10";
+        }
+    }
+    
+    typedef string-ext3 {
+        type string-ext2 {
+            pattern "[b-u]*";
+        }
+    }
+
+    typedef string-ext4 {
+        type string-ext3 {
+            pattern "[e-z]*";
+        }
+    }
+
+    typedef my-decimal-type {
+        type decimal64 {
+            fraction-digits 6;
+        }
+    }
+
+    typedef my-union {
+        type union {
+            type int16 {
+                range "1..100";
+            }
+            type int32;
+        }
+    }
+
+    typedef my-union-ext {
+        type my-union;
+    }
+
+    typedef nested-union2 {
+        type union {
+            type my-union-ext;
+            type string;
+        }
+    }
+
+    container interfaces {
+         list ifEntry {
+             key "ifIndex";
+
+             leaf ifIndex {
+                 type uint32;
+                 units minutes;
+             }
+
+             leaf ifMtu {
+                 type int32;
+             }
+
+             min-elements 1;
+             max-elements 11;
+         }
+    }
+
+}

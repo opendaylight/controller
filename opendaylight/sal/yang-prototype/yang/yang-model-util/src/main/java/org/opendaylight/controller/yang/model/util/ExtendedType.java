@@ -51,7 +51,7 @@ public class ExtendedType implements TypeDefinition<TypeDefinition<?>> {
         private List<UnknownSchemaNode> unknownSchemaNodes = Collections
                 .emptyList();
         private Status status = Status.CURRENT;
-        private String units = "";
+        private String units = null;
         private Object defaultValue = null;
         private boolean addedByUses;
 
