@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.yang.data.api;
 
-import org.opendaylight.controller.yang.common.QName;
 
 /**
  * Base representation of node in the data tree, defines basic parameters of
@@ -16,27 +15,20 @@ import org.opendaylight.controller.yang.common.QName;
  * 
  * @param <T>
  */
-public interface Node<T> {
+public interface MutableNode<T> extends Node<T> {
 
     /**
-     * Returns the name of the Node
-     * 
-     * @return qName of node
+     * @param parent value to set
      */
-    QName getNodeType();
-
+    void setParent(CompositeNode parent);
+    
     /**
-     * Returns parent node
-     * 
-     * @return parent node
+     * @param value value to set (children list or leaf value)
      */
-    CompositeNode getParent();
-
+    void setValue(T value);
+    
     /**
-     * Returns the value that holds current node, if no value is defined method
-     * can return <code>null</code>
-     * 
-     * @return Returns the value that holds current node.
+     * @param action value to set
      */
-    T getValue();
+    void setModifyAction(ModifyAction action);
 }

@@ -19,6 +19,7 @@
 		<module>yang-common</module>
 		<module>yang-data-api</module>
 		<module>yang-data-util</module>
+		<module>yang-data-impl</module>
 		<module>yang-model-api</module>
 		<module>yang-model-util</module>
 		<module>yang-binding</module>
