@@ -6,6 +6,7 @@
     <version>0.5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>concepts-lang</module>
         <module>yang</module>
         <module>code-generator</module>
         <module>model</module>
