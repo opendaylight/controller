@@ -305,26 +305,6 @@ CommandProvider {
         nodeConnectorNames = new ConcurrentHashMap<Node, Map<String, NodeConnector>>();
     }
 
-    @SuppressWarnings("deprecation")
-    private void destroyCaches(String container) {
-        if (this.clusterContainerService == null) {
-            log.info("un-initialized clusterContainerService, can't create cache");
-            return;
-        }
-
-        clusterContainerService.destroyCache("switchmanager.subnetsConfigList");
-        clusterContainerService.destroyCache("switchmanager.spanConfigList");
-        clusterContainerService.destroyCache("switchmanager.nodeConfigList");
-        clusterContainerService.destroyCache("switchmanager.subnets");
-        clusterContainerService.destroyCache("switchmanager.configSaveEvent");
-        clusterContainerService.destroyCache("switchmanager.nodeProps");
-        clusterContainerService
-        .destroyCache("switchmanager.nodeConnectorProps");
-        clusterContainerService
-        .destroyCache("switchmanager.nodeConnectorNames");
-        nonClusterObjectCreate();
-    }
-
     @Override
     public List<SubnetConfig> getSubnetsConfigList() {
         return new ArrayList<SubnetConfig>(subnetsConfigList.values());
@@ -1468,7 +1448,13 @@ CommandProvider {
         if (nodeSet == null) {
             return;
         }
+        List<String> nodeArray = new ArrayList<String>();
         for (Node node : nodeSet) {
+            nodeArray.add(node.toString());
+        }
+        Collections.sort(nodeArray);
+        for (String str: nodeArray) {
+            Node node = Node.fromString(str);
             Description desc = ((Description) getNodeProp(node,
                     Description.propertyName));
             Tier tier = ((Tier) getNodeProp(node, Tier.TierPropName));
