@@ -16,6 +16,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.opendaylight.controller.sal.utils.HexEncode;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.openflow.protocol.OFMatch;
 import org.openflow.util.U16;
 import org.openflow.util.U8;
@@ -201,17 +202,15 @@ public class V6Match extends OFMatch implements Cloneable {
         }
 
         this.dataLayerSourceMask = null;
-        if (match.getDataLayerSource() != null) {
+        if (match.getDataLayerSource() != null && !NetUtils.isZeroMAC(match.getDataLayerSource())) {
             this.setDataLayerSource(match.getDataLayerSource(), null);
         } else {
-            this.dataLayerSource = null;
             this.dlSourceState = MatchFieldState.MATCH_ABSENT;
         }
         this.dataLayerDestinationMask = null;
-        if (match.getDataLayerDestination() != null) {
+        if (match.getDataLayerDestination() != null && !NetUtils.isZeroMAC(match.getDataLayerDestination())) {
             this.setDataLayerDestination(match.getDataLayerDestination(), null);
         } else {
-            this.dataLayerDestination = null;
             this.dlDestState = MatchFieldState.MATCH_ABSENT;
         }
 
@@ -1369,5 +1368,123 @@ public class V6Match extends OFMatch implements Cloneable {
             nbytes[i] <<= 8 - bits;
         }
         return nbytes;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Arrays.hashCode(dataLayerDestinationMask);
+        result = prime * result + Arrays.hashCode(dataLayerSourceMask);
+        result = prime * result + dataLayerTypeMask;
+        result = prime * result + dataLayerVirtualLanMask;
+        result = prime * result + dataLayerVirtualLanPriorityCodePointMask;
+        result = prime * result + ((dlDestState == null) ? 0 : dlDestState.hashCode());
+        result = prime * result + ((dlSourceState == null) ? 0 : dlSourceState.hashCode());
+        result = prime * result + ((dlVlanState == null) ? 0 : dlVlanState.hashCode());
+        result = prime * result + dstIPv6SubnetMaskbits;
+        result = prime * result + ((ethTypeState == null) ? 0 : ethTypeState.hashCode());
+        result = prime * result + inputPortMask;
+        result = prime * result + ((inputPortState == null) ? 0 : inputPortState.hashCode());
+        result = prime * result + match_len;
+        result = prime * result + ((networkDestinationMask == null) ? 0 : networkDestinationMask.hashCode());
+        result = prime * result + networkProtocolMask;
+        result = prime * result + ((networkSourceMask == null) ? 0 : networkSourceMask.hashCode());
+        result = prime * result + networkTypeOfServiceMask;
+        result = prime * result + ((nwDst == null) ? 0 : nwDst.hashCode());
+        result = prime * result + ((nwDstState == null) ? 0 : nwDstState.hashCode());
+        result = prime * result + ((nwProtoState == null) ? 0 : nwProtoState.hashCode());
+        result = prime * result + ((nwSrc == null) ? 0 : nwSrc.hashCode());
+        result = prime * result + ((nwSrcState == null) ? 0 : nwSrcState.hashCode());
+        result = prime * result + ((nwTosState == null) ? 0 : nwTosState.hashCode());
+        result = prime * result + pad_size;
+        result = prime * result + srcIPv6SubnetMaskbits;
+        result = prime * result + ((tpDstState == null) ? 0 : tpDstState.hashCode());
+        result = prime * result + ((tpSrcState == null) ? 0 : tpSrcState.hashCode());
+        result = prime * result + transportDestinationMask;
+        result = prime * result + transportSourceMask;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        V6Match other = (V6Match) obj;
+        if (!Arrays.equals(dataLayerDestinationMask, other.dataLayerDestinationMask))
+            return false;
+        if (!Arrays.equals(dataLayerSourceMask, other.dataLayerSourceMask))
+            return false;
+        if (dataLayerTypeMask != other.dataLayerTypeMask)
+            return false;
+        if (dataLayerVirtualLanMask != other.dataLayerVirtualLanMask)
+            return false;
+        if (dataLayerVirtualLanPriorityCodePointMask != other.dataLayerVirtualLanPriorityCodePointMask)
+            return false;
+        if (dlDestState != other.dlDestState)
+            return false;
+        if (dlSourceState != other.dlSourceState)
+            return false;
+        if (dlVlanState != other.dlVlanState)
+            return false;
+        if (dstIPv6SubnetMaskbits != other.dstIPv6SubnetMaskbits)
+            return false;
+        if (ethTypeState != other.ethTypeState)
+            return false;
+        if (inputPortMask != other.inputPortMask)
+            return false;
+        if (inputPortState != other.inputPortState)
+            return false;
+        if (match_len != other.match_len)
+            return false;
+        if (networkDestinationMask == null) {
+            if (other.networkDestinationMask != null)
+                return false;
+        } else if (!networkDestinationMask.equals(other.networkDestinationMask))
+            return false;
+        if (networkProtocolMask != other.networkProtocolMask)
+            return false;
+        if (networkSourceMask == null) {
+            if (other.networkSourceMask != null)
+                return false;
+        } else if (!networkSourceMask.equals(other.networkSourceMask))
+            return false;
+        if (networkTypeOfServiceMask != other.networkTypeOfServiceMask)
+            return false;
+        if (nwDst == null) {
+            if (other.nwDst != null)
+                return false;
+        } else if (!nwDst.equals(other.nwDst))
+            return false;
+        if (nwDstState != other.nwDstState)
+            return false;
+        if (nwProtoState != other.nwProtoState)
+            return false;
+        if (nwSrc == null) {
+            if (other.nwSrc != null)
+                return false;
+        } else if (!nwSrc.equals(other.nwSrc))
+            return false;
+        if (nwSrcState != other.nwSrcState)
+            return false;
+        if (nwTosState != other.nwTosState)
+            return false;
+        if (pad_size != other.pad_size)
+            return false;
+        if (srcIPv6SubnetMaskbits != other.srcIPv6SubnetMaskbits)
+            return false;
+        if (tpDstState != other.tpDstState)
+            return false;
+        if (tpSrcState != other.tpSrcState)
+            return false;
+        if (transportDestinationMask != other.transportDestinationMask)
+            return false;
+        if (transportSourceMask != other.transportSourceMask)
+            return false;
+        return true;
     }
 }
