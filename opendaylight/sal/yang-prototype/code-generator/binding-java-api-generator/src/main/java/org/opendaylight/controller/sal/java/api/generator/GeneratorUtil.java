@@ -584,15 +584,15 @@ public final class GeneratorUtil {
                     builder.append(type.getName());
                 }
             }
+            if (type.equals(Types.voidType())) {
+                return "void";
+            }
             if (type instanceof ParameterizedType) {
                 final ParameterizedType pType = (ParameterizedType) type;
                 final Type[] pTypes = pType.getActualTypeArguments();
                 builder.append("<");
                 builder.append(getParameters(pTypes, imports, currentPkg));
                 builder.append(">");
-            }
-            if (builder.toString().equals("Void")) {
-                return "void";
             }
             return builder.toString();
         }
@@ -609,10 +609,17 @@ public final class GeneratorUtil {
             }
 
             String wildcardParam = "";
-            if (t instanceof WildcardType) {
-                wildcardParam = "? extends ";
+            if (t.equals(Types.voidType())) {
+                builder.append("java.lang.Void" + separator);
+                continue;
+            } else {
+
+                if (t instanceof WildcardType) {
+                    wildcardParam = "? extends ";
+                }
+
+                builder.append(wildcardParam + getExplicitType(t, availableImports, currentPkg) + separator);
             }
-            builder.append(wildcardParam + getExplicitType(t, availableImports, currentPkg) + separator);
         }
         return builder.toString();
     }

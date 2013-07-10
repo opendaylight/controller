@@ -327,7 +327,8 @@ public final class BindingGeneratorImpl implements BindingGenerator {
             if (rpc != null) {
 
                 String rpcName = parseToClassName(rpc.getQName().getLocalName());
-                MethodSignatureBuilder method = interfaceBuilder.addMethod(rpcName);
+                String rpcMethodName = parseToValidParamName(rpcName);
+                MethodSignatureBuilder method = interfaceBuilder.addMethod(rpcMethodName);
 
                 final List<DataNodeIterator> rpcInOut = new ArrayList<>();
 
