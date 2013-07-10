@@ -88,19 +88,19 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
     private Timer discoveryTimer;
     private DiscoveryTimerTask discoveryTimerTask;
-    private long discoveryTimerTick = 1L * 1000; // per tick in msec
+    private final static long discoveryTimerTick = 2L * 1000; // per tick in msec
     private int discoveryTimerTickCount = 0; // main tick counter
     // Max # of ports handled in one batch
     private int discoveryBatchMaxPorts = 500;
     // Periodically restart batching process
     private int discoveryBatchRestartTicks = getDiscoveryInterval();
-    private int discoveryBatchPausePeriod = 5; // pause for few secs
+    private int discoveryBatchPausePeriod = 5;
     // Pause after this point
     private int discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod;
     // Number of retries after initial timeout
     private int discoveryRetry = getDiscoveryRetry();
-    private int discoveryTimeoutTicks = getDiscoveryTimeout(); // timeout in sec
-    private int discoveryAgeoutTicks = 120; // age out 2 min
+    private int discoveryTimeoutTicks = getDiscoveryTimeout();
+    private int discoveryAgeoutTicks = getDiscoveryAgeout();
     // multiple of discoveryBatchRestartTicks
     private int discoveryConsistencyCheckMultiple = 2;
     // CC tick counter
@@ -158,6 +158,37 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             checkAging();
             doConsistencyCheck();
             doDiscovery();
+        }
+    }
+
+    public enum DiscoveryPeriod {
+        INTERVAL(300),
+        TIMEOUT (60),
+        AGEOUT  (120);
+
+        private int time;   // sec
+        private int tick;   // tick
+
+        DiscoveryPeriod(int time) {
+            this.time = time;
+            this.tick = time2Tick(time);
+        }
+
+        public int getTime() {
+            return time;
+        }
+
+        public void setTime(int time) {
+            this.time = time;
+            this.tick = time2Tick(time);
+        }
+
+        public int getTick() {
+            return tick;
+        }
+
+        private int time2Tick(int time) {
+            return (int) (time / (discoveryTimerTick / 1000));
         }
     }
 
@@ -1476,44 +1507,50 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         return sourceMac;
     }
 
-    /**
-     * This method returns the interval which determines how often the discovery
-     * packets will be sent. Default is 300 seconds.
-     *
-     * @return The discovery interval in second
-     */
-    private int getDiscoveryInterval() {
-        String elapsedTime = System.getProperty("of.discoveryInterval");
-        int rv = 300;
-
-        try {
-            if (elapsedTime != null) {
-                rv = Integer.parseInt(elapsedTime);
-            }
-        } catch (Exception e) {
+    private int getDiscoveryTicks(DiscoveryPeriod dp, String val) {
+        if (dp == null) {
+            return 0;
         }
 
-        return rv;
+        if (val != null) {
+            try {
+                dp.setTime(Integer.parseInt(val));
+            } catch (Exception e) {
+            }
+        }
+
+        return dp.getTick();
+    }
+
+    /**
+     * This method returns the interval which determines how often the discovery
+     * packets will be sent.
+     *
+     * @return The discovery interval in ticks
+     */
+    private int getDiscoveryInterval() {
+        String intvl = System.getProperty("of.discoveryInterval");
+        return getDiscoveryTicks(DiscoveryPeriod.INTERVAL, intvl);
     }
 
     /**
      * This method returns the timeout value in waiting for response of a
-     * discovery query. Default is 60 seconds.
+     * discovery query.
      *
-     * @return The discovery timeout in second
+     * @return The discovery timeout in ticks
      */
     private int getDiscoveryTimeout() {
-        String elapsedTime = System.getProperty("of.discoveryTimeout");
-        int rv = 60;
+        String timeout = System.getProperty("of.discoveryTimeout");
+        return getDiscoveryTicks(DiscoveryPeriod.TIMEOUT, timeout);
+    }
 
-        try {
-            if (elapsedTime != null) {
-                rv = Integer.parseInt(elapsedTime);
-            }
-        } catch (Exception e) {
-        }
-
-        return rv;
+    /**
+     * This method returns the discovery entry aging time in ticks.
+     *
+     * @return The aging time in ticks
+     */
+    private int getDiscoveryAgeout() {
+        return getDiscoveryTicks(DiscoveryPeriod.AGEOUT, null);
     }
 
     /**

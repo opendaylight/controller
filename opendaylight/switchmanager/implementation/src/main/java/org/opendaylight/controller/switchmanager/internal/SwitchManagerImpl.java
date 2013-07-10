@@ -1662,7 +1662,13 @@ CommandProvider {
         if (nodeSet == null) {
             return;
         }
+        List<String> nodeArray = new ArrayList<String>();
         for (Node node : nodeSet) {
+            nodeArray.add(node.toString());
+        }
+        Collections.sort(nodeArray);
+        for (String str: nodeArray) {
+            Node node = Node.fromString(str);
             Description desc = ((Description) getNodeProp(node,
                     Description.propertyName));
             Tier tier = ((Tier) getNodeProp(node, Tier.TierPropName));
