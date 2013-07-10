@@ -8,7 +8,7 @@
         <artifactId>yang-prototype</artifactId>
         <version>0.5-SNAPSHOT</version>
     </parent>
-    <version>0.5.3-SNAPSHOT</version>
+    <version>0.5.4-SNAPSHOT</version>
 
     <artifactId>binding-generator</artifactId>
     <packaging>pom</packaging>
@@ -17,7 +17,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- version of YANG tools dependencies -->
-        <yang.version>0.5.3-SNAPSHOT</yang.version>
+        <yang.version>0.5.4-SNAPSHOT</yang.version>
     </properties>
 
     <modules>
