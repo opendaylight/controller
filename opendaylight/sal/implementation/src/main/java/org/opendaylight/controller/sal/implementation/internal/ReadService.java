@@ -383,16 +383,15 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---SAL Reader testing commands---\n");
-        help
-        .append("\t readflows <sid> <cached>  - Read all the (cached) flows from the openflow switch <sid>\n");
-        help
-        .append("\t readflow  <sid> <cached>  - Read the (cached) sample flow from the openflow switch <sid>\n");
-        help
-        .append("\t readdesc  <sid> <cached>  - Read the (cached) description from openflow switch <sid>\n");
-        help
-        .append("\t           cached=true/false. If false or not specified, the protocol plugin cached info\n");
-        help
-        .append("\t           is returned. If true, the info is directly retrieved from the switch\n");
+        help.append("\t readflows <sid> <cached> - Read all the (cached) flows from the openflow switch <sid>\n");
+        help.append("\t readflow  <sid> <cached> - Read the (cached) sample flow from the openflow switch <sid>\n");
+        help.append("\t readdescr <sid> <cached> - Read the (cached) description from openflow switch <sid>\n");
+        help.append("\t\t cached = (true|false). If false or not specified, the plugin cached info\n");
+        help.append("\t\t is returned. If true, the info is directly retrieved from the switch\n");
+        help.append("\t readport <sid> <port>    - Read port statistics for the specified port\n");
+        help.append("\t readports <sid>          - Read port statistics for all ports of specified switch\n");
+        help.append("\t readtable <sid> <tableid>- Read specified table statistics\n");
+
         return help.toString();
     }
 

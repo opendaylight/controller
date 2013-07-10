@@ -168,23 +168,18 @@ public class InventoryServiceShim implements IContainerListener,
 
     @Override
     public void receive(ISwitch sw, OFMessage msg) {
-        try {
-            if (msg instanceof OFPortStatus) {
-                handlePortStatusMessage(sw, (OFPortStatus) msg);
-            }
-        } catch (ConstructionException e) {
-            logger.error("",e);
+        if (msg instanceof OFPortStatus) {
+            handlePortStatusMessage(sw, (OFPortStatus) msg);
         }
         return;
     }
 
-    protected void handlePortStatusMessage(ISwitch sw, OFPortStatus m)
-            throws ConstructionException {
+    protected void handlePortStatusMessage(ISwitch sw, OFPortStatus m) {
         Node node = NodeCreator.createOFNode(sw.getId());
-        NodeConnector nodeConnector = PortConverter.toNodeConnector(m.getDesc()
-                .getPortNumber(), node);
-        UpdateType type = null;
+        NodeConnector nodeConnector = PortConverter.toNodeConnector(
+            m.getDesc().getPortNumber(), node);
 
+        UpdateType type = null;
         if (m.getReason() == (byte) OFPortReason.OFPPR_ADD.ordinal()) {
             type = UpdateType.ADDED;
         } else if (m.getReason() == (byte) OFPortReason.OFPPR_DELETE.ordinal()) {
@@ -197,8 +192,7 @@ public class InventoryServiceShim implements IContainerListener,
 
         if (type != null) {
             // get node connector properties
-            Set<Property> props = InventoryServiceHelper.OFPortToProps(m
-                    .getDesc());
+            Set<Property> props = InventoryServiceHelper.OFPortToProps(m.getDesc());
             notifyInventoryShimListener(nodeConnector, type, props);
         }
     }

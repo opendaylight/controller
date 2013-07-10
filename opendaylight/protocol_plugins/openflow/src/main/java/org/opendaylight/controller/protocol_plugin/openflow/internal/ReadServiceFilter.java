@@ -10,6 +10,7 @@
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
@@ -437,7 +437,8 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
         switch (type) {
         case ADDED:
             if (!containerToNc.containsKey(containerName)) {
-                containerToNc.put(containerName, new ConcurrentSkipListSet<NodeConnector>());
+                containerToNc.put(containerName,
+                    Collections.newSetFromMap(new ConcurrentHashMap<NodeConnector,Boolean>()));
             }
             containerToNc.get(containerName).add(p);
             if (!containerToNode.containsKey(containerName)) {
@@ -467,7 +468,6 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
                         nodeSet.remove(node);
                     }
                 }
-
             }
             break;
         case CHANGED:
