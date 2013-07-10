@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///gE\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/InventoryServiceShim.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-07-10T15:26:07Z",
+      "side": 1,
+      "message": "Given you replaced new Node() with NodeCrator.createOFNode(), this function cannot  throw the this exception any longer.\n\nThis is minor, we can clean it up later.",
+      "revId": "59b93085316a18beeddec51c122775f6191fe599",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
