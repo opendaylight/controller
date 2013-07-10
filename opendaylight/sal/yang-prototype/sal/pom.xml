@@ -20,7 +20,7 @@
     </modules>
 
     <properties>
-        <yang.version>0.5.3-SNAPSHOT</yang.version>
+        <yang.version>0.5.4-SNAPSHOT</yang.version>
     </properties>
 
     <dependencyManagement>

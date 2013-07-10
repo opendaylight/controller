@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>binding-generator</artifactId>
-    <version>0.5.3-SNAPSHOT</version>
+    <version>0.5.4-SNAPSHOT</version>
   </parent>
   <artifactId>binding-generator-util</artifactId>
   <dependencies>
