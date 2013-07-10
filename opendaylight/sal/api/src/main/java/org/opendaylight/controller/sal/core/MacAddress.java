@@ -8,14 +8,13 @@
 
 package org.opendaylight.controller.sal.core;
 
-import java.util.Arrays;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.sal.utils.HexEncode;
+
 /**
  * The class contains MAC address property.
  */
@@ -24,7 +23,7 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 public class MacAddress extends Property implements Cloneable {
     private static final long serialVersionUID = 1L;
     @XmlElement(name="macAddress")
-    private final byte[] address;
+    private final String address;
     public static final String name = "macAddress";
 
     /*
@@ -42,20 +41,36 @@ public class MacAddress extends Property implements Cloneable {
      *
      *
      * @param nodeMacAddress
-     *            Data Link Address for the node
+     *            Data Link Address for the node in byte array format
      *
      * @return the constructed object
      */
     public MacAddress(byte[] nodeMacAddress) {
         super(name);
-        this.address = nodeMacAddress.clone();
+        this.address = HexEncode.bytesToHexStringFormat(nodeMacAddress);
     }
 
     /**
-     * @return the node MAC address
+     * Constructor to create DatalinkAddress property which contains the MAC
+     * address. The property will be attached to a
+     * {@link org.opendaylight.controller.sal.core.Node}.
+     *
+     *
+     * @param nodeMacAddress
+     *            Data Link Address for the node in String format
+     *
+     * @return the constructed object
+     */
+    public MacAddress(String nodeMacAddress) {
+        super(name);
+        this.address = nodeMacAddress;
+    }
+
+    /**
+     * @return the node MAC address in byte array format
      */
     public byte[] getMacAddress() {
-        return this.address.clone();
+        return HexEncode.bytesFromHexString(this.address);
     }
 
     @Override
@@ -67,7 +82,8 @@ public class MacAddress extends Property implements Cloneable {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Arrays.hashCode(address);
+        result = prime * result
+                + ((address == null) ? 0 : address.hashCode());
         return result;
     }
 
@@ -83,7 +99,7 @@ public class MacAddress extends Property implements Cloneable {
             return false;
         }
         MacAddress other = (MacAddress) obj;
-        if (!Arrays.equals(address, other.address)) {
+        if (!address.equals(other.address)) {
             return false;
         }
         return true;
@@ -91,7 +107,6 @@ public class MacAddress extends Property implements Cloneable {
 
     @Override
     public String toString() {
-        return "MacAddress [address=" +
-            HexEncode.bytesToHexStringFormat(address) + "]";
+        return "MacAddress[" + address + "]";
     }
 }
