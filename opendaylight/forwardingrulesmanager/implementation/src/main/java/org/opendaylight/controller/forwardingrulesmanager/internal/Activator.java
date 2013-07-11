@@ -65,7 +65,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public Object[] getImplementations() {
-        Object[] res = { ForwardingRulesManagerImpl.class };
+        Object[] res = { ForwardingRulesManager.class };
         return res;
     }
 
@@ -86,7 +86,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public void configureInstance(Component c, Object imp, String containerName) {
-        if (imp.equals(ForwardingRulesManagerImpl.class)) {
+        if (imp.equals(ForwardingRulesManager.class)) {
             String interfaces[] = null;
             Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
             Set<String> propSet = new HashSet<String>();

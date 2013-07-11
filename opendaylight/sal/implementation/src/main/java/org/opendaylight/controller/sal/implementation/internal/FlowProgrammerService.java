@@ -116,20 +116,20 @@ public class FlowProgrammerService implements IFlowProgrammerService,
     }
 
     // Set the reference to the plugin flow programmer
-    public void setService(Map props, IPluginInFlowProgrammerService s) {
+    public void setService(Map<String, Object> props, IPluginInFlowProgrammerService s) {
         if (this.pluginFlowProgrammer == null) {
             logger.error("pluginFlowProgrammer store null");
             return;
         }
 
-        logger.trace("Got a service set request {}", s);
-        String type = null;
-        for (Object e : props.entrySet()) {
-            Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:({}) value:({})", entry.getKey(),
-                    entry.getValue());
+        if (logger.isTraceEnabled()) {
+            logger.trace("Got a service set request {}", s);
+            for (Map.Entry<String, Object> entry : props.entrySet()) {
+                logger.trace("Prop key:({}) value:({})", entry.getKey(), entry.getValue());
+            }
         }
 
+        String type = null;
         Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
         if (value instanceof String) {
             type = (String) value;
@@ -143,20 +143,21 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         }
     }
 
-    public void unsetService(Map props, IPluginInFlowProgrammerService s) {
+    public void unsetService(Map<String, Object> props, IPluginInFlowProgrammerService s) {
         if (this.pluginFlowProgrammer == null) {
             logger.error("pluginFlowProgrammer store null");
             return;
         }
 
-        String type = null;
         logger.debug("Received unsetpluginFlowProgrammer request");
-        for (Object e : props.entrySet()) {
-            Map.Entry entry = (Map.Entry) e;
-            logger.trace("Prop key:({}) value:({})", entry.getKey(),
-                    entry.getValue());
+        if (logger.isTraceEnabled()) {
+            logger.trace("Got a service set request {}", s);
+            for (Map.Entry<String, Object> entry : props.entrySet()) {
+                logger.trace("Prop key:({}) value:({})", entry.getKey(), entry.getValue());
+            }
         }
 
+        String type = null;
         Object value = props.get(GlobalConstants.PROTOCOLPLUGINTYPE.toString());
         if (value instanceof String) {
             type = (String) value;

@@ -88,13 +88,13 @@ import org.slf4j.LoggerFactory;
  * the network. It also maintains the central repository of all the forwarding
  * rules installed on the network nodes.
  */
-public class ForwardingRulesManagerImpl implements IForwardingRulesManager, PortGroupChangeListener,
+public class ForwardingRulesManager implements IForwardingRulesManager, PortGroupChangeListener,
         IContainerListener, ISwitchManagerAware, IConfigurationContainerAware, IInventoryListener, IObjectReader,
         ICacheUpdateAware<Long, String>, CommandProvider, IFlowProgrammerListener {
     private static final String SAVE = "Save";
     private static final String NODEDOWN = "Node is Down";
     private static final String SUCCESS = StatusCode.SUCCESS.toString();
-    private static final Logger log = LoggerFactory.getLogger(ForwardingRulesManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ForwardingRulesManager.class);
     private Map<Long, String> flowsSaveEvent;
     private String frmFileName;
     private String portGroupFileName;
@@ -1690,7 +1690,7 @@ public class ForwardingRulesManagerImpl implements IForwardingRulesManager, Port
             FlowEntryInstall flowEntries = mapEntry.getValue();
             // Skip internal generated static flows
             if (!flowEntries.isInternal()) {
-                inactiveFlows.put(flowEntries.getOriginal(), null);
+                inactiveFlows.put(flowEntries.getOriginal(), flowEntries.getOriginal());
             }
         }
 
