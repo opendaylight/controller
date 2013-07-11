@@ -1,18 +1,23 @@
 package org.opendaylight.controller.forwardingrulesmanager.internal;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Bundle;
+
 import javax.inject.Inject;
 
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
@@ -25,14 +30,15 @@ import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.osgi.framework.BundleContext;
-import static org.junit.Assert.*;
-import org.ops4j.pax.exam.junit.Configuration;
-import static org.ops4j.pax.exam.CoreOptions.*;
-
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.PathUtils;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 public class ForwardingRulesManagerIT {
@@ -166,8 +172,7 @@ public class ForwardingRulesManagerIT {
         // Assert if true, if false we are good to go!
         assertFalse(debugit);
 
-        ServiceReference r = bc
-                .getServiceReference(IForwardingRulesManager.class.getName());
+        ServiceReference r = bc.getServiceReference(IForwardingRulesManager.class.getName());
         if (r != null) {
             this.manager = (IForwardingRulesManager) bc.getService(r);
         }
@@ -195,8 +200,10 @@ public class ForwardingRulesManagerIT {
         Node node = NodeCreator.createOFNode(1L);
         FlowEntry fe = new FlowEntry("g1", "f1", flow, node);
 
-        Status stat = manager.installFlowEntry(null);
-        Assert.assertTrue(stat.getCode().equals(StatusCode.NOTACCEPTABLE));
+        Status stat = manager.installFlowEntry(fe);
+
+        // OF plugin is not there in integration testing mode
+        Assert.assertTrue(stat.getCode() == StatusCode.NOSERVICE);
     }
 
 }
