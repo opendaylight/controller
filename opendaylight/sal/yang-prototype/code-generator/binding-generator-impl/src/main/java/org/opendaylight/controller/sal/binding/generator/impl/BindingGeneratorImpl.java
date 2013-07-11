@@ -11,7 +11,6 @@ import static org.opendaylight.controller.binding.generator.util.BindingGenerato
 import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findDataSchemaNode;
 import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findParentModule;
 
-import java.util.*;
 import java.util.concurrent.Future;
 
 import java.util.ArrayList;
@@ -21,9 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
 
-import org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
@@ -856,11 +853,11 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                     if (genTOBuilder != null) {
                         returnType = new ReferencedTypeImpl(genTOBuilder.getPackageName(), genTOBuilder.getName());
                     }
-                } else if(typeDef instanceof BitsTypeDefinition) {
+                } else if (typeDef instanceof BitsTypeDefinition) {
                     GeneratedTOBuilder genTOBuilder = addEnclosedTOToTypeBuilder(typeDef, typeBuilder, leafName);
                     if (genTOBuilder != null) {
                         returnType = new ReferencedTypeImpl(genTOBuilder.getPackageName(), genTOBuilder.getName());
-                    }                    
+                    }
                 } else {
                     returnType = typeProvider.javaTypeForSchemaDefinitionType(typeDef);
                 }
@@ -1184,23 +1181,23 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         return genTOBuilder;
     }
 
-    
-    private GeneratedTOBuilder addEnclosedTOToTypeBuilder( TypeDefinition<?> typeDef, GeneratedTypeBuilder typeBuilder, String leafName) { 
+    private GeneratedTOBuilder addEnclosedTOToTypeBuilder(TypeDefinition<?> typeDef, GeneratedTypeBuilder typeBuilder,
+            String leafName) {
         String className = parseToClassName(leafName);
         GeneratedTOBuilder genTOBuilder = null;
         if (typeDef instanceof UnionType) {
             genTOBuilder = ((TypeProviderImpl) typeProvider).addUnionGeneratedTypeDefinition(
                     typeBuilder.getPackageName(), typeDef, className);
         } else if (typeDef instanceof BitsTypeDefinition) {
-            genTOBuilder = ((TypeProviderImpl) typeProvider).bitsTypedefToTransferObject(
-                    typeBuilder.getPackageName(), typeDef, className);
+            genTOBuilder = ((TypeProviderImpl) typeProvider).bitsTypedefToTransferObject(typeBuilder.getPackageName(),
+                    typeDef, className);
         }
         if (genTOBuilder != null) {
             typeBuilder.addEnclosingTransferObject(genTOBuilder);
             return genTOBuilder;
         }
         return null;
-        
+
     }
-    
+
 }
