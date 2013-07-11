@@ -17,9 +17,9 @@ import java.util.Map;
 
 import org.opendaylight.controller.binding.generator.util.TypeConstants;
 import org.opendaylight.controller.sal.binding.model.api.*;
+import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.sal.binding.model.api.Enumeration.Pair;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature.Parameter;
-import org.opendaylight.controller.binding.generator.util.Types;
 
 public final class GeneratorUtil {
 
@@ -232,90 +232,241 @@ public final class GeneratorUtil {
         return builder.toString();
     }
 
-    public static String createConstructor(GeneratedTransferObject genTransferObject, final String indent,
-            final Map<String, String> availableImports, boolean isIdentity) {
-        StringBuilder builder = new StringBuilder();
+    public static String createConstructor(final GeneratedTransferObject genTransferObject, final String indent,
+            final Map<String, String> availableImports, final boolean isIdentity, final boolean oneConstructor) {
+        if (genTransferObject == null) {
+            throw new IllegalArgumentException("genTransferObject can't be null");
+        }
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
+        }
+        if (availableImports == null) {
+            throw new IllegalArgumentException("availableImports can't be null");
+        }
+        GeneratedTransferObject genTOTopParent = getTopParrentTransportObject(genTransferObject);
+        final List<GeneratedProperty> ctorProperties = resolveReadOnlyPropertiesFromTO(genTransferObject
+                .getProperties());
+        final List<GeneratedProperty> ctorPropertiesAllParents = getPropertiesOfAllParents(genTransferObject
+                .getExtends());
 
         final String currentPkg = genTransferObject.getPackageName();
-        final List<GeneratedProperty> properties = genTransferObject.getProperties();
-        final List<GeneratedProperty> ctorParams = new ArrayList<GeneratedProperty>();
-        if (properties != null) {
-            for (final GeneratedProperty property : properties) {
-                if (property.isReadOnly()) {
-                    ctorParams.add(property);
-                }
+        final String className = genTransferObject.getName();
+
+        String constructorPart = "";
+        if (oneConstructor) {
+            if (genTOTopParent != genTransferObject && genTOTopParent.isUnionType()) {
+                constructorPart = createConstructorForEveryParentProperty(indent, isIdentity, ctorProperties,
+                        ctorPropertiesAllParents, availableImports, currentPkg, className);
+
+            } else {
+                constructorPart = createOneConstructor(indent, isIdentity, ctorProperties, ctorPropertiesAllParents,
+                        availableImports, currentPkg, className);
             }
+
+        } else { // union won't be extended
+            constructorPart = createConstructorForEveryProperty(indent, isIdentity, ctorProperties,
+                    ctorPropertiesAllParents, availableImports, currentPkg, className);
         }
 
-        builder.append(createConstructorDeclarationToLeftParenthesis(genTransferObject, indent, isIdentity));
+        return constructorPart;
+    }
 
-        final String parameterSeparator = COMMA + GAP;
-        for (final GeneratedProperty ctorParam : ctorParams) {
-            builder.append(createMethodParamDeclaration(ctorParam, availableImports, currentPkg));
-            builder.append(parameterSeparator);
+    private static String createOneConstructor(final String indent, boolean isIdentity,
+            final List<GeneratedProperty> properties, final List<GeneratedProperty> propertiesAllParents,
+            final Map<String, String> availableImports, final String currentPkg, final String className) {
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
         }
-        if (!ctorParams.isEmpty()) {
-            builder = builder.delete(builder.length() - parameterSeparator.length(), builder.length());
+        if (properties == null) {
+            throw new IllegalArgumentException("properties can't be null");
         }
+        if (propertiesAllParents == null) {
+            throw new IllegalArgumentException("propertiesAllParent can't be null");
+        }
+        if (availableImports == null) {
+            throw new IllegalArgumentException("availableImports can't be null");
+        }
+        if (currentPkg == null) {
+            throw new IllegalArgumentException("currentPkg can't be null");
+        }
+        if (className == null) {
+            throw new IllegalArgumentException("className can't be null");
+        }
+
+        final StringBuilder builder = new StringBuilder();
+
+        List<GeneratedProperty> propertiesAll = new ArrayList<GeneratedProperty>(properties);
+        propertiesAll.addAll(propertiesAllParents);
+
+        builder.append(createConstructorDeclarationToLeftParenthesis(className, indent, isIdentity));
+        builder.append(createMethodPropertiesDeclaration(propertiesAll, availableImports, currentPkg, COMMA + GAP));
         builder.append(createConstructorDeclarationFromRightParenthesis());
-        builder.append(createConstructorSuperCalling(indent));
-
-        for (final GeneratedProperty ctorParam : ctorParams) {
-            builder.append(createClassAttributeInitialization(indent, ctorParam));
-        }
-
+        builder.append(createConstructorSuper(propertiesAllParents, indent));
+        builder.append(createClassPropertiesInitialization(propertiesAll, indent));
         builder.append(createConstructorClosingPart(indent));
         return builder.toString();
     }
 
-    public static String createConstructors(GeneratedTransferObject genTransferObject, final String indent,
-            final Map<String, String> availableImports, boolean isIdentity) {
-        final StringBuilder builder = new StringBuilder();
-
-        final String currentPkg = genTransferObject.getPackageName();
-        final List<GeneratedProperty> properties = genTransferObject.getProperties();
-        final List<GeneratedProperty> ctorParams = new ArrayList<GeneratedProperty>();
-        if (properties != null) {
-            for (final GeneratedProperty property : properties) {
-                if (property.isReadOnly()) {
-                    ctorParams.add(property);
-                }
-            }
+    private static String createConstructorForEveryParentProperty(final String indent, final boolean isIdentity,
+            final List<GeneratedProperty> properties, final List<GeneratedProperty> propertiesAllParents,
+            final Map<String, String> availableImports, final String currentPkg, final String className) {
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
         }
-
-        GeneratedProperty ctorParam;
-        Iterator<GeneratedProperty> iteratorCtorParams = ctorParams.iterator();
+        if (properties == null) {
+            throw new IllegalArgumentException("properties can't be null");
+        }
+        if (propertiesAllParents == null) {
+            throw new IllegalArgumentException("propertiesAllParent can't be null");
+        }
+        if (availableImports == null) {
+            throw new IllegalArgumentException("availableImports can't be null");
+        }
+        if (currentPkg == null) {
+            throw new IllegalArgumentException("currentPkg can't be null");
+        }
+        if (className == null) {
+            throw new IllegalArgumentException("className can't be null");
+        }
+        final StringBuilder builder = new StringBuilder();
+        GeneratedProperty parentProperty;
+        Iterator<GeneratedProperty> parentPropertyIterator = propertiesAllParents.iterator();
 
         do {
-            ctorParam = null;
-            if (iteratorCtorParams.hasNext()) {
-                ctorParam = iteratorCtorParams.next();
+            parentProperty = null;
+            if (parentPropertyIterator.hasNext()) {
+                parentProperty = parentPropertyIterator.next();
             }
-            builder.append(createConstructorDeclarationToLeftParenthesis(genTransferObject, indent, isIdentity));
 
-            if (ctorParam != null) {
-                builder.append(createMethodParamDeclaration(ctorParam, availableImports, currentPkg));
+            List<GeneratedProperty> propertiesAndParentProperties = new ArrayList<GeneratedProperty>();
+            if (parentProperty != null) {
+                propertiesAndParentProperties.add(parentProperty);
             }
+            propertiesAndParentProperties.addAll(properties);
+
+            builder.append(createConstructorDeclarationToLeftParenthesis(className, indent, isIdentity));
+            builder.append(createMethodPropertiesDeclaration(propertiesAndParentProperties, availableImports,
+                    currentPkg, COMMA + GAP));
             builder.append(createConstructorDeclarationFromRightParenthesis());
-            builder.append(createConstructorSuperCalling(indent));
-
-            if (ctorParam != null) {
-                builder.append(createClassAttributeInitialization(indent, ctorParam));
-            }
-
+            builder.append(createConstructorSuper(parentProperty, indent));
+            builder.append(createClassPropertiesInitialization(properties, indent));
             builder.append(createConstructorClosingPart(indent));
-        } while (iteratorCtorParams.hasNext());
+        } while (parentPropertyIterator.hasNext());
 
         return builder.toString();
     }
 
-    private static String createConstructorDeclarationToLeftParenthesis(GeneratedTransferObject genTransferObject,
-            final String indent, boolean isIdentity) {
+    private static String createConstructorForEveryProperty(final String indent, final boolean isIdentity,
+            final List<GeneratedProperty> properties, final List<GeneratedProperty> propertiesAllParents,
+            final Map<String, String> availableImports, final String currentPkg, final String className) {
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
+        }
+        if (properties == null) {
+            throw new IllegalArgumentException("properties can't be null");
+        }
+        if (propertiesAllParents == null) {
+            throw new IllegalArgumentException("propertiesAllParent can't be null");
+        }
+        if (availableImports == null) {
+            throw new IllegalArgumentException("availableImports can't be null");
+        }
+        if (currentPkg == null) {
+            throw new IllegalArgumentException("currentPkg can't be null");
+        }
+        if (className == null) {
+            throw new IllegalArgumentException("className can't be null");
+        }
+
+        final StringBuilder builder = new StringBuilder();
+
+        GeneratedProperty property;
+        Iterator<GeneratedProperty> propertyIterator = properties.iterator();
+
+        do {
+            property = null;
+            if (propertyIterator.hasNext()) {
+                property = propertyIterator.next();
+            }
+
+            List<GeneratedProperty> propertyAndTopParentProperties = new ArrayList<GeneratedProperty>();
+            if (property != null) {
+                propertyAndTopParentProperties.add(property);
+            }
+            propertyAndTopParentProperties.addAll(propertiesAllParents);
+
+            builder.append(createConstructorDeclarationToLeftParenthesis(className, indent, isIdentity));
+            builder.append(createMethodPropertiesDeclaration(propertyAndTopParentProperties, availableImports,
+                    currentPkg, COMMA + GAP));
+            builder.append(createConstructorDeclarationFromRightParenthesis());
+            builder.append(createConstructorSuper(propertiesAllParents, indent));
+            builder.append(createClassPropertyInitialization(property, indent));
+            builder.append(createConstructorClosingPart(indent));
+        } while (propertyIterator.hasNext());
+
+        return builder.toString();
+    }
+
+    /**
+     * The method selects from input list of properties only those which have
+     * read only attribute set to true.
+     * 
+     * @param properties
+     *            contains list of properties of generated transfer object
+     * @return subset of <code>properties</code> which have read only attribute
+     *         set to true
+     */
+    private static List<GeneratedProperty> resolveReadOnlyPropertiesFromTO(List<GeneratedProperty> properties) {
+        List<GeneratedProperty> readOnlyProperties = new ArrayList<GeneratedProperty>();
+        if (properties != null) {
+            for (final GeneratedProperty property : properties) {
+                if (property.isReadOnly()) {
+                    readOnlyProperties.add(property);
+                }
+            }
+        }
+        return readOnlyProperties;
+    }
+
+    private static String createMethodPropertiesDeclaration(final List<GeneratedProperty> parameters,
+            final Map<String, String> availableImports, final String currentPkg, final String parameterSeparator) {
+        StringBuilder builder = new StringBuilder();
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters can't be null");
+        }
+        if (availableImports == null) {
+            throw new IllegalArgumentException("availableImports can't be null");
+        }
+        if (currentPkg == null) {
+            throw new IllegalArgumentException("currentPkg can't be null");
+        }
+        if (parameterSeparator == null) {
+            throw new IllegalArgumentException("parameterSeparator can't be null");
+        }
+
+        for (final GeneratedProperty parameter : parameters) {
+            builder.append(createMethodPropertyDeclaration(parameter, availableImports, currentPkg));
+            builder.append(parameterSeparator);
+        }
+        if (!parameters.isEmpty()) {
+            builder = builder.delete(builder.length() - parameterSeparator.length(), builder.length());
+        }
+        return builder.toString();
+    }
+
+    private static String createConstructorDeclarationToLeftParenthesis(final String className, final String indent,
+            final boolean isIdentity) {
+        if (className == null) {
+            throw new IllegalArgumentException("className can't be null");
+        }
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
+        }
         final StringBuilder builder = new StringBuilder();
         builder.append(indent);
         builder.append(isIdentity ? PROTECTED : PUBLIC);
         builder.append(GAP);
-        builder.append(genTransferObject.getName());
+        builder.append(className);
         builder.append(LB);
         return builder.toString();
     }
@@ -326,13 +477,48 @@ public final class GeneratorUtil {
         return builder.toString();
     }
 
-    private static String createConstructorSuperCalling(String indent) {
-        final StringBuilder builder = new StringBuilder();
-        builder.append(indent + TAB + "super();" + NL);
+    private static String createConstructorSuper(final List<GeneratedProperty> superProperties, final String indent) {
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
+        }
+        if (superProperties == null) {
+            throw new IllegalArgumentException("superProperties can't be null");
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(indent + TAB + "super(");
+        String propertySeparator = COMMA + GAP;
+        for (GeneratedProperty superProperty : superProperties) {
+            builder.append(superProperty.getName());
+            builder.append(propertySeparator);
+        }
+        if (!superProperties.isEmpty()) {
+            builder = builder.delete(builder.length() - propertySeparator.length(), builder.length());
+        }
+
+        builder.append(");" + NL);
         return builder.toString();
     }
 
-    private static String createConstructorClosingPart(String indent) {
+    private static String createConstructorSuper(final GeneratedProperty superProperty, final String indent) {
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
+        }
+        if (superProperty == null) {
+            throw new IllegalArgumentException("superProperties can't be null");
+        }
+        StringBuilder builder = new StringBuilder();
+        if (superProperty != null) {
+            builder.append(indent + TAB + "super(");
+            builder.append(superProperty.getName());
+            builder.append(");" + NL);
+        }
+        return builder.toString();
+    }
+
+    private static String createConstructorClosingPart(final String indent) {
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
+        }
         final StringBuilder builder = new StringBuilder();
         builder.append(indent);
         builder.append(RCB);
@@ -340,25 +526,55 @@ public final class GeneratorUtil {
         return builder.toString();
     }
 
-    private static String createClassAttributeInitialization(String indent, GeneratedProperty methodParameter) {
+    private static String createClassPropertiesInitialization(final List<GeneratedProperty> properties,
+            final String indent) {
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
+        }
+        if (properties == null) {
+            throw new IllegalArgumentException("properties can't be null");
+        }
+        final StringBuilder builder = new StringBuilder();
+        for (final GeneratedProperty property : properties) {
+            createClassPropertyInitialization(property, indent);
+        }
+        return builder.toString();
+    }
+
+    private static String createClassPropertyInitialization(final GeneratedProperty property, final String indent) {
+        if (indent == null) {
+            throw new IllegalArgumentException("indent can't be null");
+        }
+        if (property == null) {
+            throw new IllegalArgumentException("properties can't be null");
+        }
         final StringBuilder builder = new StringBuilder();
         builder.append(indent);
         builder.append(TAB);
         builder.append("this.");
-        builder.append(methodParameter.getName());
+        builder.append(property.getName());
         builder.append(" = ");
-        builder.append(methodParameter.getName());
+        builder.append(property.getName());
         builder.append(SC);
         builder.append(NL);
         return builder.toString();
     }
 
-    private static String createMethodParamDeclaration(GeneratedProperty methodParameter,
-            final Map<String, String> availableImports, String currentPkg) {
+    private static String createMethodPropertyDeclaration(final GeneratedProperty property,
+            final Map<String, String> availableImports, final String currentPkg) {
+        if (property == null) {
+            throw new IllegalArgumentException("property can't be null");
+        }
+        if (availableImports == null) {
+            throw new IllegalArgumentException("availableImports can't be null");
+        }
+        if (currentPkg == null) {
+            throw new IllegalArgumentException("currentPkg can't be null");
+        }
         final StringBuilder builder = new StringBuilder();
-        builder.append(getExplicitType(methodParameter.getReturnType(), availableImports, currentPkg));
+        builder.append(getExplicitType(property.getReturnType(), availableImports, currentPkg));
         builder.append(GAP);
-        builder.append(methodParameter.getName());
+        builder.append(property.getName());
         return builder.toString();
     }
 
@@ -782,6 +998,51 @@ public final class GeneratorUtil {
 
         }
         return false;
+    }
+
+    /**
+     * The method returns reference to highest (top parent) Generated Transfer
+     * Object.
+     * 
+     * @param childTransportObject
+     *            is generated transfer object which can be extended by other
+     *            generated transfer object
+     * @return in first case that <code>childTransportObject</code> isn't
+     *         extended then <code>childTransportObject</code> is returned. In
+     *         second case the method is recursive called until first case.
+     */
+    private static GeneratedTransferObject getTopParrentTransportObject(GeneratedTransferObject childTransportObject) {
+        if (childTransportObject == null) {
+            throw new IllegalArgumentException("Parameter childTransportObject can't be null.");
+        }
+        if (childTransportObject.getExtends() == null) {
+            return childTransportObject;
+        } else {
+            return getTopParrentTransportObject(childTransportObject.getExtends());
+        }
+    }
+
+    /**
+     * The method returns the list of the properties of all extending generated
+     * transfer object from <code>genTO</code> to highest parent generated
+     * transfer object
+     * 
+     * @param genTO
+     * @return the list of all properties from actual to highest parent
+     *         generated transfer object. In case when extension exists the
+     *         method is recursive called.
+     */
+    private static List<GeneratedProperty> getPropertiesOfAllParents(GeneratedTransferObject genTO) {
+        List<GeneratedProperty> propertiesOfAllParents = new ArrayList<GeneratedProperty>();
+        if (genTO != null) {
+            final List<GeneratedProperty> allPropertiesOfTO = genTO.getProperties();
+            List<GeneratedProperty> readOnlyPropertiesOfTO = resolveReadOnlyPropertiesFromTO(allPropertiesOfTO);
+            propertiesOfAllParents.addAll(readOnlyPropertiesOfTO);
+            if (genTO.getExtends() != null) {
+                propertiesOfAllParents.addAll(getPropertiesOfAllParents(genTO.getExtends()));
+            }
+        }
+        return propertiesOfAllParents;
     }
 
     public static String createStaticInicializationBlock(GeneratedTransferObject genTransferObject, String indent) {
