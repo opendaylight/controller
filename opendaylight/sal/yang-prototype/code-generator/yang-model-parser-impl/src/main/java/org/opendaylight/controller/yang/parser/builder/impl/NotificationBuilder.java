@@ -48,7 +48,6 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder 
     private final Set<UsesNodeBuilder> addedUsesNodes = new HashSet<UsesNodeBuilder>();
     private Set<AugmentationSchema> augmentations;
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     NotificationBuilder(final int line, final QName qname) {
         super(line, qname);
@@ -188,11 +187,6 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder 
 
     public void setAugmentations(final Set<AugmentationSchema> augmentations) {
         this.augmentations = augmentations;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
     }
 
     @Override

@@ -122,7 +122,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
     }
 
     @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+    public void addUnknownNodeBuilder(final UnknownSchemaNodeBuilder unknownNode) {
         // not yet supported
     }
 

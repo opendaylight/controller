@@ -28,8 +28,6 @@ import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder implements TypeDefinitionBuilder {
     private SchemaPath schemaPath;
-    private List<UnknownSchemaNode> unknownNodes;
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private List<RangeConstraint> ranges = Collections.emptyList();
     private List<LengthConstraint> lengths = Collections.emptyList();
     private List<PatternConstraint> patterns = Collections.emptyList();
@@ -181,20 +179,6 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder im
     @Override
     public List<UnknownSchemaNode> getUnknownNodes() {
         return Collections.emptyList();
-    }
-
-    @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
-    }
-
-    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
-        this.unknownNodes = unknownNodes;
     }
 
     @Override

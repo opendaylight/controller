@@ -12,10 +12,9 @@ import java.util.List;
 
 import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
-import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 
-public final class RefineHolder implements Builder, ConfigNode {
+public final class RefineHolder implements Builder {
     private Builder parent;
     private final int line;
     private final String name;
@@ -74,12 +73,10 @@ public final class RefineHolder implements Builder, ConfigNode {
         this.reference = reference;
     }
 
-    @Override
     public Boolean isConfiguration() {
         return config;
     }
 
-    @Override
     public void setConfiguration(final Boolean config) {
         this.config = config;
     }
@@ -128,11 +125,13 @@ public final class RefineHolder implements Builder, ConfigNode {
         return name;
     }
 
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+    @Override
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
         return addedUnknownNodes;
     }
 
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+    @Override
+    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
     }
 

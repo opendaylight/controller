@@ -79,6 +79,11 @@ public final class IdentitySchemaNodeBuilder extends AbstractSchemaNodeBuilder {
         this.baseIdentity = baseType;
     }
 
+    @Override
+    public String toString() {
+        return "identity " + qname.getLocalName();
+    }
+
     private final class IdentitySchemaNodeImpl implements IdentitySchemaNode {
         private final QName qname;
         private IdentitySchemaNode baseIdentity;

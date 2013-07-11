@@ -386,7 +386,7 @@ public final class ParserUtils {
      */
     public static Builder findRefineTargetBuilder(final GroupingBuilder grouping, final String refineNodeName) {
         // search child nodes
-        Builder result = grouping.getChildNode(refineNodeName);
+        Builder result = grouping.getDataChildByName(refineNodeName);
         // search groupings
         if (result == null) {
             Set<GroupingBuilder> grps = grouping.getGroupingBuilders();

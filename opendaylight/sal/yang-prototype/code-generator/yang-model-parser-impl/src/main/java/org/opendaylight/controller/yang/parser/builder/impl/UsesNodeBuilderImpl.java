@@ -176,12 +176,13 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
         refines.add(refine);
     }
 
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+    @Override
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
         return addedUnknownNodes;
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
     }
 

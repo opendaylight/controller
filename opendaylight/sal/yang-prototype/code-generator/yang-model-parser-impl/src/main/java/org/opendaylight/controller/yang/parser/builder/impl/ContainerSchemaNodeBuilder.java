@@ -30,7 +30,6 @@ import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractDataNodeContainerBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
@@ -39,7 +38,7 @@ import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerBuilder implements
-        AugmentationTargetBuilder, DataSchemaNodeBuilder, GroupingMember, ConfigNode {
+        AugmentationTargetBuilder, DataSchemaNodeBuilder, GroupingMember {
     private boolean isBuilt;
     private final ContainerSchemaNodeImpl instance;
 
@@ -48,8 +47,6 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
-    private List<UnknownSchemaNode> unknownNodes;
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     // DataSchemaNode args
     private boolean augmenting;
     private boolean addedByUses;
@@ -96,7 +93,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
         augmentations = b.augmentations;
         addedAugmentations.addAll(b.getAugmentations());
         unknownNodes = b.unknownNodes;
-        addedUnknownNodes.addAll(b.getUnknownNodes());
+        addedUnknownNodes.addAll(b.getUnknownNodeBuilders());
     }
 
     @Override
@@ -312,19 +309,6 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
 
     public void setPresence(boolean presence) {
         this.presence = presence;
-    }
-
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
-    }
-
-    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
-        this.unknownNodes = unknownNodes;
     }
 
     @Override

@@ -22,6 +22,7 @@ import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class DeviationBuilder implements Builder {
     private final int line;
+    private final String targetPathStr;
     private Builder parent;
     private boolean isBuilt;
     private final DeviationImpl instance;
@@ -35,6 +36,7 @@ public final class DeviationBuilder implements Builder {
             throw new YangParseException(line, "Deviation argument string must be an absolute schema node identifier.");
         }
         this.line = line;
+        this.targetPathStr = targetPathStr;
         this.targetPath = ParserListenerUtils.parseAugmentPath(targetPathStr);
         instance = new DeviationImpl();
     }
@@ -79,7 +81,12 @@ public final class DeviationBuilder implements Builder {
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
+        return addedUnknownNodes;
+    }
+
+    @Override
+    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
     }
 
@@ -108,6 +115,11 @@ public final class DeviationBuilder implements Builder {
 
     public void setReference(final String reference) {
         this.reference = reference;
+    }
+
+    @Override
+    public String toString() {
+        return "deviation " + targetPathStr;
     }
 
     private final class DeviationImpl implements Deviation {

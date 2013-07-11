@@ -13,8 +13,17 @@ package org.opendaylight.controller.yang.parser.builder.api;
  */
 public interface GroupingMember extends Builder {
 
+    /**
+     *
+     * @return true, if this node is added by uses statement, false otherwise
+     */
     boolean isAddedByUses();
 
+    /**
+     * Set if this node is added by uses.
+     *
+     * @param addedByUses
+     */
     void setAddedByUses(boolean addedByUses);
 
 }

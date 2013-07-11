@@ -52,7 +52,6 @@ public final class AugmentationSchemaBuilderImpl extends AbstractDataNodeContain
     private SchemaPath finalAugmentTarget;
 
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private boolean resolved;
 
     AugmentationSchemaBuilderImpl(final int line, final String augmentTargetStr) {
@@ -192,15 +191,6 @@ public final class AugmentationSchemaBuilderImpl extends AbstractDataNodeContain
     @Override
     public String getTargetPathAsString() {
         return augmentTargetStr;
-    }
-
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
     }
 
     @Override

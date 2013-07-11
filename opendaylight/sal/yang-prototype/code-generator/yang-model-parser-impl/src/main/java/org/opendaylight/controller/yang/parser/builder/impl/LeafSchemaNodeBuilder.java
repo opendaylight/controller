@@ -19,13 +19,12 @@ import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractTypeAwareBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 import org.opendaylight.controller.yang.parser.util.Comparators;
 
 public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implements DataSchemaNodeBuilder,
-        GroupingMember, ConfigNode {
+        GroupingMember {
     private boolean isBuilt;
     private final LeafSchemaNodeImpl instance;
     // SchemaNode args
@@ -33,8 +32,6 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
-    private List<UnknownSchemaNode> unknownNodes;
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     // DataSchemaNode args
     private boolean augmenting;
     private boolean addedByUses;
@@ -67,7 +64,7 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
         addedByUses = b.isAddedByUses();
         configuration = b.isConfiguration();
         unknownNodes = b.unknownNodes;
-        addedUnknownNodes.addAll(b.getUnknownNodes());
+        addedUnknownNodes.addAll(b.getUnknownNodeBuilders());
 
         defaultStr = b.getDefaultStr();
         unitsStr = b.getUnits();
@@ -121,19 +118,6 @@ public final class LeafSchemaNodeBuilder extends AbstractTypeAwareBuilder implem
     @Override
     public ConstraintsBuilder getConstraints() {
         return constraints;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
-    }
-
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
-        return addedUnknownNodes;
-    }
-
-    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
-        this.unknownNodes = unknownNodes;
     }
 
     public String getDescription() {

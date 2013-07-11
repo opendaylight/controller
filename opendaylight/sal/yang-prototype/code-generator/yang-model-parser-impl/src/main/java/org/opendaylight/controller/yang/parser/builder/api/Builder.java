@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
+import java.util.List;
+
 import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 /**
@@ -37,6 +39,20 @@ public interface Builder {
     void setParent(Builder parent);
 
     /**
+     * Add unknown node to this builder.
+     *
+     * @param unknownNode
+     */
+    void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode);
+
+    /**
+     * Get builders of unknown nodes defined in this node.
+     *
+     * @return collection of UnknownSchemaNodeBuilder objects
+     */
+    List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders();
+
+    /**
      * Build YANG data model node.
      *
      * This method should create an instance of YANG data model node. After
@@ -46,7 +62,5 @@ public interface Builder {
      * @return YANG data model node
      */
     Object build();
-
-    void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode);
 
 }

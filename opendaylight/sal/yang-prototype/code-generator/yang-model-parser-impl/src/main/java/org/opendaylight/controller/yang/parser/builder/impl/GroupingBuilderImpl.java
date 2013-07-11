@@ -79,7 +79,7 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
         groupings = builder.getGroupings();
         addedGroupings.addAll(builder.getGroupingBuilders());
         addedUsesNodes.addAll(builder.getUses());
-        addedUnknownNodes.addAll(builder.getUnknownNodes());
+        addedUnknownNodes.addAll(builder.getUnknownNodeBuilders());
     }
 
     @Override
@@ -232,18 +232,6 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
     }
 
     @Override
-    public DataSchemaNodeBuilder getChildNode(String name) {
-        DataSchemaNodeBuilder result = null;
-        for (DataSchemaNodeBuilder node : addedChildNodes) {
-            if (node.getQName().getLocalName().equals(name)) {
-                result = node;
-                break;
-            }
-        }
-        return result;
-    }
-
-    @Override
     public Set<DataSchemaNode> getChildNodes() {
         return childNodes;
     }
@@ -306,17 +294,22 @@ public final class GroupingBuilderImpl implements GroupingBuilder {
     }
 
     @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
         return addedUnknownNodes;
     }
 
     @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+    public void addUnknownNodeBuilder(final UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
     }
 
     public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
         this.unknownNodes = unknownNodes;
+    }
+
+    @Override
+    public String toString() {
+        return "grouping " + qname.getLocalName();
     }
 
     private final class GroupingDefinitionImpl implements GroupingDefinition {

@@ -98,7 +98,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public final class YangParserImpl implements YangModelParser {
-    private static final Logger logger = LoggerFactory.getLogger(YangParserImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(YangParserImpl.class);
 
     @Override
     public Set<Module> parseYangModels(final List<File> yangFiles) {
@@ -114,7 +114,7 @@ public final class YangParserImpl implements YangModelParser {
                 try {
                     inputStreams.put(new FileInputStream(yangFile), yangFile);
                 } catch (FileNotFoundException e) {
-                    logger.warn("Exception while reading yang file: " + yangFile.getName(), e);
+                    LOG.warn("Exception while reading yang file: " + yangFile.getName(), e);
                 }
             }
 
@@ -127,7 +127,7 @@ public final class YangParserImpl implements YangModelParser {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    logger.debug("Failed to close stream.");
+                    LOG.debug("Failed to close stream.");
                 }
             }
 
@@ -161,7 +161,7 @@ public final class YangParserImpl implements YangModelParser {
                 try {
                     inputStreams.put(new FileInputStream(yangFile), yangFile);
                 } catch (FileNotFoundException e) {
-                    logger.warn("Exception while reading yang file: " + yangFile.getName(), e);
+                    LOG.warn("Exception while reading yang file: " + yangFile.getName(), e);
                 }
             }
 
@@ -173,7 +173,7 @@ public final class YangParserImpl implements YangModelParser {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    logger.debug("Failed to close stream.");
+                    LOG.debug("Failed to close stream.");
                 }
             }
 
@@ -294,7 +294,7 @@ public final class YangParserImpl implements YangModelParser {
 
             result = parser.yang();
         } catch (IOException e) {
-            logger.warn("Exception while reading yang file: " + yangStream, e);
+            LOG.warn("Exception while reading yang file: " + yangStream, e);
         }
         return result;
     }
@@ -1118,11 +1118,11 @@ public final class YangParserImpl implements YangModelParser {
             // uses has not path
             parent.addUsesNode(newUses);
         }
-        for (UnknownSchemaNodeBuilder un : targetGrouping.getUnknownNodes()) {
+        for (UnknownSchemaNodeBuilder un : targetGrouping.getUnknownNodeBuilders()) {
             UnknownSchemaNodeBuilder newUn = new UnknownSchemaNodeBuilder(un);
             newUn.setAddedByUses(true);
             newUn.setPath(createSchemaPath(parentPath, un.getQName().getLocalName()));
-            parent.addUnknownSchemaNode(newUn);
+            parent.addUnknownNodeBuilder(newUn);
         }
     }
 
@@ -1192,7 +1192,7 @@ public final class YangParserImpl implements YangModelParser {
             UnknownSchemaNodeBuilder newNode = createUnknownSchemaNode(un, line);
             newNode.setAddedByUses(true);
             newNode.setPath(createSchemaPath(parentPath, un.getQName().getLocalName()));
-            parent.addUnknownSchemaNode(newNode);
+            parent.addUnknownNodeBuilder(newNode);
         }
     }
 
@@ -1227,7 +1227,7 @@ public final class YangParserImpl implements YangModelParser {
                             nodeType.getPrefix(), nodeType.getLocalName());
                     usnb.setNodeType(newNodeType);
                 } catch (YangParseException e) {
-                    logger.debug(module.getName(), usnb.getLine(), "Failed to find unknown node type: " + nodeType);
+                    LOG.debug(module.getName(), usnb.getLine(), "Failed to find unknown node type: " + nodeType);
                 }
             }
         }
@@ -1255,7 +1255,7 @@ public final class YangParserImpl implements YangModelParser {
 
                     unknownNodeBuilder.setNodeType(newNodeType);
                 } catch (YangParseException e) {
-                    logger.debug(module.getName(), unknownNodeBuilder.getLine(), "Failed to find unknown node type: "
+                    LOG.debug(module.getName(), unknownNodeBuilder.getLine(), "Failed to find unknown node type: "
                             + nodeType);
                 }
             }

@@ -7,15 +7,22 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
+import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
+/**
+ * Basic implementation of DataNodeContainerBuilder.
+ */
 public abstract class AbstractDataNodeContainerBuilder implements DataNodeContainerBuilder {
     protected final int line;
     protected final QName qname;
@@ -26,6 +33,9 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
 
     protected Set<GroupingDefinition> groupings;
     protected final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
+
+    protected List<UnknownSchemaNode> unknownNodes;
+    protected final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     protected AbstractDataNodeContainerBuilder(final int line, final QName qname) {
         this.line = line;
@@ -113,6 +123,20 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
             }
         }
         addedGroupings.add(groupingBuilder);
+    }
+
+    @Override
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
+        return addedUnknownNodes;
+    }
+
+    @Override
+    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
+        addedUnknownNodes.add(unknownNode);
+    }
+
+    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
+        this.unknownNodes = unknownNodes;
     }
 
 }
