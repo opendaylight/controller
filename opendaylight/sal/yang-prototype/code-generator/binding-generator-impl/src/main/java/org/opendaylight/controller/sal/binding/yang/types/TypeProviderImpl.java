@@ -27,13 +27,16 @@ import org.opendaylight.controller.yang.model.api.type.*;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
 import org.opendaylight.controller.yang.model.util.ExtendedType;
+
 import org.opendaylight.controller.yang.model.util.StringType;
+import org.opendaylight.controller.yang.model.util.UnionType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.*;
 import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.*;
@@ -361,17 +364,14 @@ public final class TypeProviderImpl implements TypeProvider {
             final String basePackageName = moduleNamespaceToPackageName(module);
 
             final Set<TypeDefinition<?>> typeDefinitions = module.getTypeDefinitions();
+            final List<TypeDefinition<?>> listTypeDefinitions = sortTypeDefinitionAccordingDepth(typeDefinitions);
 
             final Map<String, Type> typeMap = new HashMap<>();
             genTypeDefsContextMap.put(moduleName, typeMap);
 
-            if ((typeDefinitions != null) && (basePackageName != null)) {
-                for (final TypeDefinition<?> typedef : typeDefinitions) {
+            if ((listTypeDefinitions != null) && (basePackageName != null)) {
+                for (final TypeDefinition<?> typedef : listTypeDefinitions) {
                     typedefToGeneratedType(basePackageName, moduleName, typedef);
-                }
-                final List<ExtendedType> extUnions = UnionDependencySort.sort(typeDefinitions);
-                for (final ExtendedType extUnionType : extUnions) {
-                    addUnionGeneratedTypeDefinition(basePackageName, extUnionType, null);
                 }
             }
         }
@@ -382,23 +382,31 @@ public final class TypeProviderImpl implements TypeProvider {
         if ((basePackageName != null) && (moduleName != null) && (typedef != null) && (typedef.getQName() != null)) {
 
             final String typedefName = typedef.getQName().getLocalName();
-            final TypeDefinition<?> baseTypeDefinition = baseTypeDefForExtendedType(typedef);
-            if (!(baseTypeDefinition instanceof LeafrefTypeDefinition)
-                    && !(baseTypeDefinition instanceof IdentityrefTypeDefinition)) {
-                Type returnType;
-                if (baseTypeDefinition instanceof EnumTypeDefinition) {
-                    final EnumTypeDefinition enumTypeDef = (EnumTypeDefinition) baseTypeDefinition;
+            final TypeDefinition<?> innerTypeDefinition = innerTypeDefForExtendedType(typedef);
+            if (!(innerTypeDefinition instanceof LeafrefTypeDefinition)
+                    && !(innerTypeDefinition instanceof IdentityrefTypeDefinition)) {
+                Type returnType = null;
+                if (innerTypeDefinition instanceof ExtendedType) {
+                    ExtendedType extendedTypeDef = (ExtendedType) innerTypeDefinition;
+                    returnType = resolveExtendedTypeFromTypeDef(extendedTypeDef, basePackageName, typedefName,
+                            moduleName);
+                } else if (innerTypeDefinition instanceof UnionTypeDefinition) {
+                    final GeneratedTOBuilder genTOBuilder = addUnionGeneratedTypeDefinition(basePackageName, typedef,
+                            typedefName);
+                    returnType = genTOBuilder.toInstance();
+                } else if (innerTypeDefinition instanceof EnumTypeDefinition) {
+                    final EnumTypeDefinition enumTypeDef = (EnumTypeDefinition) innerTypeDefinition;
                     returnType = resolveEnumFromTypeDefinition(enumTypeDef, typedefName);
 
-                } else if (baseTypeDefinition instanceof BitsTypeDefinition) {
-                    final BitsTypeDefinition bitsTypeDefinition = (BitsTypeDefinition) baseTypeDefinition;
-                    GeneratedTOBuilder genTOBuilder = bitsTypedefToTransferObject(basePackageName, bitsTypeDefinition,
-                            typedefName);
+                } else if (innerTypeDefinition instanceof BitsTypeDefinition) {
+                    final BitsTypeDefinition bitsTypeDefinition = (BitsTypeDefinition) innerTypeDefinition;
+                    final GeneratedTOBuilder genTOBuilder = bitsTypedefToTransferObject(basePackageName,
+                            bitsTypeDefinition, typedefName);
                     returnType = genTOBuilder.toInstance();
 
                 } else {
                     final Type javaType = BaseYangTypes.BASE_YANG_TYPES_PROVIDER
-                            .javaTypeForSchemaDefinitionType(baseTypeDefinition);
+                            .javaTypeForSchemaDefinitionType(innerTypeDefinition);
 
                     returnType = wrapJavaTypeIntoTO(basePackageName, typedef, javaType);
                 }
@@ -428,12 +436,12 @@ public final class TypeProviderImpl implements TypeProvider {
             genTOBuilder.addEqualsIdentity(genPropBuilder);
             genTOBuilder.addHashIdentity(genPropBuilder);
             genTOBuilder.addToStringProperty(genPropBuilder);
-
-            if (typedef instanceof ExtendedType) {
-                final List<String> regExps = resolveRegExpressionsFromTypedef((ExtendedType) typedef);
-                addStringRegExAsConstant(genTOBuilder, regExps);
+            if (javaType == BaseYangTypes.STRING_TYPE) {
+                if (typedef instanceof ExtendedType) {
+                    final List<String> regExps = resolveRegExpressionsFromTypedef((ExtendedType) typedef);
+                    addStringRegExAsConstant(genTOBuilder, regExps);
+                }
             }
-
             return genTOBuilder.toInstance();
         }
         return null;
@@ -479,9 +487,10 @@ public final class TypeProviderImpl implements TypeProvider {
                     final Module unionTypeModule = findParentModuleForTypeDefinition(schemaContext, unionType);
                     if (unionTypeModule != null && unionTypeModule.getName() != null) {
                         final Map<String, Type> innerGenTOs = genTypeDefsContextMap.get(unionTypeModule.getName());
-
-                        final GeneratedTransferObject genTransferObject = (GeneratedTransferObject) innerGenTOs
-                                .get(typeName);
+                        Type genTransferObject = null;
+                        if (innerGenTOs != null) {
+                            genTransferObject = innerGenTOs.get(typeName);
+                        }
                         if (genTransferObject != null) {
                             updateUnionTypeAsProperty(unionGenTransObject, genTransferObject,
                                     genTransferObject.getName());
@@ -618,6 +627,112 @@ public final class TypeProviderImpl implements TypeProvider {
             genTOBuilder.addConstant(Types.listTypeFor(BaseYangTypes.STRING_TYPE), TypeConstants.PATTERN_CONSTANT_NAME,
                     regularExpressions);
         }
+    }
+
+    private TypeDefinition<?> innerTypeDefForExtendedType(final TypeDefinition<?> extendTypeDef) {
+        if (extendTypeDef == null) {
+            throw new IllegalArgumentException("Type Definiition reference cannot be NULL!");
+        }
+        return extendTypeDef.getBaseType();
+    }
+
+    private GeneratedTransferObject resolveExtendedTypeFromTypeDef(final ExtendedType extendedType,
+            final String basePackageName, final String typedefName, final String moduleName) {
+
+        if (extendedType == null) {
+            throw new IllegalArgumentException("extendedType cannot be NULL!");
+        }
+        if (basePackageName == null) {
+            throw new IllegalArgumentException("basePackageName cannot be NULL!");
+        }
+        if (typedefName == null) {
+            throw new IllegalArgumentException("Type Definition Local Name cannot be NULL!");
+        }
+
+        final String typeDefName = parseToClassName(typedefName);
+        final String lowTypeDef = extendedType.getQName().getLocalName();
+        final GeneratedTOBuilder genTOBuilder = new GeneratedTOBuilderImpl(basePackageName, typeDefName);
+
+        final Map<String, Type> typeMap = genTypeDefsContextMap.get(moduleName);
+        if (typeMap != null) {
+            Type type = typeMap.get(lowTypeDef);
+            if (type instanceof GeneratedTransferObject) {
+                genTOBuilder.setExtendsType((GeneratedTransferObject) type);
+            }
+        }
+
+        return genTOBuilder.toInstance();
+    }
+
+    /**
+     * The method find out for each type definition how many immersion (depth)
+     * is necessary to get to the base type. Every type definition is inserted
+     * to the map which key is depth and value is list of type definitions with
+     * equal depth. In next step are lists from this map concatenated to one
+     * list in ascending order according to their depth. All type definitions
+     * are in the list behind all type definitions on which depends.
+     * 
+     * @param unsortedTypeDefinitions
+     *            represents list of type definitions
+     * @return list of type definitions sorted according their each other
+     *         dependencies (type definitions which are depend on other type
+     *         definitions are in list behind them).
+     */
+    private List<TypeDefinition<?>> sortTypeDefinitionAccordingDepth(
+            final Set<TypeDefinition<?>> unsortedTypeDefinitions) {
+        List<TypeDefinition<?>> sortedTypeDefinition = new ArrayList<>();
+
+        Map<Integer, List<TypeDefinition<?>>> typeDefinitionsDepths = new TreeMap<>();
+        for (TypeDefinition<?> unsortedTypeDefinition : unsortedTypeDefinitions) {
+            final int depth = getTypeDefinitionDepth(unsortedTypeDefinition);
+            List<TypeDefinition<?>> typeDefinitionsConcreteDepth = typeDefinitionsDepths.get(depth);
+            if (typeDefinitionsConcreteDepth == null) {
+                typeDefinitionsConcreteDepth = new ArrayList<TypeDefinition<?>>();
+                typeDefinitionsDepths.put(depth, typeDefinitionsConcreteDepth);
+            }
+            typeDefinitionsConcreteDepth.add(unsortedTypeDefinition);
+        }
+
+        Set<Integer> depths = typeDefinitionsDepths.keySet(); // keys are in
+                                                              // ascending order
+        for (Integer depth : depths) {
+            sortedTypeDefinition.addAll(typeDefinitionsDepths.get(depth));
+        }
+
+        return sortedTypeDefinition;
+    }
+
+    /**
+     * The method return how many immersion is necessary to get from type
+     * definition to base type.
+     * 
+     * @param typeDefinition
+     *            is type definition for which is depth looked for.
+     * @return how many immersion is necessary to get from type definition to
+     *         base type
+     */
+    private int getTypeDefinitionDepth(final TypeDefinition<?> typeDefinition) {
+        if (typeDefinition == null) {
+            throw new IllegalArgumentException("typeDefinition can't be null");
+        }
+        int depth = 1;
+        TypeDefinition<?> baseType = typeDefinition.getBaseType();
+
+        if (baseType instanceof ExtendedType) {
+            depth = depth + getTypeDefinitionDepth(typeDefinition.getBaseType());
+        } else if (baseType instanceof UnionType) {
+            List<TypeDefinition<?>> childTypeDefinitions = ((UnionType) baseType).getTypes();
+            int maxChildDepth = 0;
+            int childDepth = 1;
+            for (TypeDefinition<?> childTypeDefinition : childTypeDefinitions) {
+                childDepth = childDepth + getTypeDefinitionDepth(childTypeDefinition.getBaseType());
+                if (childDepth > maxChildDepth) {
+                    maxChildDepth = childDepth;
+                }
+            }
+            return maxChildDepth;
+        }
+        return depth;
     }
 
 }
