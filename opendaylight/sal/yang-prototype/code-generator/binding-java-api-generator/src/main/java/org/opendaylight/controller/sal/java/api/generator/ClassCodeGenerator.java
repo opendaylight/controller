@@ -67,11 +67,14 @@ public final class ClassCodeGenerator implements CodeGenerator {
             }
 
             writer.write(NL);
+            final boolean oneConstructor;
             if (genTO.isUnionType()) {
-                writer.write(GeneratorUtil.createConstructors(genTO, indent + TAB, imports, genTO.isAbstract()));
+                oneConstructor = false;
             } else {
-                writer.write(GeneratorUtil.createConstructor(genTO, indent + TAB, imports, genTO.isAbstract()) + NL);
+                oneConstructor = true;
             }
+            writer.write(GeneratorUtil.createConstructor(genTO, indent + TAB, imports, genTO.isAbstract(),
+                    oneConstructor));
             writer.write(NL);
 
             for (GeneratedProperty field : fields) {

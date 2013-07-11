@@ -1,0 +1,79 @@
+module typedef_typedef {
+    
+    namespace "urn:typedef:typedef";
+    prefix "sbd";
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    revision 2013-07-09 {
+        
+    }
+
+   typedef byte-type {
+        type bits {
+            bit first-bit {
+                position 10;
+            }
+            bit second-bit {
+                position 20;
+            }
+         }
+    }    
+    
+    
+  typedef typedef-enum-fruit {
+    type enumeration {
+      enum "apple" {
+        value 1;
+        description "gold";
+      }
+      enum "pear" {
+        value 2;
+      }
+    }
+  }    
+    
+    typedef simple-typedef1 {
+    	type uint8;
+    }
+    
+    typedef simple-typedef2 {
+        type simple-typedef1;
+    }
+    
+    typedef simple-typedef3 {
+        type simple-typedef2;
+    }
+    
+    typedef simple-typedef4 {
+        type simple-typedef3;
+    }
+    
+    typedef simple-typedef1-1 {
+        type uint16;
+    }    
+
+    
+    typedef union-typedef {
+        type union {
+            type simple-typedef1;
+            type simple-typedef4;
+            type byte-type;
+            type typedef-enum-fruit;
+        }
+    }    
+    
+    typedef extended-typedef-union {
+        type union-typedef;
+    }
+    
+    
+    typedef extended-typedef-simple {
+        type simple-typedef1;
+    }
+    
+    typedef extended-typedef-enum {
+        type typedef-enum-fruit;
+    }
+}
