@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///Y8\u003d",
+        "filename": "opendaylight/northbound/subnets/src/main/java/org/opendaylight/controller/subnets/northbound/SubnetsNorthboundJAXRS.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-07-12T16:50:06Z",
+      "side": 1,
+      "message": "For this operation, shouldn\u0027t 404 be something like \"Container name not found\" ?\n404 is for resource not found.",
+      "revId": "73e145ed0298dd4ea6d2b85957e458fad00c71fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///Y4\u003d",
+        "filename": "opendaylight/northbound/subnets/src/main/java/org/opendaylight/controller/subnets/northbound/SubnetsNorthboundJAXRS.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-07-12T16:50:06Z",
+      "side": 1,
+      "message": "For this operation, shouldn\u0027t 404 message be something like \"Container or Subnet not present\"",
+      "revId": "73e145ed0298dd4ea6d2b85957e458fad00c71fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///Y0\u003d",
+        "filename": "opendaylight/northbound/subnets/src/main/java/org/opendaylight/controller/subnets/northbound/SubnetsNorthboundJAXRS.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-07-12T16:50:06Z",
+      "side": 1,
+      "message": "if config with that name does not exist, we should probably return 404.\nWhile if it exists but name and subnet are not matching, I am not sure, I think we should return bad request (400) \"config does not match existing one\".",
+      "revId": "73e145ed0298dd4ea6d2b85957e458fad00c71fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///Yw\u003d",
+        "filename": "opendaylight/northbound/subnets/src/main/java/org/opendaylight/controller/subnets/northbound/SubnetsNorthboundJAXRS.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-07-12T16:50:06Z",
+      "side": 1,
+      "message": "You always return ACCEPTED regardless of the value of successful",
+      "revId": "73e145ed0298dd4ea6d2b85957e458fad00c71fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
