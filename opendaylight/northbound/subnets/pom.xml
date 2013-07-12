@@ -62,6 +62,7 @@
               org.opendaylight.controller.usermanager,
               javax.ws.rs,
               javax.ws.rs.core,
+              javax.xml.bind,
               javax.xml.bind.annotation,
               org.slf4j,
               !org.codehaus.enunciate.jaxrs
