@@ -9,6 +9,7 @@ package org.opendaylight.controller.yang.parser.builder.impl;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
@@ -66,8 +67,13 @@ public final class ConstraintsBuilder implements Builder {
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
         throw new YangParseException(line, "Can not add unknown node to constraints.");
+    }
+
+    @Override
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
+        return Collections.emptyList();
     }
 
     public Integer getMinElements() {

@@ -111,7 +111,7 @@ public final class IdentityrefTypeBuilder extends AbstractTypeAwareBuilder imple
     }
 
     @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder unknownNode) {
+    public void addUnknownNodeBuilder(final UnknownSchemaNodeBuilder unknownNode) {
         throw new YangParseException(line, "Can not add unknown node to " + NAME);
     }
 

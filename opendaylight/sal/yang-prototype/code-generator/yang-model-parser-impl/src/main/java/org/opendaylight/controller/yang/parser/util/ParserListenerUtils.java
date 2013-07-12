@@ -31,6 +31,7 @@ import org.opendaylight.controller.antlrv4.code.gen.YangParser.Error_app_tag_stm
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Error_message_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Fraction_digits_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Identityref_specificationContext;
+import org.opendaylight.controller.antlrv4.code.gen.YangParser.Instance_identifier_specificationContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Leafref_specificationContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Length_stmtContext;
 import org.opendaylight.controller.antlrv4.code.gen.YangParser.Mandatory_argContext;
@@ -108,7 +109,7 @@ import org.opendaylight.controller.yang.model.util.Uint64;
 import org.opendaylight.controller.yang.model.util.Uint8;
 import org.opendaylight.controller.yang.model.util.UnknownType;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
-import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
+import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.SchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.impl.ChoiceBuilder;
@@ -119,7 +120,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class ParserListenerUtils {
-    private static final Logger logger = LoggerFactory.getLogger(ParserListenerUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ParserListenerUtils.class);
 
     private ParserListenerUtils() {
     }
@@ -189,7 +190,7 @@ public final class ParserListenerUtils {
                 } else if ("obsolete".equals(statusArgStr)) {
                     result = Status.OBSOLETE;
                 } else {
-                    logger.warn("Invalid 'status' statement: " + statusArgStr);
+                    LOG.warn("Invalid 'status' statement: " + statusArgStr);
                 }
             }
         }
@@ -334,12 +335,12 @@ public final class ParserListenerUtils {
             final List<String> path, final URI namespace, final Date revision, final String prefix) {
         List<EnumTypeDefinition.EnumPair> enumConstants = new ArrayList<EnumTypeDefinition.EnumPair>();
 
-        for (int j = 0; j < ctx.getChildCount(); j++) {
-            ParseTree enumSpecChild = ctx.getChild(j);
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree enumSpecChild = ctx.getChild(i);
             if (enumSpecChild instanceof Enum_specificationContext) {
                 int highestValue = -1;
-                for (int k = 0; k < enumSpecChild.getChildCount(); k++) {
-                    ParseTree enumChild = enumSpecChild.getChild(k);
+                for (int j = 0; j < enumSpecChild.getChildCount(); j++) {
+                    ParseTree enumChild = enumSpecChild.getChild(j);
                     if (enumChild instanceof Enum_stmtContext) {
                         EnumPair enumPair = createEnumPair((Enum_stmtContext) enumChild, highestValue, path, namespace,
                                 revision, prefix);
@@ -423,7 +424,7 @@ public final class ParserListenerUtils {
         private String description;
         private String reference;
         private Status status;
-        private List<UnknownSchemaNode> extensionSchemaNodes = Collections.emptyList();
+        private List<UnknownSchemaNode> unknownNodes = Collections.emptyList();
         private String name;
         private Integer value;
 
@@ -454,7 +455,7 @@ public final class ParserListenerUtils {
 
         @Override
         public List<UnknownSchemaNode> getUnknownSchemaNodes() {
-            return extensionSchemaNodes;
+            return unknownNodes;
         }
 
         @Override
@@ -473,7 +474,7 @@ public final class ParserListenerUtils {
             int result = 1;
             result = prime * result + ((qname == null) ? 0 : qname.hashCode());
             result = prime * result + ((path == null) ? 0 : path.hashCode());
-            result = prime * result + ((extensionSchemaNodes == null) ? 0 : extensionSchemaNodes.hashCode());
+            result = prime * result + ((unknownNodes == null) ? 0 : unknownNodes.hashCode());
             result = prime * result + ((name == null) ? 0 : name.hashCode());
             result = prime * result + ((value == null) ? 0 : value.hashCode());
             return result;
@@ -505,11 +506,11 @@ public final class ParserListenerUtils {
             } else if (!path.equals(other.path)) {
                 return false;
             }
-            if (extensionSchemaNodes == null) {
-                if (other.extensionSchemaNodes != null) {
+            if (unknownNodes == null) {
+                if (other.unknownNodes != null) {
                     return false;
                 }
-            } else if (!extensionSchemaNodes.equals(other.extensionSchemaNodes)) {
+            } else if (!unknownNodes.equals(other.unknownNodes)) {
                 return false;
             }
             if (name == null) {
@@ -544,11 +545,11 @@ public final class ParserListenerUtils {
      */
     private static List<RangeConstraint> getRangeConstraints(final Type_body_stmtsContext ctx) {
         List<RangeConstraint> rangeConstraints = Collections.emptyList();
-        outer: for (int j = 0; j < ctx.getChildCount(); j++) {
-            ParseTree numRestrChild = ctx.getChild(j);
+        outer: for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree numRestrChild = ctx.getChild(i);
             if (numRestrChild instanceof Numerical_restrictionsContext) {
-                for (int k = 0; k < numRestrChild.getChildCount(); k++) {
-                    ParseTree rangeChild = numRestrChild.getChild(k);
+                for (int j = 0; j < numRestrChild.getChildCount(); j++) {
+                    ParseTree rangeChild = numRestrChild.getChild(j);
                     if (rangeChild instanceof Range_stmtContext) {
                         rangeConstraints = parseRangeConstraints((Range_stmtContext) rangeChild);
                         break outer;
@@ -610,11 +611,11 @@ public final class ParserListenerUtils {
      */
     private static List<LengthConstraint> getLengthConstraints(final Type_body_stmtsContext ctx) {
         List<LengthConstraint> lengthConstraints = Collections.emptyList();
-        outer: for (int j = 0; j < ctx.getChildCount(); j++) {
-            ParseTree stringRestrChild = ctx.getChild(j);
+        outer: for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree stringRestrChild = ctx.getChild(i);
             if (stringRestrChild instanceof String_restrictionsContext) {
-                for (int k = 0; k < stringRestrChild.getChildCount(); k++) {
-                    ParseTree lengthChild = stringRestrChild.getChild(k);
+                for (int j = 0; j < stringRestrChild.getChildCount(); j++) {
+                    ParseTree lengthChild = stringRestrChild.getChild(j);
                     if (lengthChild instanceof Length_stmtContext) {
                         lengthConstraints = parseLengthConstraints((Length_stmtContext) lengthChild);
                         break outer;
@@ -697,11 +698,11 @@ public final class ParserListenerUtils {
     private static List<PatternConstraint> getPatternConstraint(final Type_body_stmtsContext ctx) {
         List<PatternConstraint> patterns = new ArrayList<PatternConstraint>();
 
-        for (int j = 0; j < ctx.getChildCount(); j++) {
-            ParseTree stringRestrChild = ctx.getChild(j);
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree stringRestrChild = ctx.getChild(i);
             if (stringRestrChild instanceof String_restrictionsContext) {
-                for (int k = 0; k < stringRestrChild.getChildCount(); k++) {
-                    ParseTree lengthChild = stringRestrChild.getChild(k);
+                for (int j = 0; j < stringRestrChild.getChildCount(); j++) {
+                    ParseTree lengthChild = stringRestrChild.getChild(j);
                     if (lengthChild instanceof Pattern_stmtContext) {
                         patterns.add(parsePatternConstraint((Pattern_stmtContext) lengthChild));
                     }
@@ -761,15 +762,17 @@ public final class ParserListenerUtils {
      *
      * @param ctx
      *            type body context to parse
+     * @param moduleName
+     *            name of current module
      * @return 'fraction-digits' value if present in given context, null
      *         otherwise
      */
-    private static Integer getFractionDigits(Type_body_stmtsContext ctx) {
+    private static Integer getFractionDigits(Type_body_stmtsContext ctx, String moduleName) {
         Integer result = null;
-        for (int j = 0; j < ctx.getChildCount(); j++) {
-            ParseTree dec64specChild = ctx.getChild(j);
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree dec64specChild = ctx.getChild(i);
             if (dec64specChild instanceof Decimal64_specificationContext) {
-                result = parseFractionDigits((Decimal64_specificationContext) dec64specChild);
+                result = parseFractionDigits((Decimal64_specificationContext) dec64specChild, moduleName);
             }
         }
         return result;
@@ -780,19 +783,21 @@ public final class ParserListenerUtils {
      *
      * @param ctx
      *            decimal64 context
+     * @param moduleName
+     *            name of current module
      * @return fraction-digits value as Integer
      */
-    private static Integer parseFractionDigits(Decimal64_specificationContext ctx) {
+    private static Integer parseFractionDigits(Decimal64_specificationContext ctx, String moduleName) {
         Integer result = null;
-        for (int k = 0; k < ctx.getChildCount(); k++) {
-            ParseTree fdChild = ctx.getChild(k);
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree fdChild = ctx.getChild(i);
             if (fdChild instanceof Fraction_digits_stmtContext) {
                 String value = stringFromNode(fdChild);
                 try {
                     result = Integer.valueOf(value);
                 } catch (NumberFormatException e) {
-                    throw new YangParseException(ctx.getStart().getLine(), "Unable to parse fraction digits value '"
-                            + value + "'.", e);
+                    throw new YangParseException(moduleName, ctx.getStart().getLine(),
+                            "Unable to parse fraction digits value '" + value + "'.", e);
                 }
             }
         }
@@ -898,14 +903,14 @@ public final class ParserListenerUtils {
      * list are determined by the user or the system. The argument is one of the
      * strings "system" or "user". If not present, order defaults to "system".
      *
-     * @param childNode
+     * @param ctx
      *            Ordered_by_stmtContext
      * @return true, if ordered-by contains value 'user', false otherwise
      */
-    public static boolean parseUserOrdered(Ordered_by_stmtContext childNode) {
+    public static boolean parseUserOrdered(Ordered_by_stmtContext ctx) {
         boolean result = false;
-        for (int j = 0; j < childNode.getChildCount(); j++) {
-            ParseTree orderArg = childNode.getChild(j);
+        for (int j = 0; j < ctx.getChildCount(); j++) {
+            ParseTree orderArg = ctx.getChild(j);
             if (orderArg instanceof Ordered_by_argContext) {
                 String orderStr = stringFromNode(orderArg);
                 if ("system".equals(orderStr)) {
@@ -913,30 +918,44 @@ public final class ParserListenerUtils {
                 } else if ("user".equals(orderStr)) {
                     result = true;
                 } else {
-                    logger.warn("Invalid 'orderedby' statement.");
+                    LOG.warn("Invalid 'ordered-by' statement.");
                 }
             }
         }
         return result;
     }
 
+    /**
+     * Get config statement from given context. If there is no config statement,
+     * return config value of parent
+     *
+     * @param ctx
+     *            context to parse
+     * @param parent
+     *            parent node
+     * @param moduleName
+     *            name of current module
+     * @param line
+     *            line in current module
+     * @return config statement parsed from given context
+     */
     public static Boolean getConfig(final ParseTree ctx, final Builder parent, final String moduleName, final int line) {
         Boolean result = null;
         // parse configuration statement
-        Boolean configuration = null;
+        Boolean config = null;
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree child = ctx.getChild(i);
             if (child instanceof Config_stmtContext) {
-                configuration = parseConfig((Config_stmtContext) child);
+                config = parseConfig((Config_stmtContext) child);
                 break;
             }
         }
 
         // If 'config' is not specified, the default is the same as the parent
         // schema node's 'config' value
-        if (configuration == null) {
-            if (parent instanceof ConfigNode) {
-                Boolean parentConfig = ((ConfigNode) parent).isConfiguration();
+        if (config == null) {
+            if (parent instanceof DataSchemaNodeBuilder) {
+                Boolean parentConfig = ((DataSchemaNodeBuilder) parent).isConfiguration();
                 // If the parent node is a rpc input or output, it can has
                 // config set to null
                 result = parentConfig == null ? true : parentConfig;
@@ -958,14 +977,14 @@ public final class ParserListenerUtils {
         } else {
             // Check first: if a node has 'config' set to 'false', no node
             // underneath it can have 'config' set to 'true'
-            if (parent instanceof ConfigNode) {
-                Boolean parentConfig = ((ConfigNode) parent).isConfiguration();
-                if (parentConfig == false && configuration == true) {
+            if (parent instanceof DataSchemaNodeBuilder && !(parent instanceof ChoiceCaseBuilder)) {
+                Boolean parentConfig = ((DataSchemaNodeBuilder) parent).isConfiguration();
+                if (!parentConfig && config) {
                     throw new YangParseException(moduleName, line,
                             "Can not set 'config' to 'true' if parent node has 'config' set to 'false'");
                 }
             }
-            result = configuration;
+            result = config;
         }
 
         return result;
@@ -1004,6 +1023,8 @@ public final class ParserListenerUtils {
     /**
      * Parse type body and create UnknownType definition.
      *
+     * @param moduleName
+     *            name of current module
      * @param typedefQName
      *            qname of current type
      * @param ctx
@@ -1015,7 +1036,7 @@ public final class ParserListenerUtils {
      * @param parent
      * @return UnknownType object with constraints from parsed type body
      */
-    public static TypeDefinition<?> parseUnknownTypeWithBody(final QName typedefQName,
+    public static TypeDefinition<?> parseUnknownTypeWithBody(final String moduleName, final QName typedefQName,
             final Type_body_stmtsContext ctx, final List<String> actualPath, final URI namespace, final Date revision,
             final String prefix, final Builder parent) {
         String typeName = typedefQName.getLocalName();
@@ -1026,7 +1047,7 @@ public final class ParserListenerUtils {
             List<RangeConstraint> rangeStatements = getRangeConstraints(ctx);
             List<LengthConstraint> lengthStatements = getLengthConstraints(ctx);
             List<PatternConstraint> patternStatements = getPatternConstraint(ctx);
-            Integer fractionDigits = getFractionDigits(ctx);
+            Integer fractionDigits = getFractionDigits(ctx, moduleName);
 
             if (parent instanceof TypeDefinitionBuilder) {
                 TypeDefinitionBuilder typedef = (TypeDefinitionBuilder) parent;
@@ -1083,7 +1104,7 @@ public final class ParserListenerUtils {
         final int line = typeBody.getStart().getLine();
         TypeDefinition<?> baseType = null;
 
-        Integer fractionDigits = getFractionDigits(typeBody);
+        Integer fractionDigits = getFractionDigits(typeBody, moduleName);
         List<LengthConstraint> lengthStatements = getLengthConstraints(typeBody);
         List<PatternConstraint> patternStatements = getPatternConstraint(typeBody);
         List<RangeConstraint> rangeStatements = getRangeConstraints(typeBody);
@@ -1116,8 +1137,8 @@ public final class ParserListenerUtils {
             } else if ("int64".equals(typeName)) {
                 intType = new Int64(baseTypePath);
             }
-            if(intType == null) {
-                throw new YangParseException(moduleName, line, "Unknown yang type "+ typeName);
+            if (intType == null) {
+                throw new YangParseException(moduleName, line, "Unknown yang type " + typeName);
             }
             constraints.addRanges(intType.getRangeStatements());
             baseType = intType;
@@ -1132,8 +1153,8 @@ public final class ParserListenerUtils {
             } else if ("uint64".equals(typeName)) {
                 uintType = new Uint64(baseTypePath);
             }
-            if(uintType == null) {
-                throw new YangParseException(moduleName, line, "Unknown yang type "+ typeName);
+            if (uintType == null) {
+                throw new YangParseException(moduleName, line, "Unknown yang type " + typeName);
             }
             constraints.addRanges(uintType.getRangeStatements());
             baseType = uintType;
@@ -1158,7 +1179,7 @@ public final class ParserListenerUtils {
             baseType = binaryType;
         } else if ("instance-identifier".equals(typeName)) {
             boolean requireInstance = isRequireInstance(typeBody);
-            baseType = new InstanceIdentifier(baseTypePath, null, requireInstance);
+            return new InstanceIdentifier(baseTypePath, null, requireInstance);
         }
 
         if (parent instanceof TypeDefinitionBuilder && !(parent instanceof UnionTypeBuilder)) {
@@ -1261,16 +1282,21 @@ public final class ParserListenerUtils {
     private static boolean isRequireInstance(Type_body_stmtsContext ctx) {
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree child = ctx.getChild(i);
-            if (child instanceof Require_instance_stmtContext) {
+            if (child instanceof Instance_identifier_specificationContext) {
                 for (int j = 0; j < child.getChildCount(); j++) {
-                    ParseTree reqArg = child.getChild(j);
-                    if (reqArg instanceof Require_instance_argContext) {
-                        return Boolean.valueOf(stringFromNode(reqArg));
+                    ParseTree reqStmt = child.getChild(j);
+                    if (reqStmt instanceof Require_instance_stmtContext) {
+                        for (int k = 0; k < reqStmt.getChildCount(); k++) {
+                            ParseTree reqArg = reqStmt.getChild(k);
+                            if (reqArg instanceof Require_instance_argContext) {
+                                return Boolean.valueOf(stringFromNode(reqArg));
+                            }
+                        }
                     }
                 }
             }
         }
-        return false;
+        return true;
     }
 
     /**
@@ -1381,8 +1407,8 @@ public final class ParserListenerUtils {
     private static Integer parseMinElements(Min_elements_stmtContext ctx) {
         Integer result = null;
         try {
-            for (int j = 0; j < ctx.getChildCount(); j++) {
-                ParseTree minArg = ctx.getChild(j);
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                ParseTree minArg = ctx.getChild(i);
                 if (minArg instanceof Min_value_argContext) {
                     result = Integer.valueOf(stringFromNode(minArg));
                 }
@@ -1399,8 +1425,8 @@ public final class ParserListenerUtils {
     private static Integer parseMaxElements(Max_elements_stmtContext ctx) {
         Integer result = null;
         try {
-            for (int j = 0; j < ctx.getChildCount(); j++) {
-                ParseTree maxArg = ctx.getChild(j);
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                ParseTree maxArg = ctx.getChild(i);
                 if (maxArg instanceof Max_value_argContext) {
                     result = Integer.valueOf(stringFromNode(maxArg));
                 }
@@ -1423,11 +1449,11 @@ public final class ParserListenerUtils {
      */
     public static boolean parseYinValue(Argument_stmtContext ctx) {
         boolean yinValue = false;
-        outer: for (int j = 0; j < ctx.getChildCount(); j++) {
-            ParseTree yin = ctx.getChild(j);
+        outer: for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree yin = ctx.getChild(i);
             if (yin instanceof Yin_element_stmtContext) {
-                for (int k = 0; k < yin.getChildCount(); k++) {
-                    ParseTree yinArg = yin.getChild(k);
+                for (int j = 0; j < yin.getChildCount(); j++) {
+                    ParseTree yinArg = yin.getChild(j);
                     if (yinArg instanceof Yin_element_argContext) {
                         String yinString = stringFromNode(yinArg);
                         if ("true".equals(yinString)) {
@@ -1478,18 +1504,16 @@ public final class ParserListenerUtils {
      *
      * @param refineCtx
      *            refine statement
-     * @param line
-     *            current line in yang model
      * @return RefineHolder object representing this refine statement
      */
     public static RefineHolder parseRefine(Refine_stmtContext refineCtx) {
         final String refineTarget = stringFromNode(refineCtx);
         final RefineHolder refine = new RefineHolder(refineCtx.getStart().getLine(), refineTarget);
-        for (int j = 0; j < refineCtx.getChildCount(); j++) {
-            ParseTree refinePom = refineCtx.getChild(j);
+        for (int i = 0; i < refineCtx.getChildCount(); i++) {
+            ParseTree refinePom = refineCtx.getChild(i);
             if (refinePom instanceof Refine_pomContext) {
-                for (int k = 0; k < refinePom.getChildCount(); k++) {
-                    ParseTree refineStmt = refinePom.getChild(k);
+                for (int j = 0; j < refinePom.getChildCount(); j++) {
+                    ParseTree refineStmt = refinePom.getChild(j);
                     parseRefineDefault(refine, refineStmt);
 
                     if (refineStmt instanceof Refine_leaf_stmtsContext) {
@@ -1551,8 +1575,8 @@ public final class ParserListenerUtils {
     }
 
     private static RefineHolder parseRefine(RefineHolder refine, Refine_container_stmtsContext refineStmt) {
-        for (int m = 0; m < refineStmt.getChildCount(); m++) {
-            ParseTree refineArg = refineStmt.getChild(m);
+        for (int i = 0; i < refineStmt.getChildCount(); i++) {
+            ParseTree refineArg = refineStmt.getChild(i);
             if (refineArg instanceof Must_stmtContext) {
                 MustDefinition must = parseMust((Must_stmtContext) refineArg);
                 refine.setMust(must);
@@ -1564,8 +1588,8 @@ public final class ParserListenerUtils {
     }
 
     private static RefineHolder parseRefine(RefineHolder refine, Refine_list_stmtsContext refineStmt) {
-        for (int m = 0; m < refineStmt.getChildCount(); m++) {
-            ParseTree refineArg = refineStmt.getChild(m);
+        for (int i = 0; i < refineStmt.getChildCount(); i++) {
+            ParseTree refineArg = refineStmt.getChild(i);
             if (refineArg instanceof Must_stmtContext) {
                 MustDefinition must = parseMust((Must_stmtContext) refineArg);
                 refine.setMust(must);
@@ -1581,8 +1605,8 @@ public final class ParserListenerUtils {
     }
 
     private static RefineHolder parseRefine(RefineHolder refine, Refine_leaf_list_stmtsContext refineStmt) {
-        for (int m = 0; m < refineStmt.getChildCount(); m++) {
-            ParseTree refineArg = refineStmt.getChild(m);
+        for (int i = 0; i < refineStmt.getChildCount(); i++) {
+            ParseTree refineArg = refineStmt.getChild(i);
             if (refineArg instanceof Must_stmtContext) {
                 MustDefinition must = parseMust((Must_stmtContext) refineArg);
                 refine.setMust(must);

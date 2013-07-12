@@ -18,13 +18,11 @@ import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 import org.opendaylight.controller.yang.parser.util.Comparators;
 
-public final class AnyXmlBuilder extends AbstractSchemaNodeBuilder implements DataSchemaNodeBuilder, GroupingMember,
-        ConfigNode {
+public final class AnyXmlBuilder extends AbstractSchemaNodeBuilder implements DataSchemaNodeBuilder, GroupingMember {
     private boolean built;
     private final AnyXmlSchemaNodeImpl instance;
     private final ConstraintsBuilder constraints;

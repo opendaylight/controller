@@ -25,14 +25,13 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.parser.builder.api.AbstractSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationTargetBuilder;
-import org.opendaylight.controller.yang.parser.builder.api.ConfigNode;
 import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 import org.opendaylight.controller.yang.parser.util.Comparators;
 import org.opendaylight.controller.yang.parser.util.ParserUtils;
 
 public final class ChoiceBuilder extends AbstractSchemaNodeBuilder implements DataSchemaNodeBuilder,
-        AugmentationTargetBuilder, GroupingMember, ConfigNode {
+        AugmentationTargetBuilder, GroupingMember {
     private boolean isBuilt;
     private final ChoiceNodeImpl instance;
     // DataSchemaNode args
@@ -130,7 +129,7 @@ public final class ChoiceBuilder extends AbstractSchemaNodeBuilder implements Da
     public void addChildNode(DataSchemaNodeBuilder childNode) {
         if (!(childNode instanceof ChoiceCaseBuilder)) {
             ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(childNode.getLine(), childNode.getQName());
-            if(childNode.isAugmenting()) {
+            if (childNode.isAugmenting()) {
                 caseBuilder.setAugmenting(true);
                 childNode.setAugmenting(false);
             }

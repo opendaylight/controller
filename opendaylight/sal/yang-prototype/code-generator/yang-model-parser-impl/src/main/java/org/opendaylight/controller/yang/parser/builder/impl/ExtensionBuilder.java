@@ -60,6 +60,11 @@ public final class ExtensionBuilder extends AbstractSchemaNodeBuilder {
         instance.setArgument(argument);
     }
 
+    @Override
+    public String toString() {
+        return "extension " + qname.getLocalName();
+    }
+
     private final class ExtensionDefinitionImpl implements ExtensionDefinition {
         private final QName qname;
         private String argument;

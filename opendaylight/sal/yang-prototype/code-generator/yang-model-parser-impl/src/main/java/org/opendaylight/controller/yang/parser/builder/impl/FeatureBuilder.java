@@ -51,6 +51,11 @@ public final class FeatureBuilder extends AbstractSchemaNodeBuilder {
         return instance;
     }
 
+    @Override
+    public String toString() {
+        return "feature " + qname.getLocalName();
+    }
+
     private final class FeatureDefinitionImpl implements FeatureDefinition {
         private final QName qname;
         private SchemaPath path;

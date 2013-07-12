@@ -97,7 +97,12 @@ public abstract class AbstractSchemaNodeBuilder implements SchemaNodeBuilder {
     }
 
     @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
+    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
+        return addedUnknownNodes;
+    }
+
+    @Override
+    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
         addedUnknownNodes.add(unknownNode);
     }
 

@@ -37,7 +37,6 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     private String description;
     private String reference;
     private Status status = Status.CURRENT;
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     // DataSchemaNode args
     private boolean augmenting;
     private final ConstraintsBuilder constraints;
@@ -150,15 +149,6 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
         this.augmenting = augmenting;
     }
 
-    public List<UnknownSchemaNodeBuilder> getUnknownNodes() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownSchemaNode(UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
-    }
-
     public Set<UsesNodeBuilder> getUsesNodes() {
         return addedUsesNodes;
     }
@@ -176,6 +166,16 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     @Override
     public void addTypedef(TypeDefinitionBuilder typedefBuilder) {
         throw new YangParseException(line, "Can not add type definition to choice case.");
+    }
+
+    @Override
+    public Boolean isConfiguration() {
+        return false;
+    }
+
+    @Override
+    public void setConfiguration(final Boolean configuration) {
+        throw new YangParseException(line, "Can not add config statement to choice case.");
     }
 
     @Override

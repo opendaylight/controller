@@ -379,7 +379,7 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
                 }
             }
         } else {
-            type = parseUnknownTypeWithBody(typeQName, typeBody, actualPath, namespace, revision, yangModelPrefix,
+            type = parseUnknownTypeWithBody(moduleName, typeQName, typeBody, actualPath, namespace, revision, yangModelPrefix,
                     moduleBuilder.getActualNode());
             // add parent node of this type statement to dirty nodes
             moduleBuilder.markActualNodeDirty();

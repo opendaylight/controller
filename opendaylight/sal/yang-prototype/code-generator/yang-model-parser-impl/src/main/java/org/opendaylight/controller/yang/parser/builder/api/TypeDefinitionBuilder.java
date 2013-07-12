@@ -14,7 +14,6 @@ import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.type.LengthConstraint;
 import org.opendaylight.controller.yang.model.api.type.PatternConstraint;
 import org.opendaylight.controller.yang.model.api.type.RangeConstraint;
-import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 /**
  * Interface for builders of 'typedef' statement.
@@ -40,8 +39,6 @@ public interface TypeDefinitionBuilder extends TypeAwareBuilder, SchemaNodeBuild
     void setFractionDigits(Integer fractionDigits);
 
     List<UnknownSchemaNode> getUnknownNodes();
-
-    List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders();
 
     Object getDefaultValue();
 

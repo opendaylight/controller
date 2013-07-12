@@ -79,7 +79,6 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
     private final Set<DeviationBuilder> addedDeviations = new HashSet<DeviationBuilder>();
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final List<ExtensionBuilder> addedExtensions = new ArrayList<ExtensionBuilder>();
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
     private final List<UnknownSchemaNodeBuilder> allUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     public ModuleBuilder(final String name) {
@@ -709,7 +708,7 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
     }
 
     @Override
-    public void addUnknownSchemaNode(final UnknownSchemaNodeBuilder builder) {
+    public void addUnknownNodeBuilder(final UnknownSchemaNodeBuilder builder) {
         addedUnknownNodes.add(builder);
         allUnknownNodes.add(builder);
     }
@@ -724,11 +723,11 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
             addedUnknownNodes.add(builder);
         } else {
             if (parent instanceof SchemaNodeBuilder) {
-                ((SchemaNodeBuilder) parent).addUnknownSchemaNode(builder);
+                ((SchemaNodeBuilder) parent).addUnknownNodeBuilder(builder);
             } else if (parent instanceof DataNodeContainerBuilder) {
-                ((DataNodeContainerBuilder) parent).addUnknownSchemaNode(builder);
+                ((DataNodeContainerBuilder) parent).addUnknownNodeBuilder(builder);
             } else if (parent instanceof RefineHolder) {
-                ((RefineHolder) parent).addUnknownSchemaNode(builder);
+                ((RefineHolder) parent).addUnknownNodeBuilder(builder);
             } else {
                 throw new YangParseException(name, line, "Unresolved parent of unknown node '" + qname.getLocalName()
                         + "'");
