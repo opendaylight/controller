@@ -537,11 +537,10 @@ IInventoryShimExternalListener, CommandProvider {
             values = this.v6StatsListToOFStatsList(values);
         }
 
-        if (!values.isEmpty()) { //possiblly filtered out by v6StatsListToOFStatsList()
-            for (IOFStatisticsListener l : this.statisticsListeners) {
-                l.flowStatisticsRefreshed(switchId, values);
-            }
+        for (IOFStatisticsListener l : this.statisticsListeners) {
+            l.flowStatisticsRefreshed(switchId, values);
         }
+
     }
 
     private void notifyPortUpdate(Long switchId, List<OFStatistics> values) {

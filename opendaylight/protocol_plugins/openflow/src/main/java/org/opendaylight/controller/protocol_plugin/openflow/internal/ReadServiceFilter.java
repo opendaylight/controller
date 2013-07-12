@@ -587,9 +587,7 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
             flowOnNodeList = filterFlowListPerContainer(container, node, flowOnNodeList);
 
             // notify listeners
-            if (!flowOnNodeList.isEmpty()) {
-                l.getValue().nodeFlowStatisticsUpdated(node, flowOnNodeList);
-            }
+            l.getValue().nodeFlowStatisticsUpdated(node, flowOnNodeList);
         }
     }
 
@@ -606,9 +604,8 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
                     .getNodeConnectorStatsList();
 
             // notify listeners
-            if (!ncStatsList.isEmpty()) {
-                l.getValue().nodeConnectorStatisticsUpdated(node, ncStatsList);
-            }
+            l.getValue().nodeConnectorStatisticsUpdated(node, ncStatsList);
+
         }
     }
 
@@ -625,9 +622,7 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
                     .getNodeTableStatsList();
 
             // notify listeners
-            if (!tableStatsList.isEmpty()) {
-                l.getValue().nodeTableStatisticsUpdated(node, tableStatsList);
-            }
+            l.getValue().nodeTableStatisticsUpdated(node, tableStatsList);
         }
     }
 }
