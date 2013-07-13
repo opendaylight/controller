@@ -8,7 +8,10 @@
 package org.opendaylight.controller.subnets.northbound;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -20,6 +23,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -27,6 +31,7 @@ import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
+import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
@@ -128,7 +133,7 @@ public class SubnetsNorthboundJAXRS {
     }
 
     /**
-     * Add/Update a subnet to a container
+     * Add a subnet to a container
      *
      * @param containerName
      *            container in which we want to add/update the subnet
@@ -142,9 +147,8 @@ public class SubnetsNorthboundJAXRS {
     @Path("/{containerName}/{subnetName}")
     @POST
     @StatusCodes({
-            @ResponseCode(code = 404, condition = "The containerName passed was not found"),
             @ResponseCode(code = 404, condition = "Invalid Data passed"),
-            @ResponseCode(code = 201, condition = "Subnet added/modified"),
+            @ResponseCode(code = 201, condition = "Subnet added"),
             @ResponseCode(code = 500, condition = "Addition of subnet failed") })
     public Response addSubnet(@PathParam("containerName") String containerName,
             @PathParam("subnetName") String subnetName,
@@ -222,6 +226,88 @@ public class SubnetsNorthboundJAXRS {
             return Response.status(Response.Status.OK).build();
         }
         throw new InternalServerErrorException(status.getDescription());
+    }
+
+    /**
+     * Modify a subnet. For now only changing the port list is allowed.
+     *
+     * @param containerName
+     *            Name of the Container
+     * @param name
+     *            Name of the SubnetConfig to be modified
+     * @param subnetConfigData
+     *            the {@link SubnetConfig} structure in JSON passed as a POST
+     *            parameter
+     * @return If the operation is successful or not
+     */
+    @Path("/{containerName}/{subnetName}/modify")
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @StatusCodes({
+            @ResponseCode(code = 202, condition = "Operation successful"),
+            @ResponseCode(code = 400, condition = "Invalid request, i.e., requested changing the subnet name"),
+            @ResponseCode(code = 404, condition = "The containerName or subnetName is not found"),
+            @ResponseCode(code = 500, condition = "Internal server error")})
+    public Response modifySubnet(@PathParam("containerName") String containerName,
+                                 @PathParam("subnetName") String name,
+                                 @TypeHint(SubnetConfig.class) JAXBElement<SubnetConfig> subnetConfigData) {
+
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName,
+                                          Privilege.WRITE, this)) {
+            throw new UnauthorizedException(
+                "User is not authorized to perform this operation on container " + containerName);
+        }
+
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class,
+                                                                                  containerName, this);
+        if (switchManager == null) {
+            throw new ResourceNotFoundException(RestMessages.NOCONTAINER.toString());
+        }
+
+        SubnetConfig subnetConf = subnetConfigData.getValue();
+        SubnetConfig existingConf = switchManager.getSubnetConfig(name);
+
+        boolean successful = true;
+
+        // make sure that the name matches an existing subnet and we're not
+        // changing the name or subnet IP/mask
+        if (existingConf == null){
+            // don't have a subnet by that name
+            return Response.status(Response.Status.NOT_FOUND).build();
+
+        }else if( !existingConf.getName().equals(subnetConf.getName())
+            || !existingConf.getSubnet().equals(subnetConf.getSubnet())) {
+            // can't change the name of a subnet
+            return Response.status(Response.Status.BAD_REQUEST).build();
+
+        }else{
+            // create a set for fast lookups
+            Set<String> newPorts = new HashSet<String>(subnetConf.getNodePorts());
+
+            // go through the current ports and (1) remove ports that aren't
+            // there anymore and (2) remove ports that are still there from the
+            // set of ports to add
+            for(String s : existingConf.getNodePorts()){
+                if(newPorts.contains(s)){
+                    newPorts.remove(s);
+                }else{
+                    Status st = switchManager.removePortsFromSubnet(name, s);
+                    successful = successful && st.isSuccess();
+                }
+            }
+
+            // add any remaining ports
+            for(String s : newPorts){
+                Status st = switchManager.addPortsToSubnet(name, s);
+                successful = successful && st.isSuccess();
+            }
+        }
+
+        if(successful){
+            return Response.status(Response.Status.ACCEPTED).build();
+        }else{
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /*
