@@ -2227,8 +2227,16 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
 
     @Override
     public Set<HostNodeConnector> getInactiveStaticHosts() {
-        // TODO Auto-generated method stub
-        return null;
+        Collection<Entity> devices = Collections
+                .unmodifiableCollection(inactiveStaticDevices.values());
+        Iterator<Entity> i = devices.iterator();
+        Set<HostNodeConnector> nc = new HashSet<HostNodeConnector>();
+        while (i.hasNext()) {
+            Entity ent = i.next();
+                nc.add(ent.toHostNodeConnector());
+
+        }
+        return nc;
     }
 
     @Override
@@ -2277,6 +2285,16 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                     listener.deviceRemoved(d);
             }
         }
+        //go through inactive entites.
+        Set<HostNodeConnector> inactive = this.getInactiveStaticHosts();
+        for(HostNodeConnector nc : inactive){
+            Integer ip =toIPv4Address(nc.getNetworkAddress().getAddress());
+            if(ip.equals(addr)){
+                this.inactiveStaticDevices.remove(nc.getnodeConnector());
+            }
+        }
+
+
         return new Status(StatusCode.SUCCESS);
     }
 
@@ -2335,15 +2353,17 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
 
             Entity ent = inactiveStaticDevices.get(nodeConnector);
             Device device = this.learnDeviceByEntity(ent);
-            HostNodeConnector host = device.toHostNodeConnector();
-            if (host != null) {
-                inactiveStaticDevices.remove(nodeConnector);
-                for (IfNewHostNotify notify : newHostNotify)
-                    notify.notifyHTClient(host);
-                for (IDeviceListener listener : listeners)
-                    listener.deviceAdded(device);
-            } else {
-                logger.debug("handleNodeConnectorStatusDown {}", nodeConnector);
+            if(device!=null){
+                HostNodeConnector host = device.toHostNodeConnector();
+                if (host != null) {
+                    inactiveStaticDevices.remove(nodeConnector);
+                    for (IfNewHostNotify notify : newHostNotify)
+                        notify.notifyHTClient(host);
+                    for (IDeviceListener listener : listeners)
+                        listener.deviceAdded(device);
+                } else {
+                    logger.debug("handleNodeConnectorStatusDown {}", nodeConnector);
+                }
             }
         }else{
                 // remove all devices on the node that went down.
