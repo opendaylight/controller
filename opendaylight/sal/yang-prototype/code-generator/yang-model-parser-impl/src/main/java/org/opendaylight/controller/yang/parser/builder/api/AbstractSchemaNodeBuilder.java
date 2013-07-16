@@ -7,51 +7,31 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.Status;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 /**
  * Basic implementation of SchemaNodeBuilder.
  */
-public abstract class AbstractSchemaNodeBuilder implements SchemaNodeBuilder {
-    protected final int line;
+public abstract class AbstractSchemaNodeBuilder extends AbstractBuilder implements SchemaNodeBuilder {
     protected final QName qname;
-    protected Builder parent;
     protected SchemaPath schemaPath;
     protected String description;
     protected String reference;
     protected Status status = Status.CURRENT;
     protected List<UnknownSchemaNode> unknownNodes;
-    protected final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    protected AbstractSchemaNodeBuilder(final int line, final QName qname) {
-        this.line = line;
+    protected AbstractSchemaNodeBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line);
         this.qname = qname;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
     }
 
     public QName getQName() {
         return qname;
-    }
-
-    @Override
-    public Builder getParent() {
-        return parent;
-    }
-
-    @Override
-    public void setParent(final Builder parent) {
-        this.parent = parent;
     }
 
     @Override
@@ -94,16 +74,6 @@ public abstract class AbstractSchemaNodeBuilder implements SchemaNodeBuilder {
         if (status != null) {
             this.status = status;
         }
-    }
-
-    @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
     }
 
     public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {

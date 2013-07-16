@@ -921,7 +921,7 @@ public final class YangParserImpl implements YangModelParser {
                 usesNode.setGroupingPath(targetGrouping.getPath());
                 for (RefineHolder refine : usesNode.getRefines()) {
                     final SchemaNodeBuilder nodeToRefine = RefineUtils.getRefineNodeFromGroupingDefinition(
-                            targetGrouping, refine, module.getName());
+                            targetGrouping, refine);
                     if (nodeToRefine instanceof GroupingMember) {
                         ((GroupingMember) nodeToRefine).setAddedByUses(true);
                     }
@@ -1053,7 +1053,8 @@ public final class YangParserImpl implements YangModelParser {
     }
 
     /**
-     * Add nodes defined in target grouping to current context.
+     * Add nodes defined in target grouping to current context. Refinement has
+     * to be already performed.
      *
      * @param usesNode
      * @param targetGrouping
@@ -1088,7 +1089,7 @@ public final class YangParserImpl implements YangModelParser {
                 }
 
                 if (newChild == null) {
-                    throw new YangParseException(usesNode.getLine(),
+                    throw new YangParseException(usesNode.getModuleName(), usesNode.getLine(),
                             "Unknown member of target grouping while resolving uses node.");
                 }
 
@@ -1127,6 +1128,7 @@ public final class YangParserImpl implements YangModelParser {
     }
 
     private void processUsesNode(final UsesNodeBuilder usesNode, final GroupingDefinition targetGrouping) {
+        final String moduleName = usesNode.getModuleName();
         final int line = usesNode.getLine();
         List<SchemaNodeBuilder> refineNodes = usesNode.getRefineNodes();
         DataNodeContainerBuilder parent = usesNode.getParent();
@@ -1143,21 +1145,21 @@ public final class YangParserImpl implements YangModelParser {
 
                 DataSchemaNodeBuilder newChild = null;
                 if (child instanceof AnyXmlSchemaNode) {
-                    newChild = createAnyXml((AnyXmlSchemaNode) child, line);
+                    newChild = createAnyXml((AnyXmlSchemaNode) child, moduleName, line);
                 } else if (child instanceof ChoiceNode) {
-                    newChild = createChoice((ChoiceNode) child, line);
+                    newChild = createChoice((ChoiceNode) child, moduleName, line);
                 } else if (child instanceof ContainerSchemaNode) {
-                    newChild = createContainer((ContainerSchemaNode) child, line);
+                    newChild = createContainer((ContainerSchemaNode) child, moduleName, line);
                 } else if (child instanceof LeafListSchemaNode) {
-                    newChild = createLeafList((LeafListSchemaNode) child, line);
+                    newChild = createLeafList((LeafListSchemaNode) child, moduleName, line);
                 } else if (child instanceof LeafSchemaNode) {
-                    newChild = createLeafBuilder((LeafSchemaNode) child, line);
+                    newChild = createLeafBuilder((LeafSchemaNode) child, moduleName, line);
                 } else if (child instanceof ListSchemaNode) {
-                    newChild = createList((ListSchemaNode) child, line);
+                    newChild = createList((ListSchemaNode) child, moduleName, line);
                 }
 
                 if (newChild == null) {
-                    throw new YangParseException(usesNode.getLine(),
+                    throw new YangParseException(moduleName, line,
                             "Unknown member of target grouping while resolving uses node.");
                 }
 
@@ -1169,13 +1171,13 @@ public final class YangParserImpl implements YangModelParser {
             }
         }
         for (GroupingDefinition g : targetGrouping.getGroupings()) {
-            GroupingBuilder newGrouping = createGrouping(g, line);
+            GroupingBuilder newGrouping = createGrouping(g, moduleName, line);
             newGrouping.setAddedByUses(true);
             newGrouping.setPath(createSchemaPath(parentPath, newGrouping.getQName().getLocalName()));
             parent.addGrouping(newGrouping);
         }
         for (TypeDefinition<?> td : targetGrouping.getTypeDefinitions()) {
-            TypeDefinitionBuilder newType = createTypedef((ExtendedType) td, line);
+            TypeDefinitionBuilder newType = createTypedef((ExtendedType) td, moduleName, line);
             newType.setAddedByUses(true);
             newType.setPath(createSchemaPath(parentPath, newType.getQName().getLocalName()));
             parent.addTypedef(newType);
@@ -1189,7 +1191,7 @@ public final class YangParserImpl implements YangModelParser {
             }
         }
         for (UnknownSchemaNode un : targetGrouping.getUnknownSchemaNodes()) {
-            UnknownSchemaNodeBuilder newNode = createUnknownSchemaNode(un, line);
+            UnknownSchemaNodeBuilder newNode = createUnknownSchemaNode(un, moduleName, line);
             newNode.setAddedByUses(true);
             newNode.setPath(createSchemaPath(parentPath, un.getQName().getLocalName()));
             parent.addUnknownNodeBuilder(newNode);

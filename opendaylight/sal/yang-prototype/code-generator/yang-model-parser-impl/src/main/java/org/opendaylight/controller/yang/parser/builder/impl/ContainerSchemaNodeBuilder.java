@@ -36,6 +36,7 @@ import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.Comparators;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerBuilder implements
         AugmentationTargetBuilder, DataSchemaNodeBuilder, GroupingMember {
@@ -63,15 +64,16 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
     // ContainerSchemaNode args
     private boolean presence;
 
-    public ContainerSchemaNodeBuilder(final int line, final QName qname, final SchemaPath schemaPath) {
-        super(line, qname);
+    public ContainerSchemaNodeBuilder(final String moduleName, final int line, final QName qname,
+            final SchemaPath schemaPath) {
+        super(moduleName, line, qname);
         this.schemaPath = schemaPath;
         instance = new ContainerSchemaNodeImpl(qname);
-        constraints = new ConstraintsBuilder(line);
+        constraints = new ConstraintsBuilder(moduleName, line);
     }
 
     public ContainerSchemaNodeBuilder(final ContainerSchemaNodeBuilder b) {
-        super(b.getLine(), b.getQName());
+        super(b.getModuleName(), b.getLine(), b.getQName());
         instance = new ContainerSchemaNodeImpl(b.getQName());
         constraints = b.getConstraints();
         schemaPath = b.getPath();
@@ -116,7 +118,7 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
 
             // CHILD NODES
             final Map<QName, DataSchemaNode> childs = new TreeMap<QName, DataSchemaNode>(Comparators.QNAME_COMP);
-            if (childNodes == null) {
+            if (childNodes == null || childNodes.isEmpty()) {
                 for (DataSchemaNodeBuilder node : addedChildNodes) {
                     childs.put(node.getQName(), node.build());
                 }
@@ -194,6 +196,11 @@ public final class ContainerSchemaNodeBuilder extends AbstractDataNodeContainerB
 
     @Override
     public void addTypedef(final TypeDefinitionBuilder type) {
+        String typeName = type.getQName().getLocalName();
+        for (TypeDefinitionBuilder addedTypedef : addedTypedefs) {
+            throw new YangParseException(moduleName, type.getLine(), "Can not add typedef '" + typeName
+                    + "': typedef with same name already declared at line " + addedTypedef.getLine());
+        }
         addedTypedefs.add(type);
     }
 

@@ -2,7 +2,7 @@ module types {
     yang-version 1;
     namespace "urn:simple.types.test";
     prefix "t";
-    
+
     organization "opendaylight";
     contact "http://www.opendaylight.org/";
     description "This is types-data test description";
@@ -37,7 +37,7 @@ module types {
             length "6..10";
         }
     }
-    
+
     typedef string-ext3 {
         type string-ext2 {
             pattern "[b-u]*";
@@ -77,21 +77,24 @@ module types {
     }
 
     container interfaces {
-         list ifEntry {
-             key "ifIndex";
+        grouping ifEntry {
+            container augment-holder;
+        }
+        list ifEntry {
+            key "ifIndex";
 
-             leaf ifIndex {
-                 type uint32;
-                 units minutes;
-             }
+            leaf ifIndex {
+                type uint32;
+                units minutes;
+            }
 
-             leaf ifMtu {
-                 type int32;
-             }
+            leaf ifMtu {
+                type int32;
+            }
 
-             min-elements 1;
-             max-elements 11;
-         }
+            min-elements 1;
+            max-elements 11;
+        }
     }
 
 }

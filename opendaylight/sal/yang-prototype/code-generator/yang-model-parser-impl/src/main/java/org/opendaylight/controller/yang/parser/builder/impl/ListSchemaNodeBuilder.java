@@ -36,6 +36,7 @@ import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 import org.opendaylight.controller.yang.parser.builder.api.TypeDefinitionBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.Comparators;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class ListSchemaNodeBuilder extends AbstractDataNodeContainerBuilder implements DataSchemaNodeBuilder,
         AugmentationTargetBuilder, GroupingMember {
@@ -63,15 +64,15 @@ public final class ListSchemaNodeBuilder extends AbstractDataNodeContainerBuilde
     private List<QName> keyDefinition = Collections.emptyList();
     private boolean userOrdered;
 
-    public ListSchemaNodeBuilder(final int line, final QName qname, final SchemaPath schemaPath) {
-        super(line, qname);
+    public ListSchemaNodeBuilder(final String moduleName, final int line, final QName qname, final SchemaPath schemaPath) {
+        super(moduleName, line, qname);
         this.schemaPath = schemaPath;
         instance = new ListSchemaNodeImpl(qname);
-        constraints = new ConstraintsBuilder(line);
+        constraints = new ConstraintsBuilder(moduleName, line);
     }
 
     public ListSchemaNodeBuilder(final ListSchemaNodeBuilder b) {
-        super(b.getLine(), b.getQName());
+        super(b.getModuleName(), b.getLine(), b.getQName());
         instance = new ListSchemaNodeImpl(b.getQName());
         constraints = b.getConstraints();
         schemaPath = b.getPath();
@@ -112,7 +113,7 @@ public final class ListSchemaNodeBuilder extends AbstractDataNodeContainerBuilde
 
             // CHILD NODES
             final Map<QName, DataSchemaNode> childs = new TreeMap<QName, DataSchemaNode>(Comparators.QNAME_COMP);
-            if (childNodes == null) {
+            if (childNodes == null || childNodes.isEmpty()) {
                 for (DataSchemaNodeBuilder node : addedChildNodes) {
                     childs.put(node.getQName(), node.build());
                 }
@@ -190,6 +191,11 @@ public final class ListSchemaNodeBuilder extends AbstractDataNodeContainerBuilde
 
     @Override
     public void addTypedef(final TypeDefinitionBuilder type) {
+        String typeName = type.getQName().getLocalName();
+        for (TypeDefinitionBuilder addedTypedef : addedTypedefs) {
+            throw new YangParseException(moduleName, type.getLine(), "Can not add typedef '" + typeName
+                    + "': typedef with same name already declared at line " + addedTypedef.getLine());
+        }
         addedTypedefs.add(type);
     }
 

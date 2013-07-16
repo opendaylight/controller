@@ -40,12 +40,12 @@ public final class TypeDefinitionBuilderImpl extends AbstractTypeAwareBuilder im
     private Object defaultValue;
     private boolean addedByUses;
 
-    public TypeDefinitionBuilderImpl(final QName qname, final int line) {
-        super(line, qname);
+    public TypeDefinitionBuilderImpl(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line, qname);
     }
 
     public TypeDefinitionBuilderImpl(TypeDefinitionBuilder tdb) {
-        super(tdb.getLine(), tdb.getQName());
+        super(tdb.getModuleName(), tdb.getLine(), tdb.getQName());
         schemaPath = tdb.getPath();
 
         type = tdb.getType();

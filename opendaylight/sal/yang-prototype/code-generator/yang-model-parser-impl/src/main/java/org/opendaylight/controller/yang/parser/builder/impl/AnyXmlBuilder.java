@@ -31,15 +31,15 @@ public final class AnyXmlBuilder extends AbstractSchemaNodeBuilder implements Da
     private boolean augmenting;
     private boolean addedByUses;
 
-    public AnyXmlBuilder(final int line, final QName qname, final SchemaPath schemaPath) {
-        super(line, qname);
+    public AnyXmlBuilder(final String moduleName, final int line, final QName qname, final SchemaPath schemaPath) {
+        super(moduleName, line, qname);
         this.schemaPath = schemaPath;
         instance = new AnyXmlSchemaNodeImpl(qname);
-        constraints = new ConstraintsBuilder(line);
+        constraints = new ConstraintsBuilder(moduleName, line);
     }
 
     public AnyXmlBuilder(final AnyXmlBuilder builder) {
-        super(builder.getLine(), builder.getQName());
+        super(builder.getModuleName(), builder.getLine(), builder.getQName());
         parent = builder.getParent();
         instance = new AnyXmlSchemaNodeImpl(qname);
         constraints = builder.getConstraints();

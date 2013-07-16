@@ -26,8 +26,8 @@ public final class IdentitySchemaNodeBuilder extends AbstractSchemaNodeBuilder {
     private IdentitySchemaNode baseIdentity;
     private String baseIdentityName;
 
-    IdentitySchemaNodeBuilder(final int line, final QName qname) {
-        super(line, qname);
+    IdentitySchemaNodeBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line, qname);
         instance = new IdentitySchemaNodeImpl(qname);
     }
 

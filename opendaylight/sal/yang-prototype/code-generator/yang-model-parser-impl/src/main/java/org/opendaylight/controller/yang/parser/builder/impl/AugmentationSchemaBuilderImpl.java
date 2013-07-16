@@ -54,8 +54,8 @@ public final class AugmentationSchemaBuilderImpl extends AbstractDataNodeContain
     private final Set<UsesNodeBuilder> usesNodes = new HashSet<UsesNodeBuilder>();
     private boolean resolved;
 
-    AugmentationSchemaBuilderImpl(final int line, final String augmentTargetStr) {
-        super(line, null);
+    AugmentationSchemaBuilderImpl(final String moduleName, final int line, final String augmentTargetStr) {
+        super(moduleName, line, null);
         this.augmentTargetStr = augmentTargetStr;
         final SchemaPath targetPath = ParserListenerUtils.parseAugmentPath(augmentTargetStr);
         dirtyAugmentTarget = targetPath;
@@ -74,7 +74,7 @@ public final class AugmentationSchemaBuilderImpl extends AbstractDataNodeContain
 
     @Override
     public void addGrouping(GroupingBuilder grouping) {
-        throw new YangParseException(line, "augment can not contains grouping statement");
+        throw new YangParseException(moduleName, line, "augment can not contains grouping statement");
     }
 
     @Override
@@ -158,7 +158,7 @@ public final class AugmentationSchemaBuilderImpl extends AbstractDataNodeContain
 
     @Override
     public void addTypedef(TypeDefinitionBuilder type) {
-        throw new YangParseException(line, "Augmentation can not contains typedef statement.");
+        throw new YangParseException(moduleName, line, "Augmentation can not contains typedef statement.");
     }
 
     @Override

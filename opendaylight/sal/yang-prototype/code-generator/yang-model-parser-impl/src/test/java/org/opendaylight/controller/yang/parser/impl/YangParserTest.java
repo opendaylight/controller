@@ -195,7 +195,7 @@ public class YangParserTest {
         // test DataNodeContainer args
         assertEquals(0, interfaces.getTypeDefinitions().size());
         assertEquals(1, interfaces.getChildNodes().size());
-        assertEquals(0, interfaces.getGroupings().size());
+        assertEquals(1, interfaces.getGroupings().size());
         assertEquals(0, interfaces.getUses().size());
 
         ListSchemaNode ifEntry = (ListSchemaNode) interfaces.getDataChildByName("ifEntry");

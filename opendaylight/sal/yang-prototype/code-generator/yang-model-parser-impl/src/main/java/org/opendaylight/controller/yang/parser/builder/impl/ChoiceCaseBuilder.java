@@ -45,10 +45,10 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
     // AugmentationTarget args
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
 
-    ChoiceCaseBuilder(final int line, final QName qname) {
-        super(line, qname);
+    ChoiceCaseBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line, qname);
         instance = new ChoiceCaseNodeImpl(qname);
-        constraints = new ConstraintsBuilder(line);
+        constraints = new ConstraintsBuilder(moduleName, line);
     }
 
     @Override
@@ -165,7 +165,7 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
 
     @Override
     public void addTypedef(TypeDefinitionBuilder typedefBuilder) {
-        throw new YangParseException(line, "Can not add type definition to choice case.");
+        throw new YangParseException(moduleName, line, "Can not add type definition to choice case.");
     }
 
     @Override
@@ -175,7 +175,7 @@ public final class ChoiceCaseBuilder extends AbstractDataNodeContainerBuilder im
 
     @Override
     public void setConfiguration(final Boolean configuration) {
-        throw new YangParseException(line, "Can not add config statement to choice case.");
+        throw new YangParseException(moduleName, line, "Can not add config statement to choice case.");
     }
 
     @Override

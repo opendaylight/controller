@@ -7,26 +7,20 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.DataSchemaNode;
 import org.opendaylight.controller.yang.model.api.GroupingDefinition;
-import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 /**
  * Basic implementation of DataNodeContainerBuilder.
  */
-public abstract class AbstractDataNodeContainerBuilder implements DataNodeContainerBuilder {
-    protected final int line;
+public abstract class AbstractDataNodeContainerBuilder extends AbstractBuilder implements DataNodeContainerBuilder {
     protected final QName qname;
-    protected Builder parent;
 
     protected Set<DataSchemaNode> childNodes;
     protected final Set<DataSchemaNodeBuilder> addedChildNodes = new HashSet<DataSchemaNodeBuilder>();
@@ -34,27 +28,9 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
     protected Set<GroupingDefinition> groupings;
     protected final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
 
-    protected List<UnknownSchemaNode> unknownNodes;
-    protected final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
-
-    protected AbstractDataNodeContainerBuilder(final int line, final QName qname) {
-        this.line = line;
+    protected AbstractDataNodeContainerBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line);
         this.qname = qname;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public Builder getParent() {
-        return parent;
-    }
-
-    @Override
-    public void setParent(final Builder parent) {
-        this.parent = parent;
     }
 
     @Override
@@ -91,9 +67,12 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
 
     @Override
     public void addChildNode(DataSchemaNodeBuilder child) {
-        for (DataSchemaNodeBuilder childNode : addedChildNodes) {
-            if (childNode.getQName().getLocalName().equals(child.getQName().getLocalName())) {
-                throw new YangParseException(child.getLine(), "Duplicate node found at line " + childNode.getLine());
+        String childName = child.getQName().getLocalName();
+        for (DataSchemaNodeBuilder addedChildNode : addedChildNodes) {
+            if (addedChildNode.getQName().getLocalName().equals(childName)) {
+                throw new YangParseException(child.getModuleName(), child.getLine(), "Can not add '" + child
+                        + "' to node '" + qname.getLocalName() + "' in module '" + moduleName
+                        + "': node with same name already declared at line " + addedChildNode.getLine());
             }
         }
         addedChildNodes.add(child);
@@ -116,27 +95,16 @@ public abstract class AbstractDataNodeContainerBuilder implements DataNodeContai
     }
 
     @Override
-    public void addGrouping(GroupingBuilder groupingBuilder) {
-        for (GroupingBuilder gb : addedGroupings) {
-            if (gb.getQName().getLocalName().equals(groupingBuilder.getQName().getLocalName())) {
-                throw new YangParseException(groupingBuilder.getLine(), "Duplicate node found at line " + gb.getLine());
+    public void addGrouping(GroupingBuilder grouping) {
+        String groupingName = grouping.getQName().getLocalName();
+        for (GroupingBuilder addedGrouping : addedGroupings) {
+            if (addedGrouping.getQName().getLocalName().equals(groupingName)) {
+                throw new YangParseException(grouping.getModuleName(), grouping.getLine(), "Can not add '" + grouping
+                        + "': grouping with same name already declared in module '" + moduleName + "' at line "
+                        + addedGrouping.getLine());
             }
         }
-        addedGroupings.add(groupingBuilder);
-    }
-
-    @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
-    }
-
-    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
-        this.unknownNodes = unknownNodes;
+        addedGroupings.add(grouping);
     }
 
 }

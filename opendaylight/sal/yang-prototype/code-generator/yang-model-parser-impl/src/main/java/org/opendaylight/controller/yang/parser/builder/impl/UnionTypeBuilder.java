@@ -39,12 +39,11 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     private SchemaPath path;
 
-    public UnionTypeBuilder(final int line) {
-        super(line, null);
+    public UnionTypeBuilder(final String moduleName, final int line) {
+        super(moduleName, line, null);
         types = new ArrayList<TypeDefinition<?>>();
         typedefs = new ArrayList<TypeDefinitionBuilder>();
     }
-
 
     public List<TypeDefinition<?>> getTypes() {
         return types;
@@ -93,17 +92,17 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     @Override
     public void setDescription(final String description) {
-        throw new YangParseException(line, "Can not set description to " + NAME);
+        throw new YangParseException(moduleName, line, "Can not set description to " + NAME);
     }
 
     @Override
     public void setReference(final String reference) {
-        throw new YangParseException(line, "Can not set reference to " + NAME);
+        throw new YangParseException(moduleName, line, "Can not set reference to " + NAME);
     }
 
     @Override
     public void setStatus(final Status status) {
-        throw new YangParseException(line, "Can not set status to " + NAME);
+        throw new YangParseException(moduleName, line, "Can not set status to " + NAME);
     }
 
     @Override
@@ -113,7 +112,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     @Override
     public void setAddedByUses(final boolean addedByUses) {
-        throw new YangParseException(line, "Union type can not be added by uses.");
+        throw new YangParseException(moduleName, line, "Union type can not be added by uses.");
     }
 
     @Override
@@ -153,7 +152,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     @Override
     public void setRanges(List<RangeConstraint> ranges) {
-        throw new YangParseException(line, "Can not set ranges to " + NAME);
+        throw new YangParseException(moduleName, line, "Can not set ranges to " + NAME);
     }
 
     @Override
@@ -163,7 +162,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     @Override
     public void setLengths(List<LengthConstraint> lengths) {
-        throw new YangParseException(line, "Can not set lengths to " + NAME);
+        throw new YangParseException(moduleName, line, "Can not set lengths to " + NAME);
     }
 
     @Override
@@ -173,7 +172,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     @Override
     public void setPatterns(List<PatternConstraint> patterns) {
-        throw new YangParseException(line, "Can not set patterns to " + NAME);
+        throw new YangParseException(moduleName, line, "Can not set patterns to " + NAME);
     }
 
     @Override
@@ -183,7 +182,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     @Override
     public void setFractionDigits(Integer fractionDigits) {
-        throw new YangParseException(line, "Can not set fraction digits to " + NAME);
+        throw new YangParseException(moduleName, line, "Can not set fraction digits to " + NAME);
     }
 
     @Override
@@ -198,7 +197,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     @Override
     public void setDefaultValue(Object defaultValue) {
-        throw new YangParseException(line, "Can not set default value to " + NAME);
+        throw new YangParseException(moduleName, line, "Can not set default value to " + NAME);
     }
 
     @Override
@@ -208,7 +207,7 @@ public final class UnionTypeBuilder extends AbstractTypeAwareBuilder implements 
 
     @Override
     public void setUnits(String units) {
-        throw new YangParseException(line, "Can not set units to " + NAME);
+        throw new YangParseException(moduleName, line, "Can not set units to " + NAME);
     }
 
     @Override

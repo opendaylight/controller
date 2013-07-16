@@ -35,8 +35,8 @@ public final class RpcDefinitionBuilder extends AbstractSchemaNodeBuilder {
     private final Set<TypeDefinitionBuilder> addedTypedefs = new HashSet<TypeDefinitionBuilder>();
     private final Set<GroupingBuilder> addedGroupings = new HashSet<GroupingBuilder>();
 
-    RpcDefinitionBuilder(final int line, final QName qname) {
-        super(line, qname);
+    RpcDefinitionBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line, qname);
         this.instance = new RpcDefinitionImpl(qname);
     }
 

@@ -40,15 +40,16 @@ public final class LeafListSchemaNodeBuilder extends AbstractTypeAwareBuilder im
     // LeafListSchemaNode args
     private boolean userOrdered;
 
-    public LeafListSchemaNodeBuilder(final int line, final QName qname, final SchemaPath schemaPath) {
-        super(line, qname);
+    public LeafListSchemaNodeBuilder(final String moduleName, final int line, final QName qname,
+            final SchemaPath schemaPath) {
+        super(moduleName, line, qname);
         this.schemaPath = schemaPath;
         instance = new LeafListSchemaNodeImpl(qname);
-        constraints = new ConstraintsBuilder(line);
+        constraints = new ConstraintsBuilder(moduleName, line);
     }
 
     public LeafListSchemaNodeBuilder(final LeafListSchemaNodeBuilder b) {
-        super(b.getLine(), b.getQName());
+        super(b.getModuleName(), b.getLine(), b.getQName());
         instance = new LeafListSchemaNodeImpl(qname);
 
         type = b.getType();

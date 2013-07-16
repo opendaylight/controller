@@ -20,6 +20,7 @@ import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.controller.yang.model.api.UsesNode;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.AugmentationSchemaBuilder;
 import org.opendaylight.controller.yang.parser.builder.api.Builder;
 import org.opendaylight.controller.yang.parser.builder.api.DataNodeContainerBuilder;
@@ -28,10 +29,9 @@ import org.opendaylight.controller.yang.parser.builder.api.UsesNodeBuilder;
 import org.opendaylight.controller.yang.parser.util.RefineHolder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
+public final class UsesNodeBuilderImpl extends AbstractBuilder implements UsesNodeBuilder {
     private boolean isBuilt;
     private UsesNodeImpl instance;
-    private final int line;
     private DataNodeContainerBuilder parent;
     private final String groupingName;
     private SchemaPath groupingPath;
@@ -40,16 +40,15 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     private final Set<AugmentationSchemaBuilder> addedAugments = new HashSet<AugmentationSchemaBuilder>();
     private final List<SchemaNodeBuilder> refineBuilders = new ArrayList<SchemaNodeBuilder>();
     private final List<RefineHolder> refines = new ArrayList<RefineHolder>();
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    public UsesNodeBuilderImpl(final int line, final String groupingName) {
+    public UsesNodeBuilderImpl(final String moduleName, final int line, final String groupingName) {
+        super(moduleName, line);
         this.groupingName = groupingName;
-        this.line = line;
     }
 
     public UsesNodeBuilderImpl(UsesNodeBuilder b) {
+        super(b.getModuleName(), b.getLine());
         groupingName = b.getGroupingName();
-        line = b.getLine();
         parent = b.getParent();
         groupingPath = b.getGroupingPath();
         augmenting = b.isAugmenting();
@@ -94,11 +93,6 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     }
 
     @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
     public DataNodeContainerBuilder getParent() {
         return parent;
     }
@@ -106,7 +100,7 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     @Override
     public void setParent(Builder parent) {
         if (!(parent instanceof DataNodeContainerBuilder)) {
-            throw new YangParseException(line, "Unresolved parent of uses '" + groupingName + "'.");
+            throw new YangParseException(moduleName, line, "Unresolved parent of uses '" + groupingName + "'.");
         }
         this.parent = (DataNodeContainerBuilder) parent;
     }
@@ -174,16 +168,6 @@ public final class UsesNodeBuilderImpl implements UsesNodeBuilder {
     @Override
     public void addRefine(RefineHolder refine) {
         refines.add(refine);
-    }
-
-    @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
     }
 
     @Override

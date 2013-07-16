@@ -15,15 +15,13 @@ import org.opendaylight.controller.yang.model.api.Deviation;
 import org.opendaylight.controller.yang.model.api.Deviation.Deviate;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.parser.builder.api.Builder;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractBuilder;
 import org.opendaylight.controller.yang.parser.util.Comparators;
 import org.opendaylight.controller.yang.parser.util.ParserListenerUtils;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public final class DeviationBuilder implements Builder {
-    private final int line;
+public final class DeviationBuilder extends AbstractBuilder {
     private final String targetPathStr;
-    private Builder parent;
     private boolean isBuilt;
     private final DeviationImpl instance;
 
@@ -31,11 +29,12 @@ public final class DeviationBuilder implements Builder {
     private String reference;
     private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    DeviationBuilder(final int line, final String targetPathStr) {
-        if(!targetPathStr.startsWith("/")) {
-            throw new YangParseException(line, "Deviation argument string must be an absolute schema node identifier.");
+    DeviationBuilder(final String moduleName, final int line, final String targetPathStr) {
+        super(moduleName, line);
+        if (!targetPathStr.startsWith("/")) {
+            throw new YangParseException(moduleName, line,
+                    "Deviation argument string must be an absolute schema node identifier.");
         }
-        this.line = line;
         this.targetPathStr = targetPathStr;
         this.targetPath = ParserListenerUtils.parseAugmentPath(targetPathStr);
         instance = new DeviationImpl();
@@ -43,11 +42,11 @@ public final class DeviationBuilder implements Builder {
 
     @Override
     public Deviation build() {
-        if(targetPath == null) {
-            throw new YangParseException(line, "Unresolved deviation target");
+        if (targetPath == null) {
+            throw new YangParseException(moduleName, line, "Unresolved deviation target");
         }
 
-        if(!isBuilt) {
+        if (!isBuilt) {
             instance.setTargetPath(targetPath);
             instance.setReference(reference);
 
@@ -63,31 +62,6 @@ public final class DeviationBuilder implements Builder {
         }
 
         return instance;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public Builder getParent() {
-        return parent;
-    }
-
-    @Override
-    public void setParent(final Builder parent) {
-        this.parent = parent;
-    }
-
-    @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
     }
 
     public SchemaPath getTargetPath() {
@@ -108,8 +82,7 @@ public final class DeviationBuilder implements Builder {
         } else if ("delete".equals(deviate)) {
             instance.setDeviate(Deviate.DELETE);
         } else {
-            throw new YangParseException(line,
-                    "Unsupported type of 'deviate' statement: " + deviate);
+            throw new YangParseException(moduleName, line, "Unsupported type of 'deviate' statement: " + deviate);
         }
     }
 
@@ -173,12 +146,9 @@ public final class DeviationBuilder implements Builder {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result
-                    + ((targetPath == null) ? 0 : targetPath.hashCode());
-            result = prime * result
-                    + ((deviate == null) ? 0 : deviate.hashCode());
-            result = prime * result
-                    + ((reference == null) ? 0 : reference.hashCode());
+            result = prime * result + ((targetPath == null) ? 0 : targetPath.hashCode());
+            result = prime * result + ((deviate == null) ? 0 : deviate.hashCode());
+            result = prime * result + ((reference == null) ? 0 : reference.hashCode());
             return result;
         }
 
@@ -220,8 +190,7 @@ public final class DeviationBuilder implements Builder {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(
-                    DeviationImpl.class.getSimpleName());
+            StringBuilder sb = new StringBuilder(DeviationImpl.class.getSimpleName());
             sb.append("[");
             sb.append("targetPath=" + targetPath);
             sb.append(", deviate=" + deviate);

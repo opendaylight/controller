@@ -229,7 +229,7 @@ public final class TypeConstraints {
 
         for (RangeConstraint range : typeRange) {
             if (range.getMin() instanceof UnknownBoundaryNumber || range.getMax() instanceof UnknownBoundaryNumber) {
-                throw new YangParseException(line, "Unresolved range constraints");
+                throw new YangParseException(moduleName, line, "Unresolved range constraints");
             }
             final long min = range.getMin().longValue();
             final long max = range.getMax().longValue();
@@ -268,7 +268,7 @@ public final class TypeConstraints {
 
         for (RangeConstraint range : typeRange) {
             if (range.getMin() instanceof UnknownBoundaryNumber || range.getMax() instanceof UnknownBoundaryNumber) {
-                throw new YangParseException(line, "Unresolved range constraints");
+                throw new YangParseException(moduleName, line, "Unresolved range constraints");
             }
             final long min = range.getMin().longValue();
             final long max = range.getMax().longValue();
@@ -308,7 +308,7 @@ public final class TypeConstraints {
 
         for (LengthConstraint length : typeLength) {
             if (length.getMin() instanceof UnknownBoundaryNumber || length.getMax() instanceof UnknownBoundaryNumber) {
-                throw new YangParseException(line, "Unresolved length constraints");
+                throw new YangParseException(moduleName, line, "Unresolved length constraints");
             }
             final long min = length.getMin().longValue();
             final long max = length.getMax().longValue();
@@ -347,7 +347,7 @@ public final class TypeConstraints {
 
         for (LengthConstraint length : typeLength) {
             if (length.getMin() instanceof UnknownBoundaryNumber || length.getMax() instanceof UnknownBoundaryNumber) {
-                throw new YangParseException(line, "Unresolved length constraints");
+                throw new YangParseException(moduleName, line, "Unresolved length constraints");
             }
             final long min = length.getMin().longValue();
             final long max = length.getMax().longValue();
