@@ -52,6 +52,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,9 +72,16 @@ import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.IfNewHostNotify;
 import org.opendaylight.controller.hosttracker.SwitchPort;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.controller.sal.core.Host;
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.State;
+import org.opendaylight.controller.sal.core.Tier;
+import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.packet.ARP;
 import org.opendaylight.controller.sal.packet.Ethernet;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
@@ -81,6 +89,8 @@ import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
+import org.opendaylight.controller.sal.packet.address.DataLinkAddress;
+import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ListenerDispatcher;
@@ -88,6 +98,7 @@ import org.opendaylight.controller.sal.utils.MultiIterator;
 import org.opendaylight.controller.sal.utils.SingletonTask;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
@@ -102,7 +113,8 @@ import org.slf4j.LoggerFactory;
  * @author readams
  */
 public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
-        IListenDataPacket, ITopologyManagerAware, IfIptoHost {
+        IListenDataPacket, ITopologyManagerAware, IfIptoHost,
+        IInventoryListener {
     protected static Logger logger = LoggerFactory
             .getLogger(DeviceManagerImpl.class);
 
@@ -214,6 +226,7 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
      */
     protected ConcurrentHashMap<Long, Device> deviceMap;
 
+    protected ConcurrentHashMap<NodeConnector, Entity> inactiveStaticDevices;
     /**
      * Counter used to generate device keys
      */
@@ -297,7 +310,9 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     /**
      * Using the IfNewHostNotify to notify listeners of host changes.
      */
-    private Set<IfNewHostNotify> newHostNotify = Collections.synchronizedSet(new HashSet<IfNewHostNotify>());
+    private Set<IfNewHostNotify> newHostNotify = Collections
+            .synchronizedSet(new HashSet<IfNewHostNotify>());
+
     /**
      * A device update event to be dispatched
      */
@@ -437,11 +452,11 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     // Dependency injection
     // ********************
 
-    void setNewHostNotify(IfNewHostNotify obj){
+    void setNewHostNotify(IfNewHostNotify obj) {
         this.newHostNotify.add(obj);
     }
 
-    void unsetNewHostNotify(IfNewHostNotify obj){
+    void unsetNewHostNotify(IfNewHostNotify obj) {
         this.newHostNotify.remove(obj);
     }
 
@@ -488,6 +503,7 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         secondaryIndexMap = new HashMap<EnumSet<DeviceField>, DeviceIndex>();
 
         deviceMap = new ConcurrentHashMap<Long, Device>();
+        inactiveStaticDevices = new ConcurrentHashMap<NodeConnector, Entity>();
         classStateMap = new ConcurrentHashMap<String, ClassState>();
         apComparator = new AttachmentPointComparator();
 
@@ -796,11 +812,11 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         if (inPkt == null) {
             return PacketResult.IGNORED;
         }
-//        try {
-//            throw new Exception("Sample");
-//        } catch (Exception e) {
-//            logger.error("Sample stack trace", e);
-//        }
+        // try {
+        // throw new Exception("Sample");
+        // } catch (Exception e) {
+        // logger.error("Sample stack trace", e);
+        // }
 
         Packet formattedPak = this.dataPacketService.decodeDataPacket(inPkt);
         Ethernet eth;
@@ -1461,23 +1477,62 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
 
     protected void notifyListeners(List<IDeviceListener> listeners,
             DeviceUpdate update) {
+        // Topology update is for some reason outside of listeners registry
+        // logic
+        Entity[] ents = update.device.getEntities();
+        Entity e = ents[ents.length - 1];
+        NodeConnector p = e.getPort();
+        Node node = p.getNode();
+        Host h = null;
+        try {
+            byte[] mac = toMacByteArray(e.getMacAddress());
+            DataLinkAddress dla = new EthernetAddress(mac);
+            e.getIpv4Address();
+            InetAddress.getAllByName(e.getIpv4Address().toString());
+            h = new org.opendaylight.controller.sal.core.Host(dla,
+                    InetAddress.getByName(e.getIpv4Address().toString()));
+        } catch (ConstructionException ce) {
+            p = null;
+            h = null;
+        } catch (UnknownHostException ue) {
+            p = null;
+            h = null;
+        }
+
+        if (topology != null && p != null && h != null) {
+            if (update.change.equals(DeviceUpdate.Change.ADD)) {
+                Tier tier = new Tier(1);
+                switchManager.setNodeProp(node, tier);
+                topology.updateHostLink(p, h, UpdateType.ADDED, null);
+            } else {
+                // No need to reset the tiering if no other hosts are currently
+                // connected
+                // If this switch was discovered to be an access switch, it
+                // still is even if the host is down
+                Tier tier = new Tier(0);
+                switchManager.setNodeProp(node, tier);
+                topology.updateHostLink(p, h, UpdateType.REMOVED, null);
+            }
+        }
+
         if (listeners == null && newHostNotify.isEmpty()) {
             return;
         }
         /**
-         * TODO: IfNewHostNotify is needed for current controller API.
-         * Adding logic so that existing apps (like SimpleForwardingManager)
-         * work.  IDeviceListener adds additional methods and uses IListener's
-         * callback ordering.  The two interfaces need to be merged.
+         * TODO: IfNewHostNotify is needed for current controller API. Adding
+         * logic so that existing apps (like SimpleForwardingManager) work.
+         * IDeviceListener adds additional methods and uses IListener's callback
+         * ordering. The two interfaces need to be merged.
          */
 
-        for (IfNewHostNotify notify : newHostNotify){
+        for (IfNewHostNotify notify : newHostNotify) {
             switch (update.change) {
             case ADD:
                 notify.notifyHTClient(update.device.toHostNodeConnector());
                 break;
             case DELETE:
-                notify.notifyHTClientHostRemoved(update.device.toHostNodeConnector());
+                notify.notifyHTClientHostRemoved(update.device
+                        .toHostNodeConnector());
                 break;
             case CHANGE:
             }
@@ -1906,19 +1961,21 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
             }
         }
     }
+
     /**
-     * Send update notifications to listeners.
-     * IfNewHostNotify listeners need to remove old device and add new device.
+     * Send update notifications to listeners. IfNewHostNotify listeners need to
+     * remove old device and add new device.
+     *
      * @param device
      * @param oldDevice
      */
-    protected void sendDeviceMovedNotification(Device device, Device oldDevice){
-        for (IfNewHostNotify notify : newHostNotify){
-                notify.notifyHTClientHostRemoved(oldDevice.toHostNodeConnector());
-                notify.notifyHTClient(device.toHostNodeConnector());
-            }
-        sendDeviceMovedNotification(device);
+    protected void sendDeviceMovedNotification(Device device, Device oldDevice) {
+        for (IfNewHostNotify notify : newHostNotify) {
+            notify.notifyHTClientHostRemoved(oldDevice.toHostNodeConnector());
+            notify.notifyHTClient(device.toHostNodeConnector());
         }
+        sendDeviceMovedNotification(device);
+    }
 
     /**
      * this method will reclassify and reconcile a device - possibilities are -
@@ -1990,6 +2047,14 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         for (int i = 0; i < 6; i++) {
             long t = (address[i] & 0xffL) << ((5 - i) * 8);
             mac |= t;
+        }
+        return mac;
+    }
+
+    private byte[] toMacByteArray(long addr) {
+        byte[] mac = new byte[6];
+        for (int i = 0; i < 6; i++) {
+            mac[i] = (byte) (addr >> (i * 8));
         }
         return mac;
     }
@@ -2158,7 +2223,7 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
         Set<HostNodeConnector> nc = new HashSet<HostNodeConnector>();
         while (i.hasNext()) {
             Device device = i.next();
-            if(device.isStaticHost())
+            if (device.isStaticHost())
                 nc.add(device.toHostNodeConnector());
         }
         return nc;
@@ -2174,14 +2239,22 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     public Status addStaticHost(String networkAddress, String dataLayerAddress,
             NodeConnector nc, String vlan) {
         Long mac = HexEncode.stringToLong(dataLayerAddress);
-        try{
+        try {
             InetAddress addr = InetAddress.getByName(networkAddress);
             int ip = toIPv4Address(addr.getAddress());
             Entity e = new Entity(mac, Short.valueOf(vlan), ip, nc, new Date());
-            Device d = this.learnDeviceByEntity(e);
-            d.setStaticHost(true);
+
+            if (switchManager.isNodeConnectorEnabled(e.getPort())) {
+                Device d = this.learnDeviceByEntity(e);
+                d.setStaticHost(true);
+            } else {
+                logger.debug(
+                        "Switch or switchport is not up, adding host {} to inactive list",
+                        addr.getHostName());
+                 inactiveStaticDevices.put(e.getPort(), e);
+            }
             return new Status(StatusCode.SUCCESS);
-        }catch(UnknownHostException e){
+        } catch (UnknownHostException e) {
             return new Status(StatusCode.INTERNALERROR);
         }
     }
@@ -2190,25 +2263,109 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     public Status removeStaticHost(String networkAddress) {
         Integer addr;
         try {
-            addr = toIPv4Address(InetAddress.getByName(networkAddress).getAddress());
+            addr = toIPv4Address(InetAddress.getByName(networkAddress)
+                    .getAddress());
         } catch (UnknownHostException e) {
             return new Status(StatusCode.NOTFOUND, "Host does not exist");
         }
-        Iterator<Device> di = this.getDeviceIteratorForQuery(null, null, addr, null);
-        List<IDeviceListener> listeners = deviceListeners
-                .getOrderedListeners();
-        while(di.hasNext()){
+        Iterator<Device> di = this.getDeviceIteratorForQuery(null, null, addr,
+                null);
+        List<IDeviceListener> listeners = deviceListeners.getOrderedListeners();
+        while (di.hasNext()) {
             Device d = di.next();
-            if(d.isStaticHost()){
+            if (d.isStaticHost()) {
                 deleteDevice(d);
                 for (IfNewHostNotify notify : newHostNotify)
                     notify.notifyHTClientHostRemoved(d.toHostNodeConnector());
                 for (IDeviceListener listener : listeners)
-                        listener.deviceRemoved(d);
+                    listener.deviceRemoved(d);
             }
         }
         return new Status(StatusCode.SUCCESS);
     }
+
+    @Override
+    public void notifyNode(Node node, UpdateType type,
+            Map<String, Property> propMap) {
+        if (node == null)
+            return;
+        List<IDeviceListener> listeners = deviceListeners.getOrderedListeners();
+        switch (type) {
+        case REMOVED:
+            logger.debug("Received removed node {}", node);
+            for (Entry<Long, Device> d : deviceMap.entrySet()) {
+                Device device = d.getValue();
+                HostNodeConnector host = device.toHostNodeConnector();
+                if (host.getnodeconnectorNode().equals(node)) {
+                    logger.debug("Node: {} is down, remove from Hosts_DB", node);
+                    deleteDevice(device);
+                    for (IfNewHostNotify notify : newHostNotify)
+                        notify.notifyHTClientHostRemoved(host);
+                    for (IDeviceListener listener : listeners)
+                        listener.deviceRemoved(device);
+                }
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    @Override
+    public void notifyNodeConnector(NodeConnector nodeConnector,
+            UpdateType type, Map<String, Property> propMap) {
+        if (nodeConnector == null)
+            return;
+        List<IDeviceListener> listeners = deviceListeners.getOrderedListeners();
+        boolean up = false;
+        switch (type) {
+        case ADDED:
+            up = true;
+            break;
+        case REMOVED:
+            break;
+        case CHANGED:
+            State state = (State) propMap.get(State.StatePropName);
+            if ((state != null) && (state.getValue() == State.EDGE_UP)) {
+                up = true;
+            }
+            break;
+        default:
+            return;
+        }
+
+        if (up) {
+            logger.debug("handleNodeConnectorStatusUp {}", nodeConnector);
+
+            Entity ent = inactiveStaticDevices.get(nodeConnector);
+            Device device = this.learnDeviceByEntity(ent);
+            HostNodeConnector host = device.toHostNodeConnector();
+            if (host != null) {
+                inactiveStaticDevices.remove(nodeConnector);
+                for (IfNewHostNotify notify : newHostNotify)
+                    notify.notifyHTClient(host);
+                for (IDeviceListener listener : listeners)
+                    listener.deviceAdded(device);
+            } else {
+                logger.debug("handleNodeConnectorStatusDown {}", nodeConnector);
+            }
+        }else{
+                // remove all devices on the node that went down.
+                for (Entry<Long, Device> entry : deviceMap.entrySet()) {
+                    Device device = entry.getValue();
+                    HostNodeConnector host = device.toHostNodeConnector();
+                    if (host.getnodeConnector().equals(nodeConnector)) {
+                        deleteDevice(device);
+                        for (IfNewHostNotify notify : newHostNotify)
+                            notify.notifyHTClientHostRemoved(host);
+                        for (IDeviceListener listener : listeners)
+                            listener.deviceRemoved(device);
+                    }
+                }
+
+            }
+        }
+
 
     /**
      * For testing: consolidate the store NOW
