@@ -11,6 +11,7 @@ package org.opendaylight.controller.protocol_plugin.openflow.internal;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,20 +71,23 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     private IDiscoveryListener discoveryListener = null;
     private IInventoryProvider inventoryProvider = null;
     private IDataPacketMux iDataPacketMux = null;
-    // Newly added ports go into this list and will be served first
+    // High priority list containing newly added ports which will be served first
     private List<NodeConnector> readyListHi = null;
-    // Come here after served at least once
+    // List containing all the ports which will be served periodically
     private List<NodeConnector> readyListLo = null;
     // Staging area during quiet period
-    private List<NodeConnector> waitingList = null;
+    private List<NodeConnector> stagingList = null;
     // Wait for next discovery packet. The map contains the time elapsed since
     // the last received LLDP frame on each node connector
-    private ConcurrentMap<NodeConnector, Integer> pendingMap = null;
-    // openflow edges keyed by head connector
+    private ConcurrentMap<NodeConnector, Integer> holdTime = null;
+    // Allow one more retry for newly added ports. This map contains the time
+    // period elapsed since last discovery pkt transmission on the port.
+    private ConcurrentMap<NodeConnector, Integer> elapsedTime = null;
+    // OpenFlow edges keyed by head connector
     private ConcurrentMap<NodeConnector, Edge> edgeMap = null;
-    // Aging entries keyed by head edge connector
+    // The map contains aging entry keyed by head connector of Production edge
     private ConcurrentMap<NodeConnector, Integer> agingMap = null;
-    // Production edges keyed by head edge connector
+    // Production edges keyed by head connector
     private ConcurrentMap<NodeConnector, Edge> prodMap = null;
 
     private Timer discoveryTimer;
@@ -91,21 +95,20 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     private final static long discoveryTimerTick = 2L * 1000; // per tick in msec
     private int discoveryTimerTickCount = 0; // main tick counter
     // Max # of ports handled in one batch
-    private int discoveryBatchMaxPorts = 500;
+    private int discoveryBatchMaxPorts;
     // Periodically restart batching process
-    private int discoveryBatchRestartTicks = getDiscoveryInterval();
-    private int discoveryBatchPausePeriod = 5;
+    private int discoveryBatchRestartTicks;
+    private int discoveryBatchPausePeriod = 2;
     // Pause after this point
-    private int discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod;
-    // Number of retries after initial timeout
-    private int discoveryRetry = getDiscoveryRetry();
-    private int discoveryTimeoutTicks = getDiscoveryTimeout();
-    private int discoveryAgeoutTicks = getDiscoveryAgeout();
+    private int discoveryBatchPauseTicks;
+    private int discoveryTimeoutTicks;
+    private int discoveryThresholdTicks;
+    private int discoveryAgeoutTicks;
     // multiple of discoveryBatchRestartTicks
     private int discoveryConsistencyCheckMultiple = 2;
     // CC tick counter
-    private int discoveryConsistencyCheckTickCount = discoveryBatchPauseTicks;
-    // # of times CC getscalled
+    private int discoveryConsistencyCheckTickCount;
+    // # of times CC gets called
     private int discoveryConsistencyCheckCallingTimes = 0;
     // # of cases CC corrected
     private int discoveryConsistencyCheckCorrected = 0;
@@ -162,9 +165,9 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     }
 
     public enum DiscoveryPeriod {
-        INTERVAL(300),
-        TIMEOUT (60),
-        AGEOUT  (120);
+        INTERVAL        (300),
+        AGEOUT          (120),
+        THRESHOLD       (10);
 
         private int time;   // sec
         private int tick;   // tick
@@ -187,8 +190,17 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             return tick;
         }
 
+        public void setTick(int tick) {
+            this.time = tick2Time(tick);
+            this.tick = tick;
+        }
+
         private int time2Tick(int time) {
             return (int) (time / (discoveryTimerTick / 1000));
+        }
+
+        private int tick2Time(int tick) {
+            return (int) (tick * (discoveryTimerTick / 1000));
         }
     }
 
@@ -409,7 +421,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             logger.error("Caught exception ", e);
         }
         addEdge(edge, props);
-        pendingMap.put(dstNodeConnector, 0);
 
         logger.trace("Received discovery packet for Edge {}", edge);
 
@@ -472,11 +483,11 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             return true;
         }
 
-        if (pendingMap.keySet().contains(nodeConnector)) {
+        if (holdTime.keySet().contains(nodeConnector)) {
             return true;
         }
 
-        if (waitingList.contains(nodeConnector)) {
+        if (stagingList.contains(nodeConnector)) {
             return true;
         }
 
@@ -494,6 +505,9 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
             workingSet.add(nodeConnector);
             removeSet.add(nodeConnector);
+
+            // Put it in the map and start the timer. It may need retry.
+            elapsedTime.put(nodeConnector, 0);
         }
         readyListHi.removeAll(removeSet);
 
@@ -572,12 +586,12 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         removeSet = getRemoveSet(readyListLo, node);
         readyListLo.removeAll(removeSet);
 
-        removeSet = getRemoveSet(waitingList, node);
-        waitingList.removeAll(removeSet);
+        removeSet = getRemoveSet(stagingList, node);
+        stagingList.removeAll(removeSet);
 
-        removeSet = getRemoveSet(pendingMap.keySet(), node);
+        removeSet = getRemoveSet(holdTime.keySet(), node);
         for (NodeConnector nodeConnector : removeSet) {
-            pendingMap.remove(nodeConnector);
+            holdTime.remove(nodeConnector);
         }
 
         removeSet = getRemoveSet(edgeMap.keySet(), node);
@@ -594,28 +608,25 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     private void removeDiscovery(NodeConnector nodeConnector) {
         readyListHi.remove(nodeConnector);
         readyListLo.remove(nodeConnector);
-        waitingList.remove(nodeConnector);
-        pendingMap.remove(nodeConnector);
+        stagingList.remove(nodeConnector);
+        holdTime.remove(nodeConnector);
         removeEdge(nodeConnector, false);
         removeProdEdge(nodeConnector);
     }
 
     private void checkTimeout() {
         Set<NodeConnector> removeSet = new HashSet<NodeConnector>();
-        Set<NodeConnector> retrySet = new HashSet<NodeConnector>();
         int ticks;
 
-        Set<NodeConnector> pendingSet = pendingMap.keySet();
-        if (pendingSet != null) {
-            for (NodeConnector nodeConnector : pendingSet) {
-                ticks = pendingMap.get(nodeConnector);
-                pendingMap.put(nodeConnector, ++ticks);
-                if (ticks > getDiscoveryFinalTimeoutInterval()) {
+        Set<NodeConnector> monitorSet = holdTime.keySet();
+        if (monitorSet != null) {
+            for (NodeConnector nodeConnector : monitorSet) {
+                ticks = holdTime.get(nodeConnector);
+                holdTime.put(nodeConnector, ++ticks);
+                if (ticks >= discoveryTimeoutTicks) {
                     // timeout the edge
                     removeSet.add(nodeConnector);
                     logger.trace("Discovery timeout {}", nodeConnector);
-                } else if (ticks % discoveryTimeoutTicks == 0) {
-                    retrySet.add(nodeConnector);
                 }
             }
         }
@@ -624,8 +635,22 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             removeEdge(nodeConnector);
         }
 
-        for (NodeConnector nodeConnector : retrySet) {
-            transmitQ.add(nodeConnector);
+        Set<NodeConnector> retrySet = new HashSet<NodeConnector>();
+        Set<NodeConnector> ncSet = elapsedTime.keySet();
+        if ((ncSet != null) && (ncSet.size() > 0)) {
+            for (NodeConnector nodeConnector : ncSet) {
+                ticks = elapsedTime.get(nodeConnector);
+                elapsedTime.put(nodeConnector, ++ticks);
+                if (ticks >= discoveryThresholdTicks) {
+                    retrySet.add(nodeConnector);
+                }
+            }
+
+            for (NodeConnector nodeConnector : retrySet) {
+                // Allow one more retry
+                readyListLo.add(nodeConnector);
+                elapsedTime.remove(nodeConnector);
+            }
         }
     }
 
@@ -659,15 +684,19 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         if (++discoveryTimerTickCount <= discoveryBatchPauseTicks) {
             for (NodeConnector nodeConnector : getWorkingSet()) {
                 transmitQ.add(nodeConnector);
+                // Move to staging area after it's served
+                if (!stagingList.contains(nodeConnector)) {
+                    stagingList.add(nodeConnector);
+                }
             }
         } else if (discoveryTimerTickCount >= discoveryBatchRestartTicks) {
             discoveryTimerTickCount = 0;
-            for (NodeConnector nodeConnector : waitingList) {
+            for (NodeConnector nodeConnector : stagingList) {
                 if (!readyListLo.contains(nodeConnector)) {
                     readyListLo.add(nodeConnector);
                 }
             }
-            waitingList.removeAll(readyListLo);
+            stagingList.removeAll(readyListLo);
         }
     }
 
@@ -696,7 +725,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             }
 
             if (!isTracked(nodeConnector)) {
-                waitingList.add(nodeConnector);
+                stagingList.add(nodeConnector);
                 discoveryConsistencyCheckCorrected++;
                 logger.debug("ConsistencyChecker: add back untracked {}", nodeConnector);
                 continue;
@@ -709,14 +738,14 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
         // remove stale entries
         removeSet.clear();
-        for (NodeConnector nodeConnector : waitingList) {
+        for (NodeConnector nodeConnector : stagingList) {
             if (!isEnabled(nodeConnector)) {
                 removeSet.add(nodeConnector);
                 discoveryConsistencyCheckCorrected++;
                 logger.debug("ConsistencyChecker: remove disabled {}", nodeConnector);
             }
         }
-        waitingList.removeAll(removeSet);
+        stagingList.removeAll(removeSet);
 
         // Get a snapshot of all the existing switches
         Map<Long, ISwitch> switches = this.controller.getSwitches();
@@ -725,7 +754,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                 Node node = NodeCreator.createOFNode(sw.getId());
                 NodeConnector nodeConnector = NodeConnectorCreator.createOFNodeConnector(port.getPortNumber(), node);
                 if (!isTracked(nodeConnector)) {
-                    waitingList.add(nodeConnector);
+                    stagingList.add(nodeConnector);
                     discoveryConsistencyCheckCorrected++;
                     logger.debug("ConsistencyChecker: add back untracked {}", nodeConnector);
                 }
@@ -739,12 +768,13 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         }
 
         NodeConnector src = edge.getTailNodeConnector();
+        NodeConnector dst = edge.getHeadNodeConnector();
         if (!src.getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)) {
-            pendingMap.remove(src);
+            holdTime.put(dst, 0);
         } else {
-            NodeConnector dst = edge.getHeadNodeConnector();
             agingMap.put(dst, 0);
         }
+        elapsedTime.remove(src);
 
         // notify
         updateEdge(edge, UpdateType.ADDED, props);
@@ -812,18 +842,18 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
      * Remove OpenFlow edge
      */
     private void removeEdge(NodeConnector nodeConnector, boolean stillEnabled) {
-        pendingMap.remove(nodeConnector);
+        holdTime.remove(nodeConnector);
         readyListLo.remove(nodeConnector);
         readyListHi.remove(nodeConnector);
 
         if (stillEnabled) {
             // keep discovering
-            if (!waitingList.contains(nodeConnector)) {
-                waitingList.add(nodeConnector);
+            if (!stagingList.contains(nodeConnector)) {
+                stagingList.add(nodeConnector);
             }
         } else {
             // stop it
-            waitingList.remove(nodeConnector);
+            stagingList.remove(nodeConnector);
         }
 
         Edge edge = null;
@@ -873,8 +903,8 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     private void moveToReadyListHi(NodeConnector nodeConnector) {
         if (readyListLo.contains(nodeConnector)) {
             readyListLo.remove(nodeConnector);
-        } else if (waitingList.contains(nodeConnector)) {
-            waitingList.remove(nodeConnector);
+        } else if (stagingList.contains(nodeConnector)) {
+            stagingList.remove(nodeConnector);
         }
         readyListHi.add(nodeConnector);
     }
@@ -888,18 +918,15 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         return discoveryConsistencyCheckMultiple * discoveryBatchRestartTicks;
     }
 
-    private int getDiscoveryFinalTimeoutInterval() {
-        return (discoveryRetry + 1) * discoveryTimeoutTicks;
-    }
-
     @Override
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---Topology Discovery---\n");
         help.append("\t prlh                            - Print readyListHi entries\n");
         help.append("\t prll                            - Print readyListLo entries\n");
-        help.append("\t pwl                             - Print waitingList entries\n");
-        help.append("\t ppl                             - Print pendingList entries\n");
+        help.append("\t psl                             - Print stagingList entries\n");
+        help.append("\t pht                             - Print hold time\n");
+        help.append("\t pet                             - Print elapsed time\n");
         help.append("\t ptick                           - Print tick time in msec\n");
         help.append("\t pcc                             - Print CC info\n");
         help.append("\t psize                           - Print sizes of all the lists\n");
@@ -910,8 +937,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         help.append("\t sports [ports]                  - Set/show max ports per batch\n");
         help.append("\t spause [ticks]                  - Set/show pause period\n");
         help.append("\t sdi [ticks]                     - Set/show discovery interval in ticks\n");
-        help.append("\t stm [ticks]                     - Set/show per timeout ticks\n");
-        help.append("\t sretry [count]                  - Set/show num of retries\n");
         help.append("\t addsw <swid>                    - Add a switch\n");
         help.append("\t remsw <swid>                    - Remove a switch\n");
         help.append("\t page                            - Print aging info\n");
@@ -927,42 +952,69 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         return help.toString();
     }
 
+    private List<NodeConnector> sortList(Collection<NodeConnector> ncs) {
+        List<String> ncStrArray = new ArrayList<String>();
+        for (NodeConnector nc : ncs) {
+            ncStrArray.add(nc.toString());
+        }
+        Collections.sort(ncStrArray);
+
+        List<NodeConnector> sortedNodeConnectors = new ArrayList<NodeConnector>();
+        for (String ncStr : ncStrArray) {
+            sortedNodeConnectors.add(NodeConnector.fromString(ncStr));
+        }
+
+        return sortedNodeConnectors;
+    }
+
     public void _prlh(CommandInterpreter ci) {
-        ci.println("ReadyListHi\n");
-        for (NodeConnector nodeConnector : readyListHi) {
+        ci.println("readyListHi\n");
+        for (NodeConnector nodeConnector : sortList(readyListHi)) {
             if (nodeConnector == null) {
                 continue;
             }
             ci.println(nodeConnector);
         }
+        ci.println("Total number of Node Connectors: " + readyListHi.size());
     }
 
     public void _prll(CommandInterpreter ci) {
-        ci.println("ReadyListLo\n");
-        for (NodeConnector nodeConnector : readyListLo) {
+        ci.println("readyListLo\n");
+        for (NodeConnector nodeConnector : sortList(readyListLo)) {
             if (nodeConnector == null) {
                 continue;
             }
             ci.println(nodeConnector);
         }
+        ci.println("Total number of Node Connectors: " + readyListLo.size());
     }
 
-    public void _pwl(CommandInterpreter ci) {
-        ci.println("WaitingList\n");
-        for (NodeConnector nodeConnector : waitingList) {
+    public void _psl(CommandInterpreter ci) {
+        ci.println("stagingList\n");
+        for (NodeConnector nodeConnector : sortList(stagingList)) {
             if (nodeConnector == null) {
                 continue;
             }
             ci.println(nodeConnector);
         }
+        ci.println("Total number of Node Connectors: " + stagingList.size());
     }
 
-    public void _ppl(CommandInterpreter ci) {
-        ci.println("pendingMap\n");
-        ci.println("          NodeConnector            Last rx LLDP (s)");
-        for (ConcurrentMap.Entry<NodeConnector, Integer> entry: pendingMap.entrySet()) {
-            ci.println(entry.getKey() + "\t\t" + entry.getValue());
+    public void _pht(CommandInterpreter ci) {
+        ci.println("          NodeConnector            Last rx LLDP (sec)");
+        for (ConcurrentMap.Entry<NodeConnector, Integer> entry: holdTime.entrySet()) {
+            ci.println(entry.getKey() + "\t\t" + entry.getValue() * (discoveryTimerTick / 1000));
         }
+        ci.println("\nSize: " + holdTime.size() + "\tTimeout: " + discoveryTimeoutTicks * (discoveryTimerTick / 1000)
+                + " sec");
+    }
+
+    public void _pet(CommandInterpreter ci) {
+        ci.println("          NodeConnector            Elapsed Time (sec)");
+        for (ConcurrentMap.Entry<NodeConnector, Integer> entry: elapsedTime.entrySet()) {
+            ci.println(entry.getKey() + "\t\t" + entry.getValue() * (discoveryTimerTick / 1000));
+        }
+        ci.println("\nSize: " + elapsedTime.size() + "\tThreshold: " + DiscoveryPeriod.THRESHOLD.getTime() + " sec");
     }
 
     public void _ptick(CommandInterpreter ci) {
@@ -982,16 +1034,14 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     }
 
     public void _ptm(CommandInterpreter ci) {
-        ci.println("Final timeout ticks " + getDiscoveryFinalTimeoutInterval());
-        ci.println("Per timeout ticks " + discoveryTimeoutTicks);
-        ci.println("Number of retries after initial timeout " + discoveryRetry);
+        ci.println("Timeout " + discoveryTimeoutTicks + " ticks, " + discoveryTimerTick / 1000 + " sec per tick.");
     }
 
     public void _psize(CommandInterpreter ci) {
         ci.println("readyListLo size " + readyListLo.size() + "\n" + "readyListHi size " + readyListHi.size() + "\n"
-                + "waitingList size " + waitingList.size() + "\n" + "pendingMap size " + pendingMap.size() + "\n"
+                + "stagingList size " + stagingList.size() + "\n" + "holdTime size " + holdTime.size() + "\n"
                 + "edgeMap size " + edgeMap.size() + "\n" + "prodMap size " + prodMap.size() + "\n" + "agingMap size "
-                + agingMap.size());
+                + agingMap.size() + "\n" + "elapsedTime size " + elapsedTime.size());
     }
 
     public void _page(CommandInterpreter ci) {
@@ -1136,14 +1186,15 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     public void _spause(CommandInterpreter ci) {
         String val = ci.nextArgument();
         String out = "Please enter pause period less than " + discoveryBatchRestartTicks + ". Current pause period is "
-                + discoveryBatchPausePeriod + " pause tick is " + discoveryBatchPauseTicks + ".";
+                + discoveryBatchPausePeriod + " ticks, pause at " + discoveryBatchPauseTicks + " ticks, "
+                + discoveryTimerTick / 1000 + " sec per tick.";
 
         if (val != null) {
             try {
                 int pause = Integer.parseInt(val);
                 if (pause < discoveryBatchRestartTicks) {
                     discoveryBatchPausePeriod = pause;
-                    discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod;
+                    discoveryBatchPauseTicks = getDiscoveryPauseInterval();
                     return;
                 }
             } catch (Exception e) {
@@ -1155,17 +1206,17 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
     public void _sdi(CommandInterpreter ci) {
         String val = ci.nextArgument();
-        String out = "Please enter discovery interval greater than " + discoveryBatchPausePeriod
-                + ". Current value is " + discoveryBatchRestartTicks + ".";
+        String out = "Please enter discovery interval in ticks. Current value is " + discoveryBatchRestartTicks + " ticks, "
+                + discoveryTimerTick / 1000 + " sec per tick.";
 
         if (val != null) {
             try {
-                int restart = Integer.parseInt(val);
-                if (restart > discoveryBatchPausePeriod) {
-                    discoveryBatchRestartTicks = restart;
-                    discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod;
-                    return;
-                }
+                int ticks = Integer.parseInt(val);
+                DiscoveryPeriod.INTERVAL.setTick(ticks);
+                discoveryBatchRestartTicks = getDiscoveryInterval();
+                discoveryBatchPauseTicks = getDiscoveryPauseInterval();
+                discoveryTimeoutTicks = getDiscoveryTimeout();
+                return;
             } catch (Exception e) {
             }
         }
@@ -1184,38 +1235,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             ci.println("Please enter a valid number");
         }
         return;
-    }
-
-    public void _sretry(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        if (val == null) {
-            ci.println("Please enter number of retries. Current value is " + discoveryRetry);
-            return;
-        }
-        try {
-            discoveryRetry = Integer.parseInt(val);
-        } catch (Exception e) {
-            ci.println("Please enter a valid number");
-        }
-        return;
-    }
-
-    public void _stm(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        String out = "Please enter timeout tick value less than " + discoveryBatchRestartTicks + ". Current value is "
-                + discoveryTimeoutTicks;
-        if (val != null) {
-            try {
-                int timeout = Integer.parseInt(val);
-                if (timeout < discoveryBatchRestartTicks) {
-                    discoveryTimeoutTicks = timeout;
-                    return;
-                }
-            } catch (Exception e) {
-            }
-        }
-
-        ci.println(out);
     }
 
     public void _addsw(CommandInterpreter ci) {
@@ -1403,12 +1422,21 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
         readyListHi = new CopyOnWriteArrayList<NodeConnector>();
         readyListLo = new CopyOnWriteArrayList<NodeConnector>();
-        waitingList = new CopyOnWriteArrayList<NodeConnector>();
-        pendingMap = new ConcurrentHashMap<NodeConnector, Integer>();
+        stagingList = new CopyOnWriteArrayList<NodeConnector>();
+        holdTime = new ConcurrentHashMap<NodeConnector, Integer>();
+        elapsedTime = new ConcurrentHashMap<NodeConnector, Integer>();
         edgeMap = new ConcurrentHashMap<NodeConnector, Edge>();
         agingMap = new ConcurrentHashMap<NodeConnector, Integer>();
         prodMap = new ConcurrentHashMap<NodeConnector, Edge>();
         discoverySnoopingDisableList = new CopyOnWriteArrayList<NodeConnector>();
+
+        discoveryBatchRestartTicks = getDiscoveryInterval();
+        discoveryBatchPauseTicks = getDiscoveryPauseInterval();
+        discoveryTimeoutTicks = getDiscoveryTimeout();
+        discoveryThresholdTicks = getDiscoveryThreshold();
+        discoveryAgeoutTicks = getDiscoveryAgeout();
+        discoveryConsistencyCheckTickCount = discoveryBatchPauseTicks;
+        discoveryBatchMaxPorts = getDiscoveryBatchMaxPorts();
 
         discoveryTimer = new Timer("DiscoveryService");
         discoveryTimerTask = new DiscoveryTimerTask();
@@ -1430,8 +1458,8 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         transmitQ = null;
         readyListHi = null;
         readyListLo = null;
-        waitingList = null;
-        pendingMap = null;
+        stagingList = null;
+        holdTime = null;
         edgeMap = null;
         agingMap = null;
         prodMap = null;
@@ -1534,14 +1562,31 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     }
 
     /**
-     * This method returns the timeout value in waiting for response of a
-     * discovery query.
+     * This method returns the timeout value in receiving subsequent discovery packets on a port.
      *
      * @return The discovery timeout in ticks
      */
     private int getDiscoveryTimeout() {
-        String timeout = System.getProperty("of.discoveryTimeout");
-        return getDiscoveryTicks(DiscoveryPeriod.TIMEOUT, timeout);
+        String val = System.getProperty("of.discoveryTimeoutMultiple");
+        int multiple = 2;
+
+        if (val != null) {
+            try {
+                multiple = Integer.parseInt(val);
+            } catch (Exception e) {
+            }
+        }
+        return getDiscoveryInterval() * multiple + 3;
+    }
+
+    /**
+     * This method returns the user configurable threshold value
+     *
+     * @return The discovery threshold value in ticks
+     */
+    private int getDiscoveryThreshold() {
+        String val = System.getProperty("of.discoveryThreshold");
+        return getDiscoveryTicks(DiscoveryPeriod.THRESHOLD, val);
     }
 
     /**
@@ -1554,22 +1599,34 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     }
 
     /**
-     * This method returns the number of retries after the initial discovery
-     * packet is not received within the timeout period. Default is 2 times.
+     * This method returns the pause interval
      *
-     * @return The number of discovery retries
+     * @return The pause interval in ticks
      */
-    private int getDiscoveryRetry() {
-        String retry = System.getProperty("of.discoveryRetry");
-        int rv = 2;
+    private int getDiscoveryPauseInterval() {
+        if (discoveryBatchRestartTicks > discoveryBatchPausePeriod) {
+            return discoveryBatchRestartTicks - discoveryBatchPausePeriod;
+        } else {
+            return discoveryBatchRestartTicks - 1;
+        }
+    }
 
-        if (retry != null) {
+    /**
+     * This method returns the user configurable maximum number of ports handled
+     * in one discovery batch.
+     *
+     * @return The maximum number of ports
+     */
+    private int getDiscoveryBatchMaxPorts() {
+        String val = System.getProperty("of.discoveryBatchMaxPorts");
+        int ports = 1024;
+
+        if (val != null) {
             try {
-                rv = Integer.parseInt(retry);
+                ports = Integer.parseInt(val);
             } catch (Exception e) {
             }
         }
-
-        return rv;
+        return ports;
     }
 }
