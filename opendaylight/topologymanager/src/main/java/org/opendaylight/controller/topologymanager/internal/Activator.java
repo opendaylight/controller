@@ -9,8 +9,12 @@
 
 package org.opendaylight.controller.topologymanager.internal;
 
-import org.apache.felix.dm.Component;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
 
+import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
@@ -74,9 +78,14 @@ public class Activator extends ComponentActivatorAbstractBase {
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(TopologyManagerImpl.class)) {
             // export the service needed to listen to topology updates
+            Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
+            Set<String> propSet = new HashSet<String>();
+            propSet.add("topologymanager.configSaveEvent");
+            props.put("cachenames", propSet);
+
             c.setInterface(new String[] { IListenTopoUpdates.class.getName(),
                     ITopologyManager.class.getName(),
-                    IConfigurationContainerAware.class.getName() }, null);
+                    IConfigurationContainerAware.class.getName() }, props);
 
             c.add(createContainerServiceDependency(containerName).setService(
                     ITopologyService.class).setCallbacks("setTopoService",
