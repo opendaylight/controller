@@ -897,10 +897,11 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
             log.warn(logMsg, groupName);
             return new Status(StatusCode.NOTACCEPTABLE, msg);
         }
-        int toBeRemoved = groupFlows.get(groupName).size();
+        int toBeRemoved = 0;
         String error = "";
         if (groupFlows.containsKey(groupName)) {
             List<FlowEntryInstall> list = new ArrayList<FlowEntryInstall>(groupFlows.get(groupName));
+            toBeRemoved = list.size();
             for (FlowEntryInstall entry : list) {
                 Status status = this.removeEntry(entry.getOriginal(), false);
                 if (status.isSuccess()) {
