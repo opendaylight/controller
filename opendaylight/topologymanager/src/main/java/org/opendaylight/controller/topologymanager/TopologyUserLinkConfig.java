@@ -10,19 +10,13 @@
 package org.opendaylight.controller.topologymanager;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
-import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.utils.GUIField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +123,7 @@ public class TopologyUserLinkConfig implements Serializable {
 
         if (!isValidNodeConnector(srcNodeConnector) ||
                 !isValidNodeConnector(dstNodeConnector)) {
-            logger.warn("Invalid NodeConnector");
+            logger.debug("Invalid NodeConnector in user link: {}", this);
             return false;
         }
 
