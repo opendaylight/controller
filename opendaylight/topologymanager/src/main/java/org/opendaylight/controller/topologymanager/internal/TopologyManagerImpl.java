@@ -12,7 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.felix.dm.Component;
@@ -65,31 +66,34 @@ import org.slf4j.LoggerFactory;
 public class TopologyManagerImpl implements ITopologyManager,
 IConfigurationContainerAware, IListenTopoUpdates, IObjectReader,
 CommandProvider {
-    private static final Logger log = LoggerFactory
-            .getLogger(TopologyManagerImpl.class);
-    private ITopologyService topoService = null;
-    private IClusterContainerServices clusterContainerService = null;
+    private static final Logger log = LoggerFactory.getLogger(TopologyManagerImpl.class);
+    private static final String SAVE = "Save";
+    private ITopologyService topoService;
+    private IClusterContainerServices clusterContainerService;
     // DB of all the Edges with properties which constitute our topology
-    private ConcurrentMap<Edge, Set<Property>> edgesDB = null;
+    private ConcurrentMap<Edge, Set<Property>> edgesDB;
     // DB of all NodeConnector which are part of ISL Edges, meaning they
     // are connected to another NodeConnector on the other side of an ISL link.
     // NodeConnector of a Production Edge is not part of this DB.
-    private ConcurrentMap<NodeConnector, Set<Property>> nodeConnectorsDB = null;
+    private ConcurrentMap<NodeConnector, Set<Property>> nodeConnectorsDB;
     // DB of all the NodeConnectors with an Host attached to it
-    private ConcurrentMap<NodeConnector, ImmutablePair<Host, Set<Property>>> hostsDB = null;
+    private ConcurrentMap<NodeConnector, ImmutablePair<Host, Set<Property>>> hostsDB;
     // Topology Manager Aware listeners
-    private Set<ITopologyManagerAware> topologyManagerAware = Collections
-            .synchronizedSet(new HashSet<ITopologyManagerAware>());
+    private Set<ITopologyManagerAware> topologyManagerAware =
+            new CopyOnWriteArraySet<ITopologyManagerAware>();;
 
     private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private String userLinksFileName = null;
-    private ConcurrentMap<String, TopologyUserLinkConfig> userLinks;
+    private String userLinksFileName;
+    private ConcurrentMap<String, TopologyUserLinkConfig> userLinksDB;
+    private ConcurrentMap<Long, String> configSaveEvent;
+
 
     void nonClusterObjectCreate() {
         edgesDB = new ConcurrentHashMap<Edge, Set<Property>>();
         hostsDB = new ConcurrentHashMap<NodeConnector, ImmutablePair<Host, Set<Property>>>();
-        userLinks = new ConcurrentHashMap<String, TopologyUserLinkConfig>();
         nodeConnectorsDB = new ConcurrentHashMap<NodeConnector, Set<Property>>();
+        userLinksDB = new ConcurrentHashMap<String, TopologyUserLinkConfig>();
+        configSaveEvent = new ConcurrentHashMap<Long, String>();
     }
 
     void setTopologyManagerAware(ITopologyManagerAware s) {
@@ -136,8 +140,12 @@ CommandProvider {
      *
      */
     void init(Component c) {
+
+        allocateCaches();
+        retrieveCaches();
+
         String containerName = null;
-        Dictionary props = c.getServiceProperties();
+        Dictionary<?, ?> props = c.getServiceProperties();
         if (props != null) {
             containerName = (String) props.get("containerName");
         } else {
@@ -145,57 +153,103 @@ CommandProvider {
             containerName = "UNKNOWN";
         }
 
-        if (this.clusterContainerService == null) {
-            log.error("Cluster Services is null, not expected!");
-            return;
-        }
+        userLinksFileName = ROOT + "userTopology_" + containerName + ".conf";
+        registerWithOSGIConsole();
+        loadConfiguration();
+    }
 
-        if (this.topoService == null) {
-            log.error("Topology Services is null, not expected!");
+    @SuppressWarnings({ "unchecked", "deprecation" })
+    private void allocateCaches(){
+        if (this.clusterContainerService == null) {
+            nonClusterObjectCreate();
+            log.error("Cluster Services unavailable, allocated non-cluster caches!");
             return;
         }
 
         try {
-            this.edgesDB = (ConcurrentMap<Edge, Set<Property>>) this.clusterContainerService
-                    .createCache("topologymanager.edgesDB", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+            this.edgesDB = (ConcurrentMap<Edge, Set<Property>>) this.clusterContainerService.createCache(
+                    "topologymanager.edgesDB", EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheExistException cee) {
-            log.error("topologymanager.edgesDB Cache already exists - "
-                    + "destroy and recreate if needed");
+            log.debug("topologymanager.edgesDB Cache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {
-            log.error("topologymanager.edgesDB Cache configuration invalid - "
-                    + "check cache mode");
+            log.error("topologymanager.edgesDB Cache configuration invalid - check cache mode");
         }
 
         try {
             this.hostsDB = (ConcurrentMap<NodeConnector, ImmutablePair<Host, Set<Property>>>) this.clusterContainerService
-                    .createCache("topologymanager.hostsDB", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    .createCache("topologymanager.hostsDB", EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheExistException cee) {
-            log.error("topologymanager.hostsDB Cache already exists - "
-                    + "destroy and recreate if needed");
+            log.debug("topologymanager.hostsDB Cache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {
-            log.error("topologymanager.hostsDB Cache configuration invalid - "
-                    + "check cache mode");
+            log.error("topologymanager.hostsDB Cache configuration invalid - check cache mode");
         }
 
         try {
             this.nodeConnectorsDB = (ConcurrentMap<NodeConnector, Set<Property>>) this.clusterContainerService
-                    .createCache("topologymanager.nodeConnectorDB", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    .createCache("topologymanager.nodeConnectorDB", EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheExistException cee) {
-            log.error("topologymanager.nodeConnectorDB Cache already exists"
-                    + " - destroy and recreate if needed");
+            log.debug("topologymanager.nodeConnectorDB Cache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {
-            log.error("topologymanager.nodeConnectorDB Cache configuration "
-                    + "invalid - check cache mode");
+            log.error("topologymanager.nodeConnectorDB Cache configuration invalid - check cache mode");
         }
 
-        userLinks = new ConcurrentHashMap<String, TopologyUserLinkConfig>();
+        try {
+            this.userLinksDB = (ConcurrentMap<String, TopologyUserLinkConfig>) this.clusterContainerService
+                    .createCache("topologymanager.userLinksDB", EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+        } catch (CacheExistException cee) {
+            log.debug("topologymanager.userLinksDB Cache already exists - destroy and recreate if needed");
+        } catch (CacheConfigException cce) {
+            log.error("topologymanager.userLinksDB Cache configuration invalid - check cache mode");
+        }
 
-        userLinksFileName = ROOT + "userTopology_" + containerName + ".conf";
-        registerWithOSGIConsole();
-        loadConfiguration();
+        try {
+            this.configSaveEvent = (ConcurrentMap<Long, String>) this.clusterContainerService
+                    .createCache("topologymanager.configSaveEvent", EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+        } catch (CacheExistException cee) {
+            log.debug("topologymanager.configSaveEvent Cache already exists - destroy and recreate if needed");
+        } catch (CacheConfigException cce) {
+            log.error("topologymanager.configSaveEvent Cache configuration invalid - check cache mode");
+        }
+
+    }
+
+    @SuppressWarnings({ "unchecked", "deprecation" })
+    private void retrieveCaches() {
+        if (this.clusterContainerService == null) {
+            log.error("Cluster Services is null, can't retrieve caches.");
+            return;
+        }
+
+        this.edgesDB = (ConcurrentMap<Edge, Set<Property>>) this.clusterContainerService
+                .getCache("topologymanager.edgesDB");
+        if (edgesDB == null) {
+            log.error("Failed to get cache for topologymanager.edgesDB");
+        }
+
+        this.hostsDB = (ConcurrentMap<NodeConnector, ImmutablePair<Host, Set<Property>>>) this.clusterContainerService
+                .getCache("topologymanager.hostsDB");
+        if (hostsDB == null) {
+            log.error("Failed to get cache for topologymanager.hostsDB");
+        }
+
+        this.nodeConnectorsDB = (ConcurrentMap<NodeConnector, Set<Property>>) this.clusterContainerService
+                .getCache("topologymanager.nodeConnectorDB");
+        if (nodeConnectorsDB == null) {
+            log.error("Failed to get cache for topologymanager.nodeConnectorDB");
+        }
+
+        this.userLinksDB = (ConcurrentMap<String, TopologyUserLinkConfig>) this.clusterContainerService
+                .getCache("topologymanager.userLinksDB");
+        if (userLinksDB == null) {
+            log.error("Failed to get cache for topologymanager.userLinksDB");
+        }
+
+        this.configSaveEvent = (ConcurrentMap<Long, String>) this.clusterContainerService
+                .getCache("topologymanager.configSaveEvent");
+        if (configSaveEvent == null) {
+            log.error("Failed to get cache for topologymanager.configSaveEvent");
+        }
+
     }
 
     /**
@@ -217,62 +271,38 @@ CommandProvider {
      *
      */
     void destroy() {
-        if (this.clusterContainerService == null) {
-            log.error("Cluster Services is null, not expected!");
-            this.edgesDB = null;
-            this.hostsDB = null;
-            this.nodeConnectorsDB = null;
-            return;
-        }
-        this.clusterContainerService.destroyCache("topologymanager.edgesDB");
-        this.edgesDB = null;
-        this.clusterContainerService.destroyCache("topologymanager.hostsDB");
-        this.hostsDB = null;
-        this.clusterContainerService
-        .destroyCache("topologymanager.nodeConnectorDB");
-        this.nodeConnectorsDB = null;
-        log.debug("Topology Manager DB Deallocated");
     }
 
     @SuppressWarnings("unchecked")
     private void loadConfiguration() {
         ObjectReader objReader = new ObjectReader();
-        ConcurrentMap<String, TopologyUserLinkConfig> confList = (ConcurrentMap<String, TopologyUserLinkConfig>) objReader
-                .read(this, userLinksFileName);
+        ConcurrentMap<String, TopologyUserLinkConfig> confList =
+                (ConcurrentMap<String, TopologyUserLinkConfig>) objReader.read(this, userLinksFileName);
 
-        if (confList == null) {
-            return;
-        }
-
-        for (TopologyUserLinkConfig conf : confList.values()) {
-            addUserLink(conf);
+        if (confList != null) {
+            for (TopologyUserLinkConfig conf : confList.values()) {
+                addUserLink(conf);
+            }
         }
     }
 
     @Override
     public Status saveConfig() {
-        // Publish the save config event to the cluster nodes
-        /**
-         * Get the CLUSTERING SERVICES WORKING BEFORE TRYING THIS
-         *
-         * configSaveEvent.put(new Date().getTime(), SAVE);
-         */
+        // Publish the save config event to the cluster
+        configSaveEvent.put(new Date().getTime(), SAVE );
         return saveConfigInternal();
     }
 
     public Status saveConfigInternal() {
-        Status retS;
         ObjectWriter objWriter = new ObjectWriter();
 
-        retS = objWriter
-                .write(new ConcurrentHashMap<String, TopologyUserLinkConfig>(
-                        userLinks), userLinksFileName);
+        Status saveStatus = objWriter.write(
+                new ConcurrentHashMap<String, TopologyUserLinkConfig>(userLinksDB), userLinksFileName);
 
-        if (retS.isSuccess()) {
-            return retS;
-        } else {
-            return new Status(StatusCode.INTERNALERROR, "Save failed");
+        if (! saveStatus.isSuccess()) {
+            return new Status(StatusCode.INTERNALERROR, "Topology save failed: " + saveStatus.getDescription());
         }
+        return saveStatus;
     }
 
     @Override
@@ -281,31 +311,25 @@ CommandProvider {
             return null;
         }
 
-        HashMap<Node, Set<Edge>> res = new HashMap<Node, Set<Edge>>();
-        for (Edge key : this.edgesDB.keySet()) {
+        Map<Node, Set<Edge>> res = new HashMap<Node, Set<Edge>>();
+        for (Edge edge : this.edgesDB.keySet()) {
             // Lets analyze the tail
-            Node node = key.getTailNodeConnector().getNode();
+            Node node = edge.getTailNodeConnector().getNode();
             Set<Edge> nodeEdges = res.get(node);
             if (nodeEdges == null) {
                 nodeEdges = new HashSet<Edge>();
+                res.put(node, nodeEdges);
             }
-            nodeEdges.add(key);
-            // We need to re-add to the MAP even if the element was
-            // already there so in case of clustered services the map
-            // gets updated in the cluster
-            res.put(node, nodeEdges);
+            nodeEdges.add(edge);
 
             // Lets analyze the head
-            node = key.getHeadNodeConnector().getNode();
+            node = edge.getHeadNodeConnector().getNode();
             nodeEdges = res.get(node);
             if (nodeEdges == null) {
                 nodeEdges = new HashSet<Edge>();
+                res.put(node, nodeEdges);
             }
-            nodeEdges.add(key);
-            // We need to re-add to the MAP even if the element was
-            // already there so in case of clustered services the map
-            // gets updated in the cluster
-            res.put(node, nodeEdges);
+            nodeEdges.add(edge);
         }
 
         return res;
@@ -341,10 +365,8 @@ CommandProvider {
      * @return true if it is a production link
      */
     public boolean isProductionLink(Edge e) {
-        return (e.getHeadNodeConnector().getType()
-                .equals(NodeConnector.NodeConnectorIDType.PRODUCTION) || e
-                .getTailNodeConnector().getType()
-                .equals(NodeConnector.NodeConnectorIDType.PRODUCTION));
+        return (e.getHeadNodeConnector().getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION)
+                || e.getTailNodeConnector().getType().equals(NodeConnector.NodeConnectorIDType.PRODUCTION));
     }
 
     /**
@@ -360,31 +382,20 @@ CommandProvider {
             return null;
         }
 
-        HashMap<Edge, Set<Property>> res = new HashMap<Edge, Set<Property>>();
-        for (Edge key : this.edgesDB.keySet()) {
+        Map<Edge, Set<Property>> edgeMap = new HashMap<Edge, Set<Property>>();
+        Set<Property> props;
+        for (Map.Entry<Edge, Set<Property>> edgeEntry : edgesDB.entrySet()) {
             // Sets of props are copied because the composition of
             // those properties could change with time
-            HashSet<Property> prop = new HashSet<Property>(
-                    this.edgesDB.get(key));
+            props = new HashSet<Property>(edgeEntry.getValue());
             // We can simply reuse the key because the object is
             // immutable so doesn't really matter that we are
             // referencing the only owned by a different table, the
             // meaning is the same because doesn't change with time.
-            res.put(key, prop);
+            edgeMap.put(edgeEntry.getKey(), props);
         }
 
-        return res;
-    }
-
-    // TODO remove with spring-dm removal
-    /**
-     * @param set
-     *            the topologyAware to set
-     */
-    public void setTopologyAware(Set<Object> set) {
-        for (Object s : set) {
-            setTopologyManagerAware((ITopologyManagerAware) s);
-        }
+        return edgeMap;
     }
 
     @Override
@@ -393,7 +404,7 @@ CommandProvider {
             return null;
         }
 
-        return (this.hostsDB.keySet());
+        return (new HashSet<NodeConnector>(this.hostsDB.keySet()));
     }
 
     @Override
@@ -402,90 +413,92 @@ CommandProvider {
             return null;
         }
         HashMap<Node, Set<NodeConnector>> res = new HashMap<Node, Set<NodeConnector>>();
-
-        for (NodeConnector p : this.hostsDB.keySet()) {
-            Node n = p.getNode();
-            Set<NodeConnector> pSet = res.get(n);
-            if (pSet == null) {
+        Node node;
+        Set<NodeConnector> portSet;
+        for (NodeConnector nc : this.hostsDB.keySet()) {
+            node = nc.getNode();
+            portSet = res.get(node);
+            if (portSet == null) {
                 // Create the HashSet if null
-                pSet = new HashSet<NodeConnector>();
-                res.put(n, pSet);
+                portSet = new HashSet<NodeConnector>();
+                res.put(node, portSet);
             }
 
             // Keep updating the HashSet, given this is not a
             // clustered map we can just update the set without
             // worrying to update the hashmap.
-            pSet.add(p);
+            portSet.add(nc);
         }
 
         return (res);
     }
 
     @Override
-    public Host getHostAttachedToNodeConnector(NodeConnector p) {
-        if (this.hostsDB == null) {
+    public Host getHostAttachedToNodeConnector(NodeConnector port) {
+        ImmutablePair<Host, Set<Property>> host;
+        if (this.hostsDB == null || (host = this.hostsDB.get(port)) == null) {
             return null;
         }
-        if (this.hostsDB.get(p) == null)
-            return null;
-
-        return (this.hostsDB.get(p).getLeft());
+        return host.getLeft();
     }
 
     @Override
-    public void updateHostLink(NodeConnector p, Host h, UpdateType t,
-            Set<Property> props) {
-        if (this.hostsDB == null) {
-            return;
+    public void updateHostLink(NodeConnector port, Host h, UpdateType t, Set<Property> props) {
+
+        // Clone the property set in case non null else just
+        // create an empty one. Caches allocated via infinispan
+        // don't allow null values
+        if (props == null) {
+            props = new HashSet<Property>();
+        } else {
+            props = new HashSet<Property>(props);
         }
+        ImmutablePair<Host, Set<Property>> thisHost = new ImmutablePair<Host, Set<Property>>(h, props);
 
         switch (t) {
         case ADDED:
         case CHANGED:
-            // Clone the property set in case non null else just
-            // create an empty one. Caches allocated via infinispan
-            // don't allow null values
+            this.hostsDB.put(port, thisHost);
+            break;
+        case REMOVED:
+            //remove only if hasn't been concurrently modified
+            this.hostsDB.remove(port, thisHost);
+            break;
+        }
+    }
+
+    private TopoEdgeUpdate edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
+        switch (type) {
+        case ADDED:
+            // Make sure the props are non-null
             if (props == null) {
                 props = new HashSet<Property>();
             } else {
                 props = new HashSet<Property>(props);
             }
 
-            this.hostsDB.put(p, new ImmutablePair(h, props));
-            break;
-        case REMOVED:
-            this.hostsDB.remove(p);
-            break;
-        }
-    }
-
-    private TopoEdgeUpdate edgeUpdate(Edge e, UpdateType type,
-            Set<Property> props) {
-        switch (type) {
-        case ADDED:
-            // Make sure the props are non-null
-            if (props == null) {
-                props = (Set<Property>) new HashSet();
-            } else {
-                // Copy the set so noone is going to change the content
-                props = (Set<Property>) new HashSet(props);
+            //in case of node switch-over to a different cluster controller,
+            //let's retain edge props
+            Set<Property> currentProps = this.edgesDB.get(e);
+            if (currentProps != null){
+                props.addAll(currentProps);
             }
 
             // Now make sure there is the creation timestamp for the
-            // edge, if not there timestamp with the first update
+            // edge, if not there, stamp with the first update
             boolean found_create = false;
             for (Property prop : props) {
                 if (prop instanceof TimeStamp) {
                     TimeStamp t = (TimeStamp) prop;
                     if (t.getTimeStampName().equals("creation")) {
                         found_create = true;
+                        break;
                     }
                 }
             }
 
             if (!found_create) {
-                TimeStamp t = new TimeStamp(System.currentTimeMillis(),
-                        "creation");
+                TimeStamp t = new TimeStamp(System.currentTimeMillis(), "creation");
                 props.add(t);
             }
 
@@ -498,10 +511,8 @@ CommandProvider {
             // for now.
             // The DB only contains ISL ports
             if (isISLink(e)) {
-                this.nodeConnectorsDB.put(e.getHeadNodeConnector(),
-                        new HashSet<Property>());
-                this.nodeConnectorsDB.put(e.getTailNodeConnector(),
-                        new HashSet<Property>());
+                this.nodeConnectorsDB.put(e.getHeadNodeConnector(), new HashSet<Property>(1));
+                this.nodeConnectorsDB.put(e.getTailNodeConnector(), new HashSet<Property>(1));
             }
             log.trace("Edge {}  {}", e.toString(), type.name());
             break;
@@ -521,29 +532,29 @@ CommandProvider {
             log.trace("Edge {}  {}", e.toString(), type.name());
             break;
         case CHANGED:
-            Set<Property> old_props = this.edgesDB.get(e);
+            Set<Property> oldProps = this.edgesDB.get(e);
 
             // When property changes lets make sure we can change it
             // all except the creation time stamp because that should
             // be changed only when the edge is destroyed and created
             // again
-            TimeStamp tc = null;
-            for (Property prop : old_props) {
+            TimeStamp timeStamp = null;
+            for (Property prop : oldProps) {
                 if (prop instanceof TimeStamp) {
-                    TimeStamp t = (TimeStamp) prop;
-                    if (t.getTimeStampName().equals("creation")) {
-                        tc = t;
+                    TimeStamp tsProp = (TimeStamp) prop;
+                    if (tsProp.getTimeStampName().equals("creation")) {
+                        timeStamp = tsProp;
+                        break;
                     }
                 }
             }
 
             // Now lets make sure new properties are non-null
-            // Make sure the props are non-null
             if (props == null) {
-                props = (Set<Property>) new HashSet();
+                props = new HashSet<Property>();
             } else {
                 // Copy the set so noone is going to change the content
-                props = (Set<Property>) new HashSet(props);
+                props = new HashSet<Property>(props);
             }
 
             // Now lets remove the creation property if exist in the
@@ -554,13 +565,14 @@ CommandProvider {
                     TimeStamp t = (TimeStamp) prop;
                     if (t.getTimeStampName().equals("creation")) {
                         i.remove();
+                        break;
                     }
                 }
             }
 
             // Now lets add the creation timestamp in it
-            if (tc != null) {
-                props.add(tc);
+            if (timeStamp != null) {
+                props.add(timeStamp);
             }
 
             // Finally update
@@ -587,7 +599,7 @@ CommandProvider {
             try {
                 s.edgeUpdate(teuList);
             } catch (Exception exc) {
-                log.error("Exception on callback", exc);
+                log.error("Exception on edge update:", exc);
             }
         }
 
@@ -601,39 +613,37 @@ CommandProvider {
 
 
     private Edge getLinkTuple(TopologyUserLinkConfig link) {
-        Edge linkTuple = null;
         NodeConnector srcNodeConnector = NodeConnector.fromString(link.getSrcNodeConnector());
         NodeConnector dstNodeConnector = NodeConnector.fromString(link.getDstNodeConnector());
-        if (srcNodeConnector == null || dstNodeConnector == null) return null;
         try {
-            linkTuple = new Edge(srcNodeConnector, dstNodeConnector);
+            return new Edge(srcNodeConnector, dstNodeConnector);
         } catch (Exception e) {
+            return null;
         }
-        return linkTuple;
     }
 
     @Override
     public ConcurrentMap<String, TopologyUserLinkConfig> getUserLinks() {
-        return userLinks;
+        return new ConcurrentHashMap<String, TopologyUserLinkConfig>(userLinksDB);
     }
 
     @Override
     public Status addUserLink(TopologyUserLinkConfig link) {
         if (!link.isValid()) {
             return new Status(StatusCode.BADREQUEST,
-                    "Configuration Invalid. Please check the parameters");
-        }
-        if (userLinks.get(link.getName()) != null) {
-            return new Status(StatusCode.CONFLICT, "Link with name : "
-                    + link.getName()
-                    + " already exists. Please use another name");
-        }
-        if (userLinks.containsValue(link)) {
-            return new Status(StatusCode.CONFLICT, "Link configuration exists");
+                    "User link configuration invalid.");
         }
 
+        if (userLinksDB.containsValue(link)) {
+            return new Status(StatusCode.CONFLICT, "Link configuration exists");
+        }
         link.setStatus(TopologyUserLinkConfig.STATUS.LINKDOWN);
-        userLinks.put(link.getName(), link);
+
+        //attempt put, if mapping for this key already existed return conflict
+        if (userLinksDB.putIfAbsent(link.getName(), link) != null) {
+            return new Status(StatusCode.CONFLICT, "Link with name : " + link.getName()
+                    + " already exists. Please use another name");
+        }
 
         Edge linkTuple = getLinkTuple(link);
         if (linkTuple != null) {
@@ -649,31 +659,28 @@ CommandProvider {
                 }
             }
         }
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
     public Status deleteUserLink(String linkName) {
         if (linkName == null) {
-            return new Status(StatusCode.BADREQUEST,
-                    "A valid linkName is required to Delete a link");
+            return new Status(StatusCode.BADREQUEST, "User link name cannot be null.");
         }
 
-        TopologyUserLinkConfig link = userLinks.get(linkName);
-
-        Edge linkTuple = getLinkTuple(link);
-        userLinks.remove(linkName);
-        if (linkTuple != null) {
-            if (!isProductionLink(linkTuple)) {
+        TopologyUserLinkConfig link = userLinksDB.remove(linkName);
+        Edge linkTuple;
+        if (link != null && (linkTuple = getLinkTuple(link)) != null) {
+            if (! isProductionLink(linkTuple)) {
                 edgeUpdate(linkTuple, UpdateType.REMOVED, null);
             }
 
             linkTuple = getReverseLinkTuple(link);
-            if ((linkTuple != null) && !isProductionLink(linkTuple)) {
+            if (! isProductionLink(linkTuple)) {
                 edgeUpdate(linkTuple, UpdateType.REMOVED, null);
             }
         }
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     private void registerWithOSGIConsole() {
@@ -695,8 +702,8 @@ CommandProvider {
     }
 
     public void _printUserLink(CommandInterpreter ci) {
-        for (String name : this.userLinks.keySet()) {
-            TopologyUserLinkConfig linkConfig = userLinks.get(name);
+        for (String name : this.userLinksDB.keySet()) {
+            TopologyUserLinkConfig linkConfig = userLinksDB.get(name);
             ci.println("Name : " + name);
             ci.println(linkConfig);
             ci.println("Edge " + getLinkTuple(linkConfig));
@@ -770,7 +777,6 @@ CommandProvider {
     @Override
     public Object readObject(ObjectInputStream ois)
             throws FileNotFoundException, IOException, ClassNotFoundException {
-        // TODO Auto-generated method stub
         return ois.readObject();
     }
 

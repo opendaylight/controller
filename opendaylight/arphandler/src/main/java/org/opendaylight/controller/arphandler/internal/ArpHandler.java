@@ -21,9 +21,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
@@ -47,6 +45,8 @@ import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Subnet;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ArpHandler implements IHostFinder, IListenDataPacket {
     private static final Logger logger = LoggerFactory
@@ -57,8 +57,8 @@ public class ArpHandler implements IHostFinder, IListenDataPacket {
     private IDataPacketService dataPacketService = null;
     private Set<IfHostListener> hostListener = Collections
             .synchronizedSet(new HashSet<IfHostListener>());
-    private ConcurrentHashMap<InetAddress, Set<HostNodeConnector>> arpRequestors;
-    private ConcurrentHashMap<InetAddress, Short> countDownTimers;
+    private ConcurrentMap<InetAddress, Set<HostNodeConnector>> arpRequestors;
+    private ConcurrentMap<InetAddress, Short> countDownTimers;
     private Timer periodicTimer;
 
     void setHostListener(IfHostListener s) {

@@ -44,12 +44,12 @@ import org.opendaylight.controller.forwarding.staticrouting.StaticRouteConfig;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.IfNewHostNotify;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,22 +204,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         if (configSaveEvent == null) {
             log.error("\nFailed to get cache for configSaveEvent");
         }
-    }
-
-    @SuppressWarnings("deprecation")
-        private void destroyCaches() {
-        if (this.clusterContainerService == null) {
-            log
-                    .info("un-initialized clusterContainerService, can't destroy cache");
-            return;
-        }
-
-        clusterContainerService.destroyCache("forwarding.staticrouting.routes");
-        clusterContainerService
-                .destroyCache("forwarding.staticrouting.configs");
-        clusterContainerService
-                .destroyCache("forwarding.staticrouting.configSaveEvent");
-
     }
 
     @Override
@@ -488,7 +472,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         log.debug("Destroy all the Static Routing Rules given we are "
                 + "shutting down");
 
-        destroyCaches();
         gatewayProbeTimer.cancel();
 
         // Clear the listener so to be ready in next life
