@@ -61,6 +61,6 @@ public class ObjectWriter {
                 }
             }
         }
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 }
