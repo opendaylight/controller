@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
@@ -27,13 +29,11 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateLis
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
-import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.MacAddress;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.Tables;
@@ -64,7 +64,10 @@ public class InventoryServiceShim implements IContainerListener,
     private IController controller = null;
     private final ConcurrentMap<String, IInventoryShimInternalListener> inventoryShimInternalListeners = new ConcurrentHashMap<String, IInventoryShimInternalListener>();
     private final List<IInventoryShimExternalListener> inventoryShimExternalListeners = new CopyOnWriteArrayList<IInventoryShimExternalListener>();
-    private final ConcurrentMap<NodeConnector, List<String>> containerMap = new ConcurrentHashMap<NodeConnector, List<String>>();
+    private final ConcurrentMap<NodeConnector, Set<String>> nodeConnectorContainerMap = new ConcurrentHashMap<NodeConnector, Set<String>>();
+    private final ConcurrentMap<Node, Set<String>> nodeContainerMap = new ConcurrentHashMap<Node, Set<String>>();
+    private final ConcurrentMap<NodeConnector, Set<Property>> nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Set<Property>>();
+    private final ConcurrentMap<Node, Set<Property>> nodeProps = new ConcurrentHashMap<Node, Set<Property>>();
 
     void setController(IController s) {
         this.controller = s;
@@ -162,7 +165,8 @@ public class InventoryServiceShim implements IContainerListener,
         this.controller.removeSwitchStateListener(this);
 
         this.inventoryShimInternalListeners.clear();
-        this.containerMap.clear();
+        this.nodeConnectorContainerMap.clear();
+        this.nodeContainerMap.clear();
         this.controller = null;
     }
 
@@ -178,21 +182,24 @@ public class InventoryServiceShim implements IContainerListener,
         Node node = NodeCreator.createOFNode(sw.getId());
         NodeConnector nodeConnector = PortConverter.toNodeConnector(
             m.getDesc().getPortNumber(), node);
+        // get node connector properties
+        Set<Property> props = InventoryServiceHelper.OFPortToProps(m.getDesc());
 
         UpdateType type = null;
         if (m.getReason() == (byte) OFPortReason.OFPPR_ADD.ordinal()) {
             type = UpdateType.ADDED;
+            nodeConnectorProps.put(nodeConnector, props);
         } else if (m.getReason() == (byte) OFPortReason.OFPPR_DELETE.ordinal()) {
             type = UpdateType.REMOVED;
+            nodeConnectorProps.remove(nodeConnector);
         } else if (m.getReason() == (byte) OFPortReason.OFPPR_MODIFY.ordinal()) {
             type = UpdateType.CHANGED;
+            nodeConnectorProps.put(nodeConnector, props);
         }
 
         logger.trace("handlePortStatusMessage {} type {}", nodeConnector, type);
 
         if (type != null) {
-            // get node connector properties
-            Set<Property> props = InventoryServiceHelper.OFPortToProps(m.getDesc());
             notifyInventoryShimListener(nodeConnector, type, props);
         }
     }
@@ -207,6 +214,12 @@ public class InventoryServiceShim implements IContainerListener,
         Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper
                 .OFSwitchToProps(sw);
         for (Map.Entry<NodeConnector, Set<Property>> entry : ncProps.entrySet()) {
+            Set<Property> props = new HashSet<Property>();
+            Set<Property> prop = entry.getValue();
+            if (prop != null) {
+                props.addAll(prop);
+            }
+            nodeConnectorProps.put(entry.getKey(), props);
             notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED,
                     entry.getValue());
         }
@@ -242,48 +255,68 @@ public class InventoryServiceShim implements IContainerListener,
     }
 
     @Override
-    public void nodeConnectorUpdated(String containerName, NodeConnector p,
-            UpdateType t) {
-        logger.debug("nodeConnectorUpdated: {} type {} for container {}",
-                new Object[] { p, t, containerName });
-        if (this.containerMap == null) {
-            logger.error("containerMap is NULL");
-            return;
+    public void nodeConnectorUpdated(String containerName, NodeConnector p, UpdateType t) {
+        logger.debug("nodeConnectorUpdated: {} type {} for container {}", new Object[] { p, t, containerName });
+        Node node = p.getNode();
+        Set<String> ncContainers = this.nodeConnectorContainerMap.get(p);
+        Set<String> nodeContainers = this.nodeContainerMap.get(node);
+        if (ncContainers == null) {
+            ncContainers = new CopyOnWriteArraySet<String>();
         }
-        List<String> containers = this.containerMap.get(p);
-        if (containers == null) {
-            containers = new CopyOnWriteArrayList<String>();
+        if (nodeContainers == null) {
+            nodeContainers = new CopyOnWriteArraySet<String>();
         }
-        boolean updateMap = false;
+        boolean notifyNodeUpdate = false;
+
         switch (t) {
         case ADDED:
-            if (!containers.contains(containerName)) {
-                containers.add(containerName);
-                updateMap = true;
+            if (ncContainers.add(containerName)) {
+                this.nodeConnectorContainerMap.put(p, ncContainers);
+            }
+            if (nodeContainers.add(containerName)) {
+                this.nodeContainerMap.put(node, nodeContainers);
+                notifyNodeUpdate = true;
             }
             break;
         case REMOVED:
-            if (containers.contains(containerName)) {
-                containers.remove(containerName);
-                updateMap = true;
+            if (ncContainers.remove(containerName)) {
+                if (ncContainers.isEmpty()) {
+                    // Do cleanup to reduce memory footprint if no
+                    // elements to be tracked
+                    this.nodeConnectorContainerMap.remove(p);
+                } else {
+                    this.nodeConnectorContainerMap.put(p, ncContainers);
+                }
+            }
+            boolean nodeContainerUpdate = true;
+            for (NodeConnector nc : nodeConnectorContainerMap.keySet()) {
+                if ((nc.getNode().equals(node)) && (nodeConnectorContainerMap.get(nc).contains(containerName))) {
+                    nodeContainerUpdate = false;
+                    break;
+                }
+            }
+            if (nodeContainerUpdate) {
+                nodeContainers.remove(containerName);
+                notifyNodeUpdate = true;
+                if (nodeContainers.isEmpty()) {
+                    this.nodeContainerMap.remove(node);
+                } else {
+                    this.nodeContainerMap.put(node, nodeContainers);
+                }
             }
             break;
         case CHANGED:
             break;
         }
-        if (updateMap) {
-            if (containers.isEmpty()) {
-                // Do cleanup to reduce memory footprint if no
-                // elements to be tracked
-                this.containerMap.remove(p);
-            } else {
-                this.containerMap.put(p, containers);
-            }
-        }
 
+        Set<Property> ncProp = nodeConnectorProps.get(p);
         // notify InventoryService
-        notifyInventoryShimInternalListener(containerName, p, t, null);
-        notifyInventoryShimInternalListener(containerName, p.getNode(), t, null);
+        notifyInventoryShimInternalListener(containerName, p, t, ncProp);
+
+        if (notifyNodeUpdate) {
+            Set<Property> nodeProp = nodeProps.get(node);
+            notifyInventoryShimInternalListener(containerName, node, t, nodeProp);
+        }
     }
 
     private void notifyInventoryShimExternalListener(Node node,
@@ -316,21 +349,13 @@ public class InventoryServiceShim implements IContainerListener,
     /*
      * Notify all internal and external listeners
      */
-    private void notifyInventoryShimListener(NodeConnector nodeConnector,
-            UpdateType type, Set<Property> props) {
-        // Always notify default InventoryService. Store properties in default
-        // one.
-        notifyInventoryShimInternalListener(GlobalConstants.DEFAULT.toString(),
-                nodeConnector, type, props);
-
-        // Now notify other containers
-        List<String> containers = containerMap.get(nodeConnector);
-        if (containers != null) {
-            for (String container : containers) {
-                // no property stored in container components.
-                notifyInventoryShimInternalListener(container, nodeConnector,
-                        type, null);
-            }
+    private void notifyInventoryShimListener(NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
+        // notify other containers
+        Set<String> containers = (nodeConnectorContainerMap.get(nodeConnector) == null) ? new HashSet<String>()
+                : new HashSet<String>(nodeConnectorContainerMap.get(nodeConnector));
+        containers.add(GlobalConstants.DEFAULT.toString());
+        for (String container : containers) {
+            notifyInventoryShimInternalListener(container, nodeConnector, type, props);
         }
 
         // Notify DiscoveryService
@@ -340,34 +365,13 @@ public class InventoryServiceShim implements IContainerListener,
     /*
      * Notify all internal and external listeners
      */
-    private void notifyInventoryShimListener(Node node, UpdateType type,
-            Set<Property> props) {
-        switch (type) {
-        case ADDED:
-            // Notify only the default Inventory Service
-            IInventoryShimInternalListener inventoryShimDefaultListener = inventoryShimInternalListeners
-                    .get(GlobalConstants.DEFAULT.toString());
-            if (inventoryShimDefaultListener != null) {
-                inventoryShimDefaultListener.updateNode(node, type, props);
-            }
-            break;
-        case REMOVED:
-            // Notify all Inventory Service containers
-            for (IInventoryShimInternalListener inventoryShimInternalListener : inventoryShimInternalListeners
-                    .values()) {
-                inventoryShimInternalListener.updateNode(node, type, null);
-            }
-            break;
-        case CHANGED:
-            // Notify only the default Inventory Service
-            inventoryShimDefaultListener = inventoryShimInternalListeners
-                    .get(GlobalConstants.DEFAULT.toString());
-            if (inventoryShimDefaultListener != null) {
-                inventoryShimDefaultListener.updateNode(node, type, props);
-            }
-            break;
-        default:
-            break;
+    private void notifyInventoryShimListener(Node node, UpdateType type, Set<Property> props) {
+        // Now notify other containers
+        Set<String> containers = (nodeContainerMap.get(node) == null) ? new HashSet<String>() : new HashSet<String>(
+                nodeContainerMap.get(node));
+        containers.add(GlobalConstants.DEFAULT.toString());
+        for (String container : containers) {
+            notifyInventoryShimInternalListener(container, node, type, props);
         }
 
         // Notify external listener
@@ -421,21 +425,19 @@ public class InventoryServiceShim implements IContainerListener,
             props.add(b);
         }
 
+        nodeProps.put(node, props);
         // Notify all internal and external listeners
         notifyInventoryShimListener(node, type, props);
     }
 
     private void removeNode(ISwitch sw) {
-        Node node;
-        try {
-            node = new Node(NodeIDType.OPENFLOW, sw.getId());
-        } catch (ConstructionException e) {
-            logger.error("{}", e.getMessage());
+        Node node = NodeCreator.createOFNode(sw.getId());
+        if(node == null) {
             return;
         }
-
+        removeNodeConnectorProps(node);
+        nodeProps.remove(node);
         UpdateType type = UpdateType.REMOVED;
-
         // Notify all internal and external listeners
         notifyInventoryShimListener(node, type, null);
     }
@@ -445,6 +447,18 @@ public class InventoryServiceShim implements IContainerListener,
         Map<Long, ISwitch> switches = this.controller.getSwitches();
         for (ISwitch sw : switches.values()) {
             switchAdded(sw);
+        }
+    }
+
+    private void removeNodeConnectorProps(Node node) {
+        List<NodeConnector> ncList = new ArrayList<NodeConnector>();
+        for (NodeConnector nc : nodeConnectorProps.keySet()) {
+            if (nc.getNode().equals(node)) {
+                ncList.add(nc);
+            }
+        }
+        for (NodeConnector nc : ncList) {
+            nodeConnectorProps.remove(nc);
         }
     }
 

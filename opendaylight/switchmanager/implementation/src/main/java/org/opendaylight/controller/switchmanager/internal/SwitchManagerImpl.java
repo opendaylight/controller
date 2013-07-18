@@ -58,7 +58,6 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.IObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
@@ -888,10 +887,8 @@ CommandProvider {
         }
 
         // copy node properties from plugin
-        if (props != null) {
-            for (Property prop : props) {
-                propMap.put(prop.getName(), prop);
-            }
+        for (Property prop : props) {
+            propMap.put(prop.getName(), prop);
         }
 
         if (propMapCurr == null) {
@@ -934,7 +931,6 @@ CommandProvider {
     @Override
     public void updateNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Set<Property> props) {
-        Node node = nodeConnector.getNode();
         Map<String, Property> propMap = new HashMap<String, Property>();
 
         log.debug("updateNodeConnector: {} type {} props {} for container {}",
@@ -954,14 +950,12 @@ CommandProvider {
                 }
             } else {
                 addNodeConnectorProp(nodeConnector, null);
-                addNodeProps(node, null);
             }
 
             addSpanPort(nodeConnector);
             break;
         case REMOVED:
             removeNodeConnectorAllProps(nodeConnector);
-            removeNodeProps(node);
 
             // clean up span config
             removeSpanPort(nodeConnector);
@@ -990,23 +984,15 @@ CommandProvider {
      */
     @Override
     public Map<String, Property> getNodeProps(Node node) {
-        if (isDefaultContainer) {
-            Map<String, Property> rv = null;
-            if (this.nodeProps != null) {
-                rv = this.nodeProps.get(node);
-                if (rv != null) {
-                    /* make a copy of it */
-                    rv = new HashMap<String, Property>(rv);
-                }
+        Map<String, Property> rv = new HashMap<String, Property>();
+        if (this.nodeProps != null) {
+            rv = this.nodeProps.get(node);
+            if (rv != null) {
+                /* make a copy of it */
+                rv = new HashMap<String, Property>(rv);
             }
-            return rv;
-        } else {
-            // get it from default container
-            ISwitchManager defaultSwitchManager = (ISwitchManager) ServiceHelper
-                    .getInstance(ISwitchManager.class,
-                            GlobalConstants.DEFAULT.toString(), this);
-            return defaultSwitchManager.getNodeProps(node);
         }
+        return rv;
     }
 
     @Override
@@ -1036,7 +1022,7 @@ CommandProvider {
                 return;
             }
             if (!propMapCurr.get(prop.getName()).equals(nodeProps.get(node).get(prop.getName()))) {
-                log.warn("Cluster conflict: Unable to add property {} to node {}.", prop.getName(), node.getID());
+                log.debug("Cluster conflict: Unable to add property {} to node {}.", prop.getName(), node.getID());
                 return;
             }
         }
@@ -1135,24 +1121,15 @@ CommandProvider {
     }
 
     @Override
-    public Map<String, Property> getNodeConnectorProps(
-            NodeConnector nodeConnector) {
-        if (isDefaultContainer) {
-            Map<String, Property> rv = null;
-            if (this.nodeConnectorProps != null) {
-                rv = this.nodeConnectorProps.get(nodeConnector);
-                if (rv != null) {
-                    rv = new HashMap<String, Property>(rv);
-                }
+    public Map<String, Property> getNodeConnectorProps(NodeConnector nodeConnector) {
+        Map<String, Property> rv = new HashMap<String, Property>();
+        if (this.nodeConnectorProps != null) {
+            rv = this.nodeConnectorProps.get(nodeConnector);
+            if (rv != null) {
+                rv = new HashMap<String, Property>(rv);
             }
-            return rv;
-        } else {
-            // get it from default container
-            ISwitchManager defaultSwitchManager = (ISwitchManager) ServiceHelper
-                    .getInstance(ISwitchManager.class,
-                            GlobalConstants.DEFAULT.toString(), this);
-            return defaultSwitchManager.getNodeConnectorProps(nodeConnector);
         }
+        return rv;
     }
 
     @Override
