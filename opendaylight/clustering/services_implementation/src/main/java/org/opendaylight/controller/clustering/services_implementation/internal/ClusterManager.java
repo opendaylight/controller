@@ -9,8 +9,6 @@
 
 package org.opendaylight.controller.clustering.services_implementation.internal;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -54,10 +52,11 @@ import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.clustering.services.IGetUpdates;
 import org.opendaylight.controller.clustering.services.IListenRoleChange;
 import org.opendaylight.controller.clustering.services.ListenRoleChangeAddException;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClusterManager implements IClusterServices {
+public class ClusterManager implements IClusterServices, IContainerAware {
     protected static final Logger logger = LoggerFactory
             .getLogger(ClusterManager.class);
     private DefaultCacheManager cm;
@@ -99,10 +98,10 @@ public class ClusterManager implements IClusterServices {
             try {
                 Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
                 while (e.hasMoreElements()) {
-                    NetworkInterface n = (NetworkInterface) e.nextElement();
+                    NetworkInterface n = e.nextElement();
                     Enumeration<InetAddress> ee = n.getInetAddresses();
                     while (ee.hasMoreElements()) {
-                        InetAddress i = (InetAddress) ee.nextElement();
+                        InetAddress i = ee.nextElement();
                         myAddresses.add(i);
                     }
                 }
@@ -562,25 +561,29 @@ public class ClusterManager implements IClusterServices {
         return null;
     }
 
+    @Override
     public List<InetAddress> getClusteredControllers() {
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
             return null;
         }
         List<Address> controllers = manager.getMembers();
-        if ((controllers == null) || controllers.size() == 0)
+        if ((controllers == null) || controllers.size() == 0) {
             return null;
+        }
 
         List<InetAddress> clusteredControllers = new ArrayList<InetAddress>();
         for (Address a : controllers) {
             InetAddress inetAddress = addressToInetAddress(a);
             if (inetAddress != null
-                    && !inetAddress.getHostAddress().equals(loopbackAddress))
+                    && !inetAddress.getHostAddress().equals(loopbackAddress)) {
                 clusteredControllers.add(inetAddress);
+            }
         }
         return clusteredControllers;
     }
 
+    @Override
     public InetAddress getMyAddress() {
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
@@ -659,5 +662,22 @@ public class ClusterManager implements IClusterServices {
                 i.newActiveAvailable();
             }
         }
+    }
+
+    private void removeContainerCaches(String containerName) {
+        logger.info("Destroying caches for container {}", containerName);
+        for (String cacheName : this.getCacheList(containerName)) {
+            this.destroyCache(containerName, cacheName);
+        }
+    }
+
+    @Override
+    public void containerCreate(String arg0) {
+        // no op
+    }
+
+    @Override
+    public void containerDestroy(String container) {
+        removeContainerCaches(container);
     }
 }

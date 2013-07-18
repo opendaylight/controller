@@ -10,6 +10,7 @@
 package org.opendaylight.controller.clustering.services_implementation.internal;
 
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.opendaylight.controller.sal.core.IContainerAware;
 
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
@@ -30,6 +31,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
     }
 
@@ -38,6 +40,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * cleanup done by ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
     }
 
@@ -50,6 +53,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getGlobalImplementations() {
         Object[] res = { ClusterManager.class, ClusterGlobalManager.class };
         return res;
@@ -64,6 +68,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { ClusterContainerManager.class };
         return res;
@@ -82,6 +87,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * also optional per-container different behavior if needed, usually
      * should not be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(ClusterContainerManager.class)) {
             c.setInterface(new String[] { IClusterContainerServices.class.getName() },
@@ -118,10 +124,11 @@ public class Activator extends ComponentActivatorAbstractBase {
      * needed as long as the same routine can configure multiple
      * implementations
      */
+    @Override
     public void configureGlobalInstance(Component c, Object imp) {
         if (imp.equals(ClusterManager.class)) {
             // export the service for Apps and Plugins
-            c.setInterface(new String[] { IClusterServices.class.getName() }, null);
+            c.setInterface(new String[] { IClusterServices.class.getName(), IContainerAware.class.getName() }, null);
         }
 
         if (imp.equals(ClusterGlobalManager.class)) {
