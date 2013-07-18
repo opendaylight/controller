@@ -96,38 +96,37 @@ public class RefineUtils {
      *            grouping which should contains node to refine
      * @param refine
      *            refine object containing informations about refine
-     * @param moduleName
-     *            current module name
      * @return
      */
     public static SchemaNodeBuilder getRefineNodeFromGroupingDefinition(final GroupingDefinition grouping,
-            final RefineHolder refine, final String moduleName) {
-        SchemaNodeBuilder result = null;
+            final RefineHolder refine) {
+        final String moduleName = refine.getModuleName();
         final int line = refine.getLine();
+        SchemaNodeBuilder result = null;
         final Object lookedUpNode = findRefineTargetNode(grouping, refine.getName());
         if (lookedUpNode instanceof LeafSchemaNode) {
-            result = createLeafBuilder((LeafSchemaNode) lookedUpNode, line);
+            result = createLeafBuilder((LeafSchemaNode) lookedUpNode, moduleName, line);
         } else if (lookedUpNode instanceof ContainerSchemaNode) {
-            result = createContainer((ContainerSchemaNode) lookedUpNode, line);
+            result = createContainer((ContainerSchemaNode) lookedUpNode, moduleName, line);
         } else if (lookedUpNode instanceof ListSchemaNode) {
-            result = createList((ListSchemaNode) lookedUpNode, line);
+            result = createList((ListSchemaNode) lookedUpNode, moduleName, line);
         } else if (lookedUpNode instanceof LeafListSchemaNode) {
-            result = createLeafList((LeafListSchemaNode) lookedUpNode, line);
+            result = createLeafList((LeafListSchemaNode) lookedUpNode, moduleName, line);
         } else if (lookedUpNode instanceof ChoiceNode) {
-            result = createChoice((ChoiceNode) lookedUpNode, line);
+            result = createChoice((ChoiceNode) lookedUpNode, moduleName, line);
         } else if (lookedUpNode instanceof AnyXmlSchemaNode) {
-            result = createAnyXml((AnyXmlSchemaNode) lookedUpNode, line);
+            result = createAnyXml((AnyXmlSchemaNode) lookedUpNode, moduleName, line);
         } else if (lookedUpNode instanceof GroupingDefinition) {
-            result = createGrouping((GroupingDefinition) lookedUpNode, line);
+            result = createGrouping((GroupingDefinition) lookedUpNode, moduleName, line);
         } else if (lookedUpNode instanceof TypeDefinition) {
-            result = createTypedef((ExtendedType) lookedUpNode, line);
+            result = createTypedef((ExtendedType) lookedUpNode, moduleName, line);
         } else {
             throw new YangParseException(moduleName, line, "Target '" + refine.getName() + "' can not be refined");
         }
         return result;
     }
 
-    public static void refineLeaf(LeafSchemaNodeBuilder leaf, RefineHolder refine, int line) {
+    public static void refineLeaf(LeafSchemaNodeBuilder leaf, RefineHolder refine) {
         String defaultStr = refine.getDefaultStr();
         Boolean mandatory = refine.isMandatory();
         MustDefinition must = refine.getMust();
@@ -256,8 +255,9 @@ public class RefineUtils {
      *            refine object containing information about refine process
      */
     public static void checkRefine(SchemaNodeBuilder node, RefineHolder refine) {
-        String name = node.getQName().getLocalName();
+        String moduleName = refine.getModuleName();
         int line = refine.getLine();
+        String name = node.getQName().getLocalName();
 
         String defaultStr = refine.getDefaultStr();
         Boolean mandatory = refine.isMandatory();
@@ -267,64 +267,66 @@ public class RefineUtils {
         Integer max = refine.getMaxElements();
 
         if (node instanceof AnyXmlBuilder) {
-            checkRefineDefault(node, defaultStr, line);
-            checkRefinePresence(node, presence, line);
-            checkRefineMinMax(name, line, min, max);
+            checkRefineDefault(node, defaultStr, moduleName, line);
+            checkRefinePresence(node, presence, moduleName, line);
+            checkRefineMinMax(name, min, max, moduleName, line);
         } else if (node instanceof ChoiceBuilder) {
-            checkRefinePresence(node, presence, line);
-            checkRefineMust(node, must, line);
-            checkRefineMinMax(name, line, min, max);
+            checkRefinePresence(node, presence, moduleName, line);
+            checkRefineMust(node, must, moduleName, line);
+            checkRefineMinMax(name, min, max, moduleName, line);
         } else if (node instanceof ContainerSchemaNodeBuilder) {
-            checkRefineDefault(node, defaultStr, line);
-            checkRefineMandatory(node, mandatory, line);
-            checkRefineMust(node, must, line);
-            checkRefineMinMax(name, line, min, max);
+            checkRefineDefault(node, defaultStr, moduleName, line);
+            checkRefineMandatory(node, mandatory, moduleName, line);
+            checkRefineMust(node, must, moduleName, line);
+            checkRefineMinMax(name, min, max, moduleName, line);
         } else if (node instanceof LeafSchemaNodeBuilder) {
-            checkRefinePresence(node, presence, line);
-            checkRefineMinMax(name, line, min, max);
+            checkRefinePresence(node, presence, moduleName, line);
+            checkRefineMinMax(name, min, max, moduleName, line);
         } else if (node instanceof LeafListSchemaNodeBuilder || node instanceof ListSchemaNodeBuilder) {
-            checkRefineDefault(node, defaultStr, line);
-            checkRefinePresence(node, presence, line);
-            checkRefineMandatory(node, mandatory, line);
+            checkRefineDefault(node, defaultStr, moduleName, line);
+            checkRefinePresence(node, presence, moduleName, line);
+            checkRefineMandatory(node, mandatory, moduleName, line);
         } else if (node instanceof GroupingBuilder || node instanceof TypeDefinitionBuilder
                 || node instanceof UsesNodeBuilder) {
-            checkRefineDefault(node, defaultStr, line);
-            checkRefinePresence(node, presence, line);
-            checkRefineMandatory(node, mandatory, line);
-            checkRefineMust(node, must, line);
-            checkRefineMinMax(name, line, min, max);
+            checkRefineDefault(node, defaultStr, moduleName, line);
+            checkRefinePresence(node, presence, moduleName, line);
+            checkRefineMandatory(node, mandatory, moduleName, line);
+            checkRefineMust(node, must, moduleName, line);
+            checkRefineMinMax(name, min, max, moduleName, line);
         }
     }
 
-    private static void checkRefineDefault(SchemaNodeBuilder node, String defaultStr, int line) {
+    private static void checkRefineDefault(SchemaNodeBuilder node, String defaultStr, String moduleName, int line) {
         if (defaultStr != null) {
-            throw new YangParseException(line, "Can not refine 'default' for '" + node.getQName().getLocalName() + "'.");
+            throw new YangParseException(moduleName, line, "Can not refine 'default' for '"
+                    + node.getQName().getLocalName() + "'.");
         }
     }
 
-    private static void checkRefineMandatory(SchemaNodeBuilder node, Boolean mandatory, int line) {
+    private static void checkRefineMandatory(SchemaNodeBuilder node, Boolean mandatory, String moduleName, int line) {
         if (mandatory != null) {
-            throw new YangParseException(line, "Can not refine 'mandatory' for '" + node.getQName().getLocalName()
-                    + "'.");
+            throw new YangParseException(moduleName, line, "Can not refine 'mandatory' for '"
+                    + node.getQName().getLocalName() + "'.");
         }
     }
 
-    private static void checkRefinePresence(SchemaNodeBuilder node, Boolean presence, int line) {
+    private static void checkRefinePresence(SchemaNodeBuilder node, Boolean presence, String moduleName, int line) {
         if (presence != null) {
-            throw new YangParseException(line, "Can not refine 'presence' for '" + node.getQName().getLocalName()
-                    + "'.");
+            throw new YangParseException(moduleName, line, "Can not refine 'presence' for '"
+                    + node.getQName().getLocalName() + "'.");
         }
     }
 
-    private static void checkRefineMust(SchemaNodeBuilder node, MustDefinition must, int line) {
+    private static void checkRefineMust(SchemaNodeBuilder node, MustDefinition must, String moduleName, int line) {
         if (must != null) {
-            throw new YangParseException(line, "Can not refine 'must' for '" + node.getQName().getLocalName() + "'.");
+            throw new YangParseException(moduleName, line, "Can not refine 'must' for '"
+                    + node.getQName().getLocalName() + "'.");
         }
     }
 
-    private static void checkRefineMinMax(String refineTargetName, int refineLine, Integer min, Integer max) {
+    private static void checkRefineMinMax(String refineTargetName, Integer min, Integer max, String moduleName, int line) {
         if (min != null || max != null) {
-            throw new YangParseException(refineLine, "Can not refine 'min-elements' or 'max-elements' for '"
+            throw new YangParseException(moduleName, line, "Can not refine 'min-elements' or 'max-elements' for '"
                     + refineTargetName + "'.");
         }
     }
@@ -343,10 +345,10 @@ public class RefineUtils {
      *            node to refine
      * @param refine
      *            refine object containing information about refine process
-     * @param line
-     *            current line in yang model
      */
-    public static void refineDefault(final Builder node, final RefineHolder refine, final int line) {
+    public static void refineDefault(final Builder node, final RefineHolder refine) {
+        final String moduleName = refine.getModuleName();
+        final int line = refine.getLine();
         Class<? extends Builder> cls = node.getClass();
 
         String description = refine.getDescription();
@@ -355,7 +357,7 @@ public class RefineUtils {
                 Method method = cls.getDeclaredMethod("setDescription", String.class);
                 method.invoke(node, description);
             } catch (Exception e) {
-                throw new YangParseException(line, "Cannot refine description in " + cls.getName(), e);
+                throw new YangParseException(moduleName, line, "Cannot refine description in " + cls.getName(), e);
             }
         }
 
@@ -365,7 +367,7 @@ public class RefineUtils {
                 Method method = cls.getDeclaredMethod("setReference", String.class);
                 method.invoke(node, reference);
             } catch (Exception e) {
-                throw new YangParseException(line, "Cannot refine reference in " + cls.getName(), e);
+                throw new YangParseException(moduleName, line, "Cannot refine reference in " + cls.getName(), e);
             }
         }
 
@@ -375,7 +377,7 @@ public class RefineUtils {
                 Method method = cls.getDeclaredMethod("setConfiguration", Boolean.class);
                 method.invoke(node, config);
             } catch (Exception e) {
-                throw new YangParseException(line, "Cannot refine config in " + cls.getName(), e);
+                throw new YangParseException(moduleName, line, "Cannot refine config in " + cls.getName(), e);
             }
         }
     }
@@ -392,9 +394,9 @@ public class RefineUtils {
      */
     public static void performRefine(SchemaNodeBuilder nodeToRefine, RefineHolder refine, int line) {
         checkRefine(nodeToRefine, refine);
-        refineDefault(nodeToRefine, refine, line);
+        refineDefault(nodeToRefine, refine);
         if (nodeToRefine instanceof LeafSchemaNodeBuilder) {
-            refineLeaf((LeafSchemaNodeBuilder) nodeToRefine, refine, line);
+            refineLeaf((LeafSchemaNodeBuilder) nodeToRefine, refine);
         } else if (nodeToRefine instanceof ContainerSchemaNodeBuilder) {
             refineContainer((ContainerSchemaNodeBuilder) nodeToRefine, refine, line);
         } else if (nodeToRefine instanceof ListSchemaNodeBuilder) {

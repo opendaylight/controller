@@ -49,8 +49,8 @@ public final class NotificationBuilder extends AbstractDataNodeContainerBuilder 
     private Set<AugmentationSchema> augmentations;
     private final Set<AugmentationSchemaBuilder> addedAugmentations = new HashSet<AugmentationSchemaBuilder>();
 
-    NotificationBuilder(final int line, final QName qname) {
-        super(line, qname);
+    NotificationBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line, qname);
         instance = new NotificationDefinitionImpl(qname);
     }
 

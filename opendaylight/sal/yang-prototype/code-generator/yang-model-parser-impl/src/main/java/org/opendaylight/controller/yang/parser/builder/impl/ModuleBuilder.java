@@ -82,7 +82,7 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
     private final List<UnknownSchemaNodeBuilder> allUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
     public ModuleBuilder(final String name) {
-        super(0, null);
+        super(name, 0, null);
         this.name = name;
         instance = new ModuleImpl(name);
     }
@@ -320,85 +320,94 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
     }
 
     public ExtensionBuilder addExtension(final QName qname, final int line) {
-        final ExtensionBuilder builder = new ExtensionBuilder(line, qname);
+        final String extName = qname.getLocalName();
+        for (ExtensionBuilder addedExtension : addedExtensions) {
+            if (addedExtension.getQName().getLocalName().equals(extName)) {
+                throw new YangParseException(moduleName, line, "Can not add extension '" + extName
+                        + "': extension with same name already declared at line " + addedExtension.getLine());
+            }
+        }
+        final ExtensionBuilder builder = new ExtensionBuilder(name, line, qname);
         addedExtensions.add(builder);
         return builder;
     }
 
-    public ContainerSchemaNodeBuilder addContainerNode(final int line, final QName containerName,
-            final SchemaPath schemaPath) {
-        final ContainerSchemaNodeBuilder builder = new ContainerSchemaNodeBuilder(line, containerName, schemaPath);
+    public ContainerSchemaNodeBuilder addContainerNode(final int line, final QName qname, final SchemaPath schemaPath) {
+        final ContainerSchemaNodeBuilder builder = new ContainerSchemaNodeBuilder(name, line, qname, schemaPath);
 
         Builder parent = getActualNode();
         builder.setParent(parent);
-        addChildToParent(parent, builder, containerName.getLocalName());
+        addChildToParent(parent, builder, qname.getLocalName());
 
         return builder;
     }
 
-    public ListSchemaNodeBuilder addListNode(final int line, final QName listName, final SchemaPath schemaPath) {
-        final ListSchemaNodeBuilder builder = new ListSchemaNodeBuilder(line, listName, schemaPath);
+    public ListSchemaNodeBuilder addListNode(final int line, final QName qname, final SchemaPath schemaPath) {
+        final ListSchemaNodeBuilder builder = new ListSchemaNodeBuilder(name, line, qname, schemaPath);
 
         Builder parent = getActualNode();
         builder.setParent(parent);
-        addChildToParent(parent, builder, listName.getLocalName());
+        addChildToParent(parent, builder, qname.getLocalName());
 
         return builder;
     }
 
-    public LeafSchemaNodeBuilder addLeafNode(final int line, final QName leafName, final SchemaPath schemaPath) {
-        final LeafSchemaNodeBuilder builder = new LeafSchemaNodeBuilder(leafName, schemaPath, line);
+    public LeafSchemaNodeBuilder addLeafNode(final int line, final QName qname, final SchemaPath schemaPath) {
+        final LeafSchemaNodeBuilder builder = new LeafSchemaNodeBuilder(name, line, qname, schemaPath);
 
         Builder parent = getActualNode();
         builder.setParent(parent);
-        addChildToParent(parent, builder, leafName.getLocalName());
+        addChildToParent(parent, builder, qname.getLocalName());
 
         return builder;
     }
 
-    public LeafListSchemaNodeBuilder addLeafListNode(final int line, final QName leafListName,
-            final SchemaPath schemaPath) {
-        final LeafListSchemaNodeBuilder builder = new LeafListSchemaNodeBuilder(line, leafListName, schemaPath);
+    public LeafListSchemaNodeBuilder addLeafListNode(final int line, final QName qname, final SchemaPath schemaPath) {
+        final LeafListSchemaNodeBuilder builder = new LeafListSchemaNodeBuilder(name, line, qname, schemaPath);
 
         Builder parent = getActualNode();
         builder.setParent(parent);
-        addChildToParent(parent, builder, leafListName.getLocalName());
+        addChildToParent(parent, builder, qname.getLocalName());
 
         return builder;
     }
 
     public GroupingBuilder addGrouping(final int line, final QName qname) {
-        final GroupingBuilder builder = new GroupingBuilderImpl(qname, line);
+        final GroupingBuilder builder = new GroupingBuilderImpl(name, line, qname);
 
         Builder parent = getActualNode();
         builder.setParent(parent);
 
+        String groupingName = qname.getLocalName();
         if (parent == null) {
-            for (GroupingBuilder child : addedGroupings) {
-                if (child.getQName().getLocalName().equals(qname.getLocalName())) {
-                    throw new YangParseException(name, line, "Duplicate node found at line " + child.getLine());
+            for (GroupingBuilder addedGrouping : addedGroupings) {
+                if (addedGrouping.getQName().getLocalName().equals(groupingName)) {
+                    throw new YangParseException(name, line, "grouping with same name '" + groupingName
+                            + "' already declared at line " + addedGrouping.getLine());
                 }
             }
             addedGroupings.add(builder);
         } else {
             if (parent instanceof DataNodeContainerBuilder) {
                 DataNodeContainerBuilder parentNode = (DataNodeContainerBuilder) parent;
-                for (DataSchemaNodeBuilder child : parentNode.getChildNodeBuilders()) {
-                    if (child.getQName().getLocalName().equals(qname.getLocalName())) {
-                        throw new YangParseException(name, line, "Duplicate node found at line " + child.getLine());
+                for (GroupingBuilder addedGrouping : parentNode.getGroupingBuilders()) {
+                    if (addedGrouping.getQName().getLocalName().equals(groupingName)) {
+                        throw new YangParseException(name, line, "grouping with same name '" + groupingName
+                                + "' already declared at line " + addedGrouping.getLine());
                     }
                 }
                 parentNode.addGrouping(builder);
             } else if (parent instanceof RpcDefinitionBuilder) {
                 RpcDefinitionBuilder parentNode = (RpcDefinitionBuilder) parent;
                 for (GroupingBuilder child : parentNode.getGroupings()) {
-                    if (child.getQName().getLocalName().equals(qname.getLocalName())) {
-                        throw new YangParseException(name, line, "Duplicate node found at line " + child.getLine());
+                    if (child.getQName().getLocalName().equals(groupingName)) {
+                        throw new YangParseException(name, line, "grouping with same name '" + groupingName
+                                + "' already declared at line " + child.getLine());
                     }
                 }
                 parentNode.addGrouping(builder);
             } else {
-                throw new YangParseException(name, line, "Unresolved parent of grouping " + qname.getLocalName());
+                throw new YangParseException(name, line, "Unresolved parent of grouping " + groupingName);
             }
         }
 
@@ -406,19 +415,20 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
     }
 
     public AugmentationSchemaBuilder addAugment(final int line, final String augmentTargetStr) {
-        final AugmentationSchemaBuilder builder = new AugmentationSchemaBuilderImpl(line, augmentTargetStr);
+        final AugmentationSchemaBuilder builder = new AugmentationSchemaBuilderImpl(name, line, augmentTargetStr);
 
         Builder parent = getActualNode();
         builder.setParent(parent);
 
         if (parent == null) {
+            // augment can be declared only under 'module' ...
             addedAugments.add(builder);
         } else {
-            // augment can only be in 'module' or 'uses' statement
+            // ... or 'uses' statement
             if (parent instanceof UsesNodeBuilder) {
                 ((UsesNodeBuilder) parent).addAugment(builder);
             } else {
-                throw new YangParseException(name, line, "Augment can be declared only under module or uses.");
+                throw new YangParseException(name, line, "Augment can be declared only under module or uses statement.");
             }
         }
         allAugments.add(builder);
@@ -433,7 +443,7 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
     }
 
     public UsesNodeBuilder addUsesNode(final int line, final String groupingPathStr) {
-        final UsesNodeBuilder usesBuilder = new UsesNodeBuilderImpl(line, groupingPathStr);
+        final UsesNodeBuilder usesBuilder = new UsesNodeBuilderImpl(name, line, groupingPathStr);
 
         Builder parent = getActualNode();
         usesBuilder.setParent(parent);
@@ -453,13 +463,11 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
         return usesBuilder;
     }
 
-    public void addRefine(final RefineHolder refine, final List<String> parentPath) {
-        final List<String> path = new ArrayList<String>(parentPath);
-
-        if (actualPath.isEmpty()) {
+    public void addRefine(final RefineHolder refine) {
+        final Builder parent = getActualNode();
+        if (parent == null) {
             throw new YangParseException(name, refine.getLine(), "refine can be defined only in uses statement");
         } else {
-            final Builder parent = getActualNode();
             if (parent instanceof UsesNodeBuilder) {
                 ((UsesNodeBuilder) parent).addRefine(refine);
             } else {
@@ -467,8 +475,6 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
             }
             refine.setParent(parent);
         }
-
-        path.add(refine.getName());
     }
 
     public RpcDefinitionBuilder addRpc(final int line, final QName qname) {
@@ -477,148 +483,183 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
             throw new YangParseException(name, line, "rpc can be defined only in module or submodule");
         }
 
-        final RpcDefinitionBuilder rpcBuilder = new RpcDefinitionBuilder(line, qname);
+        final RpcDefinitionBuilder rpcBuilder = new RpcDefinitionBuilder(name, line, qname);
+
+        String rpcName = qname.getLocalName();
         for (RpcDefinitionBuilder rpc : addedRpcs) {
-            if (rpc.getQName().getLocalName().equals(qname.getLocalName())) {
-                throw new YangParseException(name, line, "Duplicate node found at line " + rpc.getLine());
+            if (rpc.getQName().getLocalName().equals(rpcName)) {
+                throw new YangParseException(name, line, "rpc with same name '" + rpcName
+                        + "' already declared at line " + rpc.getLine());
+            }
+        }
+        for (DataSchemaNodeBuilder addedChild : addedChildNodes) {
+            if (addedChild.getQName().getLocalName().equals(rpcName)) {
+                throw new YangParseException(name, line, "Can not add rpc: node with same name '" + rpcName
+                        + "' already declared at line " + addedChild.getLine());
+            }
+        }
+        for (NotificationBuilder addedNotification : addedNotifications) {
+            if (addedNotification.getQName().getLocalName().equals(rpcName)) {
+                throw new YangParseException(name, line, "Can not add rpc: notification with same name '" + rpcName
+                        + "' already declared at line " + addedNotification.getLine());
             }
         }
         addedRpcs.add(rpcBuilder);
         return rpcBuilder;
     }
 
-    public ContainerSchemaNodeBuilder addRpcInput(final SchemaPath schemaPath, final QName inputQName, final int line) {
+    public ContainerSchemaNodeBuilder addRpcInput(final int line, final QName qname, final SchemaPath schemaPath) {
         final Builder parent = getActualNode();
         if (!(parent instanceof RpcDefinitionBuilder)) {
             throw new YangParseException(name, line, "input can be defined only in rpc statement");
         }
         final RpcDefinitionBuilder rpc = (RpcDefinitionBuilder) parent;
 
-        final ContainerSchemaNodeBuilder inputBuilder = new ContainerSchemaNodeBuilder(line, inputQName, schemaPath);
+        final ContainerSchemaNodeBuilder inputBuilder = new ContainerSchemaNodeBuilder(name, line, qname, schemaPath);
         inputBuilder.setParent(rpc);
 
         rpc.setInput(inputBuilder);
         return inputBuilder;
     }
 
-    public ContainerSchemaNodeBuilder addRpcOutput(final SchemaPath schemaPath, final QName outputQName, final int line) {
+    public ContainerSchemaNodeBuilder addRpcOutput(final SchemaPath schemaPath, final QName qname, final int line) {
         final Builder parent = actualPath.getFirst();
         if (!(parent instanceof RpcDefinitionBuilder)) {
             throw new YangParseException(name, line, "output can be defined only in rpc statement");
         }
         final RpcDefinitionBuilder rpc = (RpcDefinitionBuilder) parent;
 
-        final ContainerSchemaNodeBuilder outputBuilder = new ContainerSchemaNodeBuilder(line, outputQName, schemaPath);
+        final ContainerSchemaNodeBuilder outputBuilder = new ContainerSchemaNodeBuilder(name, line, qname, schemaPath);
         outputBuilder.setParent(rpc);
 
         rpc.setOutput(outputBuilder);
         return outputBuilder;
     }
 
-    public NotificationBuilder addNotification(final QName notificationName, final List<String> parentPath,
-            final int line) {
+    public NotificationBuilder addNotification(final int line, final QName qname) {
         if (!(actualPath.isEmpty())) {
             throw new YangParseException(name, line, "notification can be defined only in module or submodule");
         }
+
+        String notificationName = qname.getLocalName();
         for (NotificationBuilder nb : addedNotifications) {
-            if (nb.getQName().equals(notificationName)) {
-                throw new YangParseException(name, line, "Duplicate node found at line " + nb.getLine());
+            if (nb.getQName().equals(qname)) {
+                throw new YangParseException(name, line, "notification with same name '" + notificationName
+                        + "' already declared at line " + nb.getLine());
+            }
+        }
+        for (RpcDefinitionBuilder rpc : addedRpcs) {
+            if (rpc.getQName().getLocalName().equals(notificationName)) {
+                throw new YangParseException(name, line, "Can not add notification: rpc with same name '"
+                        + notificationName + "' already declared at line " + rpc.getLine());
+            }
+        }
+        for (DataSchemaNodeBuilder addedChild : addedChildNodes) {
+            if (addedChild.getQName().getLocalName().equals(notificationName)) {
+                throw new YangParseException(name, line, "Can not add notification: node with same name '"
+                        + notificationName + "' already declared at line " + addedChild.getLine());
             }
         }
 
-        final NotificationBuilder builder = new NotificationBuilder(line, notificationName);
+        final NotificationBuilder builder = new NotificationBuilder(name, line, qname);
         addedNotifications.add(builder);
 
         return builder;
     }
 
-    public FeatureBuilder addFeature(final int line, final QName featureName) {
+    public FeatureBuilder addFeature(final int line, final QName qname) {
         Builder parent = getActualNode();
         if (parent != null) {
             throw new YangParseException(name, line, "feature can be defined only in module or submodule");
         }
 
-        final FeatureBuilder builder = new FeatureBuilder(line, featureName);
-        for (FeatureBuilder fb : addedFeatures) {
-            if (fb.getQName().getLocalName().equals(featureName.getLocalName())) {
-                throw new YangParseException(name, line, "Duplicate node found at line " + fb.getLine());
+        final FeatureBuilder builder = new FeatureBuilder(name, line, qname);
+
+        String featureName = qname.getLocalName();
+        for (FeatureBuilder addedFeature : addedFeatures) {
+            if (addedFeature.getQName().getLocalName().equals(featureName)) {
+                throw new YangParseException(name, line, "feature with same name '" + featureName
+                        + "' already declared at line " + addedFeature.getLine());
             }
         }
         addedFeatures.add(builder);
         return builder;
     }
 
-    public ChoiceBuilder addChoice(final int line, final QName choiceName) {
-        final ChoiceBuilder builder = new ChoiceBuilder(line, choiceName);
+    public ChoiceBuilder addChoice(final int line, final QName qname) {
+        final ChoiceBuilder builder = new ChoiceBuilder(name, line, qname);
 
         Builder parent = getActualNode();
         builder.setParent(parent);
-        addChildToParent(parent, builder, choiceName.getLocalName());
+        addChildToParent(parent, builder, qname.getLocalName());
 
         return builder;
     }
 
-    public ChoiceCaseBuilder addCase(final int line, final QName caseName) {
+    public ChoiceCaseBuilder addCase(final int line, final QName qname) {
         Builder parent = getActualNode();
         if (parent == null) {
             throw new YangParseException(name, line, "'case' parent not found");
         }
 
-        final ChoiceCaseBuilder builder = new ChoiceCaseBuilder(line, caseName);
+        final ChoiceCaseBuilder builder = new ChoiceCaseBuilder(name, line, qname);
         builder.setParent(parent);
 
         if (parent instanceof ChoiceBuilder) {
-            ((ChoiceBuilder) parent).addChildNode(builder);
+            ((ChoiceBuilder) parent).addCase(builder);
         } else if (parent instanceof AugmentationSchemaBuilder) {
             ((AugmentationSchemaBuilder) parent).addChildNode(builder);
         } else {
-            throw new YangParseException(name, line, "Unresolved parent of 'case' " + caseName.getLocalName());
+            throw new YangParseException(name, line, "Unresolved parent of 'case' " + qname.getLocalName());
         }
 
         return builder;
     }
 
-    public AnyXmlBuilder addAnyXml(final int line, final QName anyXmlName, final SchemaPath schemaPath) {
-        final AnyXmlBuilder builder = new AnyXmlBuilder(line, anyXmlName, schemaPath);
+    public AnyXmlBuilder addAnyXml(final int line, final QName qname, final SchemaPath schemaPath) {
+        final AnyXmlBuilder builder = new AnyXmlBuilder(name, line, qname, schemaPath);
 
         Builder parent = getActualNode();
         builder.setParent(parent);
-        addChildToParent(parent, builder, anyXmlName.getLocalName());
+        addChildToParent(parent, builder, qname.getLocalName());
 
         return builder;
     }
 
     @Override
     public void addTypedef(TypeDefinitionBuilder typedefBuilder) {
+        String nodeName = typedefBuilder.getQName().getLocalName();
         for (TypeDefinitionBuilder tdb : addedTypedefs) {
-            if (tdb.getQName().getLocalName().equals(typedefBuilder.getQName().getLocalName())) {
-                throw new YangParseException(name, typedefBuilder.getLine(), "Duplicate node found at line "
-                        + tdb.getLine());
+            if (tdb.getQName().getLocalName().equals(nodeName)) {
+                throw new YangParseException(name, typedefBuilder.getLine(), "typedef with same name '" + nodeName
+                        + "' already declared at line " + tdb.getLine());
             }
         }
         addedTypedefs.add(typedefBuilder);
     }
 
-    public TypeDefinitionBuilderImpl addTypedef(final int line, final QName typeDefName) {
-        final TypeDefinitionBuilderImpl builder = new TypeDefinitionBuilderImpl(typeDefName, line);
+    public TypeDefinitionBuilderImpl addTypedef(final int line, final QName qname) {
+        final TypeDefinitionBuilderImpl builder = new TypeDefinitionBuilderImpl(name, line, qname);
 
         Builder parent = getActualNode();
         builder.setParent(parent);
 
+        String typedefName = qname.getLocalName();
         if (parent == null) {
             for (TypeDefinitionBuilder tdb : addedTypedefs) {
-                if (tdb.getQName().getLocalName().equals(builder.getQName().getLocalName())) {
-                    throw new YangParseException(name, builder.getLine(), "Duplicate node found at line "
-                            + tdb.getLine());
+                if (tdb.getQName().getLocalName().equals(typedefName)) {
+                    throw new YangParseException(name, line, "typedef with same name '" + typedefName
+                            + "' already declared at line " + tdb.getLine());
                 }
             }
             addedTypedefs.add(builder);
         } else {
             if (parent instanceof DataNodeContainerBuilder) {
                 DataNodeContainerBuilder parentNode = (DataNodeContainerBuilder) parent;
-                for (DataSchemaNodeBuilder child : parentNode.getChildNodeBuilders()) {
-                    if (child.getQName().getLocalName().equals(typeDefName.getLocalName())) {
-                        throw new YangParseException(name, line, "Duplicate node found at line " + child.getLine());
+                for (TypeDefinitionBuilder child : parentNode.getTypeDefinitionBuilders()) {
+                    if (child.getQName().getLocalName().equals(typedefName)) {
+                        throw new YangParseException(name, line, "typedef with same name '" + typedefName
+                                + "' already declared at line " + child.getLine());
                     }
                 }
                 parentNode.addTypedef(builder);
@@ -626,13 +667,13 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
                 RpcDefinitionBuilder rpcParent = (RpcDefinitionBuilder) parent;
                 for (TypeDefinitionBuilder tdb : rpcParent.getTypeDefinitions()) {
                     if (tdb.getQName().getLocalName().equals(builder.getQName().getLocalName())) {
-                        throw new YangParseException(name, builder.getLine(), "Duplicate node found at line "
-                                + tdb.getLine());
+                        throw new YangParseException(name, line, "typedef with same name '" + typedefName
+                                + "' already declared at line " + tdb.getLine());
                     }
                 }
                 rpcParent.addTypedef(builder);
             } else {
-                throw new YangParseException(name, line, "Unresolved parent of typedef " + typeDefName.getLocalName());
+                throw new YangParseException(name, line, "Unresolved parent of typedef " + typedefName);
             }
         }
 
@@ -651,9 +692,9 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
     public UnionTypeBuilder addUnionType(final int line, final URI namespace, final Date revision) {
         final Builder parent = getActualNode();
         if (parent == null) {
-            throw new YangParseException(line, "Error while parsing union type");
+            throw new YangParseException(name, line, "Unresolved parent of union type");
         } else {
-            final UnionTypeBuilder union = new UnionTypeBuilder(line);
+            final UnionTypeBuilder union = new UnionTypeBuilder(name, line);
             if (parent instanceof TypeAwareBuilder) {
                 ((TypeAwareBuilder) parent).setTypedef(union);
                 return union;
@@ -664,11 +705,11 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
     }
 
     public void addIdentityrefType(final int line, final SchemaPath schemaPath, final String baseString) {
-        final IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(baseString, schemaPath, line);
+        final IdentityrefTypeBuilder identityref = new IdentityrefTypeBuilder(name, line, baseString, schemaPath);
 
         final Builder parent = getActualNode();
         if (parent == null) {
-            throw new YangParseException(line, "Error while parsing identityref type.");
+            throw new YangParseException(name, line, "Unresolved parent of identityref type.");
         } else {
             if (parent instanceof TypeAwareBuilder) {
                 final TypeAwareBuilder typeParent = (TypeAwareBuilder) parent;
@@ -686,7 +727,7 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
             throw new YangParseException(name, line, "deviation can be defined only in module or submodule");
         }
 
-        final DeviationBuilder builder = new DeviationBuilder(line, targetPath);
+        final DeviationBuilder builder = new DeviationBuilder(name, line, targetPath);
         addedDeviations.add(builder);
         return builder;
     }
@@ -696,13 +737,15 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
         if (parent != null) {
             throw new YangParseException(name, line, "identity can be defined only in module or submodule");
         }
+        String identityName = qname.getLocalName();
         for (IdentitySchemaNodeBuilder idBuilder : addedIdentities) {
             if (idBuilder.getQName().equals(qname)) {
-                throw new YangParseException(name, line, "Duplicate node found at line " + idBuilder.getLine());
+                throw new YangParseException(name, line, "identity with same name '" + identityName
+                        + "' already declared at line " + idBuilder.getLine());
             }
         }
 
-        final IdentitySchemaNodeBuilder builder = new IdentitySchemaNodeBuilder(line, qname);
+        final IdentitySchemaNodeBuilder builder = new IdentitySchemaNodeBuilder(name, line, qname);
         addedIdentities.add(builder);
         return builder;
     }
@@ -715,7 +758,7 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
 
     public UnknownSchemaNodeBuilder addUnknownSchemaNode(final int line, final QName qname) {
         final Builder parent = getActualNode();
-        final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(line, qname);
+        final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(name, line, qname);
         builder.setParent(parent);
         allUnknownNodes.add(builder);
 
@@ -1083,7 +1126,16 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
         }
     }
 
-    private void addChildToParent(final Builder parent, final DataSchemaNodeBuilder child, final String childLocalName) {
+    /**
+     * Add child to parent. Method checks for duplicates and add given child
+     * node to parent. If node with same name is found, throws exception. If
+     * parent is null, child node will be added directly to module.
+     *
+     * @param parent
+     * @param child
+     * @param childName
+     */
+    private void addChildToParent(final Builder parent, final DataSchemaNodeBuilder child, final String childName) {
         final int line = child.getLine();
         if (parent == null) {
             // if parent == null => node is defined under module
@@ -1092,18 +1144,21 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
             // top level of the module or its submodules share the same
             // identifier namespace.
             for (DataSchemaNodeBuilder childNode : addedChildNodes) {
-                if (childNode.getQName().getLocalName().equals(childLocalName)) {
-                    throw new YangParseException(name, line, "Duplicate node found at line " + childNode.getLine());
+                if (childNode.getQName().getLocalName().equals(childName)) {
+                    throw new YangParseException(name, line, "Can not add '" + child
+                            + "': node with same name already declared at line " + childNode.getLine());
                 }
             }
             for (RpcDefinitionBuilder rpc : addedRpcs) {
-                if (rpc.getQName().getLocalName().equals(childLocalName)) {
-                    throw new YangParseException(name, line, "Duplicate node found at line " + rpc.getLine());
+                if (rpc.getQName().getLocalName().equals(childName)) {
+                    throw new YangParseException(name, line, "Can not add '" + child
+                            + "': rpc with same name already declared at line " + rpc.getLine());
                 }
             }
             for (NotificationBuilder notification : addedNotifications) {
-                if (notification.getQName().getLocalName().equals(childLocalName)) {
-                    throw new YangParseException(name, line, "Duplicate node found at line " + notification.getLine());
+                if (notification.getQName().getLocalName().equals(childName)) {
+                    throw new YangParseException(name, line, "Can not add '" + child
+                            + "': notification with same name already declared at line " + notification.getLine());
                 }
             }
             addedChildNodes.add(child);
@@ -1113,22 +1168,23 @@ public class ModuleBuilder extends AbstractDataNodeContainerBuilder {
             if (parent instanceof DataNodeContainerBuilder) {
                 DataNodeContainerBuilder parentNode = (DataNodeContainerBuilder) parent;
                 for (DataSchemaNodeBuilder childNode : parentNode.getChildNodeBuilders()) {
-                    if (childNode.getQName().getLocalName().equals(childLocalName)) {
-                        throw new YangParseException(name, line, "Duplicate node found at line " + childNode.getLine());
+                    if (childNode.getQName().getLocalName().equals(childName)) {
+                        throw new YangParseException(name, line, "Can not add '" + child + "': node with same name '"
+                                + childName + "' already declared at line " + childNode.getLine());
                     }
                 }
                 parentNode.addChildNode(child);
             } else if (parent instanceof ChoiceBuilder) {
                 ChoiceBuilder parentNode = (ChoiceBuilder) parent;
                 for (ChoiceCaseBuilder caseBuilder : parentNode.getCases()) {
-                    if (caseBuilder.getQName().getLocalName().equals(childLocalName)) {
-                        throw new YangParseException(name, line, "Duplicate node found at line "
-                                + caseBuilder.getLine());
+                    if (caseBuilder.getQName().getLocalName().equals(childName)) {
+                        throw new YangParseException(name, line, "Can not add '" + child + "': case with same name '"
+                                + childName + "' already declared at line " + caseBuilder.getLine());
                     }
                 }
-                parentNode.addChildNode(child);
+                parentNode.addCase(child);
             } else {
-                throw new YangParseException(name, line, "Unresolved parent of node '" + childLocalName + "'.");
+                throw new YangParseException(name, line, "Unresolved parent of node '" + childName + "'.");
             }
         }
     }

@@ -23,8 +23,8 @@ public final class ExtensionBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
     private final ExtensionDefinitionImpl instance;
 
-    ExtensionBuilder(final int line, final QName qname) {
-        super(line, qname);
+    ExtensionBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line, qname);
         instance = new ExtensionDefinitionImpl(qname);
     }
 

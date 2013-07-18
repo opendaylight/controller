@@ -17,6 +17,20 @@ import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBui
 public interface Builder {
 
     /**
+     * Get name of module in which this node is declared.
+     *
+     * @return module name
+     */
+    String getModuleName();
+
+    /**
+     * Set name of module in which this node is declared.
+     *
+     * @param moduleName
+     */
+    void setModuleName(String moduleName);
+
+    /**
      * Get current line in yang file.
      *
      * @return current line in yang file

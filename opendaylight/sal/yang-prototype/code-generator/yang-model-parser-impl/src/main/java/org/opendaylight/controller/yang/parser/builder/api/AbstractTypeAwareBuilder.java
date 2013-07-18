@@ -7,44 +7,20 @@
  */
 package org.opendaylight.controller.yang.parser.builder.api;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opendaylight.controller.yang.common.QName;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
-import org.opendaylight.controller.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
 
 /**
  * Basic implementation for TypeAwareBuilder builders.
  */
-public abstract class AbstractTypeAwareBuilder implements TypeAwareBuilder {
-    protected final int line;
+public abstract class AbstractTypeAwareBuilder extends AbstractBuilder implements TypeAwareBuilder {
     protected final QName qname;
-    protected Builder parent;
     protected TypeDefinition<?> type;
     protected TypeDefinitionBuilder typedef;
-    protected List<UnknownSchemaNode> unknownNodes;
-    protected final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    public AbstractTypeAwareBuilder(final int line, final QName qname) {
-        this.line = line;
+    public AbstractTypeAwareBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line);
         this.qname = qname;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public Builder getParent() {
-        return parent;
-    }
-
-    @Override
-    public void setParent(final Builder parent) {
-        this.parent = parent;
     }
 
     @Override
@@ -72,20 +48,6 @@ public abstract class AbstractTypeAwareBuilder implements TypeAwareBuilder {
     public void setTypedef(TypeDefinitionBuilder typedef) {
         this.typedef = typedef;
         this.type = null;
-    }
-
-    @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
-    }
-
-    public void setUnknownNodes(List<UnknownSchemaNode> unknownNodes) {
-        this.unknownNodes = unknownNodes;
     }
 
 }

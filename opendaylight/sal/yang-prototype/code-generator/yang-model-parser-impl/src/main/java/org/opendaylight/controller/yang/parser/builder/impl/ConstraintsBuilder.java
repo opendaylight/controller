@@ -16,21 +16,19 @@ import org.opendaylight.controller.yang.model.api.ConstraintDefinition;
 import org.opendaylight.controller.yang.model.api.MustDefinition;
 import org.opendaylight.controller.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.controller.yang.model.util.RevisionAwareXPathImpl;
-import org.opendaylight.controller.yang.parser.builder.api.Builder;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractBuilder;
 import org.opendaylight.controller.yang.parser.util.YangParseException;
 
-public final class ConstraintsBuilder implements Builder {
+public final class ConstraintsBuilder extends AbstractBuilder {
     private final ConstraintDefinitionImpl instance;
-    private final int line;
-    private Builder parent;
     private final Set<MustDefinition> mustDefinitions;
     private String whenCondition;
     private boolean mandatory;
     private Integer min;
     private Integer max;
 
-    ConstraintsBuilder(final int line) {
-        this.line = line;
+    ConstraintsBuilder(final String moduleName, final int line) {
+        super(moduleName, line);
         instance = new ConstraintDefinitionImpl();
         mustDefinitions = new HashSet<MustDefinition>();
     }
@@ -52,23 +50,8 @@ public final class ConstraintsBuilder implements Builder {
     }
 
     @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public Builder getParent() {
-        return parent;
-    }
-
-    @Override
-    public void setParent(final Builder parent) {
-        this.parent = parent;
-    }
-
-    @Override
     public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
-        throw new YangParseException(line, "Can not add unknown node to constraints.");
+        throw new YangParseException(moduleName, line, "Can not add unknown node to constraints.");
     }
 
     @Override
@@ -115,7 +98,6 @@ public final class ConstraintsBuilder implements Builder {
     public void setMandatory(boolean mandatory) {
         this.mandatory = mandatory;
     }
-
 
     private final class ConstraintDefinitionImpl implements ConstraintDefinition {
         private RevisionAwareXPath whenCondition;

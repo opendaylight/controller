@@ -7,16 +7,10 @@
  */
 package org.opendaylight.controller.yang.parser.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opendaylight.controller.yang.model.api.MustDefinition;
-import org.opendaylight.controller.yang.parser.builder.api.Builder;
-import org.opendaylight.controller.yang.parser.builder.impl.UnknownSchemaNodeBuilder;
+import org.opendaylight.controller.yang.parser.builder.api.AbstractBuilder;
 
-public final class RefineHolder implements Builder {
-    private Builder parent;
-    private final int line;
+public final class RefineHolder extends AbstractBuilder {
     private final String name;
     private String defaultStr;
     private String description;
@@ -27,26 +21,10 @@ public final class RefineHolder implements Builder {
     private MustDefinition must;
     private Integer minElements;
     private Integer maxElements;
-    private final List<UnknownSchemaNodeBuilder> addedUnknownNodes = new ArrayList<UnknownSchemaNodeBuilder>();
 
-    public RefineHolder(final int line, final String name) {
+    public RefineHolder(final String moduleName, final int line, final String name) {
+        super(moduleName, line);
         this.name = name;
-        this.line = line;
-    }
-
-    @Override
-    public int getLine() {
-        return line;
-    }
-
-    @Override
-    public Builder getParent() {
-        return parent;
-    }
-
-    @Override
-    public void setParent(final Builder parent) {
-        this.parent = parent;
     }
 
     public String getDefaultStr() {
@@ -123,16 +101,6 @@ public final class RefineHolder implements Builder {
 
     public String getName() {
         return name;
-    }
-
-    @Override
-    public List<UnknownSchemaNodeBuilder> getUnknownNodeBuilders() {
-        return addedUnknownNodes;
-    }
-
-    @Override
-    public void addUnknownNodeBuilder(UnknownSchemaNodeBuilder unknownNode) {
-        addedUnknownNodes.add(unknownNode);
     }
 
     @Override
@@ -233,7 +201,7 @@ public final class RefineHolder implements Builder {
 
     @Override
     public String toString() {
-        return "revine " + name;
+        return "refine " + name;
     }
 
 }

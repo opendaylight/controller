@@ -23,8 +23,8 @@ public final class FeatureBuilder extends AbstractSchemaNodeBuilder {
     private boolean isBuilt;
     private final FeatureDefinitionImpl instance;
 
-    FeatureBuilder(final int line, final QName qname) {
-        super(line, qname);
+    FeatureBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line, qname);
         instance = new FeatureDefinitionImpl(qname);
     }
 

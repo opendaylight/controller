@@ -373,13 +373,13 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
                     SchemaPath path = createActualSchemaPath(actualPath, namespace, revision, yangModelPrefix, typeName);
                     moduleBuilder.addIdentityrefType(line, path, getIdentityrefBase(typeBody));
                 } else {
-                    type = parseTypeWithBody(moduleName, typeName, typeBody, actualPath, namespace, revision,
-                            yangModelPrefix, moduleBuilder.getActualNode());
+                    type = parseTypeWithBody(typeName, typeBody, actualPath, namespace, revision, yangModelPrefix,
+                            moduleBuilder.getActualNode());
                     moduleBuilder.setType(type);
                 }
             }
         } else {
-            type = parseUnknownTypeWithBody(moduleName, typeQName, typeBody, actualPath, namespace, revision, yangModelPrefix,
+            type = parseUnknownTypeWithBody(typeQName, typeBody, actualPath, namespace, revision, yangModelPrefix,
                     moduleBuilder.getActualNode());
             // add parent node of this type statement to dirty nodes
             moduleBuilder.markActualNodeDirty();
@@ -528,8 +528,8 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
         final String refineString = stringFromNode(ctx);
         enterLog("refine", refineString, ctx.getStart().getLine());
 
-        RefineHolder refine = parseRefine(ctx);
-        moduleBuilder.addRefine(refine, actualPath);
+        RefineHolder refine = parseRefine(ctx, moduleName);
+        moduleBuilder.addRefine(refine);
         moduleBuilder.enterNode(refine);
         actualPath.push(refineString);
     }
@@ -699,7 +699,7 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
         enterLog("notification", notificationName, line);
 
         QName notificationQName = new QName(namespace, revision, yangModelPrefix, notificationName);
-        NotificationBuilder builder = moduleBuilder.addNotification(notificationQName, actualPath, line);
+        NotificationBuilder builder = moduleBuilder.addNotification(line, notificationQName);
         moduleBuilder.enterNode(builder);
         actualPath.push(notificationName);
 
@@ -787,7 +787,7 @@ public final class YangParserListenerImpl extends YangParserBaseListener {
         QName rpcQName = new QName(namespace, revision, yangModelPrefix, input);
         SchemaPath path = createActualSchemaPath(actualPath, namespace, revision, yangModelPrefix, input);
 
-        ContainerSchemaNodeBuilder builder = moduleBuilder.addRpcInput(path, rpcQName, line);
+        ContainerSchemaNodeBuilder builder = moduleBuilder.addRpcInput(line, rpcQName, path);
         moduleBuilder.enterNode(builder);
         actualPath.push(input);
 

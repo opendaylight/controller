@@ -482,7 +482,7 @@ public final class ParserUtils {
                 }
             }
             correctAugmentChildPath(builder, target.getPath());
-            target.addChildNode(builder);
+            target.addCase(builder);
         }
     }
 
@@ -750,8 +750,9 @@ public final class ParserUtils {
      *            line in module
      * @return builder object from leaf
      */
-    public static LeafSchemaNodeBuilder createLeafBuilder(LeafSchemaNode leaf, int line) {
-        final LeafSchemaNodeBuilder builder = new LeafSchemaNodeBuilder(leaf.getQName(), leaf.getPath(), line);
+    public static LeafSchemaNodeBuilder createLeafBuilder(LeafSchemaNode leaf, String moduleName, int line) {
+        final LeafSchemaNodeBuilder builder = new LeafSchemaNodeBuilder(moduleName, line, leaf.getQName(),
+                leaf.getPath());
         convertDataSchemaNode(leaf, builder);
         builder.setConfiguration(leaf.isConfiguration());
         final TypeDefinition<?> type = leaf.getType();
@@ -763,9 +764,9 @@ public final class ParserUtils {
         return builder;
     }
 
-    public static ContainerSchemaNodeBuilder createContainer(ContainerSchemaNode container, int line) {
-        final ContainerSchemaNodeBuilder builder = new ContainerSchemaNodeBuilder(line, container.getQName(),
-                container.getPath());
+    public static ContainerSchemaNodeBuilder createContainer(ContainerSchemaNode container, String moduleName, int line) {
+        final ContainerSchemaNodeBuilder builder = new ContainerSchemaNodeBuilder(moduleName, line,
+                container.getQName(), container.getPath());
         convertDataSchemaNode(container, builder);
         builder.setConfiguration(container.isConfiguration());
         builder.setUnknownNodes(container.getUnknownSchemaNodes());
@@ -778,8 +779,8 @@ public final class ParserUtils {
         return builder;
     }
 
-    public static ListSchemaNodeBuilder createList(ListSchemaNode list, int line) {
-        ListSchemaNodeBuilder builder = new ListSchemaNodeBuilder(line, list.getQName(), list.getPath());
+    public static ListSchemaNodeBuilder createList(ListSchemaNode list, String moduleName, int line) {
+        ListSchemaNodeBuilder builder = new ListSchemaNodeBuilder(moduleName, line, list.getQName(), list.getPath());
         convertDataSchemaNode(list, builder);
         builder.setConfiguration(list.isConfiguration());
         builder.setUnknownNodes(list.getUnknownSchemaNodes());
@@ -792,8 +793,8 @@ public final class ParserUtils {
         return builder;
     }
 
-    public static LeafListSchemaNodeBuilder createLeafList(LeafListSchemaNode leafList, int line) {
-        final LeafListSchemaNodeBuilder builder = new LeafListSchemaNodeBuilder(line, leafList.getQName(),
+    public static LeafListSchemaNodeBuilder createLeafList(LeafListSchemaNode leafList, String moduleName, int line) {
+        final LeafListSchemaNodeBuilder builder = new LeafListSchemaNodeBuilder(moduleName, line, leafList.getQName(),
                 leafList.getPath());
         convertDataSchemaNode(leafList, builder);
         builder.setConfiguration(leafList.isConfiguration());
@@ -803,8 +804,8 @@ public final class ParserUtils {
         return builder;
     }
 
-    public static ChoiceBuilder createChoice(ChoiceNode choice, int line) {
-        final ChoiceBuilder builder = new ChoiceBuilder(line, choice.getQName());
+    public static ChoiceBuilder createChoice(ChoiceNode choice, String moduleName, int line) {
+        final ChoiceBuilder builder = new ChoiceBuilder(moduleName, line, choice.getQName());
         convertDataSchemaNode(choice, builder);
         builder.setConfiguration(choice.isConfiguration());
         builder.setCases(choice.getCases());
@@ -813,16 +814,16 @@ public final class ParserUtils {
         return builder;
     }
 
-    public static AnyXmlBuilder createAnyXml(AnyXmlSchemaNode anyxml, int line) {
-        final AnyXmlBuilder builder = new AnyXmlBuilder(line, anyxml.getQName(), anyxml.getPath());
+    public static AnyXmlBuilder createAnyXml(AnyXmlSchemaNode anyxml, String moduleName, int line) {
+        final AnyXmlBuilder builder = new AnyXmlBuilder(moduleName, line, anyxml.getQName(), anyxml.getPath());
         convertDataSchemaNode(anyxml, builder);
         builder.setConfiguration(anyxml.isConfiguration());
         builder.setUnknownNodes(anyxml.getUnknownSchemaNodes());
         return builder;
     }
 
-    public static GroupingBuilder createGrouping(GroupingDefinition grouping, int line) {
-        final GroupingBuilderImpl builder = new GroupingBuilderImpl(grouping.getQName(), line);
+    public static GroupingBuilder createGrouping(GroupingDefinition grouping, String moduleName, int line) {
+        final GroupingBuilderImpl builder = new GroupingBuilderImpl(moduleName, line, grouping.getQName());
         builder.setPath(grouping.getPath());
         builder.setChildNodes(grouping.getChildNodes());
         builder.setGroupings(grouping.getGroupings());
@@ -835,8 +836,8 @@ public final class ParserUtils {
         return builder;
     }
 
-    public static TypeDefinitionBuilder createTypedef(ExtendedType typedef, int line) {
-        final TypeDefinitionBuilderImpl builder = new TypeDefinitionBuilderImpl(typedef.getQName(), line);
+    public static TypeDefinitionBuilder createTypedef(ExtendedType typedef, String moduleName, int line) {
+        final TypeDefinitionBuilderImpl builder = new TypeDefinitionBuilderImpl(moduleName, line, typedef.getQName());
         builder.setPath(typedef.getPath());
         builder.setDefaultValue(typedef.getDefaultValue());
         builder.setUnits(typedef.getUnits());
@@ -854,8 +855,9 @@ public final class ParserUtils {
         return builder;
     }
 
-    public static UnknownSchemaNodeBuilder createUnknownSchemaNode(UnknownSchemaNode unknownNode, int line) {
-        final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(line, unknownNode.getQName());
+    public static UnknownSchemaNodeBuilder createUnknownSchemaNode(UnknownSchemaNode unknownNode, String moduleName,
+            int line) {
+        final UnknownSchemaNodeBuilder builder = new UnknownSchemaNodeBuilder(moduleName, line, unknownNode.getQName());
         builder.setPath(unknownNode.getPath());
         builder.setUnknownNodes(unknownNode.getUnknownSchemaNodes());
         builder.setDescription(unknownNode.getDescription());
@@ -1084,7 +1086,8 @@ public final class ParserUtils {
         tc.addRanges(oldExtendedType.getRanges());
 
         final TypeConstraints constraints = findConstraintsFromTypeBuilder(newBaseType, tc, modules, module, null);
-        final TypeDefinitionBuilderImpl newType = new TypeDefinitionBuilderImpl(oldExtendedType.getQName(), line);
+        final TypeDefinitionBuilderImpl newType = new TypeDefinitionBuilderImpl(module.getModuleName(), line,
+                oldExtendedType.getQName());
         newType.setTypedef(newBaseType);
         newType.setPath(oldExtendedType.getPath());
         newType.setDescription(oldExtendedType.getDescription());
@@ -1120,7 +1123,8 @@ public final class ParserUtils {
         final TypeConstraints tc = new TypeConstraints(module.getName(), line);
 
         final TypeConstraints constraints = findConstraintsFromTypeDefinition(newBaseType, tc);
-        final TypeDefinitionBuilderImpl newType = new TypeDefinitionBuilderImpl(oldExtendedType.getQName(), line);
+        final TypeDefinitionBuilderImpl newType = new TypeDefinitionBuilderImpl(module.getModuleName(), line,
+                oldExtendedType.getQName());
         newType.setType(newBaseType);
         newType.setPath(oldExtendedType.getPath());
         newType.setDescription(oldExtendedType.getDescription());

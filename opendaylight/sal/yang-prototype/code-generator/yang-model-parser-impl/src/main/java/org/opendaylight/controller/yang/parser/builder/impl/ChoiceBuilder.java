@@ -29,6 +29,7 @@ import org.opendaylight.controller.yang.parser.builder.api.DataSchemaNodeBuilder
 import org.opendaylight.controller.yang.parser.builder.api.GroupingMember;
 import org.opendaylight.controller.yang.parser.util.Comparators;
 import org.opendaylight.controller.yang.parser.util.ParserUtils;
+import org.opendaylight.controller.yang.parser.util.YangParseException;
 
 public final class ChoiceBuilder extends AbstractSchemaNodeBuilder implements DataSchemaNodeBuilder,
         AugmentationTargetBuilder, GroupingMember {
@@ -46,14 +47,14 @@ public final class ChoiceBuilder extends AbstractSchemaNodeBuilder implements Da
     private final Set<ChoiceCaseBuilder> addedCases = new HashSet<ChoiceCaseBuilder>();
     private String defaultCase;
 
-    public ChoiceBuilder(final int line, final QName qname) {
-        super(line, qname);
+    public ChoiceBuilder(final String moduleName, final int line, final QName qname) {
+        super(moduleName, line, qname);
         instance = new ChoiceNodeImpl(qname);
-        constraints = new ConstraintsBuilder(line);
+        constraints = new ConstraintsBuilder(moduleName, line);
     }
 
     public ChoiceBuilder(ChoiceBuilder b) {
-        super(b.getLine(), b.getQName());
+        super(b.getModuleName(), b.getLine(), b.getQName());
         parent = b.getParent();
         instance = new ChoiceNodeImpl(qname);
         constraints = b.getConstraints();
@@ -126,20 +127,41 @@ public final class ChoiceBuilder extends AbstractSchemaNodeBuilder implements Da
         return addedCases;
     }
 
-    public void addChildNode(DataSchemaNodeBuilder childNode) {
-        if (!(childNode instanceof ChoiceCaseBuilder)) {
-            ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(childNode.getLine(), childNode.getQName());
-            if (childNode.isAugmenting()) {
-                caseBuilder.setAugmenting(true);
-                childNode.setAugmenting(false);
+    /**
+     * Add case node to this choice.
+     *
+     * If node is not declared with 'case' keyword, create new case builder and
+     * make this node child of newly created case.
+     *
+     * @param caseNode
+     *            case node
+     */
+    public void addCase(DataSchemaNodeBuilder caseNode) {
+        String newCaseName = caseNode.getQName().getLocalName();
+        for (ChoiceCaseBuilder addedCase : addedCases) {
+            if (addedCase.getQName().getLocalName().equals(newCaseName)) {
+                throw new YangParseException(caseNode.getModuleName(), caseNode.getLine(), "Can not add '" + caseNode
+                        + "' to node '" + qname.getLocalName() + "' in module '" + moduleName
+                        + "': case with same name already declared at line " + addedCase.getLine());
             }
-            caseBuilder.setPath(childNode.getPath());
-            SchemaPath newPath = ParserUtils.createSchemaPath(childNode.getPath(), childNode.getQName().getLocalName());
-            childNode.setPath(newPath);
-            caseBuilder.addChildNode(childNode);
-            addedCases.add(caseBuilder);
+        }
+
+        if (caseNode instanceof ChoiceCaseBuilder) {
+            addedCases.add((ChoiceCaseBuilder) caseNode);
         } else {
-            addedCases.add((ChoiceCaseBuilder) childNode);
+            ChoiceCaseBuilder caseBuilder = new ChoiceCaseBuilder(caseNode.getModuleName(), caseNode.getLine(),
+                    caseNode.getQName());
+            if (caseNode.isAugmenting()) {
+                // if node is added by augmentation, set case builder augmenting
+                // as true and node augmenting as false
+                caseBuilder.setAugmenting(true);
+                caseNode.setAugmenting(false);
+            }
+            caseBuilder.setPath(caseNode.getPath());
+            SchemaPath newPath = ParserUtils.createSchemaPath(caseNode.getPath(), caseNode.getQName().getLocalName());
+            caseNode.setPath(newPath);
+            caseBuilder.addChildNode(caseNode);
+            addedCases.add(caseBuilder);
         }
     }
 

@@ -326,13 +326,14 @@ public final class ParserListenerUtils {
      *            type body context to parse
      * @param path
      *            actual position in YANG model
+     * @param moduleName current module name
      * @param namespace
      * @param revision
      * @param prefix
      * @return List of EnumPair object parsed from given context
      */
     private static List<EnumTypeDefinition.EnumPair> getEnumConstants(final Type_body_stmtsContext ctx,
-            final List<String> path, final URI namespace, final Date revision, final String prefix) {
+            final List<String> path, final String moduleName, final URI namespace, final Date revision, final String prefix) {
         List<EnumTypeDefinition.EnumPair> enumConstants = new ArrayList<EnumTypeDefinition.EnumPair>();
 
         for (int i = 0; i < ctx.getChildCount(); i++) {
@@ -342,7 +343,7 @@ public final class ParserListenerUtils {
                 for (int j = 0; j < enumSpecChild.getChildCount(); j++) {
                     ParseTree enumChild = enumSpecChild.getChild(j);
                     if (enumChild instanceof Enum_stmtContext) {
-                        EnumPair enumPair = createEnumPair((Enum_stmtContext) enumChild, highestValue, path, namespace,
+                        EnumPair enumPair = createEnumPair((Enum_stmtContext) enumChild, highestValue, path, moduleName, namespace,
                                 revision, prefix);
                         if (enumPair.getValue() > highestValue) {
                             highestValue = enumPair.getValue();
@@ -364,13 +365,16 @@ public final class ParserListenerUtils {
      *            current highest value in enumeration
      * @param path
      *            actual position in YANG model
+     * @param moduleName
+     *            current module name
      * @param namespace
      * @param revision
      * @param prefix
      * @return EnumPair object parsed from given context
      */
     private static EnumTypeDefinition.EnumPair createEnumPair(final Enum_stmtContext ctx, final int highestValue,
-            final List<String> path, final URI namespace, final Date revision, final String prefix) {
+            final List<String> path, final String moduleName, final URI namespace, final Date revision,
+            final String prefix) {
         final String name = stringFromNode(ctx);
         final QName qname = new QName(namespace, revision, prefix, name);
         Integer value = null;
@@ -400,7 +404,7 @@ public final class ParserListenerUtils {
             value = highestValue + 1;
         }
         if (value < -2147483648 || value > 2147483647) {
-            throw new YangParseException(ctx.getStart().getLine(), "Error on enum '" + name
+            throw new YangParseException(moduleName, ctx.getStart().getLine(), "Error on enum '" + name
                     + "': the enum value MUST be in the range from -2147483648 to 2147483647, but was: " + value);
         }
 
@@ -543,7 +547,7 @@ public final class ParserListenerUtils {
      *            type body context to parse
      * @return List of RangeConstraint created from this context
      */
-    private static List<RangeConstraint> getRangeConstraints(final Type_body_stmtsContext ctx) {
+    private static List<RangeConstraint> getRangeConstraints(final Type_body_stmtsContext ctx, final String moduleName) {
         List<RangeConstraint> rangeConstraints = Collections.emptyList();
         outer: for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree numRestrChild = ctx.getChild(i);
@@ -551,7 +555,7 @@ public final class ParserListenerUtils {
                 for (int j = 0; j < numRestrChild.getChildCount(); j++) {
                     ParseTree rangeChild = numRestrChild.getChild(j);
                     if (rangeChild instanceof Range_stmtContext) {
-                        rangeConstraints = parseRangeConstraints((Range_stmtContext) rangeChild);
+                        rangeConstraints = parseRangeConstraints((Range_stmtContext) rangeChild, moduleName);
                         break outer;
                     }
                 }
@@ -567,7 +571,7 @@ public final class ParserListenerUtils {
      *            range context to parse
      * @return List of RangeConstraints parsed from this context
      */
-    private static List<RangeConstraint> parseRangeConstraints(final Range_stmtContext ctx) {
+    private static List<RangeConstraint> parseRangeConstraints(final Range_stmtContext ctx, final String moduleName) {
         final int line = ctx.getStart().getLine();
         List<RangeConstraint> rangeConstraints = new ArrayList<RangeConstraint>();
         String description = null;
@@ -590,10 +594,10 @@ public final class ParserListenerUtils {
             Number min;
             Number max;
             if (splittedRangeDef.length == 1) {
-                min = max = parseNumberConstraintValue(splittedRangeDef[0], line);
+                min = max = parseNumberConstraintValue(splittedRangeDef[0], moduleName, line);
             } else {
-                min = parseNumberConstraintValue(splittedRangeDef[0], line);
-                max = parseNumberConstraintValue(splittedRangeDef[1], line);
+                min = parseNumberConstraintValue(splittedRangeDef[0], moduleName, line);
+                max = parseNumberConstraintValue(splittedRangeDef[1], moduleName, line);
             }
             RangeConstraint range = BaseConstraints.rangeConstraint(min, max, description, reference);
             rangeConstraints.add(range);
@@ -609,7 +613,7 @@ public final class ParserListenerUtils {
      *            type body context to parse
      * @return List of LengthConstraint created from this context
      */
-    private static List<LengthConstraint> getLengthConstraints(final Type_body_stmtsContext ctx) {
+    private static List<LengthConstraint> getLengthConstraints(final Type_body_stmtsContext ctx, final String moduleName) {
         List<LengthConstraint> lengthConstraints = Collections.emptyList();
         outer: for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree stringRestrChild = ctx.getChild(i);
@@ -617,7 +621,7 @@ public final class ParserListenerUtils {
                 for (int j = 0; j < stringRestrChild.getChildCount(); j++) {
                     ParseTree lengthChild = stringRestrChild.getChild(j);
                     if (lengthChild instanceof Length_stmtContext) {
-                        lengthConstraints = parseLengthConstraints((Length_stmtContext) lengthChild);
+                        lengthConstraints = parseLengthConstraints((Length_stmtContext) lengthChild, moduleName);
                         break outer;
                     }
                 }
@@ -633,7 +637,7 @@ public final class ParserListenerUtils {
      *            length context to parse
      * @return List of LengthConstraints parsed from this context
      */
-    private static List<LengthConstraint> parseLengthConstraints(final Length_stmtContext ctx) {
+    private static List<LengthConstraint> parseLengthConstraints(final Length_stmtContext ctx, final String moduleName) {
         final int line = ctx.getStart().getLine();
         List<LengthConstraint> lengthConstraints = new ArrayList<LengthConstraint>();
         String description = null;
@@ -656,10 +660,10 @@ public final class ParserListenerUtils {
             Number min;
             Number max;
             if (splittedRangeDef.length == 1) {
-                min = max = parseNumberConstraintValue(splittedRangeDef[0], line);
+                min = max = parseNumberConstraintValue(splittedRangeDef[0], moduleName, line);
             } else {
-                min = parseNumberConstraintValue(splittedRangeDef[0], line);
-                max = parseNumberConstraintValue(splittedRangeDef[1], line);
+                min = parseNumberConstraintValue(splittedRangeDef[0], moduleName, line);
+                max = parseNumberConstraintValue(splittedRangeDef[1], moduleName, line);
             }
             LengthConstraint range = BaseConstraints.lengthConstraint(min, max, description, reference);
             lengthConstraints.add(range);
@@ -674,7 +678,7 @@ public final class ParserListenerUtils {
      * @return wrapper object of primitive java type or UnknownBoundaryNumber if
      *         type is one of special YANG values 'min' or 'max'
      */
-    private static Number parseNumberConstraintValue(final String value, final int line) {
+    private static Number parseNumberConstraintValue(final String value, final String moduleName, final int line) {
         Number result = null;
         if ("min".equals(value) || "max".equals(value)) {
             result = new UnknownBoundaryNumber(value);
@@ -682,7 +686,7 @@ public final class ParserListenerUtils {
             try {
                 result = Long.valueOf(value);
             } catch (NumberFormatException e) {
-                throw new YangParseException(line, "Unable to parse range value '" + value + "'.", e);
+                throw new YangParseException(moduleName, line, "Unable to parse range value '" + value + "'.", e);
             }
         }
         return result;
@@ -812,13 +816,14 @@ public final class ParserListenerUtils {
      *            type body context to parse
      * @param actualPath
      *            current position in YANG model
+     * @param moduleName current module name
      * @param namespace
      * @param revision
      * @param prefix
      * @return List of Bit objects created from this context
      */
     private static List<BitsTypeDefinition.Bit> getBits(Type_body_stmtsContext ctx, List<String> actualPath,
-            URI namespace, Date revision, String prefix) {
+            String moduleName, URI namespace, Date revision, String prefix) {
         final List<BitsTypeDefinition.Bit> bits = new ArrayList<BitsTypeDefinition.Bit>();
         for (int j = 0; j < ctx.getChildCount(); j++) {
             ParseTree bitsSpecChild = ctx.getChild(j);
@@ -827,7 +832,7 @@ public final class ParserListenerUtils {
                 for (int k = 0; k < bitsSpecChild.getChildCount(); k++) {
                     ParseTree bitChild = bitsSpecChild.getChild(k);
                     if (bitChild instanceof Bit_stmtContext) {
-                        Bit bit = parseBit((Bit_stmtContext) bitChild, highestPosition, actualPath, namespace,
+                        Bit bit = parseBit((Bit_stmtContext) bitChild, highestPosition, actualPath, moduleName, namespace,
                                 revision, prefix);
                         if (bit.getPosition() > highestPosition) {
                             highestPosition = bit.getPosition();
@@ -849,13 +854,14 @@ public final class ParserListenerUtils {
      *            current highest position in bits type
      * @param actualPath
      *            current position in YANG model
+     * @param moduleName current module name
      * @param namespace
      * @param revision
      * @param prefix
      * @return Bit object parsed from this context
      */
     private static BitsTypeDefinition.Bit parseBit(final Bit_stmtContext ctx, long highestPosition,
-            List<String> actualPath, final URI namespace, final Date revision, final String prefix) {
+            List<String> actualPath, final String moduleName, final URI namespace, final Date revision, final String prefix) {
         String name = stringFromNode(ctx);
         final QName qname = new QName(namespace, revision, prefix, name);
         Long position = null;
@@ -888,7 +894,7 @@ public final class ParserListenerUtils {
             position = highestPosition + 1;
         }
         if (position < 0 || position > 4294967295L) {
-            throw new YangParseException(ctx.getStart().getLine(), "Error on bit '" + name
+            throw new YangParseException(moduleName, ctx.getStart().getLine(), "Error on bit '" + name
                     + "': the position value MUST be in the range 0 to 4294967295");
         }
 
@@ -946,7 +952,7 @@ public final class ParserListenerUtils {
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree child = ctx.getChild(i);
             if (child instanceof Config_stmtContext) {
-                config = parseConfig((Config_stmtContext) child);
+                config = parseConfig((Config_stmtContext) child, moduleName);
                 break;
             }
         }
@@ -994,10 +1000,11 @@ public final class ParserListenerUtils {
      * Parse config statement.
      *
      * @param ctx
-     *            config context to parse.
+     *            config context to parse
+     * @param moduleName current module name
      * @return true if given context contains string 'true', false otherwise
      */
-    private static Boolean parseConfig(final Config_stmtContext ctx) {
+    private static Boolean parseConfig(final Config_stmtContext ctx, final String moduleName) {
         Boolean result = null;
         if (ctx != null) {
             for (int i = 0; i < ctx.getChildCount(); ++i) {
@@ -1011,7 +1018,7 @@ public final class ParserListenerUtils {
                         result = false;
                         break;
                     } else {
-                        throw new YangParseException(ctx.getStart().getLine(),
+                        throw new YangParseException(moduleName, ctx.getStart().getLine(),
                                 "Failed to parse 'config' statement value: '" + value + "'.");
                     }
                 }
@@ -1023,8 +1030,6 @@ public final class ParserListenerUtils {
     /**
      * Parse type body and create UnknownType definition.
      *
-     * @param moduleName
-     *            name of current module
      * @param typedefQName
      *            qname of current type
      * @param ctx
@@ -1036,16 +1041,17 @@ public final class ParserListenerUtils {
      * @param parent
      * @return UnknownType object with constraints from parsed type body
      */
-    public static TypeDefinition<?> parseUnknownTypeWithBody(final String moduleName, final QName typedefQName,
+    public static TypeDefinition<?> parseUnknownTypeWithBody(final QName typedefQName,
             final Type_body_stmtsContext ctx, final List<String> actualPath, final URI namespace, final Date revision,
             final String prefix, final Builder parent) {
+        String moduleName = parent.getModuleName();
         String typeName = typedefQName.getLocalName();
 
         UnknownType.Builder unknownType = new UnknownType.Builder(typedefQName);
 
         if (ctx != null) {
-            List<RangeConstraint> rangeStatements = getRangeConstraints(ctx);
-            List<LengthConstraint> lengthStatements = getLengthConstraints(ctx);
+            List<RangeConstraint> rangeStatements = getRangeConstraints(ctx, moduleName);
+            List<LengthConstraint> lengthStatements = getLengthConstraints(ctx, moduleName);
             List<PatternConstraint> patternStatements = getPatternConstraint(ctx);
             Integer fractionDigits = getFractionDigits(ctx, moduleName);
 
@@ -1080,8 +1086,6 @@ public final class ParserListenerUtils {
     /**
      * Create TypeDefinition object based on given type name and type body.
      *
-     * @param moduleName
-     *            current module name
      * @param typeName
      *            name of type
      * @param typeBody
@@ -1098,16 +1102,17 @@ public final class ParserListenerUtils {
      *            parent builder
      * @return TypeDefinition object based on parsed values.
      */
-    public static TypeDefinition<?> parseTypeWithBody(final String moduleName, final String typeName,
+    public static TypeDefinition<?> parseTypeWithBody(final String typeName,
             final Type_body_stmtsContext typeBody, final List<String> actualPath, final URI namespace,
             final Date revision, final String prefix, final Builder parent) {
+        final String moduleName = parent.getModuleName();
         final int line = typeBody.getStart().getLine();
         TypeDefinition<?> baseType = null;
 
         Integer fractionDigits = getFractionDigits(typeBody, moduleName);
-        List<LengthConstraint> lengthStatements = getLengthConstraints(typeBody);
+        List<LengthConstraint> lengthStatements = getLengthConstraints(typeBody, moduleName);
         List<PatternConstraint> patternStatements = getPatternConstraint(typeBody);
-        List<RangeConstraint> rangeStatements = getRangeConstraints(typeBody);
+        List<RangeConstraint> rangeStatements = getRangeConstraints(typeBody, moduleName);
 
         TypeConstraints constraints = new TypeConstraints(moduleName, line);
         constraints.addFractionDigits(fractionDigits);
@@ -1159,7 +1164,7 @@ public final class ParserListenerUtils {
             constraints.addRanges(uintType.getRangeStatements());
             baseType = uintType;
         } else if ("enumeration".equals(typeName)) {
-            List<EnumTypeDefinition.EnumPair> enumConstants = getEnumConstants(typeBody, actualPath, namespace,
+            List<EnumTypeDefinition.EnumPair> enumConstants = getEnumConstants(typeBody, actualPath, moduleName, namespace,
                     revision, prefix);
             return new EnumerationType(baseTypePathFinal, enumConstants);
         } else if ("string".equals(typeName)) {
@@ -1167,7 +1172,7 @@ public final class ParserListenerUtils {
             constraints.addLengths(stringType.getLengthStatements());
             baseType = stringType;
         } else if ("bits".equals(typeName)) {
-            return new BitsType(baseTypePathFinal, getBits(typeBody, actualPath, namespace, revision, prefix));
+            return new BitsType(baseTypePathFinal, getBits(typeBody, actualPath, moduleName, namespace, revision, prefix));
         } else if ("leafref".equals(typeName)) {
             final String path = parseLeafrefPath(typeBody);
             final boolean absolute = path.startsWith("/");
@@ -1382,10 +1387,10 @@ public final class ParserListenerUtils {
         for (int i = 0; i < ctx.getChildCount(); ++i) {
             final ParseTree childNode = ctx.getChild(i);
             if (childNode instanceof Max_elements_stmtContext) {
-                Integer max = parseMaxElements((Max_elements_stmtContext) childNode);
+                Integer max = parseMaxElements((Max_elements_stmtContext) childNode, constraints.getModuleName());
                 constraints.setMaxElements(max);
             } else if (childNode instanceof Min_elements_stmtContext) {
-                Integer min = parseMinElements((Min_elements_stmtContext) childNode);
+                Integer min = parseMinElements((Min_elements_stmtContext) childNode, constraints.getModuleName());
                 constraints.setMinElements(min);
             } else if (childNode instanceof Must_stmtContext) {
                 MustDefinition must = parseMust((Must_stmtContext) childNode);
@@ -1404,7 +1409,7 @@ public final class ParserListenerUtils {
         }
     }
 
-    private static Integer parseMinElements(Min_elements_stmtContext ctx) {
+    private static Integer parseMinElements(Min_elements_stmtContext ctx, String moduleName) {
         Integer result = null;
         try {
             for (int i = 0; i < ctx.getChildCount(); i++) {
@@ -1418,11 +1423,11 @@ public final class ParserListenerUtils {
             }
             return result;
         } catch (Exception e) {
-            throw new YangParseException(ctx.getStart().getLine(), "Failed to parse min-elements.", e);
+            throw new YangParseException(moduleName, ctx.getStart().getLine(), "Failed to parse min-elements.", e);
         }
     }
 
-    private static Integer parseMaxElements(Max_elements_stmtContext ctx) {
+    private static Integer parseMaxElements(Max_elements_stmtContext ctx, String moduleName) {
         Integer result = null;
         try {
             for (int i = 0; i < ctx.getChildCount(); i++) {
@@ -1436,7 +1441,7 @@ public final class ParserListenerUtils {
             }
             return result;
         } catch (Exception e) {
-            throw new YangParseException(ctx.getStart().getLine(), "Failed to parse max-elements.", e);
+            throw new YangParseException(moduleName, ctx.getStart().getLine(), "Failed to parse max-elements.", e);
         }
     }
 
@@ -1506,9 +1511,9 @@ public final class ParserListenerUtils {
      *            refine statement
      * @return RefineHolder object representing this refine statement
      */
-    public static RefineHolder parseRefine(Refine_stmtContext refineCtx) {
+    public static RefineHolder parseRefine(Refine_stmtContext refineCtx, String moduleName) {
         final String refineTarget = stringFromNode(refineCtx);
-        final RefineHolder refine = new RefineHolder(refineCtx.getStart().getLine(), refineTarget);
+        final RefineHolder refine = new RefineHolder(moduleName, refineCtx.getStart().getLine(), refineTarget);
         for (int i = 0; i < refineCtx.getChildCount(); i++) {
             ParseTree refinePom = refineCtx.getChild(i);
             if (refinePom instanceof Refine_pomContext) {
@@ -1545,7 +1550,7 @@ public final class ParserListenerUtils {
                 String reference = stringFromNode(refineArg);
                 refine.setReference(reference);
             } else if (refineArg instanceof Config_stmtContext) {
-                Boolean config = parseConfig((Config_stmtContext) refineArg);
+                Boolean config = parseConfig((Config_stmtContext) refineArg, refine.getModuleName());
                 refine.setConfiguration(config);
             }
         }
@@ -1594,10 +1599,10 @@ public final class ParserListenerUtils {
                 MustDefinition must = parseMust((Must_stmtContext) refineArg);
                 refine.setMust(must);
             } else if (refineArg instanceof Max_elements_stmtContext) {
-                Integer max = parseMaxElements((Max_elements_stmtContext) refineArg);
+                Integer max = parseMaxElements((Max_elements_stmtContext) refineArg, refine.getModuleName());
                 refine.setMaxElements(max);
             } else if (refineArg instanceof Min_elements_stmtContext) {
-                Integer min = parseMinElements((Min_elements_stmtContext) refineArg);
+                Integer min = parseMinElements((Min_elements_stmtContext) refineArg, refine.getModuleName());
                 refine.setMinElements(min);
             }
         }
@@ -1611,10 +1616,10 @@ public final class ParserListenerUtils {
                 MustDefinition must = parseMust((Must_stmtContext) refineArg);
                 refine.setMust(must);
             } else if (refineArg instanceof Max_elements_stmtContext) {
-                Integer max = parseMaxElements((Max_elements_stmtContext) refineArg);
+                Integer max = parseMaxElements((Max_elements_stmtContext) refineArg, refine.getModuleName());
                 refine.setMaxElements(max);
             } else if (refineArg instanceof Min_elements_stmtContext) {
-                Integer min = parseMinElements((Min_elements_stmtContext) refineArg);
+                Integer min = parseMinElements((Min_elements_stmtContext) refineArg, refine.getModuleName());
                 refine.setMinElements(min);
             }
         }

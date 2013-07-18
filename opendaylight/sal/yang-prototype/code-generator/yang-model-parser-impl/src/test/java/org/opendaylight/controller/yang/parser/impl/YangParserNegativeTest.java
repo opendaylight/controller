@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -43,8 +44,7 @@ public class YangParserNegativeTest {
                 fail("YangParseException should by thrown");
             }
         } catch (YangParseException e) {
-            assertTrue(e.getMessage().contains(
-                    "Error in module 'test2' on line 24: Referenced type 'int-ext' not found."));
+            assertEquals(e.getMessage(), "Error in module 'test2' at line 24: Referenced type 'int-ext' not found.");
         }
     }
 
@@ -116,8 +116,8 @@ public class YangParserNegativeTest {
                 fail("YangParseException should by thrown");
             }
         } catch (YangParseException e) {
-            assertTrue(e.getMessage()
-                    .contains("Error in module 'container' on line 10: Duplicate node found at line 6"));
+            String expected = "Error in module 'container' at line 10: Can not add 'container foo': node with same name already declared at line 6";
+            assertEquals(expected, e.getMessage());
         }
     }
 
@@ -130,8 +130,8 @@ public class YangParserNegativeTest {
                 fail("YangParseException should by thrown");
             }
         } catch (YangParseException e) {
-            assertTrue(e.getMessage().contains(
-                    "Error in module 'container-list' on line 10: Duplicate node found at line 6"));
+            String expected = "Error in module 'container-list' at line 10: Can not add 'list foo': node with same name already declared at line 6";
+            assertEquals(expected, e.getMessage());
         }
     }
 
@@ -144,8 +144,8 @@ public class YangParserNegativeTest {
                 fail("YangParseException should by thrown");
             }
         } catch (YangParseException e) {
-            assertTrue(e.getMessage().contains(
-                    "Error in module 'container-leaf' on line 10: Duplicate node found at line 6"));
+            String expected = "Error in module 'container-leaf' at line 10: Can not add 'leaf foo': node with same name already declared at line 6";
+            assertEquals(expected, e.getMessage());
         }
     }
 
@@ -158,7 +158,40 @@ public class YangParserNegativeTest {
                 fail("YangParseException should by thrown");
             }
         } catch (YangParseException e) {
-            assertTrue(e.getMessage().contains("Error in module 'typedef' on line 10: Duplicate node found at line 6"));
+            String expected = "Error in module 'typedef' at line 10: typedef with same name 'int-ext' already declared at line 6";
+            assertEquals(expected, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDuplicityInAugmentTarget1() throws Exception {
+        try {
+            try (InputStream stream1 = new FileInputStream(getClass().getResource(
+                    "/negative-scenario/duplicity/augment0.yang").getPath());
+                    InputStream stream2 = new FileInputStream(getClass().getResource(
+                            "/negative-scenario/duplicity/augment1.yang").getPath())) {
+                TestUtils.loadModules(Arrays.asList(stream1, stream2));
+                fail("YangParseException should by thrown");
+            }
+        } catch (YangParseException e) {
+            String expected = "Error in module 'augment1' at line 11: Can not add 'leaf id' to node 'bar' in module 'augment0': node with same name already declared at line 9";
+            assertEquals(expected, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDuplicityInAugmentTarget2() throws Exception {
+        try {
+            try (InputStream stream1 = new FileInputStream(getClass().getResource(
+                    "/negative-scenario/duplicity/augment0.yang").getPath());
+                    InputStream stream2 = new FileInputStream(getClass().getResource(
+                            "/negative-scenario/duplicity/augment2.yang").getPath())) {
+                TestUtils.loadModules(Arrays.asList(stream1, stream2));
+                fail("YangParseException should by thrown");
+            }
+        } catch (YangParseException e) {
+            String expected = "Error in module 'augment2' at line 11: Can not add 'anyxml delta' to node 'choice-ext' in module 'augment0': case with same name already declared at line 18";
+            assertEquals(expected, e.getMessage());
         }
     }
 
