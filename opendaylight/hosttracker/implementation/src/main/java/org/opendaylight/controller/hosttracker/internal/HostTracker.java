@@ -212,17 +212,6 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         inactiveStaticHosts = new ConcurrentHashMap<NodeConnector, HostNodeConnector>();
     }
 
-    @SuppressWarnings("deprecation")
-    private void destroyCache() {
-        if (this.clusterContainerService == null) {
-            logger.error("un-initialized clusterMger, can't destroy cache");
-            return;
-        }
-        logger.debug("Destroying Cache for HostTracker");
-        this.clusterContainerService.destroyCache("hostTrackerAH");
-        this.clusterContainerService.destroyCache("hostTrackerIH");
-        nonClusterObjectCreate();
-    }
 
     public void shutDown() {
     }
@@ -1343,7 +1332,6 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      *
      */
     void destroy() {
-        destroyCache();
     }
 
     /**
