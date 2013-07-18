@@ -1187,10 +1187,10 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         GeneratedTOBuilder genTOBuilder = null;
         if (typeDef instanceof UnionType) {
             genTOBuilder = ((TypeProviderImpl) typeProvider).addUnionGeneratedTypeDefinition(
-                    typeBuilder.getPackageName(), typeDef, className);
+                    typeBuilder.getFullyQualifiedName(), typeDef, className);
         } else if (typeDef instanceof BitsTypeDefinition) {
-            genTOBuilder = ((TypeProviderImpl) typeProvider).bitsTypedefToTransferObject(typeBuilder.getPackageName(),
-                    typeDef, className);
+            genTOBuilder = ((TypeProviderImpl) typeProvider).bitsTypedefToTransferObject(
+                    typeBuilder.getFullyQualifiedName(), typeDef, className);
         }
         if (genTOBuilder != null) {
             typeBuilder.addEnclosingTransferObject(genTOBuilder);
