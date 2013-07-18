@@ -167,7 +167,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     public enum DiscoveryPeriod {
         INTERVAL        (300),
         AGEOUT          (120),
-        THRESHOLD       (10);
+        THRESHOLD       (30);
 
         private int time;   // sec
         private int tick;   // tick
