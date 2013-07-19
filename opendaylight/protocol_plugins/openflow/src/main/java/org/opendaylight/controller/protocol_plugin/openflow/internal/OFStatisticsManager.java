@@ -155,6 +155,20 @@ IInventoryShimExternalListener, CommandProvider {
         }
     }
 
+    private short getStatsQueueSize() {
+        String statsQueueSizeStr = System.getProperty("of.statsQueueSize");
+        short statsQueueSize = INITIAL_SIZE;
+        if (statsQueueSizeStr != null) {
+            try {
+                statsQueueSize = Short.parseShort(statsQueueSizeStr);
+                if (statsQueueSize <= 0) {
+                    statsQueueSize = INITIAL_SIZE;
+                }
+            } catch (Exception e) {
+            }
+        }
+        return statsQueueSize;
+    }
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
@@ -166,8 +180,8 @@ IInventoryShimExternalListener, CommandProvider {
         portStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
         tableStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
         dummyList = new ArrayList<OFStatistics>(1);
+        pendingStatsRequests = new LinkedBlockingQueue<StatsRequest>(getStatsQueueSize());
         statisticsTimerTicks = new ConcurrentHashMap<Long, StatisticsTicks>(INITIAL_SIZE);
-        pendingStatsRequests = new LinkedBlockingQueue<StatsRequest>(INITIAL_SIZE);
         switchPortStatsUpdated = new LinkedBlockingQueue<Long>(INITIAL_SIZE);
         switchSupportsVendorExtStats = new ConcurrentHashMap<Long, Boolean>(INITIAL_SIZE);
         txRates = new HashMap<Long, Map<Short, TxRates>>(INITIAL_SIZE);
