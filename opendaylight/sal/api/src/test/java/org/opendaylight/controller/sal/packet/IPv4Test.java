@@ -225,6 +225,126 @@ public class IPv4Test {
     }
 
     @Test
+    public void testOptions() throws Exception {
+        IPv4 ip = new IPv4();
+        Assert.assertEquals(20, ip.getHeaderLen());
+        Assert.assertEquals(160, ip.getHeaderSize());
+        Assert.assertEquals(0, ip.getfieldnumBits("Options"));
+
+        byte[][] options = {
+            new byte[] {
+                (byte)0x01,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+            },
+            null,
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+                (byte)0x05,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+                (byte)0x05, (byte)0x06,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+                (byte)0x05, (byte)0x06, (byte)0x07,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+                (byte)0x05, (byte)0x06, (byte)0x07, (byte)0x08,
+            },
+            new byte[0],
+        };
+
+        byte[][] expected = {
+            new byte[] {
+                (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x00, (byte)0x00,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x00,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+            },
+            null,
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+                (byte)0x05, (byte)0x00, (byte)0x00, (byte)0x00,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+                (byte)0x05, (byte)0x06, (byte)0x00, (byte)0x00,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+                (byte)0x05, (byte)0x06, (byte)0x07, (byte)0x00,
+            },
+            new byte[] {
+                (byte)0x01, (byte)0x02, (byte)0x03, (byte)0x04,
+                (byte)0x05, (byte)0x06, (byte)0x07, (byte)0x08,
+            },
+            null,
+        };
+
+        byte[] echo = {
+            (byte)0x11, (byte)0x22, (byte)0x33, (byte)0x44,
+            (byte)0x55, (byte)0x66, (byte)0x77, (byte)0x88,
+            (byte)0x99, (byte)0xaa,
+        };
+        ICMP icmp = new ICMP();
+        icmp.setType((byte)8);
+        icmp.setCode((byte)0);
+        icmp.setIdentifier((short)0xabcd);
+        icmp.setSequenceNumber((short)7777);
+        icmp.setRawPayload(echo);
+
+        ip.setSourceAddress(InetAddress.getByName("192.168.10.20"));
+        ip.setDestinationAddress(InetAddress.getByName("192.168.30.40"));
+        ip.setProtocol(IPProtocols.ICMP.byteValue());
+
+        for (int i = 0; i < options.length; i++) {
+            byte[] opts = options[i];
+            byte[] exp = expected[i];
+
+            // Set IPv4 options.
+            int hlen = 20;
+            int optlen;
+            if (exp != null) {
+                optlen = exp.length;
+                hlen += optlen;
+            } else {
+                optlen = 0;
+            }
+            ip.setOptions(opts);
+            Assert.assertTrue(Arrays.equals(exp, ip.getOptions()));
+            Assert.assertEquals(hlen, ip.getHeaderLen());
+            Assert.assertEquals(hlen * 8, ip.getHeaderSize());
+            Assert.assertEquals(optlen * 8, ip.getfieldnumBits("Options"));
+
+            // Serialize/Deserialize test.
+            ip.setPayload(icmp);
+
+            byte[] raw = ip.serialize();
+            IPv4 newip = new IPv4();
+            newip.deserialize(raw, 0, raw.length * 8);
+            Assert.assertEquals(ip, newip);
+            Assert.assertEquals(icmp, newip.getPayload());
+            Assert.assertTrue(Arrays.equals(exp, newip.getOptions()));
+        }
+    }
+
+    @Test
     public void testChecksum() {
         byte header[] = { (byte) 0x45, 00, 00, (byte) 0x3c, (byte) 0x1c,
                 (byte) 0x46, (byte) 0x40, 00, (byte) 0x40, 06, (byte) 0xb1,
