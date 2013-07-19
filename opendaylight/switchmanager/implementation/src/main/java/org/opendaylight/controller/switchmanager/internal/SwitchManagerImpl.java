@@ -93,13 +93,15 @@ CommandProvider {
     private String subnetFileName = null, spanFileName = null,
             switchConfigFileName = null;
     private final List<NodeConnector> spanNodeConnectors = new CopyOnWriteArrayList<NodeConnector>();
-    private ConcurrentMap<InetAddress, Subnet> subnets; // set of Subnets keyed by the InetAddress
+    // set of Subnets keyed by the InetAddress
+    private ConcurrentMap<InetAddress, Subnet> subnets;
     private ConcurrentMap<String, SubnetConfig> subnetsConfigList;
     private ConcurrentMap<SpanConfig, SpanConfig> spanConfigList;
-    private ConcurrentMap<String, SwitchConfig> nodeConfigList; // manually configured parameters for the node like name and tier
+    // manually configured parameters for the node such as name, tier, mode
+    private ConcurrentMap<String, SwitchConfig> nodeConfigList;
     private ConcurrentMap<Long, String> configSaveEvent;
-    private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in global container only
-    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in global container only
+    private ConcurrentMap<Node, Map<String, Property>> nodeProps;
+    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
     private ConcurrentMap<Node, Map<String, NodeConnector>> nodeConnectorNames;
     private IInventoryService inventoryService;
     private final Set<ISwitchManagerAware> switchManagerAware = Collections
@@ -662,40 +664,30 @@ CommandProvider {
             modeChange = true;
         }
 
-        try {
-            String nodeId = cfgObject.getNodeId();
-            Node node = Node.fromString(nodeId);
-            Map<String, Property> propMapCurr = nodeProps.get(node);
-            Map<String, Property> propMap = new HashMap<String, Property>();
-            if (propMapCurr != null) {
-                for (String s : propMapCurr.keySet()) {
-                    propMap.put(s, propMapCurr.get(s).clone());
-                }
-            }
-            Property desc = new Description(cfgObject.getNodeDescription());
-            propMap.put(desc.getName(), desc);
-            Property tier = new Tier(Integer.parseInt(cfgObject.getTier()));
-            propMap.put(tier.getName(), tier);
+        String nodeId = cfgObject.getNodeId();
+        Node node = Node.fromString(nodeId);
+        Map<String, Property> propMapCurr = nodeProps.get(node);
+        if (propMapCurr == null) {
+            return;
+        }
+        Map<String, Property> propMap = new HashMap<String, Property>();
+        for (String s : propMapCurr.keySet()) {
+            propMap.put(s, propMapCurr.get(s).clone());
+        }
+        Property desc = new Description(cfgObject.getNodeDescription());
+        propMap.put(desc.getName(), desc);
+        Property tier = new Tier(Integer.parseInt(cfgObject.getTier()));
+        propMap.put(tier.getName(), tier);
 
-            if (propMapCurr == null) {
-                if (nodeProps.putIfAbsent(node, propMap) != null) {
-                    // TODO rollback using Transactionality
-                    return;
-                }
-            } else {
-                if (!nodeProps.replace(node, propMapCurr, propMap)) {
-                    // TODO rollback using Transactionality
-                    return;
-                }
-            }
+        if (!nodeProps.replace(node, propMapCurr, propMap)) {
+            // TODO rollback using Transactionality
+            return;
+        }
 
-            log.info("Set Node {}'s Mode to {}", nodeId, cfgObject.getMode());
+        log.info("Set Node {}'s Mode to {}", nodeId, cfgObject.getMode());
 
-            if (modeChange) {
-                notifyModeChange(node, cfgObject.isProactive());
-            }
-        } catch (Exception e) {
-            log.debug("updateSwitchConfig: {}", e.getMessage());
+        if (modeChange) {
+            notifyModeChange(node, cfgObject.isProactive());
         }
     }
 
