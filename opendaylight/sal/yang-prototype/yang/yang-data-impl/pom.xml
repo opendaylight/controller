@@ -1,13 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>yang</artifactId>
         <version>0.5.4-SNAPSHOT</version>
     </parent>
+
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>yang-data-impl</artifactId>
+    <name>${project.artifactId}</name>
+    <description>${project.artifactId}</description>
 
     <properties>
         <groovy.version>2.1.6</groovy.version>
@@ -24,7 +27,6 @@
             </plugin>
         </plugins>
     </build>
-
 
     <dependencies>
         <dependency>
@@ -81,4 +83,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>
