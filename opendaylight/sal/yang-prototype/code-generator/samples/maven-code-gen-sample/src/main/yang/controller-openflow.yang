@@ -61,7 +61,7 @@ module controller-openflow {
                 }
             }
         }
-        container flow-tables {
+        container flow-tables2 {
             list flow-table {
                 key "flow-table-id";
                 leaf flow-table-id {

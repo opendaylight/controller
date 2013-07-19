@@ -1,0 +1,107 @@
+main(class) ::= <<
+package $class.packageName$;
+
+$imports(class.importsNames)$
+public class $class.className$Builder {
+
+    $fields(class.fields, class.augmentField)$
+    $setMethodsFromFields(class.fields, class.augmentField)$
+    public $class.className$ build() {
+        return new $class.className$Impl();
+    }
+
+    private class $class.className$Impl implements $class.className$ {
+    
+        $fields(class.fields, class.augmentField)$
+        private $class.className$Impl() {
+            $constructorImpl(class.fields, class.augmentField)$
+        }
+        
+        $getMethodsFromFields(class.fields, class.augmentField)$
+    }
+	
+}
+>>
+
+imports(importsNames) ::= <<
+$if(importsNames)$$importsNames:{s | import $s$;}; separator="\n"$
+$endif$
+>>
+
+fields(fs, af) ::= <<
+$if(fs)$$fs:{s | private $s.type.name$$generics(s.type.generics)$ $s.name$;}; separator="\n"$$endif$
+$if(af)$$augmentField(af)$
+$endif$
+>>
+
+augmentField(af) ::= <<
+$if(af)$private Map<Class<? extends $af.type.name$$generics(af.type.generics)$>, $af.type.name$$generics(af.type.generics)$> $af.name$ = new HashMap<>();$endif$
+>>
+
+setMethodsFromFields(fs, af) ::= <<
+$if(fs)$$fs:setMethodFromField(); separator="\n"$$endif$
+$if(af)$
+
+$addAugmentMethod(af)$
+$endif$
+>>
+
+setMethodFromField(f) ::= <<
+public $class.className$Builder set$f.name; format="firstToUpper"$($f.type.name$$generics(f.type.generics)$ $f.name$) {
+    this.$f.name$ = $f.name$;
+    return this;
+}
+>>
+
+addAugmentMethod(af) ::= <<
+$if(af)$public $class.className$Builder add$af.name; format="firstToUpper"$(Class<? extends $af.type.name$$generics(af.type.generics)$> augmentationType, $af.type.name$$generics(af.type.generics)$ augmentation) {
+    this.$af.name$.put(augmentationType, augmentation);
+    return this;
+}$endif$
+>>
+
+constructorImpl(fs, af) ::= <<
+$if(fs)$$fs:{s | this.$s.name$ = $class.className$Builder.this.$s.name$;}; separator="\n"$$endif$
+$if(af)$$copyAugmentationField(af)$$endif$
+>>
+
+copyAugmentationField(af) ::= <<
+$if(af)$this.$af.name$.putAll($class.className$Builder.this.$af.name$);$endif$
+>>
+
+getMethodsFromFields(fs, af) ::= <<
+$if(fs)$$fs:getMethodFromField(); separator="\n\n"$$endif$
+$if(af)$
+
+$getAugmentMethod(af)$
+$endif$
+>>
+
+getMethodFromField(f) ::= <<
+$if(f)$@Override
+public $f.type.name$$generics(f.type.generics)$ get$f.name; format="firstToUpper"$($parameters(f.method.parameters)$) {
+    return $f.name$;
+}$endif$
+>>
+
+getAugmentMethod(af) ::= <<
+$if(af)$@Override
+public <E extends $af.type.name$$generics(af.type.generics)$> E get$af.name; format="firstToUpper"$(Class<E> augmentationType) {
+    if (augmentationType == null) {
+        throw new IllegalArgumentException("Augmentation Type reference cannot be NULL!");
+    }
+    return (E) $af.name$.get(augmentationType);
+}$endif$
+>>
+
+parameters(ps) ::= <<
+$if(ps)$$ps:parameter(); separator=", "$$endif$
+>>
+
+parameter(p) ::= <<
+$if(p)$$p.type.name$$generics(p.type.generics)$ $p.name$$endif$
+>>
+
+generics(gs) ::= <<
+$if(gs)$<$gs:{s | $s.name$}; separator=", "$>$endif$
+>>
