@@ -1,0 +1,194 @@
+module nodes {
+    yang-version 1;
+    namespace "urn:simple.nodes.test";
+    prefix "n";
+
+    import types {
+        prefix "t";
+        revision-date 2013-07-03;
+    }
+
+   import custom {
+        prefix "c";
+        revision-date 2013-02-27;
+    }
+
+    organization "opendaylight";
+    contact "http://www.opendaylight.org/";
+
+    revision "2013-02-27" {
+        reference " WILL BE DEFINED LATER";
+    }
+
+    leaf int32-leaf {
+        type t:int32-ext2 {
+            range "12..max";
+        }
+    }
+
+    leaf string-leaf {
+        type t:string-ext4;
+    }
+
+    leaf length-leaf {
+        type t:string-ext2 {
+            length "7..max";
+        }
+    }
+
+    leaf decimal-leaf {
+        type t:my-decimal-type {
+            fraction-digits 4;
+        }
+    }
+
+    leaf decimal-leaf2 {
+        type t:my-decimal-type;
+    }
+
+    container ext {
+        types:c-define "MY_INTERFACES";
+    }
+
+    leaf union-leaf {
+        type t:my-union-ext;
+    }
+
+    deviation /t:interfaces/t:ifEntry {
+        deviate add {
+            default "admin"; // new users are 'admin' by default
+            config "true";
+        }
+        reference "system/user ref";
+    }
+
+    leaf custom-union-leaf {
+        type c:union1;
+    }
+
+    container transfer {
+        choice how {
+            default interval;
+            container input {
+            }
+            list output {
+                leaf id {
+                    type string;
+                }
+            }
+            case interval {
+                leaf interval {
+                    type uint16;
+                    default 30;
+                    units minutes;
+                }
+            }
+            case daily {
+                leaf daily {
+                    type empty;
+                }
+                leaf time-of-day {
+                    type string;
+                    units 24-hour-clock;
+                    default 1am;
+                }
+            }
+            case manual {
+                leaf manual {
+                    type empty;
+                }
+            }
+        }
+    }
+
+    anyxml datas {
+        description
+          "Copy of the source typesstore subset that matched
+           the filter criteria (if any).  An empty types container
+           indicates that the request did not produce any results.";
+        status obsolete;
+    }
+
+    augment "/t:interfaces/t:ifEntry/c:augment-holder" {
+        when "if:ifType='ds0'";
+        leaf ds0ChannelNumber {
+            type string;
+        }
+        leaf interface-id {
+            type leafref {
+                path "/if:interfaces/if:interface/if:name";
+            }
+        }
+        leaf my-type {
+            type t:int32-ext2;
+        }
+        container schemas {
+        }
+        choice odl {
+            leaf id {
+                type int8;
+            }
+            case node1 {
+                description "node1";
+            }
+            case node2 {
+                description "node2";
+            }
+            container node3 {
+                description "node3";
+            }
+        }
+    }
+
+    container mycont {
+        container innercont {
+            typedef mytype {
+                type string;
+            }
+            leaf myleaf {
+                type mytype;
+            }
+        }
+    }
+    
+    uses c:target;
+
+    container peer {
+        container destination {
+            uses c:target {
+                refine address {
+                    default "1.2.3.4";
+                    description "IP address of target node";
+                    reference "address reference added by refine";
+                    config false;
+                    mandatory true;
+                    must "ifType != 'ethernet' or " +
+                            "(ifType = 'ethernet' and ifMTU = 1500)" {
+                        error-message "An ethernet MTU must be 1500";
+                    }
+                }
+                refine port {
+                    description "description of port defined by refine";
+                    reference "port reference added by refine";
+                    config false;
+                    presence "presence is required";
+                }
+                refine addresses {
+                    description "description of addresses defined by refine";
+                    reference "addresses reference added by refine";
+                    config false;
+                    min-elements 2;
+                    max-elements 12;
+                }
+                refine target-inner {
+                    description "new target-inner grouping description";
+                }
+                refine group-type {
+                    description "new group-type description";
+                    reference "new group-type reference";
+                }
+            }
+        }
+    }
+
+}
