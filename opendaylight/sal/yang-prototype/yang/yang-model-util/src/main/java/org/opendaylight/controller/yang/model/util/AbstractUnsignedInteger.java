@@ -41,12 +41,9 @@ public abstract class AbstractUnsignedInteger implements UnsignedIntegerTypeDefi
 
     /**
      *
-     * @param actualPath
-     * @param namespace
-     * @param revision
-     * @param name
+     * @param path uint type schema path
+     * @param name qname
      * @param description
-     * @param MIN_VALUE
      * @param maxRange
      * @param units
      */
@@ -63,7 +60,9 @@ public abstract class AbstractUnsignedInteger implements UnsignedIntegerTypeDefi
     }
 
     /**
-     * @param name
+     *
+     * @param path uint type schema path
+     * @param name qname
      * @param description
      * @param rangeStatements
      * @param units
