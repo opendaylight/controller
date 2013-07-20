@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAE3///O0\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/IPv4.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-07-20T19:32:37Z",
+      "side": 1,
+      "message": "Hi Madhu, the hdrFieldMap contains the packet header fields values for fields that are present. I think it is fine to not even have a key in this map for a non present field.\nPacket.serialize() method should correctly handle this case.\n\nBut I have your same question, why don\u0027t we simply skip the put, why do we have to do a remove ? This method gets called when deserializing the streamed packet. There should not be any existing mapping for OPTIONS in the map.\n\nTo this regard, should we change the visibility of this and the other Packet methods to protected, so that they can only be invoked by Packet serialize and deserialize methods ?",
+      "parentUuid": "AAAAE3///PE\u003d",
+      "revId": "f24fad717af6a79233400214613d06f7ad6d8680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAE3///PM\u003d",
         "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/IPv4.java",
         "patchSetId": 1
