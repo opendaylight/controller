@@ -37,6 +37,42 @@
     },
     {
       "key": {
+        "uuid": "AAAAE3///OE\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/IPv4.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 396
+      },
+      "writtenOn": "2013-07-22T21:57:00Z",
+      "side": 1,
+      "message": "At this time, there is no guarantee that there is no any existing mapping for OPTIONS in the map when this method gets called.\nTo keep the consistency that IPv4 packets which have no options do not contain the headerFiled for OPTIONS in the map, it should do a remove.\n\nWe think it is better to change the visiblity of these methods to protected. But, this is not related to fixing the bugs, so we are not including this change in this change.",
+      "parentUuid": "AAAAE3///O0\u003d",
+      "revId": "f24fad717af6a79233400214613d06f7ad6d8680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///OI\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/IPv4.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 396
+      },
+      "writtenOn": "2013-07-22T21:57:00Z",
+      "side": 1,
+      "message": "Yes, it is necessary to remove this headerfiled to keep the consistency of equivalence checking for objects.\nWith this patch set, all IPv4 objects which have no options don\u0027t contain the headerFiled for OPTIONS in the map, so the consistency can be maintained.",
+      "parentUuid": "AAAAE3///PE\u003d",
+      "revId": "f24fad717af6a79233400214613d06f7ad6d8680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAE3///PM\u003d",
         "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/IPv4.java",
         "patchSetId": 1
@@ -65,6 +101,24 @@
       "writtenOn": "2013-07-20T08:58:00Z",
       "side": 1,
       "message": "This will also include the padding (not just the original padding-less options data). It seems reasonable to me that this\nmethod includes the padding as well. But do you see any case one would want to get the raw options # of bits ?",
+      "revId": "f24fad717af6a79233400214613d06f7ad6d8680",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///OA\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/packet/IPv4.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 396
+      },
+      "writtenOn": "2013-07-22T21:57:00Z",
+      "side": 1,
+      "message": "I don\u0027t see any case one would want to get it.",
+      "parentUuid": "AAAAE3///PI\u003d",
       "revId": "f24fad717af6a79233400214613d06f7ad6d8680",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
