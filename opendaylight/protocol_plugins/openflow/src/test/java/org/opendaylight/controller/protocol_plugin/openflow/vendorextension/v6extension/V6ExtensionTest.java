@@ -89,9 +89,10 @@ public class V6ExtensionTest {
                 match3.getDataLayerSource()));
         Assert.assertTrue(Arrays.equals(match.getDataLayerDestination(),
                 match3.getDataLayerDestination()));
-        Assert.assertTrue(match.getNetworkSrc().equals(match3.getNetworkSrc()));
-        Assert.assertTrue(match.getNetworkDest()
-                .equals(match3.getNetworkDest()));
+        Assert.assertNull(match.getNetworkSrc());
+        Assert.assertNull(match3.getNetworkSrc());
+        Assert.assertNull(match.getNetworkDest());
+        Assert.assertNull(match3.getNetworkDest());
         Assert.assertTrue(match.getDataLayerVirtualLan() == match3
                 .getDataLayerVirtualLan());
         Assert.assertTrue(match.getDataLayerVirtualLanPriorityCodePoint() == match3

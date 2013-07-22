@@ -51,6 +51,7 @@ import org.openflow.protocol.OFPacketOut;
 import org.openflow.protocol.OFPort;
 import org.openflow.protocol.OFVendor;
 import org.openflow.protocol.action.OFAction;
+import org.openflow.protocol.action.OFActionDataLayer;
 import org.openflow.protocol.action.OFActionDataLayerDestination;
 import org.openflow.protocol.action.OFActionDataLayerSource;
 import org.openflow.protocol.action.OFActionNetworkLayerAddress;
@@ -196,35 +197,23 @@ public class FlowConverter {
                 }
             }
             if (match.isPresent(MatchType.NW_SRC)) {
-                InetAddress address = (InetAddress) match.getField(
-                        MatchType.NW_SRC).getValue();
-                InetAddress mask = (InetAddress) match.getField(
-                        MatchType.NW_SRC).getMask();
+                InetAddress address = (InetAddress) match.getField(MatchType.NW_SRC).getValue();
+                InetAddress mask = (InetAddress) match.getField(MatchType.NW_SRC).getMask();
                 if (!isIPv6) {
-                    ofMatch.setNetworkSource(NetUtils.byteArray4ToInt(address
-                            .getAddress()));
-                    int maskLength = NetUtils
-                            .getSubnetMaskLength((mask == null) ? null : mask
-                                    .getAddress());
-                    wildcards = (wildcards & ~OFMatch.OFPFW_NW_SRC_MASK)
-                            | (maskLength << OFMatch.OFPFW_NW_SRC_SHIFT);
+                    ofMatch.setNetworkSource(NetUtils.byteArray4ToInt(address.getAddress()));
+                    int maskLength = (mask == null) ? 32 : NetUtils.getSubnetMaskLength(mask);
+                    wildcards = (wildcards & ~OFMatch.OFPFW_NW_SRC_MASK) | ((32 - maskLength) << OFMatch.OFPFW_NW_SRC_SHIFT);
                 } else {
                     ((V6Match) ofMatch).setNetworkSource(address, mask);
                 }
             }
             if (match.isPresent(MatchType.NW_DST)) {
-                InetAddress address = (InetAddress) match.getField(
-                        MatchType.NW_DST).getValue();
-                InetAddress mask = (InetAddress) match.getField(
-                        MatchType.NW_DST).getMask();
+                InetAddress address = (InetAddress) match.getField(MatchType.NW_DST).getValue();
+                InetAddress mask = (InetAddress) match.getField(MatchType.NW_DST).getMask();
                 if (!isIPv6) {
-                    ofMatch.setNetworkDestination(NetUtils
-                            .byteArray4ToInt(address.getAddress()));
-                    int maskLength = NetUtils
-                            .getSubnetMaskLength((mask == null) ? null : mask
-                                    .getAddress());
-                    wildcards = (wildcards & ~OFMatch.OFPFW_NW_DST_MASK)
-                            | (maskLength << OFMatch.OFPFW_NW_DST_SHIFT);
+                    ofMatch.setNetworkDestination(NetUtils.byteArray4ToInt(address.getAddress()));
+                    int maskLength = (mask == null) ? 32 : NetUtils.getSubnetMaskLength(mask);
+                    wildcards = (wildcards & ~OFMatch.OFPFW_NW_DST_MASK) | ((32 - maskLength) << OFMatch.OFPFW_NW_DST_SHIFT);
                 } else {
                     ((V6Match) ofMatch).setNetworkDestination(address, mask);
                 }
@@ -354,7 +343,7 @@ public class FlowConverter {
                     OFActionDataLayerSource ofAction = new OFActionDataLayerSource();
                     ofAction.setDataLayerAddress(a.getDlAddress());
                     actionsList.add(ofAction);
-                    actionsLength += OFActionDataLayerSource.MINIMUM_LENGTH;
+                    actionsLength += OFActionDataLayer.MINIMUM_LENGTH;
                     continue;
                 }
                 if (action.getType() == ActionType.SET_DL_DST) {
@@ -362,7 +351,7 @@ public class FlowConverter {
                     OFActionDataLayerDestination ofAction = new OFActionDataLayerDestination();
                     ofAction.setDataLayerAddress(a.getDlAddress());
                     actionsList.add(ofAction);
-                    actionsLength += OFActionDataLayerDestination.MINIMUM_LENGTH;
+                    actionsLength += OFActionDataLayer.MINIMUM_LENGTH;
                     continue;
                 }
                 if (action.getType() == ActionType.SET_NW_SRC) {
@@ -502,7 +491,7 @@ public class FlowConverter {
             if (ofMatch != null) {
                 if (!isIPv6) {
                     // Compute OF1.0 Match
-                    if (ofMatch.getInputPort() != 0) {
+                    if (ofMatch.getInputPort() != 0 && ofMatch.getInputPort() != OFPort.OFPP_LOCAL.getValue()) {
                         salMatch.setField(new MatchField(MatchType.IN_PORT,
                                 NodeConnectorCreator.createNodeConnector(
                                         ofMatch.getInputPort(), node)));
@@ -569,7 +558,7 @@ public class FlowConverter {
                 } else {
                     // Compute OF1.0 + IPv6 extensions Match
                     V6Match v6Match = (V6Match) ofMatch;
-                    if (v6Match.getInputPort() != 0) {
+                    if (v6Match.getInputPort() != 0 && v6Match.getInputPort() != OFPort.OFPP_LOCAL.getValue()) {
                         // Mask on input port is not defined
                         salMatch.setField(new MatchField(MatchType.IN_PORT,
                                 NodeConnectorCreator.createOFNodeConnector(
@@ -601,15 +590,30 @@ public class FlowConverter {
                         salMatch.setField(MatchType.DL_VLAN_PR, v6Match
                                 .getDataLayerVirtualLanPriorityCodePoint());
                     }
+                    // V6Match may carry IPv4 address
                     if (v6Match.getNetworkSrc() != null) {
                         salMatch.setField(MatchType.NW_SRC,
                                 v6Match.getNetworkSrc(),
                                 v6Match.getNetworkSourceMask());
+                    } else if (v6Match.getNetworkSource() != 0) {
+                        salMatch.setField(MatchType.NW_SRC, NetUtils
+                                .getInetAddress(v6Match.getNetworkSource()),
+                                NetUtils.getInetNetworkMask(
+                                        v6Match.getNetworkSourceMaskLen(),
+                                        false));
                     }
+                    // V6Match may carry IPv4 address
                     if (v6Match.getNetworkDest() != null) {
                         salMatch.setField(MatchType.NW_DST,
                                 v6Match.getNetworkDest(),
                                 v6Match.getNetworkDestinationMask());
+                    } else if (v6Match.getNetworkDestination() != 0) {
+                        salMatch.setField(MatchType.NW_DST,
+                                NetUtils.getInetAddress(v6Match
+                                        .getNetworkDestination()),
+                                NetUtils.getInetNetworkMask(
+                                        v6Match.getNetworkDestinationMaskLen(),
+                                        false));
                     }
                     if (v6Match.getNetworkTypeOfService() != 0) {
                         int dscp = NetUtils.getUnsignedByte(v6Match

@@ -200,16 +200,46 @@ public class NetUtilsTest {
     public void testGetSubnetLen() {
 
         byte address[] = { (byte) 128, (byte) 0, (byte) 0, 0 };
-        Assert.assertTrue(NetUtils.getSubnetMaskLength(address) == 31);
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address) == 1);
 
         byte address1[] = { (byte) 255, 0, 0, 0 };
-        Assert.assertTrue(NetUtils.getSubnetMaskLength(address1) == 24);
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address1) == 8);
 
         byte address2[] = { (byte) 255, (byte) 255, (byte) 248, 0 };
-        Assert.assertTrue(NetUtils.getSubnetMaskLength(address2) == 11);
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address2) == 21);
 
         byte address4[] = { (byte) 255, (byte) 255, (byte) 255, (byte) 254 };
-        Assert.assertTrue(NetUtils.getSubnetMaskLength(address4) == 1);
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address4) == 31);
+
+        byte address5[] = { (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255,
+                (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255,
+                (byte) 255 };
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address5) == 128);
+
+        byte address6[] = { (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255,
+                (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255,
+                (byte) 254 };
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address6) == 127);
+
+        byte address7[] = { (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255,
+                (byte) 255, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address7) == 64);
+
+        byte address8[] = { (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255,
+                (byte) 254, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address8) == 63);
+
+        byte address9[] = { (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 255, (byte) 128,
+                (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address9) == 49);
+
+        byte address10[] = { (byte) 128, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0,
+                (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address10) == 1);
+
+        byte address11[] = { (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0,
+                (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
+        Assert.assertTrue(NetUtils.getSubnetMaskLength(address11) == 0);
     }
 
     @Test

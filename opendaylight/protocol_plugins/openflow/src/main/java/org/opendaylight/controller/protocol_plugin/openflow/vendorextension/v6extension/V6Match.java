@@ -39,8 +39,8 @@ import org.slf4j.LoggerFactory;
 public class V6Match extends OFMatch implements Cloneable {
     private static final Logger logger = LoggerFactory.getLogger(V6Match.class);
     private static final long serialVersionUID = 1L;
-    protected InetAddress nwSrc;
-    protected InetAddress nwDst;
+    protected Inet6Address nwSrc;
+    protected Inet6Address nwDst;
     protected short inputPortMask;
     protected byte[] dataLayerSourceMask;
     protected byte[] dataLayerDestinationMask;
@@ -49,8 +49,6 @@ public class V6Match extends OFMatch implements Cloneable {
     protected short dataLayerTypeMask;
     protected byte networkTypeOfServiceMask;
     protected byte networkProtocolMask;
-    protected InetAddress networkSourceMask;
-    protected InetAddress networkDestinationMask;
     protected short transportSourceMask;
     protected short transportDestinationMask;
     protected short srcIPv6SubnetMaskbits;
@@ -135,8 +133,6 @@ public class V6Match extends OFMatch implements Cloneable {
         this.dataLayerTypeMask = 0;
         this.dataLayerVirtualLanMask = 0;
         this.dataLayerVirtualLanPriorityCodePointMask = 0;
-        this.networkDestinationMask = null;
-        this.networkSourceMask = null;
         this.networkTypeOfServiceMask = 0;
         this.networkProtocolMask = 0;
         this.transportSourceMask = 0;
@@ -163,33 +159,19 @@ public class V6Match extends OFMatch implements Cloneable {
         this.match_len = 0;
         this.pad_size = 0;
 
-        this.networkSourceMask = null;
         if (match.getNetworkSource() != 0) {
-            InetAddress address = null;
-            try {
-                address = InetAddress.getByAddress(ByteBuffer.allocate(4)
-                        .putInt(match.getNetworkSource()).array());
-            } catch (UnknownHostException e) {
-                logger.error("",e);
-            }
-            this.setNetworkSource(address, null);
+            InetAddress address = NetUtils.getInetAddress(match.getNetworkSource());
+            InetAddress mask = NetUtils.getInetNetworkMask(match.getNetworkSourceMaskLen(), false);
+            this.setNetworkDestination(address, mask);
         } else {
-            this.nwSrc = null;
             this.nwSrcState = MatchFieldState.MATCH_ABSENT;
         }
 
-        this.networkDestinationMask = null;
         if (match.getNetworkDestination() != 0) {
-            InetAddress address = null;
-            try {
-                address = InetAddress.getByAddress(ByteBuffer.allocate(4)
-                        .putInt(match.getNetworkDestination()).array());
-            } catch (UnknownHostException e) {
-                logger.error("",e);
-            }
-            this.setNetworkDestination(address, null);
+            InetAddress address = NetUtils.getInetAddress(match.getNetworkDestination());
+            InetAddress mask = NetUtils.getInetNetworkMask(match.getNetworkDestinationMaskLen(), false);
+            this.setNetworkDestination(address, mask);
         } else {
-            this.nwDst = null;
             this.nwDstState = MatchFieldState.MATCH_ABSENT;
         }
 
@@ -475,20 +457,23 @@ public class V6Match extends OFMatch implements Cloneable {
     @Override
     public void fromString(String match) throws IllegalArgumentException {
         if (match.equals("") || match.equalsIgnoreCase("any")
-                || match.equalsIgnoreCase("all") || match.equals("[]"))
+                || match.equalsIgnoreCase("all") || match.equals("[]")) {
             match = "OFMatch[]";
+        }
         String[] tokens = match.split("[\\[,\\]]");
         String[] values;
         int initArg = 0;
-        if (tokens[0].equals("OFMatch"))
+        if (tokens[0].equals("OFMatch")) {
             initArg = 1;
+        }
         this.wildcards = OFPFW_ALL;
         int i;
         for (i = initArg; i < tokens.length; i++) {
             values = tokens[i].split("=");
-            if (values.length != 2)
+            if (values.length != 2) {
                 throw new IllegalArgumentException("Token " + tokens[i]
                         + " does not have form 'key=value' parsing " + match);
+            }
             values[0] = values[0].toLowerCase(); // try to make this case insens
             if (values[0].equals(STR_IN_PORT) || values[0].equals("input_port")) {
                 this.inputPort = U16.t(Integer.valueOf(values[1]));
@@ -508,11 +493,12 @@ public class V6Match extends OFMatch implements Cloneable {
                 this.wildcards &= ~OFPFW_DL_SRC;
             } else if (values[0].equals(STR_DL_TYPE)
                     || values[0].equals("eth_type")) {
-                if (values[1].startsWith("0x"))
+                if (values[1].startsWith("0x")) {
                     this.dataLayerType = U16.t(Integer.valueOf(values[1]
                             .replaceFirst("0x", ""), 16));
-                else
+                } else {
                     this.dataLayerType = U16.t(Integer.valueOf(values[1]));
+                }
                 ethTypeState = MatchFieldState.MATCH_FIELD_ONLY;
                 match_len += 6;
             } else if (values[0].equals(STR_DL_VLAN)) {
@@ -526,36 +512,34 @@ public class V6Match extends OFMatch implements Cloneable {
             } else if (values[0].equals(STR_NW_DST)
                     || values[0].equals("ip_dst")) {
                 try {
+                    InetAddress address = null;
+                    InetAddress mask = null;
                     if (values[1].contains("/")) {
-                        String ipv6addr_wmask[] = values[1].split("/");
-                        this.nwDst = InetAddress.getByName(ipv6addr_wmask[0]);
-                        this.dstIPv6SubnetMaskbits = Short
-                                .valueOf(ipv6addr_wmask[1]);
-                        nwDstState = MatchFieldState.MATCH_FIELD_WITH_MASK;
-                        match_len += 36;
+                        String addressString[] = values[1].split("/");
+                        address = InetAddress.getByName(addressString[0]);
+                        int masklen = Integer.valueOf(addressString[1]);
+                        mask = NetUtils.getInetNetworkMask(masklen, address instanceof Inet6Address);
                     } else {
-                        this.nwDst = InetAddress.getByName(values[1]);
-                        nwDstState = MatchFieldState.MATCH_FIELD_ONLY;
-                        match_len += 20;
+                        address = InetAddress.getByName(values[1]);
                     }
+                    this.setNetworkDestination(address, mask);
                 } catch (UnknownHostException e) {
                     logger.error("",e);
                 }
             } else if (values[0].equals(STR_NW_SRC)
                     || values[0].equals("ip_src")) {
                 try {
+                    InetAddress address = null;
+                    InetAddress mask = null;
                     if (values[1].contains("/")) {
-                        String ipv6addr_wmask[] = values[1].split("/");
-                        this.nwSrc = InetAddress.getByName(ipv6addr_wmask[0]);
-                        this.srcIPv6SubnetMaskbits = Short
-                                .valueOf(ipv6addr_wmask[1]);
-                        nwSrcState = MatchFieldState.MATCH_FIELD_WITH_MASK;
-                        match_len += 36;
+                        String addressString[] = values[1].split("/");
+                        address = InetAddress.getByName(addressString[0]);
+                        int masklen = Integer.valueOf(addressString[1]);
+                        mask = NetUtils.getInetNetworkMask(masklen, address instanceof Inet6Address);
                     } else {
-                        this.nwSrc = InetAddress.getByName(values[1]);
-                        nwSrcState = MatchFieldState.MATCH_FIELD_ONLY;
-                        match_len += 20;
+                        address = InetAddress.getByName(values[1]);
                     }
+                    this.setNetworkSource(address, mask);
                 } catch (UnknownHostException e) {
                     logger.error("",e);
                 }
@@ -580,9 +564,10 @@ public class V6Match extends OFMatch implements Cloneable {
                 this.transportSource = U16.t(Integer.valueOf(values[1]));
                 tpSrcState = MatchFieldState.MATCH_FIELD_ONLY;
                 match_len += 6;
-            } else
+            } else {
                 throw new IllegalArgumentException("unknown token " + tokens[i]
                         + " parsing " + match);
+            }
         }
 
         /*
@@ -675,11 +660,12 @@ public class V6Match extends OFMatch implements Cloneable {
     }
 
     private void readInPort(ByteBuffer data, int nxmLen, boolean hasMask) {
-        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask))
+        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask)) {
             /*
              * mask is not allowed for inport port
              */
             return;
+        }
         super.setInputPort(data.getShort());
         this.inputPortState = MatchFieldState.MATCH_FIELD_ONLY;
         this.wildcards ^= (1 << 0); // Sync with 0F 1.0 Match
@@ -689,9 +675,9 @@ public class V6Match extends OFMatch implements Cloneable {
     private void readDataLinkDestination(ByteBuffer data, int nxmLen,
             boolean hasMask) {
         if (hasMask) {
-            if ((nxmLen != 2 * 6) || (data.remaining() < 2 * 6))
+            if ((nxmLen != 2 * 6) || (data.remaining() < 2 * 6)) {
                 return;
-            else {
+            } else {
                 byte[] bytes = new byte[6];
                 data.get(bytes);
                 super.setDataLayerDestination(bytes);
@@ -701,9 +687,9 @@ public class V6Match extends OFMatch implements Cloneable {
                 this.match_len += 16;
             }
         } else {
-            if ((nxmLen != 6) || (data.remaining() < 6))
+            if ((nxmLen != 6) || (data.remaining() < 6)) {
                 return;
-            else {
+            } else {
                 byte[] bytes = new byte[6];
                 data.get(bytes);
                 super.setDataLayerDestination(bytes);
@@ -718,8 +704,9 @@ public class V6Match extends OFMatch implements Cloneable {
         /*
          * mask is not allowed in data link source
          */
-        if ((nxmLen != 6) || (data.remaining() < 6) || (hasMask))
+        if ((nxmLen != 6) || (data.remaining() < 6) || (hasMask)) {
             return;
+        }
         byte[] bytes = new byte[6];
         data.get(bytes);
         super.setDataLayerSource(bytes);
@@ -732,8 +719,9 @@ public class V6Match extends OFMatch implements Cloneable {
         /*
          * mask is not allowed in ethertype
          */
-        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask))
+        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask)) {
             return;
+        }
         super.setDataLayerType(data.getShort());
         this.ethTypeState = MatchFieldState.MATCH_FIELD_ONLY;
         this.wildcards ^= (1 << 4); // Sync with 0F 1.0 Match
@@ -743,9 +731,9 @@ public class V6Match extends OFMatch implements Cloneable {
     private void readVlanTci(ByteBuffer data, int nxmLen, boolean hasMask) {
         short vlan_mask = 0xfff;
         if (hasMask) {
-            if ((nxmLen != 2 * 2) || (data.remaining() < 2 * 2))
+            if ((nxmLen != 2 * 2) || (data.remaining() < 2 * 2)) {
                 return;
-            else {
+            } else {
                 short vlan = data.getShort();
                 vlan &= vlan_mask;
                 super.setDataLayerVirtualLan(vlan);
@@ -755,9 +743,9 @@ public class V6Match extends OFMatch implements Cloneable {
                 this.wildcards ^= (1 << 20);
             }
         } else {
-            if ((nxmLen != 2) || (data.remaining() < 2))
+            if ((nxmLen != 2) || (data.remaining() < 2)) {
                 return;
-            else {
+            } else {
                 short vlan = data.getShort();
                 vlan &= vlan_mask;
                 super.setDataLayerVirtualLan(vlan);
@@ -773,8 +761,9 @@ public class V6Match extends OFMatch implements Cloneable {
         /*
          * mask is not allowed in IP TOS
          */
-        if ((nxmLen != 1) || (data.remaining() < 1) || (hasMask))
+        if ((nxmLen != 1) || (data.remaining() < 1) || (hasMask)) {
             return;
+        }
         super.setNetworkTypeOfService(data.get());
         this.nwTosState = MatchFieldState.MATCH_FIELD_ONLY;
         this.match_len += 5;
@@ -785,8 +774,9 @@ public class V6Match extends OFMatch implements Cloneable {
         /*
          * mask is not allowed in IP protocol
          */
-        if ((nxmLen != 1) || (data.remaining() < 1) || (hasMask))
+        if ((nxmLen != 1) || (data.remaining() < 1) || (hasMask)) {
             return;
+        }
         super.setNetworkProtocol(data.get());
         this.nwProtoState = MatchFieldState.MATCH_FIELD_ONLY;
         this.match_len += 5;
@@ -795,41 +785,31 @@ public class V6Match extends OFMatch implements Cloneable {
 
     private void readIpv4Src(ByteBuffer data, int nxmLen, boolean hasMask) {
         if (hasMask) {
-            if ((nxmLen != 2 * 4) || (data.remaining() < 2 * 4))
+            if ((nxmLen != 2 * 4) || (data.remaining() < 2 * 4)) {
                 return;
-            else {
+            } else {
                 byte[] sbytes = new byte[4];
                 data.get(sbytes);
-                try {
-                    this.nwSrc = InetAddress.getByAddress(sbytes);
-                } catch (UnknownHostException e) {
-                    return;
-                }
+                // For compatibility, let's set the IPv4 in the parent OFMatch
+                int address = NetUtils.byteArray4ToInt(sbytes);
+                super.setNetworkSource(address);
                 byte[] mbytes = new byte[4];
                 data.get(mbytes);
-                try {
-                    this.networkSourceMask = InetAddress.getByAddress(mbytes);
-                } catch (UnknownHostException e) {
-                    return;
-                }
                 this.nwSrcState = MatchFieldState.MATCH_FIELD_WITH_MASK;
                 this.match_len += 12;
                 int prefixlen = getNetworkMaskPrefixLength(mbytes);
                 this.wildcards ^= (((1 << 6) - 1) << 8); // Sync with 0F 1.0 Match
                 this.wildcards |= ((32 - prefixlen) << 8); // Sync with 0F 1.0 Match
-
             }
         } else {
-            if ((nxmLen != 4) || (data.remaining() < 4))
+            if ((nxmLen != 4) || (data.remaining() < 4)) {
                 return;
-            else {
+            } else {
                 byte[] sbytes = new byte[4];
                 data.get(sbytes);
-                try {
-                    this.nwSrc = InetAddress.getByAddress(sbytes);
-                } catch (UnknownHostException e) {
-                    return;
-                }
+                // For compatibility, let's also set the IPv4 in the parent OFMatch
+                int address = NetUtils.byteArray4ToInt(sbytes);
+                super.setNetworkSource(address);
                 this.nwSrcState = MatchFieldState.MATCH_FIELD_ONLY;
                 this.match_len += 8;
                 this.wildcards ^= (((1 << 6) - 1) << 8); // Sync with 0F 1.0 Match
@@ -839,24 +819,16 @@ public class V6Match extends OFMatch implements Cloneable {
 
     private void readIpv4Dst(ByteBuffer data, int nxmLen, boolean hasMask) {
         if (hasMask) {
-            if ((nxmLen != 2 * 4) || (data.remaining() < 2 * 4))
+            if ((nxmLen != 2 * 4) || (data.remaining() < 2 * 4)) {
                 return;
-            else {
+            } else {
                 byte[] dbytes = new byte[4];
                 data.get(dbytes);
-                try {
-                    this.nwDst = InetAddress.getByAddress(dbytes);
-                } catch (UnknownHostException e) {
-                    return;
-                }
+                // For compatibility, let's also set the IPv4 in the parent OFMatch
+                int address = NetUtils.byteArray4ToInt(dbytes);
+                super.setNetworkDestination(address);
                 byte[] mbytes = new byte[4];
                 data.get(mbytes);
-                try {
-                    this.networkDestinationMask = InetAddress
-                            .getByAddress(mbytes);
-                } catch (UnknownHostException e) {
-                    return;
-                }
                 this.nwDstState = MatchFieldState.MATCH_FIELD_WITH_MASK;
                 this.match_len += 12;
                 int prefixlen = getNetworkMaskPrefixLength(mbytes);
@@ -864,16 +836,13 @@ public class V6Match extends OFMatch implements Cloneable {
                 this.wildcards |= ((32 - prefixlen) << 14); // Sync with 0F 1.0 Match
             }
         } else {
-            if ((nxmLen != 4) || (data.remaining() < 4))
+            if ((nxmLen != 4) || (data.remaining() < 4)) {
                 return;
-            else {
+            } else {
                 byte[] dbytes = new byte[4];
                 data.get(dbytes);
-                try {
-                    this.nwDst = InetAddress.getByAddress(dbytes);
-                } catch (UnknownHostException e) {
-                    return;
-                }
+                int address = NetUtils.byteArray4ToInt(dbytes);
+                super.setNetworkDestination(address);
                 this.nwDstState = MatchFieldState.MATCH_FIELD_ONLY;
                 this.wildcards ^= (((1 << 6) - 1) << 14); // Sync with 0F 1.0 Match
                 this.match_len += 8;
@@ -885,8 +854,9 @@ public class V6Match extends OFMatch implements Cloneable {
         /*
          * mask is not allowed in TCP SRC
          */
-        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask))
+        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask)) {
             return;
+        }
         super.setTransportSource(data.getShort());
         this.tpSrcState = MatchFieldState.MATCH_FIELD_ONLY;
         this.match_len += 6;
@@ -897,8 +867,9 @@ public class V6Match extends OFMatch implements Cloneable {
         /*
          * mask is not allowed in TCP DST
          */
-        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask))
+        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask)) {
             return;
+        }
         super.setTransportDestination(data.getShort());
         this.tpDstState = MatchFieldState.MATCH_FIELD_ONLY;
         this.match_len += 6;
@@ -909,8 +880,9 @@ public class V6Match extends OFMatch implements Cloneable {
         /*
          * mask is not allowed in UDP SRC
          */
-        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask))
+        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask)) {
             return;
+        }
         super.setTransportSource(data.getShort());
         this.tpSrcState = MatchFieldState.MATCH_FIELD_ONLY;
         this.match_len += 6;
@@ -921,8 +893,9 @@ public class V6Match extends OFMatch implements Cloneable {
         /*
          * mask is not allowed in UDP DST
          */
-        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask))
+        if ((nxmLen != 2) || (data.remaining() < 2) || (hasMask)) {
             return;
+        }
         super.setTransportDestination(data.getShort());
         this.tpDstState = MatchFieldState.MATCH_FIELD_ONLY;
         this.match_len += 6;
@@ -931,34 +904,30 @@ public class V6Match extends OFMatch implements Cloneable {
 
     private void readIpv6Src(ByteBuffer data, int nxmLen, boolean hasMask) {
         if (hasMask) {
-            if ((nxmLen != 2 * 16) || (data.remaining() < 2 * 16))
+            if ((nxmLen != 2 * 16) || (data.remaining() < 2 * 16)) {
                 return;
-            else {
+            } else {
                 byte[] sbytes = new byte[16];
                 data.get(sbytes);
                 try {
-                    this.nwSrc = InetAddress.getByAddress(sbytes);
+                    this.nwSrc = (Inet6Address) InetAddress.getByAddress(sbytes);
                 } catch (UnknownHostException e) {
                     return;
                 }
                 byte[] mbytes = new byte[16];
                 data.get(mbytes);
-                try {
-                    this.networkSourceMask = InetAddress.getByAddress(mbytes);
-                } catch (UnknownHostException e) {
-                    return;
-                }
+                this.srcIPv6SubnetMaskbits = (short)NetUtils.getSubnetMaskLength(mbytes);
                 this.nwSrcState = MatchFieldState.MATCH_FIELD_WITH_MASK;
                 this.match_len += 36;
             }
         } else {
-            if ((nxmLen != 16) || (data.remaining() < 16))
+            if ((nxmLen != 16) || (data.remaining() < 16)) {
                 return;
-            else {
+            } else {
                 byte[] sbytes = new byte[16];
                 data.get(sbytes);
                 try {
-                    this.nwSrc = InetAddress.getByAddress(sbytes);
+                    this.nwSrc = (Inet6Address) InetAddress.getByAddress(sbytes);
                 } catch (UnknownHostException e) {
                     return;
                 }
@@ -970,35 +939,30 @@ public class V6Match extends OFMatch implements Cloneable {
 
     private void readIpv6Dst(ByteBuffer data, int nxmLen, boolean hasMask) {
         if (hasMask) {
-            if ((nxmLen != 2 * 16) || (data.remaining() < 2 * 16))
+            if ((nxmLen != 2 * 16) || (data.remaining() < 2 * 16)) {
                 return;
-            else {
+            } else {
                 byte[] dbytes = new byte[16];
                 data.get(dbytes);
                 try {
-                    this.nwDst = InetAddress.getByAddress(dbytes);
+                    this.nwDst = (Inet6Address) InetAddress.getByAddress(dbytes);
                 } catch (UnknownHostException e) {
                     return;
                 }
                 byte[] mbytes = new byte[16];
                 data.get(mbytes);
-                try {
-                    this.networkDestinationMask = InetAddress
-                            .getByAddress(mbytes);
-                } catch (UnknownHostException e) {
-                    return;
-                }
+                this.dstIPv6SubnetMaskbits = (short)NetUtils.getSubnetMaskLength(mbytes);
                 this.nwDstState = MatchFieldState.MATCH_FIELD_WITH_MASK;
                 this.match_len += 36;
             }
         } else {
-            if ((nxmLen != 16) || (data.remaining() < 16))
+            if ((nxmLen != 16) || (data.remaining() < 16)) {
                 return;
-            else {
+            } else {
                 byte[] dbytes = new byte[16];
                 data.get(dbytes);
                 try {
-                    this.nwDst = InetAddress.getByAddress(dbytes);
+                    this.nwDst = (Inet6Address) InetAddress.getByAddress(dbytes);
                 } catch (UnknownHostException e) {
                     return;
                 }
@@ -1021,8 +985,6 @@ public class V6Match extends OFMatch implements Cloneable {
                 + ", dataLayerTypeMask=" + dataLayerTypeMask
                 + ", networkTypeOfServiceMask=" + networkTypeOfServiceMask
                 + ", networkProtocolMask=" + networkProtocolMask
-                + ", networkSourceMask=" + networkSourceMask
-                + ", networkDestinationMask=" + networkDestinationMask
                 + ", transportSourceMask=" + transportSourceMask
                 + ", transportDestinationMask=" + transportDestinationMask
                 + ", srcIPv6SubnetMaskbits=" + srcIPv6SubnetMaskbits
@@ -1151,10 +1113,10 @@ public class V6Match extends OFMatch implements Cloneable {
         V6Match ret = (V6Match) super.clone();
         try {
             if (this.nwSrc != null) {
-                ret.nwSrc = InetAddress.getByAddress(this.nwSrc.getAddress());
+                ret.nwSrc = (Inet6Address) InetAddress.getByAddress(this.nwSrc.getAddress());
             }
             if (this.nwDst != null) {
-                ret.nwDst = InetAddress.getByAddress(this.nwDst.getAddress());
+                ret.nwDst = (Inet6Address) InetAddress.getByAddress(this.nwDst.getAddress());
             }
             return ret;
         } catch (UnknownHostException e) {
@@ -1168,28 +1130,8 @@ public class V6Match extends OFMatch implements Cloneable {
      * @return
      */
 
-    public InetAddress getNetworkDest() {
+    public Inet6Address getNetworkDest() {
         return this.nwDst;
-    }
-
-    /**
-     * Get nw_src
-     *
-     * @return
-     */
-
-    public void setNetworkSrc(InetAddress address) {
-        nwSrc = address;
-    }
-
-    /**
-     * Set nw_dst
-     *
-     * @return
-     */
-
-    public void setNetworkDest(InetAddress address) {
-        nwDst = address;
     }
 
     /**
@@ -1198,7 +1140,7 @@ public class V6Match extends OFMatch implements Cloneable {
      * @return
      */
 
-    public InetAddress getNetworkSrc() {
+    public Inet6Address getNetworkSrc() {
         return this.nwSrc;
     }
 
@@ -1303,35 +1245,63 @@ public class V6Match extends OFMatch implements Cloneable {
         this.match_len += 5;
     }
 
-    public InetAddress getNetworkSourceMask() {
-        return networkSourceMask;
+    public Inet6Address getNetworkSourceMask() {
+        return (this.nwSrcState == MatchFieldState.MATCH_FIELD_WITH_MASK) ? (Inet6Address) NetUtils.getInetNetworkMask(
+                this.srcIPv6SubnetMaskbits, true) : null;
     }
 
     public void setNetworkSource(InetAddress address, InetAddress mask) {
-        this.nwSrc = address;
-        if (mask == null) {
-            this.nwSrcState = MatchFieldState.MATCH_FIELD_ONLY;
-            this.match_len += (address instanceof Inet6Address) ? 20 : 8;
+        if (address instanceof Inet6Address) {
+            this.nwSrc = (Inet6Address) address;
+            if (mask == null) {
+                this.nwSrcState = MatchFieldState.MATCH_FIELD_ONLY;
+                this.match_len += (address instanceof Inet6Address) ? 20 : 8;
+            } else {
+                this.srcIPv6SubnetMaskbits = (short)NetUtils.getSubnetMaskLength(mask);
+                this.nwSrcState = MatchFieldState.MATCH_FIELD_WITH_MASK;
+                this.match_len += (address instanceof Inet6Address) ? 36 : 12;
+            }
         } else {
-            this.networkSourceMask = mask;
-            this.nwSrcState = MatchFieldState.MATCH_FIELD_WITH_MASK;
-            this.match_len += (address instanceof Inet6Address) ? 36 : 12;
+            super.setNetworkSource(NetUtils.byteArray4ToInt(address.getAddress()));
+            this.wildcards ^= (((1 << 6) - 1) << 8);
+            if (mask == null) {
+                this.nwSrcState = MatchFieldState.MATCH_FIELD_ONLY;
+                this.match_len += 8;
+            } else {
+                this.nwSrcState = MatchFieldState.MATCH_FIELD_WITH_MASK;
+                this.match_len += 12;
+                this.wildcards |= ((32 - NetUtils.getSubnetMaskLength(mask)) << 8);
+            }
         }
     }
 
-    public InetAddress getNetworkDestinationMask() {
-        return networkDestinationMask;
+    public Inet6Address getNetworkDestinationMask() {
+        return (this.nwDstState == MatchFieldState.MATCH_FIELD_WITH_MASK) ? (Inet6Address) NetUtils.getInetNetworkMask(
+                this.dstIPv6SubnetMaskbits, true) : null;
     }
 
     public void setNetworkDestination(InetAddress address, InetAddress mask) {
-        this.nwDst = address;
-        if (mask == null) {
-            this.nwDstState = MatchFieldState.MATCH_FIELD_ONLY;
-            this.match_len += (address instanceof Inet6Address) ? 20 : 8;
+        if (address instanceof Inet6Address) {
+            this.nwDst = (Inet6Address) address;
+            if (mask == null) {
+                this.nwDstState = MatchFieldState.MATCH_FIELD_ONLY;
+                this.match_len += (address instanceof Inet6Address) ? 20 : 8;
+            } else {
+                this.dstIPv6SubnetMaskbits = (short)NetUtils.getSubnetMaskLength(mask);
+                this.nwDstState = MatchFieldState.MATCH_FIELD_WITH_MASK;
+                this.match_len += (address instanceof Inet6Address) ? 36 : 12;
+            }
         } else {
-            this.networkDestinationMask = mask;
-            this.nwDstState = MatchFieldState.MATCH_FIELD_WITH_MASK;
-            this.match_len += (address instanceof Inet6Address) ? 36 : 12;
+            this.setNetworkDestination(NetUtils.byteArray4ToInt(address.getAddress()));
+            this.wildcards ^= (((1 << 6) - 1) << 14);
+            if (mask == null) {
+                this.nwDstState = MatchFieldState.MATCH_FIELD_ONLY;
+                this.match_len += 8;
+            } else {
+                this.nwDstState = MatchFieldState.MATCH_FIELD_WITH_MASK;
+                this.match_len += 12;
+                this.wildcards |= ((32 - NetUtils.getSubnetMaskLength(mask)) << 14);
+            }
         }
     }
 
@@ -1387,9 +1357,7 @@ public class V6Match extends OFMatch implements Cloneable {
         result = prime * result + inputPortMask;
         result = prime * result + ((inputPortState == null) ? 0 : inputPortState.hashCode());
         result = prime * result + match_len;
-        result = prime * result + ((networkDestinationMask == null) ? 0 : networkDestinationMask.hashCode());
         result = prime * result + networkProtocolMask;
-        result = prime * result + ((networkSourceMask == null) ? 0 : networkSourceMask.hashCode());
         result = prime * result + networkTypeOfServiceMask;
         result = prime * result + ((nwDst == null) ? 0 : nwDst.hashCode());
         result = prime * result + ((nwDstState == null) ? 0 : nwDstState.hashCode());
@@ -1408,83 +1376,105 @@ public class V6Match extends OFMatch implements Cloneable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         V6Match other = (V6Match) obj;
-        if (!Arrays.equals(dataLayerDestinationMask, other.dataLayerDestinationMask))
+        if (!Arrays.equals(dataLayerDestinationMask, other.dataLayerDestinationMask)) {
             return false;
-        if (!Arrays.equals(dataLayerSourceMask, other.dataLayerSourceMask))
+        }
+        if (!Arrays.equals(dataLayerSourceMask, other.dataLayerSourceMask)) {
             return false;
-        if (dataLayerTypeMask != other.dataLayerTypeMask)
+        }
+        if (dataLayerTypeMask != other.dataLayerTypeMask) {
             return false;
-        if (dataLayerVirtualLanMask != other.dataLayerVirtualLanMask)
+        }
+        if (dataLayerVirtualLanMask != other.dataLayerVirtualLanMask) {
             return false;
-        if (dataLayerVirtualLanPriorityCodePointMask != other.dataLayerVirtualLanPriorityCodePointMask)
+        }
+        if (dataLayerVirtualLanPriorityCodePointMask != other.dataLayerVirtualLanPriorityCodePointMask) {
             return false;
-        if (dlDestState != other.dlDestState)
+        }
+        if (dlDestState != other.dlDestState) {
             return false;
-        if (dlSourceState != other.dlSourceState)
+        }
+        if (dlSourceState != other.dlSourceState) {
             return false;
-        if (dlVlanState != other.dlVlanState)
+        }
+        if (dlVlanState != other.dlVlanState) {
             return false;
-        if (dstIPv6SubnetMaskbits != other.dstIPv6SubnetMaskbits)
+        }
+        if (dstIPv6SubnetMaskbits != other.dstIPv6SubnetMaskbits) {
             return false;
-        if (ethTypeState != other.ethTypeState)
+        }
+        if (ethTypeState != other.ethTypeState) {
             return false;
-        if (inputPortMask != other.inputPortMask)
+        }
+        if (inputPortMask != other.inputPortMask) {
             return false;
-        if (inputPortState != other.inputPortState)
+        }
+        if (inputPortState != other.inputPortState) {
             return false;
-        if (match_len != other.match_len)
+        }
+        if (match_len != other.match_len) {
             return false;
-        if (networkDestinationMask == null) {
-            if (other.networkDestinationMask != null)
-                return false;
-        } else if (!networkDestinationMask.equals(other.networkDestinationMask))
+        }
+        if (networkProtocolMask != other.networkProtocolMask) {
             return false;
-        if (networkProtocolMask != other.networkProtocolMask)
+        }
+        if (networkTypeOfServiceMask != other.networkTypeOfServiceMask) {
             return false;
-        if (networkSourceMask == null) {
-            if (other.networkSourceMask != null)
-                return false;
-        } else if (!networkSourceMask.equals(other.networkSourceMask))
-            return false;
-        if (networkTypeOfServiceMask != other.networkTypeOfServiceMask)
-            return false;
+        }
         if (nwDst == null) {
-            if (other.nwDst != null)
+            if (other.nwDst != null) {
                 return false;
-        } else if (!nwDst.equals(other.nwDst))
+            }
+        } else if (!nwDst.equals(other.nwDst)) {
             return false;
-        if (nwDstState != other.nwDstState)
+        }
+        if (nwDstState != other.nwDstState) {
             return false;
-        if (nwProtoState != other.nwProtoState)
+        }
+        if (nwProtoState != other.nwProtoState) {
             return false;
+        }
         if (nwSrc == null) {
-            if (other.nwSrc != null)
+            if (other.nwSrc != null) {
                 return false;
-        } else if (!nwSrc.equals(other.nwSrc))
+            }
+        } else if (!nwSrc.equals(other.nwSrc)) {
             return false;
-        if (nwSrcState != other.nwSrcState)
+        }
+        if (nwSrcState != other.nwSrcState) {
             return false;
-        if (nwTosState != other.nwTosState)
+        }
+        if (nwTosState != other.nwTosState) {
             return false;
-        if (pad_size != other.pad_size)
+        }
+        if (pad_size != other.pad_size) {
             return false;
-        if (srcIPv6SubnetMaskbits != other.srcIPv6SubnetMaskbits)
+        }
+        if (srcIPv6SubnetMaskbits != other.srcIPv6SubnetMaskbits) {
             return false;
-        if (tpDstState != other.tpDstState)
+        }
+        if (tpDstState != other.tpDstState) {
             return false;
-        if (tpSrcState != other.tpSrcState)
+        }
+        if (tpSrcState != other.tpSrcState) {
             return false;
-        if (transportDestinationMask != other.transportDestinationMask)
+        }
+        if (transportDestinationMask != other.transportDestinationMask) {
             return false;
-        if (transportSourceMask != other.transportSourceMask)
+        }
+        if (transportSourceMask != other.transportSourceMask) {
             return false;
+        }
         return true;
     }
 }

@@ -9,7 +9,6 @@
 package org.opendaylight.controller.sal.match;
 
 import java.io.Serializable;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -208,6 +207,6 @@ public class MatchField implements Cloneable, Serializable {
         if (type != other.type) {
             return false;
         }
-        return (type.equalValues(this.value, other.value) && type.equalMasks(this.mask, other.mask));
+        return type.equals(this.value, other.value, this.mask, other.mask);
     }
 }
