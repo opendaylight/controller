@@ -47,6 +47,10 @@ public class IPv4 extends Packet {
     private static final String DIP = "DestinationIPAddress";
     private static final String OPTIONS = "Options";
 
+    private static final int UNIT_SIZE_SHIFT = 2;
+    private static final int UNIT_SIZE = (1 << UNIT_SIZE_SHIFT);
+    private static final int MIN_HEADER_SIZE = 20;
+
     public static final Map<Byte, Class<? extends Packet>> protocolClassMap;
     static {
         protocolClassMap = new HashMap<Byte, Class<? extends Packet>>();
@@ -145,12 +149,7 @@ public class IPv4 extends Packet {
     public int getHeaderSize() {
         int headerLen = this.getHeaderLen();
         if (headerLen == 0) {
-            headerLen = 20;
-        }
-
-        byte[] options = hdrFieldsMap.get(OPTIONS);
-        if (options != null) {
-            headerLen += options.length;
+            headerLen = MIN_HEADER_SIZE;
         }
 
         return headerLen * NetUtils.NumBitsInAByte;
@@ -260,6 +259,10 @@ public class IPv4 extends Packet {
     public void setHeaderField(String headerField, byte[] readValue) {
         if (headerField.equals(PROTOCOL)) {
             payloadClass = protocolClassMap.get(readValue[0]);
+        } else if (headerField.equals(OPTIONS) &&
+                   (readValue == null || readValue.length == 0)) {
+            hdrFieldsMap.remove(headerField);
+            return;
         }
         hdrFieldsMap.put(headerField, readValue);
     }
@@ -434,8 +437,23 @@ public class IPv4 extends Packet {
      * @return IPv4
      */
     public IPv4 setOptions(byte[] options) {
-        fieldValues.put(OPTIONS, options);
-        byte newIHL = (byte) (5 + options.length);
+        byte newIHL = (byte)(MIN_HEADER_SIZE >>> UNIT_SIZE_SHIFT);
+        if (options == null || options.length == 0) {
+            fieldValues.remove(OPTIONS);
+        } else {
+            int len = options.length;
+            int rlen = (len + (UNIT_SIZE - 1)) & ~(UNIT_SIZE - 1);
+            if (rlen > len) {
+                // Padding is required.
+                byte[] newopt = new byte[rlen];
+                System.arraycopy(options, 0, newopt, 0, len);
+                options = newopt;
+                len = rlen;
+            }
+            fieldValues.put(OPTIONS, options);
+            newIHL += (len >>> UNIT_SIZE_SHIFT);
+        }
+
         setHeaderLength(newIHL);
 
         return this;
@@ -477,15 +495,13 @@ public class IPv4 extends Packet {
     @Override
     /**
      * Gets the number of bits for the fieldname specified
-     * If the fieldname has variable length like "Options", then this value is computed using the
-     * options length and the header length
+     * If the fieldname has variable length like "Options", then this value is computed using the header length
      * @param fieldname - String
      * @return number of bits for fieldname - int
      */
     public int getfieldnumBits(String fieldName) {
         if (fieldName.equals(OPTIONS)) {
-            byte[] options = getOptions();
-            return ((options == null) ? 0 : (options.length - getHeaderLen()));
+            return (getHeaderLen() - MIN_HEADER_SIZE) * NetUtils.NumBitsInAByte;
         }
         return hdrFieldCoordMap.get(fieldName).getRight();
     }
