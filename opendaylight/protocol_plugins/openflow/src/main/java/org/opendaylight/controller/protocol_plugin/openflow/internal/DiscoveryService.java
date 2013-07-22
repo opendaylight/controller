@@ -571,7 +571,16 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         }
         for (NodeConnector nodeConnector : c) {
             if (node.equals(nodeConnector.getNode())) {
-                removeSet.add(nodeConnector);
+                Edge edge1 = edgeMap.get(nodeConnector);
+                if (edge1 != null) {
+                    removeSet.add(nodeConnector);
+
+                    // check reverse direction
+                    Edge edge2 = edgeMap.get(edge1.getTailNodeConnector());
+                    if ((edge2 != null) && node.equals(edge2.getTailNodeConnector().getNode())) {
+                        removeSet.add(edge2.getHeadNodeConnector());
+                    }
+                }
             }
         }
         return removeSet;
