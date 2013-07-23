@@ -255,10 +255,10 @@ public class InventoryServiceShim implements IContainerListener,
     }
 
     @Override
-    public void nodeConnectorUpdated(String containerName, NodeConnector p, UpdateType t) {
-        logger.debug("nodeConnectorUpdated: {} type {} for container {}", new Object[] { p, t, containerName });
-        Node node = p.getNode();
-        Set<String> ncContainers = this.nodeConnectorContainerMap.get(p);
+    public void nodeConnectorUpdated(String containerName, NodeConnector nc, UpdateType t) {
+        logger.debug("nodeConnectorUpdated: {} type {} for container {}", new Object[] { nc, t, containerName });
+        Node node = nc.getNode();
+        Set<String> ncContainers = this.nodeConnectorContainerMap.get(nc);
         Set<String> nodeContainers = this.nodeContainerMap.get(node);
         if (ncContainers == null) {
             ncContainers = new CopyOnWriteArraySet<String>();
@@ -271,7 +271,7 @@ public class InventoryServiceShim implements IContainerListener,
         switch (t) {
         case ADDED:
             if (ncContainers.add(containerName)) {
-                this.nodeConnectorContainerMap.put(p, ncContainers);
+                this.nodeConnectorContainerMap.put(nc, ncContainers);
             }
             if (nodeContainers.add(containerName)) {
                 this.nodeContainerMap.put(node, nodeContainers);
@@ -283,14 +283,14 @@ public class InventoryServiceShim implements IContainerListener,
                 if (ncContainers.isEmpty()) {
                     // Do cleanup to reduce memory footprint if no
                     // elements to be tracked
-                    this.nodeConnectorContainerMap.remove(p);
+                    this.nodeConnectorContainerMap.remove(nc);
                 } else {
-                    this.nodeConnectorContainerMap.put(p, ncContainers);
+                    this.nodeConnectorContainerMap.put(nc, ncContainers);
                 }
             }
             boolean nodeContainerUpdate = true;
-            for (NodeConnector nc : nodeConnectorContainerMap.keySet()) {
-                if ((nc.getNode().equals(node)) && (nodeConnectorContainerMap.get(nc).contains(containerName))) {
+            for (NodeConnector ncContainer : nodeConnectorContainerMap.keySet()) {
+                if ((ncContainer.getNode().equals(node)) && (nodeConnectorContainerMap.get(ncContainer).contains(containerName))) {
                     nodeContainerUpdate = false;
                     break;
                 }
@@ -309,12 +309,15 @@ public class InventoryServiceShim implements IContainerListener,
             break;
         }
 
-        Set<Property> ncProp = nodeConnectorProps.get(p);
+        Set<Property> nodeProp = nodeProps.get(node);
+        if (nodeProp == null) {
+            return;
+        }
+        Set<Property> ncProp = nodeConnectorProps.get(nc);
         // notify InventoryService
-        notifyInventoryShimInternalListener(containerName, p, t, ncProp);
+        notifyInventoryShimInternalListener(containerName, nc, t, ncProp);
 
         if (notifyNodeUpdate) {
-            Set<Property> nodeProp = nodeProps.get(node);
             notifyInventoryShimInternalListener(containerName, node, t, nodeProp);
         }
     }
