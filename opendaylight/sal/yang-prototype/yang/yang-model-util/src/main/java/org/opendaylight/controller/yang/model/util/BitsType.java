@@ -36,6 +36,8 @@ public final class BitsType implements BitsTypeDefinition {
     /**
      * Default constructor. <br>
      * Instantiates Bits type as empty bits list.
+     *
+     * @param path
      */
     public BitsType(final SchemaPath path) {
         super();
@@ -47,11 +49,8 @@ public final class BitsType implements BitsTypeDefinition {
     /**
      * Constructor with explicit definition of bits assigned to BitsType.
      *
-     * @param actualPath
-     * @param namespace
-     * @param revision
+     * @param path
      * @param bits
-     *            The bits assigned for Bits Type
      */
     public BitsType(final SchemaPath path, final List<Bit> bits) {
         super();
@@ -159,12 +158,10 @@ public final class BitsType implements BitsTypeDefinition {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((bits == null) ? 0 : bits.hashCode());
-        result = prime * result
-                + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((path == null) ? 0 : path.hashCode());
-        result = prime * result
-                + ((reference == null) ? 0 : reference.hashCode());
+        result = prime * result + ((reference == null) ? 0 : reference.hashCode());
         result = prime * result + ((units == null) ? 0 : units.hashCode());
         return result;
     }
