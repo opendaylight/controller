@@ -29,31 +29,42 @@ public final class Types {
     public static final Type DATA_OBJECT = typeForClass(DataObject.class);
 
     public static ConcreteType voidType() {
-        return new ConcreteTypeImpl(Void.class.getPackage().getName(),
-                Void.class.getSimpleName());
+        return new ConcreteTypeImpl(Void.class.getPackage().getName(), Void.class.getSimpleName());
     }
 
     public static final Type primitiveType(final String primitiveType) {
         return new ConcreteTypeImpl("", primitiveType);
     }
 
-
     /**
      * Returns an instance of {@link ConcreteType} describing the class
-     *
+     * 
      * @param cls
      *            Class to describe
      * @return Description of class
      */
     public static ConcreteType typeForClass(Class<?> cls) {
-        return new ConcreteTypeImpl(cls.getPackage().getName(),
-                cls.getSimpleName());
+        return new ConcreteTypeImpl(cls.getPackage().getName(), cls.getSimpleName());
+    }
+
+    /**
+     * Returns an instance of {@link ConcreteType} according to specified
+     * package and type
+     * 
+     * @param packageName
+     *            string which contains name of package
+     * @param typeName
+     *            string contains name of type
+     * @return instance of ConcreteType
+     */
+    public static ConcreteType typeForClass(final String packageName, final String typeName) {
+        return new ConcreteTypeImpl(packageName, typeName);
     }
 
     /**
      * Returns an instance of {@link ParameterizedType} describing the typed
      * {@link Map}<K,V>
-     *
+     * 
      * @param keyType
      *            Key Type
      * @param valueType
@@ -67,7 +78,7 @@ public final class Types {
     /**
      * Returns an instance of {@link ParameterizedType} describing the typed
      * {@link Set}<V> with concrete type of value.
-     *
+     * 
      * @param valueType
      *            Value Type
      * @return Description of generic type instance of Set
@@ -79,7 +90,7 @@ public final class Types {
     /**
      * Returns an instance of {@link ParameterizedType} describing the typed
      * {@link List}<V> with concrete type of value.
-     *
+     * 
      * @param valueType
      *            Value Type
      * @return Description of type instance of List
@@ -90,19 +101,17 @@ public final class Types {
 
     public static GeneratedTransferObject getBaseIdentityTO() {
         Class<BaseIdentity> cls = BaseIdentity.class;
-        GeneratedTOBuilderImpl gto = new GeneratedTOBuilderImpl(cls.getPackage().getName(),
-                cls.getSimpleName());
+        GeneratedTOBuilderImpl gto = new GeneratedTOBuilderImpl(cls.getPackage().getName(), cls.getSimpleName());
         return gto.toInstance();
     }
 
     /**
-     *
+     * 
      * @param type
      * @param parameters
      * @return
      */
-    public static ParameterizedType parameterizedTypeFor(Type type,
-            Type... parameters) {
+    public static ParameterizedType parameterizedTypeFor(Type type, Type... parameters) {
         return new ParametrizedTypeImpl(type, parameters);
     }
 
@@ -120,15 +129,13 @@ public final class Types {
         return parameterizedTypeFor(augmentation, valueType);
     }
 
-    private static class ConcreteTypeImpl extends AbstractBaseType implements
-            ConcreteType {
+    private static class ConcreteTypeImpl extends AbstractBaseType implements ConcreteType {
         private ConcreteTypeImpl(String pkName, String name) {
             super(pkName, name);
         }
     }
 
-    private static class ParametrizedTypeImpl extends AbstractBaseType
-            implements ParameterizedType {
+    private static class ParametrizedTypeImpl extends AbstractBaseType implements ParameterizedType {
         private Type[] actualTypes;
         private Type rawType;
 
@@ -151,8 +158,7 @@ public final class Types {
 
     }
 
-    private static class WildcardTypeImpl extends AbstractBaseType
-            implements WildcardType {
+    private static class WildcardTypeImpl extends AbstractBaseType implements WildcardType {
         public WildcardTypeImpl(String packageName, String typeName) {
             super(packageName, typeName);
         }

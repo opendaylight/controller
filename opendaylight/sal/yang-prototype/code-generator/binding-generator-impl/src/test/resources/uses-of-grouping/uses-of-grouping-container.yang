@@ -1,0 +1,28 @@
+module grouping_uses_container {
+    
+    namespace "urn:grouping:uses:container";
+    prefix "sbd";
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    revision 2013-07-18 {
+    }
+    
+    grouping grouping-container-test {
+        leaf leaf-grouping-container-test1 {
+            type string;
+        }
+        leaf leaf-grouping-container-test2 {
+            type uint8;
+        }
+    }
+    
+//grouping in CONTAINER
+    container container-test {
+        leaf container-leaf-test {
+            type string;
+        }
+        uses grouping-container-test;
+    }
+}

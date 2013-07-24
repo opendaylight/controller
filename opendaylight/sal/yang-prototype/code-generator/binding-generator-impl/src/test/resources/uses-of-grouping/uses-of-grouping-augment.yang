@@ -1,0 +1,31 @@
+module grouping_uses_augment {
+    
+    namespace "urn:grouping:uses:augment";
+    prefix "sbd";
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    revision 2013-07-18 {
+    }
+
+    grouping grouping-augment-test {
+        leaf leaf-grouping-augment-test {
+            type string;
+        }
+    }
+    
+
+    container container-augment {
+        leaf leaf-container-augment1 {
+            type string;
+        }
+        leaf leaf-container-augment2 {
+            type int64;
+        }
+    }         
+    
+    augment "/container-augment" {
+        uses grouping-augment-test;        
+    }
+}
