@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///Kk\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderClassDescriptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-24T06:55:07Z",
+      "side": 1,
+      "message": "Rather than varargs in ctor use List of TypeDeclaration) if it is possible.",
+      "revId": "1a1d634579e178987f8ab70c6a9b0031a30943ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///Kg\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderClassDescriptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-24T06:55:07Z",
+      "side": 1,
+      "message": "Why not use just type.getName() ?",
+      "revId": "1a1d634579e178987f8ab70c6a9b0031a30943ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///Kc\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderClassDescriptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-24T06:55:07Z",
+      "side": 1,
+      "message": "Why not rather have two params, packageName and name??",
+      "revId": "1a1d634579e178987f8ab70c6a9b0031a30943ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///Ko\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderClassDescriptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-24T06:55:07Z",
+      "side": 1,
+      "message": "Don\u0027t use param name in Exception, rather Fully Qualified Name cannot be NULL!",
+      "revId": "1a1d634579e178987f8ab70c6a9b0031a30943ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///Ks\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderClassDescriptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-24T06:55:07Z",
+      "side": 1,
+      "message": "Not every java type has fully qualified name with dot (example what about primitive byte[], int etc...) This is not good check",
+      "revId": "1a1d634579e178987f8ab70c6a9b0031a30943ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///KY\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderClassDescriptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-24T06:55:07Z",
+      "side": 1,
+      "message": "Isn\u0027t better to have packageName and name params?",
+      "revId": "1a1d634579e178987f8ab70c6a9b0031a30943ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///KU\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderClassDescriptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-24T06:55:07Z",
+      "side": 1,
+      "message": "Method SHULD NOT return null rather return empty set than NULL - possible increase of NPE by caller of method!",
+      "revId": "1a1d634579e178987f8ab70c6a9b0031a30943ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///KQ\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderClassDescriptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-24T06:55:07Z",
+      "side": 1,
+      "message": "rather than NULL Throw IllegalArgumentException!",
+      "revId": "1a1d634579e178987f8ab70c6a9b0031a30943ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///KM\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderClassDescriptor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-24T06:55:07Z",
+      "side": 1,
+      "message": "return empty list rather than null!!",
+      "revId": "1a1d634579e178987f8ab70c6a9b0031a30943ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
