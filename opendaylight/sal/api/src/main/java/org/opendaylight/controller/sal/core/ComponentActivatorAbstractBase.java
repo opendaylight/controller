@@ -152,6 +152,11 @@ abstract public class ComponentActivatorAbstractBase implements
 
         @Override
         public void stopped(Component component) {
+            // do nothing
+        }
+
+        @Override
+        public void stopping(Component component) {
             if (component == null) {
                 return;
             }
@@ -159,11 +164,6 @@ abstract public class ComponentActivatorAbstractBase implements
                     .getService() }, "stopping", new Class[][] {
                     { Component.class }, {} }, new Object[][] { { component },
                     {} });
-        }
-
-        @Override
-        public void stopping(Component component) {
-            // do nothing
         }
     }
 
