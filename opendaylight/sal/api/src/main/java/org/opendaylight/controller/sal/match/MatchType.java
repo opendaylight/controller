@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.sal.match;
 
-import java.net.Inet6Address;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Arrays;
 
@@ -242,8 +242,12 @@ public enum MatchType {
             break;
         case NW_SRC:
         case NW_DST:
-            result = prime * result + ((v == null)? 0 : v.hashCode());
-            result = prime * result + ((m == null)? NetUtils.gethighestIP(v instanceof Inet6Address).hashCode() : m.hashCode());
+            // Hash code has to take into account only prefix address
+            InetAddress ip = (InetAddress) v;
+            int maskLen = (m == null) ? ((ip instanceof Inet4Address) ? 32 : 128) : NetUtils
+                    .getSubnetMaskLength((InetAddress) m);
+            InetAddress prefix = NetUtils.getSubnetPrefix(ip, maskLen);
+            result = prime * result + ((v == null)? 0 : prefix.hashCode());
             break;
         default:
             result = prime * result + ((v == null)? 0 : v.hashCode());
@@ -278,20 +282,35 @@ public enum MatchType {
              * For network address mask, network node may return full mask for
              * flows the controller generated with a null mask object
              */
-            byte maskBytes[] = null;
-            if (a == null) {
-                maskBytes = ((InetAddress) b).getAddress();
-            } else if (b == null) {
-                maskBytes = ((InetAddress) a).getAddress();
-            }
-            if (maskBytes != null) {
-                return (NetUtils.getSubnetMaskLength(maskBytes) == 0);
+            if (a == null || b == null) {
+                InetAddress mask = (a == null) ? (InetAddress) b : (InetAddress) a;
+                int maxLength = (mask instanceof Inet4Address) ? 32 : 128;
+                return (NetUtils.getSubnetMaskLength(mask) == maxLength);
             }
         default:
             if (a == null) {
                 return false;
             }
             return a.equals(b);
+        }
+    }
+
+    public boolean equals(Object value1, Object value2, Object mask1, Object mask2) {
+        switch (this) {
+        case NW_SRC:
+        case NW_DST:
+            // Equality to be checked against prefix addresses
+            InetAddress thisIP = (InetAddress) value1;
+            int thisMaskLen = (mask1 == null) ? ((thisIP instanceof Inet4Address) ? 32 : 128) : NetUtils
+                    .getSubnetMaskLength((InetAddress) mask1);
+            InetAddress otherIP = (InetAddress) value2;
+            int otherMaskLen = (mask2 == null) ? ((otherIP instanceof Inet4Address) ? 32 : 128) : NetUtils
+                    .getSubnetMaskLength((InetAddress) mask2);
+
+            return NetUtils.getSubnetPrefix(thisIP, thisMaskLen)
+                    .equals(NetUtils.getSubnetPrefix(otherIP, otherMaskLen));
+        default:
+            return (this.equalValues(value1, value2) && this.equalMasks(mask1, mask2));
         }
     }
 }

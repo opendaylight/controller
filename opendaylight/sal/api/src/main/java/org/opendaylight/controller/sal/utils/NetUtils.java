@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.sal.utils;
 
+import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -41,7 +42,7 @@ public abstract class NetUtils {
     /**
      * Constant holding the broadcast MAC address
      */
-    public static byte[] BroadcastMACAddr = {-1, -1, -1, -1, -1, -1};
+    private static final byte[] BroadcastMACAddr = {-1, -1, -1, -1, -1, -1};
 
     /**
      * Converts a 4 bytes array into an integer number
@@ -144,46 +145,44 @@ public abstract class NetUtils {
     }
 
     /**
-     * Returns the number of contiguous bits belonging to the subnet, that have
-     * to be masked out Example: A prefix network byte mask of ff.ff.ff.00 will
-     * give a subnet mask length of 8, while ff.00.00.00 will return a subnet
-     * mask length of 24. If the passed prefixMask object is null, 0 is returned
+     * Returns the prefix size in bits of the specified subnet mask. Example:
+     * For the subnet mask ff.ff.ff.e0 it returns 25 while for ff.00.00.00 it
+     * returns 8. If the passed subnetMask array is null, 0 is returned.
      *
-     * @param prefixMask
-     *            the prefix mask as byte array
-     * @return the length of the prefix network mask
+     * @param subnetMask
+     *            the subnet mask as byte array
+     * @return the prefix length as number of bits
      */
-    public static int getSubnetMaskLength(byte[] prefixMask) {
+    public static int getSubnetMaskLength(byte[] subnetMask) {
         int maskLength = 0;
-        if (prefixMask != null) {
-            // Create bit mask
-            int intMask = 0;
-            int numBytes = prefixMask.length;
-            for (int i = 0; i < numBytes; i++) {
-                intMask |= (prefixMask[i] & 0xff) << (8 * (numBytes - 1 - i));
+        if (subnetMask != null && (subnetMask.length == 4 || subnetMask.length == 16)) {
+            int index = 0;
+            while (index < subnetMask.length && subnetMask[index] == (byte) 0xFF) {
+                maskLength += NetUtils.NumBitsInAByte;
+                index++;
             }
-
-            int bit = 1;
-            while (((intMask & bit) == 0) && (maskLength <= (numBytes * 8))) {
-                maskLength += 1;
-                bit = bit << 1;
+            if (index != subnetMask.length) {
+                int bits = NetUtils.NumBitsInAByte - 1;
+                while (bits >= 0 && (subnetMask[index] & 1 << bits)  != 0) {
+                    bits--;
+                    maskLength++;
+                }
             }
         }
         return maskLength;
     }
 
     /**
-     * Returns the number of contiguous bits belonging to the subnet, that have
-     * to be masked out Example: A prefix network byte mask of ff.ff.ff.00 will
-     * give a subnet mask length of 8, while ff.00.00.00 will return a subnet
-     * mask length of 24 If the passed prefixMask object is null, 0 is returned
+     * Returns the prefix size in bits of the specified subnet mask. Example:
+     * For the subnet mask 255.255.255.128 it returns 25 while for 255.0.0.0 it
+     * returns 8. If the passed subnetMask object is null, 0 is returned
      *
-     * @param prefixMask
-     *            the prefix mask as InetAddress
-     * @return the length of the prefix network mask
+     * @param subnetMask
+     *            the subnet mask as InetAddress
+     * @return the prefix length as number of bits
      */
-    public static int getSubnetMaskLength(InetAddress prefixMask) {
-        return (prefixMask == null) ? 0 : NetUtils.getSubnetMaskLength(prefixMask.getAddress());
+    public static int getSubnetMaskLength(InetAddress subnetMask) {
+        return subnetMask == null ? 0 : NetUtils.getSubnetMaskLength(subnetMask.getAddress());
     }
 
     /**
@@ -247,20 +246,18 @@ public abstract class NetUtils {
             return false;
         }
 
-        int testMaskLen = (testMask != null) ? NetUtils.getSubnetMaskLength(testMask.getAddress()) : 0;
-        int filterMaskLen = (filterMask != null) ? NetUtils.getSubnetMaskLength(filterMask.getAddress()) : 0;
-
-        int testPrefixLen = (testAddress instanceof Inet6Address) ? (128 - testMaskLen) : (32 - testMaskLen);
-        int filterPrefixLen = (filterAddress instanceof Inet6Address) ? (128 - filterMaskLen) : (32 - filterMaskLen);
+        int testMaskLen = (testMask == null) ? ((testAddress instanceof Inet4Address) ? 32 : 128) : NetUtils
+                .getSubnetMaskLength(testMask);
+        int filterMaskLen = NetUtils.getSubnetMaskLength(filterMask);
 
         // Mask length check. Test mask has to be more specific than filter one
-        if (testPrefixLen < filterPrefixLen) {
+        if (testMaskLen < filterMaskLen) {
             return true;
         }
 
         // Subnet Prefix on filter mask length must be the same
-        InetAddress prefix1 = getSubnetPrefix(testAddress, filterPrefixLen);
-        InetAddress prefix2 = getSubnetPrefix(filterAddress, filterPrefixLen);
+        InetAddress prefix1 = getSubnetPrefix(testAddress, filterMaskLen);
+        InetAddress prefix2 = getSubnetPrefix(filterAddress, filterMaskLen);
         return (!prefix1.equals(prefix2));
     }
 
