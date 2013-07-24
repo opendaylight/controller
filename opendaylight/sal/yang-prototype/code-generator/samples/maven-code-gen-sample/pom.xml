@@ -109,5 +109,10 @@
             <artifactId>yang-binding</artifactId>
             <version>0.5.4-SNAPSHOT</version>
         </dependency>
+        <dependency>
+        	<groupId>org.opendaylight.controller</groupId>
+        	<artifactId>yang-common</artifactId>
+		    <version>0.5.4-SNAPSHOT</version>        	
+        </dependency>
     </dependencies>
 </project>
