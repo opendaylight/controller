@@ -1,0 +1,52 @@
+module grouping_dependencies {
+    
+    namespace "urn:grouping:dependencies";
+    prefix "sbd";
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    revision 2013-07-18 {
+    }
+  
+    grouping grouping-U {
+        leaf leaf-grouping-U {
+            type string;
+        }
+        uses grouping-V;
+        uses grouping-X;
+    }
+
+    grouping grouping-V {
+        leaf leaf-grouping-V {
+            type string;
+        }
+        uses grouping-Z;
+        uses grouping-ZZ;
+    }
+
+    grouping grouping-X {
+        leaf leaf-grouping-X {
+            type string;
+        }
+        uses grouping-Y;
+    }
+
+    grouping grouping-Y {
+        leaf leaf-grouping-Y {
+            type string;
+        }
+    }
+    
+    grouping grouping-Z {
+        leaf leaf-grouping-Z {
+            type string;
+        }
+    }
+    
+    grouping grouping-ZZ {
+        leaf leaf-grouping-ZZ {
+            type string;
+        }
+    }    
+}
