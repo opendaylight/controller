@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.*;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.moduleNamespaceToPackageName;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.packageNameForGeneratedType;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.parseToClassName;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.parseToValidParamName;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.schemaNodeToTransferObjectBuilder;
 import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findDataSchemaNode;
 import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findParentModule;
-
-import java.util.concurrent.Future;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.controller.binding.generator.util.Types;
@@ -35,6 +38,7 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedP
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTypeBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
+import org.opendaylight.controller.sal.binding.yang.types.GroupingDefinitionDependencySort;
 import org.opendaylight.controller.sal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.controller.yang.binding.Notification;
 import org.opendaylight.controller.yang.common.QName;
@@ -57,6 +61,7 @@ import org.opendaylight.controller.yang.model.api.SchemaContext;
 import org.opendaylight.controller.yang.model.api.SchemaNode;
 import org.opendaylight.controller.yang.model.api.SchemaPath;
 import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.controller.yang.model.api.UsesNode;
 import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
 import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
@@ -70,6 +75,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
     private Map<String, Map<String, GeneratedTypeBuilder>> genTypeBuilders;
     private TypeProvider typeProvider;
     private SchemaContext schemaContext;
+    private final Map<SchemaPath, GeneratedType> allGroupings = new HashMap<SchemaPath, GeneratedType>();
 
     public BindingGeneratorImpl() {
         super();
@@ -90,6 +96,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         final Set<Module> modules = context.getModules();
         genTypeBuilders = new HashMap<>();
         for (final Module module : modules) {
+            generatedTypes.addAll(allGroupingsToGenTypes(module));
             generatedTypes.add(moduleToDataType(module));
             generatedTypes.addAll(allTypeDefinitionsToGenTypes(module));
             generatedTypes.addAll(allContainersToGenTypes(module));
@@ -99,7 +106,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
             generatedTypes.addAll(allRPCMethodsToGenType(module));
             generatedTypes.addAll(allNotificationsToGenType(module));
             generatedTypes.addAll(allIdentitiesToGenTypes(module, context));
-            generatedTypes.addAll(allGroupingsToGenTypes(module));
+
         }
         return generatedTypes;
     }
@@ -124,6 +131,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         for (final Module contextModule : contextModules) {
             final List<Type> generatedTypes = new ArrayList<>();
 
+            generatedTypes.addAll(allGroupingsToGenTypes(contextModule));
             generatedTypes.add(moduleToDataType(contextModule));
             generatedTypes.addAll(allTypeDefinitionsToGenTypes(contextModule));
             generatedTypes.addAll(allContainersToGenTypes(contextModule));
@@ -133,7 +141,6 @@ public final class BindingGeneratorImpl implements BindingGenerator {
             generatedTypes.addAll(allRPCMethodsToGenType(contextModule));
             generatedTypes.addAll(allNotificationsToGenType(contextModule));
             generatedTypes.addAll(allIdentitiesToGenTypes(contextModule, context));
-            generatedTypes.addAll(allGroupingsToGenTypes(contextModule));
 
             if (modules.contains(contextModule)) {
                 filteredGenTypes.addAll(generatedTypes);
@@ -185,7 +192,9 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         final List<ContainerSchemaNode> schemaContainers = it.allContainers();
         final String basePackageName = moduleNamespaceToPackageName(module);
         for (final ContainerSchemaNode container : schemaContainers) {
-            generatedTypes.add(containerToGenType(basePackageName, container));
+            if (!container.isAddedByUses()) {
+                generatedTypes.add(containerToGenType(basePackageName, container));
+            }
         }
         return generatedTypes;
     }
@@ -210,7 +219,9 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         final String basePackageName = moduleNamespaceToPackageName(module);
         if (schemaLists != null) {
             for (final ListSchemaNode list : schemaLists) {
-                generatedTypes.addAll(listToGenType(basePackageName, list));
+                if (!list.isAddedByUses()) {
+                    generatedTypes.addAll(listToGenType(basePackageName, list));
+                }
             }
         }
         return generatedTypes;
@@ -230,7 +241,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
 
         final List<GeneratedType> generatedTypes = new ArrayList<>();
         for (final ChoiceNode choice : choiceNodes) {
-            if (choice != null) {
+            if ((choice != null) && !choice.isAddedByUses()) {
                 generatedTypes.addAll(choiceToGeneratedType(basePackageName, choice));
             }
         }
@@ -292,6 +303,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         }
 
         final GeneratedTypeBuilder moduleDataTypeBuilder = moduleTypeBuilder(module, "Data");
+        addInterfaceDefinition(module, moduleDataTypeBuilder);
 
         final String basePackageName = moduleNamespaceToPackageName(module);
         if (moduleDataTypeBuilder != null) {
@@ -335,6 +347,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                 if (input != null) {
                     rpcInOut.add(new DataNodeIterator(input));
                     GeneratedTypeBuilder inType = addRawInterfaceDefinition(basePackageName, input, rpcName);
+                    addInterfaceDefinition(input, inType);
                     resolveDataSchemaNodes(basePackageName, inType, input.getChildNodes());
                     Type inTypeInstance = inType.toInstance();
                     genRPCTypes.add(inTypeInstance);
@@ -344,8 +357,8 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                 Type outTypeInstance = Types.typeForClass(Void.class);
                 if (output != null) {
                     rpcInOut.add(new DataNodeIterator(output));
-
                     GeneratedTypeBuilder outType = addRawInterfaceDefinition(basePackageName, output, rpcName);
+                    addInterfaceDefinition(output, outType);
                     resolveDataSchemaNodes(basePackageName, outType, output.getChildNodes());
                     outTypeInstance = outType.toInstance();
                     genRPCTypes.add(outTypeInstance);
@@ -358,13 +371,17 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                     List<ContainerSchemaNode> nContainers = it.allContainers();
                     if ((nContainers != null) && !nContainers.isEmpty()) {
                         for (final ContainerSchemaNode container : nContainers) {
-                            genRPCTypes.add(containerToGenType(basePackageName, container));
+                            if (!container.isAddedByUses()) {
+                                genRPCTypes.add(containerToGenType(basePackageName, container));
+                            }
                         }
                     }
                     List<ListSchemaNode> nLists = it.allLists();
                     if ((nLists != null) && !nLists.isEmpty()) {
                         for (final ListSchemaNode list : nLists) {
-                            genRPCTypes.addAll(listToGenType(basePackageName, list));
+                            if (!list.isAddedByUses()) {
+                                genRPCTypes.addAll(listToGenType(basePackageName, list));
+                            }
                         }
                     }
                 }
@@ -398,11 +415,15 @@ public final class BindingGeneratorImpl implements BindingGenerator {
 
                 // Containers
                 for (ContainerSchemaNode node : it.allContainers()) {
-                    genNotifyTypes.add(containerToGenType(basePackageName, node));
+                    if (!node.isAddedByUses()) {
+                        genNotifyTypes.add(containerToGenType(basePackageName, node));
+                    }
                 }
                 // Lists
                 for (ListSchemaNode node : it.allLists()) {
-                    genNotifyTypes.addAll(listToGenType(basePackageName, node));
+                    if (!node.isAddedByUses()) {
+                        genNotifyTypes.addAll(listToGenType(basePackageName, node));
+                    }
                 }
                 final GeneratedTypeBuilder notificationTypeBuilder = addDefaultInterfaceDefinition(basePackageName,
                         notification);
@@ -460,10 +481,16 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         final List<Type> genTypes = new ArrayList<>();
         final String basePackageName = moduleNamespaceToPackageName(module);
         final Set<GroupingDefinition> groupings = module.getGroupings();
-        if (groupings != null && !groupings.isEmpty()) {
-            for (final GroupingDefinition grouping : groupings) {
-                genTypes.add(groupingToGenType(basePackageName, grouping));
-            }
+        List<GroupingDefinition> groupingsSortedByDependencies;
+        // groupingsSortedByDependencies =
+        // sortGroupingDefinitionsByUses(groupings);
+        groupingsSortedByDependencies = GroupingDefinitionDependencySort.sort(groupings);
+
+        for (final GroupingDefinition grouping : groupingsSortedByDependencies) {
+            GeneratedType genType = groupingToGenType(basePackageName, grouping);
+            genTypes.add(genType);
+            SchemaPath schemaPath = grouping.getPath();
+            allGroupings.put(schemaPath, genType);
         }
         return genTypes;
     }
@@ -562,6 +589,8 @@ public final class BindingGeneratorImpl implements BindingGenerator {
             if (!(targetSchemaNode instanceof ChoiceNode)) {
                 final GeneratedTypeBuilder augTypeBuilder = addRawAugmentGenTypeDefinition(augmentPackageName,
                         targetPackageName, targetSchemaNodeName, augSchema);
+                addInterfaceDefinition(augSchema, augTypeBuilder);
+
                 final GeneratedType augType = augTypeBuilder.toInstance();
                 genTypes.add(augType);
             } else {
@@ -686,7 +715,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
             final GeneratedTypeBuilder typeBuilder, final Set<DataSchemaNode> schemaNodes) {
         if ((schemaNodes != null) && (typeBuilder != null)) {
             for (final DataSchemaNode schemaNode : schemaNodes) {
-                if (schemaNode.isAugmenting()) {
+                if (schemaNode.isAugmenting() || schemaNode.isAddedByUses()) {
                     continue;
                 }
                 addSchemaNodeToBuilderAsMethod(basePackageName, schemaNode, typeBuilder);
@@ -737,7 +766,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         }
 
         final String choiceName = choiceNode.getQName().getLocalName();
-        if (choiceName != null) {
+        if (choiceName != null && !choiceNode.isAddedByUses()) {
             final String packageName = packageNameForGeneratedType(basePackageName, choiceNode.getPath());
             final GeneratedTypeBuilder choiceType = addDefaultInterfaceDefinition(packageName, choiceNode);
             constructGetter(typeBuilder, choiceName, choiceNode.getDescription(), choiceType);
@@ -834,7 +863,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                 leafDesc = "";
             }
 
-            if (leafName != null) {
+            if (leafName != null && !leaf.isAddedByUses()) {
                 final TypeDefinition<?> typeDef = leaf.getType();
 
                 Type returnType = null;
@@ -879,7 +908,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                 leafDesc = "";
             }
 
-            if (leafName != null) {
+            if (leafName != null && !leaf.isAddedByUses()) {
                 final TypeDefinition<?> typeDef = leaf.getType();
 
                 // TODO: properly resolve enum types
@@ -911,7 +940,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
                 nodeDesc = "";
             }
 
-            if (nodeName != null) {
+            if (nodeName != null && !node.isAddedByUses()) {
                 final TypeDefinition<?> type = node.getType();
                 final Type listType = Types.listTypeFor(typeProvider.javaTypeForSchemaDefinitionType(type));
 
@@ -927,7 +956,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         if ((containerNode != null) && (typeBuilder != null)) {
             final String nodeName = containerNode.getQName().getLocalName();
 
-            if (nodeName != null) {
+            if (nodeName != null && !containerNode.isAddedByUses()) {
                 final String packageName = packageNameForGeneratedType(basePackageName, containerNode.getPath());
 
                 final GeneratedTypeBuilder rawGenType = addDefaultInterfaceDefinition(packageName, containerNode);
@@ -944,7 +973,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         if ((schemaNode != null) && (typeBuilder != null)) {
             final String listName = schemaNode.getQName().getLocalName();
 
-            if (listName != null) {
+            if (listName != null && !schemaNode.isAddedByUses()) {
                 final String packageName = packageNameForGeneratedType(basePackageName, schemaNode.getPath());
                 final GeneratedTypeBuilder rawGenType = addDefaultInterfaceDefinition(packageName, schemaNode);
                 constructGetter(typeBuilder, listName, schemaNode.getDescription(), Types.listTypeFor(rawGenType));
@@ -967,7 +996,14 @@ public final class BindingGeneratorImpl implements BindingGenerator {
     private GeneratedTypeBuilder addDefaultInterfaceDefinition(final String packageName, final SchemaNode schemaNode) {
         final GeneratedTypeBuilder builder = addRawInterfaceDefinition(packageName, schemaNode, "");
         builder.addImplementsType(Types.DATA_OBJECT);
-        builder.addImplementsType(Types.augmentableTypeFor(builder));
+        if (!(schemaNode instanceof GroupingDefinition)) {
+            builder.addImplementsType(Types.augmentableTypeFor(builder));
+        }
+
+        if (schemaNode instanceof DataNodeContainer) {
+            addInterfaceDefinition((DataNodeContainer) schemaNode, builder);
+        }
+
         return builder;
     }
 
@@ -1198,6 +1234,29 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         }
         return null;
 
+    }
+
+    /**
+     * Adds the implemented types to type builder. The method passes through the
+     * list of elements which contains {@code dataNodeContainer} and adds them
+     * as <i>implements type</i> to <code>builder</code>
+     * 
+     * @param dataNodeContainer
+     *            element which contains the list of used YANG groupings
+     * @param builder
+     *            builder to which are added implemented types according to
+     *            <code>dataNodeContainer</code>
+     * @return generated type builder which contains implemented types
+     */
+    private GeneratedTypeBuilder addInterfaceDefinition(final DataNodeContainer dataNodeContainer,
+            final GeneratedTypeBuilder builder) {
+        for (UsesNode usesNode : dataNodeContainer.getUses()) {
+            if (usesNode.getGroupingPath() != null) {
+                GeneratedType genType = allGroupings.get(usesNode.getGroupingPath());
+                builder.addImplementsType(Types.typeDefinedByString(genType.getPackageName(), genType.getName()));
+            }
+        }
+        return builder;
     }
 
 }
