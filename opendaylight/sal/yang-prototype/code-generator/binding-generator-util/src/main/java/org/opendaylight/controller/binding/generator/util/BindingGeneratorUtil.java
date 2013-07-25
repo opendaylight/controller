@@ -30,8 +30,11 @@ public final class BindingGeneratorUtil {
             if (packNameParts != null) {
                 final StringBuilder builder = new StringBuilder();
                 for (int i = 0; i < packNameParts.length; ++i) {
-                    if (JAVA_RESERVED_WORDS.contains(packNameParts[i])) {
-                        packNameParts[i] = "_" + packNameParts[i];
+                    final String packNamePart = packNameParts[i];
+                    if (Character.isDigit(packNamePart.charAt(0))) {
+                        packNameParts[i] = "_" + packNamePart;
+                    } else if (JAVA_RESERVED_WORDS.contains(packNamePart)) {
+                        packNameParts[i] = "_" + packNamePart;
                     }
                     if (i > 0) {
                         builder.append(".");

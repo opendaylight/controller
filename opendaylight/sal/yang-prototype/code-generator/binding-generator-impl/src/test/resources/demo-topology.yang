@@ -1,6 +1,6 @@
 module demo-topology {
 	yang-version 1;
-    namespace "";
+    namespace "urn:model.1demo-275topology.4.5.my";
     prefix "tp";
 
     organization "OPEN DAYLIGHT";

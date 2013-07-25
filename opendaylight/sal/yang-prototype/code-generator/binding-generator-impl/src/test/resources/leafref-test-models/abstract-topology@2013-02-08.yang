@@ -57,6 +57,12 @@ module abstract-topology {
             UNIQUE topology identifier.";
         }
 
+        leaf cond-leafref {
+            type leafref {
+                path "/tp:topology/tp:network-nodes/tp:network-node[node-id = 'super-node']";
+            }
+        }
+
         container network-nodes {
             list network-node {
                 key "node-id";

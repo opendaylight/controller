@@ -221,7 +221,7 @@ public final class TypeProviderImpl implements TypeProvider {
         final String strXPath = xpath.toString();
 
         if (strXPath != null) {
-            if (strXPath.matches(".*//[.* | .*//].*")) {
+            if (strXPath.contains("[")) {
                 returnType = Types.typeForClass(Object.class);
             } else {
                 final Module module = findParentModuleForTypeDefinition(schemaContext, leafrefType);
