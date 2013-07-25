@@ -42,7 +42,7 @@ public class HostTrackerCallable implements Callable<HostNodeConnector> {
         if (h != null)
             return h;
         hostTracker.setCallableOnPendingARP(trackedHost, this);
-        latch.await();
+        Thread.sleep(2000); // wait 2sec to see if the host responds
         return hostTracker.hostQuery(trackedHost);
     }
 

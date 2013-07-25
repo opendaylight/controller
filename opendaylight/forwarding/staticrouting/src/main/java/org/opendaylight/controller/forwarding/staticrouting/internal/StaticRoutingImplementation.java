@@ -24,8 +24,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,9 +58,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Static Routing feature provides the bridge between SDN and Non-SDN networks.
- *
- *
- *
  */
 public class StaticRoutingImplementation implements IfNewHostNotify,
         IForwardingStaticRouting, IObjectReader, IConfigurationContainerAware,
@@ -75,6 +75,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     private IClusterContainerServices clusterContainerService = null;
     private Set<IStaticRoutingAware> staticRoutingAware = Collections
             .synchronizedSet(new HashSet<IStaticRoutingAware>());
+    private ExecutorService executor;
 
     void setStaticRoutingAware(IStaticRoutingAware s) {
         if (this.staticRoutingAware != null) {
@@ -235,43 +236,53 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         }
     }
 
-    private class NotifyStaticRouteThread extends Thread {
+    private class NotifyStaticRouteWorker implements Callable<Object> {
         private StaticRoute staticRoute;
         private boolean added;
 
-        public NotifyStaticRouteThread(StaticRoute s, boolean update) {
+        public NotifyStaticRouteWorker(StaticRoute s, boolean update) {
             this.staticRoute = s;
             this.added = update;
         }
 
-        public void run() {
+        @Override
+        public Object call() throws Exception {
             if (!added
                     || (staticRoute.getType() == StaticRoute.NextHopType.SWITCHPORT)) {
                 notifyStaticRouteUpdate(staticRoute, added);
             } else {
-                HostNodeConnector host = hostTracker.hostQuery(staticRoute
-                        .getNextHopAddress());
+                InetAddress nh = staticRoute.getNextHopAddress();
+                HostNodeConnector host = hostTracker.hostQuery(nh);
                 if (host == null) {
-                    Future<HostNodeConnector> future = hostTracker
-                            .discoverHost(staticRoute.getNextHopAddress());
+                    log.debug("Next hop {}  is not present, try to discover it", nh.getHostAddress());
+                    Future<HostNodeConnector> future = hostTracker.discoverHost(nh);
                     if (future != null) {
                         try {
                             host = future.get();
                         } catch (Exception e) {
-                            log.error("",e);
+                            log.error("", e);
                         }
                     }
                 }
                 if (host != null) {
+                    log.debug("Next hop {} is found", nh.getHostAddress());
                     staticRoute.setHost(host);
                     notifyStaticRouteUpdate(staticRoute, added);
+                } else {
+                    log.debug("Next hop {}  is still not present, try again later", nh.getHostAddress());
                 }
             }
+            return null;
         }
     }
 
     private void checkAndUpdateListeners(StaticRoute staticRoute, boolean added) {
-        new NotifyStaticRouteThread(staticRoute, added).start();
+        NotifyStaticRouteWorker worker = new NotifyStaticRouteWorker(staticRoute, added);
+        try {
+            executor.submit(worker);
+        } catch (Exception e) {
+            log.error("got Exception ", e);
+        }
     }
 
     private void notifyHostUpdate(HostNodeConnector host, boolean added) {
@@ -440,7 +451,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         //staticRoutes = new ConcurrentHashMap<String, StaticRoute>();
         allocateCaches();
         retrieveCaches();
-
+        this.executor = Executors.newFixedThreadPool(1);
         if (staticRouteConfigs.isEmpty())
             loadConfiguration();
 
@@ -494,10 +505,12 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
      *
      */
     void stop() {
+        executor.shutdown();
     }
 
     @Override
     public Status saveConfiguration() {
         return this.saveConfig();
     }
+
 }
