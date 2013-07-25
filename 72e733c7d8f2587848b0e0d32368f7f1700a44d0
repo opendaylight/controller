@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3///A4\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-07-25T12:18:10Z",
+      "side": 1,
+      "message": "For generated sources please use target/generated-sources/xtend-gen",
+      "revId": "72e733c7d8f2587848b0e0d32368f7f1700a44d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///A0\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-07-25T12:18:10Z",
+      "side": 1,
+      "message": "For generated sources please use target/generated-sources/xtend-gen",
+      "revId": "72e733c7d8f2587848b0e0d32368f7f1700a44d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3///Aw\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-java-api-generator/src/main/java/org/opendaylight/controller/sal/java/api/generator/BuilderTemplate.xtend",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-07-25T12:18:10Z",
+      "side": 1,
+      "message": "Replace tabs with whitespaces",
+      "revId": "72e733c7d8f2587848b0e0d32368f7f1700a44d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
