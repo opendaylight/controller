@@ -7,6 +7,39 @@
         <version>0.5.4-SNAPSHOT</version>
     </parent>
     <artifactId>binding-java-api-generator</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.xtend</groupId>
+                <artifactId>xtend-maven-plugin</artifactId>
+                <version>2.4.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                             <outputDirectory>${basedir}/src/main/xtend-gen</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+            	<artifactId>maven-clean-plugin</artifactId>
+			    <version>2.4.1</version>
+			    <configuration>
+			        <filesets>
+			            <fileset>
+			                <directory>${basedir}/src/main/xtend-gen</directory>
+			                <includes>
+			                    <include>**</include>
+			                </includes>
+			            </fileset>
+			        </filesets>
+			    </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -25,5 +58,10 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+	    <dependency>
+		    <groupId>org.eclipse.xtend</groupId>
+		    <artifactId>org.eclipse.xtend.lib</artifactId>
+		    <version>2.4.2</version>
+	    </dependency>
     </dependencies>
 </project>

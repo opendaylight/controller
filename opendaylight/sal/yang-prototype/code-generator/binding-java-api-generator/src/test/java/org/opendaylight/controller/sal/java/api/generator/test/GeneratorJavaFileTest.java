@@ -90,10 +90,13 @@ public class GeneratorJavaFileTest {
                 + "controller" + FS + "gen").list();
         List<String> filesList = Arrays.asList(files);
 
-        assertEquals(3, files.length);
+        assertEquals(6, files.length);
         assertTrue(filesList.contains("Type1.java"));
         assertTrue(filesList.contains("Type2.java"));
         assertTrue(filesList.contains("Type3.java"));
+        assertTrue(filesList.contains("Type1Builder.java"));
+        assertTrue(filesList.contains("Type2Builder.java"));
+        assertTrue(filesList.contains("Type3Builder.java"));
     }
 
     @Ignore
