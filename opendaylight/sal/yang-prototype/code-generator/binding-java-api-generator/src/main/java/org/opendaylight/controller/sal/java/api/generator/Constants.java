@@ -24,6 +24,8 @@ final class Constants {
 
     public static final String GAP = " ";
     public static final String COMMA = ",";
+    public static final String DOT = ".";
+    public static final String ASTERISK = "*";
     public static final String NL = "\n";
     public static final String SC = ";";
     public static final String TAB = "    ";
