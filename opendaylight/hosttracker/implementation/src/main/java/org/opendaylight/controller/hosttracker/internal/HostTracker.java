@@ -97,7 +97,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private Timer timer;
     private Timer arp_refresh_timer;
     private String containerName = null;
-
+    private ExecutorService executor;
     private static class ARPPending {
         protected InetAddress hostIP;
         protected short sent_count;
@@ -158,7 +158,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
 
         timer = new Timer();
         timer.schedule(new OutStandingARPHandler(), 4000, 4000);
-
+        executor = Executors.newFixedThreadPool(2);
         /* ARP Refresh Timer to go off every 5 seconds to implement ARP aging */
         arp_refresh_timer = new Timer();
         arp_refresh_timer.schedule(new ARPRefreshHandler(), 5000, 5000);
@@ -296,7 +296,6 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
 
     @Override
     public Future<HostNodeConnector> discoverHost(InetAddress networkAddress) {
-        ExecutorService executor = Executors.newFixedThreadPool(1);
         if (executor == null) {
             logger.error("discoverHost: Null executor");
             return null;
@@ -1349,6 +1348,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      *
      */
     void stop() {
+        executor.shutdown();
     }
 
     @Override
