@@ -323,9 +323,13 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             logger.debug("hostFind(): Host found for IP: {}", networkAddress.getHostAddress());
             return host;
         }
+
         /* host is not found, initiate a discovery */
+
         hostFinder.find(networkAddress);
+
         /* Also add this host to ARPPending List for any potential retries */
+
         AddtoARPPendingList(networkAddress);
         logger.debug("hostFind(): Host Not Found for IP: {}, Inititated Host Discovery ...",
                 networkAddress.getHostAddress());
@@ -447,7 +451,13 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private void replaceHost(InetAddress networkAddr, HostNodeConnector removedHost, HostNodeConnector newHost) {
         newHost.initArpSendCountDown();
         if (hostsDB.replace(networkAddr, removedHost, newHost)) {
-            logger.debug("Host move occurred. Old Host:{}, New Host: {}", removedHost, newHost);
+            logger.debug("Host move occurred: Old Host IP:{}, New Host IP: {}", removedHost.getNetworkAddress()
+                    .getHostAddress(), newHost.getNetworkAddress().getHostAddress());
+            logger.debug("Old Host MAC: {}, New Host MAC: {}",
+                    HexEncode.bytesToHexString(removedHost.getDataLayerAddressBytes()),
+                    HexEncode.bytesToHexString(newHost.getDataLayerAddressBytes()));
+            // Display the Old and New HostNodeConnectors also
+            logger.debug("Old {}, New {}", removedHost, newHost);
         } else {
             /*
              * Host replacement has failed, do the recovery
@@ -518,8 +528,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     @Override
     public void hostListener(HostNodeConnector host) {
 
+        logger.debug("ARP received for Host: IP {}, MAC {}, {}", host.getNetworkAddress().getHostAddress(),
+                HexEncode.bytesToHexString(host.getDataLayerAddressBytes()), host);
         if (hostExists(host)) {
-            logger.debug("ARP received for Host: {}", host);
             HostNodeConnector existinghost = hostsDB.get(host.getNetworkAddress());
             existinghost.initArpSendCountDown();
             return;
@@ -532,6 +543,8 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private void notifyHostLearnedOrRemoved(HostNodeConnector host, boolean add) {
         // Update listeners if any
         if (newHostNotify != null) {
+            logger.debug("Notifying Applications for Host {} Being {}", host.getNetworkAddress().getHostAddress(),
+                    add ? "Added" : "Deleted");
             synchronized (this.newHostNotify) {
                 for (IfNewHostNotify ta : newHostNotify) {
                     try {
@@ -563,6 +576,8 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         }
 
         if (topologyManager != null && p != null && h != null) {
+            logger.debug("Notifying Topology Manager for Host {} Being {}", h.getNetworkAddress().getHostAddress(),
+                    add ? "Added" : "Deleted");
             if (add == true) {
                 Tier tier = new Tier(1);
                 switchManager.setNodeProp(node, tier);
@@ -881,8 +896,12 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             for (int i = 0; i < failedARPReqList.size(); i++) {
                 ARPPending arphost;
                 arphost = failedARPReqList.get(i);
-                logger.debug("Sending the ARP from FailedARPReqList fors IP: {}", arphost.getHostIP().getHostAddress());
-                hostFinder.find(arphost.getHostIP());
+                if (hostFinder == null) {
+                    logger.warn("ARPHandler Services are not available on subnet addition");
+                    continue;
+                }
+               logger.debug("Sending the ARP from FailedARPReqList fors IP: {}", arphost.getHostIP().getHostAddress());
+               hostFinder.find(arphost.getHostIP());
             }
         }
     }
@@ -898,18 +917,23 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 if (arphost.getSent_count() < switchManager.getHostRetryCount()) {
                     /*
                      * No reply has been received of first ARP Req, send the
-                     * next one
+                     * next one. Before sending the ARP, check if ARPHandler
+                     * is available or not
                      */
+                    if (hostFinder == null) {
+                        logger.warn("ARPHandler Services are not available for Outstanding ARPs");
+                        continue;
+                    }
                     hostFinder.find(arphost.getHostIP());
                     arphost.sent_count++;
                     logger.debug("ARP Sent from ARPPending List, IP: {}", arphost.getHostIP().getHostAddress());
                 } else if (arphost.getSent_count() >= switchManager.getHostRetryCount()) {
                     /*
-                     * Two ARP requests have been sent without receiving a
+                     * ARP requests have been sent without receiving a
                      * reply, remove this from the pending list
                      */
                     removePendingARPFromList(i);
-                    logger.debug("ARP reply not received after two attempts, removing from Pending List IP: {}",
+                    logger.debug("ARP reply not received after multiple attempts, removing from Pending List IP: {}",
                             arphost.getHostIP().getHostAddress());
                     /*
                      * Add this host to a different list which will be processed
@@ -973,6 +997,15 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                                         HexEncode.bytesToHexString(host.getDataLayerAddressBytes()) });
                     }
                     host.setArpSendCountDown(arp_cntdown);
+                    if (hostFinder == null) {
+                        /*
+                         * If hostfinder is not available, then can't send the
+                         * probe. However, continue the age out the hosts since
+                         * we don't know if the host is indeed out there or not.
+                         */
+                        logger.warn("ARPHandler is not avaialable, can't send the probe");
+                        continue;
+                    }
                     hostFinder.probe(host);
                 }
             }
@@ -1254,6 +1287,12 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         for (int i = 0; i < failedARPReqList.size(); i++) {
             arphost = failedARPReqList.get(i);
             logger.debug("Sending the ARP from FailedARPReqList fors IP: {}", arphost.getHostIP().getHostAddress());
+            if (hostFinder == null) {
+                logger.warn("ARPHandler is not available at interface  up");
+                logger.warn("Since this event is missed, host(s) connected to interface {} may not be discovered",
+                        nodeConnector);
+                continue;
+            }
             hostFinder.find(arphost.getHostIP());
         }
         HostNodeConnector host = inactiveStaticHosts.get(nodeConnector);
