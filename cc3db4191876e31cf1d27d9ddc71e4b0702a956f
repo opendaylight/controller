@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+8E\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-impl/src/main/java/org/opendaylight/controller/sal/binding/generator/impl/BindingGeneratorImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1237,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-29T14:05:14Z",
+      "side": 1,
+      "message": "Use TopologicalSort algorithm for resolving of dependent groupings",
+      "revId": "cc3db4191876e31cf1d27d9ddc71e4b0702a956f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+8I\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-impl/src/test/java/org/opendaylight/controller/sal/binding/generator/impl/GroupingExtensionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-29T14:05:14Z",
+      "side": 1,
+      "message": "why grouping extension test? Are you testing yang extension for grouping?",
+      "revId": "cc3db4191876e31cf1d27d9ddc71e4b0702a956f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+8M\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-impl/src/test/resources/uses-of-grouping.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-29T14:05:14Z",
+      "side": 1,
+      "message": "yang file contains TABs",
+      "revId": "cc3db4191876e31cf1d27d9ddc71e4b0702a956f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+8Q\u003d",
+        "filename": "opendaylight/sal/yang-prototype/code-generator/binding-generator-util/src/main/java/org/opendaylight/controller/binding/generator/util/Types.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 74
+      },
+      "writtenOn": "2013-07-29T14:05:14Z",
+      "side": 1,
+      "message": "This overload method is wrong - the typeForClass method means that Type representation of Java class, ither way change the name of method or use ReferencedTypeImpl",
+      "revId": "cc3db4191876e31cf1d27d9ddc71e4b0702a956f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
