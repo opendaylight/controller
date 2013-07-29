@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -27,9 +26,8 @@ import org.slf4j.LoggerFactory;
  * This Class forms the vendor specific IPv6 Flow Match messages as well as
  * processes the vendor specific IPv6 Stats Reply message.
  *
- * For message creation, it parses the user entered IPv6 match fields, creates
- * a sub-message for each field which are later used to form the complete
- * message.
+ * For message creation, it parses the user entered IPv6 match fields, creates a
+ * sub-message for each field which are later used to form the complete message.
  *
  * For message processing, it parses the incoming message and reads each field
  * of the message and stores in appropriate field of V6Match object.
@@ -44,8 +42,7 @@ public class V6Match extends OFMatch implements Cloneable {
     protected short inputPortMask;
     protected byte[] dataLayerSourceMask;
     protected byte[] dataLayerDestinationMask;
-    protected short dataLayerVirtualLanMask;
-    protected byte dataLayerVirtualLanPriorityCodePointMask;
+    protected int dataLayerVirtualLanTCIMask;
     protected short dataLayerTypeMask;
     protected byte networkTypeOfServiceMask;
     protected byte networkProtocolMask;
@@ -57,7 +54,9 @@ public class V6Match extends OFMatch implements Cloneable {
     protected MatchFieldState inputPortState;
     protected MatchFieldState dlSourceState;
     protected MatchFieldState dlDestState;
-    protected MatchFieldState dlVlanState;
+    protected MatchFieldState dlVlanIDState;
+    protected MatchFieldState dlVlanPCPState;
+    protected MatchFieldState dlVlanTCIState;
     protected MatchFieldState ethTypeState;
     protected MatchFieldState nwTosState;
     protected MatchFieldState nwProtoState;
@@ -131,8 +130,7 @@ public class V6Match extends OFMatch implements Cloneable {
         this.dataLayerSourceMask = null;
         this.dataLayerDestinationMask = null;
         this.dataLayerTypeMask = 0;
-        this.dataLayerVirtualLanMask = 0;
-        this.dataLayerVirtualLanPriorityCodePointMask = 0;
+        this.dataLayerVirtualLanTCIMask = 0;
         this.networkTypeOfServiceMask = 0;
         this.networkProtocolMask = 0;
         this.transportSourceMask = 0;
@@ -141,7 +139,9 @@ public class V6Match extends OFMatch implements Cloneable {
         this.inputPortState = MatchFieldState.MATCH_ABSENT;
         this.dlSourceState = MatchFieldState.MATCH_ABSENT;
         this.dlDestState = MatchFieldState.MATCH_ABSENT;
-        this.dlVlanState = MatchFieldState.MATCH_ABSENT;
+        this.dlVlanIDState = MatchFieldState.MATCH_ABSENT;
+        this.dlVlanPCPState = MatchFieldState.MATCH_ABSENT;
+        this.dlVlanTCIState = MatchFieldState.MATCH_ABSENT;
         this.ethTypeState = MatchFieldState.MATCH_ABSENT;
         this.nwTosState = MatchFieldState.MATCH_ABSENT;
         this.nwProtoState = MatchFieldState.MATCH_ABSENT;
@@ -162,7 +162,7 @@ public class V6Match extends OFMatch implements Cloneable {
         if (match.getNetworkSource() != 0) {
             InetAddress address = NetUtils.getInetAddress(match.getNetworkSource());
             InetAddress mask = NetUtils.getInetNetworkMask(match.getNetworkSourceMaskLen(), false);
-            this.setNetworkDestination(address, mask);
+            this.setNetworkSource(address, mask);
         } else {
             this.nwSrcState = MatchFieldState.MATCH_ABSENT;
         }
@@ -184,13 +184,15 @@ public class V6Match extends OFMatch implements Cloneable {
         }
 
         this.dataLayerSourceMask = null;
-        if (match.getDataLayerSource() != null && !NetUtils.isZeroMAC(match.getDataLayerSource())) {
+        if (match.getDataLayerSource() != null
+                && !NetUtils.isZeroMAC(match.getDataLayerSource())) {
             this.setDataLayerSource(match.getDataLayerSource(), null);
         } else {
             this.dlSourceState = MatchFieldState.MATCH_ABSENT;
         }
         this.dataLayerDestinationMask = null;
-        if (match.getDataLayerDestination() != null && !NetUtils.isZeroMAC(match.getDataLayerDestination())) {
+        if (match.getDataLayerDestination() != null
+                && !NetUtils.isZeroMAC(match.getDataLayerDestination())) {
             this.setDataLayerDestination(match.getDataLayerDestination(), null);
         } else {
             this.dlDestState = MatchFieldState.MATCH_ABSENT;
@@ -204,27 +206,28 @@ public class V6Match extends OFMatch implements Cloneable {
             this.ethTypeState = MatchFieldState.MATCH_ABSENT;
         }
 
-        this.dataLayerVirtualLanMask = 0;
+        this.dataLayerVirtualLanTCIMask = 0;
+        this.dlVlanTCIState = MatchFieldState.MATCH_ABSENT;
         if (match.getDataLayerVirtualLan() != 0) {
             this.setDataLayerVirtualLan(match.getDataLayerVirtualLan(),
                     (short) 0);
         } else {
             this.dataLayerVirtualLan = 0;
-            this.dlVlanState = MatchFieldState.MATCH_ABSENT;
+            this.dlVlanIDState = MatchFieldState.MATCH_ABSENT;
         }
 
-        this.dataLayerVirtualLanPriorityCodePointMask = 0;
         if (match.getDataLayerVirtualLanPriorityCodePoint() != 0) {
-            this.setDataLayerVirtualLanPriorityCodePoint(match
-                    .getDataLayerVirtualLanPriorityCodePoint(), (byte) 0);
+            this.setDataLayerVirtualLanPriorityCodePoint(
+                    match.getDataLayerVirtualLanPriorityCodePoint(), (byte) 0);
         } else {
             this.dataLayerVirtualLanPriorityCodePoint = 0;
+            this.dlVlanPCPState = MatchFieldState.MATCH_ABSENT;
         }
 
         this.networkProtocolMask = 0;
         if (match.getNetworkProtocol() != 0) {
-            this.setNetworkProtocol(this.networkProtocol = match
-                    .getNetworkProtocol(), (byte) 0);
+            this.setNetworkProtocol(
+                    this.networkProtocol = match.getNetworkProtocol(), (byte) 0);
         } else {
             this.networkProtocol = 0;
             this.nwProtoState = MatchFieldState.MATCH_ABSENT;
@@ -232,8 +235,9 @@ public class V6Match extends OFMatch implements Cloneable {
 
         this.networkTypeOfServiceMask = 0;
         if (match.getNetworkTypeOfService() != 0) {
-            this.setNetworkTypeOfService(this.networkTypeOfService = match
-                    .getNetworkTypeOfService(), (byte) 0);
+            this.setNetworkTypeOfService(
+                    this.networkTypeOfService = match.getNetworkTypeOfService(),
+                    (byte) 0);
         } else {
             this.networkTypeOfService = match.getNetworkTypeOfService();
             this.nwTosState = MatchFieldState.MATCH_ABSENT;
@@ -327,13 +331,47 @@ public class V6Match extends OFMatch implements Cloneable {
         return (ipv6ext_etype_msg.array());
     }
 
-    private byte[] getIPv6ExtensionVlanIDMatchMsg(short VLAN) {
-        ByteBuffer ipv6ext_vlanid_msg = ByteBuffer.allocate(6);
+    private byte[] getVlanTCI(short dataLayerVirtualLanID,
+            byte dataLayerVirtualLanPriorityCodePoint) {
+        ByteBuffer vlan_tci = ByteBuffer.allocate(2);
+        int cfi = 1 << 12; // the cfi bit is in position 12
+        int pcp = dataLayerVirtualLanPriorityCodePoint << 13; // the pcp fields
+                                                              // have to move by
+                                                              // 13
+        int vlan_tci_int = pcp + cfi + dataLayerVirtualLanID;
+        vlan_tci.put((byte) (vlan_tci_int >> 8)); // bits 8 to 15
+        vlan_tci.put((byte) vlan_tci_int); // bits 0 to 7
+        return vlan_tci.array();
+    }
+
+    private byte[] getIPv6ExtensionVlanTCIMatchMsg(short dataLayerVirtualLanID,
+            byte dataLayerVirtualLanPriorityCodePoint) {
+        ByteBuffer ipv6ext_vlan_tci_msg = ByteBuffer.allocate(6);
         int nxm_header = getIPv6ExtensionMatchHeader(Extension_Types.OF_10,
                 OF_Match_Types.MATCH_OF_VLAN_TCI.getValue(), 0, 2);
-        ipv6ext_vlanid_msg.putInt(nxm_header);
-        ipv6ext_vlanid_msg.putShort(VLAN);
-        return (ipv6ext_vlanid_msg.array());
+        ipv6ext_vlan_tci_msg.putInt(nxm_header);
+        ipv6ext_vlan_tci_msg.put(getVlanTCI(dataLayerVirtualLanID,
+                dataLayerVirtualLanPriorityCodePoint));
+        return (ipv6ext_vlan_tci_msg.array());
+    }
+
+    private byte[] getIPv6ExtensionVlanTCIMatchWithMaskMsg(
+            short dataLayerVirtualLan,
+            byte dataLayerVirtualLanPriorityCodePoint,
+            int dataLayerVirtualLanTCIMask) {
+        ByteBuffer ipv6ext_vlan_tci_msg = ByteBuffer.allocate(8);
+        int nxm_header = getIPv6ExtensionMatchHeader(Extension_Types.OF_10,
+                OF_Match_Types.MATCH_OF_VLAN_TCI.getValue(), 1, 4);
+        ipv6ext_vlan_tci_msg.putInt(nxm_header);
+        ipv6ext_vlan_tci_msg.put(getVlanTCI(dataLayerVirtualLan,
+                dataLayerVirtualLanPriorityCodePoint));
+        ipv6ext_vlan_tci_msg.put((byte) (dataLayerVirtualLanTCIMask >> 8)); // bits
+                                                                            // 8
+                                                                            // to
+                                                                            // 15
+        ipv6ext_vlan_tci_msg.put((byte) (dataLayerVirtualLanTCIMask)); // bits 0
+                                                                       // to 7
+        return (ipv6ext_vlan_tci_msg.array());
     }
 
     private byte[] getIPv6ExtensionSrcIPv6MatchMsg(byte[] srcIpv6) {
@@ -392,11 +430,10 @@ public class V6Match extends OFMatch implements Cloneable {
         ipv6ext_proto_msg.putInt(nxm_header);
         if (protocol == IPProtocols.ICMP.getValue()) {
             /*
-             * The front end  passes the same protocol type values for IPv4
-             * and IPv6 flows. For the Protocol types we allow in our GUI
-             * (ICMP, TCP, UDP), ICMP is the only one which is different for
-             * IPv6. It is 1 for v4 and 58 for v6 Therefore, we overwrite it
-             * here.
+             * The front end passes the same protocol type values for IPv4 and
+             * IPv6 flows. For the Protocol types we allow in our GUI (ICMP,
+             * TCP, UDP), ICMP is the only one which is different for IPv6. It
+             * is 1 for v4 and 58 for v6 Therefore, we overwrite it here.
              */
             protocol = IPProtocols.ICMPV6.getValue();
         }
@@ -450,9 +487,11 @@ public class V6Match extends OFMatch implements Cloneable {
     }
 
     /**
-     * Sets this (V6Match) object's member variables based on a comma-separated key=value pair similar to OFMatch's fromString.
+     * Sets this (V6Match) object's member variables based on a comma-separated
+     * key=value pair similar to OFMatch's fromString.
      *
-     * @param match a key=value comma separated string.
+     * @param match
+     *            a key=value comma separated string.
      */
     @Override
     public void fromString(String match) throws IllegalArgumentException {
@@ -497,17 +536,45 @@ public class V6Match extends OFMatch implements Cloneable {
                     this.dataLayerType = U16.t(Integer.valueOf(values[1]
                             .replaceFirst("0x", ""), 16));
                 } else {
+
                     this.dataLayerType = U16.t(Integer.valueOf(values[1]));
                 }
                 ethTypeState = MatchFieldState.MATCH_FIELD_ONLY;
                 match_len += 6;
             } else if (values[0].equals(STR_DL_VLAN)) {
                 this.dataLayerVirtualLan = U16.t(Integer.valueOf(values[1]));
-                dlVlanState = MatchFieldState.MATCH_FIELD_ONLY;
-                match_len += 6;
+                this.dlVlanIDState = MatchFieldState.MATCH_FIELD_ONLY;
+                // the variable dlVlanIDState is not really used as a flag
+                // for serializing and deserializing. Rather it is used as a
+                // flag
+                // to check if the vlan id is being set so that we can set the
+                // dlVlanTCIState appropriately.
+                if (this.dlVlanPCPState != MatchFieldState.MATCH_ABSENT) {
+                    this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
+                    match_len -= 2;
+                } else {
+                    this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_WITH_MASK;
+                    this.dataLayerVirtualLanTCIMask = 0x1fff;
+                    match_len += 8;
+                }
+                this.wildcards &= ~OFPFW_DL_VLAN;
             } else if (values[0].equals(STR_DL_VLAN_PCP)) {
                 this.dataLayerVirtualLanPriorityCodePoint = U8.t(Short
                         .valueOf(values[1]));
+                this.dlVlanPCPState = MatchFieldState.MATCH_FIELD_ONLY;
+                // the variable dlVlanPCPState is not really used as a flag
+                // for serializing and deserializing. Rather it is used as a
+                // flag
+                // to check if the vlan pcp is being set so that we can set the
+                // dlVlanTCIState appropriately.
+                if (this.dlVlanIDState != MatchFieldState.MATCH_ABSENT) {
+                    this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
+                    match_len -= 2;
+                } else {
+                    this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_WITH_MASK;
+                    this.dataLayerVirtualLanTCIMask = 0xf000;
+                    match_len += 8;
+                }
                 this.wildcards &= ~OFPFW_DL_VLAN_PCP;
             } else if (values[0].equals(STR_NW_DST)
                     || values[0].equals("ip_dst")) {
@@ -524,7 +591,7 @@ public class V6Match extends OFMatch implements Cloneable {
                     }
                     this.setNetworkDestination(address, mask);
                 } catch (UnknownHostException e) {
-                    logger.error("",e);
+                    logger.error("", e);
                 }
             } else if (values[0].equals(STR_NW_SRC)
                     || values[0].equals("ip_src")) {
@@ -541,7 +608,7 @@ public class V6Match extends OFMatch implements Cloneable {
                     }
                     this.setNetworkSource(address, mask);
                 } catch (UnknownHostException e) {
-                    logger.error("",e);
+                    logger.error("", e);
                 }
             } else if (values[0].equals(STR_NW_PROTO)) {
                 this.networkProtocol = U8.t(Short.valueOf(values[1]));
@@ -571,8 +638,8 @@ public class V6Match extends OFMatch implements Cloneable {
         }
 
         /*
-         * In a V6 extension message action list should be preceded by a padding of 0 to
-         * 7 bytes based upon following formula.
+         * In a V6 extension message action list should be preceded by a padding
+         * of 0 to 7 bytes based upon following formula.
          */
 
         pad_size = (short) (((match_len + 7) / 8) * 8 - match_len);
@@ -602,9 +669,17 @@ public class V6Match extends OFMatch implements Cloneable {
             byte[] ipv6ext_srcmac_msg = getIPv6ExtensionSrcMacMatchMsg(this.dataLayerSource);
             data.put(ipv6ext_srcmac_msg);
         }
-        if (dlVlanState == MatchFieldState.MATCH_FIELD_ONLY) {
-            byte[] ipv6ext_vlan_id_msg = getIPv6ExtensionVlanIDMatchMsg(this.dataLayerVirtualLan);
-            data.put(ipv6ext_vlan_id_msg);
+        if (dlVlanTCIState == MatchFieldState.MATCH_FIELD_ONLY) {
+            byte[] ipv6ext_vlan_tci_msg = getIPv6ExtensionVlanTCIMatchMsg(
+                    this.dataLayerVirtualLan,
+                    this.dataLayerVirtualLanPriorityCodePoint);
+            data.put(ipv6ext_vlan_tci_msg);
+        } else if (dlVlanTCIState == MatchFieldState.MATCH_FIELD_WITH_MASK) {
+            byte[] ipv6ext_vlan_tci_msg_with_mask = getIPv6ExtensionVlanTCIMatchWithMaskMsg(
+                    this.dataLayerVirtualLan,
+                    this.dataLayerVirtualLanPriorityCodePoint,
+                    this.dataLayerVirtualLanTCIMask);
+            data.put(ipv6ext_vlan_tci_msg_with_mask);
         }
         if (nwSrcState == MatchFieldState.MATCH_FIELD_ONLY) {
             byte[] ipv6ext_src_ipv6_msg = getIPv6ExtensionSrcIPv6MatchMsg(this.nwSrc
@@ -728,33 +803,69 @@ public class V6Match extends OFMatch implements Cloneable {
         this.match_len += 6;
     }
 
+    private short getVlanID(byte firstByte, byte secondByte) {
+        short vlan_id_mask_firstByte = 0x0f;// this is the mask for the first
+                                            // byte
+        short vlan_id_mask_secondByte = 0xff;// this is the mask for the second
+                                             // byte
+        int vlanPart1 = (firstByte & vlan_id_mask_firstByte) << 8;
+        int vlanPart2 = secondByte & vlan_id_mask_secondByte;
+        return (short) (vlanPart1 + vlanPart2);
+    }
+
+    private byte getVlanPCP(byte pcpByte) {
+        short vlan_pcp_mask = 0xe0;// this is the vlan pcp mask
+        int pcp_int = pcpByte & vlan_pcp_mask;
+        return (byte) (pcp_int >> 5);
+    }
+
     private void readVlanTci(ByteBuffer data, int nxmLen, boolean hasMask) {
-        short vlan_mask = 0xfff;
         if (hasMask) {
             if ((nxmLen != 2 * 2) || (data.remaining() < 2 * 2)) {
                 return;
-            } else {
-                short vlan = data.getShort();
-                vlan &= vlan_mask;
-                super.setDataLayerVirtualLan(vlan);
-                this.dataLayerVirtualLanMask = data.getShort();
-                this.dlVlanState = MatchFieldState.MATCH_FIELD_WITH_MASK;
+            }
+            else {
+                byte firstByte = data.get();
+                byte secondByte = data.get();
+                this.dataLayerVirtualLanTCIMask = data.getShort() & 0xffff; // we
+                                                                            // need
+                                                                            // the
+                                                                            // last
+                                                                            // 16
+                                                                            // bits
+                // check the mask now
+                if ((this.dataLayerVirtualLanTCIMask & 0x0fff) != 0) {
+                    // if its a vlan id mask
+                    // extract the vlan id
+                    super.setDataLayerVirtualLan(getVlanID(firstByte,
+                            secondByte));
+                } else {
+                    this.wildcards ^= (1 << 1); // Sync with 0F 1.0 Match
+                }
+                if ((this.dataLayerVirtualLanTCIMask & 0xe000) != 0) {
+                    // else if its a vlan pcp mask
+                    // extract the vlan pcp
+                    super.setDataLayerVirtualLanPriorityCodePoint(getVlanPCP(firstByte));
+                } else {
+                    this.wildcards ^= (1 << 20);
+                }
+                this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_WITH_MASK;
                 this.match_len += 8;
-                this.wildcards ^= (1 << 20);
             }
         } else {
             if ((nxmLen != 2) || (data.remaining() < 2)) {
                 return;
-            } else {
-                short vlan = data.getShort();
-                vlan &= vlan_mask;
-                super.setDataLayerVirtualLan(vlan);
-                this.dlVlanState = MatchFieldState.MATCH_FIELD_ONLY;
+            }
+            else {
+                // get the vlan pcp
+                byte firstByte = data.get();
+                byte secondByte = data.get();
+                super.setDataLayerVirtualLanPriorityCodePoint(getVlanPCP(firstByte));
+                super.setDataLayerVirtualLan(getVlanID(firstByte, secondByte));
+                this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
                 this.match_len += 6;
             }
         }
-
-        this.wildcards ^= (1 << 1); // Sync with 0F 1.0 Match
     }
 
     private void readIpTos(ByteBuffer data, int nxmLen, boolean hasMask) {
@@ -812,7 +923,8 @@ public class V6Match extends OFMatch implements Cloneable {
                 super.setNetworkSource(address);
                 this.nwSrcState = MatchFieldState.MATCH_FIELD_ONLY;
                 this.match_len += 8;
-                this.wildcards ^= (((1 << 6) - 1) << 8); // Sync with 0F 1.0 Match
+                this.wildcards ^= (((1 << 6) - 1) << 8); // Sync with 0F 1.0
+                                                         // Match
             }
         }
     }
@@ -832,8 +944,10 @@ public class V6Match extends OFMatch implements Cloneable {
                 this.nwDstState = MatchFieldState.MATCH_FIELD_WITH_MASK;
                 this.match_len += 12;
                 int prefixlen = getNetworkMaskPrefixLength(mbytes);
-                this.wildcards ^= (((1 << 6) - 1) << 14); // Sync with 0F 1.0 Match
-                this.wildcards |= ((32 - prefixlen) << 14); // Sync with 0F 1.0 Match
+                this.wildcards ^= (((1 << 6) - 1) << 14); // Sync with 0F 1.0
+                                                          // Match
+                this.wildcards |= ((32 - prefixlen) << 14); // Sync with 0F 1.0
+                                                            // Match
             }
         } else {
             if ((nxmLen != 4) || (data.remaining() < 4)) {
@@ -844,7 +958,8 @@ public class V6Match extends OFMatch implements Cloneable {
                 int address = NetUtils.byteArray4ToInt(dbytes);
                 super.setNetworkDestination(address);
                 this.nwDstState = MatchFieldState.MATCH_FIELD_ONLY;
-                this.wildcards ^= (((1 << 6) - 1) << 14); // Sync with 0F 1.0 Match
+                this.wildcards ^= (((1 << 6) - 1) << 14); // Sync with 0F 1.0
+                                                          // Match
                 this.match_len += 8;
             }
         }
@@ -979,9 +1094,7 @@ public class V6Match extends OFMatch implements Cloneable {
                 + HexEncode.bytesToHexStringFormat(dataLayerSourceMask)
                 + ", dataLayerDestinationMask="
                 + HexEncode.bytesToHexStringFormat(dataLayerDestinationMask)
-                + ", dataLayerVirtualLanMask=" + dataLayerVirtualLanMask
-                + ", dataLayerVirtualLanPriorityCodePointMask="
-                + dataLayerVirtualLanPriorityCodePointMask
+                + ", dataLayerVirtualLanTCIMask=" + dataLayerVirtualLanTCIMask
                 + ", dataLayerTypeMask=" + dataLayerTypeMask
                 + ", networkTypeOfServiceMask=" + networkTypeOfServiceMask
                 + ", networkProtocolMask=" + networkProtocolMask
@@ -991,7 +1104,7 @@ public class V6Match extends OFMatch implements Cloneable {
                 + ", dstIPv6SubnetMaskbits=" + dstIPv6SubnetMaskbits
                 + ", inputPortState=" + inputPortState + ", dlSourceState="
                 + dlSourceState + ", dlDestState=" + dlDestState
-                + ", dlVlanState=" + dlVlanState + ", ethTypeState="
+                + ", dlVlanTCIState=" + dlVlanTCIState + ", ethTypeState="
                 + ethTypeState + ", nwTosState=" + nwTosState
                 + ", nwProtoState=" + nwProtoState + ", nwSrcState="
                 + nwSrcState + ", nwDstState=" + nwDstState + ", tpSrcState="
@@ -1001,8 +1114,9 @@ public class V6Match extends OFMatch implements Cloneable {
 
     /**
      * Read the data corresponding to the match field (received from the wire)
-     * Input: data: match field(s). Since match field is of variable length, the whole data that are passed in
-     * are assumed to fem0tbd.be the match fields.
+     * Input: data: match field(s). Since match field is of variable length, the
+     * whole data that are passed in are assumed to fem0tbd.be the match fields.
+     *
      * @param data
      */
     @Override
@@ -1018,8 +1132,8 @@ public class V6Match extends OFMatch implements Cloneable {
                 /*
                  * at least 4 bytes for each match header
                  */
-                logger.error("Invalid Vendor Extension Header. Size {}", data
-                        .remaining());
+                logger.error("Invalid Vendor Extension Header. Size {}",
+                        data.remaining());
                 return;
             }
             /*
@@ -1095,11 +1209,11 @@ public class V6Match extends OFMatch implements Cloneable {
         // Sync with 0F 1.0 Match
         if (super.getDataLayerType() == 0x800) {
             if (((this.wildcards >> 8) & 0x3f) == 0x3f) {
-                //ipv4 src processing
+                // ipv4 src processing
                 this.wildcards ^= (((1 << 5) - 1) << 8);
             }
             if (((this.wildcards >> 14) & 0x3f) == 0x3f) {
-                //ipv4 dest processing
+                // ipv4 dest processing
                 this.wildcards ^= (((1 << 5) - 1) << 14);
             }
         } else {
@@ -1204,24 +1318,40 @@ public class V6Match extends OFMatch implements Cloneable {
         }
     }
 
-    public short getDataLayerVirtualLanMask() {
-        return dataLayerVirtualLanMask;
-    }
-
     public void setDataLayerVirtualLan(short vlan, short mask) {
+        // mask is ignored as the code sets the appropriate mask
         super.dataLayerVirtualLan = vlan;
-        if (mask == 0) {
-            this.dlVlanState = MatchFieldState.MATCH_FIELD_ONLY;
-            this.match_len += 6;
+        this.dlVlanIDState = MatchFieldState.MATCH_FIELD_ONLY;
+        // the variable dlVlanIDState is not really used as a flag
+        // for serializing and deserializing. Rather it is used as a flag
+        // to check if the vlan id is being set so that we can set the
+        // dlVlanTCIState appropriately.
+        if (this.dlVlanPCPState != MatchFieldState.MATCH_ABSENT) {
+            this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
+            match_len -= 2;
         } else {
-            this.dataLayerVirtualLanMask = mask;
-            this.dlVlanState = MatchFieldState.MATCH_FIELD_WITH_MASK;
-            this.match_len += 8;
+            this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_WITH_MASK;
+            this.dataLayerVirtualLanTCIMask = 0x1fff;
+            match_len += 8;
         }
     }
 
     public void setDataLayerVirtualLanPriorityCodePoint(byte pcp, byte mask) {
+        // mask is ignored as the code sets the appropriate mask
         super.dataLayerVirtualLanPriorityCodePoint = pcp;
+        this.dlVlanPCPState = MatchFieldState.MATCH_FIELD_ONLY;
+        // the variable dlVlanPCPState is not really used as a flag
+        // for serializing and deserializing. Rather it is used as a flag
+        // to check if the vlan pcp is being set so that we can set the
+        // dlVlanTCIState appropriately.
+        if (this.dlVlanIDState != MatchFieldState.MATCH_ABSENT) {
+            this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_ONLY;
+            match_len -= 2;
+        } else {
+            this.dlVlanTCIState = MatchFieldState.MATCH_FIELD_WITH_MASK;
+            this.dataLayerVirtualLanTCIMask = 0xf000;
+            match_len += 8;
+        }
     }
 
     public void setDataLayerType(short ethType, short mask) {
@@ -1347,28 +1477,38 @@ public class V6Match extends OFMatch implements Cloneable {
         result = prime * result + Arrays.hashCode(dataLayerDestinationMask);
         result = prime * result + Arrays.hashCode(dataLayerSourceMask);
         result = prime * result + dataLayerTypeMask;
-        result = prime * result + dataLayerVirtualLanMask;
-        result = prime * result + dataLayerVirtualLanPriorityCodePointMask;
-        result = prime * result + ((dlDestState == null) ? 0 : dlDestState.hashCode());
-        result = prime * result + ((dlSourceState == null) ? 0 : dlSourceState.hashCode());
-        result = prime * result + ((dlVlanState == null) ? 0 : dlVlanState.hashCode());
+        result = prime * result + dataLayerVirtualLanTCIMask;
+        result = prime * result
+                + ((dlDestState == null) ? 0 : dlDestState.hashCode());
+        result = prime * result
+                + ((dlSourceState == null) ? 0 : dlSourceState.hashCode());
+        result = prime * result
+                + ((dlVlanTCIState == null) ? 0 : dlVlanTCIState.hashCode());
         result = prime * result + dstIPv6SubnetMaskbits;
-        result = prime * result + ((ethTypeState == null) ? 0 : ethTypeState.hashCode());
+        result = prime * result
+                + ((ethTypeState == null) ? 0 : ethTypeState.hashCode());
         result = prime * result + inputPortMask;
-        result = prime * result + ((inputPortState == null) ? 0 : inputPortState.hashCode());
+        result = prime * result
+                + ((inputPortState == null) ? 0 : inputPortState.hashCode());
         result = prime * result + match_len;
         result = prime * result + networkProtocolMask;
         result = prime * result + networkTypeOfServiceMask;
         result = prime * result + ((nwDst == null) ? 0 : nwDst.hashCode());
-        result = prime * result + ((nwDstState == null) ? 0 : nwDstState.hashCode());
-        result = prime * result + ((nwProtoState == null) ? 0 : nwProtoState.hashCode());
+        result = prime * result
+                + ((nwDstState == null) ? 0 : nwDstState.hashCode());
+        result = prime * result
+                + ((nwProtoState == null) ? 0 : nwProtoState.hashCode());
         result = prime * result + ((nwSrc == null) ? 0 : nwSrc.hashCode());
-        result = prime * result + ((nwSrcState == null) ? 0 : nwSrcState.hashCode());
-        result = prime * result + ((nwTosState == null) ? 0 : nwTosState.hashCode());
+        result = prime * result
+                + ((nwSrcState == null) ? 0 : nwSrcState.hashCode());
+        result = prime * result
+                + ((nwTosState == null) ? 0 : nwTosState.hashCode());
         result = prime * result + pad_size;
         result = prime * result + srcIPv6SubnetMaskbits;
-        result = prime * result + ((tpDstState == null) ? 0 : tpDstState.hashCode());
-        result = prime * result + ((tpSrcState == null) ? 0 : tpSrcState.hashCode());
+        result = prime * result
+                + ((tpDstState == null) ? 0 : tpDstState.hashCode());
+        result = prime * result
+                + ((tpSrcState == null) ? 0 : tpSrcState.hashCode());
         result = prime * result + transportDestinationMask;
         result = prime * result + transportSourceMask;
         return result;
@@ -1395,19 +1535,13 @@ public class V6Match extends OFMatch implements Cloneable {
         if (dataLayerTypeMask != other.dataLayerTypeMask) {
             return false;
         }
-        if (dataLayerVirtualLanMask != other.dataLayerVirtualLanMask) {
+        if (dataLayerVirtualLanTCIMask != other.dataLayerVirtualLanTCIMask) {
             return false;
         }
-        if (dataLayerVirtualLanPriorityCodePointMask != other.dataLayerVirtualLanPriorityCodePointMask) {
-            return false;
-        }
-        if (dlDestState != other.dlDestState) {
+        if (dlVlanTCIState != other.dlVlanTCIState) {
             return false;
         }
         if (dlSourceState != other.dlSourceState) {
-            return false;
-        }
-        if (dlVlanState != other.dlVlanState) {
             return false;
         }
         if (dstIPv6SubnetMaskbits != other.dstIPv6SubnetMaskbits) {

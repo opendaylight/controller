@@ -6,9 +6,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
 import org.openflow.protocol.OFMatch;
 
 public class V6ExtensionTest {
@@ -119,6 +119,7 @@ public class V6ExtensionTest {
         match.fromString("ip_src=2001:ddd:3e1:1234:0000:1111:2222:3333/64");
         match.fromString("ip_dst=2001:123:222:abc:111:aaa:1111:2222/64");
         match.fromString("dl_vlan=10");
+        match.fromString("dl_vpcp=1");
         match.fromString("nw_proto=6");
         match.fromString("nw_tos=100");
         match.fromString("tp_dst=8080");
@@ -142,7 +143,8 @@ public class V6ExtensionTest {
 
         Assert.assertTrue(match.getDataLayerVirtualLan() == match2
                 .getDataLayerVirtualLan());
-        // vlan pcp isn't part of write/read buffer
+        Assert.assertTrue(match.getDataLayerVirtualLanPriorityCodePoint() == match2
+                .getDataLayerVirtualLanPriorityCodePoint());
         Assert.assertTrue(match.getNetworkProtocol() == match2
                 .getNetworkProtocol());
         Assert.assertTrue(match.getNetworkTypeOfService() == match2
