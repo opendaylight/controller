@@ -10,6 +10,7 @@ package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.protocol_plugin.openflow.IFlowProgrammerNotifier;
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService;
@@ -24,6 +25,7 @@ public class FlowProgrammerNotifier implements IFlowProgrammerNotifier {
     protected static final Logger logger = LoggerFactory
             .getLogger(FlowProgrammerNotifier.class);
     private IPluginOutFlowProgrammerService salNotifier;
+    private IPluginOutConnectionService connectionOutService;
 
     public FlowProgrammerNotifier() {
         salNotifier = null;
@@ -76,6 +78,11 @@ public class FlowProgrammerNotifier implements IFlowProgrammerNotifier {
 
     @Override
     public void flowRemoved(Node node, Flow flow) {
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("flow removed will not be notified in a non-master controller for node "+node);
+            return;
+        }
+
         if (salNotifier != null) {
             salNotifier.flowRemoved(node, flow);
         } else {
@@ -85,10 +92,25 @@ public class FlowProgrammerNotifier implements IFlowProgrammerNotifier {
 
     @Override
     public void flowErrorReported(Node node, long rid, Object err) {
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("flow error will not be notified in a non-master controller for node "+node);
+            return;
+        }
+
         if (salNotifier != null) {
             salNotifier.flowErrorReported(node, rid, err);
         } else {
             logger.warn("Unable to relay switch error message to upper layer");
+        }
+    }
+
+    void setIPluginOutConnectionService(IPluginOutConnectionService s) {
+        connectionOutService = s;
+    }
+
+    void unsetIPluginOutConnectionService(IPluginOutConnectionService s) {
+        if (connectionOutService == s) {
+            connectionOutService = null;
         }
     }
 

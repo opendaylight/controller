@@ -28,6 +28,8 @@ import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShim
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;
+import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
@@ -162,6 +164,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setPluginOutDataPacketService",
                             "unsetPluginOutDataPacketService")
                     .setRequired(false));
+            c.add(createServiceDependency()
+                    .setService(IPluginOutConnectionService.class)
+                    .setCallbacks("setIPluginOutConnectionService",
+                            "unsetIPluginOutConnectionService")
+                    .setRequired(false));
         }
 
         if (imp.equals(ReadService.class)) {
@@ -178,10 +185,17 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IReadServiceFilter.class)
                     .setCallbacks("setService", "unsetService")
                     .setRequired(true));
+
             c.add(createContainerServiceDependency(containerName)
                     .setService(IPluginOutReadService.class)
                     .setCallbacks("setPluginOutReadServices",
                             "unsetPluginOutReadServices")
+                    .setRequired(false));
+
+            c.add(createServiceDependency()
+                    .setService(IPluginOutConnectionService.class)
+                    .setCallbacks("setIPluginOutConnectionService",
+                            "unsetIPluginOutConnectionService")
                     .setRequired(false));
         }
 
@@ -198,6 +212,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setPluginOutFlowProgrammerService",
                             "unsetPluginOutFlowProgrammerService")
                     .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IPluginOutConnectionService.class)
+                    .setCallbacks("setIPluginOutConnectionService",
+                            "unsetIPluginOutConnectionService")
+                    .setRequired(false));
         }
     }
 
@@ -213,7 +232,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     public Object[] getGlobalImplementations() {
         Object[] res = { Controller.class, OFStatisticsManager.class,
                 FlowProgrammerService.class, ReadServiceFilter.class,
-                DiscoveryService.class, DataPacketMuxDemux.class,
+                DiscoveryService.class, DataPacketMuxDemux.class, InventoryService.class,
                 InventoryServiceShim.class, TopologyServiceShim.class };
         return res;
     }
@@ -235,7 +254,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             logger.debug("Activator configureGlobalInstance( ) is called");
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put("name", "Controller");
-            c.setInterface(IController.class.getName(), props);
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
+            c.setInterface(new String[] { IController.class.getName(),
+                                          IPluginInConnectionService.class.getName()},
+                                          props);
         }
 
         if (imp.equals(FlowProgrammerService.class)) {
@@ -263,6 +285,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                             "unsetsetFlowProgrammerNotifier")
                     .setRequired(false));
 
+            c.add(createServiceDependency()
+                    .setService(IPluginOutConnectionService.class)
+                    .setCallbacks("setIPluginOutConnectionService",
+                            "unsetIPluginOutConnectionService")
+                    .setRequired(false));
         }
 
         if (imp.equals(ReadServiceFilter.class)) {
@@ -285,7 +312,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setReadFilterInternalListener",
                             "unsetReadFilterInternalListener")
                     .setRequired(false));
-
         }
 
         if (imp.equals(OFStatisticsManager.class)) {
@@ -327,6 +353,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IDiscoveryListener.class)
                     .setCallbacks("setDiscoveryListener",
                             "unsetDiscoveryListener").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IPluginOutConnectionService.class)
+                    .setCallbacks("setIPluginOutConnectionService",
+                            "unsetIPluginOutConnectionService")
+                    .setRequired(false));
         }
 
         // DataPacket mux/demux services, which is teh actual engine
@@ -350,6 +381,34 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IDataPacketListen.class)
                     .setCallbacks("setIDataPacketListen",
                             "unsetIDataPacketListen").setRequired(false));
+            c.add(createServiceDependency()
+                    .setService(IPluginOutConnectionService.class)
+                    .setCallbacks("setIPluginOutConnectionService",
+                            "unsetIPluginOutConnectionService")
+                    .setRequired(false));
+        }
+
+        if (imp.equals(InventoryService.class)) {
+            // export the service
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            props.put("scope", "Global");
+
+            c.setInterface(
+                    new String[] { IPluginInInventoryService.class.getName(),
+                            IInventoryShimInternalListener.class.getName(),
+                            IInventoryProvider.class.getName() }, props);
+
+            // Now lets add a service dependency to make sure the
+            // provider of service exists
+            c.add(createServiceDependency()
+                    .setService(IController.class, "(name=Controller)")
+                    .setCallbacks("setController", "unsetController")
+                    .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IPluginOutInventoryService.class, "(scope=Global)")
+                    .setCallbacks("setPluginOutInventoryServices",
+                            "unsetPluginOutInventoryServices")
+                    .setRequired(false));
         }
 
         if (imp.equals(InventoryServiceShim.class)) {
@@ -361,14 +420,24 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setController", "unsetController")
                     .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(IInventoryShimInternalListener.class)
+                    .setService(IInventoryShimInternalListener.class, "(!(scope=Global))")
                     .setCallbacks("setInventoryShimInternalListener",
                             "unsetInventoryShimInternalListener")
+                    .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IInventoryShimInternalListener.class, "(scope=Global)")
+                    .setCallbacks("setInventoryShimGlobalInternalListener",
+                            "unsetInventoryShimGlobalInternalListener")
                     .setRequired(true));
             c.add(createServiceDependency()
                     .setService(IInventoryShimExternalListener.class)
                     .setCallbacks("setInventoryShimExternalListener",
                             "unsetInventoryShimExternalListener")
+                    .setRequired(false));
+            c.add(createServiceDependency()
+                    .setService(IPluginOutConnectionService.class)
+                    .setCallbacks("setIPluginOutConnectionService",
+                            "unsetIPluginOutConnectionService")
                     .setRequired(false));
         }
 

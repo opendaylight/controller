@@ -35,6 +35,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ContainerFlow;
@@ -395,6 +396,17 @@ public class TopologyServiceShim implements IDiscoveryListener,
     void unsetStatisticsManager(IOFStatisticsManager s) {
         if (this.statsMgr == s) {
             this.statsMgr = null;
+        }
+    }
+
+    IPluginOutConnectionService connectionPluginOutService;
+    void setIPluginOutConnectionService(IPluginOutConnectionService s) {
+        connectionPluginOutService = s;
+    }
+
+    void unsetIPluginOutConnectionService(IPluginOutConnectionService s) {
+        if (connectionPluginOutService == s) {
+            connectionPluginOutService = null;
         }
     }
 

@@ -30,6 +30,12 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateListener;
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFType;
 import org.openflow.util.HexString;
@@ -38,7 +44,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Controller implements IController, CommandProvider {
+public class Controller implements IController, CommandProvider, IPluginInConnectionService {
     private static final Logger logger = LoggerFactory
             .getLogger(Controller.class);
     private ControllerIO controllerIO;
@@ -221,8 +227,7 @@ public class Controller implements IController, CommandProvider {
             // create new switch
             int i = this.switchInstanceNumber.addAndGet(1);
             String instanceName = "SwitchHandler-" + i;
-            SwitchHandler switchHandler = new SwitchHandler(this, sc,
-                    instanceName);
+            SwitchHandler switchHandler = new SwitchHandler(this, sc, instanceName);
             switchHandler.start();
             if (sc.isConnected()) {
                 logger.info("Switch:{} is connected to the Controller",
@@ -374,5 +379,35 @@ public class Controller implements IController, CommandProvider {
         help.append("\t controllerReset\n");
         help.append("\t controllerShowConnConfig\n");
         return help.toString();
+    }
+
+    @Override
+    public Status disconnect(Node node) {
+        ISwitch sw = getSwitch((Long) node.getID());
+        if (sw != null) disconnectSwitch(sw);
+        return new Status(StatusCode.SUCCESS);
+    }
+
+    @Override
+    public Node connect(String connectionIdentifier, Map<ConnectionConstants, String> params) {
+        return null;
+    }
+
+    /**
+     * View Change notification
+     */
+    public void notifyClusterViewChanged() {
+        for (ISwitch sw : switches.values()) {
+            notifySwitchAdded(sw);
+        }
+    }
+
+    /**
+     * Node Disconnected from the node's master controller.
+     */
+    @Override
+    public void notifyNodeDisconnectFromMaster(Node node) {
+        ISwitch sw = switches.get((Long)node.getID());
+        if (sw != null) notifySwitchAdded(sw);
     }
 }

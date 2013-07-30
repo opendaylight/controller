@@ -17,6 +17,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.protocol_plugin.openflow.IReadFilterInternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.IReadServiceFilter;
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -40,6 +41,7 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
     private IReadServiceFilter filter;
     private Set<IPluginOutReadService> pluginOutReadServices;
     private String containerName;
+    private IPluginOutConnectionService connectionOutService;
 
     /**
      * Function called by the dependency manager when all the required
@@ -110,6 +112,10 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
             return null;
         }
 
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("This Controller is not the master for the node : " + node);
+            return null;
+        }
         return filter.readFlow(containerName, node, flow, cached);
     }
 
@@ -120,6 +126,11 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
             return null;
         }
 
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("This Controller is not the master for the node : " + node);
+            return null;
+        }
+
         return filter.readAllFlow(containerName, node, cached);
     }
 
@@ -127,6 +138,11 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
     public NodeDescription readDescription(Node node, boolean cached) {
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             logger.error("Invalid node type");
+            return null;
+        }
+
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("This Controller is not the master for the node : " + node);
             return null;
         }
 
@@ -141,6 +157,12 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
             logger.error("Invalid node type");
             return null;
         }
+
+        if (!connectionOutService.isLocal(connector.getNode())) {
+            logger.debug("This Controller is not the master for connector : "+connector);
+            return null;
+        }
+
         return filter.readNodeConnector(containerName, connector, cached);
     }
 
@@ -149,6 +171,11 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
             boolean cached) {
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             logger.error("Invalid node type");
+            return null;
+        }
+
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("This Controller is not the master for node : " + node);
             return null;
         }
 
@@ -162,6 +189,12 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
             logger.error("Invalid node type");
             return 0;
         }
+
+        if (!connectionOutService.isLocal(connector.getNode())) {
+            logger.debug("This Controller is not the master for connector : "+connector);
+            return 0;
+        }
+
         return filter.getTransmitRate(containerName, connector);
     }
 
@@ -172,6 +205,12 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
             logger.error("Invalid node type");
             return null;
         }
+
+        if (!connectionOutService.isLocal(table.getNode())) {
+            logger.debug("This Controller is not the master for connector : "+table);
+            return null;
+        }
+
         return filter.readNodeTable(containerName, table, cached);
     }
 
@@ -182,11 +221,20 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
             return null;
         }
 
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("This Controller is not the master for node : " + node);
+            return null;
+        }
+
         return filter.readAllNodeTable(containerName, node, cached);
     }
 
     @Override
     public void nodeFlowStatisticsUpdated(Node node, List<FlowOnNode> flowStatsList) {
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("This Controller is not the master for node : " + node);
+            return;
+        }
         for (IPluginOutReadService service : pluginOutReadServices) {
             service.nodeFlowStatisticsUpdated(node, flowStatsList);
         }
@@ -194,6 +242,10 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
 
     @Override
     public void nodeConnectorStatisticsUpdated(Node node, List<NodeConnectorStatistics> ncStatsList) {
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("This Controller is not the master for node : " + node);
+            return;
+        }
         for (IPluginOutReadService service : pluginOutReadServices) {
             service.nodeConnectorStatisticsUpdated(node, ncStatsList);
         }
@@ -201,6 +253,10 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
 
     @Override
     public void nodeTableStatisticsUpdated(Node node, List<NodeTableStatistics> tableStatsList) {
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("This Controller is not the master for node : " + node);
+            return;
+        }
         for (IPluginOutReadService service : pluginOutReadServices) {
             service.nodeTableStatisticsUpdated(node, tableStatsList);
         }
@@ -208,8 +264,22 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
 
     @Override
     public void nodeDescriptionStatisticsUpdated(Node node, NodeDescription nodeDescription) {
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("This Controller is not the master for node : " + node);
+            return;
+        }
         for (IPluginOutReadService service : pluginOutReadServices) {
             service.descriptionStatisticsUpdated(node, nodeDescription);
+        }
+    }
+
+    void setIPluginOutConnectionService(IPluginOutConnectionService s) {
+        connectionOutService = s;
+    }
+
+    void unsetIPluginOutConnectionService(IPluginOutConnectionService s) {
+        if (connectionOutService == s) {
+            connectionOutService = null;
         }
     }
 }

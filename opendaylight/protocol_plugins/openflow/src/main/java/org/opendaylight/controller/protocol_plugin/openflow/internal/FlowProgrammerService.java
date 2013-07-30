@@ -23,6 +23,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExtern
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
@@ -65,6 +66,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     private Map<String, Set<NodeConnector>> containerToNc;
     private ConcurrentMap<Long, Map<Integer, Long>> xid2rid;
     private int barrierMessagePriorCount = getBarrierMessagePriorCount();
+    private IPluginOutConnectionService connectionOutService;
 
     public FlowProgrammerService() {
         controller = null;
@@ -80,6 +82,16 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     public void unsetController(IController core) {
         if (this.controller == core) {
             this.controller = null;
+        }
+    }
+
+    void setIPluginOutConnectionService(IPluginOutConnectionService s) {
+        connectionOutService = s;
+    }
+
+    void unsetIPluginOutConnectionService(IPluginOutConnectionService s) {
+        if (connectionOutService == s) {
+            connectionOutService = null;
         }
     }
 
@@ -146,32 +158,62 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public Status addFlow(Node node, Flow flow) {
+        if (!connectionOutService.isLocal(node)) {
+            log.debug("Add flow will not be processed in a non-master controller for node " + node);
+            return new Status(StatusCode.NOTALLOWED, "This is not the master controller for " + node);
+        }
+
         return addFlowInternal(node, flow, 0);
     }
 
     @Override
     public Status modifyFlow(Node node, Flow oldFlow, Flow newFlow) {
+        if (!connectionOutService.isLocal(node)) {
+            log.debug("Modify flow will not be processed in a non-master controller for node " + node);
+            return new Status(StatusCode.NOTALLOWED, "This is not the master controller for " + node);
+        }
+
         return modifyFlowInternal(node, oldFlow, newFlow, 0);
     }
 
     @Override
     public Status removeFlow(Node node, Flow flow) {
+        if (!connectionOutService.isLocal(node)) {
+            log.debug("Remove flow will not be processed in a non-master controller for node " + node);
+            return new Status(StatusCode.NOTALLOWED, "This is not the master controller for " + node);
+        }
+
         return removeFlowInternal(node, flow, 0);
     }
 
     @Override
     public Status addFlowAsync(Node node, Flow flow, long rid) {
+        if (!connectionOutService.isLocal(node)) {
+            log.debug("Add flow Async will not be processed in a non-master controller for node " + node);
+            return new Status(StatusCode.NOTALLOWED, "This is not the master controller for " + node);
+        }
+
         return addFlowInternal(node, flow, rid);
     }
 
     @Override
     public Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow,
             long rid) {
+        if (!connectionOutService.isLocal(node)) {
+            log.debug("Modify flow async will not be processed in a non-master controller for node " + node);
+            return new Status(StatusCode.NOTALLOWED, "This is not the master controller for " + node);
+        }
+
         return modifyFlowInternal(node, oldFlow, newFlow, rid);
     }
 
     @Override
     public Status removeFlowAsync(Node node, Flow flow, long rid) {
+        if (!connectionOutService.isLocal(node)) {
+            log.debug("Remove flow async will not be processed in a non-master controller for node " + node);
+            return new Status(StatusCode.NOTALLOWED, "This is not the master controller for " + node);
+        }
+
         return removeFlowInternal(node, flow, rid);
     }
 
@@ -324,6 +366,11 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public Status removeAllFlows(Node node) {
+        if (!connectionOutService.isLocal(node)) {
+            log.debug("Remove all flows will not be processed in a non-master controller for node " + node);
+            return new Status(StatusCode.NOTALLOWED, "This is not the master controller for " + node);
+        }
+
         return new Status(StatusCode.SUCCESS);
     }
 
@@ -446,6 +493,11 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public Status syncSendBarrierMessage(Node node) {
+        if (!connectionOutService.isLocal(node)) {
+            log.debug("Sync Send Barrier will not be processed in a non-master controller for node " + node);
+            return new Status(StatusCode.NOTALLOWED, "This is not the master controller for " + node);
+        }
+
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             return new Status(StatusCode.NOTACCEPTABLE,
                     "The node does not support Barrier message.");
@@ -469,6 +521,11 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public Status asyncSendBarrierMessage(Node node) {
+        if (!connectionOutService.isLocal(node)) {
+            log.debug("ASync Send Barrier will not be processed in a non-master controller for node " + node);
+            return new Status(StatusCode.NOTALLOWED, "This is not the master controller for " + node);
+        }
+
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             return new Status(StatusCode.NOTACCEPTABLE,
                     "The node does not support Barrier message.");
