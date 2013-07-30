@@ -25,7 +25,7 @@ public enum MatchType {
     IN_PORT("inPort", 1 << 0, NodeConnector.class, 1, 0),
     DL_SRC("dlSrc", 1 << 1, Byte[].class, 0, 0xffffffffffffL),
     DL_DST("dlDst", 1 << 2, Byte[].class, 0, 0xffffffffffffL),
-    DL_VLAN("dlVlan", 1 << 3, Short.class, 1, 0xfff), // 2 bytes
+    DL_VLAN("dlVlan", 1 << 3, Short.class, 0, 0xfff), // 2 bytes
     DL_VLAN_PR("dlVlanPriority", 1 << 4, Byte.class, 0, 0x7), // 3 bits
     DL_OUTER_VLAN("dlOuterVlan", 1 << 5, Short.class, 1, 0xfff),
     DL_OUTER_VLAN_PR("dlOuterVlanPriority", 1 << 6, Short.class, 0, 0x7),
@@ -36,6 +36,9 @@ public enum MatchType {
     NW_DST("nwDst", 1 << 11, InetAddress.class, 0, 0),
     TP_SRC("tpSrc", 1 << 12, Short.class, 1, 0xffff), // 2 bytes
     TP_DST("tpDst", 1 << 13, Short.class, 1, 0xffff); // 2 bytes
+
+    // Used to indicate that no VLAN ID is set.
+    public static final short DL_VLAN_NONE = (short) 0;
 
     private String id;
     private int index;

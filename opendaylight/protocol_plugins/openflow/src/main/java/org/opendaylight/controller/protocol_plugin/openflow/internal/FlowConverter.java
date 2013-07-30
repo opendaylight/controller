@@ -76,6 +76,13 @@ import org.slf4j.LoggerFactory;
 public class FlowConverter {
     protected static final Logger logger = LoggerFactory
             .getLogger(FlowConverter.class);
+
+    /*
+     * The value 0xffff (OFP_VLAN_NONE) is used to indicate
+     * that no VLAN ID is set for OF Flow.
+     */
+    private static final short OFP_VLAN_NONE = (short) 0xffff;
+
     private Flow flow; // SAL Flow
     private OFMatch ofMatch; // OF 1.0 match or OF 1.0 + IPv6 extension match
     private List<OFAction> actionsList; // OF 1.0 actions
@@ -143,6 +150,9 @@ public class FlowConverter {
             if (match.isPresent(MatchType.DL_VLAN)) {
                 short vlan = (Short) match.getField(MatchType.DL_VLAN)
                         .getValue();
+                if (vlan == MatchType.DL_VLAN_NONE) {
+                    vlan = OFP_VLAN_NONE;
+                }
                 if (!isIPv6) {
                     ofMatch.setDataLayerVirtualLan(vlan);
                     wildcards &= ~OFMatch.OFPFW_DL_VLAN;
@@ -514,9 +524,13 @@ public class FlowConverter {
                         salMatch.setField(new MatchField(MatchType.DL_TYPE,
                                 ofMatch.getDataLayerType()));
                     }
-                    if (ofMatch.getDataLayerVirtualLan() != 0) {
+                    short vlan = ofMatch.getDataLayerVirtualLan();
+                    if (vlan != 0) {
+                        if (vlan == OFP_VLAN_NONE) {
+                            vlan = MatchType.DL_VLAN_NONE;
+                        }
                         salMatch.setField(new MatchField(MatchType.DL_VLAN,
-                                ofMatch.getDataLayerVirtualLan()));
+                                vlan));
                     }
                     if (ofMatch.getDataLayerVirtualLanPriorityCodePoint() != 0) {
                         salMatch.setField(MatchType.DL_VLAN_PR, ofMatch
@@ -582,9 +596,13 @@ public class FlowConverter {
                         salMatch.setField(new MatchField(MatchType.DL_TYPE,
                                 v6Match.getDataLayerType()));
                     }
-                    if (v6Match.getDataLayerVirtualLan() != 0) {
+                    short vlan = v6Match.getDataLayerVirtualLan();
+                    if (vlan != 0) {
+                        if (vlan == OFP_VLAN_NONE) {
+                            vlan = MatchType.DL_VLAN_NONE;
+                        }
                         salMatch.setField(new MatchField(MatchType.DL_VLAN,
-                                v6Match.getDataLayerVirtualLan()));
+                                vlan));
                     }
                     if (v6Match.getDataLayerVirtualLanPriorityCodePoint() != 0) {
                         salMatch.setField(MatchType.DL_VLAN_PR, v6Match

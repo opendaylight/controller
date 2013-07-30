@@ -474,4 +474,15 @@ public class MatchTest {
         Assert.assertTrue(flipflip.equals(flipped));
 
     }
+
+    @Test
+    public void testVlanNone() throws Exception {
+        // The value 0 is used to indicate that no VLAN ID is set
+        short vlan = (short) 0;
+        MatchField field = new MatchField(MatchType.DL_VLAN, vlan);
+
+        Assert.assertTrue(field != null);
+        Assert.assertTrue(field.getValue().equals(new Short(vlan)));
+        Assert.assertTrue(field.isValid());
+    }
 }

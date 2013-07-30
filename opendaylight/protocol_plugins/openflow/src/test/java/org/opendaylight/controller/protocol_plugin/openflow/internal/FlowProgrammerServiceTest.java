@@ -180,6 +180,55 @@ public class FlowProgrammerServiceTest {
     }
 
     @Test
+    public void testVlanNoneIdFlowConversion() throws Exception {
+        Node node = NodeCreator.createOFNode(1000l);
+
+        /*
+         * The value 0 is used to indicate that no VLAN ID is set
+         * for SAL Flow.
+         */
+        short vlan = (short) 0;
+
+        /*
+         * Create a SAL Flow aFlow
+         */
+        Match match = new Match();
+        match.setField(MatchType.DL_VLAN, vlan);
+
+        List<Action> actions = new ArrayList<Action>();
+
+        Flow aFlow = new Flow(match, actions);
+
+        /*
+         * Convert the SAL aFlow to OF Flow
+         */
+        FlowConverter salToOF = new FlowConverter(aFlow);
+        OFMatch ofMatch = salToOF.getOFMatch();
+        List<OFAction> ofActions = salToOF.getOFActions();
+
+        /*
+         * The value 0xffff (OFP_VLAN_NONE) is used to indicate
+         * that no VLAN ID is set for OF Flow.
+         */
+        Assert.assertEquals((short) 0xffff, ofMatch.getDataLayerVirtualLan());
+
+        /*
+         * Convert the OF Flow to SAL Flow bFlow
+         */
+        FlowConverter ofToSal = new FlowConverter(ofMatch, ofActions);
+        Flow bFlow = ofToSal.getFlow(node);
+        Match bMatch = bFlow.getMatch();
+
+        /*
+         * Verify the converted SAL flow bFlow is equivalent to the original SAL Flow
+         */
+        Assert
+                .assertTrue(((Short) match.getField(MatchType.DL_VLAN)
+                        .getValue()).equals((Short) bMatch.getField(
+                        MatchType.DL_VLAN).getValue()));
+    }
+
+    @Test
     public void testV6toSALFlowConversion() throws Exception {
         Node node = NodeCreator.createOFNode(12l);
         NodeConnector port = NodeConnectorCreator.createNodeConnector(
