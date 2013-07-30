@@ -23,6 +23,7 @@ public final class GeneratorJavaFile {
     private final CodeGenerator interfaceGenerator;
     private final ClassCodeGenerator classGenerator;
     private final EnumGenerator enumGenerator;
+    private final BuilderGenerator builderGenerator;
 
     private final Set<GeneratedType> genTypes;
     private final Set<GeneratedTransferObject> genTransferObjects;
@@ -35,6 +36,7 @@ public final class GeneratorJavaFile {
         this.enumerations = new HashSet<>();
         this.classGenerator = new ClassCodeGenerator();
         this.enumGenerator = new EnumGenerator();
+        this.builderGenerator = new BuilderGenerator();
     }
 
     public GeneratorJavaFile(final Set<GeneratedType> types, final Set<GeneratedTransferObject> genTransferObjects,
@@ -42,6 +44,7 @@ public final class GeneratorJavaFile {
         this.interfaceGenerator = new InterfaceGenerator();
         this.classGenerator = new ClassCodeGenerator();
         this.enumGenerator = new EnumGenerator();
+        this.builderGenerator = new BuilderGenerator();
 
         this.genTypes = types;
         this.genTransferObjects = genTransferObjects;
@@ -51,14 +54,19 @@ public final class GeneratorJavaFile {
     public List<File> generateToFile(final File parentDirectory) throws IOException {
         final List<File> result = new ArrayList<>();
         for (GeneratedType type : genTypes) {
-            final File genFile = generateTypeToJavaFile(parentDirectory, type, interfaceGenerator);
+            final File genFile = generateTypeToJavaFile(parentDirectory, type, interfaceGenerator, "");
+            final File genBuilderFile = generateTypeToJavaFile(parentDirectory, type, builderGenerator,
+                    BuilderGenerator.FILE_NAME_SUFFIX);
 
             if (genFile != null) {
                 result.add(genFile);
             }
+            if (genBuilderFile != null) {
+                result.add(genBuilderFile);
+            }
         }
         for (GeneratedTransferObject transferObject : genTransferObjects) {
-            final File genFile = generateTypeToJavaFile(parentDirectory, transferObject, classGenerator);
+            final File genFile = generateTypeToJavaFile(parentDirectory, transferObject, classGenerator, "");
 
             if (genFile != null) {
                 result.add(genFile);
@@ -66,7 +74,7 @@ public final class GeneratorJavaFile {
         }
 
         for (Enumeration enumeration : enumerations) {
-            final File genFile = generateTypeToJavaFile(parentDirectory, enumeration, enumGenerator);
+            final File genFile = generateTypeToJavaFile(parentDirectory, enumeration, enumGenerator, "");
 
             if (genFile != null) {
                 result.add(genFile);
@@ -76,7 +84,7 @@ public final class GeneratorJavaFile {
         return result;
     }
 
-    private File generateTypeToJavaFile(final File parentDir, final Type type, final CodeGenerator generator)
+    private File generateTypeToJavaFile(final File parentDir, final Type type, final CodeGenerator generator, String fileNameSuffix)
             throws IOException {
         if (parentDir == null) {
             log.warn("Parent Directory not specified, files will be generated "
@@ -95,7 +103,7 @@ public final class GeneratorJavaFile {
         if (!packageDir.exists()) {
             packageDir.mkdirs();
         }
-        final File file = new File(packageDir, type.getName() + ".java");
+        final File file = new File(packageDir, type.getName() + fileNameSuffix + ".java");
         try (final FileWriter fw = new FileWriter(file)) {
             file.createNewFile();
 
