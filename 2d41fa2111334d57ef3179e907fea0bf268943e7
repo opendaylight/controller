@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+1g\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/ReadServiceFilter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-07-30T23:10:53Z",
+      "side": 1,
+      "message": "consider changing the name to be more readable ?\nisFlowAllowed",
+      "revId": "2d41fa2111334d57ef3179e907fea0bf268943e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
