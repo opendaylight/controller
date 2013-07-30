@@ -279,7 +279,7 @@ public class IPv4 extends Packet {
     }
 
     /**
-     * Stores the length of IP header in words (2 bytes)
+     * Stores the length of IP header in words (4 bytes)
      * @param headerLength the headerLength to set
      * @return IPv4
      */
