@@ -8,12 +8,14 @@
 package org.opendaylight.controller.sal.binding.generator.impl;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
@@ -73,9 +75,8 @@ public class GeneratedTypesTest {
         assertNotNull(inetTypesPath);
         assertNotNull(yangTypesPath);
 
-        // final SchemaContext context = resolveSchemaContextFromFiles(
-        // topologyPath, interfacesPath, ifTypePath, inetTypesPath,
-        // yangTypesPath);
+        // final SchemaContext context = resolveSchemaContextFromFiles(topologyPath, interfacesPath, ifTypePath,
+        // inetTypesPath, yangTypesPath);
         final SchemaContext context = resolveSchemaContextFromFiles(topologyPath, interfacesPath, inetTypesPath,
                 yangTypesPath);
         assertNotNull(context);
@@ -94,6 +95,7 @@ public class GeneratedTypesTest {
         GeneratedType gtDest = null;
         GeneratedType gtTunnel = null;
         GeneratedTransferObject gtTunnelKey = null;
+        GeneratedType gtTopology = null;
         for (final Type type : genTypes) {
             String name = type.getName();
             if ("InterfaceKey".equals(name)) {
@@ -110,6 +112,8 @@ public class GeneratedTypesTest {
                 gtTunnel = (GeneratedType) type;
             } else if ("TunnelKey".equals(name)) {
                 gtTunnelKey = (GeneratedTransferObject) type;
+            } else if ("Topology".equals(name)) {
+                gtTopology = (GeneratedType) type;
             }
         }
 
@@ -120,6 +124,21 @@ public class GeneratedTypesTest {
         assertNotNull(gtDest);
         assertNotNull(gtTunnel);
         assertNotNull(gtTunnelKey);
+        assertNotNull(gtTopology);
+
+        // Topology
+        final List<MethodSignature> gtTopoMethods = gtTopology.getMethodDefinitions();
+        assertNotNull(gtTopoMethods);
+        MethodSignature condLeafref = null;
+        for (final MethodSignature method : gtTopoMethods) {
+            if (method.getName().equals("getCondLeafref")) {
+                condLeafref = method;
+            }
+        }
+        assertNotNull(condLeafref);
+        Type condLeafRT = condLeafref.getReturnType();
+        assertNotNull(condLeafRT);
+        assertEquals("java.lang.Object", condLeafRT.getFullyQualifiedName());
 
         // InterfaceId
         final List<GeneratedProperty> gtIfcKeyProps = gtIfcKey.getProperties();
@@ -133,8 +152,7 @@ public class GeneratedTypesTest {
         assertNotNull(ifcIdProp);
         Type ifcIdPropType = ifcIdProp.getReturnType();
         assertNotNull(ifcIdPropType);
-        assertFalse(ifcIdPropType.equals("java.lang.Void"));
-        assertEquals(ifcIdPropType.getName(), "String");
+        assertEquals("java.lang.String", ifcIdPropType.getFullyQualifiedName());
 
         // Interface
         final List<MethodSignature> gtIfcMethods = gtIfc.getMethodDefinitions();
@@ -151,14 +169,14 @@ public class GeneratedTypesTest {
         assertNotNull(getIfcKey);
         Type getIfcKeyType = getIfcKey.getReturnType();
         assertNotNull(getIfcKeyType);
-        assertFalse(getIfcKeyType.equals("java.lang.Void"));
-        assertEquals(getIfcKeyType.getName(), "InterfaceKey");
+        assertNotSame("java.lang.Void", getIfcKeyType);
+        assertEquals("InterfaceKey", getIfcKeyType.getName());
 
         assertNotNull(getHigherLayerIf);
         Type getHigherLayerIfType = getHigherLayerIf.getReturnType();
         assertNotNull(getHigherLayerIfType);
-        assertFalse(getHigherLayerIfType.equals("java.lang.Void"));
-        assertEquals(getHigherLayerIfType.getName(), "List");
+        assertNotSame("java.lang.Void", getHigherLayerIfType);
+        assertEquals("List", getHigherLayerIfType.getName());
 
         // NetworkLink
         final List<MethodSignature> gtNetworkLinkMethods = gtNetworkLink.getMethodDefinitions();
@@ -172,8 +190,8 @@ public class GeneratedTypesTest {
         assertNotNull(getIfc);
         Type getIfcType = getIfc.getReturnType();
         assertNotNull(getIfcType);
-        assertFalse(getIfcType.equals("java.lang.Void"));
-        assertEquals(getIfcType.getName(), "String");
+        assertNotSame("java.lang.Void", getIfcType);
+        assertEquals("String", getIfcType.getName());
 
         // SourceNode
         final List<MethodSignature> gtSourceMethods = gtSource.getMethodDefinitions();
@@ -187,8 +205,8 @@ public class GeneratedTypesTest {
         assertNotNull(getIdSource);
         Type getIdType = getIdSource.getReturnType();
         assertNotNull(getIdType);
-        assertFalse(getIdType.equals("java.lang.Void"));
-        assertEquals(getIdType.getName(), "Uri");
+        assertNotSame("java.lang.Void", getIdType);
+        assertEquals("Uri", getIdType.getName());
 
         // DestinationNode
         final List<MethodSignature> gtDestMethods = gtDest.getMethodDefinitions();
@@ -202,8 +220,8 @@ public class GeneratedTypesTest {
         assertNotNull(getIdDest);
         Type getIdDestType = getIdDest.getReturnType();
         assertNotNull(getIdDestType);
-        assertFalse(getIdDestType.equals("java.lang.Void"));
-        assertEquals(getIdDestType.getName(), "Uri");
+        assertNotSame("java.lang.Void", getIdDestType);
+        assertEquals("Uri", getIdDestType.getName());
 
         // Tunnel
         final List<MethodSignature> gtTunnelMethods = gtTunnel.getMethodDefinitions();
@@ -217,8 +235,8 @@ public class GeneratedTypesTest {
         assertNotNull(getTunnelKey);
         Type getTunnelKeyType = getTunnelKey.getReturnType();
         assertNotNull(getTunnelKeyType);
-        assertFalse(getTunnelKeyType.equals("java.lang.Void"));
-        assertEquals(getTunnelKeyType.getName(), "TunnelKey");
+        assertNotSame("java.lang.Void", getTunnelKeyType);
+        assertEquals("TunnelKey", getTunnelKeyType.getName());
 
         // TunnelKey
         final List<GeneratedProperty> gtTunnelKeyProps = gtTunnelKey.getProperties();
@@ -232,8 +250,8 @@ public class GeneratedTypesTest {
         assertNotNull(tunnelId);
         Type tunnelIdType = tunnelId.getReturnType();
         assertNotNull(tunnelIdType);
-        assertFalse(tunnelIdType.equals("java.lang.Void"));
-        assertEquals(tunnelIdType.getName(), "Uri");
+        assertNotSame("java.lang.Void", tunnelIdType);
+        assertEquals("Uri", tunnelIdType.getName());
     }
 
     @Test
@@ -256,27 +274,17 @@ public class GeneratedTypesTest {
         assertEquals(3, simpleContainer.getMethodDefinitions().size());
         assertEquals(2, nestedContainer.getMethodDefinitions().size());
 
-        int setFooMethodCounter = 0;
         int getFooMethodCounter = 0;
         int getBarMethodCounter = 0;
         int getNestedContainerCounter = 0;
 
         String getFooMethodReturnTypeName = "";
-        String setFooMethodInputParamName = "";
-        String setFooMethodInputParamTypeName = "";
         String getBarMethodReturnTypeName = "";
         String getNestedContainerReturnTypeName = "";
         for (final MethodSignature method : simpleContainer.getMethodDefinitions()) {
             if (method.getName().equals("getFoo")) {
                 getFooMethodCounter++;
                 getFooMethodReturnTypeName = method.getReturnType().getName();
-            }
-
-            if (method.getName().equals("setFoo")) {
-                setFooMethodCounter++;
-                final MethodSignature.Parameter param = method.getParameters().get(0);
-                setFooMethodInputParamName = param.getName();
-                setFooMethodInputParamTypeName = param.getType().getName();
             }
 
             if (method.getName().equals("getBar")) {
@@ -290,31 +298,20 @@ public class GeneratedTypesTest {
             }
         }
 
-        assertEquals(getFooMethodCounter, 1);
-        assertEquals(getFooMethodReturnTypeName, "Integer");
+        assertEquals(1, getFooMethodCounter);
+        assertEquals("Integer", getFooMethodReturnTypeName);
 
-        // TODO no setter methods, because 'config' is default true
-        // assertEquals(setFooMethodCounter, 1);
-        // assertEquals(setFooMethodInputParamName, "foo");
-        // assertEquals(setFooMethodInputParamTypeName, "Integer");
+        assertEquals(1, getBarMethodCounter);
+        assertEquals("String", getBarMethodReturnTypeName);
 
-        assertEquals(getBarMethodCounter, 1);
-        assertEquals(getBarMethodReturnTypeName, "String");
+        assertEquals(1, getNestedContainerCounter);
+        assertEquals("NestedContainer", getNestedContainerReturnTypeName);
 
-        assertEquals(getNestedContainerCounter, 1);
-        assertEquals(getNestedContainerReturnTypeName, "NestedContainer");
-
-        setFooMethodCounter = 0;
         getFooMethodCounter = 0;
         getBarMethodCounter = 0;
-        int setBarMethodCounter = 0;
 
         getFooMethodReturnTypeName = "";
-        setFooMethodInputParamName = "";
-        setFooMethodInputParamTypeName = "";
         getBarMethodReturnTypeName = "";
-        String setBarMethodInputParamName = "";
-        String setBarMethodInputParamTypeName = "";
 
         for (final MethodSignature method : nestedContainer.getMethodDefinitions()) {
 
@@ -323,41 +320,17 @@ public class GeneratedTypesTest {
                 getFooMethodReturnTypeName = method.getReturnType().getName();
             }
 
-            if (method.getName().equals("setFoo")) {
-                setFooMethodCounter++;
-                final MethodSignature.Parameter param = method.getParameters().get(0);
-                setFooMethodInputParamName = param.getName();
-                setFooMethodInputParamTypeName = param.getType().getName();
-            }
-
             if (method.getName().equals("getBar")) {
                 getBarMethodCounter++;
                 getBarMethodReturnTypeName = method.getReturnType().getName();
             }
-
-            if (method.getName().equals("setBar")) {
-                setBarMethodCounter++;
-                final MethodSignature.Parameter param = method.getParameters().get(0);
-                setBarMethodInputParamName = param.getName();
-                setBarMethodInputParamTypeName = param.getType().getName();
-            }
         }
 
         assertEquals(1, getFooMethodCounter);
-        assertEquals(getFooMethodReturnTypeName, "Short");
-
-        // TODO no setter methods, because 'config' is default true
-        // assertEquals(1, setFooMethodCounter);
-        // assertEquals(setFooMethodInputParamName, "foo");
-        // assertEquals(setFooMethodInputParamTypeName, "Short");
+        assertEquals("Short", getFooMethodReturnTypeName);
 
         assertEquals(1, getBarMethodCounter);
-        assertEquals(getBarMethodReturnTypeName, "String");
-
-        // TODO no setter methods, because 'config' is default true
-        // assertEquals(1, setBarMethodCounter);
-        // assertEquals(setBarMethodInputParamName, "bar");
-        // assertEquals(setBarMethodInputParamTypeName, "String");
+        assertEquals("String", getBarMethodReturnTypeName);
     }
 
     @Test
@@ -380,27 +353,17 @@ public class GeneratedTypesTest {
         assertEquals(3, simpleContainer.getMethodDefinitions().size());
         assertEquals(2, nestedContainer.getMethodDefinitions().size());
 
-        int setFooMethodCounter = 0;
         int getFooMethodCounter = 0;
         int getBarMethodCounter = 0;
         int getNestedContainerCounter = 0;
 
         String getFooMethodReturnTypeName = "";
-        String setFooMethodInputParamName = "";
-        String setFooMethodInputParamTypeName = "";
         String getBarMethodReturnTypeName = "";
         String getNestedContainerReturnTypeName = "";
         for (final MethodSignature method : simpleContainer.getMethodDefinitions()) {
             if (method.getName().equals("getFoo")) {
                 getFooMethodCounter++;
                 getFooMethodReturnTypeName = method.getReturnType().getName();
-            }
-
-            if (method.getName().equals("setFoo")) {
-                setFooMethodCounter++;
-                final MethodSignature.Parameter param = method.getParameters().get(0);
-                setFooMethodInputParamName = param.getName();
-                setFooMethodInputParamTypeName = param.getType().getName();
             }
 
             if (method.getName().equals("getBar")) {
@@ -415,39 +378,24 @@ public class GeneratedTypesTest {
         }
 
         assertEquals(1, getFooMethodCounter);
-        assertEquals(getFooMethodReturnTypeName, "List");
-
-        // TODO no setter methods, because 'config' is default true
-        // assertEquals(1, setFooMethodCounter);
-        // assertEquals(setFooMethodInputParamName, "foo");
-        // assertEquals(setFooMethodInputParamTypeName, "List");
+        assertEquals("List", getFooMethodReturnTypeName);
 
         assertEquals(1, getBarMethodCounter);
-        assertEquals(getBarMethodReturnTypeName, "String");
+        assertEquals("String", getBarMethodReturnTypeName);
 
         assertEquals(1, getNestedContainerCounter);
-        assertEquals(getNestedContainerReturnTypeName, "NestedContainer");
+        assertEquals("NestedContainer", getNestedContainerReturnTypeName);
 
-        setFooMethodCounter = 0;
         getFooMethodCounter = 0;
         getBarMethodCounter = 0;
 
         getFooMethodReturnTypeName = "";
-        setFooMethodInputParamName = "";
-        setFooMethodInputParamTypeName = "";
         getBarMethodReturnTypeName = "";
 
         for (final MethodSignature method : nestedContainer.getMethodDefinitions()) {
             if (method.getName().equals("getFoo")) {
                 getFooMethodCounter++;
                 getFooMethodReturnTypeName = method.getReturnType().getName();
-            }
-
-            if (method.getName().equals("setFoo")) {
-                setFooMethodCounter++;
-                final MethodSignature.Parameter param = method.getParameters().get(0);
-                setFooMethodInputParamName = param.getName();
-                setFooMethodInputParamTypeName = param.getType().getName();
             }
 
             if (method.getName().equals("getBar")) {
@@ -457,15 +405,10 @@ public class GeneratedTypesTest {
         }
 
         assertEquals(1, getFooMethodCounter);
-        assertEquals(getFooMethodReturnTypeName, "Short");
-
-        // TODO no setter methods, because 'config' is default true
-        // assertEquals(1, setFooMethodCounter);
-        // assertEquals(setFooMethodInputParamName, "foo");
-        // assertEquals(setFooMethodInputParamTypeName, "Short");
+        assertEquals("Short", getFooMethodReturnTypeName);
 
         assertEquals(1, getBarMethodCounter);
-        assertEquals(getBarMethodReturnTypeName, "List");
+        assertEquals("List", getBarMethodReturnTypeName);
     }
 
     @Test
@@ -479,9 +422,6 @@ public class GeneratedTypesTest {
 
         assertNotNull(genTypes);
         assertEquals(6, genTypes.size());
-
-        int genTypesCount = 0;
-        int genTOsCount = 0;
 
         int listParentContainerMethodsCount = 0;
         int simpleListMethodsCount = 0;
@@ -517,7 +457,6 @@ public class GeneratedTypesTest {
                 final GeneratedType genType = (GeneratedType) type;
                 if (genType.getName().equals("ListParentContainer")) {
                     listParentContainerMethodsCount = genType.getMethodDefinitions().size();
-                    genTypesCount++;
                 } else if (genType.getName().equals("SimpleList")) {
                     simpleListMethodsCount = genType.getMethodDefinitions().size();
                     final List<MethodSignature> methods = genType.getMethodDefinitions();
@@ -540,13 +479,10 @@ public class GeneratedTypesTest {
                             getBarMethodCount++;
                         }
                     }
-                    genTypesCount++;
                 } else if (genType.getName().equals("ListChildContainer")) {
                     listChildContainerMethodsCount = genType.getMethodDefinitions().size();
-                    genTypesCount++;
                 }
             } else if (type instanceof GeneratedTransferObject) {
-                genTOsCount++;
                 final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
                 final List<GeneratedProperty> properties = genTO.getProperties();
                 final List<GeneratedProperty> hashProps = genTO.getHashCodeIdentifiers();

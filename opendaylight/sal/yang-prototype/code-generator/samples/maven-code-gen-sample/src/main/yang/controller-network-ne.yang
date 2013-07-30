@@ -14,7 +14,7 @@ module controller-openflow-ne {
 
     augment "/cn:network/cn:network-elements/cn:network-element" {
 
-        container flow-tables {
+        container flow-tables2 {
             list flow-table {
 
                 key "id";
