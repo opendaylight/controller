@@ -22,6 +22,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
@@ -73,8 +74,10 @@ public class InventoryService implements IInventoryShimInternalListener,
         Dictionary props = c.getServiceProperties();
         if (props != null) {
             containerName = (String) props.get("containerName");
-            isDefaultContainer = containerName.equals(GlobalConstants.DEFAULT
-                    .toString());
+            if (containerName != null) {
+                isDefaultContainer = containerName.equals(GlobalConstants.DEFAULT
+                        .toString());
+            }
         }
 
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
@@ -201,13 +204,6 @@ public class InventoryService implements IInventoryShimInternalListener,
             return;
         }
 
-        Set<Node> nodeSet = nodeProps.keySet();
-        if (((props == null) || props.isEmpty()) && (nodeSet != null)
-                && nodeSet.contains(node)) {
-            // node already added
-            return;
-        }
-
         logger.trace("addNode: {} added, props: {} for container {}",
                 new Object[] { node, props, containerName });
 
@@ -297,5 +293,4 @@ public class InventoryService implements IInventoryShimInternalListener,
             break;
         }
     }
-
 }

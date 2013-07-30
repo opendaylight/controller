@@ -39,6 +39,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
@@ -60,6 +61,8 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 
 /**
  * The class describes neighbor discovery service for an OpenFlow network.
@@ -126,6 +129,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     private volatile Boolean shuttingDown = false;
 
     private LLDPTLV chassisIdTlv, portIdTlv, ttlTlv, customTlv;
+    private IPluginOutConnectionService connectionOutService;
 
     class DiscoveryTransmit implements Runnable {
         private final BlockingQueue<NodeConnector> transmitQ;
@@ -256,6 +260,11 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             return;
         }
 
+        if (!connectionOutService.isLocal(nodeConnector.getNode())) {
+            logger.debug("Discoery packets will not be sent to {} in a non-master controller", nodeConnector.toString());
+            return;
+        }
+
         if (outPkt == null) {
             logger.debug("Can not send discovery packet out since outPkt is null");
             return;
@@ -301,9 +310,15 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             return PacketResult.IGNORED;
         }
 
-        if (((Short) inPkt.getIncomingNodeConnector().getID()).equals(NodeConnector.SPECIALNODECONNECTORID)) {
+        NodeConnector nodeConnector = inPkt.getIncomingNodeConnector();
+        if (((Short) nodeConnector.getID()).equals(NodeConnector.SPECIALNODECONNECTORID)) {
             logger.trace("Ignoring ethernet packet received on special port: "
                     + inPkt.getIncomingNodeConnector().toString());
+            return PacketResult.IGNORED;
+        }
+
+        if (!connectionOutService.isLocal(nodeConnector.getNode())) {
+            logger.debug("Discoery packets will not be processed from {} in a non-master controller", nodeConnector.toString());
             return PacketResult.IGNORED;
         }
 
@@ -659,6 +674,9 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                 // Allow one more retry
                 readyListLo.add(nodeConnector);
                 elapsedTime.remove(nodeConnector);
+                if (connectionOutService.isLocal(nodeConnector.getNode())) {
+                    transmitQ.add(nodeConnector);
+                }
             }
         }
     }
@@ -692,10 +710,12 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     private void doDiscovery() {
         if (++discoveryTimerTickCount <= discoveryBatchPauseTicks) {
             for (NodeConnector nodeConnector : getWorkingSet()) {
-                transmitQ.add(nodeConnector);
-                // Move to staging area after it's served
-                if (!stagingList.contains(nodeConnector)) {
-                    stagingList.add(nodeConnector);
+                if (connectionOutService.isLocal(nodeConnector.getNode())) {
+                    transmitQ.add(nodeConnector);
+                    // Move to staging area after it's served
+                    if (!stagingList.contains(nodeConnector)) {
+                        stagingList.add(nodeConnector);
+                    }
                 }
             }
         } else if (discoveryTimerTickCount >= discoveryBatchRestartTicks) {
@@ -1399,6 +1419,16 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     void unsetDiscoveryListener(IDiscoveryListener s) {
         if (this.discoveryListener == s) {
             this.discoveryListener = null;
+        }
+    }
+
+    void setIPluginOutConnectionService(IPluginOutConnectionService s) {
+        connectionOutService = s;
+    }
+
+    void unsetIPluginOutConnectionService(IPluginOutConnectionService s) {
+        if (connectionOutService == s) {
+            connectionOutService = null;
         }
     }
 

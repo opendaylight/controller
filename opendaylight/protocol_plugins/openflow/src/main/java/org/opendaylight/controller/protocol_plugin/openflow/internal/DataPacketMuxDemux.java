@@ -32,6 +32,7 @@ import org.openflow.protocol.action.OFActionOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerListener;
@@ -60,6 +61,7 @@ public class DataPacketMuxDemux implements IContainerListener,
     private ConcurrentMap<String, List<ContainerFlow>> container2FlowSpecs = new ConcurrentHashMap<String, List<ContainerFlow>>();
     // Track local data packet listener
     private List<IDataPacketListen> iDataPacketListen = new CopyOnWriteArrayList<IDataPacketListen>();
+    private IPluginOutConnectionService connectionOutService;
 
     void setIDataPacketListen(IDataPacketListen s) {
         if (this.iDataPacketListen != null) {
@@ -128,6 +130,16 @@ public class DataPacketMuxDemux implements IContainerListener,
         }
     }
 
+    void setIPluginOutConnectionService(IPluginOutConnectionService s) {
+        connectionOutService = s;
+    }
+
+    void unsetIPluginOutConnectionService(IPluginOutConnectionService s) {
+        if (connectionOutService == s) {
+            connectionOutService = null;
+        }
+    }
+
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
@@ -164,9 +176,21 @@ public class DataPacketMuxDemux implements IContainerListener,
                     new Object[] { sw, msg, this.pluginOutDataPacketServices });
             return;
         }
+
+        Long ofSwitchID = Long.valueOf(sw.getId());
+        try {
+            Node n = new Node(Node.NodeIDType.OPENFLOW, ofSwitchID);
+            if (!connectionOutService.isLocal(n)) {
+                logger.debug("Connection service refused DataPacketMuxDemux receive {} {}", sw, msg);
+                return;
+            }
+        }
+        catch (Exception e) {
+            return;
+        }
+
         if (msg instanceof OFPacketIn) {
             OFPacketIn ofPacket = (OFPacketIn) msg;
-            Long ofSwitchID = Long.valueOf(sw.getId());
             Short ofPortID = Short.valueOf(ofPacket.getInPort());
 
             try {
@@ -257,6 +281,12 @@ public class DataPacketMuxDemux implements IContainerListener,
             logger.debug("outPort is null! outPkt: {}", outPkt);
             return;
         }
+
+        if (!connectionOutService.isLocal(outPort.getNode())) {
+            logger.debug("data packets will not be sent to {} in a non-master controller", outPort.toString());
+            return;
+        }
+
 
         if (!outPort.getType().equals(
                 NodeConnector.NodeConnectorIDType.OPENFLOW)) {

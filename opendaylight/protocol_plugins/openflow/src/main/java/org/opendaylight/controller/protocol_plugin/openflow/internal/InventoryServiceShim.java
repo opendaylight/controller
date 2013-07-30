@@ -26,6 +26,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateListener;
+import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
@@ -63,11 +64,13 @@ public class InventoryServiceShim implements IContainerListener,
             .getLogger(InventoryServiceShim.class);
     private IController controller = null;
     private final ConcurrentMap<String, IInventoryShimInternalListener> inventoryShimInternalListeners = new ConcurrentHashMap<String, IInventoryShimInternalListener>();
+    private final Set<IInventoryShimInternalListener> globalInventoryShimInternalListeners = new HashSet<IInventoryShimInternalListener>();
     private final List<IInventoryShimExternalListener> inventoryShimExternalListeners = new CopyOnWriteArrayList<IInventoryShimExternalListener>();
     private final ConcurrentMap<NodeConnector, Set<String>> nodeConnectorContainerMap = new ConcurrentHashMap<NodeConnector, Set<String>>();
     private final ConcurrentMap<Node, Set<String>> nodeContainerMap = new ConcurrentHashMap<Node, Set<String>>();
     private final ConcurrentMap<NodeConnector, Set<Property>> nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Set<Property>>();
     private final ConcurrentMap<Node, Set<Property>> nodeProps = new ConcurrentHashMap<Node, Set<Property>>();
+    private IPluginOutConnectionService connectionOutService;
 
     void setController(IController s) {
         this.controller = s;
@@ -76,6 +79,20 @@ public class InventoryServiceShim implements IContainerListener,
     void unsetController(IController s) {
         if (this.controller == s) {
             this.controller = null;
+        }
+    }
+
+    void setInventoryShimGlobalInternalListener(Map<?, ?> props,
+            IInventoryShimInternalListener s) {
+        if ((this.globalInventoryShimInternalListeners != null)) {
+            this.globalInventoryShimInternalListeners.add(s);
+        }
+    }
+
+    void unsetInventoryShimGlobalInternalListener(Map<?, ?> props,
+            IInventoryShimInternalListener s) {
+        if ((this.globalInventoryShimInternalListeners != null)) {
+            this.globalInventoryShimInternalListeners.remove(s);
         }
     }
 
@@ -107,7 +124,7 @@ public class InventoryServiceShim implements IContainerListener,
         }
         String containerName = (String) props.get("containerName");
         if (containerName == null) {
-            logger.error("unsetInventoryShimInternalListener containerName not supplied");
+            logger.error("setInventoryShimInternalListener containerName not supplied");
             return;
         }
         if ((this.inventoryShimInternalListeners != null)
@@ -133,6 +150,16 @@ public class InventoryServiceShim implements IContainerListener,
         if ((this.inventoryShimExternalListeners != null)
                 && this.inventoryShimExternalListeners.contains(s)) {
             this.inventoryShimExternalListeners.remove(s);
+        }
+    }
+
+    void setIPluginOutConnectionService(IPluginOutConnectionService s) {
+        connectionOutService = s;
+    }
+
+    void unsetIPluginOutConnectionService(IPluginOutConnectionService s) {
+        if (connectionOutService == s) {
+            connectionOutService = null;
         }
     }
 
@@ -167,6 +194,7 @@ public class InventoryServiceShim implements IContainerListener,
         this.inventoryShimInternalListeners.clear();
         this.nodeConnectorContainerMap.clear();
         this.nodeContainerMap.clear();
+        this.globalInventoryShimInternalListeners.clear();
         this.controller = null;
     }
 
@@ -353,6 +381,19 @@ public class InventoryServiceShim implements IContainerListener,
      * Notify all internal and external listeners
      */
     private void notifyInventoryShimListener(NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
+        notifyGlobalInventoryShimInternalListener(nodeConnector, type, props);
+        /*
+         * isLocal is intentionally moved after the GlobalInventory listener call.
+         * The above notification to GlobalInventory will make sure that the connectionOutService be ready
+         * to reply to isLocal query.
+         */
+        if (!connectionOutService.isLocal(nodeConnector.getNode())) {
+            logger.debug("Connection service dropped the inventory notification for {} {}", nodeConnector.toString(), type);
+            return;
+        } else {
+            logger.debug("Connection service accepted the inventory notification for {} {}", nodeConnector.toString(), type);
+        }
+
         // notify other containers
         Set<String> containers = (nodeConnectorContainerMap.get(nodeConnector) == null) ? new HashSet<String>()
                 : new HashSet<String>(nodeConnectorContainerMap.get(nodeConnector));
@@ -369,7 +410,19 @@ public class InventoryServiceShim implements IContainerListener,
      * Notify all internal and external listeners
      */
     private void notifyInventoryShimListener(Node node, UpdateType type, Set<Property> props) {
-        // Now notify other containers
+        notifyGlobalInventoryShimInternalListener(node, type, props);
+        /*
+         * isLocal is intentionally moved after the GlobalInventory listener call.
+         * The above notification to GlobalInventory will make sure that the connectionOutService be ready
+         * to reply to isLocal query.
+         */
+        if (!connectionOutService.isLocal(node)) {
+            logger.debug("Connection service dropped the inventory notification for {} {}", node.toString(), type);
+            return;
+        } else {
+            logger.debug("Connection service accepted the inventory notification for {} {}", node.toString(), type);
+        }
+    // Now notify other containers
         Set<String> containers = (nodeContainerMap.get(node) == null) ? new HashSet<String>() : new HashSet<String>(
                 nodeContainerMap.get(node));
         containers.add(GlobalConstants.DEFAULT.toString());
@@ -379,6 +432,24 @@ public class InventoryServiceShim implements IContainerListener,
 
         // Notify external listener
         notifyInventoryShimExternalListener(node, type, props);
+    }
+
+    private void notifyGlobalInventoryShimInternalListener(Node node, UpdateType type, Set<Property> props) {
+        for (IInventoryShimInternalListener globalListener : globalInventoryShimInternalListeners) {
+            globalListener.updateNode(node, type, props);
+            logger.trace(
+                    "notifyGlobalInventoryShimInternalListener {} type {}",
+                    new Object[] { node, type });
+        }
+    }
+
+    private void notifyGlobalInventoryShimInternalListener(NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
+        for (IInventoryShimInternalListener globalListener : globalInventoryShimInternalListeners) {
+            globalListener.updateNodeConnector(nodeConnector, type, props);
+            logger.trace(
+                    "notifyGlobalInventoryShimInternalListener {} type {}",
+                    new Object[] { nodeConnector, type });
+        }
     }
 
     private void notifyInventoryShimInternalListener(String container,
