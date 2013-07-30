@@ -60,8 +60,9 @@
     <module>../../topologymanager</module>
     <module>../../usermanager/api</module>
     <module>../../usermanager/implementation</module>
+    <module>../../connectionmanager/api</module>
+    <module>../../connectionmanager/implementation</module>
     <module>../../security</module>
-
 
     <module>../../../third-party/openflowj</module>
     <module>../../../third-party/net.sf.jung2</module>
@@ -70,6 +71,10 @@
     <!-- SAL bundles -->
     <module>../../sal/api</module>
     <module>../../sal/implementation</module>
+
+    <!-- SAL Extension bundles -->
+    <module>../../sal/connection/api</module>
+    <module>../../sal/connection/implementation</module>
 
     <!--  Web bundles -->
     <module>../../web/root</module>
