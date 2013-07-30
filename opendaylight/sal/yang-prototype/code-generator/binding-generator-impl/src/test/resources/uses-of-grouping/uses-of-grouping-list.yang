@@ -1,0 +1,39 @@
+module grouping_uses_list {
+    
+    namespace "urn:grouping:uses:list";
+    prefix "sbd";
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    revision 2013-07-18 {
+    }
+
+
+    grouping grouping-list-test {
+        leaf leaf-grouping-list-test {
+            type string;
+        }
+        container container-grouping-list-test {
+            leaf leaf-container-grouping-list-test {
+                type uint8;
+            }
+        }
+        list list-grouping-list-test {
+            leaf leaf-list-grouping-list-test {
+                type int32;
+            }
+        }
+        leaf-list leaffllist-grouping-list-test {
+            type string;
+        }
+    }
+
+//grouping in LIST
+    list list-test {
+        leaf list-leaf-test {
+            type string;
+        }
+        uses grouping-list-test;
+    }
+}

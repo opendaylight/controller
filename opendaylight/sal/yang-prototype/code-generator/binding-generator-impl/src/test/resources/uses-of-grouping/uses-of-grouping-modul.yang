@@ -1,0 +1,23 @@
+module grouping_uses_modul {
+
+    namespace "urn:grouping:uses:modul";
+    prefix "sbd";
+
+    organization "OPEN DAYLIGHT";
+    contact "http://www.opendaylight.org/";
+
+    revision 2013-07-18 {
+    }
+
+    grouping grouping-modul-test {
+        leaf leaf-grouping-modul-test {
+            type string;
+        }
+        leaf leaf-grouping-modul-test2 {
+            type uint8;
+        }
+    }
+    
+//grouping in MODUL     
+    uses grouping-modul-test;
+}
