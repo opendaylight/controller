@@ -33,9 +33,12 @@
 
 package org.opendaylight.controller.hosttracker;
 
+import java.net.InetAddress;
 import java.util.Date;
 
+import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.NetUtils;
 
 /**
  * An entity on the network is a visible trace of a device that corresponds to a
@@ -216,6 +219,19 @@ public class Entity implements Comparable<Entity> {
         } else if (!vlan.equals(other.vlan))
             return false;
         return true;
+    }
+
+    public HostNodeConnector toHostNodeConnector() {
+        try {
+            NodeConnector n = this.getPort();
+            InetAddress ip = InetAddress.getByAddress(NetUtils.intToByteArray4(this.getIpv4Address()));
+            byte[] macAddr = NetUtils.longToByteArray6(this.getMacAddress());
+            HostNodeConnector nc = new HostNodeConnector(macAddr, ip, n,
+                    (short) 0);
+            return nc;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
