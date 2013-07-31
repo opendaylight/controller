@@ -115,6 +115,56 @@ public class FlowOnNode implements Serializable{
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (byteCount ^ (byteCount >>> 32));
+        result = prime * result + durationNanoseconds;
+        result = prime * result + durationSeconds;
+        result = prime * result + ((flow == null) ? 0 : flow.hashCode());
+        result = prime * result + (int) (packetCount ^ (packetCount >>> 32));
+        result = prime * result + tableId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof FlowOnNode)) {
+            return false;
+        }
+        FlowOnNode other = (FlowOnNode) obj;
+        if (byteCount != other.byteCount) {
+            return false;
+        }
+        if (durationNanoseconds != other.durationNanoseconds) {
+            return false;
+        }
+        if (durationSeconds != other.durationSeconds) {
+            return false;
+        }
+        if (flow == null) {
+            if (other.flow != null) {
+                return false;
+            }
+        } else if (!flow.equals(other.flow)) {
+            return false;
+        }
+        if (packetCount != other.packetCount) {
+            return false;
+        }
+        if (tableId != other.tableId) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "FlowOnNode[flow =" + flow + ", tableId = " + tableId
                 + ", sec = " + durationSeconds + ", nsec = "

@@ -167,7 +167,7 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
      * Function called after registering the service in OSGi service registry.
      */
     void started(){
-        //retrieve current statistics so we don't have to wait for next refresh
+        // Retrieve current statistics so we don't have to wait for next refresh
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(
                 ISwitchManager.class, container.getName(), this);
         if (reader != null && switchManager != null) {
@@ -180,7 +180,7 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
             }
 
         } else {
-            log.warn("Failed to retrieve current statistics. Statistics will not be immidiately available!");
+            log.trace("Failed to retrieve current statistics. Statistics will not be immediately available!");
         }
     }
 
@@ -247,7 +247,7 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
         }
 
         Node node;
-        //index FlowEntries' flows by node so we don't traverse entire flow list for each flowEntry
+        // Index FlowEntries' flows by node so we don't traverse entire flow list for each flowEntry
         Map<Node, Set<Flow>> index = new HashMap<Node, Set<Flow>>();
         for (FlowEntry flowEntry : flowList) {
             node = flowEntry.getNode();
@@ -256,7 +256,7 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
             index.put(node, set);
         }
 
-        //iterate over flows per indexed node and add to output
+        // Iterate over flows per indexed node and add to output
         for (Entry<Node, Set<Flow>> indexEntry : index.entrySet()) {
             node = indexEntry.getKey();
             List<FlowOnNode> flowsPerNode = flowStatistics.get(node);
@@ -356,27 +356,40 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
 
     @Override
     public void nodeFlowStatisticsUpdated(Node node, List<FlowOnNode> flowStatsList) {
-        this.flowStatistics.put(node, flowStatsList);
+        List<FlowOnNode> currentStat = this.flowStatistics.get(node);
+        // Update cache only if changed to avoid unnecessary cache sync operations
+        if (! flowStatsList.equals(currentStat)){
+            this.flowStatistics.put(node, flowStatsList);
+        }
     }
 
     @Override
     public void nodeConnectorStatisticsUpdated(Node node, List<NodeConnectorStatistics> ncStatsList) {
-        this.nodeConnectorStatistics.put(node, ncStatsList);
+        List<NodeConnectorStatistics> currentStat = this.nodeConnectorStatistics.get(node);
+        if (! ncStatsList.equals(currentStat)){
+            this.nodeConnectorStatistics.put(node, ncStatsList);
+        }
     }
 
     @Override
     public void nodeTableStatisticsUpdated(Node node, List<NodeTableStatistics> tableStatsList) {
-        this.tableStatistics.put(node, tableStatsList);
+        List<NodeTableStatistics> currentStat = this.tableStatistics.get(node);
+        if (! tableStatsList.equals(currentStat)) {
+            this.tableStatistics.put(node, tableStatsList);
+        }
     }
 
     @Override
     public void descriptionStatisticsUpdated(Node node, NodeDescription nodeDescription) {
-        this.descriptionStatistics.put(node, nodeDescription);
+        NodeDescription currentDesc = this.descriptionStatistics.get(node);
+        if (! nodeDescription.equals(currentDesc)){
+            this.descriptionStatistics.put(node, nodeDescription);
+        }
     }
 
     @Override
     public void updateNode(Node node, UpdateType type, Set<Property> props) {
-        //if node is removed, remove stats mappings
+        // If node is removed, clean up stats mappings
         if (type == UpdateType.REMOVED) {
             flowStatistics.remove(node);
             nodeConnectorStatistics.remove(node);
@@ -387,6 +400,6 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
 
     @Override
     public void updateNodeConnector(NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
-        // not interested in this update
+        // Not interested in this update
     }
 }

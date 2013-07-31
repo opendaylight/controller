@@ -69,6 +69,68 @@ public class NodeDescription implements Serializable, Cloneable{
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((hardware == null) ? 0 : hardware.hashCode());
+        result = prime * result + ((manufacturer == null) ? 0 : manufacturer.hashCode());
+        result = prime * result + ((serialNumber == null) ? 0 : serialNumber.hashCode());
+        result = prime * result + ((software == null) ? 0 : software.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof NodeDescription)) {
+            return false;
+        }
+        NodeDescription other = (NodeDescription) obj;
+        if (description == null) {
+            if (other.description != null) {
+                return false;
+            }
+        } else if (!description.equals(other.description)) {
+            return false;
+        }
+        if (hardware == null) {
+            if (other.hardware != null) {
+                return false;
+            }
+        } else if (!hardware.equals(other.hardware)) {
+            return false;
+        }
+        if (manufacturer == null) {
+            if (other.manufacturer != null) {
+                return false;
+            }
+        } else if (!manufacturer.equals(other.manufacturer)) {
+            return false;
+        }
+        if (serialNumber == null) {
+            if (other.serialNumber != null) {
+                return false;
+            }
+        } else if (!serialNumber.equals(other.serialNumber)) {
+            return false;
+        }
+        if (software == null) {
+            if (other.software != null) {
+                return false;
+            }
+        } else if (!software.equals(other.software)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "HwDescription[manufacturer=" + manufacturer + ", hardware="
                         + hardware + ", software=" + software + ", serialNumber="

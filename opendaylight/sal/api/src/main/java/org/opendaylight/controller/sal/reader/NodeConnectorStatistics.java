@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.opendaylight.controller.sal.core.NodeConnector;
 
 /**
- * Represents the statistics for the node conenctor
+ * Represents the statistics for a node connector
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
@@ -51,6 +51,84 @@ public class NodeConnectorStatistics implements Serializable {
     private long receiveCrcError;
     @XmlElement
     private long collisionCount;
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (collisionCount ^ (collisionCount >>> 32));
+        result = prime * result + ((nodeConnector == null) ? 0 : nodeConnector.hashCode());
+        result = prime * result + (int) (receiveBytes ^ (receiveBytes >>> 32));
+        result = prime * result + (int) (receiveCrcError ^ (receiveCrcError >>> 32));
+        result = prime * result + (int) (receiveDrops ^ (receiveDrops >>> 32));
+        result = prime * result + (int) (receiveErrors ^ (receiveErrors >>> 32));
+        result = prime * result + (int) (receiveFrameError ^ (receiveFrameError >>> 32));
+        result = prime * result + (int) (receiveOverRunError ^ (receiveOverRunError >>> 32));
+        result = prime * result + (int) (receivePackets ^ (receivePackets >>> 32));
+        result = prime * result + (int) (transmitBytes ^ (transmitBytes >>> 32));
+        result = prime * result + (int) (transmitDrops ^ (transmitDrops >>> 32));
+        result = prime * result + (int) (transmitErrors ^ (transmitErrors >>> 32));
+        result = prime * result + (int) (transmitPackets ^ (transmitPackets >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof NodeConnectorStatistics)) {
+            return false;
+        }
+        NodeConnectorStatistics other = (NodeConnectorStatistics) obj;
+        if (collisionCount != other.collisionCount) {
+            return false;
+        }
+        if (nodeConnector == null) {
+            if (other.nodeConnector != null) {
+                return false;
+            }
+        } else if (!nodeConnector.equals(other.nodeConnector)) {
+            return false;
+        }
+        if (receiveBytes != other.receiveBytes) {
+            return false;
+        }
+        if (receiveCrcError != other.receiveCrcError) {
+            return false;
+        }
+        if (receiveDrops != other.receiveDrops) {
+            return false;
+        }
+        if (receiveErrors != other.receiveErrors) {
+            return false;
+        }
+        if (receiveFrameError != other.receiveFrameError) {
+            return false;
+        }
+        if (receiveOverRunError != other.receiveOverRunError) {
+            return false;
+        }
+        if (receivePackets != other.receivePackets) {
+            return false;
+        }
+        if (transmitBytes != other.transmitBytes) {
+            return false;
+        }
+        if (transmitDrops != other.transmitDrops) {
+            return false;
+        }
+        if (transmitErrors != other.transmitErrors) {
+            return false;
+        }
+        if (transmitPackets != other.transmitPackets) {
+            return false;
+        }
+        return true;
+    }
 
     // To Satisfy JAXB
     public NodeConnectorStatistics() {
