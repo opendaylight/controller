@@ -75,6 +75,8 @@
     <!-- SAL Extension bundles -->
     <module>../../sal/connection/api</module>
     <module>../../sal/connection/implementation</module>
+    <module>../../sal/networkconfiguration/api</module>
+    <module>../../sal/networkconfiguration/implementation</module>
 
     <!--  Web bundles -->
     <module>../../web/root</module>
