@@ -66,6 +66,94 @@ public class NetUtilsTest {
     }
 
     @Test
+    public void testByteArrayMethodsForLong() {
+        // Test of longToByteArray6 method.
+        byte ba[] = {
+            (byte) 0x11, (byte) 0x22, (byte) 0x33, (byte) 0x44,
+            (byte) 0x55, (byte) 0x66
+        };
+        long mac = 0x112233445566L;
+        Assert.assertTrue(Arrays.equals(ba, NetUtils.longToByteArray6(mac)));
+
+        byte ba1[] = {
+            (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+            (byte) 0xff, (byte) 0xff
+        };
+        long mac1 = 0xffffffffffffL;
+        Assert.assertTrue(Arrays.equals(ba1, NetUtils.longToByteArray6(mac1)));
+
+        byte ba2[] = {
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00
+        };
+        long mac2 = 0x000000000000L;
+        Assert.assertTrue(Arrays.equals(ba2, NetUtils.longToByteArray6(mac2)));
+
+        byte ba3[] = {
+            (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00
+        };
+        long mac3 = 0xffffff000000L;
+        Assert.assertTrue(Arrays.equals(ba3, NetUtils.longToByteArray6(mac3)));
+
+        byte ba4[] = {
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0xff,
+            (byte) 0xff, (byte) 0xff
+        };
+        long mac4 = 0x000000ffffffL;
+        Assert.assertTrue(Arrays.equals(ba4, NetUtils.longToByteArray6(mac4)));
+
+        // Convert a long number to a byte array,
+        // and revert it to the long number again.
+        Assert.assertTrue(NetUtils
+                .byteArray6ToLong(NetUtils.longToByteArray6(mac)) == mac);
+
+        Assert.assertTrue(NetUtils
+                .byteArray6ToLong(NetUtils.longToByteArray6(mac1)) == mac1);
+
+        Assert.assertTrue(NetUtils
+                .byteArray6ToLong(NetUtils.longToByteArray6(mac2)) == mac2);
+
+        Assert.assertTrue(NetUtils
+                .byteArray6ToLong(NetUtils.longToByteArray6(mac3)) == mac3);
+
+        Assert.assertTrue(NetUtils
+                .byteArray6ToLong(NetUtils.longToByteArray6(mac4)) == mac4);
+
+        // Convert a byte array to a long nubmer,
+        // and revert it to the byte array again.
+        Assert.assertTrue(Arrays.equals(ba,
+                    NetUtils.longToByteArray6(NetUtils.byteArray6ToLong(ba))));
+
+        Assert.assertTrue(Arrays.equals(ba1,
+                    NetUtils.longToByteArray6(NetUtils.byteArray6ToLong(ba1))));
+
+        Assert.assertTrue(Arrays.equals(ba2,
+                    NetUtils.longToByteArray6(NetUtils.byteArray6ToLong(ba2))));
+
+        Assert.assertTrue(Arrays.equals(ba3,
+                    NetUtils.longToByteArray6(NetUtils.byteArray6ToLong(ba3))));
+
+        Assert.assertTrue(Arrays.equals(ba4,
+                    NetUtils.longToByteArray6(NetUtils.byteArray6ToLong(ba4))));
+
+        // Test of paramter validation of byteArray6ToLong method.
+        byte array5[] = {
+            (byte) 0x11, (byte) 0x22, (byte) 0x33, (byte) 0x44
+        };
+        Assert.assertEquals(0, NetUtils.byteArray6ToLong(array5));
+
+        byte array7[] = {
+            (byte) 0x11, (byte) 0x22, (byte) 0x33, (byte) 0x44,
+            (byte) 0x55, (byte) 0x66, (byte) 0x77
+        };
+        Assert.assertEquals(0, NetUtils.byteArray6ToLong(array7));
+
+        byte arrayNull[] = null;
+        Assert.assertEquals(0, NetUtils.byteArray6ToLong(arrayNull));
+    }
+
+    @Test
     public void testInetMethods() throws UnknownHostException {
         int ip = 0xfffffff0;
         InetAddress inet = InetAddress.getByName("255.255.255.240");
