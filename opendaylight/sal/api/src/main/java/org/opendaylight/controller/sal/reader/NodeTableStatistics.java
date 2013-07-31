@@ -39,6 +39,56 @@ public class NodeTableStatistics implements Serializable {
     private long matchedCount;
 
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + activeCount;
+        result = prime * result + (int) (lookupCount ^ (lookupCount >>> 32));
+        result = prime * result + (int) (matchedCount ^ (matchedCount >>> 32));
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((nodeTable == null) ? 0 : nodeTable.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof NodeTableStatistics)) {
+            return false;
+        }
+        NodeTableStatistics other = (NodeTableStatistics) obj;
+        if (activeCount != other.activeCount) {
+            return false;
+        }
+        if (lookupCount != other.lookupCount) {
+            return false;
+        }
+        if (matchedCount != other.matchedCount) {
+            return false;
+        }
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (nodeTable == null) {
+            if (other.nodeTable != null) {
+                return false;
+            }
+        } else if (!nodeTable.equals(other.nodeTable)) {
+            return false;
+        }
+        return true;
+    }
+
     //To Satisfy JAXB
     public NodeTableStatistics() {
 
