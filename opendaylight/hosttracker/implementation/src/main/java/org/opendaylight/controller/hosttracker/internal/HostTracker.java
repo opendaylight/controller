@@ -95,7 +95,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private IClusterContainerServices clusterContainerService = null;
     private ISwitchManager switchManager = null;
     private Timer timer;
-    private Timer arp_refresh_timer;
+    private Timer arpRefreshTimer;
     private String containerName = null;
     private ExecutorService executor;
     private static class ARPPending {
@@ -160,8 +160,8 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         timer.schedule(new OutStandingARPHandler(), 4000, 4000);
         executor = Executors.newFixedThreadPool(2);
         /* ARP Refresh Timer to go off every 5 seconds to implement ARP aging */
-        arp_refresh_timer = new Timer();
-        arp_refresh_timer.schedule(new ARPRefreshHandler(), 5000, 5000);
+        arpRefreshTimer = new Timer();
+        arpRefreshTimer.schedule(new ARPRefreshHandler(), 5000, 5000);
         logger.debug("startUp: Caches created, timers started");
     }
 
@@ -911,7 +911,6 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         public void run() {
             ARPPending arphost;
             /* This routine runs every 4 seconds */
-            // logger.info ("ARP Handler called");
             for (int i = 0; i < ARPPendingList.size(); i++) {
                 arphost = ARPPendingList.get(i);
                 if (arphost.getSent_count() < switchManager.getHostRetryCount()) {
@@ -943,7 +942,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                     failedARPReqList.add(arphost);
 
                 } else {
-                    logger.error("Inavlid arp_sent count for entery at index: {}", i);
+                    logger.error("Inavlid arp_sent count for entry at index: {}", i);
                 }
             }
         }
@@ -1386,7 +1385,12 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      * calls
      *
      */
-    void stop() {
+    void stop(){
+    }
+
+    void stopping() {
+        arpRefreshTimer.cancel();
+        timer.cancel();
         executor.shutdown();
     }
 
