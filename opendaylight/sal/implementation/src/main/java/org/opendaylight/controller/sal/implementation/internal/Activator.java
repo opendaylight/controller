@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.sal.implementation.internal;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
@@ -55,6 +58,52 @@ public class Activator extends ComponentActivatorAbstractBase {
     @Override
     public void destroy() {
 
+    }
+
+    /**
+     * Function that is used to communicate to dependency manager the list of
+     * known Global implementations
+     *
+     *
+     * @return An array containing all the CLASS objects that will be
+     *         instantiated in order to get an fully working implementation
+     *         Object
+     */
+    public Object[] getGlobalImplementations() {
+        Object[] res = { Inventory.class };
+        return res;
+    }
+
+    /**
+     * Function that is called when configuration of the dependencies is required.
+     *
+     * @param c
+     *            dependency manager Component object, used for configuring the
+     *            dependencies exported and imported
+     * @param imp
+     *            Implementation class that is being configured, needed as long
+     *            as the same routine can configure multiple implementations
+     */
+    public void configureGlobalInstance(Component c, Object imp) {
+        if (imp.equals(Inventory.class)) {
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            props.put("scope", "Global");
+            // export the service
+            c.setInterface(
+                    new String[] { IPluginOutInventoryService.class.getName(),
+                            IInventoryService.class.getName() }, props);
+
+            // Now lets add a service dependency to make sure the
+            // provider of service exists
+            c.add(createServiceDependency()
+                    .setService(IListenInventoryUpdates.class, "(scope=Global)")
+                    .setCallbacks("setUpdateService", "unsetUpdateService")
+                    .setRequired(false));
+            c.add(createServiceDependency()
+                    .setService(IPluginInInventoryService.class, "(scope=Global)")
+                    .setCallbacks("setPluginService", "unsetPluginService")
+                    .setRequired(true));
+        }
     }
 
     /**
