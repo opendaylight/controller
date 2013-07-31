@@ -59,19 +59,45 @@ public abstract class NetUtils {
     }
 
     /**
-     * Converts a long to 6 bytes array for mac addresses
-     * @param addr
-     * @return
+     * Converts a 6 bytes array into a long number MAC addresses.
+     *
+     * @param ba
+     *            The 6 bytes long byte array.
+     * @return The long number.
+     *         Zero is returned if {@code ba} is {@code null} or
+     *         the length of it is not six.
      */
-
-    public static byte[] longToByteArray6(long addr){
-        byte[] mac = new byte[6];
-        for(int i = 0; i < 6; i++){
-            mac[i] = (byte) (addr >> (i*8));
+    public static long byteArray6ToLong(byte[] ba) {
+        if (ba == null || ba.length != MACAddrLengthInBytes) {
+            return 0L;
         }
-        return mac;
+        long num = 0L;
+        int i = 0;
+        do {
+            num <<= NumBitsInAByte;
+            num |= 0xff & ba[i];
+            i++;
+        } while (i < MACAddrLengthInBytes);
+        return num;
     }
 
+    /**
+     * Converts a long number to a 6 bytes array for MAC addresses.
+     *
+     * @param addr
+     *            The long number.
+     * @return The byte array.
+     */
+    public static byte[] longToByteArray6(long addr){
+        byte[] mac = new byte[MACAddrLengthInBytes];
+        int i = MACAddrLengthInBytes - 1;
+        do {
+            mac[i] = (byte) addr;
+            addr >>>= NumBitsInAByte;
+            i--;
+        } while (i >= 0);
+        return mac;
+    }
 
     /**
      * Converts an integer number into a 4 bytes array
