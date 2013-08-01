@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 public class ConfigurationIT {
-    private Logger logger = LoggerFactory
+    private final Logger logger = LoggerFactory
             .getLogger(ConfigurationIT.class);
     // get the OSGI bundle context
     @Inject
@@ -91,7 +91,7 @@ public class ConfigurationIT {
                 mavenBundle("org.opendaylight.controller",
                         "containermanager.implementation", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "switchmanager",
-                        "0.4.0-SNAPSHOT"),
+                        "0.5.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller",
                         "switchmanager.implementation", "0.4.0-SNAPSHOT"),
                 // needed bundles by configuration

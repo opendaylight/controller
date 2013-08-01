@@ -42,6 +42,7 @@ import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Description;
+import org.opendaylight.controller.sal.core.ForwardingMode;
 import org.opendaylight.controller.sal.core.MacAddress;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
@@ -670,10 +671,7 @@ CommandProvider {
         if (propMapCurr == null) {
             return;
         }
-        Map<String, Property> propMap = new HashMap<String, Property>();
-        for (String s : propMapCurr.keySet()) {
-            propMap.put(s, propMapCurr.get(s).clone());
-        }
+        Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
         Property desc = new Description(cfgObject.getNodeDescription());
         propMap.put(desc.getName(), desc);
         Property tier = new Tier(Integer.parseInt(cfgObject.getTier()));
@@ -689,6 +687,120 @@ CommandProvider {
         if (modeChange) {
             notifyModeChange(node, cfgObject.isProactive());
         }
+    }
+
+    @Override
+    public Status updateNodeConfig(SwitchConfig switchConfig) {
+        Status status = switchConfig.validate();
+        if (!status.isSuccess()) {
+            return status;
+        }
+
+        Map<String, Property> updateProperties = switchConfig.getNodeProperties();
+        String nodeId = switchConfig.getNodeId();
+        ForwardingMode mode = (ForwardingMode) updateProperties.get(ForwardingMode.name);
+        if (mode != null) {
+            if (isDefaultContainer) {
+                if (!mode.isValid()) {
+                    return new Status(StatusCode.NOTACCEPTABLE, "Invalid Forwarding Mode Value.");
+                }
+            } else {
+                return new Status(StatusCode.NOTACCEPTABLE,
+                        "Forwarding Mode modification is allowed only in default container");
+            }
+        }
+        boolean modeChange = false;
+        SwitchConfig sc = nodeConfigList.get(nodeId);
+        Map<String, Property> prevNodeProperties = new HashMap<String, Property>();
+        if (sc == null) {
+            if ((mode != null) && mode.isProactive()) {
+                modeChange = true;
+            }
+            if (!updateProperties.isEmpty()) {
+                if (nodeConfigList.putIfAbsent(nodeId, switchConfig) != null) {
+                    return new Status(StatusCode.CONFLICT, "Cluster conflict: Unable to update node configuration");
+                }
+            }
+        } else {
+            prevNodeProperties = new HashMap<String, Property>(sc.getNodeProperties());
+            ForwardingMode prevMode = (ForwardingMode) sc.getProperty(ForwardingMode.name);
+            if (mode == null) {
+                if ((prevMode != null) && (prevMode.isProactive())) {
+                    modeChange = true;
+                }
+            } else {
+                if (((prevMode != null) && (prevMode.getValue() != mode.getValue()))
+                        || (prevMode == null && mode.isProactive())) {
+                    modeChange = true;
+                }
+            }
+            if (updateProperties.isEmpty()) {
+                nodeConfigList.remove(nodeId);
+            } else {
+                if (!nodeConfigList.replace(nodeId, sc, switchConfig)) {
+                    return new Status(StatusCode.CONFLICT, "Cluster conflict: Unable to update node configuration");
+                }
+            }
+        }
+        Node node = Node.fromString(nodeId);
+        Map<String, Property> propMapCurr = nodeProps.get(node);
+        Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
+        if (propMapCurr == null) {
+            return new Status(StatusCode.SUCCESS);
+        }
+        if (!prevNodeProperties.isEmpty()) {
+            for (String prop : prevNodeProperties.keySet()) {
+                if (!updateProperties.containsKey(prop)) {
+                    if (prop.equals(Description.propertyName)) {
+                        Map<Node, Map<String, Property>> nodeProp = this.inventoryService.getNodeProps();
+                        if (nodeProp.get(node) != null) {
+                            propMap.put(Description.propertyName, nodeProp.get(node).get(Description.propertyName));
+                            continue;
+                        }
+                    }
+                    propMap.remove(prop);
+                }
+            }
+        }
+        propMap.putAll(updateProperties);
+        if (!nodeProps.replace(node, propMapCurr, propMap)) {
+            // TODO rollback using Transactionality
+            return new Status(StatusCode.CONFLICT, "Cluster conflict: Unable to update node configuration.");
+        }
+        if (modeChange) {
+            notifyModeChange(node, (mode == null) ? false : mode.isProactive());
+        }
+        return new Status(StatusCode.SUCCESS);
+    }
+
+    @Override
+    public Status removeNodeConfig(String nodeId) {
+        if ((nodeId == null) || (nodeId.isEmpty())) {
+            return new Status(StatusCode.BADREQUEST, "nodeId cannot be empty.");
+        }
+        Map<String, Property> nodeProperties = getSwitchConfig(nodeId).getNodeProperties();
+        Node node = Node.fromString(nodeId);
+        Map<String, Property> propMapCurr = nodeProps.get(node);
+        if ((propMapCurr != null) && (nodeProperties != null) && (!nodeProperties.isEmpty())) {
+            Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
+            for (String prop : nodeProperties.keySet()) {
+                if (prop.equals(Description.propertyName)) {
+                    Map<Node, Map<String, Property>> nodeProp = this.inventoryService.getNodeProps();
+                    if (nodeProp.get(node) != null) {
+                        propMap.put(Description.propertyName, nodeProp.get(node).get(Description.propertyName));
+                        continue;
+                    }
+                }
+                propMap.remove(prop);
+            }
+            if (!nodeProps.replace(node, propMapCurr, propMap)) {
+                return new Status(StatusCode.CONFLICT, "Cluster conflict: Unable to update node configuration.");
+            }
+        }
+        if (nodeConfigList != null) {
+            nodeConfigList.remove(nodeId);
+        }
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
@@ -791,12 +903,8 @@ CommandProvider {
         }
 
         Map<String, Property> propMapCurr = nodeProps.get(node);
-        Map<String, Property> propMap = new HashMap<String, Property>();
-        if (propMapCurr != null) {
-            for (String s : propMapCurr.keySet()) {
-                propMap.put(s, propMapCurr.get(s).clone());
-            }
-        }
+        Map<String, Property> propMap = (propMapCurr == null) ? new HashMap<String, Property>()
+                : new HashMap<String, Property>(propMapCurr);
 
         // copy node properties from plugin
         if (props != null) {
@@ -809,14 +917,13 @@ CommandProvider {
         boolean proactiveForwarding = false;
         if (nodeConfigList != null) {
             String nodeId = node.toString();
-            for (SwitchConfig conf : nodeConfigList.values()) {
-                if (conf.getNodeId().equals(nodeId)) {
-                    Property description = new Description(conf.getNodeDescription());
-                    propMap.put(description.getName(), description);
-                    Property tier = new Tier(Integer.parseInt(conf.getTier()));
-                    propMap.put(tier.getName(), tier);
-                    proactiveForwarding = conf.isProactive();
-                    break;
+            SwitchConfig conf = nodeConfigList.get(nodeId);
+            if (conf != null && (conf.getNodeProperties() != null)) {
+                Map<String, Property> nodeProperties = conf.getNodeProperties();
+                propMap.putAll(nodeProperties);
+                if (nodeProperties.get(ForwardingMode.name) != null) {
+                    ForwardingMode mode = (ForwardingMode) nodeProperties.get(ForwardingMode.name);
+                    proactiveForwarding = mode.isProactive();
                 }
             }
         }
@@ -831,8 +938,7 @@ CommandProvider {
         }
 
         if (!result) {
-            log.debug(
-                    "Cluster conflict: Conflict while adding the node properties. Node: {}  Properties: {}",
+            log.debug("Cluster conflict: Conflict while adding the node properties. Node: {}  Properties: {}",
                     node.getID(), props);
             addNodeProps(node, propMap);
         }
@@ -871,12 +977,8 @@ CommandProvider {
         }
 
         Map<String, Property> propMapCurr = nodeProps.get(node);
-        Map<String, Property> propMap = new HashMap<String, Property>();
-        if (propMapCurr != null) {
-            for (String s : propMapCurr.keySet()) {
-                propMap.put(s, propMapCurr.get(s).clone());
-            }
-        }
+        Map<String, Property> propMap = (propMapCurr == null) ? new HashMap<String, Property>()
+                : new HashMap<String, Property>(propMapCurr);
 
         // copy node properties from plugin
         for (Property prop : props) {
@@ -1003,11 +1105,7 @@ CommandProvider {
                 return;
             }
 
-            Map<String, Property> propMap = new HashMap<String, Property>();
-            for (String s : propMapCurr.keySet()) {
-                propMap.put(s, propMapCurr.get(s).clone());
-            }
-
+            Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
             propMap.put(prop.getName(), prop);
 
             if (nodeProps.replace(node, propMapCurr, propMap)) {
@@ -1029,11 +1127,7 @@ CommandProvider {
                 if (!propMapCurr.containsKey(propName)) {
                     return new Status(StatusCode.SUCCESS);
                 }
-                Map<String, Property> propMap = new HashMap<String, Property>();
-                for (String s : propMapCurr.keySet()) {
-                    propMap.put(s, propMapCurr.get(s).clone());
-                }
-
+                Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
                 propMap.remove(propName);
                 if (nodeProps.replace(node, propMapCurr, propMap)) {
                     return new Status(StatusCode.SUCCESS);
@@ -1196,13 +1290,8 @@ CommandProvider {
     public Status addNodeConnectorProp(NodeConnector nodeConnector,
             Property prop) {
         Map<String, Property> propMapCurr = getNodeConnectorProps(nodeConnector);
-        Map<String, Property> propMap = new HashMap<String, Property>();
-
-        if (propMapCurr != null) {
-            for (String s : propMapCurr.keySet()) {
-                propMap.put(s, propMapCurr.get(s).clone());
-            }
-        }
+        Map<String, Property> propMap = (propMapCurr == null) ? new HashMap<String, Property>()
+                : new HashMap<String, Property>(propMapCurr);
 
         String msg = "Cluster conflict: Unable to add NodeConnector Property.";
         // Just add the nodeConnector if prop is not available (in a non-default
@@ -1282,12 +1371,7 @@ CommandProvider {
             return new Status(StatusCode.SUCCESS);
         }
 
-        Map<String, Property> propMap = new HashMap<String, Property>();
-
-        for (String s : propMapCurr.keySet()) {
-            propMap.put(s, propMapCurr.get(s).clone());
-        }
-
+        Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
         propMap.remove(propName);
         boolean result = nodeConnectorProps.replace(nodeConnector, propMapCurr, propMap);
         String msg = "Cluster conflict: Unable to remove NodeConnector property.";
@@ -1559,7 +1643,8 @@ CommandProvider {
         for (Node node : getNodes()) {
             SwitchConfig sc = getSwitchConfig(node.toString());
             if ((sc != null) && isDefaultContainer) {
-                service.modeChangeNotify(node, sc.isProactive());
+                ForwardingMode mode = (ForwardingMode) sc.getProperty(ForwardingMode.name);
+                service.modeChangeNotify(node, (mode == null) ? false : mode.isProactive());
             }
         }
     }
@@ -1965,6 +2050,9 @@ CommandProvider {
             } else if (propName.equalsIgnoreCase(Bandwidth.BandwidthPropName)) {
                 long bw = Long.parseLong(propValue);
                 return new Bandwidth(bw);
+            } else if (propName.equalsIgnoreCase(ForwardingMode.name)) {
+                int mode = Integer.parseInt(propValue);
+                return new ForwardingMode(mode);
             } else {
                 log.debug("Not able to create {} property", propName);
             }

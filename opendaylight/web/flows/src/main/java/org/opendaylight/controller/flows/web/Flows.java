@@ -20,6 +20,7 @@ import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.UserLevel;
+import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -107,9 +108,7 @@ public class Flows implements IDaylightWeb {
             entry.put("flow", flowConfig);
             entry.put("name", flowConfig.getName());
             Node node = flowConfig.getNode();
-            String description = switchManager.getNodeDescription(node);
-            entry.put("node", (description.isEmpty() || description
-                    .equalsIgnoreCase("none")) ? node.toString() : description);
+            entry.put("node", getNodeDesc(node, switchManager));
             entry.put("nodeId", node.toString());
             flowSet.add(entry);
         }
@@ -160,11 +159,7 @@ public class Flows implements IDaylightWeb {
             entry.put("ports", port);
 
             // add name
-            String description = switchManager.getNodeDescription(node
-                    .getNode());
-            entry.put("name", (description.isEmpty() || description
-                    .equalsIgnoreCase("none")) ? node.getNode().toString()
-                    : description);
+            entry.put("name", getNodeDesc(node.getNode(), switchManager));
 
             // add to the node
             nodes.put(node.getNode().toString(), entry);
@@ -205,8 +200,8 @@ public class Flows implements IDaylightWeb {
             String nodeDesc = node.toString();
             SwitchConfig config = switchManager.getSwitchConfig(node
                     .toString());
-            if (config != null) {
-                nodeDesc = config.getNodeDescription();
+            if ((config != null) && (config.getProperty(Description.propertyName) != null)) {
+                nodeDesc = ((Description) config.getProperty(Description.propertyName)).getValue();
             }
 
             nodes.put(nodeDesc, flows.size());
@@ -284,4 +279,11 @@ public class Flows implements IDaylightWeb {
         return (result.isSuccess()) ? StatusCode.SUCCESS.toString() : result
                 .getDescription();
     }
+
+    private String getNodeDesc(Node node, ISwitchManager switchManager) {
+        Description desc = (Description) switchManager.getNodeProp(node, Description.propertyName);
+        String description = (desc == null) ? "" : desc.getValue();
+        return (description.isEmpty() || description.equalsIgnoreCase("none")) ? node.toString() : description;
+    }
+
 }
