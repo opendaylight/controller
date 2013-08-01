@@ -324,15 +324,15 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             return host;
         }
 
-        /* host is not found, initiate a discovery */
-
-        hostFinder.find(networkAddress);
-
-        /* Also add this host to ARPPending List for any potential retries */
+        /* Add this host to ARPPending List for any potential retries */
 
         AddtoARPPendingList(networkAddress);
         logger.debug("hostFind(): Host Not Found for IP: {}, Inititated Host Discovery ...",
                 networkAddress.getHostAddress());
+
+        /* host is not found, initiate a discovery */
+
+        hostFinder.find(networkAddress);
         return null;
     }
 
