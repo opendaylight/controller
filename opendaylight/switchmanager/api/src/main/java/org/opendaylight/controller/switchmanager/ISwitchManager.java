@@ -19,12 +19,6 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.Status;
 
-import org.opendaylight.controller.switchmanager.SpanConfig;
-import org.opendaylight.controller.switchmanager.Subnet;
-import org.opendaylight.controller.switchmanager.SubnetConfig;
-import org.opendaylight.controller.switchmanager.Switch;
-import org.opendaylight.controller.switchmanager.SwitchConfig;
-
 /**
  * Primary purpose of this interface is to provide methods for application to
  * access various system resources and inventory data including nodes, node
@@ -129,14 +123,40 @@ public interface ISwitchManager {
      * Update Switch specific configuration such as Switch Name and Tier
      *
      * @param cfgConfig refer to {@link Open Declaration org.opendaylight.controller.switchmanager.SwitchConfig}
+     *
+     * @deprecated replaced by updateNodeConfig(switchConfig)
      */
+    @Deprecated
     public void updateSwitchConfig(SwitchConfig cfgObject);
+
+    /**
+     * Update Node specific configuration such as Node Name and Tier
+     *
+     * @param cfgConfig
+     *            refer to {@link Open Declaration
+     *            org.opendaylight.controller.switchmanager.SwitchConfig}
+     * @return "Success" or failure reason
+     */
+    public Status updateNodeConfig(SwitchConfig switchConfig);
+
+    /**
+     * Removes node properties configured by the user
+     *
+     * @param nodeId
+     *            Node Identifier as specified by
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @return "Success" or failure reason
+     */
+    public Status removeNodeConfig(String nodeId);
 
     /**
      * Return the previously configured Switch Configuration given the node id
      *
-     * @param nodeId Node Identifier as specified by {@link org.opendaylight.controller.sal.core.Node}
-     * @return {@link org.opendaylight.controller.switchmanager.SwitchConfig} resources
+     * @param nodeId
+     *            Node Identifier as specified by
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @return {@link org.opendaylight.controller.switchmanager.SwitchConfig}
+     *         resources
      */
     public SwitchConfig getSwitchConfig(String nodeId);
 
@@ -357,5 +377,6 @@ public interface ISwitchManager {
      * configured and the network node does not provide its description,
      * an empty string is returned.
      */
+    @Deprecated
     public String getNodeDescription(Node node);
 }
