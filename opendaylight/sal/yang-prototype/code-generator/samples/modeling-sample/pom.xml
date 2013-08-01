@@ -4,16 +4,16 @@
     <parent>
         <artifactId>binding-generator</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.5.4-SNAPSHOT</version>
+        <version>0.5.5-SNAPSHOT</version>
     </parent>
     <artifactId>modeling-sample</artifactId>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>0.5.4-SNAPSHOT</version>
+                <version>${yangtools.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -40,7 +40,7 @@
                     <dependency>
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
-                        <version>0.5.4-SNAPSHOT</version>
+                        <version>0.5.5-SNAPSHOT</version>
                         <type>jar</type>
                     </dependency>
                 </dependencies>
@@ -78,7 +78,7 @@
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>
-                                            org.opendaylight.controller
+                                            org.opendaylight.yangtools
                                         </groupId>
                                         <artifactId>
                                             yang-maven-plugin
@@ -105,11 +105,11 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
+            <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-binding</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
+            <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-common</artifactId>
         </dependency>
     </dependencies>

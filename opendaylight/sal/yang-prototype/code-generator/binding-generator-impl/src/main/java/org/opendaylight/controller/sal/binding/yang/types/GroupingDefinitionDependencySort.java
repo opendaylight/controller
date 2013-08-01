@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.opendaylight.controller.yang.model.api.GroupingDefinition;
-import org.opendaylight.controller.yang.model.api.SchemaPath;
-import org.opendaylight.controller.yang.model.api.UsesNode;
-import org.opendaylight.controller.yang.parser.util.TopologicalSort;
-import org.opendaylight.controller.yang.parser.util.TopologicalSort.Node;
-import org.opendaylight.controller.yang.parser.util.TopologicalSort.NodeImpl;
+import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.UsesNode;
+import org.opendaylight.yangtools.yang.parser.util.TopologicalSort;
+import org.opendaylight.yangtools.yang.parser.util.TopologicalSort.Node;
+import org.opendaylight.yangtools.yang.parser.util.TopologicalSort.NodeImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

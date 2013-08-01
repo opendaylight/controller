@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.sal.binding.generator.api;
 
-import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.SchemaContext;
-
 import java.util.List;
 import java.util.Set;
+
+import org.opendaylight.controller.sal.binding.model.api.Type;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  *

@@ -3,7 +3,6 @@ package org.opendaylight.controller.sal.java.api.generator.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -15,11 +14,10 @@ import org.opendaylight.controller.sal.binding.model.api.GeneratedProperty;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.sal.java.api.generator.ClassCodeGenerator;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.parser.api.YangModelParser;
-import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 public class GenerateInnerClassForBitsAndUnionInLeavesTest {
 
