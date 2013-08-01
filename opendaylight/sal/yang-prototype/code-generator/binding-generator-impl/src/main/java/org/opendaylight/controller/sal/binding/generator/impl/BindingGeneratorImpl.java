@@ -7,13 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.moduleNamespaceToPackageName;
-import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.packageNameForGeneratedType;
-import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.parseToClassName;
-import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.parseToValidParamName;
-import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.schemaNodeToTransferObjectBuilder;
-import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findDataSchemaNode;
-import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.findParentModule;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.*;
+import static org.opendaylight.yangtools.yang.model.util.SchemaContextUtil.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+
+import javax.management.Notification;
 
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.controller.binding.generator.util.Types;
@@ -40,35 +37,34 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedT
 import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 import org.opendaylight.controller.sal.binding.yang.types.GroupingDefinitionDependencySort;
 import org.opendaylight.controller.sal.binding.yang.types.TypeProviderImpl;
-import org.opendaylight.controller.yang.binding.Notification;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.common.RpcResult;
-import org.opendaylight.controller.yang.model.api.AugmentationSchema;
-import org.opendaylight.controller.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.controller.yang.model.api.ChoiceNode;
-import org.opendaylight.controller.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.controller.yang.model.api.DataNodeContainer;
-import org.opendaylight.controller.yang.model.api.DataSchemaNode;
-import org.opendaylight.controller.yang.model.api.GroupingDefinition;
-import org.opendaylight.controller.yang.model.api.IdentitySchemaNode;
-import org.opendaylight.controller.yang.model.api.LeafListSchemaNode;
-import org.opendaylight.controller.yang.model.api.LeafSchemaNode;
-import org.opendaylight.controller.yang.model.api.ListSchemaNode;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.NotificationDefinition;
-import org.opendaylight.controller.yang.model.api.RpcDefinition;
-import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.model.api.SchemaNode;
-import org.opendaylight.controller.yang.model.api.SchemaPath;
-import org.opendaylight.controller.yang.model.api.TypeDefinition;
-import org.opendaylight.controller.yang.model.api.UsesNode;
-import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
-import org.opendaylight.controller.yang.model.util.DataNodeIterator;
-import org.opendaylight.controller.yang.model.util.ExtendedType;
-import org.opendaylight.controller.yang.model.util.SchemaContextUtil;
-import org.opendaylight.controller.yang.model.util.UnionType;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.UsesNode;
+import org.opendaylight.yangtools.yang.model.api.type.BitsTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.EnumTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.EnumTypeDefinition.EnumPair;
+import org.opendaylight.yangtools.yang.model.util.DataNodeIterator;
+import org.opendaylight.yangtools.yang.model.util.ExtendedType;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
+import org.opendaylight.yangtools.yang.model.util.UnionType;
 
 public final class BindingGeneratorImpl implements BindingGenerator {
 
@@ -986,7 +982,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
     /**
      * Method instantiates new Generated Type Builder and sets the implements
      * definitions of Data Object and Augmentable.
-     * 
+     *
      * @param packageName
      *            Generated Type Package Name
      * @param schemaNode
@@ -1008,7 +1004,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
     }
 
     /**
-     * 
+     *
      * @param packageName
      * @param schemaNode
      * @return
@@ -1240,7 +1236,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
      * Adds the implemented types to type builder. The method passes through the
      * list of elements which contains {@code dataNodeContainer} and adds them
      * as <i>implements type</i> to <code>builder</code>
-     * 
+     *
      * @param dataNodeContainer
      *            element which contains the list of used YANG groupings
      * @param builder

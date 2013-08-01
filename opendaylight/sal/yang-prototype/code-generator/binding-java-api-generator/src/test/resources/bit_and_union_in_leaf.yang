@@ -14,7 +14,7 @@ module bit-and-union-in-leaf {
         type union {
             type string {
                 pattern "[a-g]";
-            };
+            }
             type int16;
         }
     }
@@ -40,14 +40,14 @@ module bit-and-union-in-leaf {
                 type int32;
                 type string {
                     pattern "[a-z]";
-                };
+                }
                 type string {
-                    pattern "[0-9]*"
-                };
+                    pattern "[0-9]*";
+                }
                 type string {
                     pattern "[a-d]*";
                     pattern "[0-5]*";
-                };
+                }
                 type uint8;
             }
         }

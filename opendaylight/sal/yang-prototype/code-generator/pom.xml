@@ -8,7 +8,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>0.5.4-SNAPSHOT</version>
+    <version>0.5.5-SNAPSHOT</version>
     <artifactId>binding-generator</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
@@ -16,8 +16,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- version of YANG tools dependencies -->
-        <yang.version>0.5.4-SNAPSHOT</yang.version>
     </properties>
 
     <modules>
@@ -68,55 +66,55 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-common</artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-data-api</artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-data-util</artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-model-api</artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-model-util</artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-binding</artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-model-parser-api</artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-model-parser-impl
                 </artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin-spi</artifactId>
-                <version>${yang.version}</version>
+                <version>${yangtools.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

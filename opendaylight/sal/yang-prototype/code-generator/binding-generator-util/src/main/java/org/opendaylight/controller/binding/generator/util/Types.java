@@ -17,10 +17,10 @@ import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject
 import org.opendaylight.controller.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.binding.model.api.WildcardType;
-import org.opendaylight.controller.yang.binding.Augmentable;
-import org.opendaylight.controller.yang.binding.Augmentation;
-import org.opendaylight.controller.yang.binding.BaseIdentity;
-import org.opendaylight.controller.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Augmentable;
+import org.opendaylight.yangtools.yang.binding.Augmentation;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 
 public final class Types {
     private static final Type SET_TYPE = typeForClass(Set.class);
@@ -38,7 +38,7 @@ public final class Types {
 
     /**
      * Returns an instance of {@link ConcreteType} describing the class
-     * 
+     *
      * @param cls
      *            Class to describe
      * @return Description of class
@@ -50,7 +50,7 @@ public final class Types {
     /**
      * Returns an instance of {@link ParameterizedType} describing the typed
      * {@link Map}<K,V>
-     * 
+     *
      * @param keyType
      *            Key Type
      * @param valueType
@@ -64,7 +64,7 @@ public final class Types {
     /**
      * Returns an instance of {@link ParameterizedType} describing the typed
      * {@link Set}<V> with concrete type of value.
-     * 
+     *
      * @param valueType
      *            Value Type
      * @return Description of generic type instance of Set
@@ -76,7 +76,7 @@ public final class Types {
     /**
      * Returns an instance of {@link ParameterizedType} describing the typed
      * {@link List}<V> with concrete type of value.
-     * 
+     *
      * @param valueType
      *            Value Type
      * @return Description of type instance of List
@@ -92,7 +92,7 @@ public final class Types {
     }
 
     /**
-     * 
+     *
      * @param type
      * @param parameters
      * @return

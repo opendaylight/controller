@@ -13,7 +13,7 @@ import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
 import org.opendaylight.controller.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.yang.binding.Augmentable;
+import org.opendaylight.yangtools.yang.binding.Augmentable;
 
 public class BuilderClassDescriptor {
 

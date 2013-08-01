@@ -7,23 +7,24 @@
  */
 package org.opendaylight.controller.sal.binding.yang.types;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
+import org.opendaylight.yangtools.yang.model.util.ExtendedType;
+import org.opendaylight.yangtools.yang.parser.util.TopologicalSort;
+import org.opendaylight.yangtools.yang.parser.util.TopologicalSort.Node;
+import org.opendaylight.yangtools.yang.parser.util.TopologicalSort.NodeImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.opendaylight.controller.yang.model.api.TypeDefinition;
-import org.opendaylight.controller.yang.model.api.type.UnionTypeDefinition;
-import org.opendaylight.controller.yang.model.util.ExtendedType;
-import org.opendaylight.controller.yang.parser.util.TopologicalSort;
-import org.opendaylight.controller.yang.parser.util.TopologicalSort.Node;
-import org.opendaylight.controller.yang.parser.util.TopologicalSort.NodeImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class UnionDependencySort {
     private static final Logger logger = LoggerFactory
