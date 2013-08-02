@@ -94,6 +94,7 @@
     <module>../../northbound/hosttracker</module>
     <module>../../northbound/subnets</module>
     <module>../../northbound/switchmanager</module>
+    <module>../../northbound/networkconfiguration/bridgedomain</module>
 
     <!-- Northbound integration tests -->
     <module>../../northbound/integrationtest</module>
