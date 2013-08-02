@@ -9,20 +9,25 @@
 
 package org.opendaylight.controller.arphandler.internal;
 
-import java.util.Hashtable;
 import java.util.Dictionary;
-import org.apache.felix.dm.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
 
+import org.apache.felix.dm.Component;
+import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
+import org.opendaylight.controller.clustering.services.IClusterContainerServices;
+import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.IHostFinder;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
-import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.sal.packet.IDataPacketService;
+import org.opendaylight.controller.sal.packet.IListenDataPacket;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
@@ -77,10 +82,22 @@ public class Activator extends ComponentActivatorAbstractBase {
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(ArpHandler.class)) {
             // export the service
-            Dictionary<String, String> props = new Hashtable<String, String>();
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put("salListenerName", "arphandler");
-            c.setInterface(new String[] { IHostFinder.class.getName(),
-                    IListenDataPacket.class.getName() }, props);
+            Set<String> propSet = new HashSet<String>();
+            propSet.add(ArpHandler.ARP_EVENT_CACHE_NAME);
+            props.put("cachenames", propSet);
+
+            c.setInterface(new String[] {
+                    IHostFinder.class.getName(),
+                    IListenDataPacket.class.getName(),
+                    ICacheUpdateAware.class.getName()}, props);
+
+            // We need connection mgr to distribute packet out across the cluster
+            c.add(createServiceDependency().setService(
+                    IConnectionManager.class).setCallbacks("setConnectionManager",
+                    "unsetConnectionManager").setRequired(true));
+
 
             c.add(createContainerServiceDependency(containerName).setService(
                     ISwitchManager.class).setCallbacks("setSwitchManager",
@@ -90,10 +107,15 @@ public class Activator extends ComponentActivatorAbstractBase {
                     ITopologyManager.class).setCallbacks("setTopologyManager",
                     "unsetTopologyMananger").setRequired(true));
 
-           c.add(createContainerServiceDependency(containerName).setService(
+            c.add(createContainerServiceDependency(containerName).setService(
                     IDataPacketService.class).setCallbacks(
                     "setDataPacketService", "unsetDataPacketService")
                     .setRequired(true));
+
+            c.add(createContainerServiceDependency(containerName).setService(
+                   IClusterContainerServices.class).setCallbacks(
+                   "setClusterContainerService", "unsetClusterContainerService")
+                   .setRequired(true));
 
             // the Host Listener is optional
             c.add(createContainerServiceDependency(containerName).setService(

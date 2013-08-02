@@ -147,7 +147,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      *
      * We can't recover from condition 3 above
      */
-    private final ArrayList<ARPPending> failedARPReqList = new ArrayList<HostTracker.ARPPending>();
+    private final List<ARPPending> failedARPReqList = new ArrayList<HostTracker.ARPPending>();
 
     public HostTracker() {
     }
