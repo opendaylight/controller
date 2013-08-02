@@ -147,7 +147,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      *
      * We can't recover from condition 3 above
      */
-    private final ArrayList<ARPPending> failedARPReqList = new ArrayList<HostTracker.ARPPending>();
+    private final List<ARPPending> failedARPReqList = new ArrayList<HostTracker.ARPPending>();
 
     public HostTracker() {
     }
@@ -821,7 +821,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         }
     }
 
-    private void edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
+    private void debugEdgeUpdate(Edge e, UpdateType type, Set<Property> props) {
         Long srcNid = null;
         Short srcPort = null;
         Long dstNid = null;
@@ -843,7 +843,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             }
 
             if (!srcType.equals(NodeConnector.NodeConnectorIDType.OPENFLOW)) {
-                logger.error("For now we cannot handle updates for " + "non-openflow nodes");
+                logger.debug("For now we cannot handle updates for non-openflow nodes");
                 return;
             }
 
@@ -853,7 +853,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             }
 
             if (!dstType.equals(NodeConnector.NodeConnectorIDType.OPENFLOW)) {
-                logger.error("For now we cannot handle updates for " + "non-openflow nodes");
+                logger.debug("For now we cannot handle updates for non-openflow nodes");
                 return;
             }
 
@@ -881,11 +881,14 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
 
     @Override
     public void edgeUpdate(List<TopoEdgeUpdate> topoedgeupdateList) {
-        for (int i = 0; i < topoedgeupdateList.size(); i++) {
-            Edge e = topoedgeupdateList.get(i).getEdge();
-            Set<Property> p = topoedgeupdateList.get(i).getProperty();
-            UpdateType type = topoedgeupdateList.get(i).getUpdateType();
-            edgeUpdate(e, type, p);
+        if (logger.isDebugEnabled()) {
+            for (TopoEdgeUpdate topoEdgeUpdate : topoedgeupdateList) {
+                Edge e = topoEdgeUpdate.getEdge();
+                Set<Property> p = topoEdgeUpdate.getProperty();
+                UpdateType type = topoEdgeUpdate.getUpdateType();
+
+                debugEdgeUpdate(e, type, p);
+            }
         }
     }
 
