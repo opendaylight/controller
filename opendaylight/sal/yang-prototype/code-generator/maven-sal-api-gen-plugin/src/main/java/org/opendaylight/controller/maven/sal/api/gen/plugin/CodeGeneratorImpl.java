@@ -24,9 +24,9 @@ import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.java.api.generator.GeneratorJavaFile;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang2sources.spi.CodeGenerator;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang2sources.spi.CodeGenerator;
 
 public final class CodeGeneratorImpl implements CodeGenerator {
 

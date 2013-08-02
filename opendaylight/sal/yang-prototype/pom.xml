@@ -60,12 +60,13 @@
 
     <modules>
         <module>concepts-lang</module>
-        <module>yang</module>
+        <!-- <module>yang</module> -->
         <module>code-generator</module>
         <module>model</module>
     </modules>
 
     <properties>
+        <yangtools.version>0.5.5-SNAPSHOT</yangtools.version>
         <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
         <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
         <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
@@ -89,6 +90,11 @@
             <id>central2</id>
             <name>central2</name>
             <url>${nexusproxy}/repositories/central2/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>opendaylight.snapshot</id>
+            <name>opendaylight.snapshot</name>
+            <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -156,6 +162,7 @@
             <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
         </repository>
     </repositories>
+
     <distributionManagement>
         <!-- OpenDayLight Released artifact -->
         <repository>
@@ -391,4 +398,5 @@
             </properties>
         </profile>
     </profiles>
+
 </project>

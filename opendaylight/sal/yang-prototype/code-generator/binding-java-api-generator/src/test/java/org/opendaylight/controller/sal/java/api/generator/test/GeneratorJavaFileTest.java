@@ -36,9 +36,9 @@ import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTypeBuilder;
 import org.opendaylight.controller.sal.java.api.generator.GeneratorJavaFile;
 import org.opendaylight.controller.sal.java.api.generator.InterfaceGenerator;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.SchemaContext;
-import org.opendaylight.controller.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 public class GeneratorJavaFileTest {
     private static final String FS = File.separator;
@@ -132,7 +132,7 @@ public class GeneratorJavaFileTest {
                 tosToGenerate.add((GeneratedTransferObject) type);
             }
             if (type instanceof Enumeration) {
-            	enumerationToGenerate.add((Enumeration) type);            	
+            	enumerationToGenerate.add((Enumeration) type);
             }
         }
 

@@ -7,6 +7,16 @@
  */
 package org.opendaylight.controller.sal.binding.yang.types;
 
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.*;
+import static org.opendaylight.yangtools.yang.model.util.SchemaContextUtil.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.controller.binding.generator.util.TypeConstants;
@@ -21,25 +31,27 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.EnumBuilde
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedPropertyBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTypeBuilder;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.*;
-import org.opendaylight.controller.yang.model.api.type.*;
-import org.opendaylight.controller.yang.model.api.type.BitsTypeDefinition.Bit;
-import org.opendaylight.controller.yang.model.api.type.EnumTypeDefinition.EnumPair;
-import org.opendaylight.controller.yang.model.util.ExtendedType;
-
-import org.opendaylight.controller.yang.model.util.StringType;
-import org.opendaylight.controller.yang.model.util.UnionType;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.*;
-import static org.opendaylight.controller.yang.model.util.SchemaContextUtil.*;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.RevisionAwareXPath;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.BitsTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.BitsTypeDefinition.Bit;
+import org.opendaylight.yangtools.yang.model.api.type.EnumTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.EnumTypeDefinition.EnumPair;
+import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.PatternConstraint;
+import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
+import org.opendaylight.yangtools.yang.model.util.ExtendedType;
+import org.opendaylight.yangtools.yang.model.util.StringType;
+import org.opendaylight.yangtools.yang.model.util.UnionType;
 
 public final class TypeProviderImpl implements TypeProvider {
 
@@ -71,7 +83,7 @@ public final class TypeProviderImpl implements TypeProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.opendaylight.controller.yang.model.type.provider.TypeProvider#
      * javaTypeForYangType(java.lang.String)
      */
@@ -664,7 +676,7 @@ public final class TypeProviderImpl implements TypeProvider {
      * equal depth. In next step are lists from this map concatenated to one
      * list in ascending order according to their depth. All type definitions
      * are in the list behind all type definitions on which depends.
-     * 
+     *
      * @param unsortedTypeDefinitions
      *            represents list of type definitions
      * @return list of type definitions sorted according their each other
@@ -698,7 +710,7 @@ public final class TypeProviderImpl implements TypeProvider {
     /**
      * The method return how many immersion is necessary to get from type
      * definition to base type.
-     * 
+     *
      * @param typeDefinition
      *            is type definition for which is depth looked for.
      * @return how many immersion is necessary to get from type definition to

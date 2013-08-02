@@ -1,12 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>binding-generator</artifactId>
-        <version>0.5.4-SNAPSHOT</version>
+        <version>0.5.5-SNAPSHOT</version>
     </parent>
+
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>binding-java-api-generator</artifactId>
+
     <build>
         <plugins>
             <plugin>
@@ -19,27 +22,28 @@
                             <goal>compile</goal>
                         </goals>
                         <configuration>
-                             <outputDirectory>${basedir}/src/main/xtend-gen</outputDirectory>
+                            <outputDirectory>${basedir}/src/main/xtend-gen</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-            	<artifactId>maven-clean-plugin</artifactId>
-			    <version>2.4.1</version>
-			    <configuration>
-			        <filesets>
-			            <fileset>
-			                <directory>${basedir}/src/main/xtend-gen</directory>
-			                <includes>
-			                    <include>**</include>
-			                </includes>
-			            </fileset>
-			        </filesets>
-			    </configuration>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.4.1</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}/src/main/xtend-gen</directory>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
             </plugin>
         </plugins>
     </build>
+
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -58,10 +62,11 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-	    <dependency>
-		    <groupId>org.eclipse.xtend</groupId>
-		    <artifactId>org.eclipse.xtend.lib</artifactId>
-		    <version>2.4.2</version>
-	    </dependency>
+        <dependency>
+            <groupId>org.eclipse.xtend</groupId>
+            <artifactId>org.eclipse.xtend.lib</artifactId>
+            <version>2.4.2</version>
+        </dependency>
     </dependencies>
+
 </project>

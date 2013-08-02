@@ -8,7 +8,7 @@
 package org.opendaylight.controller.sal.binding.generator.spi;
 
 import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 
 public interface TypeProvider {
 

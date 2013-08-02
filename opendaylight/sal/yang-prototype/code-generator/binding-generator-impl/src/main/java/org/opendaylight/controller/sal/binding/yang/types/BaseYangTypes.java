@@ -14,7 +14,7 @@ import java.util.Map;
 import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.sal.binding.generator.spi.TypeProvider;
 import org.opendaylight.controller.sal.binding.model.api.Type;
-import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 
 public final class BaseYangTypes {
 

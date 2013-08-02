@@ -1,14 +1,18 @@
 package org.opendaylight.controller.binding.generator.util;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTOBuilderImpl;
 import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedTOBuilder;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.SchemaNode;
-import org.opendaylight.controller.yang.model.api.SchemaPath;
-import org.opendaylight.controller.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 
 public final class BindingGeneratorUtil {
 
