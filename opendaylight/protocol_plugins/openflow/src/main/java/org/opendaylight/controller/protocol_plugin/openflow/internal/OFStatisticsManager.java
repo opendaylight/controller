@@ -203,7 +203,7 @@ IInventoryShimExternalListener, CommandProvider {
         configStatsPollIntervals();
 
         // Initialize managed timers
-        statisticsTimer = new Timer();
+        statisticsTimer = new Timer("Statistics Timer Ticks");
         statisticsTimerTask = new TimerTask() {
             @Override
             public void run() {
@@ -222,6 +222,7 @@ IInventoryShimExternalListener, CommandProvider {
                     } catch (InterruptedException e) {
                         log.warn("Flow Statistics Collector thread "
                                 + "interrupted", e);
+                        return;
                     }
                 }
             }
@@ -237,6 +238,7 @@ IInventoryShimExternalListener, CommandProvider {
                         updatePortsTxRate(switchId);
                     } catch (InterruptedException e) {
                         log.warn("TX Rate Updater thread interrupted", e);
+                        return;
                     }
                 }
             }

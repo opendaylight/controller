@@ -36,8 +36,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
-import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageReadWrite;
+import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.openflow.protocol.OFBarrierReply;
 import org.openflow.protocol.OFBarrierRequest;
 import org.openflow.protocol.OFEchoReply;
@@ -622,6 +622,7 @@ public class SwitchHandler implements ISwitch {
         } catch (Exception e) {
             logger.warn("Timeout while waiting for {} replies", req.getType());
             result = null; // to indicate timeout has occurred
+            worker.wakeup();
             return result;
         }
     }
@@ -937,6 +938,7 @@ public class SwitchHandler implements ISwitch {
             // convert the result into a Boolean with value false
             status = false;
             result = status;
+            worker.wakeup();
             return result;
         }
     }

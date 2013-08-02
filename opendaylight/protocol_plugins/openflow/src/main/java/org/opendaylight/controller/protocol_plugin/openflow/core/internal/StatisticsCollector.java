@@ -76,6 +76,7 @@ public class StatisticsCollector implements Callable<Object> {
     }
 
     public void wakeup(OFError errorMsg) {
-
+        result = errorMsg;
+        wakeup();
     }
 }
