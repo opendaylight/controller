@@ -110,14 +110,14 @@ one.f.switchmanager.nodesLearnt = {
                     var h3;
                     var footer = [];
                     var $body = one.f.switchmanager.nodesLearnt.modal.body.updateNode(nodeId, evt.target.switchDetails, tiers);
-                    if ( (one.main.registry == undefined || one.main.registry.container == 'default') && evt.target.privilege == 'WRITE'){
+                    if (evt.target.privilege == 'WRITE'){
                         h3 = "Update Node Information";
                         footer = one.f.switchmanager.nodesLearnt.modal.footer.updateNode();
                     } else { //disable node edit
                         $body.find('*').attr('disabled', 'disabled');
                         h3 = 'Node Information';
                     }
-
+                    
                     var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.modal, h3, "", footer);
                     // bind save button
                     $('#' + one.f.switchmanager.nodesLearnt.id.modal.save, $modal).click(function() {
@@ -167,6 +167,9 @@ one.f.switchmanager.nodesLearnt = {
 				var $select = one.lib.form.select.create(
 						["Allow reactive forwarding", "Proactive forwarding only"]);
 				$select.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.operationMode);
+				if ((one.main.registry != undefined) && (one.main.registry.container != 'default')) {
+					$select.attr("disabled", true);
+				}
 				$select.val(switchDetails["mode"]);
 				$fieldset.append($label).append($select);
 				$form.append($fieldset);

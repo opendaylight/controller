@@ -236,8 +236,10 @@ public class Devices implements IDaylightWeb {
             nodeProperties.put(desc.getName(), desc);
             Property nodeTier = new Tier(Integer.parseInt(tier));
             nodeProperties.put(nodeTier.getName(), nodeTier);
-            Property mode = new ForwardingMode(Integer.parseInt(operationMode));
-            nodeProperties.put(mode.getName(), mode);
+            if (containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                Property mode = new ForwardingMode(Integer.parseInt(operationMode));
+                nodeProperties.put(mode.getName(), mode);
+            }
             SwitchConfig cfg = new SwitchConfig(nodeId, nodeProperties);
             Status result = switchManager.updateNodeConfig(cfg);
             if (!result.isSuccess()) {
