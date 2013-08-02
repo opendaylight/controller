@@ -702,7 +702,7 @@ CommandProvider {
         if (mode != null) {
             if (isDefaultContainer) {
                 if (!mode.isValid()) {
-                    return new Status(StatusCode.NOTACCEPTABLE, "Invalid Forwarding Mode Value.");
+                    return new Status(StatusCode.BADREQUEST, "Invalid Forwarding Mode Value.");
                 }
             } else {
                 return new Status(StatusCode.NOTACCEPTABLE,
@@ -744,10 +744,10 @@ CommandProvider {
         }
         Node node = Node.fromString(nodeId);
         Map<String, Property> propMapCurr = nodeProps.get(node);
-        Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
         if (propMapCurr == null) {
             return new Status(StatusCode.SUCCESS);
         }
+        Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
         if (!prevNodeProperties.isEmpty()) {
             for (String prop : prevNodeProperties.keySet()) {
                 if (!updateProperties.containsKey(prop)) {
@@ -820,7 +820,6 @@ CommandProvider {
                 spanConfigList), spanFileName);
         retS = objWriter.write(new ConcurrentHashMap<String, SwitchConfig>(
                 nodeConfigList), switchConfigFileName);
-
         if (retS.equals(retP)) {
             if (retS.isSuccess()) {
                 return retS;
@@ -936,7 +935,6 @@ CommandProvider {
         } else {
             result = nodeProps.replace(node, propMapCurr, propMap);
         }
-
         if (!result) {
             log.debug("Cluster conflict: Conflict while adding the node properties. Node: {}  Properties: {}",
                     node.getID(), props);
@@ -981,7 +979,15 @@ CommandProvider {
                 : new HashMap<String, Property>(propMapCurr);
 
         // copy node properties from plugin
+        String nodeId = node.toString();
         for (Property prop : props) {
+            if (nodeConfigList != null) {
+                SwitchConfig conf = nodeConfigList.get(nodeId);
+                if (conf != null && (conf.getNodeProperties() != null)
+                        && conf.getNodeProperties().containsKey(prop.getName())) {
+                    continue;
+                }
+            }
             propMap.put(prop.getName(), prop);
         }
 
