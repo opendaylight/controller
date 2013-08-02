@@ -319,7 +319,7 @@ public class BridgeDomainNorthbound {
 
        Node node = Node.fromString(nodeType, nodeId);
        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
-       configs.put(ConfigConstants.TYPE, ConfigConstants.VLAN);
+       configs.put(ConfigConstants.TYPE, ConfigConstants.VLAN.name());
        configs.put(ConfigConstants.VLAN, vlan);
 
        Status status = null;
