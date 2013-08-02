@@ -1915,7 +1915,7 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
 
         log.info("Forwarding mode for node {} set to {}", node, (proactive ? "proactive" : "reactive"));
         for (FlowConfig fc : defaultConfigs) {
-            Status status = (proactive) ? addStaticFlowInternal(fc, true) : removeStaticFlow(fc);
+            Status status = (proactive) ? addStaticFlowInternal(fc, false) : removeStaticFlow(fc);
             if (status.isSuccess()) {
                 log.info("{} Proactive Static flow: {}", (proactive ? "Installed" : "Removed"), fc.getName());
             } else {
