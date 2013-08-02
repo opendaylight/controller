@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.opendaylight.controller.configuration.IConfigurationAware;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Bandwidth;
+import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Host;
 import org.opendaylight.controller.sal.core.Name;
@@ -176,7 +177,8 @@ public class Topology implements IObjectReader, IConfigurationAware {
 
         for (Map.Entry<Node, Set<Edge>> e : nodeEdges.entrySet()) {
             Node n = e.getKey();
-            String description = switchManager.getNodeDescription(n);
+            String description = getNodeDesc(n, switchManager);
+
             NodeBean node = createNodeBean(description, n);
 
             // skip production node
@@ -280,8 +282,7 @@ public class Topology implements IObjectReader, IConfigurationAware {
 
     private String getNodeConnectorDescription(NodeConnector nodeConnector, ISwitchManager switchManager) {
         Node node = nodeConnector.getNode();
-        String description = switchManager.getNodeDescription(node);
-        String name = this.getDescription(description, node);
+        String name = this.getDescription(getNodeDesc(node, switchManager), node);
         return name;
     }
 
@@ -307,7 +308,7 @@ public class Topology implements IObjectReader, IConfigurationAware {
                     continue;
                 }
 
-                String description = switchManager.getNodeDescription(n);
+                String description = getNodeDesc(n, switchManager);
 
                 if ((stagedNodes.containsKey(n.toString()) && metaCache.get(containerName).containsKey(n.toString())) || newNodes.containsKey(n.toString())) {
                         continue;
@@ -609,4 +610,10 @@ public class Topology implements IObjectReader, IConfigurationAware {
         // Perform the class deserialization locally, from inside the package where the class is defined
         return ois.readObject();
     }
+
+    private String getNodeDesc(Node node, ISwitchManager switchManager) {
+        Description desc = (Description) switchManager.getNodeProp(node, Description.propertyName);
+        return (desc == null) ? "" : desc.getValue();
+    }
+
 }

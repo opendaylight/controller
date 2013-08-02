@@ -11,15 +11,23 @@ package org.opendaylight.controller.switchmanager;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.sal.core.Description;
+import org.opendaylight.controller.sal.core.ForwardingMode;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.Tier;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 public class SwitchTest {
 
@@ -122,24 +130,21 @@ public class SwitchTest {
 
     @Test
     public void testSwitchConfig(){
-        SwitchConfig sc = new SwitchConfig(null, null, null, null);
-        SwitchConfig sc2 = new SwitchConfig(null, null, null, null);
-        Assert.assertTrue(sc.equals(sc2));
-
-        Assert.assertNull(sc.getMode());
-        Assert.assertNull(sc.getNodeId());
-        Assert.assertNull(sc.getTier());
-        Assert.assertNull(sc.getNodeDescription());
-
-        SwitchConfig sc3 = new SwitchConfig("123", "name", "tier", "mode");
-        SwitchConfig sc4 = new SwitchConfig("123", "name", "tier", "mode");
-        Assert.assertFalse(sc.equals(sc3));
-        Assert.assertTrue(sc3.equals(sc4));
-
-        Assert.assertTrue(sc3.getNodeId().equals("123"));
-        Assert.assertTrue(sc3.getNodeDescription().equals("name"));
-        Assert.assertTrue(sc3.getTier().equals("tier"));
-        Assert.assertTrue(sc3.getMode().equals("mode"));
+        Map<String, Property> prop = new HashMap<String, Property>();
+        Property desc = new Description("swicth1");
+        prop.put(desc.getName(), desc);
+        Property tier = new Tier(1);
+        prop.put(tier.getName(), tier);
+        SwitchConfig sc1 = new SwitchConfig("123", prop);
+        SwitchConfig sc2 = new SwitchConfig("123", prop);
+        Property mode = new ForwardingMode(1);
+        prop.put(mode.getName(), mode);
+        SwitchConfig sc3 = new SwitchConfig("123", prop);
+        Assert.assertTrue(sc1.equals(sc2));
+        Assert.assertEquals(tier, sc1.getProperty(Tier.TierPropName));
+        Assert.assertFalse(sc1.equals(sc3));
+        Assert.assertTrue(sc1.hashCode() == sc2.hashCode());
+        Assert.assertTrue(sc1.getNodeProperties().equals(sc2.getNodeProperties()));
     }
 
 }

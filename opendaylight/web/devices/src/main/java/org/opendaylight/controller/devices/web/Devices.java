@@ -26,9 +26,12 @@ import org.opendaylight.controller.forwarding.staticrouting.StaticRouteConfig;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Config;
+import org.opendaylight.controller.sal.core.Description;
+import org.opendaylight.controller.sal.core.ForwardingMode;
 import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.Tier;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
@@ -95,45 +98,39 @@ public class Devices implements IDaylightWeb {
         String userName = request.getUserPrincipal().getName();
         Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
 
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, containerName, this);
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName,
+                this);
         List<Map<String, String>> nodeData = new ArrayList<Map<String, String>>();
         if (switchManager != null && privilege != Privilege.NONE) {
             for (Switch device : switchManager.getNetworkDevices()) {
                 HashMap<String, String> nodeDatum = new HashMap<String, String>();
                 Node node = device.getNode();
-                Tier tier = (Tier) switchManager.getNodeProp(node,
-                        Tier.TierPropName);
-
+                Tier tier = (Tier) switchManager.getNodeProp(node, Tier.TierPropName);
                 nodeDatum.put("containerName", containerName);
-                nodeDatum.put("nodeName",
-                        switchManager.getNodeDescription(node));
+                Description description = (Description) switchManager.getNodeProp(node, Description.propertyName);
+                String desc = (description == null) ? "" : description.getValue();
+                nodeDatum.put("nodeName", desc);
                 nodeDatum.put("nodeId", node.toString());
-                int tierNumber = (tier == null) ? TierHelper.unknownTierNumber
-                        : tier.getValue();
-                nodeDatum.put("tierName", TierHelper.getTierName(tierNumber)
-                        + " (Tier-" + tierNumber + ")");
+                int tierNumber = (tier == null) ? TierHelper.unknownTierNumber : tier.getValue();
+                nodeDatum.put("tierName", TierHelper.getTierName(tierNumber) + " (Tier-" + tierNumber + ")");
                 nodeDatum.put("tier", tierNumber + "");
-                SwitchConfig sc = switchManager.getSwitchConfig(device
-                        .getNode().toString());
-                String modeStr = (sc != null) ? sc.getMode() : "0";
+                String modeStr = "0";
+                ForwardingMode mode = (ForwardingMode) switchManager.getNodeProp(node, ForwardingMode.name);
+                if (mode != null) {
+                    modeStr = String.valueOf(mode.getValue());
+                }
                 nodeDatum.put("mode", modeStr);
 
                 nodeDatum.put("json", gson.toJson(nodeDatum));
-                nodeDatum.put("mac", HexEncode.bytesToHexString(device
-                        .getDataLayerAddress()));
+                nodeDatum.put("mac", HexEncode.bytesToHexString(device.getDataLayerAddress()));
                 StringBuffer sb1 = new StringBuffer();
-                Set<NodeConnector> nodeConnectorSet = device
-                        .getNodeConnectors();
+                Set<NodeConnector> nodeConnectorSet = device.getNodeConnectors();
                 if (nodeConnectorSet != null && nodeConnectorSet.size() > 0) {
                     Map<Short, String> portList = new HashMap<Short, String>();
                     List<String> intfList = new ArrayList<String>();
                     for (NodeConnector nodeConnector : nodeConnectorSet) {
-                        String nodeConnectorNumberToStr = nodeConnector.getID()
-                                .toString();
-                        Name ncName = ((Name) switchManager
-                                .getNodeConnectorProp(nodeConnector,
-                                        Name.NamePropName));
+                        String nodeConnectorNumberToStr = nodeConnector.getID().toString();
+                        Name ncName = ((Name) switchManager.getNodeConnectorProp(nodeConnector, Name.NamePropName));
                         Config portStatus = ((Config) switchManager
                                 .getNodeConnectorProp(nodeConnector,
                                         Config.ConfigPropName));
@@ -234,11 +231,22 @@ public class Devices implements IDaylightWeb {
         try {
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
-            SwitchConfig cfg = new SwitchConfig(nodeId, nodeName, tier,
-                    operationMode);
-            switchManager.updateSwitchConfig(cfg);
-            resultBean.setStatus(true);
-            resultBean.setMessage("Updated node information successfully");
+            Map<String, Property> nodeProperties = new HashMap<String, Property>();
+            Property desc = new Description(nodeName);
+            nodeProperties.put(desc.getName(), desc);
+            Property nodeTier = new Tier(Integer.parseInt(tier));
+            nodeProperties.put(nodeTier.getName(), nodeTier);
+            Property mode = new ForwardingMode(Integer.parseInt(operationMode));
+            nodeProperties.put(mode.getName(), mode);
+            SwitchConfig cfg = new SwitchConfig(nodeId, nodeProperties);
+            Status result = switchManager.updateNodeConfig(cfg);
+            if (!result.isSuccess()) {
+                resultBean.setStatus(false);
+                resultBean.setMessage(result.getDescription());
+            } else {
+                resultBean.setStatus(true);
+                resultBean.setMessage("Updated node information successfully");
+            }
         } catch (Exception e) {
             resultBean.setStatus(false);
             resultBean.setMessage("Error updating node information. "
@@ -737,8 +745,10 @@ public class Devices implements IDaylightWeb {
                 .getInstance(ISwitchManager.class, containerName, this);
         String description = "";
         if (switchManager != null) {
-            description = switchManager.getNodeDescription(Node
-                    .fromString(nodeId));
+            Description desc = (Description) switchManager.getNodeProp(Node.fromString(nodeId), Description.propertyName);
+            if(desc != null) {
+                description = desc.getValue();
+            }
         }
         return (description.isEmpty() || description.equalsIgnoreCase("none")) ? nodeId
                 : description;

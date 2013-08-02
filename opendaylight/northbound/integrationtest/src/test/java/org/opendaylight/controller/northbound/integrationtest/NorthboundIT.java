@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 public class NorthboundIT {
-    private Logger log = LoggerFactory.getLogger(NorthboundIT.class);
+    private final Logger log = LoggerFactory.getLogger(NorthboundIT.class);
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
@@ -66,7 +66,7 @@ public class NorthboundIT {
     private IInventoryListener invtoryListener = null;
     private IListenTopoUpdates topoUpdates = null;
 
-    private Boolean debugMsg = false;
+    private final Boolean debugMsg = false;
 
     private String stateToString(int state) {
         switch (state) {
@@ -1271,7 +1271,7 @@ public class NorthboundIT {
                 mavenBundle("org.opendaylight.controller", "security", "0.4.0-SNAPSHOT").noStart(),
                 mavenBundle("org.opendaylight.controller", "sal", "0.5.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "sal.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "switchmanager", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "switchmanager", "0.5.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "switchmanager.implementation", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "forwardingrulesmanager", "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller", "forwardingrulesmanager.implementation", "0.4.0-SNAPSHOT"),

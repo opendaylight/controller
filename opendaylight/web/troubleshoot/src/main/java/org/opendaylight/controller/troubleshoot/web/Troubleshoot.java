@@ -24,6 +24,7 @@ import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.SetVlanId;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.UserLevel;
+import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.TimeStamp;
@@ -109,7 +110,7 @@ public class Troubleshoot implements IDaylightWeb {
             if (nodeSet != null) {
                 for (Node node : nodeSet) {
                     Map<String, String> device = new HashMap<String, String>();
-                    device.put("nodeName", switchManager.getNodeDescription(node));
+                    device.put("nodeName", getNodeDesc(node, switchManager));
                     device.put("nodeId", node.toString());
                     lines.add(device);
                 }
@@ -139,7 +140,7 @@ public class Troubleshoot implements IDaylightWeb {
             if (nodeSet != null) {
                 for (Node node : nodeSet) {
                     Map<String, String> device = new HashMap<String, String>();
-                    device.put("nodeName", switchManager.getNodeDescription(node));
+                    device.put("nodeName", getNodeDesc(node, switchManager));
                     device.put("nodeId", node.toString());
                     TimeStamp timeStamp = (TimeStamp) switchManager.getNodeProp(
                             node, TimeStamp.TimeStampPropName);
@@ -251,10 +252,9 @@ public class Troubleshoot implements IDaylightWeb {
         Match match = flow.getMatch();
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
-        String desc = (switchManager == null)?
-                        "" : switchManager.getNodeDescription(node);
-        desc = (desc.isEmpty() || desc.equalsIgnoreCase("none"))?
-                        node.toString(): desc;
+        String desc = getNodeDesc(node, switchManager);
+        desc = (desc == null || desc.isEmpty() || desc.equalsIgnoreCase("none"))?
+                        node.toString() : desc;
         row.put("nodeName", desc);
         if (match.isPresent(MatchType.IN_PORT)) {
             row.put(MatchType.IN_PORT.id(), ((NodeConnector) flow.getMatch()
@@ -368,4 +368,11 @@ public class Troubleshoot implements IDaylightWeb {
         return row;
     }
 
+    private String getNodeDesc(Node node, ISwitchManager switchManager) {
+        if (switchManager == null) {
+            return null;
+        }
+        Description desc = (Description) switchManager.getNodeProp(node, Description.propertyName);
+        return (desc == null) ? "" : desc.getValue();
+    }
 }
