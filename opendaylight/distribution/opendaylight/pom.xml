@@ -108,7 +108,8 @@
     <module>../../samples/northbound/loadbalancer</module>
     <module>../../commons/concepts</module>
     <module>../../commons/integrationtest</module>
-
+    <module>../../commons/checkstyle</module>
+    <module>../../commons/opendaylight</module>
   </modules>
 
   <build>
