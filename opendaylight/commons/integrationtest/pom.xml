@@ -77,9 +77,16 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${checkstyle.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>0.0.1</version>
+          </dependency>
+         </dependencies>
         <configuration>
           <failsOnError>true</failsOnError>
-          <configLocation>${project.parent.parent.basedir}/space_and_tabs_checks.xml</configLocation>
+          <configLocation>controller/space_and_tabs_checks.xml</configLocation>
         </configuration>
       </plugin>
       <plugin>
