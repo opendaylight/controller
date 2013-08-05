@@ -61,6 +61,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * are done by the ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
     }
 
@@ -69,6 +70,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
     }
 
@@ -81,6 +83,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *         instantiated in order to get an fully working implementation
      *         Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { TopologyServices.class, DataPacketServices.class,
                 InventoryService.class, ReadService.class,
@@ -103,6 +106,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *            per-container different behavior if needed, usually should not
      *            be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(TopologyServices.class)) {
             // export the service to be used by SAL
@@ -168,7 +172,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginOutConnectionService.class)
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
-                    .setRequired(false));
+                    .setRequired(true));
         }
 
         if (imp.equals(ReadService.class)) {
@@ -196,7 +200,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginOutConnectionService.class)
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
-                    .setRequired(false));
+                    .setRequired(true));
         }
 
         if (imp.equals(FlowProgrammerNotifier.class)) {
@@ -216,7 +220,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginOutConnectionService.class)
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
-                    .setRequired(false));
+                    .setRequired(true));
         }
     }
 
@@ -229,6 +233,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *         instantiated in order to get an fully working implementation
      *         Object
      */
+    @Override
     public Object[] getGlobalImplementations() {
         Object[] res = { Controller.class, OFStatisticsManager.class,
                 FlowProgrammerService.class, ReadServiceFilter.class,
@@ -248,6 +253,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *            Implementation class that is being configured, needed as long
      *            as the same routine can configure multiple implementations
      */
+    @Override
     public void configureGlobalInstance(Component c, Object imp) {
 
         if (imp.equals(Controller.class)) {
@@ -289,7 +295,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginOutConnectionService.class)
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
-                    .setRequired(false));
+                    .setRequired(true));
         }
 
         if (imp.equals(ReadServiceFilter.class)) {
@@ -357,7 +363,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginOutConnectionService.class)
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
-                    .setRequired(false));
+                    .setRequired(true));
         }
 
         // DataPacket mux/demux services, which is teh actual engine
@@ -385,7 +391,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginOutConnectionService.class)
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
-                    .setRequired(false));
+                    .setRequired(true));
         }
 
         if (imp.equals(InventoryService.class)) {
@@ -408,7 +414,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginOutInventoryService.class, "(scope=Global)")
                     .setCallbacks("setPluginOutInventoryServices",
                             "unsetPluginOutInventoryServices")
-                    .setRequired(false));
+                    .setRequired(true));
         }
 
         if (imp.equals(InventoryServiceShim.class)) {
@@ -438,7 +444,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IPluginOutConnectionService.class)
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
-                    .setRequired(false));
+                    .setRequired(true));
         }
 
         if (imp.equals(TopologyServiceShim.class)) {

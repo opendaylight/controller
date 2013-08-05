@@ -26,7 +26,6 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Output;
-import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
@@ -156,17 +155,6 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
 
     public void unsetService(IOFStatisticsManager service) {
         this.statsMgr = null;
-    }
-
-    IPluginOutConnectionService connectionPluginOutService;
-    void setIPluginOutConnectionService(IPluginOutConnectionService s) {
-        connectionPluginOutService = s;
-    }
-
-    void unsetIPluginOutConnectionService(IPluginOutConnectionService s) {
-        if (connectionPluginOutService == s) {
-            connectionPluginOutService = null;
-        }
     }
 
     @Override
