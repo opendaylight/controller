@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.java.api.generator;
 
-import static org.opendaylight.controller.sal.java.api.generator.Constants.NL;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -22,25 +20,11 @@ public class EnumGenerator implements CodeGenerator {
     @Override
     public Writer generate(Type type) throws IOException {
         final Writer writer = new StringWriter();
-
         if (type instanceof Enumeration) {
-            Enumeration enums = (Enumeration) type;
-            writer.write(GeneratorUtil.createPackageDeclaration(enums.getPackageName()));
-            writer.write(NL + NL);
-            writer.write(GeneratorUtil.createEnum(enums, ""));
+            final Enumeration enums = (Enumeration) type;
+            final EnumTemplate enumTemplate = new EnumTemplate(enums);
+            writer.write(enumTemplate.generate().toString());
         }
-
-        return writer;
-    }
-
-    public Writer generateInnerEnumeration(Type type, String indent) throws IOException {
-        final Writer writer = new StringWriter();
-
-        if (type instanceof Enumeration) {
-            Enumeration enums = (Enumeration) type;
-            writer.write(GeneratorUtil.createEnum(enums, indent));
-        }
-
         return writer;
     }
 
