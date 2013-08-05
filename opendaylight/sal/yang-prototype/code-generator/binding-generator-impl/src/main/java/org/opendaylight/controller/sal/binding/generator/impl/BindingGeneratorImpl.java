@@ -7,8 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.*;
-import static org.opendaylight.yangtools.yang.model.util.SchemaContextUtil.*;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.moduleNamespaceToPackageName;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.packageNameForGeneratedType;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.parseToClassName;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.parseToValidParamName;
+import static org.opendaylight.controller.binding.generator.util.BindingGeneratorUtil.schemaNodeToTransferObjectBuilder;
+import static org.opendaylight.yangtools.yang.model.util.SchemaContextUtil.findDataSchemaNode;
+import static org.opendaylight.yangtools.yang.model.util.SchemaContextUtil.findParentModule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
-
-import javax.management.Notification;
 
 import org.opendaylight.controller.binding.generator.util.ReferencedTypeImpl;
 import org.opendaylight.controller.binding.generator.util.Types;
@@ -37,6 +40,7 @@ import org.opendaylight.controller.sal.binding.model.api.type.builder.GeneratedT
 import org.opendaylight.controller.sal.binding.model.api.type.builder.MethodSignatureBuilder;
 import org.opendaylight.controller.sal.binding.yang.types.GroupingDefinitionDependencySort;
 import org.opendaylight.controller.sal.binding.yang.types.TypeProviderImpl;
+import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;

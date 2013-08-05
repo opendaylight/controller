@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.controller.sal.binding.model.api.*;
+import org.opendaylight.yangtools.yang.binding.Augmentable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,14 +56,16 @@ public final class GeneratorJavaFile {
         final List<File> result = new ArrayList<>();
         for (GeneratedType type : genTypes) {
             final File genFile = generateTypeToJavaFile(parentDirectory, type, interfaceGenerator, "");
-            final File genBuilderFile = generateTypeToJavaFile(parentDirectory, type, builderGenerator,
-                    BuilderGenerator.FILE_NAME_SUFFIX);
-
             if (genFile != null) {
                 result.add(genFile);
             }
-            if (genBuilderFile != null) {
-                result.add(genBuilderFile);
+            // "rpc" and "grouping" elements do not implement Augmentable interface
+            if (isAugmentableIfcImplemented(type)) {
+                final File genBuilderFile = generateTypeToJavaFile(parentDirectory, type, builderGenerator,
+                        BuilderGenerator.FILE_NAME_SUFFIX);
+                if (genBuilderFile != null) {
+                    result.add(genBuilderFile);
+                }
             }
         }
         for (GeneratedTransferObject transferObject : genTransferObjects) {
@@ -82,6 +85,15 @@ public final class GeneratorJavaFile {
         }
 
         return result;
+    }
+    
+    private boolean isAugmentableIfcImplemented(GeneratedType genType) {
+        for (Type implType : genType.getImplements()) {
+            if (implType.getFullyQualifiedName().equals(Augmentable.class.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private File generateTypeToJavaFile(final File parentDir, final Type type, final CodeGenerator generator, String fileNameSuffix)

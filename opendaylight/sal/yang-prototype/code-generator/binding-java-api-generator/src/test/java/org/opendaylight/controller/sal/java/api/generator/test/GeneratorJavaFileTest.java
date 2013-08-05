@@ -26,6 +26,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.opendaylight.controller.binding.generator.util.Types;
 import org.opendaylight.controller.binding.generator.util.generated.type.builder.GeneratedTypeBuilderImpl;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.generator.impl.BindingGeneratorImpl;
@@ -82,6 +83,9 @@ public class GeneratorJavaFileTest {
         types.add(t1);
         types.add(t2);
         types.add(t3);
+        GeneratedTypeBuilder gtb = new GeneratedTypeBuilderImpl("org.opendaylight.controller.gen", "Type4");
+        gtb.addImplementsType(Types.augmentableTypeFor(gtb));
+        types.add(gtb.toInstance());
         GeneratorJavaFile generator = new GeneratorJavaFile(
                 new InterfaceGenerator(), types);
         generator.generateToFile(new File(PATH));
@@ -90,13 +94,12 @@ public class GeneratorJavaFileTest {
                 + "controller" + FS + "gen").list();
         List<String> filesList = Arrays.asList(files);
 
-        assertEquals(6, files.length);
+        assertEquals(5, files.length);
         assertTrue(filesList.contains("Type1.java"));
         assertTrue(filesList.contains("Type2.java"));
         assertTrue(filesList.contains("Type3.java"));
-        assertTrue(filesList.contains("Type1Builder.java"));
-        assertTrue(filesList.contains("Type2Builder.java"));
-        assertTrue(filesList.contains("Type3Builder.java"));
+        assertTrue(filesList.contains("Type4.java"));
+        assertTrue(filesList.contains("Type4Builder.java"));
     }
 
     @Ignore
