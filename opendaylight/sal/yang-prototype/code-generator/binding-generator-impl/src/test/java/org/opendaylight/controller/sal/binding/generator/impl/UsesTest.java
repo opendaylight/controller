@@ -7,7 +7,11 @@
  */
 package org.opendaylight.controller.sal.binding.generator.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.opendaylight.controller.sal.binding.generator.impl.SupportTestUtil.containsInterface;
+import static org.opendaylight.controller.sal.binding.generator.impl.SupportTestUtil.containsSignatures;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,8 +22,6 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.binding.generator.api.BindingGenerator;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
-import org.opendaylight.controller.sal.binding.model.api.MethodSignature;
-import org.opendaylight.controller.sal.binding.model.api.ParameterizedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -27,80 +29,6 @@ import org.opendaylight.yangtools.yang.model.parser.api.YangModelParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 public class UsesTest {
-
-    private class MethodSignaturePattern {
-        final String name;
-        final String type;
-
-        public MethodSignaturePattern(String methodName, String methodType) {
-            this.name = methodName;
-            this.type = methodType;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public String getType() {
-            return this.type;
-        }
-    }
-
-    private static void containsSignatures(final List<MethodSignature> searchedSignsIn,
-            final MethodSignaturePattern... searchedSignsWhat) {
-        if (searchedSignsIn == null) {
-            throw new IllegalArgumentException("List of method signatures in which should be searched can't be null");
-        }
-        if (searchedSignsWhat == null) {
-            throw new IllegalArgumentException("Array of method signatures which should be searched can't be null");
-        }
-
-        for (MethodSignaturePattern searchedSignWhat : searchedSignsWhat) {
-            boolean nameMatchFound = false;
-            String typeNameFound = "";
-            for (MethodSignature searchedSignIn : searchedSignsIn) {
-                if (searchedSignWhat.getName().equals(searchedSignIn.getName())) {
-                    nameMatchFound = true;
-                    typeNameFound = resolveFullNameOfReturnType(searchedSignIn);
-                    if (searchedSignWhat.getType().equals(typeNameFound)) {
-                        break;
-                    }
-                }
-            }
-            assertTrue("Method " + searchedSignWhat.getName() + " wasn't found.", nameMatchFound);
-            assertEquals("Return type in method " + searchedSignWhat.getName() + " doesn't match expected type ",
-                    searchedSignWhat.getType(), typeNameFound);
-
-        }
-    }
-
-    private static String resolveFullNameOfReturnType(final MethodSignature methodSignature) {
-        final StringBuilder nameBuilder = new StringBuilder();
-        if (methodSignature.getReturnType() instanceof ParameterizedType) {
-            nameBuilder.append(methodSignature.getReturnType().getName() + "<");
-            ParameterizedType parametrizedTypes = (ParameterizedType) methodSignature.getReturnType();
-            for (Type parametrizedType : parametrizedTypes.getActualTypeArguments()) {
-                nameBuilder.append(parametrizedType.getName() + ",");
-            }
-            if (nameBuilder.charAt(nameBuilder.length() - 1) == ',') {
-                nameBuilder.deleteCharAt(nameBuilder.length() - 1);
-            }
-            nameBuilder.append(">");
-        } else {
-            nameBuilder.append(methodSignature.getReturnType().getName());
-        }
-        return nameBuilder.toString();
-    }
-
-    private static boolean containsInterface(String interfaceName, GeneratedType genType) {
-        List<Type> caseCImplements = genType.getImplements();
-        for (Type caseCImplement : caseCImplements) {
-            if (caseCImplement.getName().equals(interfaceName)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     private static List<File> loadTestResources(String testFile) {
         final List<File> testModels = new ArrayList<File>();
@@ -158,11 +86,11 @@ public class UsesTest {
         assertEquals("GroupingX is in wrong package.",
                 "org.opendaylight.yang.gen.v1.urn.grouping.dependencies.rev2013718", groupingX.getPackageName());
 
-        assertTrue("GroupingV doesn't extend GroupingU.", containsInterface("GroupingV", groupingU));
-        assertTrue("GroupingX doesn't extend GroupingU.", containsInterface("GroupingX", groupingU));
-        assertTrue("GroupingZ doesn't extend GroupingV.", containsInterface("GroupingZ", groupingV));
-        assertTrue("GroupingZZ doesn't extend GroupingV.", containsInterface("GroupingZZ", groupingV));
-        assertTrue("GroupingY doesn't extend GroupingX.", containsInterface("GroupingY", groupingX));
+        containsInterface("GroupingV", groupingU);
+        containsInterface("GroupingX", groupingU);
+        containsInterface("GroupingZ", groupingV);
+        containsInterface("GroupingZZ", groupingV);
+        containsInterface("GroupingY", groupingX);
     }
 
     @Test
@@ -205,7 +133,7 @@ public class UsesTest {
         assertEquals("GroupingCaseTest is in wrong package.",
                 "org.opendaylight.yang.gen.v1.urn.grouping.uses._case.rev2013718", groupingCaseTest.getPackageName());
 
-        assertTrue("Case C doesn't extend GroupingCaseTest.", containsInterface("GroupingCaseTest", caseC));
+        containsInterface("GroupingCaseTest", caseC);
         assertTrue("Case C shouldn't contain any method.", caseC.getMethodDefinitions().isEmpty());
 
         assertEquals("Number of method in GroupingCaseTest is incorrect", 1, groupingCaseTest.getMethodDefinitions()
@@ -255,8 +183,7 @@ public class UsesTest {
         assertEquals("ContainerTest isn't in correct package",
                 "org.opendaylight.yang.gen.v1.urn.grouping.uses.container.rev2013718", containerTest.getPackageName());
 
-        assertTrue("ContainerTest doesn't extend GroupingContainerTest.",
-                containsInterface("GroupingContainerTest", containerTest));
+        containsInterface("GroupingContainerTest", containerTest);
 
         assertEquals("Number of method in GroupingContainerTestis incorrect", 2, groupingContainerTest
                 .getMethodDefinitions().size());
@@ -310,8 +237,7 @@ public class UsesTest {
         assertEquals("GroupingTest isn't in correct package",
                 "org.opendaylight.yang.gen.v1.urn.grouping.uses.grouping.rev2013718", groupingTest.getPackageName());
 
-        assertTrue("GroupingTest doesn't extend GroupingGroupingTest.",
-                containsInterface("GroupingGroupingTest", groupingTest));
+        containsInterface("GroupingGroupingTest", groupingTest);
 
         assertEquals("Number of method in GroupingGroupingTest is incorrect", 1, groupingGroupingTest
                 .getMethodDefinitions().size());
@@ -386,7 +312,7 @@ public class UsesTest {
                 "org.opendaylight.yang.gen.v1.urn.grouping.uses.list.rev2013718.grouping.list.test",
                 listGroupingListTest.getPackageName());
 
-        assertTrue("ListTest doesn't extend GroupingGroupingTest.", containsInterface("GroupingListTest", listTest));
+        containsInterface("GroupingListTest", listTest);
 
         assertEquals("Number of method in GroupingListTest is incorrect", 4, groupingListTest.getMethodDefinitions()
                 .size());
@@ -448,8 +374,7 @@ public class UsesTest {
                 "org.opendaylight.yang.gen.v1.urn.grouping.uses.modul.rev2013718",
                 groupingUsesModulData.getPackageName());
 
-        assertTrue("GroupingUsesModulData doesn't extend GroupingModulTest.",
-                containsInterface("GroupingModulTest", groupingUsesModulData));
+        containsInterface("GroupingModulTest", groupingUsesModulData);
 
         assertEquals("Number of method in GroupingUsesModulData is incorrect", 0, groupingUsesModulData
                 .getMethodDefinitions().size());
@@ -533,10 +458,8 @@ public class UsesTest {
                 "org.opendaylight.yang.gen.v1.urn.grouping.uses.rpc.rev2013718.grouping.rpc.input.test",
                 containerGroupingRpcInputTest.getPackageName());
 
-        assertTrue("RpcTestInput doesn't extend GroupingRpcInputTest.",
-                containsInterface("GroupingRpcInputTest", rpcTestInput));
-        assertTrue("RpcTestOutput doesn't extend GroupingRpcOutputTest.",
-                containsInterface("GroupingRpcOutputTest", rpcTestOutput));
+        containsInterface("GroupingRpcInputTest", rpcTestInput);
+        containsInterface("GroupingRpcOutputTest", rpcTestOutput);
 
         assertEquals("Number of method in RpcTestInput is incorrect", 0, rpcTestInput.getMethodDefinitions().size());
         assertEquals("Number of method in RpcTestOutput is incorrect", 0, rpcTestOutput.getMethodDefinitions().size());
@@ -596,8 +519,7 @@ public class UsesTest {
                 "org.opendaylight.yang.gen.v1.urn.grouping.uses.augment.rev2013718",
                 groupingAugmentTest.getPackageName());
 
-        assertTrue("ContainerAugment1 doesn't extend GroupingAugmentTest.",
-                containsInterface("GroupingAugmentTest", containerAugment1));
+        containsInterface("GroupingAugmentTest", containerAugment1);
 
         assertEquals("Number of method in GroupingCaseTest is incorrect", 0, containerAugment1.getMethodDefinitions()
                 .size());
@@ -666,8 +588,7 @@ public class UsesTest {
                 "org.opendaylight.yang.gen.v1.urn.grouping.uses.notification.rev2013718.grouping.notification.test",
                 containerGroupingNotificationTest.getPackageName());
 
-        assertTrue("NotificationTest doesn't extend GroupingNotificationTest.",
-                containsInterface("GroupingNotificationTest", notificationTest));
+        containsInterface("GroupingNotificationTest", notificationTest);
 
         assertEquals("Number of method in NotificationTest is incorrect", 1, notificationTest.getMethodDefinitions()
                 .size());
