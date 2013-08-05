@@ -805,7 +805,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
 
         final List<GeneratedType> generatedTypes = new ArrayList<>();
         for (final ChoiceCaseNode caseNode : caseNodes) {
-            if (caseNode != null && !caseNode.isAddedByUses()) {
+            if (caseNode != null && !caseNode.isAddedByUses() && !caseNode.isAugmenting()) {
                 final String packageName = packageNameForGeneratedType(basePackageName, caseNode.getPath());
                 final GeneratedTypeBuilder caseTypeBuilder = addDefaultInterfaceDefinition(packageName, caseNode);
                 caseTypeBuilder.addImplementsType(refChoiceType);
@@ -1249,7 +1249,7 @@ public final class BindingGeneratorImpl implements BindingGenerator {
         for (UsesNode usesNode : dataNodeContainer.getUses()) {
             if (usesNode.getGroupingPath() != null) {
                 GeneratedType genType = allGroupings.get(usesNode.getGroupingPath());
-                builder.addImplementsType(new ReferencedTypeImpl(genType.getPackageName(), genType.getName()));
+                builder.addImplementsType(genType);
             }
         }
         return builder;
