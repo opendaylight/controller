@@ -15,10 +15,11 @@ public final class BuilderGenerator implements CodeGenerator {
 
     @Override
     public Writer generate(Type type) throws IOException {
-        Writer writer = new StringWriter();
+        final Writer writer = new StringWriter();
         if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
-            BuilderTemplate builerGeneratorXtend = new BuilderTemplate();
-            writer.write(builerGeneratorXtend.generate(new BuilderClassDescriptor((GeneratedType) type)).toString());
+            final GeneratedType genType = (GeneratedType) type;
+            final BuilderTemplate template = new BuilderTemplate(genType);
+            writer.write(template.generate().toString());
         }
         return writer;
     }

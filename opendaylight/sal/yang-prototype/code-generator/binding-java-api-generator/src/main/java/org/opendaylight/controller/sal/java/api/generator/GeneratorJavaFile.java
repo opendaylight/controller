@@ -21,7 +21,7 @@ public final class GeneratorJavaFile {
 
     private static final Logger log = LoggerFactory.getLogger(GeneratorJavaFile.class);
     private final CodeGenerator interfaceGenerator;
-    private final ClassCodeGenerator classGenerator;
+    private final ClassGenerator classGenerator;
     private final EnumGenerator enumGenerator;
     private final BuilderGenerator builderGenerator;
 
@@ -34,7 +34,7 @@ public final class GeneratorJavaFile {
         this.genTypes = types;
         this.genTransferObjects = new HashSet<>();
         this.enumerations = new HashSet<>();
-        this.classGenerator = new ClassCodeGenerator();
+        this.classGenerator = new ClassGenerator();
         this.enumGenerator = new EnumGenerator();
         this.builderGenerator = new BuilderGenerator();
     }
@@ -42,7 +42,7 @@ public final class GeneratorJavaFile {
     public GeneratorJavaFile(final Set<GeneratedType> types, final Set<GeneratedTransferObject> genTransferObjects,
             final Set<Enumeration> enumerations) {
         this.interfaceGenerator = new InterfaceGenerator();
-        this.classGenerator = new ClassCodeGenerator();
+        this.classGenerator = new ClassGenerator();
         this.enumGenerator = new EnumGenerator();
         this.builderGenerator = new BuilderGenerator();
 

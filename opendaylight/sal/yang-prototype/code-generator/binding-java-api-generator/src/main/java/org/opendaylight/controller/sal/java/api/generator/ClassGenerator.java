@@ -13,20 +13,19 @@ import java.io.Writer;
 
 import org.opendaylight.controller.sal.binding.model.api.CodeGenerator;
 import org.opendaylight.controller.sal.binding.model.api.GeneratedTransferObject;
-import org.opendaylight.controller.sal.binding.model.api.GeneratedType;
 import org.opendaylight.controller.sal.binding.model.api.Type;
 
-public final class InterfaceGenerator implements CodeGenerator {
+public final class ClassGenerator implements CodeGenerator {
 
     @Override
     public Writer generate(Type type) throws IOException {
         final Writer writer = new StringWriter();
-        if (type instanceof GeneratedType && !(type instanceof GeneratedTransferObject)) {
-            final GeneratedType genType = (GeneratedType) type;
-            final InterfaceTemplate interfaceTemplate = new InterfaceTemplate(genType);
-            writer.write(interfaceTemplate.generate().toString());
+        if (type instanceof GeneratedTransferObject) {
+            final GeneratedTransferObject genTO = (GeneratedTransferObject) type;
+            final ClassTemplate template = new ClassTemplate(genTO);
+            writer.write(template.generate().toString());
         }
         return writer;
     }
-    
+
 }
