@@ -8,61 +8,11 @@
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>
-        YANG Tools is a infrastructure project aiming to develop necessary tooling and libraries providing support of
-        NETCONF and YANG for Java (JVM-language based) projects and applications, such as Model Driven SAL for 
-        Controller (which uses YANG as it's modeling language) and Netconf / OFConfig plugins. 
+        yang-prototype
     </description>
-
-    <developers>
-        <developer>
-            <id>ttkacik</id>
-            <name>Tony Tkacik</name>
-            <email>ttkacik@cisco.com</email>
-            <organization>OpenDaylight</organization>
-        </developer>
-        <developer>
-            <id>rovarga</id>
-            <name>Robert Varga</name>
-            <email>rovarga@cisco.com</email>
-            <organization>OpenDaylight</organization>
-        </developer>
-        <developer>
-            <id>lsedlak</id>
-            <name>Lukas Sedlak</name>
-            <email>lsedlak@cisco.com</email>
-            <organization>OpenDaylight</organization>
-        </developer>
-        <developer>
-            <id>mvitez</id>
-            <name>Martin Vitez</name>
-            <email>mvitez@cisco.com</email>
-            <organization>OpenDaylight</organization>
-        </developer>
-        <developer>
-            <id>jmedved</id>
-            <name>Jan Medved</name>
-            <email>jmedved@cisco.com</email>
-            <organization>OpenDaylight</organization>
-        </developer>
-        <developer>
-            <id>jgloncak</id>
-            <name>Jozef Gloncak</name>
-            <email>jgloncak@cisco.com</email>
-            <organization>OpenDaylight</organization>
-        </developer>
-        <developer>
-            <id>mirehak</id>
-            <name>Michal Rehak</name>
-            <email>mirehak@cisco.com</email>
-            <organization>OpenDaylight</organization>
-        </developer>
-    </developers>
 
     <modules>
         <module>concepts-lang</module>
-        <!-- <module>yang</module> -->
-        <module>code-generator</module>
-        <module>model</module>
     </modules>
 
     <properties>
