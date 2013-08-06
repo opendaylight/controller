@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+hc\u003d",
+        "filename": "opendaylight/northbound/integrationtest/logs/web_access_log_2013-06.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-08-06T16:50:51Z",
+      "side": 1,
+      "message": "Do you need to checkin this log file?",
+      "revId": "cfc924ae41c292e648a9aeea799d7a4d17675b88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+hs\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/core/internal/Controller.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-08-06T16:50:51Z",
+      "side": 1,
+      "message": "It would be helpful if you can justify the size of the thread pool as 20. Can this be made configurable?",
+      "revId": "cfc924ae41c292e648a9aeea799d7a4d17675b88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+hg\u003d",
+        "filename": "opendaylight/samples/reactiveforwarding/src/main/java/org/opendaylight/controller/samples/reactiveforwarding/LBConst.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-08-06T16:50:51Z",
+      "side": 1,
+      "message": "Add a private no-arg ctor to prevent instantiation of this class. Else, consider marking it as an interface.",
+      "revId": "cfc924ae41c292e648a9aeea799d7a4d17675b88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+hk\u003d",
+        "filename": "opendaylight/samples/reactiveforwarding/src/main/java/org/opendaylight/controller/samples/reactiveforwarding/entities/Client.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-08-06T16:50:51Z",
+      "side": 1,
+      "message": "This hashCode() suffers from the same issue as commented in VIP.java. Refer to the comments in VIP.java",
+      "revId": "cfc924ae41c292e648a9aeea799d7a4d17675b88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+ho\u003d",
+        "filename": "opendaylight/samples/reactiveforwarding/src/main/java/org/opendaylight/controller/samples/reactiveforwarding/entities/VIP.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-08-06T16:50:51Z",
+      "side": 1,
+      "message": "The hashCode() implementation is dependent on mutable fields. Please avoid this. If the object is mutated after being placed in a collection, retrieval operations will fail. You can consider marking the fields as \u0027final\u0027 and remove the setters.",
+      "revId": "cfc924ae41c292e648a9aeea799d7a4d17675b88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
