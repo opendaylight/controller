@@ -636,7 +636,7 @@ CommandProvider {
         }
 
         for (SwitchConfig conf : confList.values()) {
-            updateSwitchConfig(conf);
+            updateNodeConfig(conf);
         }
     }
 
