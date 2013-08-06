@@ -65,6 +65,7 @@
     <module>../../security</module>
 
     <module>../../../third-party/openflowj</module>
+    <module>../../../third-party/openflowj_netty</module>
     <module>../../../third-party/net.sf.jung2</module>
     <module>../../../third-party/jersey-servlet</module>
 
@@ -103,12 +104,14 @@
 
     <!-- Southbound bundles -->
     <module>../../protocol_plugins/openflow</module>
+    <module>../../protocol_plugins/openflow_netty</module>
     <module>../../protocol_plugins/stub</module>
 
     <!-- Samples -->
     <module>../../samples/simpleforwarding</module>
     <module>../../samples/loadbalancer</module>
     <module>../../samples/northbound/loadbalancer</module>
+    <module>../../samples/reactiveforwarding</module>
     <module>../../commons/concepts</module>
     <module>../../commons/integrationtest</module>
     <module>../../commons/checkstyle</module>

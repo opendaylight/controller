@@ -43,7 +43,6 @@
               org.opendaylight.controller.containermanager,
               org.opendaylight.controller.switchmanager,
               org.apache.commons.logging,
-              com.sun.jersey.spi.container.servlet,
               org.opendaylight.controller.northbound.commons,
               org.opendaylight.controller.northbound.commons.exception,
               javax.ws.rs,
