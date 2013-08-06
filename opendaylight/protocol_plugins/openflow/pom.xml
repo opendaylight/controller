@@ -50,9 +50,11 @@
             <Embed-Transitive>
               false
             </Embed-Transitive>
+<!-- uncomment to switch back to non-netty
             <Bundle-Activator>
               org.opendaylight.controller.protocol_plugin.openflow.internal.Activator
             </Bundle-Activator>
+-->
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>

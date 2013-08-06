@@ -39,6 +39,7 @@
     <jersey.version>1.17</jersey.version>
     <virgo.version>3.6.0.RELEASE</virgo.version>
     <geminiweb.version>2.2.0.RELEASE</geminiweb.version>
+    <netty.version>3.2.6.Final</netty.version>
     <checkstyle.version>2.10</checkstyle.version>
     <testvm.argLine>-Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
   </properties>
@@ -903,6 +904,11 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
       <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.netty</groupId>
+      <artifactId>netty</artifactId>
+      <version>${netty.version}</version>
     </dependency>
   </dependencies>
 </project>
