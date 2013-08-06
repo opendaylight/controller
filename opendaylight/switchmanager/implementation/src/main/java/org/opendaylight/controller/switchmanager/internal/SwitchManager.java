@@ -83,16 +83,14 @@ import org.slf4j.LoggerFactory;
  * instance per container of the network. All the node/nodeConnector properties
  * are maintained in the default container only.
  */
-public class SwitchManagerImpl implements ISwitchManager,
+public class SwitchManager implements ISwitchManager,
 IConfigurationContainerAware, IObjectReader,
 ICacheUpdateAware<Long, String>, IListenInventoryUpdates,
 CommandProvider {
-    private static Logger log = LoggerFactory
-            .getLogger(SwitchManagerImpl.class);
+    private static Logger log = LoggerFactory.getLogger(SwitchManager.class);
     private static String ROOT = GlobalConstants.STARTUPHOME.toString();
     private static final String SAVE = "Save";
-    private String subnetFileName = null, spanFileName = null,
-            switchConfigFileName = null;
+    private String subnetFileName, spanFileName, switchConfigFileName;
     private final List<NodeConnector> spanNodeConnectors = new CopyOnWriteArrayList<NodeConnector>();
     // set of Subnets keyed by the InetAddress
     private ConcurrentMap<InetAddress, Subnet> subnets;
@@ -104,37 +102,19 @@ CommandProvider {
     private ConcurrentMap<Node, Map<String, Property>> nodeProps;
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
     private ConcurrentMap<Node, Map<String, NodeConnector>> nodeConnectorNames;
+    private ConcurrentMap<String, Property> controllerProps;
     private IInventoryService inventoryService;
     private final Set<ISwitchManagerAware> switchManagerAware = Collections
             .synchronizedSet(new HashSet<ISwitchManagerAware>());
     private final Set<IInventoryListener> inventoryListeners = Collections
             .synchronizedSet(new HashSet<IInventoryListener>());
-    private final Set<ISpanAware> spanAware = Collections
-            .synchronizedSet(new HashSet<ISpanAware>());
-    private byte[] MAC;
+    private final Set<ISpanAware> spanAware = Collections.synchronizedSet(new HashSet<ISpanAware>());
     private static boolean hostRefresh = true;
     private int hostRetryCount = 5;
     private IClusterContainerServices clusterContainerService = null;
     private String containerName = null;
     private boolean isDefaultContainer = true;
     private static final int REPLACE_RETRY = 1;
-
-    public enum ReasonCode {
-        SUCCESS("Success"), FAILURE("Failure"), INVALID_CONF(
-                "Invalid Configuration"), EXIST("Entry Already Exist"), CONFLICT(
-                        "Configuration Conflict with Existing Entry");
-
-        private final String name;
-
-        private ReasonCode(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
 
     public void notifySubnetChange(Subnet sub, boolean add) {
         synchronized (switchManagerAware) {
@@ -149,8 +129,7 @@ CommandProvider {
         }
     }
 
-    public void notifySpanPortChange(Node node, List<NodeConnector> ports,
-            boolean add) {
+    public void notifySpanPortChange(Node node, List<NodeConnector> ports, boolean add) {
         synchronized (spanAware) {
             for (Object sa : spanAware) {
                 try {
@@ -177,11 +156,11 @@ CommandProvider {
     }
 
     public void startUp() {
+        String container = this.getContainerName();
         // Initialize configuration file names
-        subnetFileName = ROOT + "subnets_" + this.getContainerName() + ".conf";
-        spanFileName = ROOT + "spanPorts_" + this.getContainerName() + ".conf";
-        switchConfigFileName = ROOT + "switchConfig_" + this.getContainerName()
-                + ".conf";
+        subnetFileName = ROOT + "subnets_" + container + ".conf";
+        spanFileName = ROOT + "spanPorts_" + container + ".conf";
+        switchConfigFileName = ROOT + "switchConfig_" + container + ".conf";
 
         // Instantiate cluster synced variables
         allocateCaches();
@@ -201,7 +180,17 @@ CommandProvider {
             loadSwitchConfiguration();
         }
 
-        MAC = getHardwareMAC();
+        // Add controller MAC, if first node in the cluster
+        if (!controllerProps.containsKey(MacAddress.name)) {
+            byte controllerMac[] = getHardwareMAC();
+            if (controllerMac != null) {
+                Property existing = controllerProps.putIfAbsent(MacAddress.name, new MacAddress(controllerMac));
+                if (existing == null && log.isTraceEnabled()) {
+                    log.trace("Container {}: Setting controller MAC address in the cluster: {}", container,
+                            HexEncode.bytesToHexStringFormat(controllerMac));
+                }
+            }
+        }
     }
 
     public void shutDown() {
@@ -235,6 +224,9 @@ CommandProvider {
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
             clusterContainerService.createCache(
                     "switchmanager.nodeConnectorNames",
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+            clusterContainerService.createCache(
+                    "switchmanager.controllerProps",
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             log.error("\nCache configuration invalid - check cache mode");
@@ -297,6 +289,12 @@ CommandProvider {
         if (nodeConnectorNames == null) {
             log.error("\nFailed to get cache for nodeConnectorNames");
         }
+
+        controllerProps = (ConcurrentMap<String, Property>) clusterContainerService
+                .getCache("switchmanager.controllerProps");
+        if (controllerProps == null) {
+            log.error("\nFailed to get cache for controllerProps");
+        }
     }
 
     private void nonClusterObjectCreate() {
@@ -308,6 +306,7 @@ CommandProvider {
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
         nodeConnectorNames = new ConcurrentHashMap<Node, Map<String, NodeConnector>>();
+        controllerProps = new ConcurrentHashMap<String, Property>();
     }
 
     @Override
@@ -1233,30 +1232,38 @@ CommandProvider {
 
     private byte[] getHardwareMAC() {
         Enumeration<NetworkInterface> nis;
+        byte[] macAddress = null;
+
         try {
             nis = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException e1) {
-            log.error("",e1);
-            return null;
+        } catch (SocketException e) {
+            log.error("Failed to acquire controller MAC: ", e);
+            return macAddress;
         }
-        byte[] MAC = null;
-        for (; nis.hasMoreElements();) {
+
+        while (nis.hasMoreElements()) {
             NetworkInterface ni = nis.nextElement();
             try {
-                MAC = ni.getHardwareAddress();
+                macAddress = ni.getHardwareAddress();
             } catch (SocketException e) {
-                log.error("",e);
+                log.error("Failed to acquire controller MAC: ", e);
             }
-            if (MAC != null) {
-                return MAC;
+            if (macAddress != null) {
+                break;
             }
         }
-        return null;
+        if (macAddress == null) {
+            log.warn("Failed to acquire controller MAC: No physical interface found");
+            // This happens when running controller on windows VM, for example
+            // Try parsing the OS command output
+        }
+        return macAddress;
     }
 
     @Override
     public byte[] getControllerMAC() {
-        return MAC;
+        MacAddress macProperty = (MacAddress)controllerProps.get(MacAddress.name);
+        return (macProperty == null) ? null : macProperty.getMacAddress();
     }
 
     @Override

@@ -66,7 +66,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * Object
      */
     public Object[] getImplementations() {
-        Object[] res = { SwitchManagerImpl.class };
+        Object[] res = { SwitchManager.class };
         return res;
     }
 
@@ -84,7 +84,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * should not be the case though.
      */
     public void configureInstance(Component c, Object imp, String containerName) {
-        if (imp.equals(SwitchManagerImpl.class)) {
+        if (imp.equals(SwitchManager.class)) {
             Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
             Set<String> propSet = new HashSet<String>();
             propSet.add("switchmanager.configSaveEvent");

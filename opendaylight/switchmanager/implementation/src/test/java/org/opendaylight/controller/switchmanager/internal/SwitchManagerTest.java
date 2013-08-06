@@ -26,11 +26,11 @@ import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.switchmanager.SubnetConfig;
 
-public class SwitchManagerImplTest {
+public class SwitchManagerTest {
 
     @Test
     public void testSwitchManagerAddRemoveSubnet() {
-        SwitchManagerImpl switchmgr = new SwitchManagerImpl();
+        SwitchManager switchmgr = new SwitchManager();
         switchmgr.startUp();
 
         ArrayList<String> portList = new ArrayList<String>();
@@ -55,7 +55,7 @@ public class SwitchManagerImplTest {
 
     @Test
     public void testSwitchManagerNodeConnectors() {
-        SwitchManagerImpl switchmgr = new SwitchManagerImpl();
+        SwitchManager switchmgr = new SwitchManager();
         switchmgr.startUp();
 
         State state;
