@@ -611,7 +611,13 @@ public class frmTest {
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport source port"));
 
+        fc.setSrcPort("0");
+        Assert.assertTrue(fc.validate(null).isSuccess());
+
         fc.setSrcPort("0x00ff");
+        Assert.assertTrue(fc.validate(null).isSuccess());
+
+        fc.setSrcPort("0xffff");
         Assert.assertTrue(fc.validate(null).isSuccess());
 
         fc.setDstPort("-1");
@@ -624,7 +630,13 @@ public class frmTest {
         Assert.assertFalse(status.isSuccess());
         Assert.assertTrue(status.getDescription().contains("Transport destination port"));
 
+        fc.setDstPort("0");
+        Assert.assertTrue(fc.validate(null).isSuccess());
+
         fc.setDstPort("0x00ff");
+        Assert.assertTrue(fc.validate(null).isSuccess());
+
+        fc.setDstPort("0xffff");
         Assert.assertTrue(fc.validate(null).isSuccess());
 
         fc.setSrcMac("abc");

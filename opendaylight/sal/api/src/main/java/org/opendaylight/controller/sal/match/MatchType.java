@@ -34,8 +34,8 @@ public enum MatchType {
     NW_PROTO("nwProto", 1 << 9, Byte.class, 0, 0xff), // 1 byte
     NW_SRC("nwSrc", 1 << 10, InetAddress.class, 0, 0),
     NW_DST("nwDst", 1 << 11, InetAddress.class, 0, 0),
-    TP_SRC("tpSrc", 1 << 12, Short.class, 1, 0xffff), // 2 bytes
-    TP_DST("tpDst", 1 << 13, Short.class, 1, 0xffff); // 2 bytes
+    TP_SRC("tpSrc", 1 << 12, Short.class, 0, 0xffff), // 2 bytes
+    TP_DST("tpDst", 1 << 13, Short.class, 0, 0xffff); // 2 bytes
 
     // Used to indicate that no VLAN ID is set.
     public static final short DL_VLAN_NONE = (short) 0;

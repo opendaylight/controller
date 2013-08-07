@@ -715,13 +715,13 @@ one.f.flows = {
 			var $label = one.lib.form.label("Source Port");
 			var $input = one.lib.form.input("Source Port");
 			$input.attr('id', one.f.flows.id.modal.form.srcPort);
-			var $help = one.lib.form.help("Range: 1 - 65535");
+			var $help = one.lib.form.help("Range: 0 - 65535");
 			$fieldset.append($label).append($input).append($help);
 			// dstPort
 			var $label = one.lib.form.label("Destination Port");
 			var $input = one.lib.form.input("Destination Port");
 			$input.attr('id', one.f.flows.id.modal.form.dstPort);
-			var $help = one.lib.form.help("Range: 1 - 65535");
+			var $help = one.lib.form.help("Range: 0 - 65535");
 			$fieldset.append($label).append($input).append($help);
 			// protocol
 			var $label = one.lib.form.label("Protocol");

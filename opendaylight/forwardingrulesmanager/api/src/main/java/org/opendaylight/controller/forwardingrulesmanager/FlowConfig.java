@@ -647,7 +647,7 @@ public class FlowConfig implements Serializable {
 
     public boolean isTpPortValid(String tpPort) {
         int port = Integer.decode(tpPort);
-        return ((port > 0) && (port <= 0xffff));
+        return ((port >= 0) && (port <= 0xffff));
     }
 
     public boolean isTimeoutValid(String timeout) {
