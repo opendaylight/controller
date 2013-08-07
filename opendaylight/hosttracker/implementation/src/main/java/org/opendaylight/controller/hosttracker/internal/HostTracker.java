@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
+import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.hosttracker.IfHostListener;
@@ -79,7 +80,9 @@ import org.slf4j.LoggerFactory;
  */
 
 public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAware, IInventoryListener,
-        ITopologyManagerAware {
+        ITopologyManagerAware, ICacheUpdateAware<InetAddress, HostNodeConnector> {
+    static final String ACTIVE_HOST_CACHE = "hostTrackerAH";
+    static final String INACTIVE_HOST_CACHE = "hostTrackerIH";
     private static final Logger logger = LoggerFactory.getLogger(HostTracker.class);
     private IHostFinder hostFinder;
     private ConcurrentMap<InetAddress, HostNodeConnector> hostsDB;
@@ -173,9 +176,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         }
         logger.debug("Creating Cache for HostTracker");
         try {
-            this.clusterContainerService.createCache("hostTrackerAH",
+            this.clusterContainerService.createCache(ACTIVE_HOST_CACHE,
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
-            this.clusterContainerService.createCache("hostTrackerIH",
+            this.clusterContainerService.createCache(INACTIVE_HOST_CACHE,
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             logger.error("Cache couldn't be created for HostTracker -  check cache mode");
@@ -193,14 +196,14 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         }
         logger.debug("Retrieving cache for HostTrackerAH");
         hostsDB = (ConcurrentMap<InetAddress, HostNodeConnector>) this.clusterContainerService
-                .getCache("hostTrackerAH");
+                .getCache(ACTIVE_HOST_CACHE);
         if (hostsDB == null) {
             logger.error("Cache couldn't be retrieved for HostTracker");
         }
         logger.debug("Cache was successfully retrieved for HostTracker");
         logger.debug("Retrieving cache for HostTrackerIH");
         inactiveStaticHosts = (ConcurrentMap<NodeConnector, HostNodeConnector>) this.clusterContainerService
-                .getCache("hostTrackerIH");
+                .getCache(INACTIVE_HOST_CACHE);
         if (inactiveStaticHosts == null) {
             logger.error("Cache couldn't be retrieved for HostTrackerIH");
         }
@@ -401,7 +404,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         }
     }
 
-    private void ProcPendingARPReqs(InetAddress networkAddr) {
+    private void processPendingARPReqs(InetAddress networkAddr) {
         ARPPending arphost;
 
         for (int i = 0; i < ARPPendingList.size(); i++) {
@@ -469,7 +472,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         notifyHostLearnedOrRemoved(removedHost, false);
         notifyHostLearnedOrRemoved(newHost, true);
         if (!newHost.isStaticHost()) {
-            ProcPendingARPReqs(networkAddr);
+            processPendingARPReqs(networkAddr);
         }
     }
 
@@ -520,7 +523,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             }
 
             /* check if there is an outstanding request for this host */
-            ProcPendingARPReqs(networkAddr);
+            processPendingARPReqs(networkAddr);
             notifyHostLearnedOrRemoved(host, true);
         }
     }
@@ -1404,6 +1407,23 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     public void edgeUtilBackToNormal(Edge edge) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void entryCreated(InetAddress key, String cacheName,
+            boolean originLocal) {
+        if (originLocal) return;
+        processPendingARPReqs(key);
+    }
+
+    @Override
+    public void entryUpdated(InetAddress key, HostNodeConnector new_value,
+            String cacheName, boolean originLocal) {
+    }
+
+    @Override
+    public void entryDeleted(InetAddress key, String cacheName,
+            boolean originLocal) {
     }
 
 }
