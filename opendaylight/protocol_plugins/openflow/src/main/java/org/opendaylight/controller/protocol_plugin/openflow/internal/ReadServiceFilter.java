@@ -64,7 +64,8 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
     private ConcurrentMap<String, Set<Node>> containerToNode;
     private ConcurrentMap<String, Set<NodeTable>> containerToNt;
     private ConcurrentMap<String, Set<ContainerFlow>> containerFlows;
-    private ConcurrentMap<String, IReadFilterInternalListener> readFilterInternalListeners;
+    private ConcurrentMap<String, IReadFilterInternalListener> readFilterInternalListeners =
+        new ConcurrentHashMap<String, IReadFilterInternalListener>();
 
     public void setController(IController core) {
         this.controller = core;
@@ -119,7 +120,6 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
         containerToNt = new ConcurrentHashMap<String, Set<NodeTable>>();
         containerToNode = new ConcurrentHashMap<String, Set<Node>>();
         containerFlows = new ConcurrentHashMap<String, Set<ContainerFlow>>();
-        readFilterInternalListeners = new ConcurrentHashMap<String, IReadFilterInternalListener>();
     }
 
     /**
@@ -129,6 +129,7 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
      *
      */
     void destroy() {
+        readFilterInternalListeners.clear();
     }
 
     /**

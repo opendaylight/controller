@@ -131,7 +131,8 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
     private ConcurrentMap<FlowEntry, FlowEntry> inactiveFlows;
 
     private IContainer container;
-    private Set<IForwardingRulesManagerAware> frmAware;
+    private Set<IForwardingRulesManagerAware> frmAware =
+        Collections.synchronizedSet(new HashSet<IForwardingRulesManagerAware>());
     private PortGroupProvider portGroupProvider;
     private IFlowProgrammerService programmer;
     private IClusterContainerServices clusterContainerService = null;
@@ -2138,7 +2139,6 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
      *
      */
     void init() {
-        frmAware = Collections.synchronizedSet(new HashSet<IForwardingRulesManagerAware>());
         frmFileName = GlobalConstants.STARTUPHOME.toString() + "frm_staticflows_" + this.getContainerName() + ".conf";
         portGroupFileName = GlobalConstants.STARTUPHOME.toString() + "portgroup_" + this.getContainerName() + ".conf";
 
@@ -2207,6 +2207,7 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
      *
      */
     void destroy() {
+        frmAware.clear();
     }
 
     /**
