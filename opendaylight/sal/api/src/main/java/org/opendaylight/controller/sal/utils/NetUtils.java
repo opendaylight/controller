@@ -322,6 +322,19 @@ public abstract class NetUtils {
 
         return false;
     }
+    /**
+     * Returns true if the MAC address is a unicast MAC address and false
+     * otherwise.
+     *
+     * @param MACAddress
+     * @return
+     */
+    public static boolean isUnicastMACAddr(byte[] MACAddress) {
+        if (MACAddress.length == MACAddrLengthInBytes) {
+            return (MACAddress[0] & 1) == 0;
+        }
+        return false;
+    }
 
     /**
      * Returns true if the MAC address is a multicast MAC address and false

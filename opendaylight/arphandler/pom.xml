@@ -23,17 +23,22 @@
         <configuration>
           <instructions>
             <Import-Package>
+              org.opendaylight.controller.connectionmanager,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.topologymanager,
+              org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.hosttracker,
               org.opendaylight.controller.hosttracker.hostAware,
               org.apache.felix.dm,
               org.osgi.service.component,
               org.slf4j
             </Import-Package>
+            <Export-Package>
+              org.opendaylight.controller.arphandler
+            </Export-Package>
             <Bundle-Activator>
               org.opendaylight.controller.arphandler.internal.Activator
             </Bundle-Activator>
@@ -48,6 +53,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>switchmanager</artifactId>
       <version>0.5.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>connectionmanager</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
     </dependency>
      <dependency>
       <groupId>org.opendaylight.controller</groupId>
