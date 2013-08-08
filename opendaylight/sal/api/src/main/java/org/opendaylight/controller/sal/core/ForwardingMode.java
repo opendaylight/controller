@@ -13,7 +13,7 @@ public class ForwardingMode extends Property {
     private final int modeValue;
     public static final int REACTIVE_FORWARDING = 0;
     public static final int PROACTIVE_FORWARDING = 1;
-    public static final String name = "mode";
+    public static final String name = "forwarding";
 
     /*
      * Private constructor used for JAXB mapping

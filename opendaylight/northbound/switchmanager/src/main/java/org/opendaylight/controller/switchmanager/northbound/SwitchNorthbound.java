@@ -9,6 +9,7 @@
 package org.opendaylight.controller.switchmanager.northbound;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,6 @@ import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
@@ -45,7 +45,9 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
+import org.opendaylight.controller.switchmanager.SwitchConfig;
 
 /**
  * The class provides Northbound REST APIs to access the nodes, node connectors
@@ -121,6 +123,10 @@ public class SwitchNorthbound {
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Nodes getNodes(@PathParam("containerName") String containerName) {
 
+        if (!isValidContainer(containerName)) {
+            throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
+        }
+
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException(
@@ -155,7 +161,13 @@ public class SwitchNorthbound {
     }
 
     /**
-     * Add a Name/Tier property to a node
+     * Add a Name, Tier and Forwarding mode property to a node.
+     *
+     * <pre>
+     * Example Request:
+     *  http://localhost:8080/controller/nb/v2/switch/red/node/OF/00:00:00:00:00:03/property/description/Switch3
+     *  (Valid properties that can be configured are: description, forwarding(only for default container) and tier)
+     * </pre>
      *
      * @param containerName
      *            Name of the Container
@@ -181,7 +193,10 @@ public class SwitchNorthbound {
     @TypeHint(Response.class)
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
+            @ResponseCode(code = 400, condition = "The nodeId or configuration is invalid"),
+            @ResponseCode(code = 404, condition = "The Container Name or node or configuration name is not found"),
+            @ResponseCode(code = 406, condition = "The property cannot be configured in non-default container"),
+            @ResponseCode(code = 409, condition = "Unable to update configuration due to cluster conflict"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addNodeProperty(
             @PathParam("containerName") String containerName,
@@ -190,14 +205,15 @@ public class SwitchNorthbound {
             @PathParam("propName") String propName,
             @PathParam("propValue") String propValue) {
 
+        if (!isValidContainer(containerName)) {
+            throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
+        }
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.WRITE, this)) {
             throw new UnauthorizedException(
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
-        handleDefaultDisabled(containerName);
-
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
             throw new ServiceUnavailableException("Switch Manager "
@@ -206,19 +222,26 @@ public class SwitchNorthbound {
 
         handleNodeAvailability(containerName, nodeType, nodeId);
         Node node = Node.fromString(nodeType, nodeId);
-
         Property prop = switchManager.createProperty(propName, propValue);
         if (prop == null) {
-            throw new ResourceNotFoundException(
-                    RestMessages.INVALIDDATA.toString());
+            throw new ResourceNotFoundException("Property with name " + propName + " does not exist.");
         }
-
-        switchManager.setNodeProp(node, prop);
-        return Response.status(Response.Status.CREATED).build();
+        SwitchConfig switchConfig = switchManager.getSwitchConfig(node.toString());
+        Map<String, Property> nodeProperties = (switchConfig == null) ? new HashMap<String, Property>()
+                : new HashMap<String, Property>(switchConfig.getNodeProperties());
+        nodeProperties.put(prop.getName(), prop);
+        SwitchConfig newSwitchConfig = new SwitchConfig(node.toString(), nodeProperties);
+        Status status = switchManager.updateNodeConfig(newSwitchConfig);
+        return NorthboundUtils.getResponse(status);
     }
 
     /**
      * Delete a property of a node
+     *
+     * <pre>
+     * Example Request:
+     *  http://localhost:8080/controller/nb/v2/switch/default/node/OF/00:00:00:00:00:03/property/forwarding
+     * </pre>
      *
      * @param containerName
      *            Name of the Container
@@ -239,7 +262,9 @@ public class SwitchNorthbound {
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 400, condition = "The nodeId or configuration is invalid"),
             @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
+            @ResponseCode(code = 409, condition = "Unable to delete property due to cluster conflict"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response deleteNodeProperty(
             @PathParam("containerName") String containerName,
@@ -247,14 +272,15 @@ public class SwitchNorthbound {
             @PathParam("nodeId") String nodeId,
             @PathParam("propertyName") String propertyName) {
 
+        if (!isValidContainer(containerName)) {
+            throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
+        }
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.WRITE, this)) {
             throw new UnauthorizedException(
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
-        handleDefaultDisabled(containerName);
-
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
             throw new ServiceUnavailableException("Switch Manager "
@@ -263,11 +289,23 @@ public class SwitchNorthbound {
 
         handleNodeAvailability(containerName, nodeType, nodeId);
         Node node = Node.fromString(nodeType, nodeId);
-        Status ret = switchManager.removeNodeProp(node, propertyName);
-        if (ret.isSuccess()) {
-            return Response.ok().build();
+
+        SwitchConfig switchConfig = switchManager.getSwitchConfig(node.toString());
+        Status status;
+        if (switchConfig == null) {
+            status = new Status(StatusCode.NOTFOUND, "Switch Configuration does not exist");
+        } else {
+            Map<String, Property> nodeProperties = new HashMap<String, Property>(switchConfig.getNodeProperties());
+            if (!nodeProperties.containsKey(propertyName.toLowerCase())) {
+                String msg = "Property " + propertyName + " does not exist or not configured for switch " + nodeId;
+                status = new Status(StatusCode.NOTFOUND, msg);
+            } else {
+                nodeProperties.remove(propertyName.toLowerCase());
+                SwitchConfig newSwitchConfig = new SwitchConfig(node.toString(), nodeProperties);
+                status = switchManager.updateNodeConfig(newSwitchConfig);
+            }
         }
-        throw new ResourceNotFoundException(ret.getDescription());
+        return NorthboundUtils.getResponse(status);
     }
 
     /**
@@ -301,6 +339,9 @@ public class SwitchNorthbound {
             @PathParam("nodeType") String nodeType,
             @PathParam("nodeId") String nodeId) {
 
+        if (!isValidContainer(containerName)) {
+            throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
+        }
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.READ, this)) {
             throw new UnauthorizedException(
@@ -379,14 +420,15 @@ public class SwitchNorthbound {
             @PathParam("propName") String propName,
             @PathParam("propValue") String propValue) {
 
+        if (!isValidContainer(containerName)) {
+            throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
+        }
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.WRITE, this)) {
             throw new UnauthorizedException(
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
-
-        handleDefaultDisabled(containerName);
 
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
@@ -452,14 +494,15 @@ public class SwitchNorthbound {
             @PathParam("nodeConnectorId") String nodeConnectorId,
             @PathParam("propertyName") String propertyName) {
 
+        if (!isValidContainer(containerName)) {
+            throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
+        }
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.WRITE, this)) {
             throw new UnauthorizedException(
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
-
-        handleDefaultDisabled(containerName);
 
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
@@ -604,6 +647,9 @@ public class SwitchNorthbound {
     public Response saveSwitchConfig(
             @PathParam("containerName") String containerName) {
 
+        if (!isValidContainer(containerName)) {
+            throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
+        }
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.WRITE, this)) {
             throw new UnauthorizedException(
@@ -621,20 +667,6 @@ public class SwitchNorthbound {
             return Response.ok().build();
         }
         throw new InternalServerErrorException(ret.getDescription());
-    }
-
-    private void handleDefaultDisabled(String containerName) {
-        IContainerManager containerManager = (IContainerManager) ServiceHelper
-                .getGlobalInstance(IContainerManager.class, this);
-        if (containerManager == null) {
-            throw new InternalServerErrorException(
-                    RestMessages.INTERNALERROR.toString());
-        }
-        if (containerName.equals(GlobalConstants.DEFAULT.toString())
-                && containerManager.hasNonDefaultContainer()) {
-            throw new ResourceConflictException(
-                    RestMessages.DEFAULTDISABLED.toString());
-        }
     }
 
     private Node handleNodeAvailability(String containerName, String nodeType,
@@ -683,6 +715,22 @@ public class SwitchNorthbound {
             throw new ResourceNotFoundException(nc.toString() + " : "
                     + RestMessages.NORESOURCE.toString());
         }
+    }
+
+    private boolean isValidContainer(String containerName) {
+        if (containerName.equals(GlobalConstants.DEFAULT.toString())) {
+            return true;
+        }
+        IContainerManager containerManager = (IContainerManager) ServiceHelper
+                .getGlobalInstance(IContainerManager.class, this);
+        if (containerManager == null) {
+            throw new InternalServerErrorException(
+                    RestMessages.INTERNALERROR.toString());
+        }
+        if (containerManager.getContainerNames().contains(containerName)) {
+            return true;
+       }
+        return false;
     }
 
 }
