@@ -16,6 +16,7 @@
  */
 package org.opendaylight.controller.routing.dijkstra_implementation.internal;
 
+import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Edge;
@@ -24,19 +25,18 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Path;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.reader.IReadService;
 import org.opendaylight.controller.sal.routing.IListenRoutingUpdates;
-
 import org.opendaylight.controller.sal.routing.IRouting;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
-import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
+import org.opendaylight.controller.topologymanager.ITopologyManagerClusterWideAware;
 
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
+
 import java.lang.Exception;
 import java.lang.IllegalArgumentException;
 import java.util.HashSet;
@@ -47,23 +47,24 @@ import java.util.Set;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.collections15.Transformer;
 
-public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
-    private static Logger log = LoggerFactory
-            .getLogger(DijkstraImplementation.class);
+@SuppressWarnings("rawtypes")
+public class DijkstraImplementation implements IRouting, ITopologyManagerClusterWideAware {
+    private static Logger log = LoggerFactory.getLogger(DijkstraImplementation.class);
     private ConcurrentMap<Short, Graph<Node, Edge>> topologyBWAware;
     private ConcurrentMap<Short, DijkstraShortestPath<Node, Edge>> sptBWAware;
     DijkstraShortestPath<Node, Edge> mtp; // Max Throughput Path
     private Set<IListenRoutingUpdates> routingAware;
     private ISwitchManager switchManager;
     private ITopologyManager topologyManager;
-    private IReadService readService;
     private static final long DEFAULT_LINK_SPEED = Bandwidth.BW1Gbps;
+    private IClusterContainerServices clusterContainerService;
 
-    public void setListenRoutingUpdates(IListenRoutingUpdates i) {
+    public void setListenRoutingUpdates(final IListenRoutingUpdates i) {
         if (this.routingAware == null) {
             this.routingAware = new HashSet<IListenRoutingUpdates>();
         }
@@ -73,7 +74,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         }
     }
 
-    public void unsetListenRoutingUpdates(IListenRoutingUpdates i) {
+    public void unsetListenRoutingUpdates(final IListenRoutingUpdates i) {
         if (this.routingAware == null) {
             return;
         }
@@ -95,6 +96,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         Transformer<Edge, ? extends Number> mtTransformer = null;
         if (EdgeWeightMap == null) {
             mtTransformer = new Transformer<Edge, Double>() {
+                @Override
                 public Double transform(Edge e) {
                     if (switchManager == null) {
                         log.error("switchManager is null");
@@ -106,43 +108,39 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                         log.error("srcNC:{} or dstNC:{} is null", srcNC, dstNC);
                         return (double) -1;
                     }
-                    Bandwidth bwSrc = (Bandwidth) switchManager
-                            .getNodeConnectorProp(srcNC,
-                                    Bandwidth.BandwidthPropName);
-                    Bandwidth bwDst = (Bandwidth) switchManager
-                            .getNodeConnectorProp(dstNC,
-                                    Bandwidth.BandwidthPropName);
+                    Bandwidth bwSrc = (Bandwidth) switchManager.getNodeConnectorProp(srcNC,
+                            Bandwidth.BandwidthPropName);
+                    Bandwidth bwDst = (Bandwidth) switchManager.getNodeConnectorProp(dstNC,
+                            Bandwidth.BandwidthPropName);
 
                     long srcLinkSpeed = 0, dstLinkSpeed = 0;
-                    if ((bwSrc == null)
-                            || ((srcLinkSpeed = bwSrc.getValue()) == 0)) {
-                        log.debug(
-                                "srcNC: {} - Setting srcLinkSpeed to Default!",
-                                srcNC);
+                    if ((bwSrc == null) || ((srcLinkSpeed = bwSrc.getValue()) == 0)) {
+                        log.debug("srcNC: {} - Setting srcLinkSpeed to Default!", srcNC);
                         srcLinkSpeed = DEFAULT_LINK_SPEED;
                     }
 
-                    if ((bwDst == null)
-                            || ((dstLinkSpeed = bwDst.getValue()) == 0)) {
-                        log.debug(
-                                "dstNC: {} - Setting dstLinkSpeed to Default!",
-                                dstNC);
+                    if ((bwDst == null) || ((dstLinkSpeed = bwDst.getValue()) == 0)) {
+                        log.debug("dstNC: {} - Setting dstLinkSpeed to Default!", dstNC);
                         dstLinkSpeed = DEFAULT_LINK_SPEED;
                     }
 
-                    long avlSrcThruPut = srcLinkSpeed
-                            - readService.getTransmitRate(srcNC);
-                    long avlDstThruPut = dstLinkSpeed
-                            - readService.getTransmitRate(dstNC);
+                    // TODO: revisit the logic below with the real use case in
+                    // mind
+                    // For now we assume the throughput to be the speed of the
+                    // link itself
+                    // this kind of logic require information that should be
+                    // polled by statistic manager and are not yet available,
+                    // also this service at the moment is not used, so to be
+                    // revisited later on
+                    long avlSrcThruPut = srcLinkSpeed;
+                    long avlDstThruPut = dstLinkSpeed;
 
-                    // Use lower of the 2 available thruput as the available
-                    // thruput
-                    long avlThruPut = avlSrcThruPut < avlDstThruPut ? avlSrcThruPut
-                            : avlDstThruPut;
+                    // Use lower of the 2 available throughput as the available
+                    // throughput
+                    long avlThruPut = avlSrcThruPut < avlDstThruPut ? avlSrcThruPut : avlDstThruPut;
 
                     if (avlThruPut <= 0) {
-                        log.debug("Edge {}: Available Throughput {} <= 0!", e,
-                                avlThruPut);
+                        log.debug("Edge {}: Available Throughput {} <= 0!", e, avlThruPut);
                         return (double) -1;
                     }
                     return (double) (Bandwidth.BW1Pbps / avlThruPut);
@@ -150,6 +148,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
             };
         } else {
             mtTransformer = new Transformer<Edge, Number>() {
+                @Override
                 public Number transform(Edge e) {
                     return EdgeWeightMap.get(e);
                 }
@@ -166,8 +165,8 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
     }
 
     @Override
-    public Path getRoute(Node src, Node dst) {
-        if (src == null || dst == null) {
+    public Path getRoute(final Node src, final Node dst) {
+        if ((src == null) || (dst == null)) {
             return null;
         }
         return getRoute(src, dst, (short) 0);
@@ -198,10 +197,11 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
     }
 
     @Override
-    public synchronized Path getRoute(Node src, Node dst, Short Bw) {
+    public synchronized Path getRoute(final Node src, final Node dst, final Short Bw) {
         DijkstraShortestPath<Node, Edge> spt = this.sptBWAware.get(Bw);
-        if (spt == null)
+        if (spt == null) {
             return null;
+        }
         List<Edge> path;
         try {
             path = spt.getPath(src, dst);
@@ -238,8 +238,8 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private synchronized boolean updateTopo(Edge edge, Short bw, boolean added) {
+    @SuppressWarnings({ "unchecked" })
+    private synchronized boolean updateTopo(Edge edge, Short bw, UpdateType type) {
         Graph<Node, Edge> topo = this.topologyBWAware.get(bw);
         DijkstraShortestPath<Node, Edge> spt = this.sptBWAware.get(bw);
         boolean edgePresentInGraph = false;
@@ -262,7 +262,8 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                 this.sptBWAware.put(bw, spt);
             }
 
-            if (added) {
+            switch (type) {
+            case ADDED:
                 // Make sure the vertex are there before adding the edge
                 topo.addVertex(src.getNode());
                 topo.addVertex(dst.getNode());
@@ -270,37 +271,39 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                 edgePresentInGraph = topo.containsEdge(edge);
                 if (edgePresentInGraph == false) {
                     try {
-                        topo.addEdge(new Edge(src, dst), src.getNode(),
-                                dst.getNode(), EdgeType.DIRECTED);
-                    } catch (ConstructionException e) {
+                        topo.addEdge(new Edge(src, dst), src.getNode(), dst.getNode(), EdgeType.DIRECTED);
+                    } catch (final ConstructionException e) {
                         log.error("", e);
                         return edgePresentInGraph;
                     }
                 }
-            } else {
+            case CHANGED:
+                // Mainly raised only on properties update, so not really useful
+                // in this case
+                break;
+            case REMOVED:
                 // Remove the edge
                 try {
                     topo.removeEdge(new Edge(src, dst));
-                } catch (ConstructionException e) {
+                } catch (final ConstructionException e) {
                     log.error("", e);
                     return edgePresentInGraph;
                 }
 
                 // If the src and dst vertex don't have incoming or
                 // outgoing links we can get ride of them
-                if (topo.containsVertex(src.getNode())
-                        && topo.inDegree(src.getNode()) == 0
-                        && topo.outDegree(src.getNode()) == 0) {
+                if (topo.containsVertex(src.getNode()) && (topo.inDegree(src.getNode()) == 0)
+                        && (topo.outDegree(src.getNode()) == 0)) {
                     log.debug("Removing vertex {}", src);
                     topo.removeVertex(src.getNode());
                 }
 
-                if (topo.containsVertex(dst.getNode())
-                        && topo.inDegree(dst.getNode()) == 0
-                        && topo.outDegree(dst.getNode()) == 0) {
+                if (topo.containsVertex(dst.getNode()) && (topo.inDegree(dst.getNode()) == 0)
+                        && (topo.outDegree(dst.getNode()) == 0)) {
                     log.debug("Removing vertex {}", dst);
                     topo.removeVertex(dst.getNode());
                 }
+                break;
             }
             spt.reset();
             if (bw.equals(baseBW)) {
@@ -312,11 +315,13 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         return edgePresentInGraph;
     }
 
-    private boolean edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
+    private boolean edgeUpdate(Edge e, UpdateType type, Set<Property> props, boolean local) {
         String srcType = null;
         String dstType = null;
 
-        if (e == null || type == null) {
+        log.trace("Got an edgeUpdate: {} props: {} update type: {} local: {}", new Object[] { e, props, type, local });
+
+        if ((e == null) || (type == null)) {
             log.error("Edge or Update type are null!");
             return false;
         } else {
@@ -336,21 +341,17 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
 
         Bandwidth bw = new Bandwidth(0);
         boolean newEdge = false;
-        if (props != null)
+        if (props != null) {
             props.remove(bw);
-
-        if (log.isDebugEnabled()) {
-          log.debug("edgeUpdate: {} bw: {}", e, bw.getValue());
         }
 
         Short baseBW = Short.valueOf((short) 0);
-        boolean add = (type == UpdateType.ADDED) ? true : false;
         // Update base topo
-        newEdge = !updateTopo(e, baseBW, add);
+        newEdge = !updateTopo(e, baseBW, type);
         if (newEdge == true) {
             if (bw.getValue() != baseBW) {
                 // Update BW topo
-                updateTopo(e, (short) bw.getValue(), add);
+                updateTopo(e, (short) bw.getValue(), type);
             }
         }
         return newEdge;
@@ -358,16 +359,30 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
 
     @Override
     public void edgeUpdate(List<TopoEdgeUpdate> topoedgeupdateList) {
+        log.trace("Start of a Bulk EdgeUpdate with " + topoedgeupdateList.size() + " elements");
         boolean callListeners = false;
         for (int i = 0; i < topoedgeupdateList.size(); i++) {
             Edge e = topoedgeupdateList.get(i).getEdge();
-            Set<Property> p = topoedgeupdateList.get(i).getProperty();
-            UpdateType type = topoedgeupdateList.get(i).getUpdateType();
-            if ((edgeUpdate(e, type, p)) && (!callListeners)) {
+            Set<Property> p = topoedgeupdateList.get(i)
+                    .getProperty();
+            UpdateType type = topoedgeupdateList.get(i)
+                    .getUpdateType();
+            boolean isLocal = topoedgeupdateList.get(i)
+                    .isLocal();
+            if ((edgeUpdate(e, type, p, isLocal)) && (!callListeners)) {
                 callListeners = true;
             }
         }
-        if ((callListeners) && (this.routingAware != null)) {
+
+        // The routing listeners should only be called on the coordinator, to
+        // avoid multiple controller cluster nodes to actually do the
+        // recalculation when only one need to react
+        boolean amICoordinator = true;
+        if (this.clusterContainerService != null) {
+            amICoordinator = this.clusterContainerService.amICoordinator();
+        }
+        if ((callListeners) && (this.routingAware != null) && amICoordinator) {
+            log.trace("Calling the routing listeners");
             for (IListenRoutingUpdates ra : this.routingAware) {
                 try {
                     ra.recalculateDone();
@@ -376,6 +391,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
                 }
             }
         }
+        log.trace("End of a Bulk EdgeUpdate");
     }
 
     /**
@@ -386,8 +402,8 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void init() {
         log.debug("Routing init() is called");
-        this.topologyBWAware = (ConcurrentMap<Short, Graph<Node, Edge>>) new ConcurrentHashMap();
-        this.sptBWAware = (ConcurrentMap<Short, DijkstraShortestPath<Node, Edge>>) new ConcurrentHashMap();
+        this.topologyBWAware = new ConcurrentHashMap<Short, Graph<Node, Edge>>();
+        this.sptBWAware = new ConcurrentHashMap<Short, DijkstraShortestPath<Node, Edge>>();
         // Now create the default topology, which doesn't consider the
         // BW, also create the corresponding Dijkstra calculation
         Graph<Node, Edge> g = new SparseMultigraph();
@@ -443,18 +459,6 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         log.debug("Routing stop() is called");
     }
 
-    @Override
-    public void edgeOverUtilized(Edge edge) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void edgeUtilBackToNormal(Edge edge) {
-        // TODO Auto-generated method stub
-
-    }
-
     public void setSwitchManager(ISwitchManager switchManager) {
         this.switchManager = switchManager;
     }
@@ -462,16 +466,6 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
     public void unsetSwitchManager(ISwitchManager switchManager) {
         if (this.switchManager == switchManager) {
             this.switchManager = null;
-        }
-    }
-
-    public void setReadService(IReadService readService) {
-        this.readService = readService;
-    }
-
-    public void unsetReadService(IReadService readService) {
-        if (this.readService == readService) {
-            this.readService = null;
         }
     }
 
@@ -483,5 +477,29 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerAware {
         if (this.topologyManager == tm) {
             this.topologyManager = null;
         }
+    }
+
+    void setClusterContainerService(IClusterContainerServices s) {
+        log.debug("Cluster Service set");
+        this.clusterContainerService = s;
+    }
+
+    void unsetClusterContainerService(IClusterContainerServices s) {
+        if (this.clusterContainerService == s) {
+            log.debug("Cluster Service removed!");
+            this.clusterContainerService = null;
+        }
+    }
+
+    @Override
+    public void edgeOverUtilized(Edge edge) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void edgeUtilBackToNormal(Edge edge) {
+        // TODO Auto-generated method stub
+
     }
 }
