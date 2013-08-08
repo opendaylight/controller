@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @SuppressWarnings("serial")
 public class Description extends Property {
     @XmlElement
-    private String description;
+    private String descriptionValue;
     public static final String propertyName = "description";
 
     /*
@@ -18,20 +18,20 @@ public class Description extends Property {
      */
     private Description() {
         super(propertyName);
-        this.description = null;
+        this.descriptionValue = null;
     }
 
     public Description(String description) {
         super(propertyName);
-        this.description = description;
+        this.descriptionValue = description;
     }
 
     public Description clone() {
-        return new Description(this.description);
+        return new Description(this.descriptionValue);
     }
 
     public String getValue() {
-        return this.description;
+        return this.descriptionValue;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class Description extends Property {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result
-                + ((description == null) ? 0 : description.hashCode());
+                + ((descriptionValue == null) ? 0 : descriptionValue.hashCode());
         return result;
     }
 
@@ -52,16 +52,16 @@ public class Description extends Property {
         if (getClass() != obj.getClass())
             return false;
         Description other = (Description) obj;
-        if (description == null) {
-            if (other.description != null)
+        if (descriptionValue == null) {
+            if (other.descriptionValue != null)
                 return false;
-        } else if (!description.equals(other.description))
+        } else if (!descriptionValue.equals(other.descriptionValue))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "Description[" + description + "]";
+        return "Description[" + descriptionValue + "]";
     }
 }

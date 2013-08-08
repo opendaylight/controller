@@ -486,39 +486,12 @@ public class NorthboundIT {
         testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_3, ncType, nodeId_3, nodeType, ncState,
                 ncCapabilities, ncBandwidth);
 
-        // Test delete node property
-        // Delete timestamp property from node1
-        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1 + "/property/timeStamp", "DELETE");
-        Assert.assertEquals(200, httpResponseCode.intValue());
-
-        // Check node1
-        result = getJsonResult(baseURL + "nodes");
-        jt = new JSONTokener(result);
-        json = new JSONObject(jt);
-        node = getJsonInstance(json, "nodeProperties", nodeId_1);
-        Assert.assertNotNull(node);
-        testNodeProperties(node, nodeId_1, nodeType, null, null, actionsValue_1, capabilitiesValue_1, tablesValue_1,
-                buffersValue_1);
-
-        // Delete actions property from node2
-        result = getJsonResult(baseURL + "node/STUB/" + nodeId_2 + "/property/actions", "DELETE");
-        Assert.assertEquals(200, httpResponseCode.intValue());
-
-        // Check node2
-        result = getJsonResult(baseURL + "nodes");
-        jt = new JSONTokener(result);
-        json = new JSONObject(jt);
-        node = getJsonInstance(json, "nodeProperties", nodeId_2);
-        Assert.assertNotNull(node);
-        testNodeProperties(node, nodeId_2, nodeType, timestamp_1, timestampName_1, null, capabilitiesValue_1,
-                tablesValue_1, buffersValue_1);
-
         // Test add property to node
-        // Add Tier and Bandwidth property to node1
+        // Add Tier and Description property to node1
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1 + "/property/tier/1001", "PUT");
-        Assert.assertEquals(201, httpResponseCode.intValue());
-        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1 + "/property/bandwidth/1002", "PUT");
-        Assert.assertEquals(201, httpResponseCode.intValue());
+        Assert.assertEquals(200, httpResponseCode.intValue());
+        result = getJsonResult(baseURL + "node/STUB/" + nodeId_1 + "/property/description/node1", "PUT");
+        Assert.assertEquals(200, httpResponseCode.intValue());
 
         // Test for first node
         result = getJsonResult(baseURL + "nodes");
@@ -527,7 +500,7 @@ public class NorthboundIT {
         node = getJsonInstance(json, "nodeProperties", nodeId_1);
         Assert.assertNotNull(node);
         Assert.assertEquals(1001, node.getJSONObject("properties").getJSONObject("tier").getInt("tierValue"));
-        Assert.assertEquals(1002, node.getJSONObject("properties").getJSONObject("bandwidth").getInt("bandwidthValue"));
+        Assert.assertEquals("node1", node.getJSONObject("properties").getJSONObject("description").getString("descriptionValue"));
 
         // Test delete nodeConnector property
         // Delete state property of nodeconnector1

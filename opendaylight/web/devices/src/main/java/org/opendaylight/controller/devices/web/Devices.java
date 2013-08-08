@@ -116,7 +116,14 @@ public class Devices implements IDaylightWeb {
                 nodeDatum.put("tierName", TierHelper.getTierName(tierNumber) + " (Tier-" + tierNumber + ")");
                 nodeDatum.put("tier", tierNumber + "");
                 String modeStr = "0";
-                ForwardingMode mode = (ForwardingMode) switchManager.getNodeProp(node, ForwardingMode.name);
+                ForwardingMode mode = null;
+                if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                    ISwitchManager switchManagerDefault = (ISwitchManager) ServiceHelper.getInstance(
+                            ISwitchManager.class, GlobalConstants.DEFAULT.toString(), this);
+                    mode = (ForwardingMode) switchManagerDefault.getNodeProp(node, ForwardingMode.name);
+                } else {
+                    mode = (ForwardingMode) switchManager.getNodeProp(node, ForwardingMode.name);
+                }
                 if (mode != null) {
                     modeStr = String.valueOf(mode.getValue());
                 }

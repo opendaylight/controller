@@ -21,9 +21,9 @@ import org.opendaylight.controller.sal.utils.Status;
 public interface IContainerManager {
 
     /**
-     * Returns a list of Containers that currently exist.
+     * Returns true if there are any non-default Containers present.
      *
-     * @return  array of String Container names
+     * @return  true, if any non-default container is present, else false
      */
     public boolean hasNonDefaultContainer();
 
