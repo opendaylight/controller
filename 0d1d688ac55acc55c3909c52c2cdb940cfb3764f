@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+YQ\u003d",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-08T15:05:54Z",
+      "side": 1,
+      "message": "Same here, either lazy initialization for all, or we should create a default constructor and have everything initialized there.",
+      "revId": "0d1d688ac55acc55c3909c52c2cdb940cfb3764f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+YY\u003d",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2210,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-08T15:05:54Z",
+      "side": 1,
+      "message": "Please check this does not cause cache exception  on container destroy. Cluster mgr sometimes destroy the cluster caches before the component\u0027s destroy() is invoked.",
+      "revId": "0d1d688ac55acc55c3909c52c2cdb940cfb3764f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+YU\u003d",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/OFStatisticsManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-08T15:05:54Z",
+      "side": 1,
+      "message": "I would follow same convention/style followed in each file. If here all initializations done in default constructor, I would follow the same approach for this field instead of lazy initialization.\n\nI feel having the same convention makes readability and debugging easier.",
+      "revId": "0d1d688ac55acc55c3909c52c2cdb940cfb3764f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
