@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAE3//+YA\u003d",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-08-08T15:18:29Z",
+      "side": 1,
+      "message": "Actually i have no real preference between one or the other approach, but seems like that lazy approach has actually the advantage of delaying the allocation of it when needed. For this variable for example if there was no frmAware ever registered then this would never be built ...",
+      "parentUuid": "AAAAE3//+YQ\u003d",
+      "revId": "0d1d688ac55acc55c3909c52c2cdb940cfb3764f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAE3//+YY\u003d",
         "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-08-08T15:05:54Z",
       "side": 1,
       "message": "Please check this does not cause cache exception  on container destroy. Cluster mgr sometimes destroy the cluster caches before the component\u0027s destroy() is invoked.",
+      "revId": "0d1d688ac55acc55c3909c52c2cdb940cfb3764f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+YE\u003d",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2210,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-08-08T15:18:29Z",
+      "side": 1,
+      "message": "This is not an issue because the data are instance variables and not clustered caches",
+      "parentUuid": "AAAAE3//+YY\u003d",
       "revId": "0d1d688ac55acc55c3909c52c2cdb940cfb3764f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
