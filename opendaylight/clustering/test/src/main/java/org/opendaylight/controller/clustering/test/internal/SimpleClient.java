@@ -151,7 +151,7 @@ public class SimpleClient implements CommandProvider {
                 .getILoggerFactory();
         if (lc != null) {
             for (ch.qos.logback.classic.Logger l : lc.getLoggerList()) {
-                if (loggerName == null || l.getName().startsWith(loggerName)) {
+                if ((loggerName == null) || l.getName().startsWith(loggerName)) {
                     ci.println(retrieveLogLevel(l));
                 }
             }
@@ -382,6 +382,7 @@ public class SimpleClient implements CommandProvider {
             ci.println("Cache not supplied");
             return;
         }
+        int count = 0;
         c = (ConcurrentMap<Object, Object>) this.icluster.getCache(containerName, cacheName);
         if (c != null) {
             for (Map.Entry<Object, Object> e : c.entrySet()) {
@@ -394,7 +395,9 @@ public class SimpleClient implements CommandProvider {
                 ci.println("Element " + entry.getKey() + "(hashCode="
                         + entry.getKey().hashCode() + ") has value = (" + res
                         + ")");
+                count++;
             }
+            ci.println("Dumped " + count + " records");
         } else {
             ci.println("Cache " + cacheName + " on container " + containerName
                     + " not existant!");

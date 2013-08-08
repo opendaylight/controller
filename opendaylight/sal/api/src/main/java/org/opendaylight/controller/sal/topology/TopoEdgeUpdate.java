@@ -17,16 +17,29 @@ import org.opendaylight.controller.sal.core.UpdateType;
 /**
  * The class represents an Edge, the Edge's Property Set and its UpdateType.
  */
-
 public class TopoEdgeUpdate {
     private Edge edge;
     private Set<Property> props;
     private UpdateType type;
+    private boolean isLocal;
 
+    /**
+     * Constructor for a topology element update. A TopologyElementUpdate is an
+     * object that summarize what has happened on an Edge and if the update is
+     * generated locally to this controller or no
+     *
+     * @param e
+     *            Edge being updated
+     * @param p
+     *            Set of Properties attached to the edge
+     * @param t
+     *            Type of update
+     */
     public TopoEdgeUpdate(Edge e, Set<Property> p, UpdateType t) {
         edge = e;
         props = p;
         type = t;
+        setLocal(true);
     }
 
     public Edge getEdge() {
@@ -45,39 +58,46 @@ public class TopoEdgeUpdate {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((edge == null) ? 0 : edge.hashCode());
-        result = prime * result + ((props == null) ? 0 : props.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = (prime * result) + ((edge == null) ? 0 : edge.hashCode());
+        result = (prime * result) + ((type == null) ? 0 : type.hashCode());
         return result;
     }
 
     @Override
     public String toString() {
-        return "TopoEdgeUpdate [edge=" + edge + ", props=" + props + ", type="
-                + type + "]";
+        return "TopoEdgeUpdate [edge=" + edge + ", props=" + props + ", type=" + type + ", isLocal=" + isLocal + "]";
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         TopoEdgeUpdate other = (TopoEdgeUpdate) obj;
         if (edge == null) {
-            if (other.edge != null)
+            if (other.edge != null) {
                 return false;
-        } else if (!edge.equals(other.edge))
+            }
+        } else if (!edge.equals(other.edge)) {
             return false;
-        if (props == null) {
-            if (other.props != null)
-                return false;
-        } else if (!props.equals(other.props))
+        }
+        if (type != other.type) {
             return false;
-        if (type != other.type)
-            return false;
+        }
         return true;
+    }
+
+    public boolean isLocal() {
+        return isLocal;
+    }
+
+    public void setLocal(boolean isLocal) {
+        this.isLocal = isLocal;
     }
 }
