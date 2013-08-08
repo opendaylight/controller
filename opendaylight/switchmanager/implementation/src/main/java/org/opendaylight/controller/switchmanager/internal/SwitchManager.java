@@ -92,7 +92,7 @@ CommandProvider {
     private static final String SAVE = "Save";
     private String subnetFileName, spanFileName, switchConfigFileName;
     private final List<NodeConnector> spanNodeConnectors = new CopyOnWriteArrayList<NodeConnector>();
-    // set of Subnets keyed by the InetAddress
+    // Collection of Subnets keyed by the InetAddress
     private ConcurrentMap<InetAddress, Subnet> subnets;
     private ConcurrentMap<String, SubnetConfig> subnetsConfigList;
     private ConcurrentMap<SpanConfig, SpanConfig> spanConfigList;
@@ -401,19 +401,21 @@ CommandProvider {
                 Set<NodeConnector> sp = conf.getSubnetNodeConnectors();
                 subnet.addNodeConnectors(sp);
             }
-            boolean result = false;
+            boolean putNewSubnet = false;
             if(subnetCurr == null) {
                 if(subnets.putIfAbsent(conf.getIPnum(), subnet) == null) {
-                    result = true;
+                    putNewSubnet = true;
                 }
             } else {
-                result = subnets.replace(conf.getIPnum(), subnetCurr, subnet);
+                putNewSubnet = subnets.replace(conf.getIPnum(), subnetCurr, subnet);
             }
-            if(!result) {
+            if(!putNewSubnet) {
                 String msg = "Cluster conflict: Conflict while adding the subnet " + conf.getIPnum();
                 return new Status(StatusCode.CONFLICT, msg);
             }
-        } else { // This is the deletion of the whole subnet
+
+        // Subnet removal case
+        } else {
             subnets.remove(conf.getIPnum());
         }
         return new Status(StatusCode.SUCCESS);
@@ -435,7 +437,7 @@ CommandProvider {
         return new Status(StatusCode.SUCCESS);
     }
 
-    private Status addRemoveSubnet(SubnetConfig conf, boolean add) {
+    private Status addRemoveSubnet(SubnetConfig conf, boolean isAdding) {
         // Valid config check
         if (!conf.isValidConfig()) {
             String msg = "Invalid Subnet configuration";
@@ -443,13 +445,13 @@ CommandProvider {
             return new Status(StatusCode.BADREQUEST, msg);
         }
 
-        if (add) {
+        if (isAdding) {
             // Presence check
             if (subnetsConfigList.containsKey(conf.getName())) {
                 return new Status(StatusCode.CONFLICT,
-                        "Same subnet config already exists");
+                        "Subnet with the specified name already configured.");
             }
-            // Semantyc check
+            // Semantic check
             Status rc = semanticCheck(conf);
             if (!rc.isSuccess()) {
                 return rc;
@@ -457,13 +459,13 @@ CommandProvider {
         }
 
         // Update Database
-        Status rc = updateDatabase(conf, add);
+        Status rc = updateDatabase(conf, isAdding);
 
         if (rc.isSuccess()) {
             // Update Configuration
-            rc = updateConfig(conf, add);
+            rc = updateConfig(conf, isAdding);
             if(!rc.isSuccess()) {
-                updateDatabase(conf, (!add));
+                updateDatabase(conf, (!isAdding));
             }
         }
 
@@ -512,8 +514,8 @@ CommandProvider {
         Subnet sub = subCurr.clone();
         Set<NodeConnector> sp = confCurr.getNodeConnectors(switchPorts);
         sub.addNodeConnectors(sp);
-        boolean subnetsReplace = subnets.replace(confCurr.getIPnum(), subCurr, sub);
-        if (!subnetsReplace) {
+        boolean subnetsReplaced = subnets.replace(confCurr.getIPnum(), subCurr, sub);
+        if (!subnetsReplaced) {
             String msg = "Cluster conflict: Conflict while adding ports to the subnet " + name;
             return new Status(StatusCode.CONFLICT, msg);
         }
@@ -521,8 +523,8 @@ CommandProvider {
         // Update Configuration
         SubnetConfig conf = confCurr.clone();
         conf.addNodeConnectors(switchPorts);
-        boolean result = subnetsConfigList.replace(name, confCurr, conf);
-        if (!result) {
+        boolean configReplaced = subnetsConfigList.replace(name, confCurr, conf);
+        if (!configReplaced) {
             // TODO: recovery using Transactionality
             String msg = "Cluster conflict: Conflict while adding ports to the subnet " + name;
             return new Status(StatusCode.CONFLICT, msg);

@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.subnets.northbound;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -159,7 +157,7 @@ public class SubnetsNorthboundJAXRS {
             throw new ResourceNotFoundException(RestMessages.NOCONTAINER.toString());
         }
 
-        SubnetConfig cfgObject = new SubnetConfig(subnetName, subnet, new ArrayList<String>(0));
+        SubnetConfig cfgObject = new SubnetConfig(subnetName, subnet, new HashSet<String>(0));
         Status status = switchManager.addSubnet(cfgObject);
         if (status.isSuccess()) {
             return Response.status(Response.Status.CREATED).build();
@@ -387,7 +385,7 @@ public class SubnetsNorthboundJAXRS {
         } else {
             Status st;
             boolean successful = true;
-            List<String> ports = subnetConf.getNodePorts();
+            Set<String> ports = subnetConf.getNodePorts();
 
             if (action.equals("add")) {
                 // add new ports

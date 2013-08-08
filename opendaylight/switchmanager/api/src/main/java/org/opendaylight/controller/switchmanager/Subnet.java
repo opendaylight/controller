@@ -56,12 +56,8 @@ public class Subnet implements Cloneable, Serializable {
      * @param sp Set of NodeConnectors to add to the subnet
      */
     public void addNodeConnectors(Set<NodeConnector> sp) {
-        if (sp == null) {
-            return;
-        }
-
-        for (NodeConnector p : sp) {
-            this.nodeConnectors.add(p);
+        if (sp != null) {
+            this.nodeConnectors.addAll(sp);
         }
     }
 

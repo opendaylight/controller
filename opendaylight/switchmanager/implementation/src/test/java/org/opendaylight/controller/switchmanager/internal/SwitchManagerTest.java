@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.switchmanager.internal;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,7 +32,7 @@ public class SwitchManagerTest {
         SwitchManager switchmgr = new SwitchManager();
         switchmgr.startUp();
 
-        ArrayList<String> portList = new ArrayList<String>();
+        Set<String> portList = new HashSet<String>();
         portList.add("1/1");
         portList.add("1/2");
         portList.add("1/3");

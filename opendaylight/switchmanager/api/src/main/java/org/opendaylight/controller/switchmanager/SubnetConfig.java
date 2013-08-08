@@ -48,13 +48,13 @@ public class SubnetConfig implements Cloneable, Serializable {
     private String subnet; // A.B.C.D/MM  Where A.B.C.D is the Default
                            // Gateway IP (L3) or ARP Querier IP (L2
     @XmlElement
-    private List<String> nodePorts; // datapath ID/port list:
+    private Set<String> nodePorts; // datapath ID/port list:
                                     // xx:xx:xx:xx:xx:xx:xx:xx/a,b,c-m,r-t,y
 
     public SubnetConfig() {
     }
 
-    public SubnetConfig(String desc, String sub, List<String> sp) {
+    public SubnetConfig(String desc, String sub, Set<String> sp) {
         name = desc;
         subnet = sub;
         nodePorts = sp;
@@ -63,14 +63,14 @@ public class SubnetConfig implements Cloneable, Serializable {
     public SubnetConfig(SubnetConfig subnetConfig) {
         name = subnetConfig.name;
         subnet = subnetConfig.subnet;
-        nodePorts = new ArrayList<String>(subnetConfig.nodePorts);
+        nodePorts = new HashSet<String>(subnetConfig.nodePorts);
     }
 
     public String getName() {
         return name;
     }
 
-    public List<String> getNodePorts() {
+    public Set<String> getNodePorts() {
         return nodePorts;
     }
 
