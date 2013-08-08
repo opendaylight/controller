@@ -170,13 +170,25 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
         // Retrieve current statistics so we don't have to wait for next refresh
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(
                 ISwitchManager.class, container.getName(), this);
-        if (reader != null && switchManager != null) {
+        if ((reader != null) && (switchManager != null)) {
             Set<Node> nodeSet = switchManager.getNodes();
             for (Node node : nodeSet) {
-                flowStatistics.put(node, reader.readAllFlows(node));
-                descriptionStatistics.put(node, reader.readDescription(node));
-                tableStatistics.put(node, reader.readNodeTable(node));
-                nodeConnectorStatistics.put(node, reader.readNodeConnectors(node));
+                List<FlowOnNode> flows = reader.readAllFlows(node);
+                if (flows != null) {
+                    flowStatistics.put(node, flows);
+                }
+                NodeDescription descr = reader.readDescription(node);
+                if (descr != null) {
+                    descriptionStatistics.put(node, descr);
+                }
+                List<NodeTableStatistics> tableStats = reader.readNodeTable(node);
+                if (tableStats != null) {
+                    tableStatistics.put(node, tableStats);
+                }
+                List<NodeConnectorStatistics> ncStats = reader.readNodeConnectors(node);
+                if (ncStats != null) {
+                    nodeConnectorStatistics.put(node, ncStats);
+                }
             }
 
         } else {
