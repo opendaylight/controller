@@ -98,7 +98,7 @@ IInventoryShimExternalListener, CommandProvider {
     private ConcurrentMap<Long, Boolean> switchSupportsVendorExtStats;
     // Per port sampled (every portStatsPeriod) transmit rate
     private Map<Long, Map<Short, TxRates>> txRates;
-    private Set<IOFStatisticsListener> statisticsListeners;
+    private Set<IOFStatisticsListener> statisticsListeners = new CopyOnWriteArraySet<IOFStatisticsListener>();
 
     /**
      * The object containing the latest factoredSamples tx rate samples for a
@@ -198,7 +198,6 @@ IInventoryShimExternalListener, CommandProvider {
         switchPortStatsUpdated = new LinkedBlockingQueue<Long>(INITIAL_SIZE);
         switchSupportsVendorExtStats = new ConcurrentHashMap<Long, Boolean>(INITIAL_SIZE);
         txRates = new HashMap<Long, Map<Short, TxRates>>(INITIAL_SIZE);
-        statisticsListeners = new CopyOnWriteArraySet<IOFStatisticsListener>();
 
         configStatsPollIntervals();
 
@@ -252,6 +251,7 @@ IInventoryShimExternalListener, CommandProvider {
      *
      */
     void destroy() {
+        statisticsListeners.clear();
     }
 
     /**

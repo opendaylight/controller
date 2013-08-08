@@ -39,7 +39,7 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
     private static final Logger logger = LoggerFactory
             .getLogger(ReadService.class);
     private IReadServiceFilter filter;
-    private Set<IPluginOutReadService> pluginOutReadServices;
+    private Set<IPluginOutReadService> pluginOutReadServices = new CopyOnWriteArraySet<IPluginOutReadService>();
     private String containerName;
     private IPluginOutConnectionService connectionOutService;
 
@@ -51,9 +51,7 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
     @SuppressWarnings("unchecked")
     void init(Component c) {
         Dictionary<Object, Object> props = c.getServiceProperties();
-        containerName = (props != null) ? (String) props.get("containerName")
-                : null;
-        pluginOutReadServices = new CopyOnWriteArraySet<IPluginOutReadService>();
+        containerName = (props != null) ? (String) props.get("containerName") : null;
     }
 
     /**
@@ -63,6 +61,7 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
      *
      */
     void destroy() {
+        pluginOutReadServices.clear();
     }
 
     /**

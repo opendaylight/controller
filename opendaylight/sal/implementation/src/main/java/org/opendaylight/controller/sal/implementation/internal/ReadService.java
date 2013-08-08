@@ -59,8 +59,10 @@ import org.slf4j.LoggerFactory;
 public class ReadService implements IReadService, CommandProvider, IPluginOutReadService {
 
     protected static final Logger logger = LoggerFactory.getLogger(ReadService.class);
-    private ConcurrentHashMap<String, IPluginInReadService> pluginReader;
-    private Set<IReadServiceListener> readerListeners;
+    private ConcurrentHashMap<String, IPluginInReadService> pluginReader =
+        new ConcurrentHashMap<String, IPluginInReadService>();
+    private Set<IReadServiceListener> readerListeners =
+        new CopyOnWriteArraySet<IReadServiceListener>();
 
     /**
      * Function called by the dependency manager when all the required
@@ -68,8 +70,6 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
      *
      */
     void init() {
-        pluginReader = new ConcurrentHashMap<String, IPluginInReadService>();
-        readerListeners = new CopyOnWriteArraySet<IReadServiceListener>();
     }
 
     /**
@@ -82,6 +82,7 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
         // In case of plugin disactivating make sure we clear the
         // dependencies
         this.pluginReader.clear();
+        this.readerListeners.clear();
     }
 
     /**
