@@ -26,16 +26,20 @@ public class LogListenerImpl implements LogListener {
         if (this.logger != null) {
             switch (entry.getLevel()) {
             case LogService.LOG_DEBUG:
-                this.logger.debug(entry.getMessage());
+                this.logger.debug("Bundle:{} Message:{} Exception:{}", entry.getBundle()
+                        .getSymbolicName(), entry.getMessage(), entry.getException());
                 break;
             case LogService.LOG_INFO:
-                this.logger.info(entry.getMessage());
+                this.logger.info("Bundle:{} Message:{} Exception:{}", entry.getBundle()
+                        .getSymbolicName(), entry.getMessage(), entry.getException());
                 break;
             case LogService.LOG_WARNING:
-                this.logger.warn(entry.getMessage());
+                this.logger.warn("Bundle:{} Message:{} Exception:{}", entry.getBundle()
+                        .getSymbolicName(), entry.getMessage(), entry.getException());
                 break;
             case LogService.LOG_ERROR:
-                this.logger.error(entry.getMessage());
+                this.logger.error("Bundle:{} Message:{} Exception:{}", entry.getBundle()
+                        .getSymbolicName(), entry.getMessage(), entry.getException());
                 break;
             }
         }
