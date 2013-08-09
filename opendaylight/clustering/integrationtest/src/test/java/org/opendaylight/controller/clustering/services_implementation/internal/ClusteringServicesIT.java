@@ -362,6 +362,25 @@ public class ClusteringServicesIT {
             assertTrue(up.value.equals("baz"));
             assertTrue(up.cacheName.equals(cache1));
 
+            /**********************************/
+            /* RE-UPDATE AN EXISTING KEY CASE */
+            /**********************************/
+            // Start monitoring the updates
+            res = listener.restart(1);
+            // modify the cache
+            cm11.put(k1, "baz");
+            // Wait
+            res.await(100L, TimeUnit.SECONDS);
+            // Analyze the updates
+            ups = listener.getUpdates();
+            assertTrue(ups.size() == 1);
+            // Validate we get an update with expect fields
+            up = ups.get(0);
+            assertTrue(up.t.equals(UpdateType.CHANGED));
+            assertTrue(up.key.equals(k1));
+            assertTrue(up.value.equals("baz"));
+            assertTrue(up.cacheName.equals(cache1));
+
             /********************************/
             /* REMOVAL OF EXISTING KEY CASE */
             /********************************/

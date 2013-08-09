@@ -381,57 +381,68 @@ public class InventoryServiceShim implements IContainerListener,
      * Notify all internal and external listeners
      */
     private void notifyInventoryShimListener(NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
-        notifyGlobalInventoryShimInternalListener(nodeConnector, type, props);
-        /*
-         * isLocal is intentionally moved after the GlobalInventory listener call.
-         * The above notification to GlobalInventory will make sure that the connectionOutService be ready
-         * to reply to isLocal query.
-         */
-        if (!connectionOutService.isLocal(nodeConnector.getNode())) {
-            logger.debug("Connection service dropped the inventory notification for {} {}", nodeConnector.toString(), type);
-            return;
+
+        //establish locality before notifying
+        boolean isNodeLocal;
+        if (type == UpdateType.REMOVED){
+            //if removing get the locality first
+            isNodeLocal = connectionOutService.isLocal(nodeConnector.getNode());
+            notifyGlobalInventoryShimInternalListener(nodeConnector, type, props);
         } else {
-            logger.debug("Connection service accepted the inventory notification for {} {}", nodeConnector.toString(), type);
+            notifyGlobalInventoryShimInternalListener(nodeConnector, type, props);
+            isNodeLocal = connectionOutService.isLocal(nodeConnector.getNode());
         }
 
-        // notify other containers
-        Set<String> containers = (nodeConnectorContainerMap.get(nodeConnector) == null) ? new HashSet<String>()
-                : new HashSet<String>(nodeConnectorContainerMap.get(nodeConnector));
-        containers.add(GlobalConstants.DEFAULT.toString());
-        for (String container : containers) {
-            notifyInventoryShimInternalListener(container, nodeConnector, type, props);
-        }
+        if (isNodeLocal) {
+            // notify other containers
+            Set<String> containers = (nodeConnectorContainerMap.get(nodeConnector) == null) ? new HashSet<String>()
+                    : new HashSet<String>(nodeConnectorContainerMap.get(nodeConnector));
+            containers.add(GlobalConstants.DEFAULT.toString());
+            for (String container : containers) {
+                notifyInventoryShimInternalListener(container, nodeConnector, type, props);
+            }
 
-        // Notify DiscoveryService
-        notifyInventoryShimExternalListener(nodeConnector, type, props);
+            // Notify DiscoveryService
+            notifyInventoryShimExternalListener(nodeConnector, type, props);
+
+            logger.debug("Connection service accepted the inventory notification for {} {}", nodeConnector, type);
+        } else {
+            logger.debug("Connection service dropped the inventory notification for {} {}", nodeConnector, type);
+        }
     }
 
     /*
      * Notify all internal and external listeners
      */
     private void notifyInventoryShimListener(Node node, UpdateType type, Set<Property> props) {
-        notifyGlobalInventoryShimInternalListener(node, type, props);
-        /*
-         * isLocal is intentionally moved after the GlobalInventory listener call.
-         * The above notification to GlobalInventory will make sure that the connectionOutService be ready
-         * to reply to isLocal query.
-         */
-        if (!connectionOutService.isLocal(node)) {
-            logger.debug("Connection service dropped the inventory notification for {} {}", node.toString(), type);
-            return;
+
+        //establish locality before notifying
+        boolean isNodeLocal;
+        if (type == UpdateType.REMOVED){
+            //if removing get the locality first
+            isNodeLocal = connectionOutService.isLocal(node);
+            notifyGlobalInventoryShimInternalListener(node, type, props);
         } else {
-            logger.debug("Connection service accepted the inventory notification for {} {}", node.toString(), type);
-        }
-    // Now notify other containers
-        Set<String> containers = (nodeContainerMap.get(node) == null) ? new HashSet<String>() : new HashSet<String>(
-                nodeContainerMap.get(node));
-        containers.add(GlobalConstants.DEFAULT.toString());
-        for (String container : containers) {
-            notifyInventoryShimInternalListener(container, node, type, props);
+            notifyGlobalInventoryShimInternalListener(node, type, props);
+            isNodeLocal = connectionOutService.isLocal(node);
         }
 
-        // Notify external listener
-        notifyInventoryShimExternalListener(node, type, props);
+        if (isNodeLocal) {
+            // Now notify other containers
+            Set<String> containers = (nodeContainerMap.get(node) == null) ? new HashSet<String>() : new HashSet<String>(
+                    nodeContainerMap.get(node));
+            containers.add(GlobalConstants.DEFAULT.toString());
+            for (String container : containers) {
+                notifyInventoryShimInternalListener(container, node, type, props);
+            }
+
+            // Notify external listener
+            notifyInventoryShimExternalListener(node, type, props);
+
+            logger.debug("Connection service accepted the inventory notification for {} {}", node, type);
+        } else {
+            logger.debug("Connection service dropped the inventory notification for {} {}", node, type);
+        }
     }
 
     private void notifyGlobalInventoryShimInternalListener(Node node, UpdateType type, Set<Property> props) {

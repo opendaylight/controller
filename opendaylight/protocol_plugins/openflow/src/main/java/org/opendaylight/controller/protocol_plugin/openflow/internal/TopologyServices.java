@@ -16,7 +16,6 @@ import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShim
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
@@ -28,7 +27,6 @@ public class TopologyServices implements ITopologyServiceShimListener,
             .getLogger(TopologyServices.class);
     private IPluginOutTopologyService salTopoService = null;
     private IRefreshInternalProvider topoRefreshService = null;
-    private IPluginOutConnectionService connectionOutService;
     private String containerName;
 
     /**
@@ -150,16 +148,6 @@ public class TopologyServices implements ITopologyServiceShimListener,
     public void edgeUtilBackToNormal(Edge edge) {
         if (this.salTopoService != null) {
             this.salTopoService.edgeUtilBackToNormal(edge);
-        }
-    }
-
-    void setIPluginOutConnectionService(IPluginOutConnectionService s) {
-        connectionOutService = s;
-    }
-
-    void unsetIPluginOutConnectionService(IPluginOutConnectionService s) {
-        if (connectionOutService == s) {
-            connectionOutService = null;
         }
     }
 }

@@ -102,7 +102,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                     .setService(IPluginInInventoryService.class, "(scope=Global)")
                     .setCallbacks("setPluginService", "unsetPluginService")
-                    .setRequired(true));
+                    .setRequired(false));
         }
     }
 

@@ -45,7 +45,8 @@ public class InventoryService implements IInventoryShimInternalListener,
         IPluginInInventoryService, IInventoryProvider {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryService.class);
-    private Set<IPluginOutInventoryService> pluginOutInventoryServices;
+    private Set<IPluginOutInventoryService> pluginOutInventoryServices =
+            new CopyOnWriteArraySet<IPluginOutInventoryService>();
     private IController controller = null;
     private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in global container only
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in global container only
@@ -82,7 +83,6 @@ public class InventoryService implements IInventoryShimInternalListener,
 
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
-        pluginOutInventoryServices = new CopyOnWriteArraySet<IPluginOutInventoryService>();
     }
 
     /**
@@ -112,6 +112,7 @@ public class InventoryService implements IInventoryShimInternalListener,
      */
     void stop() {
         logger.trace("STOP called!");
+        pluginOutInventoryServices.clear();
     }
 
     public void setPluginOutInventoryServices(IPluginOutInventoryService service) {
@@ -228,8 +229,9 @@ public class InventoryService implements IInventoryShimInternalListener,
 
     private void removeNode(Node node) {
         logger.trace("{} removed", node);
-        if (nodeProps == null)
+        if (nodeProps == null) {
             return;
+        }
 
         // update local cache
         nodeProps.remove(node);
@@ -252,8 +254,8 @@ public class InventoryService implements IInventoryShimInternalListener,
 
     private void updateNode(Node node, Set<Property> properties) {
         logger.trace("{} updated, props: {}", node, properties);
-        if (nodeProps == null || !nodeProps.containsKey(node) ||
-                properties == null || properties.isEmpty()) {
+        if ((nodeProps == null) || !nodeProps.containsKey(node) ||
+                (properties == null) || properties.isEmpty()) {
             return;
         }
 

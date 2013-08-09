@@ -138,6 +138,44 @@ public class MatchTest {
     }
 
     @Test
+    public void testSetTpSrc() {
+        // Minimum value validation.
+        Match match = new Match();
+        short tp_src = 0;
+        match.setField(MatchType.TP_SRC, tp_src);
+
+        Object o = match.getField(MatchType.TP_SRC).getValue();
+        Assert.assertTrue(o.equals(tp_src));
+
+        // Maximum value validation.
+        match = new Match();
+        tp_src = (short) 0xffff;
+        match.setField(MatchType.TP_SRC, tp_src);
+
+        o = match.getField(MatchType.TP_SRC).getValue();
+        Assert.assertTrue(o.equals(tp_src));
+    }
+
+    @Test
+    public void testSetTpDst() {
+        // Minimum value validation.
+        Match match = new Match();
+        short tp_dst = 0;
+        match.setField(MatchType.TP_DST, tp_dst);
+
+        Object o = match.getField(MatchType.TP_DST).getValue();
+        Assert.assertTrue(o.equals(tp_dst));
+
+        // Maximum value validation.
+        match = new Match();
+        tp_dst = (short) 0xffff;
+        match.setField(MatchType.TP_DST, tp_dst);
+
+        o = match.getField(MatchType.TP_DST).getValue();
+        Assert.assertTrue(o.equals(tp_dst));
+    }
+
+    @Test
     public void testMatchMask() {
         Match x = new Match();
         NodeConnector inPort = NodeConnectorCreator.createOFNodeConnector((short) 6, NodeCreator.createOFNode(3l));

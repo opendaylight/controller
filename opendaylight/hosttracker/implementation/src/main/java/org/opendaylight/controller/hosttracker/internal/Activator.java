@@ -8,7 +8,13 @@
 
 package org.opendaylight.controller.hosttracker.internal;
 
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
+
 import org.apache.felix.dm.Component;
+import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
@@ -74,13 +80,19 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(HostTracker.class)) {
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Set<String> propSet = new HashSet<String>();
+            propSet.add(HostTracker.ACTIVE_HOST_CACHE);
+            props.put("cachenames", propSet);
+
             // export the service
             c.setInterface(
                     new String[] { ISwitchManagerAware.class.getName(),
                             IInventoryListener.class.getName(),
                             IfIptoHost.class.getName(),
                             IfHostListener.class.getName(),
-                            ITopologyManagerAware.class.getName() }, null);
+                            ITopologyManagerAware.class.getName(),
+                            ICacheUpdateAware.class.getName() }, props);
 
             c.add(createContainerServiceDependency(containerName)
                     .setService(ISwitchManager.class)
