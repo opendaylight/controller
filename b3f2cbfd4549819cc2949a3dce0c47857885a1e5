@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAE3//+XA\u003d",
+        "filename": "opendaylight/routing/dijkstra_implementation/src/main/java/org/opendaylight/controller/routing/dijkstra_implementation/internal/DijkstraImplementation.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-09T00:52:59Z",
+      "side": 1,
+      "message": "Come to think of it, instead of amICoordinator, shall we use the isLocal flag to decide which controller must send the Event to the applications ?\nHaving the same controller (which receives the Topology update) handling the Routing update along with Application changes will certainly help with Troubleshooting and debugging.\n\nIf we let the Coordinator handle the event, then the applications that act on the routing update can be different from the controller that originally received the topology update",
+      "revId": "b3f2cbfd4549819cc2949a3dce0c47857885a1e5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAE3//+XU\u003d",
         "filename": "opendaylight/topologymanager/src/main/java/org/opendaylight/controller/topologymanager/ITopologyManagerClusterWideAware.java",
         "patchSetId": 1
