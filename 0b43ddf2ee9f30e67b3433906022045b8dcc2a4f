@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+T8\u003d",
+        "filename": "opendaylight/topologymanager/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-09T23:21:55Z",
+      "side": 1,
+      "message": "I doubt this would go through in a multiple controller scenario.\nThe remote controller value for that key is still a set containing one Pair.",
+      "revId": "0b43ddf2ee9f30e67b3433906022045b8dcc2a4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
