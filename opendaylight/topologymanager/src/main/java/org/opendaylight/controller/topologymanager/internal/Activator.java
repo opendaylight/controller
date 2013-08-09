@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.felix.dm.Component;
+import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
@@ -22,6 +23,7 @@ import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.ITopologyService;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
+import org.opendaylight.controller.topologymanager.ITopologyManagerClusterWideAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +37,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
 
     }
@@ -44,6 +47,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * cleanup done by ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
 
     }
@@ -57,6 +61,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { TopologyManagerImpl.class };
         return res;
@@ -75,17 +80,19 @@ public class Activator extends ComponentActivatorAbstractBase {
      * also optional per-container different behavior if needed, usually
      * should not be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(TopologyManagerImpl.class)) {
             // export the service needed to listen to topology updates
             Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
             Set<String> propSet = new HashSet<String>();
-            propSet.add("topologymanager.configSaveEvent");
+            propSet.add(TopologyManagerImpl.TOPOEDGESDB);
             props.put("cachenames", propSet);
 
             c.setInterface(new String[] { IListenTopoUpdates.class.getName(),
                     ITopologyManager.class.getName(),
-                    IConfigurationContainerAware.class.getName() }, props);
+                    IConfigurationContainerAware.class.getName(),
+                    ICacheUpdateAware.class.getName() }, props);
 
             c.add(createContainerServiceDependency(containerName).setService(
                     ITopologyService.class).setCallbacks("setTopoService",
@@ -96,6 +103,13 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName).setService(
                     ITopologyManagerAware.class).setCallbacks(
                     "setTopologyManagerAware", "unsetTopologyManagerAware")
+                    .setRequired(false));
+
+            // These are all the listeners for a topology manager for the
+            // cluster wide events
+            // updates, there could be many or none
+            c.add(createContainerServiceDependency(containerName).setService(ITopologyManagerClusterWideAware.class)
+                    .setCallbacks("setTopologyManagerClusterWideAware", "unsetTopologyManagerClusterWideAware")
                     .setRequired(false));
 
             c.add(createContainerServiceDependency(containerName).setService(

@@ -28,6 +28,7 @@
               org.opendaylight.controller.sal.topology,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.reader,
+              org.opendaylight.controller.clustering.services,
               org.apache.commons.collections15,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.topologymanager,
@@ -35,6 +36,8 @@
               edu.uci.ics.jung.algorithms.shortestpath,
               edu.uci.ics.jung.graph.util,
               org.apache.felix.dm,
+              org.osgi.framework,
+              org.apache.felix.service.command,
               org.junit;resolution:=optional
             </Import-Package>
             <Bundle-Activator>
