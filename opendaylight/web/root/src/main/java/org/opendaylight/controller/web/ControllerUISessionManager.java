@@ -18,29 +18,25 @@ import org.slf4j.LoggerFactory;
 
 public class ControllerUISessionManager implements HttpSessionListener {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(ControllerUISessionManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ControllerUISessionManager.class);
 
     @Override
     public void sessionCreated(HttpSessionEvent se) {
-        ((HttpSessionListener) getUserManagerRef().getSessionManager())
-                .sessionCreated(se);
+        IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
+        if (userManager != null) {
+            ((HttpSessionListener) userManager.getSessionManager()).sessionCreated(se);
+        } else {
+            logger.warn("User Manager is currently unavailable. Unable to register UI session.");
+        }
     }
 
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
-        ((HttpSessionListener) getUserManagerRef().getSessionManager())
-                .sessionDestroyed(se);
-    }
-
-    private IUserManager getUserManagerRef() {
-        IUserManager userManager = (IUserManager) ServiceHelper
-                .getGlobalInstance(IUserManager.class, this);
+        IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager != null) {
-            return userManager;
+            ((HttpSessionListener) userManager.getSessionManager()).sessionDestroyed(se);
         } else {
-            logger.error("UserManager Ref is null. ");
-            throw new RuntimeException("UserManager Ref is null. ");
+            logger.warn("User Manager is currently unavailable. Unable to destroy UI session.");
         }
     }
 
