@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.topologymanager;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -67,11 +68,22 @@ public interface ITopologyManager {
     public Set<NodeConnector> getNodeConnectorWithHost();
 
     /**
-     * Return the Host attached to a NodeConnector with Host
-     *
+     * Return the Host attached to a NodeConnector with Host.
+     * Multiple hosts maybe attached to a node connector.
+     * This method returns the first one only. Hence it has been
+     * deprecated. Use the new method getHostsAttachedToNodeConnector
+     * that returns the complete list of hosts.
      * @return The Host attached to a NodeConnector
      */
+    @Deprecated
     public Host getHostAttachedToNodeConnector(NodeConnector p);
+
+    /**
+     * Returns a list of hosts attached to a NodeConnector
+     * @param p NodeConnector
+     * @return The list of hosts attached to a NodeConnector
+     */
+    public List<Host> getHostsAttachedToNodeConnector(NodeConnector p);
 
     /**
      * Returns a copy map which associates every node with all the

@@ -12,12 +12,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -89,7 +89,7 @@ public class TopologyManagerImpl implements
     // NodeConnector of a Production Edge is not part of this DB.
     private ConcurrentMap<NodeConnector, Set<Property>> nodeConnectorsDB;
     // DB of all the NodeConnectors with an Host attached to it
-    private ConcurrentMap<NodeConnector, ImmutablePair<Host, Set<Property>>> hostsDB;
+    private ConcurrentMap<NodeConnector, Set<ImmutablePair<Host, Set<Property>>>> hostsDB;
     // Topology Manager Aware listeners
     private Set<ITopologyManagerAware> topologyManagerAware = new CopyOnWriteArraySet<ITopologyManagerAware>();
     // Topology Manager Aware listeners - for clusterwide updates
@@ -105,7 +105,7 @@ public class TopologyManagerImpl implements
 
     void nonClusterObjectCreate() {
         edgesDB = new ConcurrentHashMap<Edge, Set<Property>>();
-        hostsDB = new ConcurrentHashMap<NodeConnector, ImmutablePair<Host, Set<Property>>>();
+        hostsDB = new ConcurrentHashMap<NodeConnector, Set<ImmutablePair<Host, Set<Property>>>>();
         nodeConnectorsDB = new ConcurrentHashMap<NodeConnector, Set<Property>>();
         userLinksDB = new ConcurrentHashMap<String, TopologyUserLinkConfig>();
     }
@@ -201,7 +201,7 @@ public class TopologyManagerImpl implements
 
         try {
             this.hostsDB =
-                    (ConcurrentMap<NodeConnector, ImmutablePair<Host, Set<Property>>>) this.clusterContainerService.createCache(
+                    (ConcurrentMap<NodeConnector, Set<ImmutablePair<Host, Set<Property>>>>) this.clusterContainerService.createCache(
                             TOPOHOSTSDB, EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
         } catch (CacheExistException cee) {
             log.debug(TOPOHOSTSDB + " Cache already exists - destroy and recreate if needed");
@@ -243,7 +243,7 @@ public class TopologyManagerImpl implements
         }
 
         this.hostsDB =
-                (ConcurrentMap<NodeConnector, ImmutablePair<Host, Set<Property>>>) this.clusterContainerService.getCache(TOPOHOSTSDB);
+                (ConcurrentMap<NodeConnector, Set<ImmutablePair<Host, Set<Property>>>>) this.clusterContainerService.getCache(TOPOHOSTSDB);
         if (hostsDB == null) {
             log.error("Failed to get cache for " + TOPOHOSTSDB);
         }
@@ -451,11 +451,25 @@ public class TopologyManagerImpl implements
 
     @Override
     public Host getHostAttachedToNodeConnector(NodeConnector port) {
-        ImmutablePair<Host, Set<Property>> host;
-        if ((this.hostsDB == null) || ((host = this.hostsDB.get(port)) == null)) {
+        List<Host> hosts = getHostsAttachedToNodeConnector(port);
+        if(hosts != null && !hosts.isEmpty()){
+            return hosts.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Host> getHostsAttachedToNodeConnector(NodeConnector p) {
+        Set<ImmutablePair<Host, Set<Property>>> hosts;
+        if (this.hostsDB == null || (hosts = this.hostsDB.get(p)) == null) {
             return null;
         }
-        return host.getLeft();
+        // create a list of hosts
+        List<Host> retHosts = new LinkedList<Host>();
+        for(ImmutablePair<Host, Set<Property>> host : hosts) {
+            retHosts.add(host.getLeft());
+        }
+        return retHosts;
     }
 
     @Override
@@ -471,14 +485,25 @@ public class TopologyManagerImpl implements
         }
         ImmutablePair<Host, Set<Property>> thisHost = new ImmutablePair<Host, Set<Property>>(h, props);
 
+        // get the host list
+        Set<ImmutablePair<Host, Set<Property>>> hostSet = this.hostsDB.get(port);
+        if(hostSet == null) {
+            hostSet = new HashSet<ImmutablePair<Host, Set<Property>>>();
+        }
         switch (t) {
         case ADDED:
         case CHANGED:
-            this.hostsDB.put(port, thisHost);
+            hostSet.add(thisHost);
+            this.hostsDB.put(port, hostSet);
             break;
         case REMOVED:
-            //remove only if hasn't been concurrently modified
-            this.hostsDB.remove(port, thisHost);
+            hostSet.remove(thisHost);
+            if(hostSet.isEmpty()) {
+                //remove only if hasn't been concurrently modified
+                this.hostsDB.remove(port, hostSet);
+            } else {
+                this.hostsDB.put(port, hostSet);
+            }
             break;
         }
     }
