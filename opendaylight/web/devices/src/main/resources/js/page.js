@@ -12,10 +12,10 @@ one.f = {};
 // specify dashlets and layouts
 
 one.f.dashlet = {
-	nodesLearnt : {
-		id : 'nodesLearnt',
-	    name : 'Nodes Learnt'
-	},
+    nodesLearnt : {
+        id : 'nodesLearnt',
+        name : 'Nodes Learnt'
+    },
     staticRouteConfig : {
         id : 'staticRouteConfig',
         name : 'Static Route Configuration'
@@ -50,67 +50,77 @@ one.f.menu = {
 
 /**Devices Modules */
 one.f.switchmanager = {
-	rootUrl: "controller/web/devices",
-	createTable: function(columnNames, body) {
-		var tableAttributes = ["table-striped", "table-bordered", "table-condensed"];
-		var $table = one.lib.dashlet.table.table(tableAttributes);
-		var tableHeaders = columnNames;
-		var $thead = one.lib.dashlet.table.header(tableHeaders);
-		var $tbody = one.lib.dashlet.table.body(body, tableHeaders);
-		$table.append($thead)
-		.append($tbody);
-		return $table;
-	},
-	validateName: function(name) {
+    rootUrl: "controller/web/devices",
+    createTable: function(columnNames, body) {
+        var tableAttributes = ["table-striped", "table-bordered", "table-condensed"];
+        var $table = one.lib.dashlet.table.table(tableAttributes);
+        var tableHeaders = columnNames;
+        var $thead = one.lib.dashlet.table.header(tableHeaders);
+        var $tbody = one.lib.dashlet.table.body(body, tableHeaders);
+        $table.append($thead)
+        .append($tbody);
+        return $table;
+    },
+    validateName: function(name) {
         return (name.length < 256);
-	}
+    }
 };
 
 one.f.switchmanager.nodesLearnt = {
-	id: {
-		dashlet: {
-			popout: "one_f_switchmanager_nodesLearnt_id_dashlet_popout"
-		},
-		modal: {
-			modal: "one_f_switchmanager_nodesLearnt_id_modal_modal",
-			save: "one_f_switchmanager_nodesLearnt_id_modal_save",
-			form: {
-				nodeId: "one_f_switchmanager_nodesLearnt_id_modal_form_nodeid",
-				nodeName : "one_f_switchmanager_nodesLearnt_id_modal_form_nodename",
-				portStatus : "one_f_switchmanager_nodesLearnt_id_modal_form_portstatus",
-				tier: "one_f_switchmanager_nodesLearnt_id_modal_form_tier",
-				operationMode: "one_f_switchmanager_nodesLearnt_id_modal_form_opmode"
-			}
-		}
-	},
-	dashlet: function($dashlet) {
-		var url = one.f.switchmanager.rootUrl + "/nodesLearnt";
-		one.lib.dashlet.empty($dashlet);
-		$dashlet.append(one.lib.dashlet.header(one.f.dashlet.nodesLearnt.name));
+    id: {
+        dashlet: {
+            popout: "one_f_switchmanager_nodesLearnt_id_dashlet_popout",
+            datagrid: "one_f_switchmanager_nodesLearnt_id_dashlet_datagrid"
+        },
+        modal: {
+            modal: "one_f_switchmanager_nodesLearnt_id_modal_modal",
+            save: "one_f_switchmanager_nodesLearnt_id_modal_save",
+            datagrid: "one_f_switchmanager_nodesLearnt_id_modal_datagrid",
+            form: {
+                nodeId: "one_f_switchmanager_nodesLearnt_id_modal_form_nodeid",
+                nodeName : "one_f_switchmanager_nodesLearnt_id_modal_form_nodename",
+                portStatus : "one_f_switchmanager_nodesLearnt_id_modal_form_portstatus",
+                tier: "one_f_switchmanager_nodesLearnt_id_modal_form_tier",
+                operationMode: "one_f_switchmanager_nodesLearnt_id_modal_form_opmode"
+            }
+        }
+    },
+    dashlet: function($dashlet) {
+        var url = one.f.switchmanager.rootUrl + "/nodesLearnt";
+        one.lib.dashlet.empty($dashlet);
+        $dashlet.append(one.lib.dashlet.header(one.f.dashlet.nodesLearnt.name));
 
-		one.f.switchmanager.nodesLearnt.ajax.main(url, function(content) {
-			var body = one.f.switchmanager.nodesLearnt.data.abridged(content);
-			var $table = one.f.switchmanager.createTable(["Node Name", "Node ID", "Ports"], body);
-			$dashlet.append($table);
-		});
-	},
-	ajax : {
-		main : function(url, callback) {
-			$.getJSON(url, function(data) {
-				callback(data);
-			});
-		}
-	},
-	modal : {
-		initialize: {
-			updateNode: function(evt) {
-	            one.f.switchmanager.nodesLearnt.ajax.main(one.f.switchmanager.rootUrl + "/tiers", function(tiers) {
+        one.f.switchmanager.nodesLearnt.ajax.main(url, function(content) {
+            var $gridHTML = one.lib.dashlet.datagrid.init(one.f.switchmanager.nodesLearnt.id.dashlet.datagrid, {
+                searchable: true,
+                filterable: false,
+                pagination: true,
+                flexibleRowsPerPage: true
+                }, "table-striped table-condensed");
+            $dashlet.append($gridHTML);
+            var dataSource = one.f.switchmanager.nodesLearnt.data.gridDataSource.abridged(content);
+            $("#" + one.f.switchmanager.nodesLearnt.id.dashlet.datagrid).datagrid({dataSource: dataSource}).on("loaded", function() {
+                $(this).find("tbody a").click(one.f.switchmanager.nodesLearnt.modal.initialize.updateNode);
+            });
+        });
+    },
+    ajax : {
+        main : function(url, callback) {
+            $.getJSON(url, function(data) {
+                callback(data);
+            });
+        }
+    },
+    modal : {
+        initialize: {
+            updateNode: function(evt) {
+                one.f.switchmanager.nodesLearnt.ajax.main(one.f.switchmanager.rootUrl + "/tiers", function(tiers) {
 
                     var nodeId = decodeURIComponent(evt.target.id);
                     var h3;
                     var footer = [];
-                    var $body = one.f.switchmanager.nodesLearnt.modal.body.updateNode(nodeId, evt.target.switchDetails, tiers);
-                    if (evt.target.privilege == 'WRITE'){
+                    var $body = one.f.switchmanager.nodesLearnt.modal.body.updateNode(nodeId, JSON.parse(decodeURIComponent(evt.target.getAttribute("switchDetails"))), tiers);
+                    if (evt.target.getAttribute("privilege") == 'WRITE'){
                         h3 = "Update Node Information";
                         footer = one.f.switchmanager.nodesLearnt.modal.footer.updateNode();
                     } else { //disable node edit
@@ -124,121 +134,201 @@ one.f.switchmanager.nodesLearnt = {
                         one.f.switchmanager.nodesLearnt.modal.save($modal);
                     });
 
-	                // inject body (nodePorts)
-	                one.lib.modal.inject.body($modal, $body);
-	                $modal.modal();
-	            });
-			},
-			popout: function() {
-				var h3 = "Nodes Learnt";
-	            var footer = one.f.switchmanager.nodesLearnt.modal.footer.popout();
-	            var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.modal, h3, "", footer);
-	            var $body = one.f.switchmanager.nodesLearnt.modal.body.popout($modal);
-	            return $modal;
-			}
-		},
-		body: {
-			updateNode: function(nodeId, switchDetails, tiers) {
-				var $form = $(document.createElement('form'));
-				var $fieldset = $(document.createElement('fieldset'));
-				// node ID. not editable.
-				var $label = one.lib.form.label("Node ID");
-				var $input = one.lib.form.input("node id");
-				$input.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.nodeId);
-				$input.attr("disabled", true);
-				$input.attr("value", nodeId);
-				$fieldset.append($label).append($input);
-				// node name
-				var $label = one.lib.form.label("Node Name");
-				var $input = one.lib.form.input("Node Name");
-				$input.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.nodeName);
-				if(switchDetails["nodeName"] != null) {
-					$input.attr('value', switchDetails["nodeName"]);
-				}
-				$fieldset.append($label).append($input);
-				// node tier
-				var $label = one.lib.form.label("Tier");
-				var $select = one.lib.form.select.create(tiers);
-				$select.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.tier);
-				$select.val(switchDetails["tier"]);
-				$fieldset.append($label).append($select);
-				// operation mode
-				var $label = one.lib.form.label("Operation Mode");
-				var $select = one.lib.form.select.create(
-						["Allow reactive forwarding", "Proactive forwarding only"]);
-				$select.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.operationMode);
-				if ((one.main.registry != undefined) && (one.main.registry.container != 'default')) {
-					$select.attr("disabled", true);
-				}
-				$select.val(switchDetails["mode"]);
-				$fieldset.append($label).append($select);
-				$form.append($fieldset);
-				return $form;
-			},
-			popout: function($modal) {
-				var url = one.f.switchmanager.rootUrl + "/nodesLearnt";
-				one.f.switchmanager.nodesLearnt.ajax.main(url, function(content) {
-					var tableContent = one.f.switchmanager.nodesLearnt.data.popout(content);
-					var $table = one.f.switchmanager.createTable(content.columnNames, tableContent);
-					one.lib.modal.inject.body($modal, $table);
-				});
-			}
-		},
-		save: function($modal) {
-			var result = {};
+                    // inject body (nodePorts)
+                    one.lib.modal.inject.body($modal, $body);
+                    $modal.modal();
+                });
+            },
+            popout: function() {
+                var h3 = "Nodes Learnt";
+                var footer = one.f.switchmanager.nodesLearnt.modal.footer.popout();
+                var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.modal, h3, "", footer);
+                var $body = one.f.switchmanager.nodesLearnt.modal.body.popout($modal);
+                return $modal;
+            }
+        },
+        body: {
+            updateNode: function(nodeId, switchDetails, tiers) {
+                var $form = $(document.createElement('form'));
+                var $fieldset = $(document.createElement('fieldset'));
+                // node ID. not editable.
+                var $label = one.lib.form.label("Node ID");
+                var $input = one.lib.form.input("node id");
+                $input.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.nodeId);
+                $input.attr("disabled", true);
+                $input.attr("value", nodeId);
+                $fieldset.append($label).append($input);
+                // node name
+                var $label = one.lib.form.label("Node Name");
+                var $input = one.lib.form.input("Node Name");
+                $input.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.nodeName);
+                if(switchDetails["nodeName"] != null) {
+                    $input.attr('value', switchDetails["nodeName"]);
+                }
+                $fieldset.append($label).append($input);
+                // node tier
+                var $label = one.lib.form.label("Tier");
+                var $select = one.lib.form.select.create(tiers);
+                $select.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.tier);
+                $select.val(switchDetails["tier"]);
+                $fieldset.append($label).append($select);
+                // operation mode
+                var $label = one.lib.form.label("Operation Mode");
+                var $select = one.lib.form.select.create(
+                        ["Allow reactive forwarding", "Proactive forwarding only"]);
+                $select.attr('id', one.f.switchmanager.nodesLearnt.id.modal.form.operationMode);
+                if ((one.main.registry != undefined) && (one.main.registry.container != 'default')) {
+                    $select.attr("disabled", true);
+                }
+                $select.val(switchDetails["mode"]);
+                $fieldset.append($label).append($select);
+                $form.append($fieldset);
+                return $form;
+            },
+            popout: function($modal) {
+                var $gridHTML = one.lib.dashlet.datagrid.init(one.f.switchmanager.nodesLearnt.id.modal.datagrid, {
+                        searchable: true,
+                        filterable: false,
+                        pagination: true,
+                        flexibleRowsPerPage: true
+                        }, "table-striped table-condensed");
+                one.lib.modal.inject.body($modal, $gridHTML);
+                // attach to shown event of modal 
+                $modal.on("shown", function() {
+                    var url = one.f.switchmanager.rootUrl + "/nodesLearnt";
+                    one.f.switchmanager.nodesLearnt.ajax.main(url, function(content) {
+                        var dataSource = one.f.switchmanager.nodesLearnt.data.gridDataSource.popout(content);
+                        $("#" + one.f.switchmanager.nodesLearnt.id.modal.datagrid).datagrid({
+                            dataSource: dataSource,
+                            stretchHeight: true
+                        });
+                    });
+                });
+            }
+        },
+        save: function($modal) {
+            var result = {};
             result['nodeName'] = $('#' + one.f.switchmanager.nodesLearnt.id.modal.form.nodeName, $modal).val();
             if(!one.f.switchmanager.validateName(result['nodeName'])) {
-            	alert("Node name can contain upto 255 characters");
-            	return;
+                alert("Node name can contain upto 255 characters");
+                return;
             }
             result['nodeId'] = $('#' + one.f.switchmanager.nodesLearnt.id.modal.form.nodeId, $modal).val();
             result['tier'] = $('#' + one.f.switchmanager.nodesLearnt.id.modal.form.tier, $modal).val();
             result['operationMode'] = $('#' + one.f.switchmanager.nodesLearnt.id.modal.form.operationMode, $modal).val();
             one.f.switchmanager.nodesLearnt.modal.ajax(result, 
-			  	function(response) {
-            		if(response.status == true) {
-            			$modal.modal('hide');
-            			one.topology.update(); // refresh visual topology with new name
-            			// TODO: Identify dashlet by inserting a nodesLearnt div 
-           			 	// in the dashlet() instead
-            			one.f.switchmanager.nodesLearnt.dashlet($("#left-top .dashlet"));
-            		} else {
-            			alert(response.message);
-            		}
-	                
-	            });
-		},
-		ajax: function(requestData, callback) {
-			$.getJSON(one.f.switchmanager.rootUrl + "/nodesLearnt/update", requestData, function(response) {
-				callback(response);
-			});
-		},
-		footer: {
-			updateNode: function() {
-				var footer = [];
+                function(response) {
+                    if(response.status == true) {
+                        $modal.modal('hide');
+                        one.topology.update(); // refresh visual topology with new name
+                        // TODO: Identify dashlet by inserting a nodesLearnt div 
+                        // in the dashlet() instead
+                        one.f.switchmanager.nodesLearnt.dashlet($("#left-top .dashlet"));
+                    } else {
+                        alert(response.message);
+                    }
+                    
+                });
+        },
+        ajax: function(requestData, callback) {
+            $.getJSON(one.f.switchmanager.rootUrl + "/nodesLearnt/update", requestData, function(response) {
+                callback(response);
+            });
+        },
+        footer: {
+            updateNode: function() {
+                var footer = [];
                 var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.nodesLearnt.id.modal.save, "btn-success", "");
                 var $saveButton = one.lib.dashlet.button.button(saveButton);
                 footer.push($saveButton);
 
-	            return footer;
-			},
-			popout: function() {
-				// TODO: Maybe put a close button in the footer?
-				return [];
-			}
-		}
-	},
-	// data functions
-	data : {
-		abridged : function(data) {
-			var result = [];
-			$.each(data.nodeData, function(key, value) {
-				var tr = {};
-				var entry = [];
-				var nodenameentry = value["nodeName"] ? value["nodeName"] : "Click to update";
+                return footer;
+            },
+            popout: function() {
+                // TODO: Maybe put a close button in the footer?
+                return [];
+            }
+        }
+    },
+    // data functions
+    data : {
+        gridDataSource: {
+            abridged: function(data) {
+                var source = new StaticDataSource({
+                    columns: [
+                        {
+                            property: 'nodeName',
+                            label: 'Node Name',
+                            sortable: true
+                        },
+                        {
+                            property: 'nodeId',
+                            label: 'Node ID',
+                            sortable: true
+                        },
+                        {
+                            property: 'ports',
+                            label: 'Ports',
+                            sortable: true
+                        }
+                    ],
+                    data: data.nodeData,
+                    formatter: function(items) {
+                    $.each(items, function (index, item) {
+                        var nodeNameEntry = item.nodeName ? item.nodeName : "Click to update";
+                        item.nodeName = '<a href="#" id="' + item.nodeId + '" switchDetails=' + encodeURIComponent(JSON.stringify(item)) + 
+                        ' privilege=' + data.privilege + '>' + nodeNameEntry + '</a>';
+                    }); 
+                    },
+                    delay: 0
+                });
+                return source;
 
-				// TODO: Move anchor tag creation to one.lib.form.
-				var aTag;
+            },
+            popout: function(data) {
+                var source = new StaticDataSource({
+                    columns: [
+                        {
+                            property: 'nodeName',
+                            label: 'Node Name',
+                            sortable: true
+                        },
+                        {
+                            property: 'nodeId',
+                            label: 'Node ID',
+                            sortable: true
+                        },
+                        {
+                            property: 'tierName',
+                            label: 'Tier Name',
+                            sortable: true
+                        },
+                        {
+                            property: 'mac',
+                            label: 'Mac',
+                            sortable: true
+                        },
+                        {
+                            property: 'ports',
+                            label: 'Ports',
+                            sortable: true
+                        }
+                    ],
+                    data: data.nodeData,
+                    delay: 0
+                });
+                return source;
+            }
+        },
+        abridged : function(data) {
+            var result = [];
+            $.each(data.nodeData, function(key, value) {
+                var tr = {};
+                var entry = [];
+                var nodeNameEntry = value["nodeName"] ? value["nodeName"] : "Click to update";
+
+                // TODO: Move anchor tag creation to one.lib.form.
+                var aTag;
                 aTag = document.createElement("a");
                 aTag.privilege = data.privilege;
                 aTag.addEventListener("click", one.f.switchmanager.nodesLearnt.modal.initialize.updateNode);
@@ -247,61 +337,61 @@ one.f.switchmanager.nodesLearnt = {
                 }, false);
                 aTag.setAttribute("id", encodeURIComponent(value["nodeId"]));
                 aTag.switchDetails = value;
-				aTag.innerHTML = nodenameentry;
-				entry.push(aTag);
-				entry.push(value["nodeId"]);
-				entry.push(value["ports"]);
-				tr.entry = entry;
-				result.push(tr);
-			});
-			return result;
-		},
-		popout : function(data) {
-			var result = [];
-			$.each(data.nodeData, function(key, value) {
-				var tr = {};
-				// fill up all the td's
-				var entry = [];
-				var nodenameentry = value["nodeName"] ? value["nodeName"] : "No name provided";
-				entry.push(nodenameentry);
-				entry.push(value["nodeId"]);
-				entry.push(value["tierName"]);
-				entry.push(value["mac"]);
-				entry.push(value["ports"]);
-				entry.push(value["portStatus"]);
-				tr.entry = entry;
-				result.push(tr);
-			});
-			return result;
-		}
-	}
+                aTag.innerHTML = nodeNameEntry;
+                entry.push(aTag);
+                entry.push(value["nodeId"]);
+                entry.push(value["ports"]);
+                tr.entry = entry;
+                result.push(tr);
+            });
+            return result;
+        },
+        popout : function(data) {
+            var result = [];
+            $.each(data.nodeData, function(key, value) {
+                var tr = {};
+                // fill up all the td's
+                var entry = [];
+                var nodenameentry = value["nodeName"] ? value["nodeName"] : "No name provided";
+                entry.push(nodenameentry);
+                entry.push(value["nodeId"]);
+                entry.push(value["tierName"]);
+                entry.push(value["mac"]);
+                entry.push(value["ports"]);
+                tr.entry = entry;
+                result.push(tr);
+            });
+            return result;
+        }
+    }
 };
 
 one.f.switchmanager.subnetGatewayConfig = {
-	id: {
-		dashlet: {
-			addIPAddress: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_addIP",
-			addPorts: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_addPorts",
-			removeIPAddress: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_removeIP"
-		}, 
-		modal: {
-			modal: "one_f_switchmanager_subnetGatewayConfig_id_modal_modal",
-			save: "one_f_switchmanager_subnetGatewayConfig_id_modal_save",
-			form: {
-				name : "one_f_switchmanager_subnetGatewayConfig_id_modal_form_gatewayname",
-				gatewayIPAddress : "one_f_switchmanager_subnetGatewayConfig_id_modal_form_gatewayipaddress",
-				nodeId: "one_f_switchmanager_subnetGatewayConfig_id_modal_form_nodeid",
-				ports: "one_f_switchmanager_subnetGatewayConfig_id_modal_form_ports"
-			}
-		}
-	},
-	// device ajax calls
-	dashlet: function($dashlet) {
-		one.lib.dashlet.empty($dashlet);
-		$dashlet.append(one.lib.dashlet.header(one.f.dashlet.subnetGatewayConfig.name));
-		// Add gateway IP Address button
-		var url = one.f.switchmanager.rootUrl + "/subnets";
-		one.f.switchmanager.subnetGatewayConfig.ajax.main(url, {}, function(content) {
+    id: {
+        dashlet: {
+            addIPAddress: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_addIP",
+            addPorts: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_addPorts",
+            removeIPAddress: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_removeIP",
+            datagrid: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_datagrid"
+        }, 
+        modal: {
+            modal: "one_f_switchmanager_subnetGatewayConfig_id_modal_modal",
+            save: "one_f_switchmanager_subnetGatewayConfig_id_modal_save",
+            form: {
+                name : "one_f_switchmanager_subnetGatewayConfig_id_modal_form_gatewayname",
+                gatewayIPAddress : "one_f_switchmanager_subnetGatewayConfig_id_modal_form_gatewayipaddress",
+                nodeId: "one_f_switchmanager_subnetGatewayConfig_id_modal_form_nodeid",
+                ports: "one_f_switchmanager_subnetGatewayConfig_id_modal_form_ports"
+            }
+        }
+    },
+    // device ajax calls
+    dashlet: function($dashlet) {
+        one.lib.dashlet.empty($dashlet);
+        $dashlet.append(one.lib.dashlet.header(one.f.dashlet.subnetGatewayConfig.name));
+        // Add gateway IP Address button
+        var url = one.f.switchmanager.rootUrl + "/subnets";
+        one.f.switchmanager.subnetGatewayConfig.ajax.main(url, {}, function(content) {
 
             if (content.privilege === 'WRITE') {
                 var button = one.lib.dashlet.button.single("Add Gateway IP Address",
@@ -320,7 +410,7 @@ one.f.switchmanager.subnetGatewayConfig = {
                 $button.click(function() {
                     var requestData = {};
                     var gatewaysToDelete = [];
-                    var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
+                    var checkedCheckBoxes = $("#" + one.f.switchmanager.subnetGatewayConfig.id.dashlet.datagrid).find("tbody input:checked")
                     checkedCheckBoxes.each(function(index, value) {
                         gatewaysToDelete.push(checkedCheckBoxes[index].id);
                     });
@@ -349,263 +439,336 @@ one.f.switchmanager.subnetGatewayConfig = {
                 });
                 $dashlet.append($button);
             }
+            var $gridHTML = one.lib.dashlet.datagrid.init(one.f.switchmanager.subnetGatewayConfig.id.dashlet.datagrid, {
+                searchable: true,
+                filterable: false,
+                pagination: true,
+                flexibleRowsPerPage: true
+                }, "table-striped table-condensed");
+            $dashlet.append($gridHTML);
+            var dataSource = one.f.switchmanager.subnetGatewayConfig.data.devicesgrid(content);
+            $("#" + one.f.switchmanager.subnetGatewayConfig.id.dashlet.datagrid).datagrid({dataSource: dataSource});
+        });
+    },
+    ajax : {
+        main : function(url, requestData, callback) {
+            $.getJSON(url, requestData, function(data) {
+                callback(data);
+            });
+        }
+    },
+    registry: {},
+    modal : {
+        initialize: {
+            gateway: function() {
+                var h3 = "Add Gateway IP Address";
+                var footer = one.f.switchmanager.subnetGatewayConfig.modal.footer();
+                var $modal = one.lib.modal.spawn(one.f.switchmanager.subnetGatewayConfig.id.modal.modal, h3, "", footer);
+                // bind save button
+                $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.save, $modal).click(function() {
+                    one.f.switchmanager.subnetGatewayConfig.modal.save.gateway($modal);
+                });
+                var $body = one.f.switchmanager.subnetGatewayConfig.modal.body.gateway();
+                one.lib.modal.inject.body($modal, $body);
+                return $modal;
+            },
+            ports: function() {
+                var h3 = "Add Ports";
+                var footer = one.f.switchmanager.subnetGatewayConfig.modal.footer();
+                var $modal = one.lib.modal.spawn(one.f.switchmanager.subnetGatewayConfig.id.modal.modal, h3, "", footer);
+                // bind save button
+                $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.save, $modal).click(function() {
+                    one.f.switchmanager.subnetGatewayConfig.modal.save.ports($modal);
+                });
+                
+                // TODO: Change to subnetGateway instead.
+                one.f.switchmanager.spanPortConfig.modal.ajax.nodes(function(nodes, nodeports) {
+                    var $body = one.f.switchmanager.subnetGatewayConfig.modal.body.ports(nodes, nodeports);
+                    one.lib.modal.inject.body($modal, $body);
+                });
+                return $modal;
+            }
+        },
+        save: {
+            gateway: function($modal) {
+                var result = {};
+                result['gatewayName'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.name, $modal).val();
+                if(!one.f.switchmanager.validateName(result['gatewayName'])) {
+                    alert("Gateway name can contain upto 255 characters");
+                    return;
+                }
+                result['gatewayIPAddress'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.gatewayIPAddress, $modal).val();
+                one.f.switchmanager.subnetGatewayConfig.modal.ajax.gateway(result, 
+                    function(response) {
+                        if(response.status == true) {
+                            $modal.modal('hide');
+                            one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
+                        } else {
+                            alert(response.message);
+                        }
+                    });
+            },
+            ports: function($modal) {
+                var result = {};
+                var gatewayRegistryIndex = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.name, $modal).val();
+                result['portsName'] = one.f.switchmanager.subnetGatewayConfig.registry.gateways[gatewayRegistryIndex];
+                result['nodeId'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.nodeId, $modal).val();
+                result['ports'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.ports, $modal).val();
+                if(!result['portsName'] || result['portsName'] == "") {
+                    alert("No gateway chosen. Cannot add port");
+                    return;
+                }
+                if(!result['nodeId'] || result['nodeId'] == "") {
+                    alert("Please select a node.");
+                    return;
+                }
+                if(!result['ports'] || result['ports'] == "") {
+                    alert("Please choose a port.");
+                    return;
+                }
+                one.f.switchmanager.subnetGatewayConfig.modal.ajax.ports(result, 
+                    function(response) {
+                        if(response.status == true) {
+                            $modal.modal('hide');
+                            one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
+                        } else {
+                            alert(response.message);
+                        }
+                    });
+            }
+        },
+        body: {
+            gateway: function() {
+                var $form = $(document.createElement('form'));
+                var $fieldset = $(document.createElement('fieldset'));
+                // gateway name
+                var $label = one.lib.form.label("Name");
+                var $input = one.lib.form.input("Name");
+                $input.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.name);
+                $fieldset.append($label).append($input);
+                // gateway IP Mask 
+                var $label = one.lib.form.label("Gateway IP Address/Mask");
+                var $input = one.lib.form.input("Gateway IP Address/Mask");
+                $input.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.gatewayIPAddress);
+                $fieldset.append($label).append($input);
+                
+                $form.append($fieldset);
+                return $form;
+            },
+            ports: function(nodes, nodeports) {
+                var $form = $(document.createElement('form'));
+                var $fieldset = $(document.createElement('fieldset'));
+                // gateways drop down
+                var $label = one.lib.form.label("Gateway Name");
+                var $select = one.lib.form.select.create(one.f.switchmanager.subnetGatewayConfig.registry.gateways);
+                $select.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.name);
+                $select.val($select.find("option:first").val());
+                $fieldset.append($label).append($select);
 
-			var body = one.f.switchmanager.subnetGatewayConfig.data.devices(content);
-			// first column contains checkbox. no need for header
-			content.columnNames.splice(0,0," ");
-			var $table = one.f.switchmanager.createTable(content.columnNames, body);
-			$dashlet.append($table);
-		});
-	},
-	ajax : {
-		main : function(url, requestData, callback) {
-			$.getJSON(url, requestData, function(data) {
-				callback(data);
-			});
-		}
-	},
-	registry: {},
-	modal : {
-		initialize: {
-			gateway: function() {
-				var h3 = "Add Gateway IP Address";
-	            var footer = one.f.switchmanager.subnetGatewayConfig.modal.footer();
-	            var $modal = one.lib.modal.spawn(one.f.switchmanager.subnetGatewayConfig.id.modal.modal, h3, "", footer);
-	            // bind save button
-	            $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.save, $modal).click(function() {
-	            	one.f.switchmanager.subnetGatewayConfig.modal.save.gateway($modal);
-	            });
-	            var $body = one.f.switchmanager.subnetGatewayConfig.modal.body.gateway();
-	            one.lib.modal.inject.body($modal, $body);
-	            return $modal;
-			},
-			ports: function() {
-				var h3 = "Add Ports";
-	            var footer = one.f.switchmanager.subnetGatewayConfig.modal.footer();
-	            var $modal = one.lib.modal.spawn(one.f.switchmanager.subnetGatewayConfig.id.modal.modal, h3, "", footer);
-	            // bind save button
-	            $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.save, $modal).click(function() {
-	            	one.f.switchmanager.subnetGatewayConfig.modal.save.ports($modal);
-	            });
-	            
-	            // TODO: Change to subnetGateway instead.
-	            one.f.switchmanager.spanPortConfig.modal.ajax.nodes(function(nodes, nodeports) {
-	                var $body = one.f.switchmanager.subnetGatewayConfig.modal.body.ports(nodes, nodeports);
-	                one.lib.modal.inject.body($modal, $body);
-	            });
-	            return $modal;
-			}
-		},
-		save: {
-			gateway: function($modal) {
-				var result = {};
-	            result['gatewayName'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.name, $modal).val();
-	            if(!one.f.switchmanager.validateName(result['gatewayName'])) {
-	            	alert("Gateway name can contain upto 255 characters");
-	            	return;
-	            }
-	            result['gatewayIPAddress'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.gatewayIPAddress, $modal).val();
-	            one.f.switchmanager.subnetGatewayConfig.modal.ajax.gateway(result, 
-				  	function(response) {
-	            		if(response.status == true) {
-	            			$modal.modal('hide');
-	            			one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
-	            		} else {
-	            			alert(response.message);
-	            		}
-		            });
-			},
-			ports: function($modal) {
-				var result = {};
-				var gatewayRegistryIndex = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.name, $modal).val();
-	            result['portsName'] = one.f.switchmanager.subnetGatewayConfig.registry.gateways[gatewayRegistryIndex];
-	            result['nodeId'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.nodeId, $modal).val();
-	            result['ports'] = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.ports, $modal).val();
-	            if(!result['portsName'] || result['portsName'] == "") {
-	            	alert("No gateway chosen. Cannot add port");
-	            	return;
-	            }
-	            if(!result['nodeId'] || result['nodeId'] == "") {
-	            	alert("Please select a node.");
-	            	return;
-	            }
-	            if(!result['ports'] || result['ports'] == "") {
-	            	alert("Please choose a port.");
-	            	return;
-	            }
-	            one.f.switchmanager.subnetGatewayConfig.modal.ajax.ports(result, 
-				  	function(response) {
-	            		if(response.status == true) {
-	            			$modal.modal('hide');
-	            			one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
-	            		} else {
-	            			alert(response.message);
-	            		}
-		        	});
-			}
-		},
-		body: {
-			gateway: function() {
-				var $form = $(document.createElement('form'));
-				var $fieldset = $(document.createElement('fieldset'));
-				// gateway name
-				var $label = one.lib.form.label("Name");
-				var $input = one.lib.form.input("Name");
-				$input.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.name);
-				$fieldset.append($label).append($input);
-				// gateway IP Mask 
-				var $label = one.lib.form.label("Gateway IP Address/Mask");
-				var $input = one.lib.form.input("Gateway IP Address/Mask");
-				$input.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.gatewayIPAddress);
-				$fieldset.append($label).append($input);
-				
-				$form.append($fieldset);
-				return $form;
-			},
-			ports: function(nodes, nodeports) {
-				var $form = $(document.createElement('form'));
-				var $fieldset = $(document.createElement('fieldset'));
-				// gateways drop down
-				var $label = one.lib.form.label("Gateway Name");
-				var $select = one.lib.form.select.create(one.f.switchmanager.subnetGatewayConfig.registry.gateways);
-				$select.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.name);
-				$select.val($select.find("option:first").val());
-				$fieldset.append($label).append($select);
+                // node ID
+                var $label = one.lib.form.label("Node ID");
+                var $select = one.lib.form.select.create(nodes);
+                $select.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.nodeId);
+                one.lib.form.select.prepend($select, { '' : 'Please Select a Node' });
+                $select.val($select.find("option:first").val());
+                $fieldset.append($label).append($select);
 
-				// node ID
-				var $label = one.lib.form.label("Node ID");
-				var $select = one.lib.form.select.create(nodes);
-				$select.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.nodeId);
-				one.lib.form.select.prepend($select, { '' : 'Please Select a Node' });
-				$select.val($select.find("option:first").val());
-				$fieldset.append($label).append($select);
+                // bind onchange
+                $select.change(function() {
+                    // retrieve port value
+                    var node = $(this).find('option:selected').attr('value');
+                    one.f.switchmanager.subnetGatewayConfig.registry['currentNode'] = node;
+                    var $ports = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.ports);
+                    var ports = nodeports[node];
+                    one.lib.form.select.inject($ports, ports);
+                    one.lib.form.select.prepend($ports, { '' : 'Please Select a Port' });
+                    $ports.val($ports.find("option:first").val());
+                });
 
-				// bind onchange
-				$select.change(function() {
-				    // retrieve port value
-				    var node = $(this).find('option:selected').attr('value');
-				    one.f.switchmanager.subnetGatewayConfig.registry['currentNode'] = node;
-				    var $ports = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.ports);
-				    var ports = nodeports[node];
-				    one.lib.form.select.inject($ports, ports);
-				    one.lib.form.select.prepend($ports, { '' : 'Please Select a Port' });
-				    $ports.val($ports.find("option:first").val());
-				});
-
-				// ports
-				var $label = one.lib.form.label("Select Port");
-				var $select = one.lib.form.select.create();
-				$select.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.ports);
-				$fieldset.append($label).append($select);
-				
-				$form.append($fieldset);
-				return $form;
-			}
-		},
-		ajax: {
-			gateway: function(requestData, callback) {
-				$.getJSON(one.f.switchmanager.rootUrl + "/subnetGateway/add", requestData, function(data) {
-					callback(data);
-			});
-			},
-			ports: function(requestData, callback) {
-				$.getJSON(one.f.switchmanager.rootUrl + "/subnetGateway/ports/add", requestData, function(data) {
-					callback(data);
-			});
-			}
-		},
-		footer : function() {
+                // ports
+                var $label = one.lib.form.label("Select Port");
+                var $select = one.lib.form.select.create();
+                $select.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.ports);
+                $fieldset.append($label).append($select);
+                
+                $form.append($fieldset);
+                return $form;
+            }
+        },
+        ajax: {
+            gateway: function(requestData, callback) {
+                $.getJSON(one.f.switchmanager.rootUrl + "/subnetGateway/add", requestData, function(data) {
+                    callback(data);
+            });
+            },
+            ports: function(requestData, callback) {
+                $.getJSON(one.f.switchmanager.rootUrl + "/subnetGateway/ports/add", requestData, function(data) {
+                    callback(data);
+            });
+            }
+        },
+        footer : function() {
             var footer = [];
             var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.subnetGatewayConfig.id.modal.save, "btn-success", "");
             var $saveButton = one.lib.dashlet.button.button(saveButton);
             footer.push($saveButton);
             return footer;
         }
-	},
-	// data functions
-	data : {
-		devices : function(data) {
-			var result = [];
-			one.f.switchmanager.subnetGatewayConfig.registry.gateways = [];
-			$.each(data.nodeData, function(key, value) {
-				var tr = {};
-				// fill up all the td's
-				var subnetConfigObject = $.parseJSON(value["json"]);
-				var nodePorts = subnetConfigObject.nodePorts;
-				var $nodePortsContainer = $(document.createElement("div"));
-				
-				for(var i = 0; i < nodePorts.length; i++) {
-					var nodePort = nodePorts[i];
-					$nodePortsContainer.append(nodePort + " ");
-					// add delete anchor tag to delete ports
-					var aTag = document.createElement("a");
-					aTag.setAttribute("id", encodeURIComponent(nodePort));
-					aTag.gatewayName = value["name"];
-					aTag.addEventListener("click", function(evt) {
-						var htmlPortAnchor = evt.target;
-						var requestData = {};
-						requestData["gatewayName"] = evt.target.gatewayName;
-						requestData["nodePort"] = decodeURIComponent(evt.target.id);
-						// make ajax call to delete port
-						var url = one.f.switchmanager.rootUrl + "/subnetGateway/ports/delete";
-		        		one.f.switchmanager.subnetGatewayConfig.ajax.main(url, requestData, function(response) {
-		        			if(response.status == true) {
-		        				// refresh dashlet by passing dashlet div as param
-		                    	one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
-		        			} else {
-		        				alert(response.message);
-		        			}
-		        		});
-						
-					});
-					aTag.addEventListener("mouseover", function(evt) {
-						evt.target.style.cursor = "pointer";
-					}, false);
-					aTag.innerHTML = "Delete";
-					$nodePortsContainer.append(aTag);
-					$nodePortsContainer.append("<br/>");
-				}
+    },
+    // data functions
+    data : {
+        devicesgrid: function(data) {
+            one.f.switchmanager.subnetGatewayConfig.registry.gateways = [];
+            var source = new StaticDataSource({
+                    columns: [
+                        {
+                            property: 'selector',
+                            label: ' ',
+                            sortable: false
+                        },
+                        {
+                            property: 'name',
+                            label: 'Name',
+                            sortable: true
+                        },
+                        {
+                            property: 'subnet',
+                            label: 'Gateway IP Address/Mask',
+                            sortable: true
+                        },
+                        {
+                            property: 'json',
+                            label: 'Node/Ports',
+                            sortable: false
+                        }
+                    ],
+                    data: data.nodeData,
+                    formatter: function(items) {
+                        $.each(items, function(index, tableRow) {
+                            tableRow["selector"] = '<input type="checkbox" id=' + tableRow["name"] + '></input>';
+                            var json = tableRow["json"];
+                            var subnetConfigObject = JSON.parse(json);
+                            var nodePortHtml = "<div>";
+                            $.each(subnetConfigObject.nodePorts, function(index, nodePort) {
+                                nodePortHtml += nodePort;
+                                nodePortHtml += "&nbsp;";
+                                nodePortHtml += '<a href="#" id=' + encodeURIComponent(nodePort) + 
+                                    ' gatewayName=' + tableRow["name"] + 
+                                    ' onclick="javascript:one.f.switchmanager.subnetGatewayConfig.actions.deleteNodePort(this);">Delete</a>';
+                                nodePortHtml += "<br/>";
+                            });
+                            nodePortHtml += "</div>";
+                            tableRow["json"] = nodePortHtml;
+                        });
 
-				// store gateways in the registry so that they can be used in the add ports popup
-				one.f.switchmanager.subnetGatewayConfig.registry.gateways.push(value["name"]);
-				var entry = [];
-				var checkbox = document.createElement("input");
-				checkbox.setAttribute("type", "checkbox");
-				checkbox.setAttribute("id", value["name"]);
-				entry.push(checkbox);
-				entry.push(value["name"]);
-				entry.push(value["subnet"]);
-				entry.push($nodePortsContainer);
-				tr.entry = entry;
-				result.push(tr);
-			});
-			return result;
-		}
-	}
+                    },
+                    delay: 0
+                });
+                // populate the registry with subnet names
+                one.f.switchmanager.subnetGatewayConfig.registry.gateways = [];
+                $.each(data.nodeData, function(key, value) {
+                    one.f.switchmanager.subnetGatewayConfig.registry.gateways.push(value["name"]);
+                });
+                return source;          
+        },
+        devices : function(data) {
+            var result = [];
+            one.f.switchmanager.subnetGatewayConfig.registry.gateways = [];
+            $.each(data.nodeData, function(key, value) {
+                var tr = {};
+                // fill up all the td's
+                var subnetConfigObject = $.parseJSON(value["json"]);
+                var nodePorts = subnetConfigObject.nodePorts;
+                var $nodePortsContainer = $(document.createElement("div"));
+                
+                for(var i = 0; i < nodePorts.length; i++) {
+                    var nodePort = nodePorts[i];
+                    $nodePortsContainer.append(nodePort + " ");
+                    // add delete anchor tag to delete ports
+                    var aTag = document.createElement("a");
+                    aTag.setAttribute("id", encodeURIComponent(nodePort));
+                    aTag.gatewayName = value["name"];
+                    aTag.addEventListener("click", function(evt) {
+                        var htmlPortAnchor = evt.target;
+                        var requestData = {};
+                        requestData["gatewayName"] = evt.target.gatewayName;
+                        requestData["nodePort"] = decodeURIComponent(evt.target.id);
+                        // make ajax call to delete port
+                        var url = one.f.switchmanager.rootUrl + "/subnetGateway/ports/delete";
+                        one.f.switchmanager.subnetGatewayConfig.ajax.main(url, requestData, function(response) {
+                            if(response.status == true) {
+                                // refresh dashlet by passing dashlet div as param
+                                one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
+                            } else {
+                                alert(response.message);
+                            }
+                        });
+                        
+                    });
+                    aTag.addEventListener("mouseover", function(evt) {
+                        evt.target.style.cursor = "pointer";
+                    }, false);
+                    aTag.innerHTML = "Delete";
+                    $nodePortsContainer.append(aTag);
+                    $nodePortsContainer.append("<br/>");
+                }
+
+                // store gateways in the registry so that they can be used in the add ports popup
+                one.f.switchmanager.subnetGatewayConfig.registry.gateways.push(value["name"]);
+                var entry = [];
+                var checkbox = document.createElement("input");
+                checkbox.setAttribute("type", "checkbox");
+                checkbox.setAttribute("id", value["name"]);
+                entry.push(checkbox);
+                entry.push(value["name"]);
+                entry.push(value["subnet"]);
+                entry.push($nodePortsContainer);
+                tr.entry = entry;
+                result.push(tr);
+            });
+            return result;
+        }
+    },
+    actions: {
+        deleteNodePort: function(htmlPortAnchor) {
+            var requestData = {};
+            requestData["gatewayName"] = htmlPortAnchor.getAttribute("gatewayName");
+            requestData["nodePort"] = decodeURIComponent(htmlPortAnchor.id);
+            // make ajax call to delete port
+            var url = one.f.switchmanager.rootUrl + "/subnetGateway/ports/delete";
+            one.f.switchmanager.subnetGatewayConfig.ajax.main(url, requestData, function(response) {
+                if(response.status == true) {
+                    // refresh dashlet by passing dashlet div as param
+                    one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
+                } else {
+                    alert(response.message);
+                }
+            });
+        }
+    }
 }
 
 one.f.switchmanager.staticRouteConfig = {
-	id: {
-		dashlet: {
-			add: "one_f_switchmanager_staticRouteConfig_id_dashlet_add",
-			remove: "one_f_switchmanager_staticRouteConfig_id_dashlet_remove"
-		}, 
-		modal: {
-			modal: "one_f_switchmanager_staticRouteConfig_id_modal_modal",
-			save: "one_f_switchmanager_staticRouteConfig_id_modal_save",
-			form: {
-				routeName : "one_f_switchmanager_staticRouteConfig_id_modal_form_routename",
-				staticRoute : "one_f_switchmanager_staticRouteConfig_id_modal_form_staticroute",
+    id: {
+        dashlet: {
+            add: "one_f_switchmanager_staticRouteConfig_id_dashlet_add",
+            remove: "one_f_switchmanager_staticRouteConfig_id_dashlet_remove",
+            datagrid: "one_f_switchmanager_staticRouteConfig_id_dashlet_datagrid"
+        }, 
+        modal: {
+            modal: "one_f_switchmanager_staticRouteConfig_id_modal_modal",
+            save: "one_f_switchmanager_staticRouteConfig_id_modal_save",
+            form: {
+                routeName : "one_f_switchmanager_staticRouteConfig_id_modal_form_routename",
+                staticRoute : "one_f_switchmanager_staticRouteConfig_id_modal_form_staticroute",
                 nextHop : "one_f_switchmanager_staticRouteConfig_id_modal_form_nexthop",
-			}
-		}
-	},
-	dashlet: function($dashlet) {
-		one.lib.dashlet.empty($dashlet);
-		
-
-		var url = one.f.switchmanager.rootUrl + "/staticRoutes";
-		one.f.switchmanager.staticRouteConfig.ajax.main(url, {}, function(content) {
+            }
+        }
+    },
+    dashlet: function($dashlet) {
+        one.lib.dashlet.empty($dashlet);
+        var url = one.f.switchmanager.rootUrl + "/staticRoutes";
+        one.f.switchmanager.staticRouteConfig.ajax.main(url, {}, function(content) {
 
             if (content.privilege === 'WRITE') {
                 // Add static route button
@@ -624,7 +787,8 @@ one.f.switchmanager.staticRouteConfig = {
                 $button.click(function() {
                     var requestData = {};
                     var routesToDelete = [];
-                    var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
+                    //var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
+                    var checkedCheckBoxes = $("#" + one.f.switchmanager.staticRouteConfig.id.dashlet.datagrid).find("tbody input:checked");
                     checkedCheckBoxes.each(function(index, value) {
                         routesToDelete.push(checkedCheckBoxes[index].id);
                     });
@@ -643,138 +807,176 @@ one.f.switchmanager.staticRouteConfig = {
                 });
                 $dashlet.append($button);
             }
-
-			var body = one.f.switchmanager.staticRouteConfig.data.staticRouteConfig(content);
-			// first column contains checkbox. no need for header
-			content.columnNames.splice(0,0," ");
-			var tableHeaders = ['', 'Name', 'Static Route', 'Next Hop Address'];
-			var $table = one.f.switchmanager.createTable(tableHeaders, body);
-			$dashlet.append($table);
-		});
-	},
-	// device ajax calls
-	ajax : {
-		main : function(url, requestData, callback) {
-			$.getJSON(url, requestData, function(data) {
-				callback(data);
-			});
-		}
-	},
-	registry: {},
-	modal : {
-		initialize: function() {
-			var h3 = "Add Static Route";
+            var $gridHTML = one.lib.dashlet.datagrid.init(one.f.switchmanager.staticRouteConfig.id.dashlet.datagrid, {
+                searchable: true,
+                filterable: false,
+                pagination: true,
+                flexibleRowsPerPage: true
+                }, "table-striped table-condensed");
+            $dashlet.append($gridHTML);
+            var dataSource = one.f.switchmanager.staticRouteConfig.data.staticRouteConfigGrid(content);
+            $("#" + one.f.switchmanager.staticRouteConfig.id.dashlet.datagrid).datagrid({dataSource: dataSource});
+        });
+    },
+    // device ajax calls
+    ajax : {
+        main : function(url, requestData, callback) {
+            $.getJSON(url, requestData, function(data) {
+                callback(data);
+            });
+        }
+    },
+    registry: {},
+    modal : {
+        initialize: function() {
+            var h3 = "Add Static Route";
             var footer = one.f.switchmanager.staticRouteConfig.modal.footer();
             var $modal = one.lib.modal.spawn(one.f.switchmanager.staticRouteConfig.id.modal.modal, h3, "", footer);
             // bind save button
             $('#' + one.f.switchmanager.staticRouteConfig.id.modal.save, $modal).click(function() {
-            	one.f.switchmanager.staticRouteConfig.modal.save($modal);
+                one.f.switchmanager.staticRouteConfig.modal.save($modal);
             });
             var $body = one.f.switchmanager.staticRouteConfig.modal.body();
             one.lib.modal.inject.body($modal, $body);
             return $modal;
-		},
-		save: function($modal) {
-			var result = {};
+        },
+        save: function($modal) {
+            var result = {};
             result['routeName'] = $('#' + one.f.switchmanager.staticRouteConfig.id.modal.form.routeName, $modal).val();
             result['staticRoute'] = $('#' + one.f.switchmanager.staticRouteConfig.id.modal.form.staticRoute, $modal).val();
             result['nextHop'] = $('#' + one.f.switchmanager.staticRouteConfig.id.modal.form.nextHop, $modal).val();
-			one.f.switchmanager.staticRouteConfig.modal.ajax.staticRouteConfig(result, function(response) {
-	                if(response.status == true) {
-	                	$modal.modal('hide');
-	                	// refresh dashlet by passing dashlet div as param
-	                	one.f.switchmanager.staticRouteConfig.dashlet($("#left-bottom .dashlet"));
-	                } else {
-	                	// TODO: Show error message in a error message label instead.
-	                	alert(response.message);
-	                }
-	            });
-		},
-		body: function() {
-			var $form = $(document.createElement('form'));
-			var $fieldset = $(document.createElement('fieldset'));
-			// static route name
-			var $label = one.lib.form.label("Name");
-			var $input = one.lib.form.input("Name");
-			$input.attr('id', one.f.switchmanager.staticRouteConfig.id.modal.form.routeName);
-			$fieldset.append($label).append($input);
-			// static route IP Mask 
-			var $label = one.lib.form.label("Static Route");
-			var $input = one.lib.form.input("Static Route");
-			$input.attr('id', one.f.switchmanager.staticRouteConfig.id.modal.form.staticRoute);
-			$fieldset.append($label).append($input);
-			// static route IP Mask 
-			var $label = one.lib.form.label("Next Hop");
-			var $input = one.lib.form.input("Next Hop");
-			$input.attr('id', one.f.switchmanager.staticRouteConfig.id.modal.form.nextHop);
-			$fieldset.append($label).append($input);
-			// return
-			$form.append($fieldset);
-			return $form;
-		},
-		ajax: {
-			staticRouteConfig: function(requestData, callback) {
-				$.getJSON(one.f.switchmanager.rootUrl + "/staticRoute/add", requestData, function(data) {
-					callback(data);
-				});
-			}
-		},
-		data : {
+            one.f.switchmanager.staticRouteConfig.modal.ajax.staticRouteConfig(result, function(response) {
+                    if(response.status == true) {
+                        $modal.modal('hide');
+                        // refresh dashlet by passing dashlet div as param
+                        one.f.switchmanager.staticRouteConfig.dashlet($("#left-bottom .dashlet"));
+                    } else {
+                        // TODO: Show error message in a error message label instead.
+                        alert(response.message);
+                    }
+                });
+        },
+        body: function() {
+            var $form = $(document.createElement('form'));
+            var $fieldset = $(document.createElement('fieldset'));
+            // static route name
+            var $label = one.lib.form.label("Name");
+            var $input = one.lib.form.input("Name");
+            $input.attr('id', one.f.switchmanager.staticRouteConfig.id.modal.form.routeName);
+            $fieldset.append($label).append($input);
+            // static route IP Mask 
+            var $label = one.lib.form.label("Static Route");
+            var $input = one.lib.form.input("Static Route");
+            $input.attr('id', one.f.switchmanager.staticRouteConfig.id.modal.form.staticRoute);
+            $fieldset.append($label).append($input);
+            // static route IP Mask 
+            var $label = one.lib.form.label("Next Hop");
+            var $input = one.lib.form.input("Next Hop");
+            $input.attr('id', one.f.switchmanager.staticRouteConfig.id.modal.form.nextHop);
+            $fieldset.append($label).append($input);
+            // return
+            $form.append($fieldset);
+            return $form;
+        },
+        ajax: {
+            staticRouteConfig: function(requestData, callback) {
+                $.getJSON(one.f.switchmanager.rootUrl + "/staticRoute/add", requestData, function(data) {
+                    callback(data);
+                });
+            }
+        },
+        data : {
             
         },
-		footer : function() {
+        footer : function() {
             var footer = [];
             var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.staticRouteConfig.id.modal.save, "btn-success", "");
             var $saveButton = one.lib.dashlet.button.button(saveButton);
             footer.push($saveButton);
             return footer;
         }
-	},
-	// data functions
-	data : {
-		staticRouteConfig : function(data) {
-			var result = [];
-			$.each(data.nodeData, function(key, value) {
-				var tr = {};
-				// fill up all the td's
-				var entry = [];
-				var checkbox = document.createElement("input");
-				checkbox.setAttribute("type", "checkbox");
-				checkbox.setAttribute("id", value["name"]);
-				entry.push(checkbox);
-				entry.push(value["name"]);
-				entry.push(value["staticRoute"]);
-				entry.push(value["nextHop"]);
-				tr.entry = entry;
-				result.push(tr);
-			});
-			return result;
-		}
-	}
+    },
+    // data functions
+    data : {
+        staticRouteConfigGrid: function(data) {
+            var source = new StaticDataSource({
+                    columns: [
+                        {
+                            property: 'selector',
+                            label: ' ',
+                            sortable: false
+                        },
+                        {
+                            property: 'name',
+                            label: 'Name',
+                            sortable: true
+                        },
+                        {
+                            property: 'staticRoute',
+                            label: 'Static Route',
+                            sortable: true
+                        },
+                        {
+                            property: 'nextHop',
+                            label: 'Next Hop Address',
+                            sortable: true
+                        }
+                    ],
+                    data: data.nodeData,
+                    formatter: function(items) {
+                        $.each(items, function(index, item) {
+                            item["selector"] = '<input type="checkbox" id=' + item["name"] + '></input>';
+                        });
+
+                    },
+                    delay: 0
+                });
+            return source;              
+        },
+        staticRouteConfig : function(data) {
+            var result = [];
+            $.each(data.nodeData, function(key, value) {
+                var tr = {};
+                // fill up all the td's
+                var entry = [];
+                var checkbox = document.createElement("input");
+                checkbox.setAttribute("type", "checkbox");
+                checkbox.setAttribute("id", value["name"]);
+                entry.push(checkbox);
+                entry.push(value["name"]);
+                entry.push(value["staticRoute"]);
+                entry.push(value["nextHop"]);
+                tr.entry = entry;
+                result.push(tr);
+            });
+            return result;
+        }
+    }
 }
 
 one.f.switchmanager.spanPortConfig = {
-	id: {
-		dashlet: {
-			add: "one_f_switchmanager_spanPortConfig_id_dashlet_add",
-			remove: "one_f_switchmanager_spanPortConfig_id_dashlet_remove"
-		}, 
-		modal: {
-			modal: "one_f_switchmanager_spanPortConfig_id_modal_modal",
-			save: "one_f_switchmanager_spanPortConfig_id_modal_save",
-			form: {
-				name : "one_f_switchmanager_spanPortConfig_id_modal_form_name",
-				nodes : "one_f_switchmanager_spanPortConfig_id_modal_form_nodes",
+    id: {
+        dashlet: {
+            add: "one_f_switchmanager_spanPortConfig_id_dashlet_add",
+            remove: "one_f_switchmanager_spanPortConfig_id_dashlet_remove",
+            datagrid: "one_f_switchmanager_spanPortConfig_id_dashlet_datagrid"
+        }, 
+        modal: {
+            modal: "one_f_switchmanager_spanPortConfig_id_modal_modal",
+            save: "one_f_switchmanager_spanPortConfig_id_modal_save",
+            form: {
+                name : "one_f_switchmanager_spanPortConfig_id_modal_form_name",
+                nodes : "one_f_switchmanager_spanPortConfig_id_modal_form_nodes",
                 port : "one_f_switchmanager_spanPortConfig_id_modal_form_port",
-			}
-		}
-	},
-	dashlet: function($dashlet) {
-		one.lib.dashlet.empty($dashlet);
+            }
+        }
+    },
+    dashlet: function($dashlet) {
+        one.lib.dashlet.empty($dashlet);
         
         //populate table in dashlet
-		var url = one.f.switchmanager.rootUrl + "/spanPorts";
-		one.f.switchmanager.spanPortConfig.ajax.main(url, {}, function(content) {
+        var url = one.f.switchmanager.rootUrl + "/spanPorts";
+        one.f.switchmanager.spanPortConfig.ajax.main(url, {}, function(content) {
 
             if (content.privilege === 'WRITE') {
 
@@ -794,11 +996,11 @@ one.f.switchmanager.spanPortConfig = {
                 var $button = one.lib.dashlet.button.button(button);
                 $button.click(function() {
 
-                    var checkedCheckBoxes = $("input:checked", $(this).closest(".dashlet").find("table"));
+                    var checkedCheckBoxes = $("#" + one.f.switchmanager.spanPortConfig.id.dashlet.datagrid).find("tbody input:checked");
                     if (checkedCheckBoxes.length > 0) {
                         var spanPortsToDelete = "";
                         checkedCheckBoxes.each(function(index, value) {
-                            spanPortsToDelete += checkedCheckBoxes[index].spanPort + "###";
+                            spanPortsToDelete += decodeURIComponent(checkedCheckBoxes[index].getAttribute("spanPort")) + "###";
                         });
 
                         var requestData = {};
@@ -816,31 +1018,37 @@ one.f.switchmanager.spanPortConfig = {
                 });
                 $dashlet.append($button);
             }
+            var $gridHTML = one.lib.dashlet.datagrid.init(one.f.switchmanager.spanPortConfig.id.dashlet.datagrid, {
+                searchable: true,
+                filterable: false,
+                pagination: true,
+                flexibleRowsPerPage: true
+                }, "table-striped table-condensed");
+            $dashlet.append($gridHTML);
+            var dataSource = one.f.switchmanager.spanPortConfig.data.spanPortConfigGrid(content);
+            $("#" + one.f.switchmanager.spanPortConfig.id.dashlet.datagrid).datagrid({dataSource: dataSource});
 
-			var body = one.f.switchmanager.spanPortConfig.data.devices(content);
-			// first column contains the checkbox. no header required.
-			content.columnNames.splice(0,0," ");
-			var $table = one.f.switchmanager.createTable(content.columnNames, body);
-			$dashlet.append($table);
-		});
-	},
-	// device ajax calls
-	ajax : {
-		main : function(url, requestData, callback) {
-			$.getJSON(url, requestData, function(data) {
-				callback(data);
-			});
-		}
-	},
-	registry: {},
-	modal : {
-		initialize: function() {
-			var h3 = "Add SPAN Port";
+
+
+        });
+    },
+    // device ajax calls
+    ajax : {
+        main : function(url, requestData, callback) {
+            $.getJSON(url, requestData, function(data) {
+                callback(data);
+            });
+        }
+    },
+    registry: {},
+    modal : {
+        initialize: function() {
+            var h3 = "Add SPAN Port";
             var footer = one.f.switchmanager.spanPortConfig.modal.footer();
             var $modal = one.lib.modal.spawn(one.f.switchmanager.spanPortConfig.id.modal.modal, h3, "", footer);
             // bind save button
             $('#' + one.f.switchmanager.spanPortConfig.id.modal.save, $modal).click(function() {
-            	one.f.switchmanager.spanPortConfig.modal.save($modal);
+                one.f.switchmanager.spanPortConfig.modal.save($modal);
             });
 
             one.f.switchmanager.spanPortConfig.modal.ajax.nodes(function(nodes, nodeports) {
@@ -848,70 +1056,70 @@ one.f.switchmanager.spanPortConfig = {
                 one.lib.modal.inject.body($modal, $body);
             });
             return $modal;
-		},
-		save: function($modal) {
-			var result = {};
+        },
+        save: function($modal) {
+            var result = {};
             result['nodeId'] = $('#' + one.f.switchmanager.spanPortConfig.id.modal.form.nodes, $modal).val();
             result['spanPort'] = $('#' + one.f.switchmanager.spanPortConfig.id.modal.form.port, $modal).val();
-			one.f.switchmanager.spanPortConfig.modal.ajax.saveSpanPortConfig(result, 
-				function(response) {
-					if(response.status == true) {
-						$modal.modal('hide');
-						one.f.switchmanager.spanPortConfig.dashlet($("#right-bottom .dashlet"));
-					} else {
-						alert(response.message);
-					}
-	                
-	            });
-		},
-		body: function(nodes, nodeports) {
-			var $form = $(document.createElement('form'));
-			var $fieldset = $(document.createElement('fieldset'));
-			// node
-			var $label = one.lib.form.label("Node");
-			var $select = one.lib.form.select.create(nodes);
-			one.lib.form.select.prepend($select, { '' : 'Please Select a Node' });
-			$select.attr('id', one.f.switchmanager.spanPortConfig.id.modal.form.nodes);
-			
-			// bind onchange
-			$select.change(function() {
-			    // retrieve port value
-			    var node = $(this).find('option:selected').attr('value');
-			    one.f.switchmanager.spanPortConfig.registry['currentNode'] = node;
-			    var $ports = $('#' + one.f.switchmanager.spanPortConfig.id.modal.form.port);
-			    var ports = nodeports[node];
-			    one.lib.form.select.inject($ports, ports);
-			});
+            one.f.switchmanager.spanPortConfig.modal.ajax.saveSpanPortConfig(result, 
+                function(response) {
+                    if(response.status == true) {
+                        $modal.modal('hide');
+                        one.f.switchmanager.spanPortConfig.dashlet($("#right-bottom .dashlet"));
+                    } else {
+                        alert(response.message);
+                    }
+                    
+                });
+        },
+        body: function(nodes, nodeports) {
+            var $form = $(document.createElement('form'));
+            var $fieldset = $(document.createElement('fieldset'));
+            // node
+            var $label = one.lib.form.label("Node");
+            var $select = one.lib.form.select.create(nodes);
+            one.lib.form.select.prepend($select, { '' : 'Please Select a Node' });
+            $select.attr('id', one.f.switchmanager.spanPortConfig.id.modal.form.nodes);
+            
+            // bind onchange
+            $select.change(function() {
+                // retrieve port value
+                var node = $(this).find('option:selected').attr('value');
+                one.f.switchmanager.spanPortConfig.registry['currentNode'] = node;
+                var $ports = $('#' + one.f.switchmanager.spanPortConfig.id.modal.form.port);
+                var ports = nodeports[node];
+                one.lib.form.select.inject($ports, ports);
+            });
 
             $fieldset.append($label).append($select);
-			// input port
-			var $label = one.lib.form.label("Input Port");
-			var $select = one.lib.form.select.create();
-			$select.attr('id', one.f.switchmanager.spanPortConfig.id.modal.form.port);
-			$fieldset.append($label).append($select);
-			
-			// return
-			$form.append($fieldset);
-			return $form;
-		},
-		ajax: {
-			nodes: function(callback) {
-				$.getJSON(one.f.switchmanager.rootUrl + "/nodeports", function(data) {
+            // input port
+            var $label = one.lib.form.label("Input Port");
+            var $select = one.lib.form.select.create();
+            $select.attr('id', one.f.switchmanager.spanPortConfig.id.modal.form.port);
+            $fieldset.append($label).append($select);
+            
+            // return
+            $form.append($fieldset);
+            return $form;
+        },
+        ajax: {
+            nodes: function(callback) {
+                $.getJSON(one.f.switchmanager.rootUrl + "/nodeports", function(data) {
                     var nodes = one.f.switchmanager.spanPortConfig.modal.data.nodes(data);
                     var nodeports = data;
                     one.f.switchmanager.spanPortConfig.registry['nodeports'] = nodeports;
                     callback(nodes, nodeports);
                 });
-			},
-			saveSpanPortConfig: function(requestData, callback) {
-				var resource = {};
-				resource["jsonData"] = JSON.stringify(requestData);
-				$.getJSON(one.f.switchmanager.rootUrl + "/spanPorts/add", resource, function(data) {
-					callback(data);
-				});
-			}
-		},
-		data : {
+            },
+            saveSpanPortConfig: function(requestData, callback) {
+                var resource = {};
+                resource["jsonData"] = JSON.stringify(requestData);
+                $.getJSON(one.f.switchmanager.rootUrl + "/spanPorts/add", resource, function(data) {
+                    callback(data);
+                });
+            }
+        },
+        data : {
             nodes : function(data) {
                 result = {};
                 $.each(data, function(key, value) {
@@ -920,34 +1128,63 @@ one.f.switchmanager.spanPortConfig = {
                 return result;
             }
         },
-		footer : function() {
+        footer : function() {
             var footer = [];
             var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.spanPortConfig.id.modal.save, "btn-success", "");
             var $saveButton = one.lib.dashlet.button.button(saveButton);
             footer.push($saveButton);
             return footer;
         }
-	},
-	// data functions
-	data : {
-		devices : function(data) {
-			var result = [];
-			$.each(data.nodeData, function(key, value) {
-				var tr = {};
-				// fill up all the td's
-				var entry = [];
-				var checkbox = document.createElement("input");
-				checkbox.setAttribute("type", "checkbox");
-				checkbox.spanPort = value.json;
-				entry.push(checkbox);
-				entry.push(value["nodeName"]);
-				entry.push(value["spanPort"]);
-				tr.entry = entry;
-				result.push(tr);
-			});
-			return result;
-		}
-	}
+    },
+    // data functions
+    data : {
+        spanPortConfigGrid: function(data) {
+            var source = new StaticDataSource({
+                    columns: [
+                        {
+                            property: 'selector',
+                            label: ' ',
+                            sortable: false
+                        },
+                        {
+                            property: 'nodeName',
+                            label: 'Node',
+                            sortable: true
+                        },
+                        {
+                            property: 'spanPort',
+                            label: 'span Port',
+                            sortable: true
+                        },
+                    ],
+                    data: data.nodeData,
+                    formatter: function(items) {
+                        $.each(items, function(index, item) {
+                            item["selector"] = '<input type="checkbox" spanPort=' + encodeURIComponent(item["json"]) + '></input>';
+                        });
+                    },
+                    delay: 0
+                });
+            return source;              
+        },
+        devices : function(data) {
+            var result = [];
+            $.each(data.nodeData, function(key, value) {
+                var tr = {};
+                // fill up all the td's
+                var entry = [];
+                var checkbox = document.createElement("input");
+                checkbox.setAttribute("type", "checkbox");
+                checkbox.spanPort = value.json;
+                entry.push(checkbox);
+                entry.push(value["nodeName"]);
+                entry.push(value["spanPort"]);
+                tr.entry = entry;
+                result.push(tr);
+            });
+            return result;
+        }
+    }
 }
 
 /** INIT **/
@@ -968,20 +1205,27 @@ $(one.f.menu.right.bottom).each(function(index, value) {
 });
 
 one.f.addPopOut = function() {
-	$img1 = $(document.createElement("img"));
-	$img1.attr("src", "/img/Expand16T.png");
-	$img1.attr("style", "float: right;");
-	$img1.hover(function() {
-		$img1.css("cursor", "pointer");
-	});
-	$img1.click(function() {
-		var $modal = one.f.switchmanager.nodesLearnt.modal.initialize.popout();
-    	$modal.css('width', 'auto');
-		$modal.css('margin-left', '-40%');
+    $img1 = $(document.createElement("img"));
+    $img1.attr("src", "/img/Expand16T.png");
+    $img1.attr("style", "float: right;");
+    $img1.hover(function() {
+        $img1.css("cursor", "pointer");
+    });
+    $img1.click(function() {
+        var $modal = one.f.switchmanager.nodesLearnt.modal.initialize.popout();
+        $modal.css({
+            'margin-left': '-45%',
+            'margin-top': '-3%',
+            'width':$(document).width() * 0.8,
+            'height':$(document).height() * 0.9
+        });
+        $(".modal-body", $modal).css({
+            "max-height": $(document).height() * 0.75,
+        });
         $modal.modal();
-	});
-	$dash1 = $($("#left-top .nav")[0]);
-	$dash1.append($img1);
+    });
+    $dash1 = $($("#left-top .nav")[0]);
+    $dash1.append($img1);
 };
 one.f.addPopOut();
 
@@ -1001,16 +1245,16 @@ $('.dash .nav a', '#main').click(function() {
     var menu = one.f.dashlet;
     switch (id) {
         case menu.nodesLearnt.id:
-        	one.f.switchmanager.nodesLearnt.dashlet($dashlet);
+            one.f.switchmanager.nodesLearnt.dashlet($dashlet);
             break;
         case menu.staticRouteConfig.id:
-        	one.f.switchmanager.staticRouteConfig.dashlet($dashlet);
+            one.f.switchmanager.staticRouteConfig.dashlet($dashlet);
             break;
         case menu.subnetGatewayConfig.id:
-        	one.f.switchmanager.subnetGatewayConfig.dashlet($dashlet);
+            one.f.switchmanager.subnetGatewayConfig.dashlet($dashlet);
             break;
         case menu.spanPortConfig.id:
-        	one.f.switchmanager.spanPortConfig.dashlet($dashlet);
+            one.f.switchmanager.spanPortConfig.dashlet($dashlet);
             break;
     };
 });
