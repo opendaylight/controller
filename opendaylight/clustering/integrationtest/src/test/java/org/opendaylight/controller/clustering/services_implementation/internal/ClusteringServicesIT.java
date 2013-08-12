@@ -111,6 +111,7 @@ public class ClusteringServicesIT {
                         "org.apache.felix.dependencymanager").versionAsInProject(),
             mavenBundle("org.apache.felix",
                         "org.apache.felix.dependencymanager.shell").versionAsInProject(),
+            mavenBundle("eclipselink", "javax.resource").versionAsInProject(),
             junitBundles());
     }
 

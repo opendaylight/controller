@@ -24,7 +24,7 @@
   <!-- transactionManagerLookupClass="org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup" -->
   <namedCache name="transactional-type">
     <transaction
-        transactionManagerLookupClass="org.infinispan.transaction.lookup.GenericTransactionManagerLookup"
+        transactionManagerLookupClass="org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup"
         syncRollbackPhase="false"
         syncCommitPhase="false"
         cacheStopTimeout="30000"

@@ -1319,6 +1319,7 @@ public class NorthboundIT {
                 mavenBundle("commons-codec", "commons-codec"),
                 mavenBundle("virgomirror", "org.eclipse.jdt.core.compiler.batch", "3.8.0.I20120518-2145"),
                 mavenBundle("eclipselink", "javax.persistence", "2.0.4.v201112161009"),
+                mavenBundle("eclipselink", "javax.resource", "1.5.0.v200906010428"),
 
                 mavenBundle("orbit", "javax.activation", "1.1.0.v201211130549"),
                 mavenBundle("orbit", "javax.annotation", "1.1.0.v201209060031"),

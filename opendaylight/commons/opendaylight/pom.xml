@@ -776,6 +776,11 @@
       <artifactId>javax.servlet.jsp.jstl.impl</artifactId>
       <version>1.2.0.v201210211230</version>
     </dependency>
+    <dependency>
+      <groupId>eclipselink</groupId>
+      <artifactId>javax.resource</artifactId>
+      <version>1.5.0.v200906010428</version>
+    </dependency>
     <!-- Add Pax Exam -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>

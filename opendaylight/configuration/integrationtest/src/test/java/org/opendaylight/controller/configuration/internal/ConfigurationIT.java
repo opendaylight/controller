@@ -75,6 +75,7 @@ public class ConfigurationIT {
                 mavenBundle("org.apache.commons", "commons-lang3", "3.1"),
                 mavenBundle("org.jboss.spec.javax.transaction",
                         "jboss-transaction-api_1.1_spec", "1.0.1.Final"),
+                mavenBundle("eclipselink", "javax.resource").versionAsInProject(),
                 mavenBundle("org.apache.felix",
                         "org.apache.felix.dependencymanager", "3.1.0"),
                 // List all the bundles on which the test case depends

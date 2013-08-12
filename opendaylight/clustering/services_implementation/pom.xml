@@ -39,9 +39,11 @@
         <instructions>
           <Import-Package>
             org.slf4j,
-            !org.jboss.*,
             !bsh*,
             !net.jcip.*,
+            !javax.swing,
+            !org.hornetq.*,
+            !org.jboss.*,
             javax.transaction,
             *,
             org.opendaylight.controller.clustering.services,
@@ -61,7 +63,7 @@
             *
           </DynamicImport-Package>
           <Embed-Dependency>
-            infinispan-core,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper;type=!pom;inline=false
+            infinispan-core,jgroups,jboss-marshalling-river,jboss-marshalling,jboss-logging,staxmapper,narayana-jta;type=!pom;inline=false
           </Embed-Dependency>
           <Embed-Transitive>
             true
@@ -109,6 +111,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
       <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.jbossts.jta</groupId>
+      <artifactId>narayana-jta</artifactId>
+      <version>4.17.7.Final</version>
     </dependency>
   </dependencies>
 </project>
