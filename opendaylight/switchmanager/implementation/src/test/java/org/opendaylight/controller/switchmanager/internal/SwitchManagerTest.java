@@ -112,5 +112,4 @@ public class SwitchManagerTest {
         }
         Assert.assertTrue(nodes.isEmpty());
     }
-
 }
