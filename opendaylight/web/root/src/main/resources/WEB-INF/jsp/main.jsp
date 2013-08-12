@@ -16,6 +16,8 @@
 
 <!-- Bootstrap CSS - 1 -->
 <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" type="text/css" href="/css/fuelux.min.css">
+<link rel="stylesheet" type="text/css" href="/css/opendaylight.css">
 
 <!-- Core CSS - 2 -->
 <link rel="stylesheet/less" type="text/css" href="/css/one.less">
@@ -38,7 +40,9 @@
 <script src="/js/jquery-1.9.1.min.js"></script>
 
 <!-- Bootstrap JS - 2 -->
-<script src="/js/bootstrap.min.js"></script>
+<script src="/js/underscore-min.js"></script>
+<script src="/js/fuelux/loader.min.js"></script>
+<script src="/js/datasource.js"></script>
 
 <!-- LESS - 3 -->
 <script type="text/javascript">
