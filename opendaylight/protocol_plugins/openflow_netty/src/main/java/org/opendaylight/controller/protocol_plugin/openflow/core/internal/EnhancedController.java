@@ -48,12 +48,16 @@ import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFType;
 import org.openflow.protocol.factory.BasicFactory;
 import org.openflow.protocol.factory.MessageParseException;
-
-
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
+import org.opendaylight.controller.protocol_plugin.openflow.core.IEnhancedSwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateListener;
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 //import org.opendaylight.controller.protocol_plugin.openflow.core.internal.OFChannelState.HandshakeState;
 //import org.openflow.protocol.OFType;
 import org.slf4j.Logger;
@@ -62,7 +66,7 @@ import org.slf4j.LoggerFactory;
 
 
 
-public class EnhancedController implements IController {
+public class EnhancedController implements IController, IPluginInConnectionService {
 
 
     protected BasicFactory factory;
@@ -76,7 +80,7 @@ public class EnhancedController implements IController {
     private ConcurrentHashMap<Long, ISwitch> connectedSwitches;
 
     // Track connected switches via ChannelID. Whenever the message
-    private ConcurrentHashMap<Integer, ISwitch> channelIDToSwitchMap;
+    private ConcurrentHashMap<Integer, IEnhancedSwitch> channelIDToSwitchMap;
 
     // only 1 message listener per OFType
     private ConcurrentMap<OFType, IMessageListener> messageListeners;
@@ -216,7 +220,7 @@ public class EnhancedController implements IController {
     public void init() {
         logger.debug("Initializing!");
         this.connectedSwitches = new ConcurrentHashMap<Long, ISwitch>();
-        this.channelIDToSwitchMap = new ConcurrentHashMap<Integer, ISwitch>();
+        this.channelIDToSwitchMap = new ConcurrentHashMap<Integer, IEnhancedSwitch>();
         this.messageListeners = new ConcurrentHashMap<OFType, IMessageListener>();
         this.switchStateListener = null;
         this.hashedWheelTimer = new HashedWheelTimer();
@@ -252,9 +256,9 @@ public class EnhancedController implements IController {
      *
      */
     public void stop() {
-        for (Iterator<Entry<Integer, ISwitch>> it = channelIDToSwitchMap.entrySet().iterator(); it
+        for (Iterator<Entry<Integer, IEnhancedSwitch>> it = channelIDToSwitchMap.entrySet().iterator(); it
                 .hasNext();) {
-            Entry<Integer, ISwitch> entry = it.next();
+            Entry<Integer, IEnhancedSwitch> entry = it.next();
             ((EnhancedSwitchHandler) entry.getValue()).stop();
         }
 
@@ -310,7 +314,7 @@ public class EnhancedController implements IController {
 
             Integer channelID = e.getChannel().getId();
 
-            ISwitch switchHandler = new EnhancedSwitchHandler(controller,
+            IEnhancedSwitch switchHandler = new EnhancedSwitchHandler(controller,
                     channelID, channel, hashedWheelTimer, executorService, statsHandler);
             switchHandler.startHandler();
             channelIDToSwitchMap.put(channelID, switchHandler);
@@ -326,7 +330,7 @@ public class EnhancedController implements IController {
             // controller both release resources of the switch concerned
 
             Integer channelID = e.getChannel().getId();
-            ISwitch switchHandler = channelIDToSwitchMap.get(channelID);
+            IEnhancedSwitch switchHandler = channelIDToSwitchMap.get(channelID);
             if (switchHandler != null){
                 switchHandler.shutDownHandler();
             }
@@ -400,7 +404,7 @@ public class EnhancedController implements IController {
         public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
                 throws Exception {
             Integer messageChannelId = e.getChannel().getId();
-            ISwitch swHan = (EnhancedSwitchHandler)channelIDToSwitchMap.get(messageChannelId);
+            IEnhancedSwitch swHan = (EnhancedSwitchHandler)channelIDToSwitchMap.get(messageChannelId);
 
             if (e.getMessage() instanceof List) {
                 //@SuppressWarnings("unchecked")
@@ -432,7 +436,7 @@ public class EnhancedController implements IController {
 
 
         public void processOFMessage(OFMessage ofm, Integer channelID){
-            ISwitch switchHandler = channelIDToSwitchMap.get(channelID);
+            IEnhancedSwitch switchHandler = (IEnhancedSwitch) channelIDToSwitchMap.get(channelID);
             statsHandler.countForEntitySimpleMeasurement(channelID, TrafficStatisticsHandler.ENTITY_COUNTER_RCV_MSG);
             if (switchHandler != null){
                 switchHandler.handleMessage(ofm);
@@ -634,26 +638,37 @@ public class EnhancedController implements IController {
     }
 
     @Override
-    public InetAddress getControllerIdForSwitch(Long id) {
-        //Added to enable Cluster handling.
-
-        if(id==null)
-        {
-            logger.debug("id is null");
-            return null;
+    public Status disconnect(Node node) {
+        ISwitch sw = getSwitch((Long)node.getID());
+        if (sw != null) {
+            if (sw instanceof EnhancedSwitchHandler) {
+                EnhancedSwitchHandler eSw = (EnhancedSwitchHandler)sw;
+                disconnectSwitch(sw, eSw.getSwitchChannelID());
+            }
         }
+        return new Status(StatusCode.SUCCESS);
+    }
 
-        ISwitch sw = (ISwitch) connectedSwitches.get(id);
-
-        SocketAddress sockAddr = sw.getLocalAddress();
-
-        if( sockAddr != null && InetSocketAddress.class.isAssignableFrom(sockAddr.getClass())) {
-            InetAddress localAddress = ((InetSocketAddress) sockAddr).getAddress();
-            this.logger.debug("socketchannel local address is " + localAddress);
-            return localAddress;
-        }
-
+    @Override
+    public Node connect(String connectionIdentifier, Map<ConnectionConstants, String> params) {
         return null;
     }
 
+    /**
+     * View Change notification
+     */
+    public void notifyClusterViewChanged() {
+        for (ISwitch sw : connectedSwitches.values()) {
+            notifySwitchAdded(sw);
+        }
+    }
+
+    /**
+     * Node Disconnected from the node's master controller.
+     */
+    @Override
+    public void notifyNodeDisconnectFromMaster(Node node) {
+        ISwitch sw = connectedSwitches.get((Long)node.getID());
+        if (sw != null) notifySwitchAdded(sw);
+    }
 }

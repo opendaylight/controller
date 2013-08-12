@@ -88,36 +88,8 @@
 		  org.jboss.netty.*
 		</Import-Package>
 	    <Export-Package>
-	      org.openflow.example;version="1.0.1";
-	      uses:="org.openflow.example.cli,
-	      org.openflow.protocol,
-	      org.openflow.io,
-	      org.openflow.protocol.factory",
-	      org.openflow.io;version="1.0.1";
-	      uses:="org.openflow.protocol,
-	      org.openflow.protocol.factory",
-	      org.openflow.protocol;version="1.0.1";
-	      uses:="org.openflow.protocol.statistics,
-	      org.openflow.protocol,
-	      org.openflow.protocol.factory",
-	      org.openflow.protocol.action;version="1.0.1";
-	      uses:="org.openflow.protocol",
-	      org.openflow.protocol.factory;version="1.0.1";
-	      uses:="org.openflow.protocol.statistics,
-	      org.openflow.protocol,
-	      org.openflow.protocol.action,
-	      org.openflow.protocol.queue",
-	      org.openflow.protocol.queue;version="1.0.2";
-	      uses:="org.openflow.protocol,
-	      org.openflow.protocol.factory",
-	      org.openflow.protocol.statistics;version="1.0.1";
-	      uses:="org.openflow.protocol,
-	      org.openflow.protocol.factory",
-	      org.openflow.util;version="1.0.1"
+	      org.openflow.*
 	    </Export-Package>
-        <Embed-Dependency>
-          org.jboss.netty;type=!pom;inline=false
-        </Embed-Dependency>	    
 	  </instructions>
 	</configuration>
       </plugin>
@@ -139,11 +111,10 @@
       <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
-        <dependency>
+    <dependency>
       <groupId>org.jboss.netty</groupId>
       <artifactId>netty</artifactId>
       <version>3.2.6.Final</version>
     </dependency>
-    
   </dependencies>
 </project>
