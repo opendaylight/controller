@@ -43,6 +43,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
 
     }
@@ -52,6 +53,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * cleanup done by ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
 
     }
@@ -65,6 +67,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { SwitchManager.class };
         return res;
@@ -83,6 +86,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * also optional per-container different behavior if needed, usually
      * should not be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(SwitchManager.class)) {
             Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
@@ -118,5 +122,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     "setClusterContainerService",
                     "unsetClusterContainerService").setRequired(true));
         }
+    }
+
+    @Override
+    protected Object[] getGlobalImplementations() {
+        final Object[] res = { SwitchManagerCLI.class };
+        return res;
     }
 }
