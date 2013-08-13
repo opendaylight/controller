@@ -809,7 +809,21 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             Node dstNode = lt.getHeadNodeConnector().getNode();
 
             Tier nodeTier = (Tier) switchManager.getNodeProp(node, Tier.TierPropName);
+            /*
+             * If Tier of the src node is null, then return. If the host is
+             * directly attached to the src node, then the node should have been
+             * assigned the "Access" tier in notifyHostLearnedOrRemoved If the
+             * src node here, is the next node in the hierarchy of the nodes,
+             * then its tier cannot be null
+             */
+
             Tier dstNodeTier = (Tier) switchManager.getNodeProp(dstNode, Tier.TierPropName);
+            /*
+             * Skip if the tier of the destination node is Unknown
+             */
+            if (dstNodeTier == null) {
+                continue;
+            }
             if (dstNodeTier.getValue() > nodeTier.getValue()) {
                 ArrayList<String> buildHierarchy = currHierarchy;
                 if (currHierarchy.size() > currHierarchyClone.size()) {
