@@ -11,9 +11,11 @@
     <moduleSet>
       <excludes>
         <exclude>org.opendaylight.controller.thirdparty:org.openflow.openflowj</exclude>
+        <exclude>org.opendaylight.controller.thirdparty:org.openflow.openflowj_netty</exclude>
         <exclude>org.opendaylight.controller:clustering.stub</exclude>
         <exclude>org.opendaylight.controller:logging.bridge</exclude>
         <exclude>org.opendaylight.controller:protocol_plugins.stub</exclude>
+        <exclude>org.opendaylight.controller:protocol_plugins.openflow</exclude>
         <exclude>org.opendaylight.controller:*.integrationtest</exclude>
         <exclude>org.opendaylight.controller:hosttracker_new</exclude>
         <exclude>org.opendaylight.controller:hosttracker_new.implementation</exclude>

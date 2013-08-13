@@ -22,6 +22,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.util.HashedWheelTimer;
 import org.jboss.netty.util.Timeout;
 import org.jboss.netty.util.TimerTask;
+import org.opendaylight.controller.protocol_plugin.openflow.core.IEnhancedSwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.internal.SwitchEvent.SwitchEventType;
 import org.openflow.protocol.OFBarrierReply;
@@ -49,7 +50,7 @@ import org.openflow.protocol.factory.MessageParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EnhancedSwitchHandler implements ISwitch {
+public class EnhancedSwitchHandler implements IEnhancedSwitch {
 
 
     private static final Logger logger = LoggerFactory
@@ -142,6 +143,9 @@ public class EnhancedSwitchHandler implements ISwitch {
 
     }
 
+    Integer getSwitchChannelID() {
+        return this.switchChannelID;
+    }
 
     public void startHandler(){
         this.factory = new BasicFactory();
