@@ -1,0 +1,18 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>sal</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<groupId>org.opendaylight.controller</groupId>
+	</parent>
+	<packaging>pom</packaging>
+	<artifactId>sal-samples</artifactId>
+	<modules>
+		<module>toaster</module>
+		<module>toaster-consumer</module>
+		<module>toaster-it</module>
+		<module>toaster-provider</module>
+	</modules>
+	<groupId>org.opendaylight.controller.samples</groupId>
+</project>
