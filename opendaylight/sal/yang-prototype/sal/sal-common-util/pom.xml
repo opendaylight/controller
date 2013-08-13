@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal</artifactId>
+        <artifactId>sal-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>sal-common-util</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
+            <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-common</artifactId>
         </dependency>
         <dependency>
@@ -20,4 +20,5 @@
         </dependency>
     </dependencies>
 
+    <packaging>bundle</packaging>
 </project>

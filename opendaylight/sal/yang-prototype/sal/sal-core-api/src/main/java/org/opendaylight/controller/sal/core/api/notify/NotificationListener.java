@@ -10,8 +10,8 @@ package org.opendaylight.controller.sal.core.api.notify;
 import java.util.Set;
 
 import org.opendaylight.controller.sal.core.api.Consumer;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 
 /**

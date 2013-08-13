@@ -11,7 +11,7 @@ import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
-import org.opendaylight.controller.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.QName;
 
 
 /**

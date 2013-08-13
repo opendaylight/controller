@@ -7,16 +7,11 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import org.opendaylight.controller.yang.binding.Notification;
-import org.opendaylight.controller.yang.binding.NotificationListener;
+import org.opendaylight.yangtools.yang.binding.Notification;
 
 public interface NotificationService extends BindingAwareService {
 
-    void addNotificationListener(
-            Class<? extends Notification> notificationType,
-            NotificationListener listener);
+    <T extends Notification> void addNotificationListener(Class<T> notificationType, NotificationListener<T> listener);
 
-    void removeNotificationListener(
-            Class<? extends Notification> notificationType,
-            NotificationListener listener);
+    <T extends Notification> void removeNotificationListener(Class<T> notificationType, NotificationListener<T> listener);
 }

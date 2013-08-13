@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import org.opendaylight.controller.yang.binding.RpcService;
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
+import org.opendaylight.controller.sal.binding.api.data.DataConsumerService;
+import org.opendaylight.yangtools.yang.binding.RpcService;
+import org.osgi.framework.BundleContext;
 
 /**
  * Binding-aware core of the SAL layer responsible for wiring the SAL consumers.
@@ -15,7 +18,7 @@ import org.opendaylight.controller.yang.binding.RpcService;
  * The responsibility of the broker is to maintain registration of SAL
  * functionality {@link Consumer}s and {@link Provider}s, store provider and
  * consumer specific context and functionality registration via
- * {@link ConsumerSession} and provide access to infrastructure services, which
+ * {@link ConsumerContext} and provide access to infrastructure services, which
  * removes direct dependencies between providers and consumers.
  * 
  * The Binding-aware broker is also responsible for translation from Java
@@ -26,13 +29,13 @@ import org.opendaylight.controller.yang.binding.RpcService;
  * <h3>Infrastructure services</h3> Some examples of infrastructure services:
  * 
  * <ul>
- * <li>YANG Module service - see {@link ConsumerSession#getRpcService(Class)},
- * {@link ProviderSession}
+ * <li>YANG Module service - see {@link ConsumerContext#getRpcService(Class)},
+ * {@link ProviderContext}
  * <li>Notification Service - see {@link NotificationService} and
  * {@link NotificationProviderService}
  * <li>Functionality and Data model
  * <li>Data Store access and modification - see {@link DataBrokerService} and
- * {@link DataProviderService}
+ * {@link DataConsumerService}
  * </ul>
  * 
  * The services are exposed via session.
@@ -42,11 +45,10 @@ import org.opendaylight.controller.yang.binding.RpcService;
  * The providers and consumers needs to register in order to use the
  * binding-independent SAL layer and to expose functionality via SAL layer.
  * 
- * For more information about session-based access see {@link ConsumerSession}
- * and {@link ProviderSession}
+ * For more information about session-based access see {@link ConsumerContext}
+ * and {@link ProviderContext}
  * 
  * 
-
  * 
  */
 public interface BindingAwareBroker {
@@ -61,7 +63,7 @@ public interface BindingAwareBroker {
      * The consumer is required to use returned session for all communication
      * with broker or one of the broker services. The session is announced to
      * the consumer by invoking
-     * {@link Consumer#onSessionInitiated(ConsumerSession)}.
+     * {@link Consumer#onSessionInitiated(ConsumerContext)}.
      * 
      * @param cons
      *            Consumer to be registered.
@@ -71,7 +73,7 @@ public interface BindingAwareBroker {
      * @throws IllegalStateException
      *             If the consumer is already registered.
      */
-    ConsumerSession registerConsumer(BindingAwareConsumer consumer);
+    ConsumerContext registerConsumer(BindingAwareConsumer consumer, BundleContext ctx);
 
     /**
      * Registers the {@link BindingAwareProvider}, which will use the SAL layer.
@@ -90,7 +92,7 @@ public interface BindingAwareBroker {
      * The consumer is <b>required to use</b> returned session for all
      * communication with broker or one of the broker services. The session is
      * announced to the consumer by invoking
-     * {@link BindingAwareProvider#onSessionInitiated(ProviderSession)}.
+     * {@link BindingAwareProvider#onSessionInitiated(ProviderContext)}.
      * 
      * 
      * @param prov
@@ -101,7 +103,7 @@ public interface BindingAwareBroker {
      * @throws IllegalStateException
      *             If the consumer is already registered.
      */
-    ProviderSession registerProvider(BindingAwareProvider provider);
+    ProviderContext registerProvider(BindingAwareProvider provider, BundleContext ctx);
 
     /**
      * {@link BindingAwareConsumer} specific access to the SAL functionality.
@@ -116,10 +118,10 @@ public interface BindingAwareBroker {
      * infrastructure services and other functionality provided by
      * {@link Provider}s.
      * 
-
+     * 
      * 
      */
-    public interface ConsumerSession {
+    public interface ConsumerContext {
 
         /**
          * Returns a session specific instance (implementation) of requested
@@ -158,11 +160,15 @@ public interface BindingAwareBroker {
      * functionality provided by other {@link BindingAwareConsumer}s.
      * 
      */
-    public interface ProviderSession extends ConsumerSession {
+    public interface ProviderContext extends ConsumerContext {
 
-        void addRpcImplementation(RpcService implementation);
+        <T extends RpcService> RpcServiceRegistration<T> addRpcImplementation(Class<T> type, T implementation);
+    }
 
-        void removeRpcImplementation(RpcService implementation);
+    public interface RpcServiceRegistration<T extends RpcService> {
+
+        T getService();
+
+        void unregister();
     }
 }
-

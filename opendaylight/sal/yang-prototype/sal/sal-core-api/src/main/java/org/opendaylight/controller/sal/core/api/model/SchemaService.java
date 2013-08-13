@@ -8,8 +8,8 @@
 package org.opendaylight.controller.sal.core.api.model;
 
 import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.opendaylight.controller.yang.model.api.Module;
-import org.opendaylight.controller.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public interface SchemaService extends BrokerService {
 
