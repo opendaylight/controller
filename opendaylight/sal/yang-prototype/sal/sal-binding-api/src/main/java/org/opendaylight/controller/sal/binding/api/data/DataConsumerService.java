@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.core.api.data;
+package org.opendaylight.controller.sal.binding.api.data;
 
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
-import org.opendaylight.controller.sal.core.api.Provider;
 
-public interface DataProviderService extends DataBrokerService {
+public interface DataConsumerService extends DataBrokerService {
 
     /**
      * Adds {@link DataValidator} for specified Data Store
@@ -29,8 +28,7 @@ public interface DataProviderService extends DataBrokerService {
      * @param validator
      *            Validator
      */
-    public void removeValidator(DataStoreIdentifier store,
-            DataValidator validator);
+    public void removeValidator(DataStoreIdentifier store, DataValidator validator);
 
     /**
      * Adds {@link DataCommitHandler} for specified data store
@@ -46,8 +44,7 @@ public interface DataProviderService extends DataBrokerService {
      * @param store
      * @param provider
      */
-    void removeCommitHandler(DataStoreIdentifier store,
-            DataCommitHandler provider);
+    void removeCommitHandler(DataStoreIdentifier store, DataCommitHandler provider);
 
     /**
      * Adds {@link DataRefresher} for specified data store
@@ -65,14 +62,4 @@ public interface DataProviderService extends DataBrokerService {
      */
     void removeRefresher(DataStoreIdentifier store, DataRefresher refresher);
 
-    public interface DataRefresher extends Provider.ProviderFunctionality {
-
-        /**
-         * Fired when some component explicitly requested the data refresh.
-         * 
-         * The provider which exposed the {@link DataRefresher} should republish
-         * its provided data by editing the data in all affected data stores.
-         */
-        void refreshData();
-    }
 }

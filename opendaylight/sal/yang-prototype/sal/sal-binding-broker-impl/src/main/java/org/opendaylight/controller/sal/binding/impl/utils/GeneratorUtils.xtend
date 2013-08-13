@@ -5,4 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.core.api.data;
+package org.opendaylight.controller.sal.binding.impl.utils
+
+class GeneratorUtils {
+
+    static val PREFIX = "_gen.";
+
+    public static def generatedName(Class<?> cls, String suffix) {
+        '''«PREFIX»«cls.package.name»«cls.simpleName»$«suffix»'''.toString()
+    }
+}

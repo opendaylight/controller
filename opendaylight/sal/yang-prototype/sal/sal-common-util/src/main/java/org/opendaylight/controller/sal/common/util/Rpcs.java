@@ -10,8 +10,8 @@ package org.opendaylight.controller.sal.common.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import org.opendaylight.controller.yang.common.RpcError;
-import org.opendaylight.controller.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public class Rpcs {
     public static <T> RpcResult<T> getRpcResult(boolean successful, T result,

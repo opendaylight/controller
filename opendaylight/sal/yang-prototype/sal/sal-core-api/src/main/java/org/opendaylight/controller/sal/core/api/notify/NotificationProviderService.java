@@ -9,7 +9,7 @@ package org.opendaylight.controller.sal.core.api.notify;
 
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 
 /**
