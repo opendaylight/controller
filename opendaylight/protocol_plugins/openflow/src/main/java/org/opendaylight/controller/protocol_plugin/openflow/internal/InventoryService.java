@@ -22,7 +22,6 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
-import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
@@ -45,11 +44,11 @@ public class InventoryService implements IInventoryShimInternalListener,
         IPluginInInventoryService, IInventoryProvider {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryService.class);
-    private Set<IPluginOutInventoryService> pluginOutInventoryServices =
+    private final Set<IPluginOutInventoryService> pluginOutInventoryServices =
             new CopyOnWriteArraySet<IPluginOutInventoryService>();
     private IController controller = null;
-    private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties are maintained in global container only
-    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties are maintained in global container only
+    private ConcurrentMap<Node, Map<String, Property>> nodeProps;
+    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
     private boolean isDefaultContainer = false;
     private String containerName = null;
 
