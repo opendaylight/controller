@@ -12,6 +12,7 @@
 		<module>sal-data-api</module>
 		<module>sal-binding-api</module>
 		<module>sal-binding-broker-impl</module>
+        <module>samples</module>
 	</modules>
 
 	<properties>
