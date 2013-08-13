@@ -11,4 +11,5 @@
     <dependencies>
     </dependencies>
 
+    <packaging>bundle</packaging>
 </project>

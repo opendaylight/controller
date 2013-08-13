@@ -11,10 +11,10 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.controller.yang.binding.DataObject;
-import org.opendaylight.controller.yang.binding.RpcService;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.RpcService;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public interface RpcMapper<T extends RpcService> {
     
