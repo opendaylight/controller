@@ -5,14 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.core.api.data;
+package org.opendaylight.controller.sal.binding.api.data;
 
 import java.util.Set;
 
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
-import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
 
 /**
  * Two phase commit handler (cohort) of the two-phase commit protocol of data.
@@ -37,7 +37,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * 
  * <ol>
  * <li> <code>Consumer</code> edits data by invocation of
- * <code>DataBrokerService.editCandidateData(DataStoreIdentifier, CompositeNodeModification)</code>
+ * <code>DataBrokerService.editCandidateData(DataStoreIdentifier, DataRoot)</code>
  * <li> <code>Consumer</code> starts a commit by invoking
  * <code>DataBrokerService.commit(DataStoreIdentifier)</code>
  * <li> <code>Broker</code> retrieves a list of all registered
@@ -78,6 +78,106 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * <ol>
  * <li><code>Broker</code>
  * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
  * broker invokes a {@link CommitTransaction#finish()}
  * <li>The provider rollbacks a commit and returns an {@link RpcResult} of
  * rollback. </ol>
@@ -91,13 +191,13 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * {@link Provider#getProviderFunctionality()}
  * <li>passing an instance of implementation and {@link DataStoreIdentifier} of
  * rpc as arguments to the
- * {@link DataProviderService#addCommitHandler(DataStoreIdentifier, DataCommitHandler)}
+ * {@link DataConsumerService#addCommitHandler(DataStoreIdentifier, DataCommitHandler)}
  * </ul>
  * 
  * 
+ * 
  */
-public interface DataCommitHandler extends Provider.ProviderFunctionality {
-
+public interface DataCommitHandler extends ProviderFunctionality {
     /**
      * A set of Data Stores supported by implementation.
      * 
@@ -161,4 +261,5 @@ public interface DataCommitHandler extends Provider.ProviderFunctionality {
          */
         RpcResult<Void> rollback() throws IllegalStateException;
     }
+
 }

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import org.opendaylight.controller.yang.binding.Notification;
+import org.opendaylight.yangtools.yang.binding.Notification;
 
 public interface NotificationProviderService extends NotificationService {
 

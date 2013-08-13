@@ -11,8 +11,8 @@ import java.util.Set;
 
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.controller.yang.common.RpcResult;
-import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 
 /**

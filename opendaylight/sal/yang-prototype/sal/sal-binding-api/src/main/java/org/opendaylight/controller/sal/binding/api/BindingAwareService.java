@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerSession;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 
 /**
  * 
@@ -21,7 +21,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerSe
  * 
  * <p>
  * The consumer's (or provider's) instance of specific service could be obtained
- * by invoking {@link ConsumerSession#getSALService(Class)} method on session
+ * by invoking {@link ConsumerContext#getSALService(Class)} method on session
  * assigned to the consumer.
  * 
  * <p>
@@ -32,7 +32,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerSe
  * development of {@link BindingAwareConsumer}s and {@link BindingAwareProvider}
  * s.
  * 
-
+ * 
  * 
  */
 public interface BindingAwareService {

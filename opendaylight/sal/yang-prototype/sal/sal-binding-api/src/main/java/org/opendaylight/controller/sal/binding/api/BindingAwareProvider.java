@@ -9,10 +9,9 @@ package org.opendaylight.controller.sal.binding.api;
 
 import java.util.Collection;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerSession;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderSession;
-import org.opendaylight.controller.yang.binding.RpcService;
-
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.yangtools.yang.binding.RpcService;
 
 /**
  * 
@@ -25,12 +24,11 @@ import org.opendaylight.controller.yang.binding.RpcService;
  * services to access infrastructure services and to provide functionality to
  * {@link Consumer}s and other providers.
  * 
-
  * 
  */
 public interface BindingAwareProvider {
 
-    void onSessionInitialized(ConsumerSession session);
+    void onSessionInitialized(ConsumerContext session);
 
     /**
      * Returns a set of provided implementations of YANG modules and their rpcs.
@@ -59,14 +57,13 @@ public interface BindingAwareProvider {
      * Marker interface used to mark the interfaces describing specific
      * functionality which could be exposed by providers to other components.
      * 
-
+     * 
      * 
      */
     public interface ProviderFunctionality {
 
     }
 
-    void onSessionInitiated(ProviderSession session);
+    void onSessionInitiated(ProviderContext session);
 
 }
-

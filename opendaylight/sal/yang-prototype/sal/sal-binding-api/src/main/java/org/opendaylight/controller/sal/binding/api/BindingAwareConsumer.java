@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerSession;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 
 /**
  * 
@@ -18,7 +18,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerSe
  * A user-implemented component (application) which faciliates the SAL and SAL
  * services to access infrastructure services or providers' functionality.
  * 
-
+ * 
  * 
  */
 public interface BindingAwareConsumer {
@@ -35,6 +35,6 @@ public interface BindingAwareConsumer {
      * @param session
      *            Unique session between consumer and SAL.
      */
-    void onSessionInitialized(ConsumerSession session);
+    void onSessionInitialized(ConsumerContext session);
 
 }

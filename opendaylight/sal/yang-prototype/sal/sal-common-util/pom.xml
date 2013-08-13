@@ -10,7 +10,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
+            <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-common</artifactId>
         </dependency>
         <dependency>
@@ -20,4 +20,5 @@
         </dependency>
     </dependencies>
 
+    <packaging>bundle</packaging>
 </project>

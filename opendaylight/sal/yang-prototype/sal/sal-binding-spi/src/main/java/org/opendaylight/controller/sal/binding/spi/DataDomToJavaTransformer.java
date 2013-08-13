@@ -8,9 +8,9 @@
 package org.opendaylight.controller.sal.binding.spi;
 
 import org.opendaylight.controller.concepts.lang.Transformer;
-import org.opendaylight.controller.yang.binding.DataObject;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 public interface DataDomToJavaTransformer<P extends DataObject> extends Transformer<CompositeNode, P> {
 
