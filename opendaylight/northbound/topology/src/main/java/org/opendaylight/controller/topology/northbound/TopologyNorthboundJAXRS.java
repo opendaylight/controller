@@ -195,6 +195,7 @@ public class TopologyNorthboundJAXRS {
 
         Status status = topologyManager.addUserLink(userLinkConfig.getValue());
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("User Link", username, "added", userLinkConfig.getValue().getName(), containerName);
             return Response.status(Response.Status.CREATED).build();
         }
         throw new InternalServerErrorException(status.getDescription());
@@ -236,6 +237,7 @@ public class TopologyNorthboundJAXRS {
 
         Status ret = topologyManager.deleteUserLink(name);
         if (ret.isSuccess()) {
+            NorthboundUtils.auditlog("User Link", username, "removed", name, containerName);
             return Response.ok().build();
         }
         throw new ResourceNotFoundException(ret.getDescription());

@@ -1,4 +1,4 @@
-<configuration scan="true">
+ <configuration scan="true">
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
@@ -13,18 +13,28 @@
       <maxHistory>1</maxHistory>
     </rollingPolicy>
 
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <maxFileSize>10MB</maxFileSize>
+    </triggeringPolicy>
+
     <encoder>
       <pattern>%date{"yyyy-MM-dd HH:mm:ss.SSS z"} [%thread] %-5level %logger{35} - %msg%n</pattern>
     </encoder>
   </appender>
-
+  <appender name="audit-file" class="ch.qos.logback.core.FileAppender">
+        <file>logs/audit.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%date{"yyyy-MM-dd HH:mm:ss.SSS z"} %msg %n</pattern>
+        </encoder>
+  </appender>
   <root level="error">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="opendaylight.log" />
   </root>
 
   <!--  Base log level  -->
-  <logger name="org.opendaylight" level="INFO"/>
+  <logger name="org.opendaylight.controller" level="INFO"/>
 
   <!-- OSGi logging bridge -->
   <logger name="org.opendaylight.controller.logging.bridge" level="WARN"/>
@@ -55,4 +65,8 @@
   <logger name="org.opendaylight.controller.usermanager" level="INFO"/>
   <!-- Web modules -->
   <logger name="org.opendaylight.controller.web" level="INFO"/>
+  <!-- additivity=false ensures analytics data only goes to the analytics log -->
+  <logger name="audit" level="INFO" additivity="false">
+       <appender-ref ref="audit-file"/>
+  </logger>
 </configuration>

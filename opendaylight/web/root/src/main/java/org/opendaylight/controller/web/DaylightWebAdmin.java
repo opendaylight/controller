@@ -30,6 +30,9 @@ import com.google.gson.Gson;
 @Controller
 @RequestMapping("/admin")
 public class DaylightWebAdmin {
+
+
+
     @RequestMapping("/users")
     @ResponseBody
     public List<UserConfig> getUsers() {
@@ -69,7 +72,11 @@ public class DaylightWebAdmin {
 
         Status result = (action.equals("add")) ? userManager
                 .addLocalUser(config) : userManager.removeLocalUser(config);
-
+        if(result.getCode().equals(StatusCode.SUCCESS)) {
+            String userAction=(action.equals("add")) ? "added":"removed";
+            DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), userAction, config.getUser());
+            return "Success";
+        }
         return result.getDescription();
     }
 
@@ -93,7 +100,12 @@ public class DaylightWebAdmin {
             return "Operation not permitted";
         }
 
-        return userManager.removeLocalUser(userName).getDescription();
+        Status result = userManager.removeLocalUser(userName);
+        if(result.getCode().equals(StatusCode.SUCCESS)) {
+            DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), "removed", userName);
+            return "Success";
+        }
+        return result.getDescription();
     }
 
     @RequestMapping(value = "/users/password/{username}", method = RequestMethod.POST)
@@ -115,7 +127,9 @@ public class DaylightWebAdmin {
         }
 
         Status status = userManager.changeLocalUserPassword(username, currentPassword, newPassword);
-
+        if(status.isSuccess()){
+            DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), "changed password for", username);
+        }
         return status;
     }
 

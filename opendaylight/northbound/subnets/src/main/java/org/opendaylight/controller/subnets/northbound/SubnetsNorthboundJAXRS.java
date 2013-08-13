@@ -160,6 +160,7 @@ public class SubnetsNorthboundJAXRS {
         SubnetConfig cfgObject = new SubnetConfig(subnetName, subnet, new HashSet<String>(0));
         Status status = switchManager.addSubnet(cfgObject);
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Subnet Gateway", username, "added", subnetName, containerName);
             return Response.status(Response.Status.CREATED).build();
         }
         throw new InternalServerErrorException(status.getDescription());
@@ -198,6 +199,7 @@ public class SubnetsNorthboundJAXRS {
         }
         Status status = switchManager.removeSubnet(subnetName);
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Subnet Gateway", username, "removed", subnetName, containerName);
             return Response.status(Response.Status.OK).build();
         }
         throw new InternalServerErrorException(status.getDescription());
@@ -274,6 +276,9 @@ public class SubnetsNorthboundJAXRS {
             for (String s : newPorts) {
                 Status st = switchManager.addPortsToSubnet(name, s);
                 successful = successful && st.isSuccess();
+                if(successful){
+                    NorthboundUtils.auditlog("Subnet Gateway", username, "added", s +" to "+name, containerName);
+                }
             }
         }
 
@@ -393,6 +398,9 @@ public class SubnetsNorthboundJAXRS {
                 for (String port : ports) {
                     st = switchManager.addPortsToSubnet(name, port);
                     successful = successful && st.isSuccess();
+                    if(successful){
+                        NorthboundUtils.auditlog("Subnet Gateway", username, "added",  st +" to "+name, containerName);
+                    }
                 }
             } else if (action.equals("delete")) {
                 // delete existing ports
@@ -400,6 +408,9 @@ public class SubnetsNorthboundJAXRS {
                 for (String port : ports) {
                     st = switchManager.removePortsFromSubnet(name, port);
                     successful = successful && st.isSuccess();
+                    if(successful){
+                        NorthboundUtils.auditlog("Subnet Gateway", username, "removed",  st +" from "+name, containerName);
+                    }
                 }
             } else {
                 return Response.status(Response.Status.BAD_REQUEST).build();
