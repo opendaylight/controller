@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+JU\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/toaster/provider/api/ToastConsumer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-08-13T20:30:44Z",
+      "side": 1,
+      "message": "No copyright header, same for all the other files.",
+      "revId": "e8c0395fc17643156a4e31218a105518be9cc04f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+Jw\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/toaster/provider/api/ToastConsumer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-08-13T20:30:44Z",
+      "side": 1,
+      "message": "Trailing whitespace.",
+      "revId": "e8c0395fc17643156a4e31218a105518be9cc04f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+Js\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/toaster/provider/impl/ToastConsumerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-08-13T20:30:44Z",
+      "side": 1,
+      "message": "Please keep samples clean from commented-out code.",
+      "revId": "e8c0395fc17643156a4e31218a105518be9cc04f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+Jk\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/toaster/provider/impl/ToastConsumerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-08-13T20:30:44Z",
+      "side": 1,
+      "message": "Please log the exception, e.g.\nlog.info(\"Error occured during toast creation\", e);",
+      "revId": "e8c0395fc17643156a4e31218a105518be9cc04f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+Jo\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/toaster/provider/impl/ToastConsumerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-08-13T20:30:44Z",
+      "side": 1,
+      "message": "String concatenation in logging.",
+      "revId": "e8c0395fc17643156a4e31218a105518be9cc04f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+Jg\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/samples/toaster-it/src/test/java/org/opendaylight/controller/sample/toaster/it/ToasterTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-08-13T20:30:44Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "revId": "e8c0395fc17643156a4e31218a105518be9cc04f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+JY\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-08-13T20:30:44Z",
+      "side": 1,
+      "message": "Trailing whitespace.",
+      "revId": "e8c0395fc17643156a4e31218a105518be9cc04f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+Jc\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-08-13T20:30:44Z",
+      "side": 1,
+      "message": "String concatenation in logging.",
+      "revId": "e8c0395fc17643156a4e31218a105518be9cc04f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
