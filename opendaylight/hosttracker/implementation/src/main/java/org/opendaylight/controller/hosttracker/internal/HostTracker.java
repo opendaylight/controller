@@ -784,10 +784,8 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private void updateCurrentHierarchy(Node node, ArrayList<String> currHierarchy, List<List<String>> fullHierarchy) {
         // currHierarchy.add(String.format("%x", currSw.getId()));
         currHierarchy.add(dpidToHostNameHack((Long) node.getID()));
-        ArrayList<String> currHierarchyClone = (ArrayList<String>) currHierarchy.clone(); // Shallow
-                                                                                          // copy
-                                                                                          // as
-                                                                                          // required
+        // Shallow copy as required
+        ArrayList<String> currHierarchyClone = (ArrayList<String>) currHierarchy.clone();
 
         Map<Node, Set<Edge>> ndlinks = topologyManager.getNodeEdges();
         if (ndlinks == null) {
@@ -809,14 +807,27 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             Node dstNode = lt.getHeadNodeConnector().getNode();
 
             Tier nodeTier = (Tier) switchManager.getNodeProp(node, Tier.TierPropName);
+            /*
+             * If the host is directly attached to the src node, then the node
+             * should have been assigned the "Access" tier in
+             * notifyHostLearnedOrRemoved. If not, it would be assigned
+             * "Unknown" tier. Thus the tier of host attached node cannot be
+             * null. If the src node here, is the next node in the hierarchy of
+             * the nodes, then its tier cannot be null
+             */
+
             Tier dstNodeTier = (Tier) switchManager.getNodeProp(dstNode, Tier.TierPropName);
+            /*
+             * Skip if the tier of the destination node is null
+             */
+            if (dstNodeTier == null) {
+                continue;
+            }
             if (dstNodeTier.getValue() > nodeTier.getValue()) {
                 ArrayList<String> buildHierarchy = currHierarchy;
                 if (currHierarchy.size() > currHierarchyClone.size()) {
-                    buildHierarchy = (ArrayList<String>) currHierarchyClone.clone(); // Shallow
-                                                                                     // copy
-                                                                                     // as
-                                                                                     // required
+                    // Shallow copy as required
+                    buildHierarchy = (ArrayList<String>) currHierarchyClone.clone();
                     fullHierarchy.add(buildHierarchy);
                 }
                 updateCurrentHierarchy(dstNode, buildHierarchy, fullHierarchy);
