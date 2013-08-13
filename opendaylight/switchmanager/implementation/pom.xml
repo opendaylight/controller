@@ -53,6 +53,7 @@
               org.apache.felix.dm,
               org.eclipse.osgi.framework.console,
               org.osgi.framework,
+              org.apache.felix.service.command,
               javax.xml.bind.annotation,
               org.apache.commons.lang3.builder
             </Import-Package>
