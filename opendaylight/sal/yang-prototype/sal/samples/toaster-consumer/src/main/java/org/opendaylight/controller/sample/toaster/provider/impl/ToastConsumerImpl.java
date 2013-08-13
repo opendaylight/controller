@@ -1,0 +1,102 @@
+package org.opendaylight.controller.sample.toaster.provider.impl;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
+import org.opendaylight.controller.sal.binding.api.NotificationListener;
+import org.opendaylight.controller.sal.binding.api.NotificationService;
+import org.opendaylight.controller.sample.toaster.provider.api.ToastConsumer;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.MakeToastInput;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.MakeToastInputBuilder;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.ToastDone;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.ToastType;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.ToasterService;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class ToastConsumerImpl implements BundleActivator, BindingAwareConsumer, ToastConsumer,
+        NotificationListener<ToastDone> {
+
+    private static final Logger log = LoggerFactory.getLogger(ToastConsumerImpl.class);
+
+    private ToasterService toaster;
+
+    private ConsumerContext session;
+
+    // private Class<? extends ToastType> toastTypes = []
+
+    @Override
+    public boolean createRandomToast() {
+
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean createToast(Class<? extends ToastType> type, int doneness) {
+        MakeToastInputBuilder toastInput = new MakeToastInputBuilder();
+        toastInput.setToasterDoneness((long) doneness);
+        toastInput.setToasterToastType(type);
+
+        try {
+            RpcResult<Void> result = getToastService().makeToast(toastInput.build()).get();
+
+            if (result.isSuccessful()) {
+                log.info("Toast was successfuly finished");
+            } else {
+                log.info("Toast was not successfuly finished");
+            }
+            return result.isSuccessful();
+        } catch (InterruptedException | ExecutionException e) {
+            log.info("Error occured during toast creation");
+        }
+        return false;
+
+    }
+
+    @Override
+    public void onSessionInitialized(ConsumerContext session) {
+        this.session = session;
+        NotificationService notificationService = session.getSALService(NotificationService.class);
+        notificationService.addNotificationListener(ToastDone.class, this);
+
+    }
+
+    @Override
+    public void start(BundleContext context) throws Exception {
+        ServiceReference<BindingAwareBroker> brokerRef = context.getServiceReference(BindingAwareBroker.class);
+        BindingAwareBroker broker = context.getService(brokerRef);
+        broker.registerConsumer(this, context);
+        Dictionary<String, String> properties = new Hashtable<>();
+        context.registerService(ToastConsumer.class, this, properties);
+    }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onNotification(ToastDone notification) {
+        log.info("ToastDone Notification Received: " + notification.getToastStatus());
+
+    }
+
+    private ToasterService getToastService() {
+        if (toaster == null) {
+            toaster = session.getRpcService(ToasterService.class);
+        }
+        return toaster;
+    }
+
+}
