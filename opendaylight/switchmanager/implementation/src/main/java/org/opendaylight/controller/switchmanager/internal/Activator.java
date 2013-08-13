@@ -21,6 +21,7 @@ import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.inventory.IInventoryService;
 import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
+import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISpanAware;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
@@ -105,6 +106,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName).setService(
                     IInventoryService.class).setCallbacks(
                     "setInventoryService", "unsetInventoryService")
+                    .setRequired(false));
+            c.add(createContainerServiceDependency(containerName).setService(
+                    IStatisticsManager.class).setCallbacks(
+                    "setStatisticsManager", "unsetStatisticsManager")
                     .setRequired(false));
             c.add(createContainerServiceDependency(containerName).setService(
                     ISwitchManagerAware.class).setCallbacks(

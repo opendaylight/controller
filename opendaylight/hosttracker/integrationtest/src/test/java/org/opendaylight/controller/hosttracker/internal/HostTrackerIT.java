@@ -99,6 +99,8 @@ public class HostTrackerIT {
 
                 // needed by forwardingrulesmanager
                 mavenBundle("org.opendaylight.controller", "switchmanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "switchmanager.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "configuration").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "configuration.implementation").versionAsInProject(),

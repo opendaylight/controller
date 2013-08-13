@@ -48,7 +48,9 @@
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
+              org.opendaylight.controller.sal.reader,
               org.opendaylight.controller.sal.inventory,
+              org.opendaylight.controller.statisticsmanager,
               org.slf4j,
               org.apache.felix.dm,
               org.eclipse.osgi.framework.console,
@@ -108,6 +110,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>switchmanager</artifactId>
       <version>0.5.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>statisticsmanager</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
