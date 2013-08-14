@@ -147,10 +147,11 @@ public class ICMP extends Packet {
     short computeChecksum(byte[] data, int start) {
         int sum = 0, carry = 0, finalSum = 0;
         int wordData;
-        int end = start + this.getHeaderSize() / NetUtils.NumBitsInAByte
-                + rawPayload.length;
-        int checksumStartByte = start + getfieldOffset(CHECKSUM)
-                / NetUtils.NumBitsInAByte;
+        int end = start + this.getHeaderSize() / NetUtils.NumBitsInAByte;
+        if (rawPayload != null) {
+            end += rawPayload.length;
+        }
+        int checksumStartByte = start + getfieldOffset(CHECKSUM) / NetUtils.NumBitsInAByte;
 
         for (int i = start; i <= (end - 1); i = i + 2) {
             // Skip, if the current bytes are checkSum bytes
