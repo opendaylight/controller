@@ -176,9 +176,6 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
 
     @Override
     public void coordinatorChanged() {
-        AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme == null) return;
-        scheme.handleClusterViewChanged();
         notifyClusterViewChanged();
     }
 
@@ -202,8 +199,7 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
 
     @Override
     public void entryCreated(Node key, String cacheName, boolean originLocal) {
-        AbstractScheme scheme = schemes.get(activeScheme);
-        logger.debug("Created : {} cache : {} existingValue : {}", key, cacheName, scheme.getNodeConnections().get(key));
+        if (originLocal) return;
     }
 
     /*
@@ -277,6 +273,9 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
                         connectionService.notifyNodeDisconnectFromMaster(node);
                         break;
                     case CLUSTER_VIEW_CHANGED:
+                        AbstractScheme scheme = schemes.get(activeScheme);
+                        if (scheme == null) return;
+                        scheme.handleClusterViewChanged();
                         connectionService.notifyClusterViewChanged();
                         break;
                     default:

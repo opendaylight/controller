@@ -39,6 +39,7 @@
         <instructions>
           <Import-Package>
             org.slf4j,
+            !org.apache.logging.log4j.*,
             !bsh*,
             !net.jcip.*,
             !javax.swing,
@@ -100,7 +101,7 @@
     <dependency>
       <groupId>org.infinispan</groupId>
       <artifactId>infinispan-core</artifactId>
-      <version>5.2.3.Final</version>
+      <version>5.3.0.Final</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

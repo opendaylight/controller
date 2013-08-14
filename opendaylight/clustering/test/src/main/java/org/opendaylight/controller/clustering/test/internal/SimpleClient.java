@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.clustering.test.internal;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -268,6 +269,24 @@ public class SimpleClient implements CommandProvider {
         ci.println(cacheName + " is no longer being monitored for updates");
     }
 
+    public void _myController(CommandInterpreter ci) {
+        if (this.icluster == null) {
+            ci.println("\nNo Clustering services available");
+            return;
+        }
+        ci.println("This Controller : " +icluster.getMyAddress().getHostAddress());
+    }
+
+    public void _getClusterNodes(CommandInterpreter ci) {
+        if (this.icluster == null) {
+            ci.println("\nNo Clustering services available");
+            return;
+        }
+        for (InetAddress address : icluster.getClusteredControllers()) {
+            ci.println("\t"+address.getHostAddress());
+        }
+    }
+
     public void _listcaches(CommandInterpreter ci) {
         if (this.icluster == null) {
             ci.println("\nNo Clustering services available");
@@ -439,29 +458,6 @@ public class SimpleClient implements CommandProvider {
             ci.println("Cache " + cacheName + " on container " + containerName
                     + " not existant!");
         }
-    }
-
-    @SuppressWarnings("deprecation") //TODO: remove call to deprecated amIStandby
-    public void _getRole(CommandInterpreter ci) {
-        if (this.icluster == null) {
-            ci.println("\nNo Clustering services available");
-            return;
-        }
-        String role = "Active";
-        if (this.icluster.amIStandby()) {
-            role = "Standby";
-        }
-        ci.println("My role is: " + role);
-    }
-
-    @SuppressWarnings("deprecation") //TODO: remove call to deprecated getActiveAddres
-    public void _getActive(CommandInterpreter ci) {
-        if (this.icluster == null) {
-            ci.println("\nNo Clustering services available");
-            return;
-        }
-        ci.println("Current active address is "
-                + this.icluster.getActiveAddress());
     }
 
     @SuppressWarnings("deprecation") //TODO: remove use of deprecated listenRoleChange
@@ -640,16 +636,12 @@ public class SimpleClient implements CommandProvider {
         help.append("\tunlistenActive   - UNListen to Active updates\n");
         help.append("\tdestroy          - Destroy a cache\n");
         help.append("\tcreate           - Create a cache\n");
-        help.append("\tgetRole          - Tell if active or standby\n");
-        help.append("\tgetActive        - Report the IP address of Active\n");
-        help
-                .append("\tputComplex       - Fill a more complex data structure\n");
-        help
-                .append("\tupdateComplex    - Update the value of a more complex data structure\n");
-        help
-                .append("\tgetLogLevel      - Get the loglevel for the logger specified\n");
-        help
-                .append("\tsetLogLevel      - Set the loglevel for the logger specified\n");
+        help.append("\tmyController     - Print this controller's Cluster identifier\n");
+        help.append("\tgetClusterNodes  - Print all the controllers that make this cluster\n");
+        help.append("\tputComplex       - Fill a more complex data structure\n");
+        help.append("\tupdateComplex    - Update the value of a more complex data structure\n");
+        help.append("\tgetLogLevel      - Get the loglevel for the logger specified\n");
+        help.append("\tsetLogLevel      - Set the loglevel for the logger specified\n");
         return help.toString();
     }
 }

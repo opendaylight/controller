@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.transaction.SystemException;
+
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
@@ -82,6 +84,7 @@ public abstract class AbstractScheme {
             }
         }
 
+        boolean retry = false;
         for (InetAddress c : toRemove) {
             log.debug("Removing Controller : {} from the Connections table", c);
             for (Iterator<Node> nodeIterator = nodeConnections.keySet().iterator();nodeIterator.hasNext();) {
@@ -89,22 +92,34 @@ public abstract class AbstractScheme {
                 Set <InetAddress> oldControllers = nodeConnections.get(node);
                 Set <InetAddress> newControllers = new HashSet<InetAddress>(oldControllers);
                 if (newControllers.remove(c)) {
-                    boolean replaced = false;
                     try {
-                        replaced = nodeConnections.replace(node, oldControllers, newControllers);
-                    } catch (Exception e) {
-                        log.debug("Replace exception : ", e);
-                        replaced = false;
-                    }
-                    if (!replaced) {
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
+                        clusterServices.tbegin();
+                        if (!nodeConnections.replace(node, oldControllers, newControllers)) {
+                            log.debug("Replace Failed for {} ", node.toString());
+                            retry = true;
+                            clusterServices.trollback();
+                            break;
+                        } else {
+                            clusterServices.tcommit();
                         }
-                        handleClusterViewChanged();
+                    } catch (Exception e) {
+                        log.error("Exception in replacing nodeConnections ", e);
+                        retry = false;
+                        try {
+                            clusterServices.trollback();
+                        } catch (Exception e1) {}
+                        break;
                     }
                 }
             }
+        }
+        if (retry) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            handleClusterViewChanged();
         }
     }
 
@@ -155,24 +170,30 @@ public abstract class AbstractScheme {
         if (oldControllers != null && oldControllers.contains(controller)) {
             Set<InetAddress> newControllers = new HashSet<InetAddress>(oldControllers);
             if (newControllers.remove(controller)) {
-                if (newControllers.size() > 0) {
-                    boolean replaced = false;
-                    try {
-                    replaced = nodeConnections.replace(node, oldControllers, newControllers);
-                    } catch (Exception e) {
-                        log.debug("Replace exception : ", e);
-                        replaced = false;
-                    }
-                    if (!replaced) {
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
+                try {
+                    clusterServices.tbegin();
+                    if (newControllers.size() > 0) {
+                        if (!nodeConnections.replace(node, oldControllers, newControllers)) {
+                            clusterServices.trollback();
+                            try {
+                                Thread.sleep(100);
+                            } catch ( InterruptedException e) {}
+                            return removeNodeFromController(node, controller);
                         }
-                        return removeNodeFromController(node, controller);
+                    } else {
+                        nodeConnections.remove(node);
                     }
-                } else {
-                    nodeConnections.remove(node);
+                    clusterServices.tcommit();
+                } catch (Exception e) {
+                    log.error("Excepion in removing Controller from a Node", e);
+                    try {
+                        clusterServices.trollback();
+                    } catch (Exception e1) {
+                        log.error("Error Rolling back the node Connections Changes ", e);
+                    }
+                    return new Status(StatusCode.INTERNALERROR);
                 }
+
             }
         }
         return new Status(StatusCode.SUCCESS);
@@ -206,34 +227,45 @@ public abstract class AbstractScheme {
         }
         newControllers.add(controller);
 
-        if (nodeConnections.putIfAbsent(node, newControllers) != null) {
-            log.debug("PutIfAbsent failed {} to {}", controller.getHostAddress(), node.toString());
-            /*
-             * This check is needed again to take care of the case where some schemes
-             * would not allow nodes to be connected to multiple controllers.
-             * Hence, if putIfAbsent fails, that means, some other controller is competing
-             * with this controller to take hold of a Node.
-             */
-            if (isConnectionAllowed(node)) {
-                log.debug("Trying to replace old={} with new={} for {} to {}", oldControllers.toString(), newControllers.toString(),
-                        controller.getHostAddress(), node.toString());
-                if (!nodeConnections.replace(node, oldControllers, newControllers)) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
+        try {
+            clusterServices.tbegin();
+            if (nodeConnections.putIfAbsent(node, newControllers) != null) {
+                log.debug("PutIfAbsent failed {} to {}", controller.getHostAddress(), node.toString());
+                /*
+                 * This check is needed again to take care of the case where some schemes
+                 * would not allow nodes to be connected to multiple controllers.
+                 * Hence, if putIfAbsent fails, that means, some other controller is competing
+                 * with this controller to take hold of a Node.
+                 */
+                if (isConnectionAllowed(node)) {
+                    if (!nodeConnections.replace(node, oldControllers, newControllers)) {
+                        clusterServices.trollback();
+                        try {
+                            Thread.sleep(100);
+                        } catch ( InterruptedException e) {}
+                        log.debug("Replace failed... old={} with new={} for {} to {}", oldControllers.toString(), newControllers.toString(),
+                                controller.getHostAddress(), node.toString());
+                        return putNodeToController(node, controller);
+                    } else {
+                        log.debug("Replace successful old={} with new={} for {} to {}", oldControllers.toString(), newControllers.toString(),
+                                controller.getHostAddress(), node.toString());
                     }
-                    log.debug("Replace failed... old={} with new={} for {} to {}", oldControllers.toString(), newControllers.toString(),
-                            controller.getHostAddress(), node.toString());
-                    return putNodeToController(node, controller);
                 } else {
-                    log.debug("Replace successful old={} with new={} for {} to {}", oldControllers.toString(), newControllers.toString(),
-                            controller.getHostAddress(), node.toString());
+                    clusterServices.trollback();
+                    return new Status(StatusCode.CONFLICT);
                 }
             } else {
-                return new Status(StatusCode.CONFLICT);
+                log.debug("Added {} to {}", controller.getHostAddress(), node.toString());
             }
-        } else {
-            log.debug("Added {} to {}", controller.getHostAddress(), node.toString());
+            clusterServices.tcommit();
+        } catch (Exception e) {
+            log.error("Excepion in adding Controller to a Node", e);
+            try {
+                clusterServices.trollback();
+            } catch (Exception e1) {
+                log.error("Error Rolling back the node Connections Changes ", e);
+            }
+            return new Status(StatusCode.INTERNALERROR);
         }
         return new Status(StatusCode.SUCCESS);
     }
@@ -277,7 +309,7 @@ public abstract class AbstractScheme {
         }
 
         try {
-            clusterServices.createCache("connectionmanager."+name+".nodeconnections", EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+            clusterServices.createCache("connectionmanager."+name+".nodeconnections", EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
             log.error("\nCache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {

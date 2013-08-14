@@ -25,13 +25,13 @@
   <namedCache name="transactional-type">
     <transaction
         transactionManagerLookupClass="org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup"
-        syncRollbackPhase="false"
-        syncCommitPhase="false"
+        syncRollbackPhase="true"
+        syncCommitPhase="true"
         cacheStopTimeout="30000"
         use1PcForAutoCommitTransactions="false"
         autoCommit="true"
         lockingMode="OPTIMISTIC"
-        useSynchronization="false"
+        useSynchronization="true"
         transactionMode="TRANSACTIONAL"
         />
   </namedCache>

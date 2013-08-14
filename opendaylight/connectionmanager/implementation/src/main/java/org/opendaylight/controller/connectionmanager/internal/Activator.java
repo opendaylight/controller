@@ -17,6 +17,7 @@ import java.util.Set;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.ICoordinatorChangeAware;
+import org.opendaylight.controller.connectionmanager.ConnectionMgmtScheme;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.sal.connection.IConnectionListener;
 import org.opendaylight.controller.sal.connection.IConnectionService;
@@ -77,7 +78,9 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(ConnectionManager.class)) {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             Set<String> propSet = new HashSet<String>();
-            propSet.add("connectionmanager.nodeconnections");
+            for (ConnectionMgmtScheme scheme:ConnectionMgmtScheme.values()) {
+                propSet.add("connectionmanager."+scheme.name()+".nodeconnections");
+            }
             props.put("cachenames", propSet);
             props.put("scope", "Global");
 
