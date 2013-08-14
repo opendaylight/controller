@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+DQ\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/data/DataCommitHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-08-14T13:40:42Z",
+      "side": 1,
+      "message": "We are using a JTA Transaction manager, why do we need to have this interface? Can we create an XA resource to wrap the entities that wants to partecipate in a transaction? In general why do we want to have yet another transaction manager in the system?",
+      "revId": "42183ad5bfefff7d6de9df467cdaa600a450af29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+DM\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/sal-binding-broker-impl/src/main/java/org/opendaylight/controller/sal/binding/impl/NotificationServiceImpl.xtend",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-08-14T13:40:42Z",
+      "side": 1,
+      "message": "This notification listener are supposed to be in the same bundle or spanning different bundles?\nHave you considered to publish the listener in the OSGi service registry and to retrieve from the publisher? That guarantee proper interaction with the OSGi service registry.",
+      "revId": "42183ad5bfefff7d6de9df467cdaa600a450af29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
