@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+Dk\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/toaster/provider/impl/ToastConsumerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-08-14T13:01:06Z",
+      "side": 1,
+      "message": "Trailing space in message",
+      "revId": "35620f5ccf1ed4d1e4ac78a97fff3c1fede8ad95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
