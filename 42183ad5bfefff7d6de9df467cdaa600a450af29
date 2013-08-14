@@ -33,6 +33,24 @@
       "revId": "42183ad5bfefff7d6de9df467cdaa600a450af29",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+Cc\u003d",
+        "filename": "opendaylight/sal/yang-prototype/sal/sal-binding-broker-impl/src/main/java/org/opendaylight/controller/sal/binding/impl/NotificationServiceImpl.xtend",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-08-14T15:20:11Z",
+      "side": 1,
+      "message": "For simple implementation of publisher that will decrease performance for each notification, but later we could rewrite it using OSGi service registry and set of ServiceTracker to dynamicly populate / unpopulate list for notifications, so set of listeners does not have to be retrieved on each event.",
+      "parentUuid": "AAAAE3//+DM\u003d",
+      "revId": "42183ad5bfefff7d6de9df467cdaa600a450af29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
