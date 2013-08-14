@@ -310,6 +310,7 @@ public class HostTrackerNorthbound {
         Status status = hostTracker.addStaticHost(networkAddress,
                 dataLayerAddress, nc, vlan);
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Static Host", username, "added", networkAddress, containerName);
             return Response.status(Response.Status.CREATED).build();
         } else if (status.getCode().equals(StatusCode.BADREQUEST)) {
             throw new UnsupportedMediaTypeException(status.getDescription());
@@ -364,6 +365,7 @@ public class HostTrackerNorthbound {
 
         Status status = hostTracker.removeStaticHost(networkAddress);
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Static Host", username, "removed", networkAddress, containerName);
             return Response.ok().build();
         }
         throw new InternalServerErrorException(status.getDescription());

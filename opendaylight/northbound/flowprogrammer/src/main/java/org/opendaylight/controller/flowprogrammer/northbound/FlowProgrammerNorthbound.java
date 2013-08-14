@@ -322,7 +322,9 @@ public class FlowProgrammerNorthbound {
         }
 
         Status status = frm.addStaticFlow(flowConfig.getValue());
+
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Flow", username, "added", name, containerName);
             return Response.status(Response.Status.CREATED).build();
         }
         throw new InternalServerErrorException(status.getDescription());
@@ -385,6 +387,7 @@ public class FlowProgrammerNorthbound {
 
         Status status = frm.removeStaticFlow(name, node);
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Flow", username, "removed", name, containerName);
             return Response.ok().build();
         }
         throw new InternalServerErrorException(status.getDescription());
@@ -446,6 +449,7 @@ public class FlowProgrammerNorthbound {
 
         Status status = frm.toggleStaticFlowStatus(staticFlow);
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Flow", username, "toggled", name, containerName);
             return Response.ok().build();
         }
         throw new InternalServerErrorException(status.getDescription());

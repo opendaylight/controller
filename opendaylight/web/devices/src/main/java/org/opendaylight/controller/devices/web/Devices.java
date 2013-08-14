@@ -256,6 +256,7 @@ public class Devices implements IDaylightWeb {
             } else {
                 resultBean.setStatus(true);
                 resultBean.setMessage("Updated node information successfully");
+                DaylightWebUtil.auditlog("Node", userName, "updated", nodeId + " to "+ nodeName, containerName);
             }
         } catch (Exception e) {
             resultBean.setStatus(false);
@@ -338,6 +339,7 @@ public class Devices implements IDaylightWeb {
             if (addStaticRouteResult.isSuccess()) {
                 result.setStatus(true);
                 result.setMessage("Static Route saved successfully");
+                DaylightWebUtil.auditlog("Static Route", userName, "added", routeName, containerName);
             } else {
                 result.setStatus(false);
                 result.setMessage(addStaticRouteResult.getDescription());
@@ -381,6 +383,7 @@ public class Devices implements IDaylightWeb {
                     resultBean.setMessage(result.getDescription());
                     break;
                 }
+                DaylightWebUtil.auditlog("Static Route", userName, "removed", route, containerName);
             }
         } catch (Exception e) {
             resultBean.setStatus(false);
@@ -451,6 +454,7 @@ public class Devices implements IDaylightWeb {
             if (result.isSuccess()) {
                 resultBean.setStatus(true);
                 resultBean.setMessage("Added gateway address successfully");
+                DaylightWebUtil.auditlog("Subnet Gateway", userName, "added", gatewayName, containerName);
             } else {
                 resultBean.setStatus(false);
                 resultBean.setMessage(result.getDescription());
@@ -491,6 +495,7 @@ public class Devices implements IDaylightWeb {
                     resultBean.setMessage(result.getDescription());
                     break;
                 }
+                DaylightWebUtil.auditlog("Subnet Gateway", userName, "removed", subnet, containerName);
             }
         } catch (Exception e) {
             resultBean.setStatus(false);
@@ -526,6 +531,7 @@ public class Devices implements IDaylightWeb {
                 resultBean.setStatus(true);
                 resultBean
                         .setMessage("Added ports to subnet gateway address successfully");
+                DaylightWebUtil.auditlog("Ports to Subnet Gateway", userName, "added",nodeId+"/"+ ports, containerName);
             } else {
                 resultBean.setStatus(false);
                 resultBean.setMessage(result.getDescription());
@@ -564,6 +570,7 @@ public class Devices implements IDaylightWeb {
                 resultBean.setStatus(true);
                 resultBean
                         .setMessage("Deleted port from subnet gateway address successfully");
+                DaylightWebUtil.auditlog("Ports from Subnet Gateway", userName, "removed", nodePort, containerName);
             } else {
                 resultBean.setStatus(false);
                 resultBean.setMessage(result.getDescription());
@@ -695,6 +702,7 @@ public class Devices implements IDaylightWeb {
             if (result.isSuccess()) {
                 resultBean.setStatus(true);
                 resultBean.setMessage("SPAN Port added successfully");
+                DaylightWebUtil.auditlog("SPAN Port", userName, "added", cfgObject.getNodeId(), containerName);
             } else {
                 resultBean.setStatus(false);
                 resultBean.setMessage(result.getDescription());
@@ -740,6 +748,7 @@ public class Devices implements IDaylightWeb {
                         resultBean.setMessage(result.getDescription());
                         break;
                     }
+                    DaylightWebUtil.auditlog("SPAN Port", userName, "removed", cfgObject.getNodeId(), containerName);
                 }
             }
         } catch (Exception e) {

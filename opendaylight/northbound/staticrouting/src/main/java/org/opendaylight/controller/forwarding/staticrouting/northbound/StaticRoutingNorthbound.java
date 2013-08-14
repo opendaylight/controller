@@ -58,8 +58,7 @@ import org.opendaylight.controller.sal.utils.Status;
 @Path("/")
 public class StaticRoutingNorthbound {
 
-
-        private String username;
+    private String username;
 
     @Context
     public void setSecurityContext(SecurityContext context) {
@@ -197,6 +196,7 @@ public class StaticRoutingNorthbound {
                 sRoute.getPrefix(), sRoute.getNextHop());
         Status response = staticRouting.addStaticRoute(cfgObject);
         if (response.isSuccess()) {
+            NorthboundUtils.auditlog("Static Route", username, "added", name, containerName);
             return Response.status(Response.Status.CREATED).build();
         }
         throw new ResourceConflictException(response.getDescription());
@@ -241,6 +241,7 @@ public class StaticRoutingNorthbound {
 
         Status status = staticRouting.removeStaticRoute(name);
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Static Route", username, "removed", name, containerName);
             return Response.ok().build();
         }
         throw new ResourceNotFoundException(status.getDescription());

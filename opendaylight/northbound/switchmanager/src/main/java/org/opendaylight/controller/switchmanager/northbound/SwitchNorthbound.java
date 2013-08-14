@@ -303,6 +303,9 @@ public class SwitchNorthbound {
                 nodeProperties.remove(propertyName.toLowerCase());
                 SwitchConfig newSwitchConfig = new SwitchConfig(node.toString(), nodeProperties);
                 status = switchManager.updateNodeConfig(newSwitchConfig);
+                if(status.isSuccess()){
+                    NorthboundUtils.auditlog("Static Route", username, "updated", nodeId, containerName);
+                }
             }
         }
         return NorthboundUtils.getResponse(status);
@@ -519,6 +522,7 @@ public class SwitchNorthbound {
                 .fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
         Status ret = switchManager.removeNodeConnectorProp(nc, propertyName);
         if (ret.isSuccess()) {
+            NorthboundUtils.auditlog("Node Connector Property", username, "removed", nc + " from " + nodeConnectorId, containerName);
             return Response.ok().build();
         }
         throw new ResourceNotFoundException(ret.getDescription());

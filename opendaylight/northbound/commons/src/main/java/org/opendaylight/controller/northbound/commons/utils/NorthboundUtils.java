@@ -13,6 +13,8 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.usermanager.IUserManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NorthboundUtils {
 
@@ -36,6 +38,10 @@ public class NorthboundUtils {
             put(StatusCode.UNDEFINED, Response.Status.BAD_REQUEST);
         }
     };
+
+    private static final String AUDIT = "audit";
+
+    private static final Logger logger = LoggerFactory.getLogger(AUDIT);
 
     // Suppress default constructor for noninstantiability
     private NorthboundUtils() {
@@ -114,4 +120,20 @@ public class NorthboundUtils {
         return true;
     }
 
+    public static void auditlog(String moduleName, String user, String action, String resource,
+            String containerName) {
+        String auditMsg = "";
+        String mode = "REST";
+        if (containerName != null) {
+            auditMsg = "Mode: " + mode + " User " + user + " "  + action + " " + moduleName + " " + resource + " in container "
+                    + containerName;
+        } else {
+            auditMsg = "Mode: " + mode + " User " + user + " "  + action + " " + moduleName + " " + resource;
+        }
+        logger.info(auditMsg);
+    }
+
+    public static void auditlog(String moduleName, String user, String action, String resource) {
+        auditlog(moduleName, user, action, resource, null);
+    }
 }

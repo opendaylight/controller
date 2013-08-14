@@ -47,6 +47,7 @@ import com.google.gson.Gson;
 public class Flows implements IDaylightWeb {
     private static final UserLevel AUTH_LEVEL = UserLevel.CONTAINERUSER;
     private static final String WEB_NAME = "Flows";
+
     private static final String WEB_ID = "flows";
     private static final short WEB_ORDER = 2;
 
@@ -237,6 +238,7 @@ public class Flows implements IDaylightWeb {
         Status result = new Status(StatusCode.BADREQUEST, "Invalid request");
         if (action.equals("add")) {
             result = frm.addStaticFlow(flow);
+            DaylightWebUtil.auditlog("Flow", userName, "added", flow.getName(), containerName);
         }
 
         return (result.isSuccess()) ? StatusCode.SUCCESS.toString() : result
@@ -270,8 +272,14 @@ public class Flows implements IDaylightWeb {
         }
         if (action.equals("remove")) {
             result = frm.removeStaticFlow(name, node);
+            if(result.isSuccess()) {
+                DaylightWebUtil.auditlog("Flow", userName, "removed", name, containerName);
+            }
         } else if (action.equals("toggle")) {
             result = frm.toggleStaticFlowStatus(name, node);
+            if(result.isSuccess()) {
+                DaylightWebUtil.auditlog("Flow", userName, "toggled", name, containerName);
+            }
         } else {
             result = new Status(StatusCode.BADREQUEST, "Unknown action");
         }
