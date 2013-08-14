@@ -25,10 +25,10 @@ public class LoggingListener implements IGetUpdates<Integer, StringContainer> {
     }
 
     @Override
-    public void entryUpdated(Integer key, StringContainer new_value,
+    public void entryUpdated(Integer key, StringContainer newValue,
             String containerName, String cacheName, boolean originLocal) {
         logger.debug(" Cache entry with key " + key + " modified to value "
-                + new_value + "  in cache " + cacheName);
+                + newValue + "  in cache " + cacheName);
     }
 
     @Override

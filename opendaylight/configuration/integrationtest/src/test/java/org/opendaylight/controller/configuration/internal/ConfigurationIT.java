@@ -91,10 +91,6 @@ public class ConfigurationIT {
                         "0.4.0-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller",
                         "containermanager.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "switchmanager",
-                        "0.5.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "switchmanager.implementation", "0.4.0-SNAPSHOT"),
                 // needed bundles by configuration
                 mavenBundle("org.opendaylight.controller",
                         "clustering.services", "0.4.0-SNAPSHOT"), // what are

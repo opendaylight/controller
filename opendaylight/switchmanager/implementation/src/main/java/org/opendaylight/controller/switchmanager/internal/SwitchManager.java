@@ -54,6 +54,7 @@ import org.opendaylight.controller.sal.core.Tier;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IInventoryService;
 import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
+import org.opendaylight.controller.sal.reader.NodeDescription;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.IObjectReader;
@@ -61,6 +62,7 @@ import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISpanAware;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
@@ -104,6 +106,7 @@ CommandProvider {
     private ConcurrentMap<Node, Map<String, NodeConnector>> nodeConnectorNames;
     private ConcurrentMap<String, Property> controllerProps;
     private IInventoryService inventoryService;
+    private IStatisticsManager statisticsManager;
     private final Set<ISwitchManagerAware> switchManagerAware = Collections
             .synchronizedSet(new HashSet<ISwitchManagerAware>());
     private final Set<IInventoryListener> inventoryListeners = Collections
@@ -698,18 +701,42 @@ CommandProvider {
         }
 
         Map<String, Property> updateProperties = switchConfig.getNodeProperties();
-        String nodeId = switchConfig.getNodeId();
         ForwardingMode mode = (ForwardingMode) updateProperties.get(ForwardingMode.name);
         if (mode != null) {
             if (isDefaultContainer) {
                 if (!mode.isValid()) {
-                    return new Status(StatusCode.BADREQUEST, "Invalid Forwarding Mode Value.");
+                    return new Status(StatusCode.BADREQUEST, "Invalid Forwarding Mode Value");
                 }
             } else {
                 return new Status(StatusCode.NOTACCEPTABLE,
                         "Forwarding Mode modification is allowed only in default container");
             }
         }
+
+        Description description = (Description) switchConfig.getProperty(Description.propertyName);
+        String nodeId = switchConfig.getNodeId();
+        Node node = Node.fromString(nodeId);
+        NodeDescription nodeDesc = (this.statisticsManager == null) ? null : this.statisticsManager
+                .getNodeDescription(node);
+        String advertisedDesc = (nodeDesc == null) ? "" : nodeDesc.getDescription();
+        if (description != null && description.getValue() != null) {
+            if (description.getValue().isEmpty() || description.getValue().equals(advertisedDesc)) {
+                updateProperties.remove(Description.propertyName);
+                switchConfig = new SwitchConfig(nodeId, updateProperties);
+            } else {
+                // check if description is configured or was published by any other node
+                for (Node n : nodeProps.keySet()) {
+                    Description desc = (Description) getNodeProp(n, Description.propertyName);
+                    NodeDescription nDesc = (this.statisticsManager == null) ? null : this.statisticsManager
+                            .getNodeDescription(n);
+                    String advDesc = (nDesc == null) ? "" : nDesc.getDescription();
+                    if ((description.equals(desc) || description.getValue().equals(advDesc)) && !node.equals(n)) {
+                        return new Status(StatusCode.CONFLICT, "Node name already in use");
+                    }
+                }
+            }
+        }
+
         boolean modeChange = false;
         SwitchConfig sc = nodeConfigList.get(nodeId);
         Map<String, Property> prevNodeProperties = new HashMap<String, Property>();
@@ -743,30 +770,27 @@ CommandProvider {
                 }
             }
         }
-        Node node = Node.fromString(nodeId);
         Map<String, Property> propMapCurr = nodeProps.get(node);
         if (propMapCurr == null) {
             return new Status(StatusCode.SUCCESS);
         }
         Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
-        if (!prevNodeProperties.isEmpty()) {
-            for (String prop : prevNodeProperties.keySet()) {
-                if (!updateProperties.containsKey(prop)) {
-                    if (prop.equals(Description.propertyName)) {
-                        Map<Node, Map<String, Property>> nodeProp = this.inventoryService.getNodeProps();
-                        if (nodeProp.get(node) != null) {
-                            propMap.put(Description.propertyName, nodeProp.get(node).get(Description.propertyName));
-                            continue;
-                        }
+        for (String prop : prevNodeProperties.keySet()) {
+            if (!updateProperties.containsKey(prop)) {
+                if (prop.equals(Description.propertyName)) {
+                    if (!advertisedDesc.isEmpty()) {
+                        Property desc = new Description(advertisedDesc);
+                        propMap.put(Description.propertyName, desc);
                     }
-                    propMap.remove(prop);
+                    continue;
                 }
+                propMap.remove(prop);
             }
         }
         propMap.putAll(updateProperties);
         if (!nodeProps.replace(node, propMapCurr, propMap)) {
             // TODO rollback using Transactionality
-            return new Status(StatusCode.CONFLICT, "Cluster conflict: Unable to update node configuration.");
+            return new Status(StatusCode.CONFLICT, "Cluster conflict: Unable to update node configuration");
         }
         if (modeChange) {
             notifyModeChange(node, (mode == null) ? false : mode.isProactive());
@@ -887,7 +911,7 @@ CommandProvider {
     }
 
     @Override
-    public void entryUpdated(Long key, String new_value, String cacheName,
+    public void entryUpdated(Long key, String newValue, String cacheName,
             boolean originLocal) {
         saveSwitchConfigInternal();
     }
@@ -1446,9 +1470,13 @@ CommandProvider {
                         }
                     }
                     map.remove(name.getValue());
-                    if (!nodeConnectorNames.replace(node, mapCurr, map)) {
-                        log.warn("Cluster conflict: Unable remove Name property of nodeconnector {}, skip.",
-                                nodeConnector.getID());
+                    if (map.isEmpty()) {
+                        nodeConnectorNames.remove(node);
+                    } else {
+                        if (!nodeConnectorNames.replace(node, mapCurr, map)) {
+                            log.warn("Cluster conflict: Unable remove Name property of nodeconnector {}, skip.",
+                                    nodeConnector.getID());
+                        }
                     }
                 }
 
@@ -1530,6 +1558,16 @@ CommandProvider {
 
         // clear existing inventories
         clearInventories();
+    }
+
+    public void setStatisticsManager(IStatisticsManager statisticsManager) {
+        log.trace("Got statistics manager set request {}", statisticsManager);
+        this.statisticsManager = statisticsManager;
+    }
+
+    public void unsetStatisticsManager(IStatisticsManager statisticsManager) {
+        log.trace("Got statistics manager UNset request");
+        this.statisticsManager = null;
     }
 
     public void setSwitchManagerAware(ISwitchManagerAware service) {
@@ -2022,12 +2060,6 @@ CommandProvider {
             propMap = new HashMap<String, Property>();
         }
         nodeProps.put(node, propMap);
-    }
-
-    private void removeNodeProps(Node node) {
-        if (getUpNodeConnectors(node).size() == 0) {
-            nodeProps.remove(node);
-        }
     }
 
     @Override

@@ -110,6 +110,10 @@ public class SwitchManagerIT {
                                 "protocol_plugins.stub").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "switchmanager")
                         .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "topologymanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "hosttracker").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
                         "switchmanager.implementation").versionAsInProject(),
                 mavenBundle("org.jboss.spec.javax.transaction",
