@@ -502,4 +502,13 @@ public abstract class NetUtils {
             return null;
         }
     }
+    /**
+     * Returns Broadcast MAC Address
+     *
+     * @return the byte array containing  broadcaset mac address
+     */
+    public static byte[] getBroadcastMACAddr() {
+        return BroadcastMACAddr;
+    }
+
 }
