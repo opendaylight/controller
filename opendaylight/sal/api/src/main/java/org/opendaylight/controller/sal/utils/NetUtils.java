@@ -12,6 +12,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -502,4 +503,14 @@ public abstract class NetUtils {
             return null;
         }
     }
+
+    /**
+     * Returns Broadcast MAC Address
+     *
+     * @return the byte array containing  broadcaset mac address
+     */
+    public static byte[] getBroadcastMACAddr() {
+        return Arrays.copyOf(BroadcastMACAddr, BroadcastMACAddr.length);
+    }
+
 }

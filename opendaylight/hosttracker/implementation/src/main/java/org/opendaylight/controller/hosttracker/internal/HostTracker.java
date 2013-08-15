@@ -29,6 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.felix.dm.Component;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
@@ -63,6 +65,8 @@ import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
 import org.opendaylight.controller.switchmanager.Subnet;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,9 +84,9 @@ import org.slf4j.LoggerFactory;
  */
 
 public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAware, IInventoryListener,
-        ITopologyManagerAware, ICacheUpdateAware<InetAddress, HostNodeConnector> {
-    static final String ACTIVE_HOST_CACHE = "hostTrackerAH";
-    static final String INACTIVE_HOST_CACHE = "hostTrackerIH";
+        ITopologyManagerAware, ICacheUpdateAware<InetAddress, HostNodeConnector>, CommandProvider {
+    static final String ACTIVE_HOST_CACHE = "hosttracker.ActiveHosts";
+    static final String INACTIVE_HOST_CACHE = "hosttracker.InactiveHosts";
     private static final Logger logger = LoggerFactory.getLogger(HostTracker.class);
     private IHostFinder hostFinder;
     private ConcurrentMap<InetAddress, HostNodeConnector> hostsDB;
@@ -130,10 +134,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             hostTrackerCallable = callable;
         }
     }
-
     // This list contains the hosts for which ARP requests are being sent
     // periodically
-    private final List<ARPPending> ARPPendingList = new ArrayList<HostTracker.ARPPending>();
+    ConcurrentMap<InetAddress, ARPPending> ARPPendingList;
     /*
      * This list below contains the hosts which were initially in ARPPendingList
      * above, but ARP response didn't come from there hosts after multiple
@@ -150,12 +153,13 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      *
      * We can't recover from condition 3 above
      */
-    private final List<ARPPending> failedARPReqList = new ArrayList<HostTracker.ARPPending>();
+    ConcurrentMap<InetAddress, ARPPending> failedARPReqList;
 
     public HostTracker() {
     }
 
     private void startUp() {
+        nonClusterObjectCreate();
         allocateCache();
         retrieveCache();
 
@@ -213,6 +217,8 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     public void nonClusterObjectCreate() {
         hostsDB = new ConcurrentHashMap<InetAddress, HostNodeConnector>();
         inactiveStaticHosts = new ConcurrentHashMap<NodeConnector, HostNodeConnector>();
+        ARPPendingList = new ConcurrentHashMap<InetAddress, ARPPending>();
+        failedARPReqList = new ConcurrentHashMap<InetAddress, ARPPending>();
     }
 
 
@@ -378,26 +384,14 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
 
         arphost.setHostIP(networkAddr);
         arphost.setSent_count((short) 1);
-        ARPPendingList.add(arphost);
+        ARPPendingList.put(networkAddr, arphost);
         logger.debug("Host Added to ARPPending List, IP: {}", networkAddr);
-    }
-
-    private void removePendingARPFromList(int index) {
-        if (index >= ARPPendingList.size()) {
-            logger.warn("removePendingARPFromList(): index greater than the List. Size:{}, Index:{}",
-                    ARPPendingList.size(), index);
-            return;
-        }
-        ARPPending arphost = ARPPendingList.remove(index);
-        HostTrackerCallable htCallable = arphost.getHostTrackerCallable();
-        if (htCallable != null)
-            htCallable.wakeup();
     }
 
     public void setCallableOnPendingARP(InetAddress networkAddr, HostTrackerCallable callable) {
         ARPPending arphost;
-        for (int i = 0; i < ARPPendingList.size(); i++) {
-            arphost = ARPPendingList.get(i);
+        for (Entry <InetAddress, ARPPending> entry : ARPPendingList.entrySet()) {
+            arphost = entry.getValue();
             if (arphost.getHostIP().equals(networkAddr)) {
                 arphost.setHostTrackerCallable(callable);
             }
@@ -407,34 +401,22 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private void processPendingARPReqs(InetAddress networkAddr) {
         ARPPending arphost;
 
-        for (int i = 0; i < ARPPendingList.size(); i++) {
-            arphost = ARPPendingList.get(i);
-            if (arphost.getHostIP().equals(networkAddr)) {
-                /*
-                 * An ARP was sent for this host. The address is learned, remove
-                 * the request
-                 */
-                removePendingARPFromList(i);
-                logger.debug("Host Removed from ARPPending List, IP: {}", networkAddr);
-                return;
-            }
+        if ((arphost = ARPPendingList.remove(networkAddr)) != null) {
+            // Remove the arphost from ARPPendingList as it has been learned now
+            logger.debug("Host Removed from ARPPending List, IP: {}", networkAddr);
+            HostTrackerCallable htCallable = arphost.getHostTrackerCallable();
+            if (htCallable != null)
+                htCallable.wakeup();
+            return;
         }
 
         /*
          * It could have been a host from the FailedARPReqList
          */
 
-        for (int i = 0; i < failedARPReqList.size(); i++) {
-            arphost = failedARPReqList.get(i);
-            if (arphost.getHostIP().equals(networkAddr)) {
-                /*
-                 * An ARP was sent for this host. The address is learned, remove
-                 * the request
-                 */
-                failedARPReqList.remove(i);
-                logger.debug("Host Removed from FailedARPReqList List, IP: {}", networkAddr);
-                return;
-            }
+        if  (failedARPReqList.containsKey(networkAddr)) {
+            failedARPReqList.remove(networkAddr);
+            logger.debug("Host Removed from FailedARPReqList List, IP: {}", networkAddr);
         }
     }
 
@@ -910,9 +892,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     public void subnetNotify(Subnet sub, boolean add) {
         logger.debug("Received subnet notification: {}  add={}", sub, add);
         if (add) {
-            for (int i = 0; i < failedARPReqList.size(); i++) {
+            for (Entry <InetAddress, ARPPending> entry : failedARPReqList.entrySet()) {
                 ARPPending arphost;
-                arphost = failedARPReqList.get(i);
+                arphost = entry.getValue();
                 if (hostFinder == null) {
                     logger.warn("ARPHandler Services are not available on subnet addition");
                     continue;
@@ -927,9 +909,20 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         @Override
         public void run() {
             ARPPending arphost;
+
             /* This routine runs every 4 seconds */
-            for (int i = 0; i < ARPPendingList.size(); i++) {
-                arphost = ARPPendingList.get(i);
+            logger.trace("Number of Entries in ARP Pending/Failed Lists: ARPPendingList = {}, failedARPReqList = {}",
+                    ARPPendingList.size(), failedARPReqList.size());
+            for (Entry <InetAddress, ARPPending> entry : ARPPendingList.entrySet()) {
+                arphost = entry.getValue();
+
+                if (hostsDB.containsKey(arphost.getHostIP())) {
+                    // this host is already learned, shouldn't be in ARPPendingList
+                    // Remove it and continue
+                    logger.warn("Learned Host {} found in ARPPendingList", arphost.getHostIP());
+                    ARPPendingList.remove(entry.getKey());
+                    continue;
+                }
                 if (arphost.getSent_count() < switchManager.getHostRetryCount()) {
                     /*
                      * No reply has been received of first ARP Req, send the
@@ -948,7 +941,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                      * ARP requests have been sent without receiving a
                      * reply, remove this from the pending list
                      */
-                    removePendingARPFromList(i);
+                    ARPPendingList.remove(entry.getKey());
                     logger.debug("ARP reply not received after multiple attempts, removing from Pending List IP: {}",
                             arphost.getHostIP().getHostAddress());
                     /*
@@ -956,10 +949,10 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                      * on link up events
                      */
                     logger.debug("Adding the host to FailedARPReqList IP: {}", arphost.getHostIP().getHostAddress());
-                    failedARPReqList.add(arphost);
+                    failedARPReqList.put(entry.getKey(), arphost);
 
                 } else {
-                    logger.error("Inavlid arp_sent count for entry at index: {}", i);
+                    logger.error("Inavlid arp_sent count for entry: {}", entry);
                 }
             }
         }
@@ -1086,6 +1079,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
              */
             if (switchManager.isNodeConnectorEnabled(nc)) {
                 learnNewHost(host);
+                processPendingARPReqs(networkAddr);
                 notifyHostLearnedOrRemoved(host, true);
             } else {
                 inactiveStaticHosts.put(nc, host);
@@ -1297,11 +1291,12 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
 
     private void handleNodeConnectorStatusUp(NodeConnector nodeConnector) {
         ARPPending arphost;
+        HostNodeConnector host = null;
 
         logger.debug("handleNodeConnectorStatusUp {}", nodeConnector);
 
-        for (int i = 0; i < failedARPReqList.size(); i++) {
-            arphost = failedARPReqList.get(i);
+        for (Entry <InetAddress, ARPPending> entry : failedARPReqList.entrySet()) {
+            arphost = entry.getValue();
             logger.debug("Sending the ARP from FailedARPReqList fors IP: {}", arphost.getHostIP().getHostAddress());
             if (hostFinder == null) {
                 logger.warn("ARPHandler is not available at interface  up");
@@ -1309,12 +1304,26 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                         nodeConnector);
                 continue;
             }
-            hostFinder.find(arphost.getHostIP());
+
+            // Send a broadcast ARP only on the interface which just came up.
+            // Use hostFinder's "probe" method
+            try {
+                byte[] dataLayerAddress = NetUtils.getBroadcastMACAddr();
+                host = new HostNodeConnector(dataLayerAddress, arphost.getHostIP(), nodeConnector, (short) 0);
+                hostFinder.probe(host);
+            } catch (ConstructionException e) {
+                logger.debug("HostNodeConnector couldn't be created for Host: {}, NodeConnector: {}",
+                        arphost.getHostIP(), nodeConnector);
+                logger.error("", e);
+            }
+            logger.debug("Done. handleNodeConnectorStatusUp {}", nodeConnector);
         }
-        HostNodeConnector host = inactiveStaticHosts.get(nodeConnector);
+
+        host = inactiveStaticHosts.get(nodeConnector);
         if (host != null) {
             inactiveStaticHosts.remove(nodeConnector);
             learnNewHost(host);
+            processPendingARPReqs(host.getNetworkAddress());
             notifyHostLearnedOrRemoved(host, true);
         }
     }
@@ -1394,6 +1403,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      *
      */
     void start() {
+        registerWithOSGIConsole();
     }
 
     /**
@@ -1440,4 +1450,30 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             boolean originLocal) {
     }
 
+    private void registerWithOSGIConsole() {
+        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+        bundleContext.registerService(CommandProvider.class.getName(), this, null);
+    }
+
+    @Override
+    public String getHelp() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void _dumpPendingARPReqList(CommandInterpreter ci) {
+        ARPPending arphost;
+        for (Entry <InetAddress, ARPPending> entry : ARPPendingList.entrySet()) {
+            arphost = entry.getValue();
+            ci.println(arphost.getHostIP().toString());
+        }
+    }
+
+    public void _dumpFailedARPReqList(CommandInterpreter ci) {
+        ARPPending arphost;
+        for (Entry <InetAddress, ARPPending> entry : failedARPReqList.entrySet()) {
+            arphost = entry.getValue();
+            ci.println(arphost.getHostIP().toString());
+        }
+    }
 }
