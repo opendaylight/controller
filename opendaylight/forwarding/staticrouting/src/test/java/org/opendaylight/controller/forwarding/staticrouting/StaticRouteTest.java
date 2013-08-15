@@ -83,9 +83,9 @@ public class StaticRouteTest {
         Assert.assertFalse(staticRoute1.equals(staticRoute3));
         Assert.assertFalse(staticRoute1.equals(staticRoute4));
 
-        Assert.assertTrue(staticRoute1.compareTo(staticRoute2) == 0 ? true : false);
-        Assert.assertFalse(staticRoute1.compareTo(staticRoute3) == 0 ? true : false);
-        Assert.assertTrue(staticRoute1.compareTo(staticRoute4) == 0 ? true : false);
+        Assert.assertTrue(staticRoute1.compareTo(staticRoute2) == 0);
+        Assert.assertFalse(staticRoute1.compareTo(staticRoute3) == 0);
+        Assert.assertTrue(staticRoute1.compareTo(staticRoute4) == 0);
 
         }
 
