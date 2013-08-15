@@ -97,6 +97,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         }
     }
 
+    @Override
     public ConcurrentMap<String, StaticRouteConfig> getStaticRouteConfigs() {
         return staticRouteConfigs;
     }
@@ -258,11 +259,13 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     }
 
     private void notifyHostUpdate(HostNodeConnector host, boolean added) {
-        if (host == null)
+        if (host == null) {
             return;
+        }
         for (StaticRoute s : staticRoutes.values()) {
-            if (s.getType() == StaticRoute.NextHopType.SWITCHPORT)
+            if (s.getType() == StaticRoute.NextHopType.SWITCHPORT) {
                 continue;
+            }
             if (s.getNextHopAddress().equals(host.getNetworkAddress())) {
                 if (added) {
                     s.setHost(host);
@@ -285,8 +288,9 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     }
 
     public boolean isIPv4AddressValid(String cidr) {
-        if (cidr == null)
+        if (cidr == null) {
             return false;
+        }
 
         String values[] = cidr.split("/");
         Pattern ipv4Pattern = Pattern
@@ -322,6 +326,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         return 0;
     }
 
+    @Override
     public StaticRoute getBestMatchStaticRoute(InetAddress ipAddress) {
         ByteBuffer bblongestPrefix = null;
         try {
@@ -349,10 +354,9 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         return longestPrefixRoute;
     }
 
+    @Override
     public Status addStaticRoute(StaticRouteConfig config) {
-        Status status;
-
-        status = config.isValid();
+        Status status = config.isValid();
         if (!status.isSuccess()) {
             return status;
         }
@@ -361,22 +365,29 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
                                 "A valid Static Route configuration with this name " +
                                                 "already exists. Please use a different name");
         }
-        for (StaticRouteConfig s : staticRouteConfigs.values()) {
-            if (s.equals(config)) {
+
+        // Update database
+        StaticRoute sRoute = new StaticRoute(config);
+
+        for (Map.Entry<String, StaticRoute> entry : staticRoutes.entrySet()) {
+            if (entry.getValue().compareTo(sRoute) == 0) {
                 return new Status(StatusCode.CONFLICT,
-                                "This conflicts with an existing Static Route " +
-                                        "Configuration. Please check the configuration " +
-                                                "and try again");
+                        "This conflicts with an existing Static Route " +
+                                "Configuration. Please check the configuration " +
+                                        "and try again");
             }
         }
-
-        staticRouteConfigs.put(config.getName(), config);
-        StaticRoute sRoute = new StaticRoute(config);
         staticRoutes.put(config.getName(), sRoute);
+
+        // Update config databse
+        staticRouteConfigs.put(config.getName(), config);
+
+        // Notify
         checkAndUpdateListeners(sRoute, true);
         return status;
     }
 
+    @Override
     public Status removeStaticRoute(String name) {
         staticRouteConfigs.remove(name);
         StaticRoute sRoute = staticRoutes.remove(name);
@@ -424,8 +435,9 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         allocateCaches();
         retrieveCaches();
         this.executor = Executors.newFixedThreadPool(1);
-        if (staticRouteConfigs.isEmpty())
+        if (staticRouteConfigs.isEmpty()) {
             loadConfiguration();
+        }
 
         /*
          *  Slow probe to identify any gateway that might have silently appeared
