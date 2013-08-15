@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -47,7 +46,7 @@ one.f.address = {
     root : "/controller/web/flows",
     flows : {
         main : "/main",
-		flows : "/node-flows",
+        flows : "/node-flows",
         nodes : "/node-ports",
         flow : "/flow"
     }
@@ -55,54 +54,63 @@ one.f.address = {
 
 /** NODES **/
 one.f.nodes = {
-    id : {},
+    id : {
+        dashlet: {
+            datagrid: "one_f_nodes_id_dashlet_datagrid"
+        }
+    },
     registry : {},
     dashlet : function($dashlet) {
         var $h4 = one.lib.dashlet.header("Nodes");
         $dashlet.append($h4);
 
-        // load body
-        one.f.nodes.ajax.dashlet(function($table) {
-			// total nodes count
-			var nodeCount = $table.find('tbody').find('tr').size();
-			// prompt output
-			var nodeText = "node";
-			var verb = "is";
-			if (nodeCount != 1) {
-				nodeText += "s";
-				verb = "are";
-			}
-			var out = "There "+verb+" "+nodeCount+" "+nodeText;
-			$p = $(document.createElement('p'));
-			$p.append(out);
-			$dashlet.append($p);
-            // add to dashlet
-            $dashlet.append($table);
+        one.f.nodes.ajax.dashlet(function(data) {
+            var $gridHTML = one.lib.dashlet.datagrid.init(one.f.nodes.id.dashlet.datagrid, {
+                searchable: true,
+                filterable: false,
+                pagination: true,
+                flexibleRowsPerPage: true
+                }, "table-striped table-condensed");
+            $dashlet.append($gridHTML);
+            var dataSource = one.f.nodes.data.nodesDataGrid(data);
+            $("#" + one.f.nodes.id.dashlet.datagrid).datagrid({dataSource: dataSource});
         });
     },
     ajax : {
         dashlet : function(callback) {
             $.getJSON(one.f.address.root+one.f.address.flows.flows, function(data) {
-                var body = one.f.nodes.data.dashlet(data);
-                var $body = one.f.nodes.body.dashlet(body, callback);
-                callback($body);
+                callback(data);
             });
         }
     },
     data : {
-        dashlet : function(data) {
-            var body = [];
-            $.each(data, function(key, value) {
-                var tr = {};
-                var entry = [];
-                entry.push(key);
-                // parse ports
-                entry.push(value);
-                // add entry to tr
-                tr['entry'] = entry;
-                body.push(tr);
+        nodesDataGrid: function(data) {
+            var gridData = [];
+            $.each(data, function(nodeName, flow) {
+                var nodeFlowObject = {};
+                nodeFlowObject["nodeName"] = nodeName;
+                nodeFlowObject["flows"] = flow;
+                nodeFlowObject["rowData"] = nodeName + flow + "-foobar";
+                gridData.push(nodeFlowObject);
             });
-            return body;
+
+            var source = new StaticDataSource({
+                    columns: [
+                        {
+                            property: 'nodeName',
+                            label: 'Node',
+                            sortable: true
+                        },
+                        {
+                            property: 'flows',
+                            label: 'Flows',
+                            sortable: true
+                        }
+                    ],
+                    data: gridData,
+                    delay: 0
+                });
+            return source;
         }
     },
     body : {
@@ -132,109 +140,109 @@ one.f.detail = {
 
         // details
         if (details == undefined) {
-        	var $none = $(document.createElement('div'));
-        	$none.addClass('none');
+            var $none = $(document.createElement('div'));
+            $none.addClass('none');
             var $p = $(document.createElement('p'));
             $p.text('Please select a flow');
             $p.addClass('text-center').addClass('text-info');
 
             $dashlet.append($none)
-            	.append($p);
+                .append($p);
         }
     },
     data : {
-		dashlet : function(data) {
-			var body = [];
-			var tr = {};
-			var entry = [];
+        dashlet : function(data) {
+            var body = [];
+            var tr = {};
+            var entry = [];
 
-			entry.push(data['name']);
-			entry.push(data['node']);
-			entry.push(data['flow']['priority']);
-			entry.push(data['flow']['hardTimeout']);
-			entry.push(data['flow']['idleTimeout']);
+            entry.push(data['name']);
+            entry.push(data['node']);
+            entry.push(data['flow']['priority']);
+            entry.push(data['flow']['hardTimeout']);
+            entry.push(data['flow']['idleTimeout']);
 
-			tr.entry = entry;
-			body.push(tr);
-			return body;
-		},
-        description : function(data) {
-			var body = [];
-			var tr = {};
-			var entry = [];
-                        entry.push(data['flow']['ingressPort']);
-			entry.push(data['flow']['etherType']);
-			entry.push(data['flow']['vlanId']);
-			entry.push(data['flow']['vlanPriority']);
-			entry.push(data['flow']['srcMac']);
-			entry.push(data['flow']['dstMac']);
-			entry.push(data['flow']['srcIp']);
-			entry.push(data['flow']['dstIp']);
-			entry.push(data['flow']['tosBits']);
-			entry.push(data['flow']['srcPort']);
-			entry.push(data['flow']['dstPort']);
-			entry.push(data['flow']['protocol']);
-			entry.push(data['flow']['cookie']);
-
-			tr.entry = entry;
-			body.push(tr);
-			return body;
+            tr.entry = entry;
+            body.push(tr);
+            return body;
         },
-		actions : function(data) {
-			var body = [];
-			var tr = {};
-			var entry = [];
+        description : function(data) {
+            var body = [];
+            var tr = {};
+            var entry = [];
+                        entry.push(data['flow']['ingressPort']);
+            entry.push(data['flow']['etherType']);
+            entry.push(data['flow']['vlanId']);
+            entry.push(data['flow']['vlanPriority']);
+            entry.push(data['flow']['srcMac']);
+            entry.push(data['flow']['dstMac']);
+            entry.push(data['flow']['srcIp']);
+            entry.push(data['flow']['dstIp']);
+            entry.push(data['flow']['tosBits']);
+            entry.push(data['flow']['srcPort']);
+            entry.push(data['flow']['dstPort']);
+            entry.push(data['flow']['protocol']);
+            entry.push(data['flow']['cookie']);
 
-			var actions = '';
-			$(data['flow']['actions']).each(function(index, value) {
-				actions += value + ', ';
-			});
-			actions = actions.slice(0,-2);
-			entry.push(actions);
+            tr.entry = entry;
+            body.push(tr);
+            return body;
+        },
+        actions : function(data) {
+            var body = [];
+            var tr = {};
+            var entry = [];
 
-			tr.entry = entry;
-			body.push(tr);
-			return body;
-		}
+            var actions = '';
+            $(data['flow']['actions']).each(function(index, value) {
+                actions += value + ', ';
+            });
+            actions = actions.slice(0,-2);
+            entry.push(actions);
+
+            tr.entry = entry;
+            body.push(tr);
+            return body;
+        }
     },
     body : {
         dashlet : function(body) {
-			// create table
-			var header = ['Flow Name', 'Node', 'Priority', 'Hard Timeout', 'Idle Timeout'];
-			var $thead = one.lib.dashlet.table.header(header);
-			var attributes = ['table-striped', 'table-bordered', 'table-condensed'];
-			var $table = one.lib.dashlet.table.table(attributes);
-			$table.append($thead);
+            // create table
+            var header = ['Flow Name', 'Node', 'Priority', 'Hard Timeout', 'Idle Timeout'];
+            var $thead = one.lib.dashlet.table.header(header);
+            var attributes = ['table-striped', 'table-bordered', 'table-condensed'];
+            var $table = one.lib.dashlet.table.table(attributes);
+            $table.append($thead);
 
-			var $tbody = one.lib.dashlet.table.body(body);
-			$table.append($tbody);
+            var $tbody = one.lib.dashlet.table.body(body);
+            $table.append($tbody);
 
             return $table;
         },
-		description : function(body) {
-			var header = ['Input Port', 'Ethernet Type', 'VLAN ID', 'VLAN Priority', 'Source MAC', 'Dest MAC', 'Source IP', 'Dest IP', 'TOS', 'Source Port', 'Dest Port', 'Protocol', 'Cookie'];
-			var $thead = one.lib.dashlet.table.header(header);
-			var attributes = ['table-striped', 'table-bordered', 'table-condensed'];
-			var $table = one.lib.dashlet.table.table(attributes);
-			$table.append($thead);
+        description : function(body) {
+            var header = ['Input Port', 'Ethernet Type', 'VLAN ID', 'VLAN Priority', 'Source MAC', 'Dest MAC', 'Source IP', 'Dest IP', 'TOS', 'Source Port', 'Dest Port', 'Protocol', 'Cookie'];
+            var $thead = one.lib.dashlet.table.header(header);
+            var attributes = ['table-striped', 'table-bordered', 'table-condensed'];
+            var $table = one.lib.dashlet.table.table(attributes);
+            $table.append($thead);
 
-			var $tbody = one.lib.dashlet.table.body(body);
-			$table.append($tbody);
-
-            return $table;
-		},
-		actions : function(body) {
-			var header = ['Actions'];
-			var $thead = one.lib.dashlet.table.header(header);
-			var attributes = ['table-striped', 'table-bordered', 'table-condensed'];
-			var $table = one.lib.dashlet.table.table(attributes);
-			$table.append($thead);
-
-			var $tbody = one.lib.dashlet.table.body(body);
-			$table.append($tbody);
+            var $tbody = one.lib.dashlet.table.body(body);
+            $table.append($tbody);
 
             return $table;
-		}
+        },
+        actions : function(body) {
+            var header = ['Actions'];
+            var $thead = one.lib.dashlet.table.header(header);
+            var attributes = ['table-striped', 'table-bordered', 'table-condensed'];
+            var $table = one.lib.dashlet.table.table(attributes);
+            $table.append($thead);
+
+            var $tbody = one.lib.dashlet.table.body(body);
+            $table.append($tbody);
+
+            return $table;
+        }
     }
 }
 
@@ -244,15 +252,16 @@ one.f.flows = {
         dashlet : {
             add : "one_f_flows_id_dashlet_add",
             remove : "one_f_flows_id_dashlet_remove",
-            toggle : "one_f_flows_id_dashlet_toggle"
+            toggle : "one_f_flows_id_dashlet_toggle",
+            datagrid: "one_f_flows_id_dashlet_datagrid"
         },
         modal : {
-			install : "one_f_flows_id_modal_install",
+            install : "one_f_flows_id_modal_install",
             add : "one_f_flows_id_modal_add",
             close : "one_f_flows_id_modal_close",
             modal : "one_f_flows_id_modal_modal",
             dialog : {
-            	modal : "one_f_flows_id_modal_dialog_modal",
+                modal : "one_f_flows_id_modal_dialog_modal",
                 remove : "one_f_flows_id_modal_dialog_remove",
                 close : "one_f_flows_id_modal_dialog_close"
             },
@@ -272,11 +281,11 @@ one.f.flows = {
                 modifyTosBits : "one_f_flows_modal_action_modifyTosBits",
                 modifyTransportSourcePort : "one_f_flows_modal_action_modifyTransportSourcePort",
                 modifyTransportDestinationPort : "one_f_flows_modal_action_modifyTransportDestinationPort",
-				modal : {
-					modal : "one_f_flows_modal_action_modal_modal",
-					remove : "one_f_flows_modal_action_modal_remove",
-					cancel : "one_f_flows_modal_action_modal_cancel"
-				}
+                modal : {
+                    modal : "one_f_flows_modal_action_modal_modal",
+                    remove : "one_f_flows_modal_action_modal_remove",
+                    cancel : "one_f_flows_modal_action_modal_cancel"
+                }
             },
             form : {
                 name : "one_f_flows_id_modal_form_name",
@@ -284,8 +293,8 @@ one.f.flows = {
                 port : "one_f_flows_id_modal_form_port",
                 priority : "one_f_flows_id_modal_form_priority",
                 hardTimeout : "one_f_flows_id_modal_form_hardTimeout",
-				idleTimeout : "one_f_flows_id_modal_form_idleTimeout",
-				cookie : "one_f_flows_id_modal_form_cookie",
+                idleTimeout : "one_f_flows_id_modal_form_idleTimeout",
+                cookie : "one_f_flows_id_modal_form_cookie",
                 etherType : "one_f_flows_id_modal_form_etherType",
                 vlanId : "one_f_flows_id_modal_form_vlanId",
                 vlanPriority : "one_f_flows_id_modal_form_vlanPriority",
@@ -304,7 +313,7 @@ one.f.flows = {
     dashlet : function($dashlet, callback) {
 
         // load body
-        one.f.flows.ajax.dashlet(function($table) {
+        one.f.flows.ajax.dashlet(function(data) {
 
             var $h4 = one.lib.dashlet.header("Flow Entries");
 
@@ -321,28 +330,39 @@ one.f.flows = {
 
             }
 
-            // table bindings
-            $table.find('tbody').find('tr').click(function() {
-                var id = $($(this).find('td')[0]).text();
-                var node = $(this).data('id');
-                one.f.flows.detail(id, node);
+            var $gridHTML = one.lib.dashlet.datagrid.init(one.f.flows.id.dashlet.datagrid, {
+                searchable: true,
+                filterable: false,
+                pagination: true,
+                flexibleRowsPerPage: true
+                }, "table-striped table-condensed");
+            $dashlet.append($gridHTML);
+            var dataSource = one.f.flows.data.flowsDataGrid(data);
+            $("#" + one.f.flows.id.dashlet.datagrid).datagrid({dataSource: dataSource}).on("loaded", function() {
+                $("#" + one.f.flows.id.dashlet.datagrid).find("tbody tr").each(function(index, tr) {
+                    $tr = $(tr);
+                    $span = $("td span", $tr);
+                    var flowstatus = $span.data("flowstatus");
+                    var installInHw = $span.data("installinhw").toString();
+                    if(installInHw == "true" && flowstatus == "Success") {
+                        $tr.addClass("success");
+                    } else {
+                        $tr.addClass("warning");
+                    }
+                    // attach mouseover to show pointer cursor
+                    $tr.mouseover(function() {
+                        $(this).css("cursor", "pointer");
+                    });
+                    // attach click event
+                    $tr.click(function() {
+                        var $td = $($(this).find("td")[0]);
+                        var id = $td.text();
+                        var node = $td.find("span").data("nodeid");
+                        one.f.flows.detail(id, node);   
+                    });
+                });
             });
-
-			// total flows
-			var flowCount = $table.find('tbody').find('tr').size();
-			// prompt output
-			var flowText = "flow";
-			var verb = "is";
-			if (flowCount != 1) {
-				flowText += "s";
-				verb = "are";
-			}
-			var out = "There "+verb+" "+flowCount+" "+flowText;
-			$p = $(document.createElement('p'));
-			$p.append(out);
-			$dashlet.append($p);
-            // add table to dashlet
-            $dashlet.append($table);
+            
             // details callback
             if(callback != undefined) callback();
         });
@@ -363,54 +383,54 @@ one.f.flows = {
             }
         });
         if (one.f.flows.registry.privilege === 'WRITE') {
-	        // remove button
-	        var button = one.lib.dashlet.button.single("Remove Flow", one.f.flows.id.dashlet.remove, "btn-danger", "btn-mini");
-	        var $button = one.lib.dashlet.button.button(button);
-	        $button.click(function() {
-	            var $modal = one.f.flows.modal.dialog.initialize(id, node);
-	            $modal.modal();
-	        });
-	        // toggle button
-	        var toggle;
-	        if (flow['flow']['installInHw'] == 'true' && flow['flow']['status'] == 'Success') {
-	            toggle = one.lib.dashlet.button.single("Uninstall Flow", one.f.flows.id.dashlet.toggle, "btn-warning", "btn-mini");
-	        } else {
-	            toggle = one.lib.dashlet.button.single("Install Flow", one.f.flows.id.dashlet.toggle, "btn-success", "btn-mini");
-	        }
-	        var $toggle = one.lib.dashlet.button.button(toggle);
-	        $toggle.click(function() {
-	            one.f.flows.modal.ajax.toggleflow(id, node, function(data) {
-	                if(data == "Success") {
-	                    one.main.dashlet.right.bottom.empty();
-	                    one.f.detail.dashlet(one.main.dashlet.right.bottom);
-	                    one.main.dashlet.left.top.empty();
-	                	one.f.flows.dashlet(one.main.dashlet.left.top, function() {
-	                	   // checks are backwards due to stale registry
-	                	   if(flow['flow']['installInHw'] == 'true') {
-	                	       one.lib.alert('Uninstalled Flow');
-	                	   } else {
-	                	       one.lib.alert('Installed Flow');
-	                	   }
-	                	   one.f.flows.detail(id, node)
-	                	});
-	                } else {
-	                    one.lib.alert('Cannot toggle flow: '+data);
-	                }
-	            });
-	        });
+            // remove button
+            var button = one.lib.dashlet.button.single("Remove Flow", one.f.flows.id.dashlet.remove, "btn-danger", "btn-mini");
+            var $button = one.lib.dashlet.button.button(button);
+            $button.click(function() {
+                var $modal = one.f.flows.modal.dialog.initialize(id, node);
+                $modal.modal();
+            });
+            // toggle button
+            var toggle;
+            if (flow['flow']['installInHw'] == 'true' && flow['flow']['status'] == 'Success') {
+                toggle = one.lib.dashlet.button.single("Uninstall Flow", one.f.flows.id.dashlet.toggle, "btn-warning", "btn-mini");
+            } else {
+                toggle = one.lib.dashlet.button.single("Install Flow", one.f.flows.id.dashlet.toggle, "btn-success", "btn-mini");
+            }
+            var $toggle = one.lib.dashlet.button.button(toggle);
+            $toggle.click(function() {
+                one.f.flows.modal.ajax.toggleflow(id, node, function(data) {
+                    if(data == "Success") {
+                        one.main.dashlet.right.bottom.empty();
+                        one.f.detail.dashlet(one.main.dashlet.right.bottom);
+                        one.main.dashlet.left.top.empty();
+                        one.f.flows.dashlet(one.main.dashlet.left.top, function() {
+                           // checks are backwards due to stale registry
+                           if(flow['flow']['installInHw'] == 'true') {
+                               one.lib.alert('Uninstalled Flow');
+                           } else {
+                               one.lib.alert('Installed Flow');
+                           }
+                           one.f.flows.detail(id, node)
+                        });
+                    } else {
+                        one.lib.alert('Cannot toggle flow: '+data);
+                    }
+                });
+            });
 
-	        $detailDashlet.append($button).append($toggle);
+            $detailDashlet.append($button).append($toggle);
         }
         // append details
         var body = one.f.detail.data.dashlet(flow);
         var $body = one.f.detail.body.dashlet(body);
         $detailDashlet.append($body);
-		var body = one.f.detail.data.description(flow);
-		var $body = one.f.detail.body.description(body);
-		$detailDashlet.append($body);
-		var body = one.f.detail.data.actions(flow);
-		var $body = one.f.detail.body.actions(body);
-		$detailDashlet.append($body);
+        var body = one.f.detail.data.description(flow);
+        var $body = one.f.detail.body.description(body);
+        $detailDashlet.append($body);
+        var body = one.f.detail.data.actions(flow);
+        var $body = one.f.detail.body.actions(body);
+        $detailDashlet.append($body);
     },
     modal : {
         dialog : {
@@ -492,8 +512,8 @@ one.f.flows = {
             result['ingressPort'] = $('#'+one.f.flows.id.modal.form.port, $modal).val();
             result['priority'] = $('#'+one.f.flows.id.modal.form.priority, $modal).val();
             result['hardTimeout'] = $('#'+one.f.flows.id.modal.form.hardTimeout, $modal).val();
-			result['idleTimeout'] = $('#'+one.f.flows.id.modal.form.idleTimeout, $modal).val();
-			result['cookie'] = $('#'+one.f.flows.id.modal.form.cookie, $modal).val();
+            result['idleTimeout'] = $('#'+one.f.flows.id.modal.form.idleTimeout, $modal).val();
+            result['cookie'] = $('#'+one.f.flows.id.modal.form.cookie, $modal).val();
             result['etherType'] = $('#'+one.f.flows.id.modal.form.etherType, $modal).val();
             result['vlanId'] = $('#'+one.f.flows.id.modal.form.vlanId, $modal).val();
             result['vlanPriority'] = $('#'+one.f.flows.id.modal.form.vlanPriority, $modal).val();
@@ -506,7 +526,7 @@ one.f.flows = {
             result['tpDst'] = $('#'+one.f.flows.id.modal.form.dstPort, $modal).val();
             result['protocol'] = $('#'+one.f.flows.id.modal.form.protocol, $modal).val();
 
-			result['installInHw'] = install;
+            result['installInHw'] = install;
 
             var nodeId = $('#'+one.f.flows.id.modal.form.nodes, $modal).val();
 
@@ -517,31 +537,31 @@ one.f.flows = {
             var action = [];
             var $table = $('#'+one.f.flows.id.modal.action.table, $modal);
             $($table.find('tbody').find('tr')).each(function(index, value) {
-				if (!$(this).find('td').hasClass('empty')) {
-	                action.push($(value).data('action'));
-				}
+                if (!$(this).find('td').hasClass('empty')) {
+                    action.push($(value).data('action'));
+                }
             });
             result['actions'] = action;
 
             // frontend validation
-			if (result['name'] == undefined) {
-				alert('Need flow name');
-				return;
-			}
-			if (nodeId == '') {
-				alert('Select node');
-				return;
-			}
-			if (action.length == 0) {
-				alert('Please specify an action');
-				return;
-			}
+            if (result['name'] == undefined) {
+                alert('Need flow name');
+                return;
+            }
+            if (nodeId == '') {
+                alert('Select node');
+                return;
+            }
+            if (action.length == 0) {
+                alert('Please specify an action');
+                return;
+            }
 
-			// package for ajax call
+            // package for ajax call
             var resource = {};
             resource['body'] = JSON.stringify(result);
             resource['action'] = 'add';
-			resource['nodeId'] = nodeId;
+            resource['nodeId'] = nodeId;
 
             one.f.flows.modal.ajax.saveflow(resource, function(data) {
                 if (data == "Success") {
@@ -550,7 +570,7 @@ one.f.flows = {
                     one.main.dashlet.left.top.empty();
                     one.f.flows.dashlet(one.main.dashlet.left.top);
                 } else {
-					alert('Could not add flow: '+data);
+                    alert('Could not add flow: '+data);
                 }
             });
         },
@@ -570,18 +590,18 @@ one.f.flows = {
                 });
             },
             removeflow : function(id, node, callback) {
-            	resource = {};
-            	resource['action'] = 'remove';
+                resource = {};
+                resource['action'] = 'remove';
                 $.post(one.f.address.root+one.f.address.flows.flow+'/'+node+'/'+id, resource, function(data) {
                     callback(data);
                 });
             },
             toggleflow : function(id, node, callback) {
-            	resource = {};
-            	resource['action'] = 'toggle';
-            	$.post(one.f.address.root+one.f.address.flows.flow+'/'+node+'/'+id, resource, function(data) {
-            		callback(data);
-            	});
+                resource = {};
+                resource['action'] = 'toggle';
+                $.post(one.f.address.root+one.f.address.flows.flow+'/'+node+'/'+id, resource, function(data) {
+                    callback(data);
+                });
             }
         },
         data : {
@@ -595,184 +615,184 @@ one.f.flows = {
         },
         body : function(nodes, nodeports) {
             var $form = $(document.createElement('form'));
-			var $fieldset = $(document.createElement('fieldset'));
-			// flow description
-			var $legend = one.lib.form.legend("Flow Description");
-			$fieldset.append($legend);
-			// name
-			var $label = one.lib.form.label("Name");
-			var $input = one.lib.form.input("Flow Name");
-			$input.attr('id', one.f.flows.id.modal.form.name);
-			$fieldset.append($label).append($input);
-			// node
-			var $label = one.lib.form.label("Node");
-			var $select = one.lib.form.select.create(nodes);
-			one.lib.form.select.prepend($select, { '' : 'Please Select a Node' });
-			$select.val($select.find("option:first").val());
-			$select.attr('id', one.f.flows.id.modal.form.nodes);
+            var $fieldset = $(document.createElement('fieldset'));
+            // flow description
+            var $legend = one.lib.form.legend("Flow Description");
+            $fieldset.append($legend);
+            // name
+            var $label = one.lib.form.label("Name");
+            var $input = one.lib.form.input("Flow Name");
+            $input.attr('id', one.f.flows.id.modal.form.name);
+            $fieldset.append($label).append($input);
+            // node
+            var $label = one.lib.form.label("Node");
+            var $select = one.lib.form.select.create(nodes);
+            one.lib.form.select.prepend($select, { '' : 'Please Select a Node' });
+            $select.val($select.find("option:first").val());
+            $select.attr('id', one.f.flows.id.modal.form.nodes);
 
-			// bind onchange
-			$select.change(function() {
-			    // retrieve port value
-			    var node = $(this).find('option:selected').attr('value');
-			    var $ports = $('#'+one.f.flows.id.modal.form.port);
-				if (node == '') {
-					one.lib.form.select.inject($ports, {});
-					return;
-				}
-			    one.f.flows.registry['currentNode'] = node;
-			    var ports = nodeports[node]['ports'];
-			    one.lib.form.select.inject($ports, ports);
-			    one.lib.form.select.prepend($ports, { '' : 'Please Select a Port' });
-			    $ports.val($ports.find("option:first").val());
-			});
+            // bind onchange
+            $select.change(function() {
+                // retrieve port value
+                var node = $(this).find('option:selected').attr('value');
+                var $ports = $('#'+one.f.flows.id.modal.form.port);
+                if (node == '') {
+                    one.lib.form.select.inject($ports, {});
+                    return;
+                }
+                one.f.flows.registry['currentNode'] = node;
+                var ports = nodeports[node]['ports'];
+                one.lib.form.select.inject($ports, ports);
+                one.lib.form.select.prepend($ports, { '' : 'Please Select a Port' });
+                $ports.val($ports.find("option:first").val());
+            });
 
             $fieldset.append($label).append($select);
-			// input port
-			var $label = one.lib.form.label("Input Port");
-			var $select = one.lib.form.select.create();
-			$select.attr('id', one.f.flows.id.modal.form.port);
-			$fieldset.append($label).append($select);
-			// priority
-			var $label = one.lib.form.label("Priority");
-			var $input = one.lib.form.input("Priority");
-			$input.attr('id', one.f.flows.id.modal.form.priority);
-			$input.val('500');
-			$fieldset.append($label).append($input);
-			// hardTimeout
-			var $label = one.lib.form.label("Hard Timeout");
-			var $input = one.lib.form.input("Hard Timeout");
-			$input.attr('id', one.f.flows.id.modal.form.hardTimeout);
-			$fieldset.append($label).append($input);
-			// idleTimeout
-			var $label = one.lib.form.label("Idle Timeout");
-			var $input = one.lib.form.input("Idle Timeout");
-			$input.attr('id', one.f.flows.id.modal.form.idleTimeout);
-			$fieldset.append($label).append($input);
-			// cookie
-			var $label = one.lib.form.label("Cookie");
-			var $input = one.lib.form.input("Cookie");
-			$input.attr('id', one.f.flows.id.modal.form.cookie);
-			$fieldset.append($label).append($input);
-			// layer 2
-			var $legend = one.lib.form.legend("Layer 2");
-			$fieldset.append($legend);
-			// etherType
-			var $label = one.lib.form.label("Ethernet Type");
-			var $input = one.lib.form.input("Ethernet Type");
-			$input.attr('id', one.f.flows.id.modal.form.etherType);
-			$input.val('0x800');
-			$fieldset.append($label).append($input);
-			// vlanId
-			var $label = one.lib.form.label("VLAN Identification Number");
-			var $input = one.lib.form.input("VLAN Identification Number");
-			$input.attr('id', one.f.flows.id.modal.form.vlanId);
-			var $help = one.lib.form.help("Range: 0 - 4095");
-			$fieldset.append($label).append($input).append($help);
-			// vlanPriority
-			var $label = one.lib.form.label("VLAN Priority");
-			var $input = one.lib.form.input("VLAN Priority");
-			$input.attr('id', one.f.flows.id.modal.form.vlanPriority);
-			var $help = one.lib.form.help("Range: 0 - 7");
-			$fieldset.append($label).append($input).append($help);
-			// srcMac
-			var $label = one.lib.form.label("Source MAC Address");
-			var $input = one.lib.form.input("Source MAC Address");
-			$input.attr('id', one.f.flows.id.modal.form.srcMac);
-			var $help = one.lib.form.help("Example: 00:11:22:aa:bb:cc");
-			$fieldset.append($label).append($input).append($help);
-			// dstMac
-			var $label = one.lib.form.label("Destination MAC Address");
-			var $input = one.lib.form.input("Destination MAC Address");
-			$input.attr('id', one.f.flows.id.modal.form.dstMac);
-			var $help = one.lib.form.help("Example: 00:11:22:aa:bb:cc");
-			$fieldset.append($label).append($input).append($help);
-			// layer 3
-			var $legend = one.lib.form.legend("Layer 3");
-			$fieldset.append($legend);
-			// srcIp
-			var $label = one.lib.form.label("Source IP Address");
-			var $input = one.lib.form.input("Source IP Address");
-			$input.attr('id', one.f.flows.id.modal.form.srcIp);
-			var $help = one.lib.form.help("Example: 127.0.0.1");
-			$fieldset.append($label).append($input).append($help);
-			// dstIp
-			var $label = one.lib.form.label("Destination IP Address");
-			var $input = one.lib.form.input("Destination IP Address");
-			$input.attr('id', one.f.flows.id.modal.form.dstIp);
-			var $help = one.lib.form.help("Example: 127.0.0.1");
-			$fieldset.append($label).append($input).append($help);
-			// tosBits
-			var $label = one.lib.form.label("TOS Bits");
-			var $input = one.lib.form.input("TOS Bits");
-			$input.attr('id', one.f.flows.id.modal.form.tosBits);
-			var $help = one.lib.form.help("Range: 0 - 63");
-			$fieldset.append($label).append($input).append($help);
-			// layer 4
-			var $legend = one.lib.form.legend("Layer 4");
-			$fieldset.append($legend);
-			// srcPort
-			var $label = one.lib.form.label("Source Port");
-			var $input = one.lib.form.input("Source Port");
-			$input.attr('id', one.f.flows.id.modal.form.srcPort);
-			var $help = one.lib.form.help("Range: 0 - 65535");
-			$fieldset.append($label).append($input).append($help);
-			// dstPort
-			var $label = one.lib.form.label("Destination Port");
-			var $input = one.lib.form.input("Destination Port");
-			$input.attr('id', one.f.flows.id.modal.form.dstPort);
-			var $help = one.lib.form.help("Range: 0 - 65535");
-			$fieldset.append($label).append($input).append($help);
-			// protocol
-			var $label = one.lib.form.label("Protocol");
-			var $input = one.lib.form.input("Protocol");
-			$input.attr('id', one.f.flows.id.modal.form.protocol);
-			$fieldset.append($label).append($input);
-			// actions
-			var $legend = one.lib.form.label("Actions");
-			$fieldset.append($legend);
-			// actions table
-			var tableAttributes = ["table-striped", "table-bordered", "table-condensed", "table-hover", "table-cursor"];
-			var $table = one.lib.dashlet.table.table(tableAttributes);
-			$table.attr('id', one.f.flows.id.modal.action.table);
-			var tableHeaders = ["Action", "Data", "Type"];
-		    var $thead = one.lib.dashlet.table.header(tableHeaders);
-			var $tbody = one.lib.dashlet.table.body("", tableHeaders);
-			$table.append($thead).append($tbody);
-			// actions
-			var actions = {
-			    "" : "Please Select an Action",
-			    "drop" : "Drop",
-			    "loopback" : "Loopback",
-			    "flood" : "Flood",
-			    "softwarePath" : "Software Path",
-			    "hardwarePath" : "Hardware Path",
-			    "controller" : "Controller",
-			    "addOutputPorts" : "Add Output Ports",
-			    "setVlanId" : "Set VLAN ID",
-			    "setVlanPriority" : "Set VLAN Priority",
-			    "stripVlanHeader" : "Strip VLAN Header",
-			    "modifyDatalayerSourceAddress" : "Modify Datalayer Source Address",
-			    "modifyDatalayerDestinationAddress" : "Modify Datalayer Destination Address",
-			    "modifyNetworkSourceAddress" : "Modify Network Source Address",
-			    "modifyNetworkDestinationAddress" :"Modify Network Destination Address",
-			    "modifyTosBits" : "Modify TOS Bits",
-			    "modifyTransportSourcePort" : "Modify Transport Source Port",
-			    "modifyTransportDestinationPort" : "Modify Transport Destination Port"
-			};
+            // input port
+            var $label = one.lib.form.label("Input Port");
+            var $select = one.lib.form.select.create();
+            $select.attr('id', one.f.flows.id.modal.form.port);
+            $fieldset.append($label).append($select);
+            // priority
+            var $label = one.lib.form.label("Priority");
+            var $input = one.lib.form.input("Priority");
+            $input.attr('id', one.f.flows.id.modal.form.priority);
+            $input.val('500');
+            $fieldset.append($label).append($input);
+            // hardTimeout
+            var $label = one.lib.form.label("Hard Timeout");
+            var $input = one.lib.form.input("Hard Timeout");
+            $input.attr('id', one.f.flows.id.modal.form.hardTimeout);
+            $fieldset.append($label).append($input);
+            // idleTimeout
+            var $label = one.lib.form.label("Idle Timeout");
+            var $input = one.lib.form.input("Idle Timeout");
+            $input.attr('id', one.f.flows.id.modal.form.idleTimeout);
+            $fieldset.append($label).append($input);
+            // cookie
+            var $label = one.lib.form.label("Cookie");
+            var $input = one.lib.form.input("Cookie");
+            $input.attr('id', one.f.flows.id.modal.form.cookie);
+            $fieldset.append($label).append($input);
+            // layer 2
+            var $legend = one.lib.form.legend("Layer 2");
+            $fieldset.append($legend);
+            // etherType
+            var $label = one.lib.form.label("Ethernet Type");
+            var $input = one.lib.form.input("Ethernet Type");
+            $input.attr('id', one.f.flows.id.modal.form.etherType);
+            $input.val('0x800');
+            $fieldset.append($label).append($input);
+            // vlanId
+            var $label = one.lib.form.label("VLAN Identification Number");
+            var $input = one.lib.form.input("VLAN Identification Number");
+            $input.attr('id', one.f.flows.id.modal.form.vlanId);
+            var $help = one.lib.form.help("Range: 0 - 4095");
+            $fieldset.append($label).append($input).append($help);
+            // vlanPriority
+            var $label = one.lib.form.label("VLAN Priority");
+            var $input = one.lib.form.input("VLAN Priority");
+            $input.attr('id', one.f.flows.id.modal.form.vlanPriority);
+            var $help = one.lib.form.help("Range: 0 - 7");
+            $fieldset.append($label).append($input).append($help);
+            // srcMac
+            var $label = one.lib.form.label("Source MAC Address");
+            var $input = one.lib.form.input("Source MAC Address");
+            $input.attr('id', one.f.flows.id.modal.form.srcMac);
+            var $help = one.lib.form.help("Example: 00:11:22:aa:bb:cc");
+            $fieldset.append($label).append($input).append($help);
+            // dstMac
+            var $label = one.lib.form.label("Destination MAC Address");
+            var $input = one.lib.form.input("Destination MAC Address");
+            $input.attr('id', one.f.flows.id.modal.form.dstMac);
+            var $help = one.lib.form.help("Example: 00:11:22:aa:bb:cc");
+            $fieldset.append($label).append($input).append($help);
+            // layer 3
+            var $legend = one.lib.form.legend("Layer 3");
+            $fieldset.append($legend);
+            // srcIp
+            var $label = one.lib.form.label("Source IP Address");
+            var $input = one.lib.form.input("Source IP Address");
+            $input.attr('id', one.f.flows.id.modal.form.srcIp);
+            var $help = one.lib.form.help("Example: 127.0.0.1");
+            $fieldset.append($label).append($input).append($help);
+            // dstIp
+            var $label = one.lib.form.label("Destination IP Address");
+            var $input = one.lib.form.input("Destination IP Address");
+            $input.attr('id', one.f.flows.id.modal.form.dstIp);
+            var $help = one.lib.form.help("Example: 127.0.0.1");
+            $fieldset.append($label).append($input).append($help);
+            // tosBits
+            var $label = one.lib.form.label("TOS Bits");
+            var $input = one.lib.form.input("TOS Bits");
+            $input.attr('id', one.f.flows.id.modal.form.tosBits);
+            var $help = one.lib.form.help("Range: 0 - 63");
+            $fieldset.append($label).append($input).append($help);
+            // layer 4
+            var $legend = one.lib.form.legend("Layer 4");
+            $fieldset.append($legend);
+            // srcPort
+            var $label = one.lib.form.label("Source Port");
+            var $input = one.lib.form.input("Source Port");
+            $input.attr('id', one.f.flows.id.modal.form.srcPort);
+            var $help = one.lib.form.help("Range: 0 - 65535");
+            $fieldset.append($label).append($input).append($help);
+            // dstPort
+            var $label = one.lib.form.label("Destination Port");
+            var $input = one.lib.form.input("Destination Port");
+            $input.attr('id', one.f.flows.id.modal.form.dstPort);
+            var $help = one.lib.form.help("Range: 0 - 65535");
+            $fieldset.append($label).append($input).append($help);
+            // protocol
+            var $label = one.lib.form.label("Protocol");
+            var $input = one.lib.form.input("Protocol");
+            $input.attr('id', one.f.flows.id.modal.form.protocol);
+            $fieldset.append($label).append($input);
+            // actions
+            var $legend = one.lib.form.label("Actions");
+            $fieldset.append($legend);
+            // actions table
+            var tableAttributes = ["table-striped", "table-bordered", "table-condensed", "table-hover", "table-cursor"];
+            var $table = one.lib.dashlet.table.table(tableAttributes);
+            $table.attr('id', one.f.flows.id.modal.action.table);
+            var tableHeaders = ["Action", "Data", "Type"];
+            var $thead = one.lib.dashlet.table.header(tableHeaders);
+            var $tbody = one.lib.dashlet.table.body("", tableHeaders);
+            $table.append($thead).append($tbody);
+            // actions
+            var actions = {
+                "" : "Please Select an Action",
+                "drop" : "Drop",
+                "loopback" : "Loopback",
+                "flood" : "Flood",
+                "softwarePath" : "Software Path",
+                "hardwarePath" : "Hardware Path",
+                "controller" : "Controller",
+                "addOutputPorts" : "Add Output Ports",
+                "setVlanId" : "Set VLAN ID",
+                "setVlanPriority" : "Set VLAN Priority",
+                "stripVlanHeader" : "Strip VLAN Header",
+                "modifyDatalayerSourceAddress" : "Modify Datalayer Source Address",
+                "modifyDatalayerDestinationAddress" : "Modify Datalayer Destination Address",
+                "modifyNetworkSourceAddress" : "Modify Network Source Address",
+                "modifyNetworkDestinationAddress" :"Modify Network Destination Address",
+                "modifyTosBits" : "Modify TOS Bits",
+                "modifyTransportSourcePort" : "Modify Transport Source Port",
+                "modifyTransportDestinationPort" : "Modify Transport Destination Port"
+            };
             var $select = one.lib.form.select.create(actions);
             // when selecting an action
             $select.change(function() {
                 var action = $(this).find('option:selected');
                 one.f.flows.modal.action.parse(action.attr('value'));
-				$select[0].selectedIndex = 0;
+                $select[0].selectedIndex = 0;
             });
 
-			$fieldset.append($select).append($table);
+            $fieldset.append($select).append($table);
 
-			// return
-			$form.append($fieldset);
-			return $form;
+            // return
+            $form.append($fieldset);
+            return $form;
         },
         action : {
             parse : function(option) {
@@ -991,9 +1011,9 @@ one.f.flows = {
                     var $tr = one.f.flows.modal.action.table.add("Add Output Ports", ports);
                     $tr.attr('id', 'addOutputPorts');
                     $tr.data('action', 'OUTPUT='+pid);
-					$tr.click(function() {
-						one.f.flows.modal.action.add.modal.initialize(this);
-					});
+                    $tr.click(function() {
+                        one.f.flows.modal.action.add.modal.initialize(this);
+                    });
                     one.f.flows.modal.action.table.append($tr);
                     $modal.modal('hide');
                 },
@@ -1001,9 +1021,9 @@ one.f.flows = {
                     var $tr = one.f.flows.modal.action.table.add(name);
                     $tr.attr('id', action);
                     $tr.data('action', action);
-					$tr.click(function() {
-						one.f.flows.modal.action.add.modal.initialize(this);
-					});
+                    $tr.click(function() {
+                        one.f.flows.modal.action.add.modal.initialize(this);
+                    });
                     one.f.flows.modal.action.table.append($tr);
                 },
                 set : function(name, id, action, $modal) {
@@ -1012,64 +1032,64 @@ one.f.flows = {
                     var $tr = one.f.flows.modal.action.table.add(name, value);
                     $tr.attr('id', action);
                     $tr.data('action', action+'='+value);
-					$tr.click(function() {
-						one.f.flows.modal.action.add.modal.initialize(this);
-					});
+                    $tr.click(function() {
+                        one.f.flows.modal.action.add.modal.initialize(this);
+                    });
                     one.f.flows.modal.action.table.append($tr);
                     $modal.modal('hide');
                 },
-				remove : function(that) {
-					$(that).remove();
-					var $table = $('#'+one.f.flows.id.modal.action.table);
-					if ($table.find('tbody').find('tr').size() == 0) {
-						var $tr = $(document.createElement('tr'));
-						var $td = $(document.createElement('td'));
-						$td.attr('colspan', '3');
-						$tr.addClass('empty');
-						$td.text('No data available');
-						$tr.append($td);
-						$table.find('tbody').append($tr);
-					}
-				},
-				modal : {
-					initialize : function(that) {
-						var h3 = "Remove Action";
-						var footer = one.f.flows.modal.action.add.modal.footer();
-						var $body = one.f.flows.modal.action.add.modal.body();
-						var $modal = one.lib.modal.spawn(one.f.flows.id.modal.action.modal.modal, h3, $body, footer);
+                remove : function(that) {
+                    $(that).remove();
+                    var $table = $('#'+one.f.flows.id.modal.action.table);
+                    if ($table.find('tbody').find('tr').size() == 0) {
+                        var $tr = $(document.createElement('tr'));
+                        var $td = $(document.createElement('td'));
+                        $td.attr('colspan', '3');
+                        $tr.addClass('empty');
+                        $td.text('No data available');
+                        $tr.append($td);
+                        $table.find('tbody').append($tr);
+                    }
+                },
+                modal : {
+                    initialize : function(that) {
+                        var h3 = "Remove Action";
+                        var footer = one.f.flows.modal.action.add.modal.footer();
+                        var $body = one.f.flows.modal.action.add.modal.body();
+                        var $modal = one.lib.modal.spawn(one.f.flows.id.modal.action.modal.modal, h3, $body, footer);
 
-						// bind cancel button
-						$('#'+one.f.flows.id.modal.action.modal.cancel, $modal).click(function() {
-							$modal.modal('hide');
-						});
+                        // bind cancel button
+                        $('#'+one.f.flows.id.modal.action.modal.cancel, $modal).click(function() {
+                            $modal.modal('hide');
+                        });
 
-						// bind remove button
-						$('#'+one.f.flows.id.modal.action.modal.remove, $modal).click(function() {
-							one.f.flows.modal.action.add.remove(that);
-							$modal.modal('hide');
-						});
+                        // bind remove button
+                        $('#'+one.f.flows.id.modal.action.modal.remove, $modal).click(function() {
+                            one.f.flows.modal.action.add.remove(that);
+                            $modal.modal('hide');
+                        });
 
-						$modal.modal();
-					},
-					body : function() {
-						var $p = $(document.createElement('p'));
-						$p.append("Remove this action?");
-						return $p;
-					},
-					footer : function() {
-						var footer = [];
+                        $modal.modal();
+                    },
+                    body : function() {
+                        var $p = $(document.createElement('p'));
+                        $p.append("Remove this action?");
+                        return $p;
+                    },
+                    footer : function() {
+                        var footer = [];
 
-						var removeButton = one.lib.dashlet.button.single("Remove Action", one.f.flows.id.modal.action.modal.remove, "btn-danger", "");
-						var $removeButton = one.lib.dashlet.button.button(removeButton);
-						footer.push($removeButton);
+                        var removeButton = one.lib.dashlet.button.single("Remove Action", one.f.flows.id.modal.action.modal.remove, "btn-danger", "");
+                        var $removeButton = one.lib.dashlet.button.button(removeButton);
+                        footer.push($removeButton);
 
-						var cancelButton = one.lib.dashlet.button.single("Cancel", one.f.flows.id.modal.action.modal.cancel, "", "");
-						var $cancelButton = one.lib.dashlet.button.button(cancelButton);
-						footer.push($cancelButton);
+                        var cancelButton = one.lib.dashlet.button.single("Cancel", one.f.flows.id.modal.action.modal.cancel, "", "");
+                        var $cancelButton = one.lib.dashlet.button.button(cancelButton);
+                        footer.push($cancelButton);
 
-						return footer;
-					}
-				}
+                        return footer;
+                    }
+                }
             },
             table : {
                 add : function(action, data, type) {
@@ -1143,9 +1163,9 @@ one.f.flows = {
         footer : function() {
             var footer = [];
 
-			var installButton = one.lib.dashlet.button.single("Install Flow", one.f.flows.id.modal.install, "btn-success", "");
-			var $installButton = one.lib.dashlet.button.button(installButton);
-			footer.push($installButton);
+            var installButton = one.lib.dashlet.button.single("Install Flow", one.f.flows.id.modal.install, "btn-success", "");
+            var $installButton = one.lib.dashlet.button.button(installButton);
+            footer.push($installButton);
 
             var addButton = one.lib.dashlet.button.single("Save Flow", one.f.flows.id.modal.add, "btn-primary", "");
             var $addButton = one.lib.dashlet.button.button(addButton);
@@ -1163,13 +1183,38 @@ one.f.flows = {
             $.getJSON(one.f.address.root+one.f.address.flows.main, function(data) {
                 one.f.flows.registry['flows'] = data.flows;
                 one.f.flows.registry['privilege'] = data.privilege;
-                var body = one.f.flows.data.dashlet(data.flows);
-                var $body = one.f.flows.body.dashlet(body, callback);
-                callback($body);
+                callback(data);
             });
         }
     },
     data : {
+        flowsDataGrid: function(data) {
+            var source = new StaticDataSource({
+                    columns: [
+                        {
+                            property: 'name',
+                            label: 'Flow Name',
+                            sortable: true
+                        },
+                        {
+                            property: 'node',
+                            label: 'Node',
+                            sortable: true
+                        }
+                    ],
+                    data: data.flows,
+                    formatter: function(items) {
+                        $.each(items, function(index, item) {
+                            item["name"] = '<span data-installInHw=' + item["flow"]["installInHw"] + 
+                                ' data-flowstatus=' + item["flow"]["status"] + 
+                                ' data-nodeId=' + item["nodeId"] + '>' + item["name"] + '</span>';
+                        });
+
+                    },
+                    delay: 0
+                });
+            return source;
+        },
         dashlet : function(data) {
             var body = [];
             $(data).each(function(index, value) {
@@ -1178,11 +1223,11 @@ one.f.flows = {
                 entry.push(value['name']);
                 entry.push(value['node']);
                 if (value['flow']['installInHw'] == 'true' && value['flow']['status'] == 'Success')
-                	tr['type'] = ['success'];
+                    tr['type'] = ['success'];
                 else if (value['flow']['installInHw'] == 'false' && value['flow']['status'] == 'Success')
-                	tr['type'] = ['warning'];
+                    tr['type'] = ['warning'];
                 else 
-                	tr['type'] = ['warning'];
+                    tr['type'] = ['warning'];
                 tr['entry'] = entry;
                 tr['id'] = value['nodeId'];
 
