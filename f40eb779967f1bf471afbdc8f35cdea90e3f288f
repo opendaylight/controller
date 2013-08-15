@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//9/A\u003d",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/utils/NetUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-15T23:25:44Z",
+      "side": 1,
+      "message": "Please return a copy of this array, so that nobody can mutate its content.",
+      "revId": "f40eb779967f1bf471afbdc8f35cdea90e3f288f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
