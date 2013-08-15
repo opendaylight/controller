@@ -17,6 +17,7 @@
 <!-- Bootstrap CSS - 1 -->
 <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
 <link rel="stylesheet" type="text/css" href="/css/fuelux.min.css">
+<link rel="stylesheet" type="text/css" href="/css/opendaylight.css">
 
 <!-- Core CSS - 2 -->
 <link rel="stylesheet/less" type="text/css" href="/css/one.less">
