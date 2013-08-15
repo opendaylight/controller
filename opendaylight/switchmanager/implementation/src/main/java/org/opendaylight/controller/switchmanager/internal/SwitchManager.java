@@ -712,7 +712,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 switchConfig = new SwitchConfig(nodeId, updateProperties);
             } else {
                 // check if description is configured or was published by any other node
-                for (Node n : nodeProps.keySet()) {
+                for (Map.Entry<Node, Map<String, Property>> entry : nodeProps.entrySet()) {
+                    Node n = entry.getKey();
                     Description desc = (Description) getNodeProp(n, Description.propertyName);
                     NodeDescription nDesc = (this.statisticsManager == null) ? null : this.statisticsManager
                             .getNodeDescription(n);
@@ -762,7 +763,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             return new Status(StatusCode.SUCCESS);
         }
         Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
-        for (String prop : prevNodeProperties.keySet()) {
+        for (Map.Entry<String, Property> entry : prevNodeProperties.entrySet()) {
+            String prop = entry.getKey();
             if (!updateProperties.containsKey(prop)) {
                 if (prop.equals(Description.propertyName)) {
                     if (!advertisedDesc.isEmpty()) {
@@ -795,7 +797,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         Map<String, Property> propMapCurr = nodeProps.get(node);
         if ((propMapCurr != null) && (nodeProperties != null) && (!nodeProperties.isEmpty())) {
             Map<String, Property> propMap = new HashMap<String, Property>(propMapCurr);
-            for (String prop : nodeProperties.keySet()) {
+            for (Map.Entry<String, Property> entry : nodeProperties.entrySet()) {
+                String prop = entry.getKey();
                 if (prop.equals(Description.propertyName)) {
                     Map<Node, Map<String, Property>> nodeProp = this.inventoryService.getNodeProps();
                     if (nodeProp.get(node) != null) {
@@ -955,6 +958,17 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             return;
         }
         nodeProps.remove(node);
+        nodeConnectorNames.remove(node);
+        Set<NodeConnector> removeNodeConnectorSet = new HashSet<NodeConnector>();
+        for (Map.Entry<NodeConnector, Map<String, Property>> entry : nodeConnectorProps.entrySet()) {
+            NodeConnector nodeConnector = entry.getKey();
+            if (nodeConnector.getNode().equals(node)) {
+                removeNodeConnectorSet.add(nodeConnector);
+            }
+        }
+        for (NodeConnector nc : removeNodeConnectorSet) {
+            nodeConnectorProps.remove(nc);
+        }
 
         // check if span ports need to be cleaned up
         removeSpanPorts(node);
@@ -1161,7 +1175,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         }
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
-        for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
+        for (Map.Entry<NodeConnector, Map<String, Property>> entry : nodeConnectorProps.entrySet()) {
+            NodeConnector nodeConnector = entry.getKey();
             if (!nodeConnector.getNode().equals(node)) {
                 continue;
             }
@@ -1180,7 +1195,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         }
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
-        for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
+        for (Map.Entry<NodeConnector, Map<String, Property>> entry : nodeConnectorProps.entrySet()) {
+            NodeConnector nodeConnector = entry.getKey();
             if (!nodeConnector.getNode().equals(node)) {
                 continue;
             }
@@ -1197,7 +1213,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         }
 
         Set<NodeConnector> nodeConnectorSet = new HashSet<NodeConnector>();
-        for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
+        for (Map.Entry<NodeConnector, Map<String, Property>> entry : nodeConnectorProps.entrySet()) {
+            NodeConnector nodeConnector = entry.getKey();
             if (!nodeConnector.getNode().equals(node)
                     || isSpecial(nodeConnector)) {
                 continue;
@@ -1336,9 +1353,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 Map<String, NodeConnector> mapCurr = nodeConnectorNames.get(node);
                 Map<String, NodeConnector> map = new HashMap<String, NodeConnector>();
                 if (mapCurr != null) {
-                    for (String s : mapCurr.keySet()) {
+                    for (Map.Entry<String, NodeConnector> entry : mapCurr.entrySet()) {
+                        String s = entry.getKey();
                         try {
-                            map.put(s, new NodeConnector(mapCurr.get(s)));
+                            map.put(s, new NodeConnector(entry.getValue()));
                         } catch (ConstructionException e) {
                             e.printStackTrace();
                         }
@@ -1397,9 +1415,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                     Map<String, NodeConnector> mapCurr = nodeConnectorNames.get(node);
                     if (mapCurr != null) {
                         Map<String, NodeConnector> map = new HashMap<String, NodeConnector>();
-                        for (String s : mapCurr.keySet()) {
+                        for (Map.Entry<String, NodeConnector> entry : mapCurr.entrySet()) {
+                            String s = entry.getKey();
                             try {
-                                map.put(s, new NodeConnector(mapCurr.get(s)));
+                                map.put(s, new NodeConnector(entry.getValue()));
                             } catch (ConstructionException e) {
                                 e.printStackTrace();
                             }
@@ -1433,9 +1452,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 Map<String, NodeConnector> mapCurr = nodeConnectorNames.get(node);
                 if (mapCurr != null) {
                     Map<String, NodeConnector> map = new HashMap<String, NodeConnector>();
-                    for (String s : mapCurr.keySet()) {
+                    for (Map.Entry<String, NodeConnector> entry : mapCurr.entrySet()) {
+                        String s = entry.getKey();
                         try {
-                            map.put(s, new NodeConnector(mapCurr.get(s)));
+                            map.put(s, new NodeConnector(entry.getValue()));
                         } catch (ConstructionException e) {
                             e.printStackTrace();
                         }
@@ -1682,7 +1702,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             service.notifyNode(node, type, propMap);
         }
 
-        for (NodeConnector nodeConnector : nodeConnectorProps.keySet()) {
+        for (Map.Entry<NodeConnector, Map<String, Property>> entry : nodeConnectorProps.entrySet()) {
+            NodeConnector nodeConnector = entry.getKey();
             propMap = nodeConnectorProps.get(nodeConnector);
             service.notifyNodeConnector(nodeConnector, type, propMap);
         }
