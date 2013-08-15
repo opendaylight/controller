@@ -81,6 +81,9 @@ public abstract class NetUtils {
         return num;
     }
 
+    public static byte[] getBroadcastMACAddr() {
+        return BroadcastMACAddr;
+    }
     /**
      * Converts a long number to a 6 bytes array for MAC addresses.
      *

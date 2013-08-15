@@ -455,7 +455,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         }
 
         for (UserConfig conf : confList.values()) {
-            addLocalUser(conf);
+            addRemoveLocalUserInternal(conf, false);
         }
     }
 
@@ -492,21 +492,44 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     /*
      * Interaction with GUI START
      */
-    public Status addRemoveLocalUser(UserConfig AAAconf, boolean delete) {
+    private Status addRemoveLocalUser(UserConfig AAAconf, boolean delete) {
         // UserConfig Validation check
         Status validCheck = AAAconf.validate();
         if (!validCheck.isSuccess()) {
             return validCheck;
         }
 
+        String user = AAAconf.getUser();
+
+        // Check default admin user
+        if (user.equals(UserManagerImpl.defaultAdmin)) {
+            String msg = "Invalid Request: Default Network Admin  User cannot be " + ((delete)? "removed" : "added");
+            logger.debug(msg);
+            return new Status(StatusCode.NOTALLOWED, msg);
+        }
+
+        // Check user presence/conflict
+        StatusCode statusCode = null;
+        String reason = null;
+        if (delete && !localUserConfigList.containsKey(user)) {
+            reason = "not found";
+            statusCode = StatusCode.NOTFOUND;
+        } else if (!delete && localUserConfigList.containsKey(user)) {
+            reason = "already present";
+            statusCode = StatusCode.CONFLICT;
+        }
+        if (statusCode != null) {
+            String msg = String.format("User %s %s in configuration database", user, reason);
+            logger.debug(msg);
+            return new Status(statusCode, msg);
+        }
+
+        return addRemoveLocalUserInternal(AAAconf, delete);
+    }
+
+    private Status addRemoveLocalUserInternal(UserConfig AAAconf, boolean delete) {
         // Update Config database
         if (delete) {
-            if (AAAconf.getUser().equals(UserManagerImpl.defaultAdmin)) {
-                String msg = "Invalid Request: Default Network Admin  User "
-                        + "cannot be deleted";
-                logger.debug(msg);
-                return new Status(StatusCode.NOTALLOWED, msg);
-            }
             localUserConfigList.remove(AAAconf.getUser());
             /*
              * A user account has been removed form local database, we assume
@@ -515,16 +538,10 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
              */
             removeUserFromActiveList(AAAconf.getUser());
         } else {
-            if (AAAconf.getUser().equals(UserManagerImpl.defaultAdmin)) {
-                String msg = "Invalid Request: Default Network Admin  User "
-                        + "cannot be added";
-                logger.debug(msg);
-                return new Status(StatusCode.NOTALLOWED, msg);
-            }
             localUserConfigList.put(AAAconf.getUser(), AAAconf);
         }
 
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     private Status addRemoveAAAServer(ServerConfig AAAconf, boolean delete) {
@@ -542,7 +559,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             remoteServerConfigList.put(AAAconf.getAddress(), AAAconf);
         }
 
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     private Status addRemoveAuthInfo(AuthorizationConfig AAAconf, boolean delete) {
@@ -561,7 +578,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             authorizationConfList.put(AAAconf.getUser(), AAAconf);
         }
 
-        return new Status(StatusCode.SUCCESS, null);
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
@@ -579,9 +596,11 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         if (userName == null || userName.trim().isEmpty()) {
             return new Status(StatusCode.BADREQUEST, "Invalid user name");
         }
+
         if (!localUserConfigList.containsKey(userName)) {
             return new Status(StatusCode.NOTFOUND, "User does not exist");
         }
+
         return addRemoveLocalUser(localUserConfigList.get(userName), true);
     }
 
@@ -989,11 +1008,10 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         }
 
         if (success) {
-            return new Status(StatusCode.SUCCESS, null);
+            return new Status(StatusCode.SUCCESS);
         }
 
-        return new Status(StatusCode.INTERNALERROR,
-                "Failed to save user configurations");
+        return new Status(StatusCode.INTERNALERROR, "Failed to save user configurations");
     }
 
     @Override
