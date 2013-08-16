@@ -74,8 +74,10 @@ one.f.switchmanager.nodesLearnt = {
         },
         modal: {
             modal: "one_f_switchmanager_nodesLearnt_id_modal_modal",
+            ports: "one_f_switchmanager_nodesLearnt_id_modal_ports",
             save: "one_f_switchmanager_nodesLearnt_id_modal_save",
             datagrid: "one_f_switchmanager_nodesLearnt_id_modal_datagrid",
+            portsDatagrid: "one_f_switchmanager_nodesLearnt_id_modal_portsDatagrid",
             form: {
                 nodeId: "one_f_switchmanager_nodesLearnt_id_modal_form_nodeid",
                 nodeName : "one_f_switchmanager_nodesLearnt_id_modal_form_nodename",
@@ -102,6 +104,13 @@ one.f.switchmanager.nodesLearnt = {
             $("#" + one.f.switchmanager.nodesLearnt.id.dashlet.datagrid).datagrid({dataSource: dataSource}).on("loaded", function() {
                 $(this).find("tbody a").click(one.f.switchmanager.nodesLearnt.modal.initialize.updateNode);
             });
+            
+            $("#" + one.f.switchmanager.nodesLearnt.id.dashlet.datagrid).datagrid({dataSource: dataSource}).on("loaded", function() {
+                $(this).find("tbody span").click(function(){
+                	one.f.switchmanager.nodesLearnt.modal.initialize.displayPorts($(this));
+                });
+            });
+            
         });
     },
     ajax : {
@@ -145,6 +154,29 @@ one.f.switchmanager.nodesLearnt = {
                 var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.modal, h3, "", footer);
                 var $body = one.f.switchmanager.nodesLearnt.modal.body.popout($modal);
                 return $modal;
+            },
+            displayPorts: function(ports) {
+            	var content = JSON.parse(decodeURIComponent(ports.attr("ports")));
+            	
+            	var h3 = ((ports.attr("nodeName") == "None")? ports.attr("nodeId") : ports.attr("nodeName"))
+            	var footer = [];
+            	var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.ports, h3, "", footer);
+            	
+            	var $gridHTML = one.lib.dashlet.datagrid.init(one.f.switchmanager.nodesLearnt.id.modal.portsDatagrid, {
+                    searchable: true,
+                    filterable: false,
+                    pagination: true,
+                    flexibleRowsPerPage: true
+                    }, "table-striped table-condensed");
+            	one.lib.modal.inject.body($modal, $gridHTML);
+            	$modal.on("shown", function() {
+            		var dataSource = one.f.switchmanager.nodesLearnt.data.gridDataSource.displayPorts(content);
+            		$("#" + one.f.switchmanager.nodesLearnt.id.modal.portsDatagrid).datagrid({
+	                    dataSource: dataSource,
+	                    stretchHeight: false
+                	});
+            	});
+                $modal.modal();
             }
         },
         body: {
@@ -200,7 +232,12 @@ one.f.switchmanager.nodesLearnt = {
                         var dataSource = one.f.switchmanager.nodesLearnt.data.gridDataSource.popout(content);
                         $("#" + one.f.switchmanager.nodesLearnt.id.modal.datagrid).datagrid({
                             dataSource: dataSource,
-                            stretchHeight: true
+                            stretchHeight: false
+                        })
+                        .on("loaded", function() {
+                        	$("#" + one.f.switchmanager.nodesLearnt.id.modal.datagrid).find("tbody span").click(function(){
+        	                	one.f.switchmanager.nodesLearnt.modal.initialize.displayPorts($(this));
+                        	});
                         });
                     });
                 });
@@ -275,9 +312,15 @@ one.f.switchmanager.nodesLearnt = {
                     data: data.nodeData,
                     formatter: function(items) {
                     $.each(items, function (index, item) {
-                        var nodeNameEntry = item.nodeName ? item.nodeName : "Click to update";
+                    	var nodeName = item.nodeName;
+                    	var nodeNameEntry = item.nodeName ? item.nodeName : "Click to update";
                         item.nodeName = '<a href="#" id="' + item.nodeId + '" switchDetails=' + encodeURIComponent(JSON.stringify(item)) + 
                         ' privilege=' + data.privilege + '>' + nodeNameEntry + '</a>';
+                        
+                        var ports = item.ports;
+                        item.ports = '<span class="nodePorts" style="cursor:pointer;color: #08c" ports='+encodeURIComponent(JSON.stringify(item.ports)) + ' nodeId=' + item.nodeId 
+                            + ' nodeName=' + nodeName  
+                        	+ '>' + ports.match(/<\/span>/g).length+'</span>';
                     }); 
                     },
                     delay: 0
@@ -315,9 +358,40 @@ one.f.switchmanager.nodesLearnt = {
                         }
                     ],
                     data: data.nodeData,
+                    formatter: function(items) {
+                        $.each(items, function (index, item) {
+                        	var ports = item.ports;
+                            item.ports = '<span class="nodePorts" style="cursor: pointer;color: #08c" ports='+encodeURIComponent(JSON.stringify(item.ports)) + ' nodeId=' + item.nodeId 
+                                + ' nodeName=' + item.nodeName  
+                            	+ '>' + ports.match(/<\/span>/g).length+'</span>';
+                        }); 
+                    },
                     delay: 0
                 });
                 return source;
+            },
+            displayPorts: function(content){
+            	var data=[];
+            	var start=0;;
+            	var finish=content.indexOf("<br>",start);
+            	while(finish != -1){
+            		data.push({"ports":content.substring(start,finish)});
+            		start=finish+4
+            		finish=content.indexOf("<br>",start);
+            	}
+            	var source = new StaticDataSource({
+                    columns: [
+                        {
+                            property: 'ports',
+                            label: 'Ports',
+                            sortable: true
+                        }
+                    ],
+                    data:data,
+                    delay: 0
+                });
+            	
+            	return source;
             }
         },
         abridged : function(data) {
@@ -981,7 +1055,7 @@ one.f.switchmanager.spanPortConfig = {
             if (content.privilege === 'WRITE') {
 
                 // Add span port button
-                var button = one.lib.dashlet.button.single("Add Span Port", one.f.switchmanager.spanPortConfig.id.dashlet.add, "btn-primary", "btn-mini");
+                var button = one.lib.dashlet.button.single("Add SPAN Port", one.f.switchmanager.spanPortConfig.id.dashlet.add, "btn-primary", "btn-mini");
                 var $button = one.lib.dashlet.button.button(button);
 
                 $button.click(function() {
@@ -1153,7 +1227,7 @@ one.f.switchmanager.spanPortConfig = {
                         },
                         {
                             property: 'spanPort',
-                            label: 'span Port',
+                            label: 'SPAN Port',
                             sortable: true
                         },
                     ],
