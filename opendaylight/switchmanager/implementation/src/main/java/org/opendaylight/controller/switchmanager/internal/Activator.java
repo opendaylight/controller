@@ -15,7 +15,6 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.felix.dm.Component;
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
@@ -90,16 +89,11 @@ public class Activator extends ComponentActivatorAbstractBase {
     @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(SwitchManager.class)) {
-            Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
-            Set<String> propSet = new HashSet<String>();
-            propSet.add("switchmanager.configSaveEvent");
-            props.put("cachenames", propSet);
             // export the service
             c.setInterface(new String[] {
                     IListenInventoryUpdates.class.getName(),
                     ISwitchManager.class.getName(),
-                    ICacheUpdateAware.class.getName(),
-                    IConfigurationContainerAware.class.getName() }, props);
+                    IConfigurationContainerAware.class.getName() }, null);
 
             // Now lets add a service dependency to make sure the
             // provider of service exists

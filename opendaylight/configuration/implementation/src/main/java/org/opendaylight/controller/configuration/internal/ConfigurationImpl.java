@@ -145,7 +145,7 @@ public class ConfigurationImpl implements IConfigurationService, ICacheUpdateAwa
         }
         try {
             this.clusterServices.createCache("config.event.save",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             logger.error("Error creating Configuration cache ", cce);
         } catch (CacheExistException cce) {

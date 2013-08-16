@@ -158,7 +158,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
 
         try {
             clusterContainerService.createCache("forwarding.ipswitch.rules",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
             log.error("\nCache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {

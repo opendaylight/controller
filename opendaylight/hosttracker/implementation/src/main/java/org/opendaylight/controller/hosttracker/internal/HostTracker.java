@@ -181,9 +181,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         logger.debug("Creating Cache for HostTracker");
         try {
             this.clusterContainerService.createCache(ACTIVE_HOST_CACHE,
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             this.clusterContainerService.createCache(INACTIVE_HOST_CACHE,
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             logger.error("Cache couldn't be created for HostTracker -  check cache mode");
         } catch (CacheExistException cce) {

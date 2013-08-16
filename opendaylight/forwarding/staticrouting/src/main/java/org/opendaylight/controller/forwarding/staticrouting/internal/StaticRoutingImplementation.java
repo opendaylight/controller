@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
@@ -60,8 +59,7 @@ import org.slf4j.LoggerFactory;
  * Static Routing feature provides the bridge between SDN and Non-SDN networks.
  */
 public class StaticRoutingImplementation implements IfNewHostNotify,
-        IForwardingStaticRouting, IObjectReader, IConfigurationContainerAware,
-        ICacheUpdateAware<Long, String> {
+        IForwardingStaticRouting, IObjectReader, IConfigurationContainerAware {
     private static Logger log = LoggerFactory
             .getLogger(StaticRoutingImplementation.class);
     private static String ROOT = GlobalConstants.STARTUPHOME.toString();
@@ -71,7 +69,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     private IfIptoHost hostTracker;
     private Timer gatewayProbeTimer;
     private String staticRoutesFileName = null;
-    private Map<Long, String> configSaveEvent;
     private IClusterContainerServices clusterContainerService = null;
     private Set<IStaticRoutingAware> staticRoutingAware = Collections
             .synchronizedSet(new HashSet<IStaticRoutingAware>());
@@ -134,8 +131,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
 
 
     private Status saveConfig() {
-        // Publish the save config event to the cluster nodes
-        configSaveEvent.put(new Date().getTime(), SAVE);
         return saveConfigInternal();
     }
 
@@ -165,14 +160,10 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         try {
             clusterContainerService.createCache(
                     "forwarding.staticrouting.routes", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                            .of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache(
                     "forwarding.staticrouting.configs", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
-            clusterContainerService.createCache(
-                    "forwarding.staticrouting.configSaveEvent", EnumSet
-                            .of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
-
+                            .of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
             log
                     .error("\nCache already exists - destroy and recreate if needed");
@@ -200,25 +191,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         if (staticRouteConfigs == null) {
             log.error("\nFailed to get rulesDB handle");
         }
-        configSaveEvent = (ConcurrentMap<Long, String>) clusterContainerService
-                .getCache("forwarding.staticrouting.configSaveEvent");
-        if (configSaveEvent == null) {
-            log.error("\nFailed to get cache for configSaveEvent");
-        }
-    }
-
-    @Override
-    public void entryCreated(Long key, String cacheName, boolean local) {
-    }
-
-    @Override
-    public void entryUpdated(Long key, String new_value, String cacheName,
-            boolean originLocal) {
-        saveConfigInternal();
-    }
-
-    @Override
-    public void entryDeleted(Long key, String cacheName, boolean originLocal) {
     }
 
     private void notifyStaticRouteUpdate(StaticRoute s, boolean update) {

@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +27,6 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationAware;
@@ -72,8 +70,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
  * The internal implementation of the User Manager.
  */
 public class UserManagerImpl implements IUserManager, IObjectReader,
-        IConfigurationAware, ICacheUpdateAware<Long, String>, CommandProvider,
-        AuthenticationProvider {
+        IConfigurationAware, CommandProvider, AuthenticationProvider {
     private static final Logger logger = LoggerFactory
             .getLogger(UserManagerImpl.class);
     private static final String defaultAdmin = "admin";
@@ -136,30 +133,30 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
         try {
             clusterGlobalService.createCache("usermanager.localUserConfigList",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterGlobalService.createCache(
                     "usermanager.remoteServerConfigList",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterGlobalService.createCache(
                     "usermanager.authorizationConfList",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterGlobalService.createCache("usermanager.activeUsers",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterGlobalService.createCache(
                     "usermanager.localUserSaveConfigEvent",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterGlobalService.createCache(
                     "usermanager.remoteServerSaveConfigEvent",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterGlobalService.createCache(
                     "usermanager.authorizationSaveConfigEvent",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             logger.error("Cache configuration invalid - check cache mode");
         } catch (CacheExistException ce) {
@@ -398,8 +395,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     @Override
     public Status saveLocalUserList() {
-        // Publish the save config event to the cluster nodes
-        localUserListSaveConfigEvent.put(new Date().getTime(), SAVE);
         return saveLocalUserListInternal();
     }
 
@@ -411,8 +406,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     @Override
     public Status saveAAAServerList() {
-        // Publish the save config event to the cluster nodes
-        remoteServerSaveConfigEvent.put(new Date().getTime(), SAVE);
         return saveAAAServerListInternal();
     }
 
@@ -424,8 +417,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     @Override
     public Status saveAuthorizationList() {
-        // Publish the save config event to the cluster nodes
-        authorizationSaveConfigEvent.put(new Date().getTime(), SAVE);
         return saveAuthorizationListInternal();
     }
 
@@ -676,36 +667,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             loggedInList.put(userNameShow, user.getValue().getUserRoles());
         }
         return loggedInList;
-    }
-
-    /*
-     * Interaction with GUI END
-     */
-
-    /*
-     * Cluster notifications
-     */
-
-    @Override
-    public void entryCreated(Long key, String cacheName, boolean originLocal) {
-        // don't react on this event
-    }
-
-    @Override
-    public void entryUpdated(Long key, String new_value, String cacheName,
-            boolean originLocal) {
-        if (cacheName.equals("localUserSaveConfigEvent")) {
-            this.saveLocalUserListInternal();
-        } else if (cacheName.equals("remoteServerSaveConfigEvent")) {
-            this.saveAAAServerListInternal();
-        } else if (cacheName.equals("authorizationSaveConfigEvent")) {
-            this.saveAuthorizationListInternal();
-        }
-    }
-
-    @Override
-    public void entryDeleted(Long key, String cacheName, boolean originLocal) {
-        // don't react on this event
     }
 
     public void _umAddUser(CommandInterpreter ci) {

@@ -75,6 +75,7 @@ public abstract class AbstractScheme {
 
     @SuppressWarnings("deprecation")
     public void handleClusterViewChanged() {
+        log.debug("Handling Cluster View changed notification");
         List<InetAddress> controllers = clusterServices.getClusteredControllers();
         ConcurrentMap <InetAddress, Set<Node>> controllerNodesMap = getControllerToNodesMap();
         List<InetAddress> toRemove = new ArrayList<InetAddress>();
@@ -103,8 +104,8 @@ public abstract class AbstractScheme {
                             clusterServices.tcommit();
                         }
                     } catch (Exception e) {
-                        log.error("Exception in replacing nodeConnections ", e);
-                        retry = false;
+                        log.debug("Exception in replacing nodeConnections ", e);
+                        retry = true;
                         try {
                             clusterServices.trollback();
                         } catch (Exception e1) {}
@@ -115,10 +116,8 @@ public abstract class AbstractScheme {
         }
         if (retry) {
             try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {}
             handleClusterViewChanged();
         }
     }

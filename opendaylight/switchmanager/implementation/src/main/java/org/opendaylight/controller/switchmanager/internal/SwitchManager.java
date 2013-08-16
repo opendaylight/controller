@@ -16,7 +16,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -34,7 +33,6 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
@@ -85,13 +83,10 @@ import org.slf4j.LoggerFactory;
  * instance per container of the network. All the node/nodeConnector properties
  * are maintained in the default container only.
  */
-public class SwitchManager implements ISwitchManager,
-IConfigurationContainerAware, IObjectReader,
-ICacheUpdateAware<Long, String>, IListenInventoryUpdates,
-CommandProvider {
+public class SwitchManager implements ISwitchManager, IConfigurationContainerAware,
+                                      IObjectReader, IListenInventoryUpdates, CommandProvider {
     private static Logger log = LoggerFactory.getLogger(SwitchManager.class);
     private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static final String SAVE = "Save";
     private String subnetFileName, spanFileName, switchConfigFileName;
     private final List<NodeConnector> spanNodeConnectors = new CopyOnWriteArrayList<NodeConnector>();
     // Collection of Subnets keyed by the InetAddress
@@ -100,7 +95,6 @@ CommandProvider {
     private ConcurrentMap<SpanConfig, SpanConfig> spanConfigList;
     // manually configured parameters for the node such as name, tier, mode
     private ConcurrentMap<String, SwitchConfig> nodeConfigList;
-    private ConcurrentMap<Long, String> configSaveEvent;
     private ConcurrentMap<Node, Map<String, Property>> nodeProps;
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
     private ConcurrentMap<Node, Map<String, NodeConnector>> nodeConnectorNames;
@@ -210,27 +204,27 @@ CommandProvider {
         try {
             clusterContainerService.createCache(
                     "switchmanager.subnetsConfigList",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache("switchmanager.spanConfigList",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache("switchmanager.nodeConfigList",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache("switchmanager.subnets",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache(
                     "switchmanager.configSaveEvent",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache("switchmanager.nodeProps",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache(
                     "switchmanager.nodeConnectorProps",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache(
                     "switchmanager.nodeConnectorNames",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache(
                     "switchmanager.controllerProps",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             log.error("\nCache configuration invalid - check cache mode");
         } catch (CacheExistException ce) {
@@ -269,12 +263,6 @@ CommandProvider {
             log.error("\nFailed to get cache for subnets");
         }
 
-        configSaveEvent = (ConcurrentMap<Long, String>) clusterContainerService
-                .getCache("switchmanager.configSaveEvent");
-        if (configSaveEvent == null) {
-            log.error("\nFailed to get cache for configSaveEvent");
-        }
-
         nodeProps = (ConcurrentMap<Node, Map<String, Property>>) clusterContainerService
                 .getCache("switchmanager.nodeProps");
         if (nodeProps == null) {
@@ -305,7 +293,6 @@ CommandProvider {
         spanConfigList = new ConcurrentHashMap<SpanConfig, SpanConfig>();
         nodeConfigList = new ConcurrentHashMap<String, SwitchConfig>();
         subnets = new ConcurrentHashMap<InetAddress, Subnet>();
-        configSaveEvent = new ConcurrentHashMap<Long, String>();
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
         nodeConnectorNames = new ConcurrentHashMap<Node, Map<String, NodeConnector>>();
@@ -830,8 +817,6 @@ CommandProvider {
 
     @Override
     public Status saveSwitchConfig() {
-        // Publish the save config event to the cluster nodes
-        configSaveEvent.put(new Date().getTime(), SAVE);
         return saveSwitchConfigInternal();
     }
 
@@ -904,20 +889,6 @@ CommandProvider {
             }
         }
         return ncList;
-    }
-
-    @Override
-    public void entryCreated(Long key, String cacheName, boolean local) {
-    }
-
-    @Override
-    public void entryUpdated(Long key, String newValue, String cacheName,
-            boolean originLocal) {
-        saveSwitchConfigInternal();
-    }
-
-    @Override
-    public void entryDeleted(Long key, String cacheName, boolean originLocal) {
     }
 
     private void addNode(Node node, Set<Property> props) {
