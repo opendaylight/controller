@@ -434,7 +434,15 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     }
 
     private void replaceHost(InetAddress networkAddr, HostNodeConnector removedHost, HostNodeConnector newHost) {
+        // Ignore ARP messages from internal nodes
+        NodeConnector newHostNc = newHost.getnodeConnector();
+        boolean newHostIsInternal = topologyManager.isInternal(newHostNc);
+        if (newHostIsInternal) {
+            return;
+        }
+
         newHost.initArpSendCountDown();
+
         if (hostsDB.replace(networkAddr, removedHost, newHost)) {
             logger.debug("Host move occurred: Old Host IP:{}, New Host IP: {}", removedHost.getNetworkAddress()
                     .getHostAddress(), newHost.getNetworkAddress().getHostAddress());
