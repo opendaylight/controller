@@ -21,7 +21,6 @@ import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
@@ -79,16 +78,10 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(StaticRoutingImplementation.class)) {
-            Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
-            Set<String> propSet = new HashSet<String>();
-            propSet.add("forwarding.staticrouting.configSaveEvent");
-            props.put("cachenames", propSet);
-            // export the service
-
-            c.setInterface(new String[] { ICacheUpdateAware.class.getName(),
+            c.setInterface(new String[] {
                     IForwardingStaticRouting.class.getName(),
                     IfNewHostNotify.class.getName(),
-                    IConfigurationContainerAware.class.getName() }, props);
+                    IConfigurationContainerAware.class.getName() }, null);
 
             c.add(createContainerServiceDependency(containerName).setService(
                     IClusterContainerServices.class).setCallbacks(

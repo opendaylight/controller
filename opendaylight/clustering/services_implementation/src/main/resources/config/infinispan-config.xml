@@ -28,7 +28,7 @@
         syncRollbackPhase="true"
         syncCommitPhase="true"
         cacheStopTimeout="30000"
-        use1PcForAutoCommitTransactions="false"
+        use1PcForAutoCommitTransactions="true"
         autoCommit="true"
         lockingMode="OPTIMISTIC"
         useSynchronization="true"

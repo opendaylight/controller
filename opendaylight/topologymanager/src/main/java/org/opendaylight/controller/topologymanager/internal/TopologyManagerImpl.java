@@ -192,7 +192,7 @@ public class TopologyManagerImpl implements
         try {
             this.edgesDB =
                     (ConcurrentMap<Edge, Set<Property>>) this.clusterContainerService.createCache(TOPOEDGESDB,
-                            EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                            EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
             log.debug(TOPOEDGESDB + " Cache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {
@@ -202,7 +202,7 @@ public class TopologyManagerImpl implements
         try {
             this.hostsDB =
                     (ConcurrentMap<NodeConnector, Set<ImmutablePair<Host, Set<Property>>>>) this.clusterContainerService.createCache(
-                            TOPOHOSTSDB, EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                            TOPOHOSTSDB, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
             log.debug(TOPOHOSTSDB + " Cache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {
@@ -212,7 +212,7 @@ public class TopologyManagerImpl implements
         try {
             this.nodeConnectorsDB =
                     (ConcurrentMap<NodeConnector, Set<Property>>) this.clusterContainerService.createCache(
-                            TOPONODECONNECTORDB, EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                            TOPONODECONNECTORDB, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
             log.debug(TOPONODECONNECTORDB + " Cache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {
@@ -222,7 +222,7 @@ public class TopologyManagerImpl implements
         try {
             this.userLinksDB =
                     (ConcurrentMap<String, TopologyUserLinkConfig>) this.clusterContainerService.createCache(
-                            TOPOUSERLINKSDB, EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                            TOPOUSERLINKSDB, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
             log.debug(TOPOUSERLINKSDB + " Cache already exists - destroy and recreate if needed");
         } catch (CacheConfigException cce) {

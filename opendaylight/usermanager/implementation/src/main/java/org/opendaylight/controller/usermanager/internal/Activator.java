@@ -15,7 +15,6 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.apache.felix.dm.Component;
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.configuration.IConfigurationAware;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
@@ -111,18 +110,11 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     protected void configureGlobalInstance(Component c, Object imp) {
         if (imp.equals(UserManagerImpl.class)) {
-            // export the service
-            Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
-            Set<String> propSet = new HashSet<String>();
-            propSet.add("usermanager.localUserSaveConfigEvent");
-            propSet.add("usermanager.remoteServerSaveConfigEvent");
-            propSet.add("usermanager.authorizationSaveConfigEvent");
-            props.put("cachenames", propSet);
 
             // export the service
-            c.setInterface(new String[] { ICacheUpdateAware.class.getName(),
+            c.setInterface(new String[] {
                     IUserManager.class.getName(),
-                    IConfigurationAware.class.getName() }, props);
+                    IConfigurationAware.class.getName() }, null);
 
             c.add(createServiceDependency().setService(
                     IClusterGlobalServices.class).setCallbacks(

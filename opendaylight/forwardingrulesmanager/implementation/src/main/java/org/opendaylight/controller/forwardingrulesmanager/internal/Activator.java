@@ -28,7 +28,6 @@ import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 
 public class Activator extends ComponentActivatorAbstractBase {
@@ -88,18 +87,14 @@ public class Activator extends ComponentActivatorAbstractBase {
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(ForwardingRulesManager.class)) {
             String interfaces[] = null;
-            Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
-            Set<String> propSet = new HashSet<String>();
-            propSet.add("frm.flowsSaveEvent");
-            props.put("cachenames", propSet);
 
             // export the service
             interfaces = new String[] { IContainerListener.class.getName(), ISwitchManagerAware.class.getName(),
                     IForwardingRulesManager.class.getName(), IInventoryListener.class.getName(),
-                    ICacheUpdateAware.class.getName(), IConfigurationContainerAware.class.getName(),
+                    IConfigurationContainerAware.class.getName(),
                     IFlowProgrammerListener.class.getName() };
 
-            c.setInterface(interfaces, props);
+            c.setInterface(interfaces, null);
 
             c.add(createContainerServiceDependency(containerName).setService(IFlowProgrammerService.class)
                     .setCallbacks("setFlowProgrammerService", "unsetFlowProgrammerService").setRequired(true));

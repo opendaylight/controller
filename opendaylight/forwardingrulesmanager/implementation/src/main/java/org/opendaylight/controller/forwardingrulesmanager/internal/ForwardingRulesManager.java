@@ -15,9 +15,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +30,6 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
@@ -90,12 +87,10 @@ import org.slf4j.LoggerFactory;
  */
 public class ForwardingRulesManager implements IForwardingRulesManager, PortGroupChangeListener,
         IContainerListener, ISwitchManagerAware, IConfigurationContainerAware, IInventoryListener, IObjectReader,
-        ICacheUpdateAware<Long, String>, CommandProvider, IFlowProgrammerListener {
-    private static final String SAVE = "Save";
+        CommandProvider, IFlowProgrammerListener {
     private static final String NODEDOWN = "Node is Down";
     private static final String SUCCESS = StatusCode.SUCCESS.toString();
     private static final Logger log = LoggerFactory.getLogger(ForwardingRulesManager.class);
-    private Map<Long, String> flowsSaveEvent;
     private String frmFileName;
     private String portGroupFileName;
     private ConcurrentMap<Integer, FlowConfig> staticFlows;
@@ -980,7 +975,6 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
         portGroupConfigs = new ConcurrentHashMap<String, PortGroupConfig>();
         portGroupData = new ConcurrentHashMap<PortGroupConfig, Map<Node, PortGroup>>();
         staticFlows = new ConcurrentHashMap<Integer, FlowConfig>();
-        flowsSaveEvent = new HashMap<Long, String>();
         inactiveFlows = new ConcurrentHashMap<FlowEntry, FlowEntry>();
     }
 
@@ -1163,37 +1157,37 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
 
         try {
             clusterContainerService.createCache("frm.originalSwView",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.installedSwView",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.inactiveFlows",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.nodeFlows",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.groupFlows",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.staticFlows",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.flowsSaveEvent",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.staticFlowsOrdinal",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.portGroupConfigs",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.portGroupData",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
             clusterContainerService.createCache("frm.TSPolicies",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
         } catch (CacheConfigException cce) {
             log.error("CacheConfigException");
@@ -1254,13 +1248,6 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
             staticFlows = (ConcurrentMap<Integer, FlowConfig>) map;
         } else {
             log.error("Retrieval of frm.staticFlows cache failed for Container {}", container.getName());
-        }
-
-        map = clusterContainerService.getCache("frm.flowsSaveEvent");
-        if (map != null) {
-            flowsSaveEvent = (ConcurrentMap<Long, String>) map;
-        } else {
-            log.error("Retrieval of frm.flowsSaveEvent cache failed for Container {}", container.getName());
         }
 
         map = clusterContainerService.getCache("frm.staticFlowsOrdinal");
@@ -1820,8 +1807,6 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
 
     @Override
     public Status saveConfig() {
-        // Publish the save config event to the cluster nodes
-        flowsSaveEvent.put(new Date().getTime(), SAVE);
         return saveConfigInternal();
     }
 
@@ -1839,19 +1824,6 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
         objWriter.write(nonDynamicFlows, frmFileName);
         objWriter.write(new ConcurrentHashMap<String, PortGroupConfig>(portGroupConfigs), portGroupFileName);
         return new Status(StatusCode.SUCCESS, null);
-    }
-
-    @Override
-    public void entryCreated(Long key, String cacheName, boolean local) {
-    }
-
-    @Override
-    public void entryUpdated(Long key, String new_value, String cacheName, boolean originLocal) {
-        saveConfigInternal();
-    }
-
-    @Override
-    public void entryDeleted(Long key, String cacheName, boolean originLocal) {
     }
 
     @Override

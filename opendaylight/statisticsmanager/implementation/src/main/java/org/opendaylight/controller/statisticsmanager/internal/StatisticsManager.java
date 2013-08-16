@@ -77,13 +77,13 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
 
         try {
             clusterContainerService.createCache("statisticsmanager.flowStatistics",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache("statisticsmanager.nodeConnectorStatistics",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache("statisticsmanager.tableStatistics",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache("statisticsmanager.descriptionStatistics",
-                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
         } catch (CacheConfigException cce) {
             log.error("Statistics cache configuration invalid - check cache mode");
