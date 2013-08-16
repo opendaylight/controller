@@ -30,10 +30,10 @@ import org.opendaylight.controller.sal.core.api.data.DataValidator;
 import org.opendaylight.controller.sal.core.api.data.DataCommitHandler.CommitTransaction;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService.DataRefresher;
 import org.opendaylight.controller.sal.core.spi.BrokerModule;
-import org.opendaylight.controller.yang.common.RpcError;
-import org.opendaylight.controller.yang.common.RpcResult;
-import org.opendaylight.controller.yang.data.api.CompositeNode;
-import org.opendaylight.controller.yang.data.api.CompositeNodeModification;
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +143,7 @@ public class DataBrokerModule implements BrokerModule {
 
         @Override
         public RpcResult<CompositeNode> editCandidateData(
-                DataStoreIdentifier store, CompositeNodeModification changeSet) {
+                DataStoreIdentifier store, MutableCompositeNode changeSet) {
             // TODO Implement this method
             throw new UnsupportedOperationException("Not implemented");
         }

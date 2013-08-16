@@ -11,9 +11,9 @@ import java.util.Set;
 
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.common.RpcResult;
-import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 /**
  * {@link Provider}'s implementation of rpc.

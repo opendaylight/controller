@@ -12,6 +12,7 @@
     </description>
 
     <modules>
+        <module>sal</module>
         <module>concepts-lang</module>
     </modules>
 
@@ -36,6 +37,11 @@
     </properties>
 
     <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <name>central</name>
+            <url>${nexusproxy}/repositories/central/</url>
+        </pluginRepository>
         <pluginRepository>
             <id>central2</id>
             <name>central2</name>

@@ -13,9 +13,9 @@ import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationProviderService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationService;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.common.RpcResult;
-import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 
 /**

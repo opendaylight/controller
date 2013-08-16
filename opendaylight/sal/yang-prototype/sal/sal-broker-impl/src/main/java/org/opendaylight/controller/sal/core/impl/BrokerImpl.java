@@ -22,9 +22,9 @@ import org.opendaylight.controller.sal.core.api.Consumer;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.spi.BrokerModule;
-import org.opendaylight.controller.yang.common.QName;
-import org.opendaylight.controller.yang.common.RpcResult;
-import org.opendaylight.controller.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
