@@ -199,13 +199,28 @@ public interface IForwardingRulesManager {
 
     /**
      * Returns the list of Flow entries across network nodes which are part of
-     * the same flow group, policy
+     * the same flow group, policy. This list contains the flows as they were
+     * requested to be installed by the applications, before any merging with
+     * container flow is done.
      *
      * @param group
      *            the group name
-     * @return the list of flow entries belonging to the specified group
+     * @return the original list of flow entries belonging to the specified group
      */
     public List<FlowEntry> getFlowEntriesForGroup(String group);
+
+    /**
+     * Returns the list of Flow entries installed in network nodes which are part of
+     * the same flow group, policy. This list contains the effective flows installed
+     * on the nodes after the merging with any possible container flow was performed.
+     * If no container flow are specified, this method returns the same list returned
+     * by getFlowEntriesForGroup(String group).
+     *
+     * @param group
+     *            the group name
+     * @return the list of container flow merged flow entries belonging to the specified group
+     */
+    public List<FlowEntry> getInstalledFlowEntriesForGroup(String policyName);
 
     /**
      * Add a list of output port to the flow with the specified name on the

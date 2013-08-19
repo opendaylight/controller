@@ -1035,6 +1035,19 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
     }
 
     @Override
+    public List<FlowEntry> getInstalledFlowEntriesForGroup(String policyName) {
+        List<FlowEntry> list = new ArrayList<FlowEntry>();
+        if (policyName != null && !policyName.trim().isEmpty()) {
+            for (Map.Entry<FlowEntryInstall, FlowEntryInstall> entry : this.installedSwView.entrySet()) {
+                if (policyName.equals(entry.getKey().getGroupName())) {
+                    list.add(entry.getKey().getInstall().clone());
+                }
+            }
+        }
+        return list;
+    }
+
+    @Override
     public void addOutputPort(Node node, String flowName, List<NodeConnector> portList) {
 
         for (FlowEntryInstall flow : this.nodeFlows.get(node)) {
