@@ -191,7 +191,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * {@link Provider#getProviderFunctionality()}
  * <li>passing an instance of implementation and {@link DataStoreIdentifier} of
  * rpc as arguments to the
- * {@link DataConsumerService#addCommitHandler(DataStoreIdentifier, DataCommitHandler)}
+ * {@link DataProviderService#addCommitHandler(DataStoreIdentifier, DataCommitHandler)}
  * </ul>
  * 
  * 

@@ -16,7 +16,7 @@ import org.opendaylight.controller.sal.core.api.Consumer;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.CompositeNodeModification;
+import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
 
 
@@ -106,7 +106,7 @@ public interface DataBrokerService extends BrokerService {
      *         was successful, otherwise list of the encountered errors.
      */
     RpcResult<CompositeNode> editCandidateData(DataStoreIdentifier store,
-            CompositeNodeModification changeSet);
+            MutableCompositeNode changeSet);
 
     /**
      * Initiates a two-phase commit of candidate data.

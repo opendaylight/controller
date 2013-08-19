@@ -1,0 +1,266 @@
+module opendaylight-flow {
+    namespace "urn:opendaylight:flow:service";
+    prefix flow;
+
+    import yang-ext {prefix ext;}
+    import ietf-inet-types {prefix inet;}
+    import ietf-yang-types {prefix yang;}
+    import opendaylight-inventory {prefix inv;}
+
+    revision "2013-08-19" {
+        description "Initial revision of flow service";
+    }
+
+    /** Base structure **/
+    container flows {
+        list flow {
+            leaf node {
+                type inv:node-id;
+            }
+            container match {
+                // Match is empty
+                leaf input-node-connector {
+                    type inv:node-connector-id; //
+                }
+            }
+            list action {
+                key id;
+                leaf id {
+                    type string;
+                }
+                choice action {
+                
+                }
+            }
+        }
+    }
+
+    /** Matches **/
+    augment "/flows/flow/match" {
+        ext:augment-identifier "ethernet-match";
+        container ethernet-source {
+            description "Ethernet source address.";
+            leaf address {
+                type yang:mac-address;
+            }
+            leaf mask {
+                type binary;
+            }
+        }
+        container ethernet-destination {
+            description "Ethernet destination address.";
+            leaf address {
+                type yang:mac-address;
+            }
+        }
+        container ethernet-type {
+            description "Ethernet frame type.";
+            leaf type {
+                type uint16; // Needs to define that as general model
+            }
+            leaf mask {
+                type binary;
+            }
+        }
+    }
+
+    augment "/flows/flow/match" {
+        ext:augment-identifier "vlan-match";
+
+        container vlan-id {
+            description "VLAN id.";
+            leaf vlan-id {
+                type uint16; // TODO: Define proper vlan id type.
+            }
+            leaf mask {
+                type binary;
+            }
+        }
+        leaf vlan-pcp {
+            description "VLAN priority.";
+            type uint8; // TODO: Define PCP type
+        }
+        
+
+    }
+
+    augment "/flows/flow/match" {
+        ext:augment-identifier "ip-match";
+
+        leaf ip-protocol {
+                description "IP protocol.";
+                type uint8; // TODO define IP protocol number
+        }
+
+        leaf ip-dscp {
+            description "IP DSCP (6 bits in ToS field).";
+            type inet:dscp; // TODO: Define DSCP type
+        }
+        leaf ip-ecn {
+            description "IP ECN (2 bits in ToS field).";
+            type uint8; // TODO define ECN
+        }
+    }
+
+    augment "/flows/flow/match" {
+        ext:augment-identifier "ipv4-match";
+        leaf ipv4-source {
+            description "IPv4 source address.";
+            type inet:ipv4-prefix;
+        }
+        leaf ipv4-destination {
+            description "IPv4 destination address.";
+            type inet:ipv4-prefix;
+        }
+    }
+
+    augment "/flows/flow/match" {
+        ext:augment-identifier "ipv6-match";
+        leaf ipv6-source {
+            description "IPv6 source address.";
+            type inet:ipv6-prefix;
+        }
+        leaf ipv6-destination {
+            description "IPv6 destination address.";
+            type inet:ipv6-prefix;
+        }
+    }
+
+
+    augment "/flows/flow/match" {
+        ext:augment-identifier "udp-match";
+        
+        leaf udp-source-port {
+            description "UDP source port.";
+            type inet:port-number;
+        }
+        leaf udp-destination-port {
+            description "UDP destination port.";
+                type inet:port-number;
+        }
+    }
+
+    augment "/flows/flow/match" {
+        ext:augment-identifier "tcp-match";
+        leaf tcp-source-port {
+            description "TCP source port.";
+            type inet:port-number;
+        }
+        leaf tcp-destination-port {
+            description "TCP destination port.";
+            type inet:port-number;
+        }
+    }
+
+    augment "/flows/flow/match" {
+        ext:augment-identifier "sctp-match";
+        leaf sctp-source-port {
+            description "SCTP source port.";
+            type inet:port-number;
+        }
+        leaf sctp-destination-dst {
+            description "SCTP destination port.";
+            type inet:port-number;
+        }
+    }
+
+    augment "/flows/flow/match" {
+        ext:augment-identifier "icmpv4-match";
+        leaf icmpv4-type {
+        description "ICMP type.";
+            type uint8; // Define ICMP Type
+        }
+        description "ICMP code.";
+        leaf icmpv4-code {
+            type uint8; // Define ICMP Code
+        }
+    }
+
+    augment "/flows/flow/match" {
+        ext:augment-identifier "arp-match";
+            
+        leaf arp-source-transport-address {
+            description "ARP source IPv4 address.";
+            type inet:ipv4-prefix;
+        }
+    
+        leaf arp-target-transport-address {
+            description "ARP target IPv4 address.";
+            type inet:ipv4-prefix;
+        }
+        container arp-source-hardware-address {
+            description "ARP source hardware address.";
+            leaf address {
+                type yang:mac-address;
+            }
+            leaf mask {
+                type binary;
+            }
+        }
+        container arp-target-hardware-address {
+            description "ARP target hardware address.";
+            leaf address {
+                type yang:mac-address;
+            }
+            leaf mask {
+                type binary;
+            }
+        }
+    }
+
+    /** Actions **/
+    augment "/flows/flow/action/action" {
+        case output-action {
+            leaf output-node-connector {
+                type string;
+            }
+        }
+
+        case controller-action {
+            leaf max-length {
+                type uint16 {
+                    range "0..65294";
+                }
+            }
+        }
+
+        case set-queue-action {
+            leaf queue {
+                type string; // TODO: define queues
+            }
+        }
+
+        case pop-mpls-action {
+            container pop-mpls {
+                leaf ethernet-type {
+                    type uint16; // TODO: define ethertype type
+                }
+            }
+        }
+
+        case set-mpls-ttl-action {
+            leaf mpls-ttl {
+                type uint8;
+            }
+        }
+
+        case set-nw-ttl-action {
+            leaf nw-ttl {
+                type uint8;
+            }
+        }
+
+        case push-pbb-action {
+
+        }
+
+        case push-mpls-action {
+
+        }
+
+        case push-vlan-action {
+
+        }
+    }
+
+}

@@ -8,7 +8,7 @@
 package org.opendaylight.controller.sal.binding.api;
 
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataConsumerService;
+import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 
@@ -35,7 +35,7 @@ import org.osgi.framework.BundleContext;
  * {@link NotificationProviderService}
  * <li>Functionality and Data model
  * <li>Data Store access and modification - see {@link DataBrokerService} and
- * {@link DataConsumerService}
+ * {@link DataProviderService}
  * </ul>
  * 
  * The services are exposed via session.

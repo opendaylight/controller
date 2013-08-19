@@ -9,7 +9,7 @@ package org.opendaylight.controller.sal.binding.api.data;
 
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 
-public interface DataConsumerService extends DataBrokerService {
+public interface DataProviderService extends DataBrokerService {
 
     /**
      * Adds {@link DataValidator} for specified Data Store

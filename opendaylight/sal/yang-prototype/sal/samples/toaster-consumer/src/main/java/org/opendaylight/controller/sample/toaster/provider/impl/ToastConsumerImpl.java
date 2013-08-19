@@ -11,15 +11,21 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
+import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
+import org.opendaylight.controller.sal.common.DataStoreIdentifier;
+import org.opendaylight.controller.sal.common.GlobalDataStore;
 import org.opendaylight.controller.sample.toaster.provider.api.ToastConsumer;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.MakeToastInputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.ToastDone;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.ToastType;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.Toaster;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.ToasterData;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.ToasterService;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.osgi.framework.BundleActivator;
@@ -28,7 +34,7 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ToastConsumerImpl implements BundleActivator, BindingAwareConsumer, ToastConsumer,
+public class ToastConsumerImpl extends AbstractBindingAwareConsumer implements BundleActivator, BindingAwareConsumer, ToastConsumer,
         NotificationListener<ToastDone> {
 
     private static final Logger log = LoggerFactory.getLogger(ToastConsumerImpl.class);
@@ -64,22 +70,17 @@ public class ToastConsumerImpl implements BundleActivator, BindingAwareConsumer,
         this.session = session;
         NotificationService notificationService = session.getSALService(NotificationService.class);
         notificationService.addNotificationListener(ToastDone.class, this);
-
+        
+        
     }
 
-    @Override
-    public void start(BundleContext context) throws Exception {
-        ServiceReference<BindingAwareBroker> brokerRef = context.getServiceReference(BindingAwareBroker.class);
-        BindingAwareBroker broker = context.getService(brokerRef);
-        broker.registerConsumer(this, context);
-        Dictionary<String, String> properties = new Hashtable<>();
-        context.registerService(ToastConsumer.class, this, properties);
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        // TODO Auto-generated method stub
-
+    private void loadToasterData() {
+        // We request data store service implementation
+        DataBrokerService brokerService = session.getSALService(DataBrokerService.class);
+        
+        ToasterData data = brokerService.getData(GlobalDataStore.RuntimeInfo, ToasterData.class);
+        Toaster toaster = data.getToaster();
+        log.info("Available toaster is: ", toaster.getToasterManufacturer(),toaster.getToasterModelNumber());
     }
 
     @Override

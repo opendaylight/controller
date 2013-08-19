@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * system.
  * 
  * 
- * @see DataConsumerService
+ * @see DataProviderService
  */
 public interface DataBrokerService extends BindingAwareService {
 
