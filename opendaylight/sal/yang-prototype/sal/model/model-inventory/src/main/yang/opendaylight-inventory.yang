@@ -1,0 +1,34 @@
+module opendaylight-inventory {
+    namespace "urn:opendaylight:inventory";
+    prefix flow;
+
+    import yang-ext {prefix ext;}
+    import ietf-inet-types {prefix inet;}
+    import ietf-yang-types {prefix yang;}
+
+
+    revision "2013-08-19" {
+        description "Initial revision of Inventory model";
+    }
+
+    typedef node-id {
+        type inet:uri;
+    }
+
+    typedef node-connector-id {
+        type inet:uri;
+    }
+
+    /** Base structure **/
+    container nodes {
+        list node {
+            key id;
+            leaf id {
+                type node-id;
+            }
+            list node-connector {
+                type node-connector-id;
+            }
+        }
+    }
+}

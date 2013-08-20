@@ -3,11 +3,12 @@ import java.util.Collection;
 import java.util.Collections;
 
 
+import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.ToasterService;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleActivator;
@@ -17,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class ToasterProvider implements BindingAwareProvider, BundleActivator {
+public class ToasterProvider extends AbstractBindingAwareProvider {
     private static final Logger log = LoggerFactory.getLogger(ToasterProvider.class);
 
 	private ConsumerContext consumerContext;
@@ -54,18 +55,5 @@ public class ToasterProvider implements BindingAwareProvider, BundleActivator {
 	@Override
 	public Collection<? extends ProviderFunctionality> getFunctionality() {
 		return Collections.emptySet();
-	}
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-		ServiceReference<BindingAwareBroker> brokerRef = context.getServiceReference(BindingAwareBroker.class);
-		BindingAwareBroker broker = context.getService(brokerRef);
-		broker.registerProvider(this, context);
-	}
-
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		
-		
 	}
 }

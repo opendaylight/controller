@@ -38,7 +38,8 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
     private Map<Class<? extends RpcService>, RpcProxyContext> managedProxies = new HashMap();
     private var NotificationBrokerImpl notifyBroker
     private var ServiceRegistration<NotificationProviderService> notifyBrokerRegistration
-
+    private var DataBrokerImpl dataBroker
+    
     @Property
     var BundleContext brokerBundleContext
 
@@ -80,6 +81,17 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         new OsgiProviderContext(providerCtx, this)
     }
 
+    /**
+     * Returns a Managed Direct Proxy for supplied class
+     * 
+     * Managed direct proxy is a generated proxy class conforming to the supplied interface
+     * which delegates all calls to the backing delegate.
+     * 
+     * Proxy does not do any validation, null pointer checks or modifies data in any way, it
+     * is only use to avoid exposing direct references to backing implementation of service.
+     * 
+     * If proxy class does not exist for supplied service class it will be generated automatically.
+     */
     def <T extends RpcService> getManagedDirectProxy(Class<T> service) {
         
         var RpcProxyContext existing = null
@@ -115,6 +127,10 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         return proxyCls.toClass(delegate.classLoader)
     }
 
+    /**
+     * Registers RPC Implementation
+     * 
+     */
     def <T extends RpcService> registerRpcImplementation(Class<T> type, T service, OsgiProviderContext context,
         Hashtable<String, String> properties) {
         val proxy = getManagedDirectProxy(type)
@@ -126,12 +142,26 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         return new RpcServiceRegistrationImpl<T>(type, service, osgiReg);
     }
     
+    /**
+     * Helper method to return delegate from ManagedDirectedProxy with use of reflection.
+     * 
+     * Note: This method uses reflection, but access to delegate field should be 
+     * avoided and called only if neccessary.
+     * 
+     */
     def <T extends RpcService> getDelegate(RpcService proxy) {
         val field = proxy.class.getField(DELEGATE_FIELD)
         if(field == null) throw new UnsupportedOperationException("Unable to get delegate from proxy");
         return field.get(proxy) as T
     }
     
+        /**
+     * Helper method to set delegate to ManagedDirectedProxy with use of reflection.
+     * 
+     * Note: This method uses reflection, but setting delegate field should not occur too much
+     * to introduce any significant performance hits.
+     * 
+     */
     def void setDelegate(RpcService proxy, RpcService delegate) {
         val field = proxy.class.getField(DELEGATE_FIELD)
         if(field == null) throw new UnsupportedOperationException("Unable to set delegate to proxy");
