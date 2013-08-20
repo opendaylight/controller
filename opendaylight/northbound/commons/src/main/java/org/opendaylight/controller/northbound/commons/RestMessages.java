@@ -9,17 +9,13 @@
 package org.opendaylight.controller.northbound.commons;
 
 public enum RestMessages {
-    SUCCESS("Success"), NOCONTAINER("Container does not exist"), NOFLOWSPEC(
-            "Flow Spec does not exist"), NOSUBNET("Subnet does not exist"), NOSTATICROUTE(
-            "Static Route does not exist"), NOHOST("Host does not exist"), NOFLOW(
-            "Flow does not exist"), NONODE("Node does not exist"), NOPOLICY(
-            "Policy does not exist"), NORESOURCE("Resource does not exist"), RESOURCECONFLICT(
-            "Operation failed due to Resource Conflict"), NODEFAULT(
-            "Container default is not a custom container"), DEFAULTDISABLED(
+    SUCCESS("Success"), NOCONTAINER("Container does not exist"), NOSUBNET("Subnet does not exist"), NOSTATICROUTE(
+            "Static Route does not exist"), NOHOST("Host does not exist"), NOFLOW("Flow does not exist"), NONODE(
+            "Node does not exist"), NOPOLICY("Policy does not exist"), NORESOURCE("Resource does not exist"), RESOURCECONFLICT(
+            "Operation failed due to Resource Conflict"), NODEFAULT("Container default is not a custom container"), DEFAULTDISABLED(
             "Container(s) are configured. Container default is not operational"), NOTALLOWEDONDEFAULT(
-            "Container default is a static resource, no modification allowed on it"), UNKNOWNACTION(
-            "Unknown action"), INVALIDJSON("JSON message is invalid"), INVALIDADDRESS(
-            "invalid InetAddress"), AVAILABLESOON(
+            "Container default is a static resource, no modification allowed on it"), UNKNOWNACTION("Unknown action"), INVALIDJSON(
+            "JSON message is invalid"), INVALIDADDRESS("invalid InetAddress"), AVAILABLESOON(
             "Resource is not implemented yet"), INTERNALERROR("Internal Error"), SERVICEUNAVAILABLE(
             "Service is not available. Could be down for maintanence"), INVALIDDATA(
             "Data is invalid or conflicts with URI");
@@ -30,6 +26,7 @@ public enum RestMessages {
         message = msg;
     }
 
+    @Override
     public String toString() {
         return message;
     }
