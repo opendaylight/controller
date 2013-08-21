@@ -343,11 +343,13 @@ one.f.flows = {
                     $tr = $(tr);
                     $span = $("td span", $tr);
                     var flowstatus = $span.data("flowstatus");
-                    var installInHw = $span.data("installinhw").toString();
-                    if(installInHw == "true" && flowstatus == "Success") {
-                        $tr.addClass("success");
-                    } else {
-                        $tr.addClass("warning");
+                    if($span.data("installinhw") != null) {
+                        var installInHw = $span.data("installinhw").toString();
+                        if(installInHw == "true" && flowstatus == "Success") {
+                            $tr.addClass("success");
+                        } else {
+                            $tr.addClass("warning");
+                        }
                     }
                     // attach mouseover to show pointer cursor
                     $tr.mouseover(function() {
