@@ -74,6 +74,7 @@ one.f.switchmanager.nodesLearnt = {
         },
         modal: {
             modal: "one_f_switchmanager_nodesLearnt_id_modal_modal",
+            configure: "one_f_switchmanager_nodesLearnt_id_modal_configure",
             ports: "one_f_switchmanager_nodesLearnt_id_modal_ports",
             save: "one_f_switchmanager_nodesLearnt_id_modal_save",
             datagrid: "one_f_switchmanager_nodesLearnt_id_modal_datagrid",
@@ -137,7 +138,7 @@ one.f.switchmanager.nodesLearnt = {
                         h3 = 'Node Information';
                     }
                     
-                    var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.modal, h3, "", footer);
+                    var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.configure, h3, "", footer);
                     // bind save button
                     $('#' + one.f.switchmanager.nodesLearnt.id.modal.save, $modal).click(function() {
                         one.f.switchmanager.nodesLearnt.modal.save($modal);
