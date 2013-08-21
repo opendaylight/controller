@@ -61,8 +61,6 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
 
 /**
  * The class describes neighbor discovery service for an OpenFlow network.
@@ -579,6 +577,14 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         readyListHi.add(nodeConnector);
     }
 
+    private void removeNodeConnector(NodeConnector nodeConnector) {
+        readyListLo.remove(nodeConnector);
+        readyListHi.remove(nodeConnector);
+        stagingList.remove(nodeConnector);
+        holdTime.remove(nodeConnector);
+        elapsedTime.remove(nodeConnector);
+    }
+
     private Set<NodeConnector> getRemoveSet(Collection<NodeConnector> c, Node node) {
         Set<NodeConnector> removeSet = new HashSet<NodeConnector>();
         if (c == null) {
@@ -586,16 +592,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         }
         for (NodeConnector nodeConnector : c) {
             if (node.equals(nodeConnector.getNode())) {
-                Edge edge1 = edgeMap.get(nodeConnector);
-                if (edge1 != null) {
-                    removeSet.add(nodeConnector);
-
-                    // check reverse direction
-                    Edge edge2 = edgeMap.get(edge1.getTailNodeConnector());
-                    if ((edge2 != null) && node.equals(edge2.getTailNodeConnector().getNode())) {
-                        removeSet.add(edge2.getHeadNodeConnector());
-                    }
-                }
+                removeSet.add(nodeConnector);
             }
         }
         return removeSet;
@@ -603,6 +600,29 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
     private void removeDiscovery(Node node) {
         Set<NodeConnector> removeSet;
+
+        removeSet = getRemoveSet(edgeMap.keySet(), node);
+        NodeConnector peerConnector;
+        Edge edge1, edge2;
+        for (NodeConnector nodeConnector : removeSet) {
+            // get the peer for fast removal of the edge in reverse direction
+            peerConnector = null;
+            edge1 = edgeMap.get(nodeConnector);
+            if (edge1 != null) {
+                edge2 = edgeMap.get(edge1.getTailNodeConnector());
+                if ((edge2 != null) && node.equals(edge2.getTailNodeConnector().getNode())) {
+                    peerConnector = edge2.getHeadNodeConnector();
+                }
+            }
+
+            removeEdge(nodeConnector, false);
+            removeEdge(peerConnector, isEnabled(peerConnector));
+        }
+
+        removeSet = getRemoveSet(prodMap.keySet(), node);
+        for (NodeConnector nodeConnector : removeSet) {
+            removeProdEdge(nodeConnector);
+        }
 
         removeSet = getRemoveSet(readyListHi, node);
         readyListHi.removeAll(removeSet);
@@ -618,22 +638,14 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             holdTime.remove(nodeConnector);
         }
 
-        removeSet = getRemoveSet(edgeMap.keySet(), node);
+        removeSet = getRemoveSet(elapsedTime.keySet(), node);
         for (NodeConnector nodeConnector : removeSet) {
-            removeEdge(nodeConnector, false);
-        }
-
-        removeSet = getRemoveSet(prodMap.keySet(), node);
-        for (NodeConnector nodeConnector : removeSet) {
-            removeProdEdge(nodeConnector);
+            elapsedTime.remove(nodeConnector);
         }
     }
 
     private void removeDiscovery(NodeConnector nodeConnector) {
-        readyListHi.remove(nodeConnector);
-        readyListLo.remove(nodeConnector);
-        stagingList.remove(nodeConnector);
-        holdTime.remove(nodeConnector);
+        removeNodeConnector(nodeConnector);
         removeEdge(nodeConnector, false);
         removeProdEdge(nodeConnector);
     }
@@ -672,7 +684,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
             for (NodeConnector nodeConnector : retrySet) {
                 // Allow one more retry
-                readyListLo.add(nodeConnector);
                 elapsedTime.remove(nodeConnector);
                 if (connectionOutService.isLocal(nodeConnector.getNode())) {
                     transmitQ.add(nodeConnector);
@@ -805,6 +816,11 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         }
         elapsedTime.remove(src);
 
+        // fast discovery of the edge in reverse direction
+        if (!edgeMap.containsKey(dst) && !readyListHi.contains(dst) && !elapsedTime.keySet().contains(dst)) {
+            moveToReadyListHi(dst);
+        }
+
         // notify
         updateEdge(edge, UpdateType.ADDED, props);
         logger.trace("Add edge {}", edge);
@@ -871,18 +887,15 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
      * Remove OpenFlow edge
      */
     private void removeEdge(NodeConnector nodeConnector, boolean stillEnabled) {
-        holdTime.remove(nodeConnector);
-        readyListLo.remove(nodeConnector);
-        readyListHi.remove(nodeConnector);
+        if (nodeConnector == null) {
+            return;
+        }
+
+        removeNodeConnector(nodeConnector);
 
         if (stillEnabled) {
             // keep discovering
-            if (!stagingList.contains(nodeConnector)) {
-                stagingList.add(nodeConnector);
-            }
-        } else {
-            // stop it
-            stagingList.remove(nodeConnector);
+            stagingList.add(nodeConnector);
         }
 
         Edge edge = null;
@@ -1240,7 +1253,15 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
         if (val != null) {
             try {
-                int ticks = Integer.parseInt(val);
+                int ticks;
+                Set<NodeConnector> monitorSet = holdTime.keySet();
+                if (monitorSet != null) {
+                    for (NodeConnector nodeConnector : monitorSet) {
+                        holdTime.put(nodeConnector, 0);
+                    }
+                }
+
+                ticks = Integer.parseInt(val);
                 DiscoveryPeriod.INTERVAL.setTick(ticks);
                 discoveryBatchRestartTicks = getDiscoveryInterval();
                 discoveryBatchPauseTicks = getDiscoveryPauseInterval();

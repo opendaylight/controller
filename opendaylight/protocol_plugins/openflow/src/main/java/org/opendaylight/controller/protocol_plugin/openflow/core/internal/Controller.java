@@ -13,15 +13,15 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
@@ -32,7 +32,6 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateListener;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
-import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -50,13 +49,15 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
     private ControllerIO controllerIO;
     private Thread switchEventThread;
     private ConcurrentHashMap<Long, ISwitch> switches;
-    private BlockingQueue<SwitchEvent> switchEvents;
+    private PriorityBlockingQueue<SwitchEvent> switchEvents;
     // only 1 message listener per OFType
     private ConcurrentMap<OFType, IMessageListener> messageListeners;
     // only 1 switch state listener
     private ISwitchStateListener switchStateListener;
     private AtomicInteger switchInstanceNumber;
     private int MAXQUEUESIZE = 50000;
+
+    private static enum SwitchEventPriority { LOW, NORMAL, HIGH }
 
     /*
      * this thread monitors the switchEvents queue for new incoming events from
@@ -119,7 +120,12 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
     public void init() {
         logger.debug("Initializing!");
         this.switches = new ConcurrentHashMap<Long, ISwitch>();
-        this.switchEvents = new LinkedBlockingQueue<SwitchEvent>(MAXQUEUESIZE);
+        this.switchEvents = new PriorityBlockingQueue<SwitchEvent>(MAXQUEUESIZE, new Comparator<SwitchEvent>() {
+            @Override
+            public int compare(SwitchEvent p1, SwitchEvent p2) {
+                return p2.getPriority() - p1.getPriority();
+            }
+        });
         this.messageListeners = new ConcurrentHashMap<OFType, IMessageListener>();
         this.switchStateListener = null;
         this.switchInstanceNumber = new AtomicInteger(0);
@@ -244,7 +250,7 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
         if (((SwitchHandler) sw).isOperational()) {
             Long sid = sw.getId();
             if (this.switches.remove(sid, sw)) {
-                logger.warn("{} is Disconnected", sw);
+                logger.info("{} is removed", sw);
                 notifySwitchDeleted(sw);
             }
         }
@@ -265,35 +271,31 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
     }
 
     private synchronized void addSwitchEvent(SwitchEvent event) {
-        try {
-            this.switchEvents.put(event);
-        } catch (InterruptedException e) {
-            logger.debug("SwitchEvent caught Interrupt Exception");
-        }
+        this.switchEvents.put(event);
     }
 
     public void takeSwitchEventAdd(ISwitch sw) {
-        SwitchEvent ev = new SwitchEvent(
-                SwitchEvent.SwitchEventType.SWITCH_ADD, sw, null);
+        SwitchEvent ev = new SwitchEvent(SwitchEvent.SwitchEventType.SWITCH_ADD, sw, null,
+                SwitchEventPriority.HIGH.ordinal());
         addSwitchEvent(ev);
     }
 
     public void takeSwitchEventDelete(ISwitch sw) {
-        SwitchEvent ev = new SwitchEvent(
-                SwitchEvent.SwitchEventType.SWITCH_DELETE, sw, null);
+        SwitchEvent ev = new SwitchEvent(SwitchEvent.SwitchEventType.SWITCH_DELETE, sw, null,
+                SwitchEventPriority.HIGH.ordinal());
         addSwitchEvent(ev);
     }
 
     public void takeSwitchEventError(ISwitch sw) {
-        SwitchEvent ev = new SwitchEvent(
-                SwitchEvent.SwitchEventType.SWITCH_ERROR, sw, null);
+        SwitchEvent ev = new SwitchEvent(SwitchEvent.SwitchEventType.SWITCH_ERROR, sw, null,
+                SwitchEventPriority.NORMAL.ordinal());
         addSwitchEvent(ev);
     }
 
     public void takeSwitchEventMsg(ISwitch sw, OFMessage msg) {
         if (messageListeners.get(msg.getType()) != null) {
-            SwitchEvent ev = new SwitchEvent(
-                    SwitchEvent.SwitchEventType.SWITCH_MESSAGE, sw, msg);
+            SwitchEvent ev = new SwitchEvent(SwitchEvent.SwitchEventType.SWITCH_MESSAGE, sw, msg,
+                    SwitchEventPriority.LOW.ordinal());
             addSwitchEvent(ev);
         }
     }
@@ -306,6 +308,10 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
     @Override
     public ISwitch getSwitch(Long switchId) {
         return this.switches.get(switchId);
+    }
+
+    public void _controllerShowQueueSize(CommandInterpreter ci) {
+        ci.print("switchEvents queue size: " + switchEvents.size() + "\n");
     }
 
     public void _controllerShowSwitches(CommandInterpreter ci) {
@@ -378,6 +384,7 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
         help.append("\t controllerShowSwitches\n");
         help.append("\t controllerReset\n");
         help.append("\t controllerShowConnConfig\n");
+        help.append("\t controllerShowQueueSize\n");
         return help.toString();
     }
 
