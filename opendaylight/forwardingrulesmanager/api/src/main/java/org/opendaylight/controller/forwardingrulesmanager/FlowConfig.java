@@ -72,7 +72,7 @@ public class FlowConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(FlowConfig.class);
     private static final String NAMEREGEX = "^[a-zA-Z0-9]+$";
-    private static final String STATICFLOWGROUP = "__StaticFlows__";
+    public static final String STATICFLOWGROUP = "__StaticFlows__";
     public static final String INTERNALSTATICFLOWGROUP = "__InternalStaticFlows__";
     public static final String INTERNALSTATICFLOWBEGIN = "__";
     public static final String INTERNALSTATICFLOWEND = "__";
