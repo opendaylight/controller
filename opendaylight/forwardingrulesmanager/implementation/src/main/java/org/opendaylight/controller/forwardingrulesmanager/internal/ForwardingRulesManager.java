@@ -91,6 +91,7 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
     private static final String NODEDOWN = "Node is Down";
     private static final String SUCCESS = StatusCode.SUCCESS.toString();
     private static final Logger log = LoggerFactory.getLogger(ForwardingRulesManager.class);
+    private static final String PORTREMOVED = "Port removed";
     private String frmFileName;
     private String portGroupFileName;
     private ConcurrentMap<Integer, FlowConfig> staticFlows;
@@ -1926,6 +1927,32 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
         }
     }
 
+    private boolean doesFlowContainNodeConnector(Flow flow, NodeConnector nc) {
+        if (nc == null) {
+            return false;
+        }
+
+        Match match = flow.getMatch();
+        if (match.isPresent(MatchType.IN_PORT)) {
+            NodeConnector matchPort = (NodeConnector) match.getField(MatchType.IN_PORT).getValue();
+            if (matchPort.equals(nc)) {
+                return true;
+            }
+        }
+        List<Action> actionsList = flow.getActions();
+        if (actionsList != null) {
+            for (Action action : actionsList) {
+                if (action instanceof Output) {
+                    NodeConnector actionPort = ((Output) action).getPort();
+                    if (actionPort.equals(nc)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public void notifyNode(Node node, UpdateType type, Map<String, Property> propMap) {
         this.pendingEvents.offer(new NodeUpdateEvent(type, node));
@@ -2269,9 +2296,65 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
     }
 
     @Override
-    public void nodeConnectorUpdated(String containerName, NodeConnector p, UpdateType t) {
+    public void nodeConnectorUpdated(String containerName, NodeConnector nc, UpdateType t) {
         if (!container.getName().equals(containerName)) {
             return;
+        }
+
+        boolean updateStaticFlowCluster = false;
+
+        switch (t) {
+        case REMOVED:
+
+            List<FlowEntryInstall> nodeFlowEntries = nodeFlows.get(nc.getNode());
+            if (nodeFlowEntries == null) {
+                return;
+            }
+            for (FlowEntryInstall fei : new ArrayList<FlowEntryInstall>(nodeFlowEntries)) {
+                if (doesFlowContainNodeConnector(fei.getInstall().getFlow(), nc)) {
+                    Status status = this.removeEntryInternal(fei, true);
+                    if (!status.isSuccess()) {
+                        continue;
+                    }
+                    /*
+                     * If the flow entry is a static flow, then update its
+                     * configuration
+                     */
+                    if (fei.getGroupName().equals(FlowConfig.STATICFLOWGROUP)) {
+                        FlowConfig flowConfig = getStaticFlow(fei.getFlowName(), fei.getNode());
+                        if (flowConfig != null) {
+                            flowConfig.setStatus(PORTREMOVED);
+                            updateStaticFlowCluster = true;
+                        }
+                    }
+                }
+            }
+            if (updateStaticFlowCluster) {
+                refreshClusterStaticFlowsStatus(nc.getNode());
+            }
+            break;
+        case ADDED:
+            List<FlowConfig> flowConfigForNode = getStaticFlows(nc.getNode());
+            for (FlowConfig flowConfig : flowConfigForNode) {
+                if (doesFlowContainNodeConnector(flowConfig.getFlow(), nc)) {
+                    if (flowConfig.installInHw()) {
+                        Status status = this.installFlowEntry(flowConfig.getFlowEntry());
+                        if (!status.isSuccess()) {
+                            flowConfig.setStatus(status.getDescription());
+                        } else {
+                            flowConfig.setStatus(SUCCESS);
+                        }
+                        updateStaticFlowCluster = true;
+                    }
+                }
+            }
+            if (updateStaticFlowCluster) {
+                refreshClusterStaticFlowsStatus(nc.getNode());
+            }
+            break;
+        case CHANGED:
+            break;
+        default:
         }
     }
 
