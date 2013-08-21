@@ -166,7 +166,8 @@ one.f.switchmanager.nodesLearnt = {
                     searchable: true,
                     filterable: false,
                     pagination: true,
-                    flexibleRowsPerPage: true
+                    flexibleRowsPerPage: true,
+                    popout: true
                     }, "table-striped table-condensed");
                 one.lib.modal.inject.body($modal, $gridHTML);
                 $modal.on("shown", function() {
@@ -222,7 +223,8 @@ one.f.switchmanager.nodesLearnt = {
                         searchable: true,
                         filterable: false,
                         pagination: true,
-                        flexibleRowsPerPage: true
+                        flexibleRowsPerPage: true,
+                        popout: true
                         }, "table-striped table-condensed");
                 one.lib.modal.inject.body($modal, $gridHTML);
                 // attach to shown event of modal 
