@@ -11,9 +11,13 @@ public abstract class AbstractBindingAwareConsumer implements BindingAwareConsum
         ServiceReference<BindingAwareBroker> brokerRef = context.getServiceReference(BindingAwareBroker.class);
         BindingAwareBroker broker = context.getService(brokerRef);
         broker.registerConsumer(this, context);
+        startImpl(context);
         //context.ungetService(brokerRef);
     }
 
+    @Deprecated
+    abstract protected void startImpl(BundleContext context);
+    
     @Override
     public final  void stop(BundleContext context) throws Exception {
         // TODO Auto-generated method stub

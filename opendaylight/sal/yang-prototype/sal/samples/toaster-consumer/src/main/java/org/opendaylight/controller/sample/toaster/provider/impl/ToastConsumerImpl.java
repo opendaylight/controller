@@ -64,6 +64,12 @@ public class ToastConsumerImpl extends AbstractBindingAwareConsumer implements B
         return false;
 
     }
+    
+    @Override
+    @Deprecated
+    protected void startImpl(BundleContext context) {
+        context.registerService(ToastConsumer.class, this, new Hashtable<String,String>());
+    }
 
     @Override
     public void onSessionInitialized(ConsumerContext session) {

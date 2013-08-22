@@ -56,4 +56,11 @@ public class ToasterProvider extends AbstractBindingAwareProvider {
 	public Collection<? extends ProviderFunctionality> getFunctionality() {
 		return Collections.emptySet();
 	}
+	
+	@Override
+	@Deprecated
+	protected void startImpl(BundleContext context) {
+	    // TODO Auto-generated method stub
+	    
+	}
 }

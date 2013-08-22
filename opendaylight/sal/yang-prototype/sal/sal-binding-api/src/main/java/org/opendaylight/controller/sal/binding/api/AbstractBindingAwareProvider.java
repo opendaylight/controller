@@ -11,8 +11,12 @@ public abstract class AbstractBindingAwareProvider implements BindingAwareProvid
             ServiceReference<BindingAwareBroker> brokerRef = context.getServiceReference(BindingAwareBroker.class);
             BindingAwareBroker broker = context.getService(brokerRef);
             broker.registerProvider(this, context);
+            startImpl(context);
     }
-
+    
+    @Deprecated
+    abstract protected void startImpl(BundleContext context);
+    
     @Override
     public final void stop(BundleContext context) throws Exception {
             
