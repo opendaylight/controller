@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.forwardingrulesmanager.internal;
 
+import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -29,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
+import org.opendaylight.controller.connectionmanager.IConnectionManager;
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory.getLogger(Activator.class);
@@ -87,14 +89,19 @@ public class Activator extends ComponentActivatorAbstractBase {
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(ForwardingRulesManager.class)) {
             String interfaces[] = null;
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Set<String> propSet = new HashSet<String>();
+            propSet.add(ForwardingRulesManager.WORKSTATUSCACHE);
+            propSet.add(ForwardingRulesManager.WORKORDERCACHE);
+            props.put("cachenames", propSet);
 
             // export the service
             interfaces = new String[] { IContainerListener.class.getName(), ISwitchManagerAware.class.getName(),
                     IForwardingRulesManager.class.getName(), IInventoryListener.class.getName(),
-                    IConfigurationContainerAware.class.getName(),
+                    IConfigurationContainerAware.class.getName(), ICacheUpdateAware.class.getName(),
                     IFlowProgrammerListener.class.getName() };
 
-            c.setInterface(interfaces, null);
+            c.setInterface(interfaces, props);
 
             c.add(createContainerServiceDependency(containerName).setService(IFlowProgrammerService.class)
                     .setCallbacks("setFlowProgrammerService", "unsetFlowProgrammerService").setRequired(true));
@@ -106,6 +113,9 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setFrmAware", "unsetFrmAware").setRequired(false));
             c.add(createContainerServiceDependency(containerName).setService(IContainer.class)
                     .setCallbacks("setIContainer", "unsetIContainer").setRequired(true));
+            c.add(createServiceDependency().setService(IConnectionManager.class)
+                    .setCallbacks("setIConnectionManager", "unsetIConnectionManager")
+                    .setRequired(true));
         }
     }
 }

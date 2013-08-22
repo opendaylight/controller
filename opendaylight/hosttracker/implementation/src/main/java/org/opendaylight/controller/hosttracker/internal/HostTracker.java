@@ -526,6 +526,8 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         if (hostExists(host)) {
             HostNodeConnector existinghost = hostsDB.get(host.getNetworkAddress());
             existinghost.initArpSendCountDown();
+            // Update the host
+            hostsDB.put(host.getNetworkAddress(), existinghost);
             return;
         }
         new NotifyHostThread(host).start();

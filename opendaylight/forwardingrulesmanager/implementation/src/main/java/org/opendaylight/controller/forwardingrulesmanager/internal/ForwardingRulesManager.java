@@ -24,15 +24,19 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
+import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntryInstall;
@@ -42,6 +46,7 @@ import org.opendaylight.controller.forwardingrulesmanager.PortGroup;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupChangeListener;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupConfig;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupProvider;
+import org.opendaylight.controller.forwardingrulesmanager.implementation.data.FlowEntryDistributionOrder;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
@@ -85,13 +90,22 @@ import org.slf4j.LoggerFactory;
  * the network. It also maintains the central repository of all the forwarding
  * rules installed on the network nodes.
  */
-public class ForwardingRulesManager implements IForwardingRulesManager, PortGroupChangeListener,
-        IContainerListener, ISwitchManagerAware, IConfigurationContainerAware, IInventoryListener, IObjectReader,
-        CommandProvider, IFlowProgrammerListener {
+public class ForwardingRulesManager implements
+        IForwardingRulesManager,
+        PortGroupChangeListener,
+        IContainerListener,
+        ISwitchManagerAware,
+        IConfigurationContainerAware,
+        IInventoryListener,
+        IObjectReader,
+        ICacheUpdateAware,
+        CommandProvider,
+        IFlowProgrammerListener {
     private static final String NODEDOWN = "Node is Down";
     private static final String SUCCESS = StatusCode.SUCCESS.toString();
     private static final Logger log = LoggerFactory.getLogger(ForwardingRulesManager.class);
     private static final String PORTREMOVED = "Port removed";
+    private static final Logger logsync = LoggerFactory.getLogger("FRMsync");
     private String frmFileName;
     private String portGroupFileName;
     private ConcurrentMap<Integer, FlowConfig> staticFlows;
@@ -135,6 +149,98 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
     private ISwitchManager switchManager;
     private Thread frmEventHandler;
     protected BlockingQueue<FRMEvent> pendingEvents;
+
+    // Distributes FRM programming in the cluster
+    private IConnectionManager connectionManager;
+
+    /*
+     * Name clustered caches used to support FRM entry distribution these are by
+     * necessity non-transactional as long as need to be able to synchronize
+     * states also while a transaction is in progress
+     */
+    static final String WORKORDERCACHE = "frm.workOrder";
+    static final String WORKSTATUSCACHE = "frm.workStatus";
+
+    /*
+     * Data structure responsible for distributing the FlowEntryInstall requests
+     * in the cluster. The key value is entry that is being either Installed or
+     * Updated or Delete. The value field is the same of the key value in case
+     * of Installation or Deletion, it's the new entry in case of Modification,
+     * this because the clustering caches don't allow null values.
+     *
+     * The logic behind this data structure is that the controller that initiate
+     * the request will place the order here, someone will pick it and then will
+     * remove from this data structure because is being served.
+     *
+     * TODO: We need to have a way to cleanup this data structure if entries are
+     * not picked by anyone, which is always a case can happen especially on
+     * Node disconnect cases.
+     */
+    private ConcurrentMap<FlowEntryDistributionOrder, FlowEntryInstall> workOrder;
+
+    /*
+     * Data structure responsible for retrieving the results of the workOrder
+     * submitted to the cluster.
+     *
+     * The logic behind this data structure is that the controller that has
+     * executed the order will then place the result in workStatus signaling
+     * that there was a success or a failure.
+     *
+     * TODO: The workStatus entries need to have a lifetime associated in case
+     * of requestor controller leaving the cluster.
+     */
+    private ConcurrentMap<FlowEntryDistributionOrder, Status> workStatus;
+
+    /*
+     * Local Map used to hold the Future which a caller can use to monitor for
+     * completion
+     */
+    private ConcurrentMap<FlowEntryDistributionOrder, FlowEntryDistributionOrderFutureTask> workMonitor =
+            new ConcurrentHashMap<FlowEntryDistributionOrder, FlowEntryDistributionOrderFutureTask>();
+
+    /**
+     * @param e
+     *            Entry being installed/updated/removed
+     * @param u
+     *            New entry will be placed after the update operation. Valid
+     *            only for UpdateType.CHANGED, null for all the other cases
+     * @param t
+     *            Type of update
+     * @return a Future object for monitoring the progress of the result, or
+     *         null in case the processing should take place locally
+     */
+    private Future<Status> distributeWorkOrder(FlowEntryInstall e, FlowEntryInstall u, UpdateType t) {
+        // A null entry it's an unexpected condition, anyway it's safe to keep
+        // the handling local
+        if (e == null) {
+            return null;
+        }
+
+        Node n = e.getNode();
+        if (!connectionManager.isLocal(n)) {
+            // Create the work order and distribute it
+            FlowEntryDistributionOrder fe =
+                    new FlowEntryDistributionOrder(e, t, clusterContainerService.getMyAddress());
+            // First create the monitor job
+            FlowEntryDistributionOrderFutureTask ret = new FlowEntryDistributionOrderFutureTask(fe);
+            logsync.trace("Node {} not local so sending fe {}", n, fe);
+            workMonitor.put(fe, ret);
+            if (t.equals(UpdateType.CHANGED)) {
+                // Then distribute the work
+                workOrder.put(fe, u);
+            } else {
+                // Then distribute the work
+                workOrder.put(fe, e);
+            }
+            logsync.trace("WorkOrder requested");
+            // Now create an Handle to monitor the execution of the operation
+            return ret;
+        }
+
+        logsync.trace("LOCAL Node {} so processing Entry:{} UpdateType:{}", n, e, t);
+
+        return null;
+    }
 
     /**
      * Adds a flow entry onto the network node It runs various validity checks
@@ -434,25 +540,40 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
      *         contain the unique id assigned to this request
      */
     private Status modifyEntryInternal(FlowEntryInstall currentEntries, FlowEntryInstall newEntries, boolean async) {
-        // Modify the flow on the network node
-        Status status = (async) ? programmer.modifyFlowAsync(currentEntries.getNode(), currentEntries.getInstall()
-                .getFlow(), newEntries.getInstall().getFlow()) : programmer.modifyFlow(currentEntries.getNode(),
-                currentEntries.getInstall().getFlow(), newEntries.getInstall().getFlow());
+        Future<Status> futureStatus = distributeWorkOrder(currentEntries, newEntries, UpdateType.CHANGED);
+        if (futureStatus != null) {
+            Status retStatus = new Status(StatusCode.UNDEFINED);
+            try {
+                retStatus = futureStatus.get();
+            } catch (InterruptedException e) {
+                log.error("", e);
+            } catch (ExecutionException e) {
+                log.error("", e);
+            }
+            return retStatus;
+        } else {
+            // Modify the flow on the network node
+            Status status = async ? programmer.modifyFlowAsync(currentEntries.getNode(), currentEntries.getInstall()
+                    .getFlow(), newEntries.getInstall()
+                    .getFlow()) : programmer.modifyFlow(currentEntries.getNode(), currentEntries.getInstall()
+                    .getFlow(), newEntries.getInstall()
+                    .getFlow());
 
-        if (!status.isSuccess()) {
-            log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", newEntries.getInstall(),
-                    status.getDescription());
+            if (!status.isSuccess()) {
+                log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", newEntries.getInstall(),
+                        status.getDescription());
+                return status;
+            }
+
+            log.trace("Modified {} => {}", currentEntries.getInstall(), newEntries.getInstall());
+
+            // Update DB
+            newEntries.setRequestId(status.getRequestId());
+            updateLocalDatabase(currentEntries, false);
+            updateLocalDatabase(newEntries, true);
+
             return status;
         }
-
-        log.trace("Modified {} => {}", currentEntries.getInstall(), newEntries.getInstall());
-
-        // Update DB
-        newEntries.setRequestId(status.getRequestId());
-        updateLocalDatabase(currentEntries, false);
-        updateLocalDatabase(newEntries, true);
-
-        return status;
     }
 
     /**
@@ -531,24 +652,38 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
      *         contain the unique id assigned to this request
      */
     private Status removeEntryInternal(FlowEntryInstall entry, boolean async) {
-        // Mark the entry to be deleted (for CC just in case we fail)
-        entry.toBeDeleted();
+        Future<Status> futureStatus = distributeWorkOrder(entry, null, UpdateType.REMOVED);
+        if (futureStatus != null) {
+            Status retStatus = new Status(StatusCode.UNDEFINED);
+            try {
+                retStatus = futureStatus.get();
+            } catch (InterruptedException e) {
+                log.error("", e);
+            } catch (ExecutionException e) {
+                log.error("", e);
+            }
+            return retStatus;
+        } else {
+            // Mark the entry to be deleted (for CC just in case we fail)
+            entry.toBeDeleted();
 
-        // Remove from node
-        Status status = (async) ? programmer.removeFlowAsync(entry.getNode(), entry.getInstall().getFlow())
-                : programmer.removeFlow(entry.getNode(), entry.getInstall().getFlow());
+            // Remove from node
+            Status status = async ? programmer.removeFlowAsync(entry.getNode(), entry.getInstall()
+                    .getFlow()) : programmer.removeFlow(entry.getNode(), entry.getInstall()
+                    .getFlow());
 
-        if (!status.isSuccess()) {
-            log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
-                    status.getDescription());
+            if (!status.isSuccess()) {
+                log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
+                        status.getDescription());
+                return status;
+            }
+            log.trace("Removed  {}", entry.getInstall());
+
+            // Update DB
+            updateLocalDatabase(entry, false);
+
             return status;
         }
-        log.trace("Removed  {}", entry.getInstall());
-
-        // Update DB
-        updateLocalDatabase(entry, false);
-
-        return status;
     }
 
     /**
@@ -565,23 +700,37 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
      *         contain the unique id assigned to this request
      */
     private Status addEntriesInternal(FlowEntryInstall entry, boolean async) {
-        // Install the flow on the network node
-        Status status = (async) ? programmer.addFlowAsync(entry.getNode(), entry.getInstall().getFlow()) : programmer
-                .addFlow(entry.getNode(), entry.getInstall().getFlow());
+        Future<Status> futureStatus = distributeWorkOrder(entry, null, UpdateType.ADDED);
+        if (futureStatus != null) {
+            Status retStatus = new Status(StatusCode.UNDEFINED);
+            try {
+                retStatus = futureStatus.get();
+            } catch (InterruptedException e) {
+                log.error("", e);
+            } catch (ExecutionException e) {
+                log.error("", e);
+            }
+            return retStatus;
+        } else {
+            // Install the flow on the network node
+            Status status = async ? programmer.addFlowAsync(entry.getNode(), entry.getInstall()
+                    .getFlow()) : programmer.addFlow(entry.getNode(), entry.getInstall()
+                    .getFlow());
 
-        if (!status.isSuccess()) {
-            log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
-                    status.getDescription());
+            if (!status.isSuccess()) {
+                log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
+                        status.getDescription());
+                return status;
+            }
+
+            log.trace("Added    {}", entry.getInstall());
+
+            // Update DB
+            entry.setRequestId(status.getRequestId());
+            updateLocalDatabase(entry, true);
+
             return status;
         }
-
-        log.trace("Added    {}", entry.getInstall());
-
-        // Update DB
-        entry.setRequestId(status.getRequestId());
-        updateLocalDatabase(entry, true);
-
-        return status;
     }
 
     /**
@@ -1203,6 +1352,12 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
             clusterContainerService.createCache("frm.TSPolicies",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
+            clusterContainerService.createCache(WORKSTATUSCACHE,
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+
+            clusterContainerService.createCache(WORKORDERCACHE,
+                    EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL));
+
         } catch (CacheConfigException cce) {
             log.error("CacheConfigException");
         } catch (CacheExistException cce) {
@@ -1292,6 +1447,19 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
             log.error("Retrieval of frm.TSPolicies cache failed for Container {}", container.getName());
         }
 
+        map = clusterContainerService.getCache(WORKORDERCACHE);
+        if (map != null) {
+            workOrder = (ConcurrentMap<FlowEntryDistributionOrder, FlowEntryInstall>) map;
+        } else {
+            log.error("Retrieval of " + WORKORDERCACHE + " cache failed for Container {}", container.getName());
+        }
+
+        map = clusterContainerService.getCache(WORKSTATUSCACHE);
+        if (map != null) {
+            workStatus = (ConcurrentMap<FlowEntryDistributionOrder, Status>) map;
+        } else {
+            log.error("Retrieval of " + WORKSTATUSCACHE + " cache failed for Container {}", container.getName());
+        }
     }
 
     private boolean flowConfigExists(FlowConfig config) {
@@ -2201,11 +2369,60 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
                         } else if (event instanceof ErrorReportedEvent) {
                             ErrorReportedEvent errEvent = (ErrorReportedEvent) event;
                             processErrorEvent(errEvent);
+                        } else if (event instanceof WorkOrderEvent) {
+                            /*
+                             * Take care of handling the remote Work request
+                             */
+                            WorkOrderEvent work = (WorkOrderEvent) event;
+                            FlowEntryDistributionOrder fe = work.getFe();
+                            if (fe != null) {
+                                logsync.trace("Executing the workOrder {}", fe);
+                                Status gotStatus = null;
+                                FlowEntryInstall feiCurrent = fe.getEntry();
+                                FlowEntryInstall feiNew = workOrder.get(fe.getEntry());
+                                switch (fe.getUpType()) {
+                                case ADDED:
+                                    /*
+                                     * TODO: Not still sure how to handle the
+                                     * sync entries
+                                     */
+                                    gotStatus = addEntriesInternal(feiCurrent, true);
+                                    break;
+                                case CHANGED:
+                                    gotStatus = modifyEntryInternal(feiCurrent, feiNew, true);
+                                    break;
+                                case REMOVED:
+                                    gotStatus = removeEntryInternal(feiCurrent, true);
+                                    break;
+                                }
+                                // Remove the Order
+                                workOrder.remove(fe);
+                                logsync.trace(
+                                        "The workOrder has been executed and now the status is being returned {}", fe);
+                                // Place the status
+                                workStatus.put(fe, gotStatus);
+                            } else {
+                                log.warn("Not expected null WorkOrder", work);
+                            }
+                        } else if (event instanceof WorkStatusCleanup) {
+                            /*
+                             * Take care of handling the remote Work request
+                             */
+                            WorkStatusCleanup work = (WorkStatusCleanup) event;
+                            FlowEntryDistributionOrder fe = work.getFe();
+                            if (fe != null) {
+                                logsync.trace("The workStatus {} is being removed", fe);
+                                workStatus.remove(fe);
+                            } else {
+                                log.warn("Not expected null WorkStatus", work);
+                            }
                         } else {
-                            log.warn("Dequeued unknown event {}", event.getClass().getSimpleName());
+                            log.warn("Dequeued unknown event {}", event.getClass()
+                                    .getSimpleName());
                         }
                     } catch (InterruptedException e) {
-                        log.warn("FRM EventHandler thread interrupted", e);
+                        // clear pending events
+                        pendingEvents.clear();
                     }
                 }
             }
@@ -2219,7 +2436,12 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
      *
      */
     void destroy() {
+        // Interrupt the thread
+        frmEventHandler.interrupt();
+        // Clear the pendingEvents queue
+        pendingEvents.clear();
         frmAware.clear();
+        workMonitor.clear();
     }
 
     /**
@@ -2423,6 +2645,52 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
 
         public Node getNode() {
             return node;
+        }
+    }
+
+    private class WorkOrderEvent extends FRMEvent {
+        private FlowEntryDistributionOrder fe;
+        private FlowEntryInstall newEntry;
+
+        /**
+         * @param fe
+         * @param newEntry
+         */
+        WorkOrderEvent(FlowEntryDistributionOrder fe, FlowEntryInstall newEntry) {
+            this.fe = fe;
+            this.newEntry = newEntry;
+        }
+
+        /**
+         * @return the fe
+         */
+        public FlowEntryDistributionOrder getFe() {
+            return fe;
+        }
+
+        /**
+         * @return the newEntry
+         */
+        public FlowEntryInstall getNewEntry() {
+            return newEntry;
+        }
+    }
+
+    private class WorkStatusCleanup extends FRMEvent {
+        private FlowEntryDistributionOrder fe;
+
+        /**
+         * @param fe
+         */
+        WorkStatusCleanup(FlowEntryDistributionOrder fe) {
+            this.fe = fe;
+        }
+
+        /**
+         * @return the fe
+         */
+        public FlowEntryDistributionOrder getFe() {
+            return fe;
         }
     }
 
@@ -2695,5 +2963,79 @@ public class ForwardingRulesManager implements IForwardingRulesManager, PortGrou
         }
 
         return rv;
+    }
+
+    public void unsetIConnectionManager(IConnectionManager s) {
+        if (s == this.connectionManager) {
+            this.connectionManager = null;
+        }
+    }
+
+    public void setIConnectionManager(IConnectionManager s) {
+        this.connectionManager = s;
+    }
+
+    @Override
+    public void entryCreated(Object key, String cacheName, boolean originLocal) {
+        /*
+         * Do nothing
+         */
+    }
+
+    @Override
+    public void entryUpdated(Object key, Object new_value, String cacheName, boolean originLocal) {
+        if (originLocal) {
+            /*
+             * Local updates are of no interest
+             */
+            return;
+        }
+        if (cacheName.equals(WORKORDERCACHE)) {
+            logsync.trace("Got a WorkOrderCacheUpdate for {}", key);
+            /*
+             * This is the case of one workOrder becoming available, so we need
+             * to dispatch the work to the appropriate handler
+             */
+            FlowEntryDistributionOrder fe = (FlowEntryDistributionOrder) key;
+            FlowEntryInstall fei = fe.getEntry();
+            if (fei == null) {
+                return;
+            }
+            Node n = fei.getNode();
+            if (connectionManager.isLocal(n)) {
+                logsync.trace("workOrder for fe {} processed locally", fe);
+                // I'm the controller in charge for the request, queue it for
+                // processing
+                pendingEvents.offer(new WorkOrderEvent(fe, (FlowEntryInstall) new_value));
+            }
+        } else if (cacheName.equals(WORKSTATUSCACHE)) {
+            logsync.trace("Got a WorkStatusCacheUpdate for {}", key);
+            /*
+             * This is the case of one workOrder being completed and a status
+             * returned
+             */
+            FlowEntryDistributionOrder fe = (FlowEntryDistributionOrder) key;
+            /*
+             * Check if the order was initiated by this controller in that case
+             * we need to actually look at the status returned
+             */
+            if (fe.getRequestorController()
+                    .equals(clusterContainerService.getMyAddress())) {
+                FlowEntryDistributionOrderFutureTask fet = workMonitor.get(fe);
+                if (fet != null) {
+                    logsync.trace("workStatus response is for us {}", fe);
+                    // Signal we got the status
+                    fet.gotStatus(fe, workStatus.get(fe));
+                    pendingEvents.offer(new WorkStatusCleanup(fe));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void entryDeleted(Object key, String cacheName, boolean originLocal) {
+        /*
+         * Do nothing
+         */
     }
 }

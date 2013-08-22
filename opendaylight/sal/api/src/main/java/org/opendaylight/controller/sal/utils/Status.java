@@ -8,12 +8,14 @@
 
 package org.opendaylight.controller.sal.utils;
 
+import java.io.Serializable;
+
 /**
  * Represents the return object of the osgi service interfaces function calls.
  * It contains a code {@code StatusCode} representing the result of the call and
  * a string which describes a failure reason (if any) in human readable form.
  */
-public class Status {
+public class Status implements Serializable {
     private StatusCode code;
     private String description;
     private long requestId;
