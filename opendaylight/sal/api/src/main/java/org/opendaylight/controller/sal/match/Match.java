@@ -246,93 +246,175 @@ public class Match implements Cloneable, Serializable {
     /**
      * Check whether the current match conflicts with the passed filter match
      * This match conflicts with the filter if for at least a MatchType defined
-     * in the filter match, the respective MatchFields differ or are not compatible
+     * in the filter match, the respective MatchFields differ or are not
+     * compatible
+     *
+     * In other words the function returns true if the set of packets described
+     * by one match and the set of packets described by the other match are
+     * disjoint. Equivalently, if the intersection of the two sets of packets
+     * described by the two matches is an empty.
      *
      * For example, Let's suppose the filter has the following MatchFields:
      * DL_TYPE = 0x800
-     * NW_DST =  172.20.30.110/24
+     * NW_DST = 172.20.30.110/24
      *
      * while this match has the following MatchFields:
+     * DL_TYPE = 0x800
      * NW_DST = 172.20.30.45/24
      * TP_DST = 80
      *
-     * Then the function would return false as the two Match are not conflicting
+     * Then the function would return false as the two Match are not
+     * conflicting.
      *
-     * Note: the mask value is taken into account only for MatchType.NW_SRC and MatchType.NW_DST
+     * Note: the mask value is taken into account only for MatchType.NW_SRC and
+     * MatchType.NW_DST
      *
-     * @param match the MAtch describing the filter
-     * @return true if the match is conflicting with the filter, false otherwise
+     * @param match
+     *            the Match describing the filter
+     * @return true if the set of packets described by one match and the set of
+     *         packets described by the other match are disjoint, false
+     *         otherwise
      */
     public boolean conflictWithFilter(Match filter) {
+        return !this.intersetcs(filter);
+    }
+
+    /**
+     * Merge the current Match fields with the fields of the filter Match. A
+     * check is first run to see if this Match is compatible with the filter
+     * Match. If it is not, the merge is not attempted.
+     *
+     * The result is the match object representing the intersection of the set
+     * of packets described by this match with the set of packets described by
+     * the filter match. If the intersection of the two sets is empty, the
+     * return match will be empty as well.
+     *
+     * @param filter
+     *            the match with which attempting the merge
+     * @return a new Match object describing the set of packets represented by
+     *         the intersection of this and the filter matches.
+     */
+    public Match mergeWithFilter(Match filter) {
+        return this.getIntersection(filter);
+    }
+
+    /**
+     * Return the match representing the intersection of the set of packets
+     * described by this match with the set of packets described by the other
+     * match. Such as m.intersect(m) == m and m.intersect(o) == o where o is an
+     * empty match.
+     *
+     * @param other
+     *            the match with which computing the intersection
+     * @return a new Match object representing the intersection of the set of
+     *         packets described by this match with the set of packets described
+     *         by the other match.
+     */
+    public Match getIntersection(Match other) {
+        Match intersection = new Match();
+        if (this.intersetcs(other)) {
+            for (MatchType type : MatchType.values()) {
+                if (this.isAny(type) && other.isAny(type)) {
+                    continue;
+                }
+                if (this.isAny(type)) {
+                    intersection.setField(other.getField(type).clone());
+                    continue;
+                } else if (other.isAny(type)) {
+                    intersection.setField(this.getField(type).clone());
+                    continue;
+                }
+                // Either they are equal or it is about IP address
+                switch (type) {
+                // When it is about IP address, take the wider prefix address between the twos
+                case NW_SRC:
+                case NW_DST:
+                    MatchField thisField = this.getField(type);
+                    MatchField otherField = other.getField(type);
+                    InetAddress thisAddress = (InetAddress) thisField.getValue();
+                    InetAddress otherAddress = (InetAddress) otherField.getValue();
+                    InetAddress thisMask = (InetAddress) thisField.getMask();
+                    InetAddress otherMask = (InetAddress) otherField.getMask();
+
+                    int thisMaskLen = (thisMask == null) ? ((thisAddress instanceof Inet4Address) ? 32 : 128)
+                            : NetUtils.getSubnetMaskLength(thisMask);
+                    int otherMaskLen = (otherMask == null) ? ((otherAddress instanceof Inet4Address) ? 32 : 128)
+                            : NetUtils.getSubnetMaskLength(otherMask);
+                    if (otherMaskLen < thisMaskLen) {
+                        intersection.setField(new MatchField(type, NetUtils.getSubnetPrefix(otherAddress, otherMaskLen), otherMask));
+                    } else {
+                        intersection.setField(new MatchField(type, NetUtils.getSubnetPrefix(thisAddress, thisMaskLen), thisMask));
+                    }
+                    break;
+                default:
+                    // this and other match field are equal for this type, pick this match field
+                    intersection.setField(this.getField(type).clone());
+                }
+            }
+        }
+        return intersection;
+    }
+
+    /**
+     * Checks whether the intersection of the set of packets described by this
+     * match with the set of packets described by the other match is non empty
+     *
+     * For example, if this match is: DL_SRC = 00:cc:bb:aa:11:22
+     *
+     * and the other match is: DL_TYPE = 0x800 NW_SRC = 1.2.3.4
+     *
+     * then their respective matching packets set intersection is non empty:
+     * DL_SRC = 00:cc:bb:aa:11:22 DL_TYPE = 0x800 NW_SRC = 1.2.3.4
+     *
+     * @param other
+     *            the other match with which testing the intersection
+     * @return true if the intersection of the respective matching packets sets
+     *         is non empty
+     */
+    public boolean intersetcs(Match other) {
+        if (this.getMatches() == 0 || other.getMatches() == 0) {
+            // No intersection with the empty set
+            return false;
+        }
         // Iterate through the MatchType defined in the filter
-        for (MatchType type : filter.getMatchesList()) {
-            if (this.isAny(type)) {
+        for (MatchType type : MatchType.values()) {
+            if (this.isAny(type) || other.isAny(type)) {
                 continue;
             }
 
             MatchField thisField = this.getField(type);
-            MatchField filterField = filter.getField(type);
+            MatchField otherField = other.getField(type);
 
             switch (type) {
             case DL_SRC:
             case DL_DST:
-                if (Arrays.equals((byte[]) thisField.getValue(),
-                        (byte[]) filterField.getValue())) {
+                if (!Arrays.equals((byte[]) thisField.getValue(), (byte[]) otherField.getValue())) {
                     return false;
                 }
                 break;
             case NW_SRC:
             case NW_DST:
                 InetAddress thisAddress = (InetAddress) thisField.getValue();
-                InetAddress filterAddress = (InetAddress) filterField
-                        .getValue();
+                InetAddress otherAddress = (InetAddress) otherField.getValue();
                 // Validity check
-                if (thisAddress instanceof Inet4Address
-                        && filterAddress instanceof Inet6Address
-                        || thisAddress instanceof Inet6Address
-                        && filterAddress instanceof Inet4Address) {
-                    return true;
+                if (thisAddress instanceof Inet4Address && otherAddress instanceof Inet6Address
+                        || thisAddress instanceof Inet6Address && otherAddress instanceof Inet4Address) {
+                    return false;
                 }
                 InetAddress thisMask = (InetAddress) thisField.getMask();
-                InetAddress filterMask = (InetAddress) filterField.getMask();
-                // thisAddress has to be in same subnet of filterAddress
-                if (NetUtils.inetAddressConflict(thisAddress, filterAddress,
-                        thisMask, filterMask)) {
-                    return true;
+                InetAddress otherMask = (InetAddress) otherField.getMask();
+                if (NetUtils.inetAddressConflict(thisAddress, otherAddress, thisMask, otherMask)
+                        && NetUtils.inetAddressConflict(otherAddress, thisAddress, otherMask, thisMask)) {
+                    return false;
                 }
                 break;
             default:
-                if (!thisField.getValue().equals(filterField.getValue())) {
-                    return true;
-                }
-            }
-            //TODO: check v4 v6 incompatibility
-        }
-        return false;
-    }
-
-    /**
-     * Merge the current Match fields with the fields of the filter Match
-     * A check is first run to see if this Match is compatible with the
-     * filter Match. If it is not, the merge is not attempted.
-     *
-     *
-     * @param filter
-     * @return
-     */
-    public Match mergeWithFilter(Match filter) {
-        if (!this.conflictWithFilter(filter)) {
-            /*
-             * No conflict with the filter
-             * We can copy over the fields which this match does not have
-             */
-            for (MatchType type : filter.getMatchesList()) {
-                if (this.isAny(type)) {
-                    this.setField(filter.getField(type).clone());
+                if (!thisField.getValue().equals(otherField.getValue())) {
+                    return false;
                 }
             }
         }
-        return this;
+        return true;
     }
 
     @Override

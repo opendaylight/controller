@@ -247,11 +247,18 @@ public abstract class NetUtils {
      * Checks if the test address and mask conflicts with the filter address and
      * mask
      *
-     * For example: testAddress: 172.28.2.23 testMask: 255.255.255.0
-     * filtAddress: 172.28.1.10 testMask: 255.255.255.0 conflict
+     * For example:
+     * testAddress: 172.28.2.23
+     * testMask: 255.255.255.0
+     * filterAddress: 172.28.1.10
+     * testMask: 255.255.255.0
+     * do conflict
      *
-     * testAddress: 172.28.2.23 testMask: 255.255.255.0 filtAddress: 172.28.1.10
-     * testMask: 255.255.0.0 do not conflict
+     * testAddress: 172.28.2.23
+     * testMask: 255.255.255.0
+     * filterAddress: 172.28.1.10
+     * testMask: 255.255.0.0
+     * do not conflict
      *
      * Null parameters are permitted
      *
@@ -275,7 +282,8 @@ public abstract class NetUtils {
 
         int testMaskLen = (testMask == null) ? ((testAddress instanceof Inet4Address) ? 32 : 128) : NetUtils
                 .getSubnetMaskLength(testMask);
-        int filterMaskLen = NetUtils.getSubnetMaskLength(filterMask);
+        int filterMaskLen = (filterMask == null) ? ((testAddress instanceof Inet4Address) ? 32 : 128) : NetUtils
+                .getSubnetMaskLength(filterMask);
 
         // Mask length check. Test mask has to be more specific than filter one
         if (testMaskLen < filterMaskLen) {
@@ -464,7 +472,7 @@ public abstract class NetUtils {
 
     /*
      * Following utilities are useful when you need to compare or bit shift java
-     * primitive type variable which are inerently signed
+     * primitive type variable which are inherently signed
      */
     /**
      * Returns the unsigned value of the passed byte variable

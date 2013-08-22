@@ -184,7 +184,8 @@ public class MatchField implements Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return type + "(" + getValueString() + "," + getMaskString() + ")";
+        return (mask == null) ? String.format("%s(%s)", getTypeString(), getValueString()) :
+            String.format("%s(%s,%s)", getTypeString(), getValueString(), getMaskString());
     }
 
     @Override
