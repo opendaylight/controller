@@ -1,9 +1,5 @@
 #!/bin/bash
 
-[[ -z ${JAVA_HOME} ]] && echo "Need to set JAVA_HOME environment variable" && exit -1;
-[[ ! -x ${JAVA_HOME}/bin/java ]] && echo "Cannot find an executable \
-JVM at path ${JAVA_HOME}/bin/java check your JAVA_HOME" && exit -1;
-
 platform='unknown'
 unamestr=`uname`
 if [[ "$unamestr" == 'Linux' ]]; then
@@ -32,7 +28,14 @@ elif [[ $platform == 'osx' ]]; then
    PHYS_DIR=`pwd -P`
    RESULT=$PHYS_DIR/$TARGET_FILE
    fullpath=$RESULT
+
+   [[ -z ${JAVA_HOME} ]] && [[ -x "/usr/libexec/java_home" ]] && export JAVA_HOME=`/usr/libexec/java_home -v 1.7`;
+
 fi
+
+[[ -z ${JAVA_HOME} ]] && echo "Need to set JAVA_HOME environment variable" && exit -1;
+[[ ! -x ${JAVA_HOME}/bin/java ]] && echo "Cannot find an executable \
+JVM at path ${JAVA_HOME}/bin/java check your JAVA_HOME" && exit -1;
 
 basedir=`dirname ${fullpath}`
 
