@@ -172,10 +172,28 @@ public class HostNodeConnector extends Host implements Serializable {
         return !Arrays.equals(emptyArray, macaddr);
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
-        return "HostNodeConnector [nodeConnector=" + nodeConnector + ", vlan="
-                + vlan + ", staticHost=" + staticHost + "]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("HostNodeConnector [");
+        if (nodeConnector != null) {
+            builder.append("nodeConnector=")
+                    .append(nodeConnector)
+                    .append(", ");
+        }
+        builder.append("vlan=")
+                .append(vlan)
+                .append(", staticHost=")
+                .append(staticHost)
+                .append(", arpSendCountDown=")
+                .append(arpSendCountDown)
+                .append("]");
+        return builder.toString();
     }
 
     public boolean isV4Host() {

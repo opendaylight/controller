@@ -23,6 +23,7 @@ import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
@@ -122,6 +123,14 @@ public class ForwardingRulesManagerIT {
                         .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
                         "hosttracker.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "connectionmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "connectionmanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "sal.connection").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",
+                        "sal.connection.implementation").versionAsInProject(),
 
                 // needed by hosttracker
                 mavenBundle("org.opendaylight.controller", "topologymanager")
@@ -196,14 +205,18 @@ public class ForwardingRulesManagerIT {
         List<Action> actions = new ArrayList<Action>();
         actions.add(action);
         flow.setActions(actions);
+        Node node;
+        try {
+            // Must use a node published by the stub protocol plugin else
+            // connection manager will not report it as a local node
+            node = new Node("STUB", 51966);
+            FlowEntry fe = new FlowEntry("g1", "f1", flow, node);
+            Status stat = manager.installFlowEntry(fe);
 
-        Node node = NodeCreator.createOFNode(1L);
-        FlowEntry fe = new FlowEntry("g1", "f1", flow, node);
-
-        Status stat = manager.installFlowEntry(fe);
-
-        // OF plugin is not there in integration testing mode
-        Assert.assertTrue(stat.getCode() == StatusCode.NOSERVICE);
+            Assert.assertTrue(stat.getCode() == StatusCode.SUCCESS);
+        } catch (ConstructionException e) {
+            // Got a failure while allocating the node
+            Assert.assertTrue(false);
+        }
     }
-
 }
