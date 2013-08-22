@@ -58,7 +58,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
      * @throws Exception
      */
     @Override
-    public void asyncSend(OFMessage msg) throws IOException {
+    public void asyncSend(OFMessage msg) throws Exception {
         synchronized (outBuffer) {
             int msgLen = msg.getLengthU();
             if (outBuffer.remaining() < msgLen) {
@@ -94,7 +94,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
      * @throws Exception
      */
     @Override
-    public void resumeSend() throws IOException {
+    public void resumeSend() throws Exception {
         synchronized (outBuffer) {
             if (!socket.isOpen()) {
                 return;
@@ -121,7 +121,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
      * @throws Exception
      */
     @Override
-    public List<OFMessage> readMessages() throws IOException {
+    public List<OFMessage> readMessages() throws Exception {
         if (!socket.isOpen()) {
             return null;
         }

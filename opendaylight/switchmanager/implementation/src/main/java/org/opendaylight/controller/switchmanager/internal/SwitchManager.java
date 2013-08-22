@@ -1042,6 +1042,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     public void updateNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Set<Property> props) {
         Map<String, Property> propMap = new HashMap<String, Property>();
+        boolean update = true;
 
         log.debug("updateNodeConnector: {} type {} props {} for container {}",
                 new Object[] { nodeConnector, type, props, containerName });
@@ -1052,7 +1053,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
         switch (type) {
         case ADDED:
-        case CHANGED:
             if (props != null) {
                 for (Property prop : props) {
                     addNodeConnectorProp(nodeConnector, prop);
@@ -1064,17 +1064,33 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
             addSpanPort(nodeConnector);
             break;
+        case CHANGED:
+            if (!nodeConnectorProps.containsKey(nodeConnector) || (props == null)) {
+                update = false;
+            } else {
+                for (Property prop : props) {
+                    addNodeConnectorProp(nodeConnector, prop);
+                    propMap.put(prop.getName(), prop);
+                }
+            }
+            break;
         case REMOVED:
+            if (!nodeConnectorProps.containsKey(nodeConnector)) {
+                update = false;
+            }
             removeNodeConnectorAllProps(nodeConnector);
 
             // clean up span config
             removeSpanPort(nodeConnector);
             break;
         default:
+            update = false;
             break;
         }
 
-        notifyNodeConnector(nodeConnector, type, propMap);
+        if (update) {
+            notifyNodeConnector(nodeConnector, type, propMap);
+        }
     }
 
     @Override

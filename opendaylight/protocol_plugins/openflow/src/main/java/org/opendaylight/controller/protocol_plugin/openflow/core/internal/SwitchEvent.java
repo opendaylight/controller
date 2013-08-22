@@ -21,11 +21,13 @@ public class SwitchEvent {
     private SwitchEventType eventType;
     private ISwitch sw;
     private OFMessage msg;
+    private int priority;
 
-    public SwitchEvent(SwitchEventType type, ISwitch sw, OFMessage msg) {
+    public SwitchEvent(SwitchEventType type, ISwitch sw, OFMessage msg, int priority) {
         this.eventType = type;
         this.sw = sw;
         this.msg = msg;
+        this.priority = priority;
     }
 
     public SwitchEventType getEventType() {
@@ -38,6 +40,14 @@ public class SwitchEvent {
 
     public OFMessage getMsg() {
         return this.msg;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 
     @Override

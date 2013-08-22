@@ -41,7 +41,6 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
             .getLogger(SecureMessageReadWriteService.class);
 
     private Selector selector;
-    private SelectionKey clientSelectionKey;
     private SocketChannel socket;
     private BasicFactory factory;
 
@@ -132,12 +131,28 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
         sslEngine = sslContext.createSSLEngine();
         sslEngine.setUseClientMode(false);
         sslEngine.setNeedClientAuth(true);
+        sslEngine.setEnabledCipherSuites(new String[] {
+                "SSL_RSA_WITH_RC4_128_MD5",
+                "SSL_RSA_WITH_RC4_128_SHA",
+                "TLS_RSA_WITH_AES_128_CBC_SHA",
+                "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+                "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
+                "SSL_RSA_WITH_3DES_EDE_CBC_SHA",
+                "SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA",
+                "SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA",
+                "SSL_RSA_WITH_DES_CBC_SHA",
+                "SSL_DHE_RSA_WITH_DES_CBC_SHA",
+                "SSL_DHE_DSS_WITH_DES_CBC_SHA",
+                "SSL_RSA_EXPORT_WITH_RC4_40_MD5",
+                "SSL_RSA_EXPORT_WITH_DES40_CBC_SHA",
+                "SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA",
+                "SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA",
+                "TLS_EMPTY_RENEGOTIATION_INFO_SCSV"});
 
         // Do initial handshake
         doHandshake(socket, sslEngine);
 
-        this.clientSelectionKey = this.socket.register(this.selector,
-                SelectionKey.OP_READ);
+        this.socket.register(this.selector, SelectionKey.OP_READ);
     }
 
     /**
@@ -182,12 +197,10 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
 
             if (myAppData.hasRemaining()) {
                 myAppData.compact();
-                this.clientSelectionKey = this.socket.register(this.selector,
-                        SelectionKey.OP_WRITE, this);
+                this.socket.register(this.selector, SelectionKey.OP_WRITE, this);
             } else {
                 myAppData.clear();
-                this.clientSelectionKey = this.socket.register(this.selector,
-                        SelectionKey.OP_READ, this);
+                this.socket.register(this.selector, SelectionKey.OP_READ, this);
             }
 
             logger.trace("Message sent: {}", msg);
@@ -221,12 +234,10 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
 
             if (myAppData.hasRemaining()) {
                 myAppData.compact();
-                this.clientSelectionKey = this.socket.register(this.selector,
-                        SelectionKey.OP_WRITE, this);
+                this.socket.register(this.selector, SelectionKey.OP_WRITE, this);
             } else {
                 myAppData.clear();
-                this.clientSelectionKey = this.socket.register(this.selector,
-                        SelectionKey.OP_READ, this);
+                this.socket.register(this.selector, SelectionKey.OP_READ, this);
             }
         }
     }
@@ -280,8 +291,7 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
             peerAppData.clear();
         }
 
-        this.clientSelectionKey = this.socket.register(this.selector,
-                SelectionKey.OP_READ, this);
+        this.socket.register(this.selector, SelectionKey.OP_READ, this);
 
         return msgs;
     }
