@@ -40,6 +40,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * are done by the ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
         Node.NodeIDType.registerIDType("STUB", Integer.class);
         NodeConnector.NodeConnectorIDType.registerIDType("STUB", Integer.class, "STUB");
@@ -50,6 +51,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
         Node.NodeIDType.unRegisterIDType("STUB");
         NodeConnector.NodeConnectorIDType.unRegisterIDType("STUB");
@@ -64,6 +66,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *         instantiated in order to get an fully working implementation
      *         Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { ReadService.class, InventoryService.class };
         return res;
@@ -84,6 +87,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *            per-container different behavior if needed, usually should not
      *            be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(ReadService.class)) {
             // export the service to be used by SAL
@@ -104,11 +108,18 @@ public class Activator extends ComponentActivatorAbstractBase {
         }
     }
 
+    @Override
     public Object[] getGlobalImplementations() {
-        Object[] res = { FlowProgrammerService.class, StubNodeFactory.class, StubNodeConnectorFactory.class };
+        Object[] res =
+                {
+                        FlowProgrammerService.class,
+                        StubNodeFactory.class,
+                        StubNodeConnectorFactory.class,
+                        InventoryService.class };
         return res;
     }
 
+    @Override
     public void configureGlobalInstance(Component c, Object imp){
         if (imp.equals(FlowProgrammerService.class)) {
             // export the service to be used by SAL
@@ -136,6 +147,17 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("protocolName", "STUB");
             c.setInterface(INodeConnectorFactory.class.getName(), props);
         }
-
+        if (imp.equals(InventoryService.class)) {
+            // export the service to be used by SAL
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            // Set the protocolPluginType property which will be used
+            // by SAL
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "STUB");
+            props.put("scope", "Global");
+            c.setInterface(IPluginInInventoryService.class.getName(), props);
+            c.add(createServiceDependency().setService(IPluginOutInventoryService.class, "(scope=Global)")
+                    .setCallbacks("setPluginOutInventoryServices", "unsetPluginOutInventoryServices")
+                    .setRequired(true));
+        }
     }
 }

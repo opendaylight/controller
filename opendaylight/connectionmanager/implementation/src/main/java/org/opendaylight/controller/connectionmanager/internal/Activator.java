@@ -25,6 +25,7 @@ import org.apache.felix.dm.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.opendaylight.controller.sal.inventory.IInventoryService;
 import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
 
 public class Activator extends ComponentActivatorAbstractBase {
@@ -37,6 +38,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
     }
 
@@ -45,6 +47,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * cleanup done by ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
     }
 
@@ -61,6 +64,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * @return The list of implementations the bundle will support,
      * in Global version
      */
+    @Override
     protected Object[] getGlobalImplementations() {
         Object[] res = { ConnectionManager.class };
         return res;
@@ -74,6 +78,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * @param imp implementation to be configured
      * @param containerName container on which the configuration happens
      */
+    @Override
     protected void configureGlobalInstance(Component c, Object imp) {
         if (imp.equals(ConnectionManager.class)) {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
@@ -99,6 +104,9 @@ public class Activator extends ComponentActivatorAbstractBase {
 
             c.add(createServiceDependency().setService(IConnectionService.class)
                     .setCallbacks("setConnectionService", "unsetConnectionService")
+                    .setRequired(true));
+            c.add(createServiceDependency().setService(IInventoryService.class, "(scope=Global)")
+                    .setCallbacks("setInventoryService", "unsetInventoryService")
                     .setRequired(true));
         }
     }

@@ -32,7 +32,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
@@ -49,6 +48,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.inventory.IInventoryService;
 import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -66,6 +66,7 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
     private IConnectionService connectionService;
     private Thread connectionEventThread;
     private BlockingQueue<ConnectionMgmtEvent> connectionEvents;
+    private IInventoryService inventoryService;
 
     public void setClusterServices(IClusterGlobalServices i) {
         this.clusterServices = i;
@@ -87,12 +88,48 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
         }
     }
 
+    public void setInventoryService(IInventoryService service) {
+        logger.trace("Got inventory service set request {}", service);
+        this.inventoryService = service;
+    }
+
+    public void unsetInventoryService(IInventoryService service) {
+        logger.trace("Got a service UNset request");
+        this.inventoryService = null;
+    }
+
+    private void getInventories() {
+        Map<Node, Map<String, Property>> nodeProp = this.inventoryService.getNodeProps();
+        for (Map.Entry<Node, Map<String, Property>> entry : nodeProp.entrySet()) {
+            Node node = entry.getKey();
+            logger.debug("getInventories for node:{}", new Object[] { node });
+            Map<String, Property> propMap = entry.getValue();
+            Set<Property> props = new HashSet<Property>();
+            for (Property property : propMap.values()) {
+                props.add(property);
+            }
+            updateNode(node, UpdateType.ADDED, props);
+        }
+
+        Map<NodeConnector, Map<String, Property>> nodeConnectorProp = this.inventoryService.getNodeConnectorProps();
+        for (Map.Entry<NodeConnector, Map<String, Property>> entry : nodeConnectorProp.entrySet()) {
+            Map<String, Property> propMap = entry.getValue();
+            Set<Property> props = new HashSet<Property>();
+            for (Property property : propMap.values()) {
+                props.add(property);
+            }
+            updateNodeConnector(entry.getKey(), UpdateType.ADDED, props);
+        }
+    }
+
     public void started() {
         connectionEventThread = new Thread(new EventHandler(), "ConnectionEvent Thread");
         connectionEventThread.start();
 
         registerWithOSGIConsole();
         notifyClusterViewChanged();
+        // Should pull the Inventory updates in case we missed it
+        getInventories();
     }
 
     public void init() {
