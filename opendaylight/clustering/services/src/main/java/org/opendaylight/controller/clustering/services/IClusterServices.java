@@ -10,7 +10,7 @@
 /**
  * @file   IClusterServices.java
  *
- * @brief  : Set of services and application will expect from the
+ * @brief  : Set of services an application will expect from the
  * clustering services provider
  *
  * Contract between the applications and the clustering service
@@ -33,7 +33,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 
 /**
- * Set of services and application will expect from the
+ * Set of services an application will expect from the
  * clustering services provider
  *
  */

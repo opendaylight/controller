@@ -10,7 +10,7 @@
 /**
  * @file   IClusterGlobalServices.java
  *
- * @brief  : Set of services and application will expect from the
+ * @brief  : Set of services an application will expect from the
  * clustering services provider. This interface is supposed to have
  * Global scope
  *
@@ -21,10 +21,9 @@
 package org.opendaylight.controller.clustering.services;
 
 /**
- * Set of services and application will expect from the
- * clustering services provider. This interface is supposed to have
- * Global scope
- *
+ * Set of services an application will expect from the clustering services
+ * provider. This interface is supposed to have Global scope
+ * 
  */
 public interface IClusterGlobalServices extends IClusterServicesCommon {
 }

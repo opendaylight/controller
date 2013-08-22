@@ -10,7 +10,7 @@
 /**
  * @file   IClusterContainerServices.java
  *
- * @brief  : Set of services and application will expect from the
+ * @brief  : Set of services an application will expect from the
  * clustering services provider. This interface is per-container and so
  * the container parameter is implicitely known
  *
@@ -21,9 +21,9 @@
 package org.opendaylight.controller.clustering.services;
 
 /**
- * Set of services and application will expect from the
- * clustering services provider. This interface is per-container and so
- * the container parameter is implicitly known
+ * Set of services an application will expect from the clustering services
+ * provider. This interface is per-container and so the container parameter is
+ * implicitly known
  *
  */
 public interface IClusterContainerServices extends IClusterServicesCommon {
