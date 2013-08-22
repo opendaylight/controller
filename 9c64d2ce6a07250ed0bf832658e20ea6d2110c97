@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFH///3k\u003d",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/configuration/logback.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-22T16:13:38Z",
+      "side": 1,
+      "message": "Below this one, should we also add one for org.opendaylight.controller  so that we can isolate controller only logs from applications above-controller logs ?",
+      "revId": "9c64d2ce6a07250ed0bf832658e20ea6d2110c97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
