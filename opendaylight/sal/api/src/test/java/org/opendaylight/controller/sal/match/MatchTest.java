@@ -523,4 +523,94 @@ public class MatchTest {
         Assert.assertTrue(field.getValue().equals(new Short(vlan)));
         Assert.assertTrue(field.isValid());
     }
+
+    @Test
+    public void testIntersection() throws UnknownHostException {
+        Short ethType = Short.valueOf((short)0x800);
+        InetAddress ip1 = InetAddress.getByName("1.1.1.1");
+        InetAddress ip2 = InetAddress.getByName("1.1.1.0");
+        InetAddress ipm2 = InetAddress.getByName("255.255.255.0");
+        InetAddress ip3 = InetAddress.getByName("1.3.0.0");
+        InetAddress ipm3 = InetAddress.getByName("255.255.0.0");
+
+        Match m1 = new Match();
+        m1.setField(MatchType.DL_TYPE, ethType);
+        m1.setField(MatchType.NW_SRC, ip1);
+
+        Match m2 = new Match();
+        m2.setField(MatchType.DL_TYPE, ethType);
+        m2.setField(MatchType.NW_SRC, ip2, ipm2);
+
+        Match m3 = new Match();
+        m3.setField(MatchType.DL_TYPE, ethType);
+        m3.setField(MatchType.NW_SRC, ip3, ipm3);
+        m3.setField(MatchType.NW_PROTO, IPProtocols.TCP.byteValue());
+
+        Match m3r = m3.reverse();
+        Assert.assertTrue(m3.intersetcs(m3r));
+
+        Assert.assertTrue(m1.intersetcs(m2));
+        Assert.assertTrue(m2.intersetcs(m1));
+        Assert.assertFalse(m1.intersetcs(m3));
+        Assert.assertTrue(m1.intersetcs(m3r));
+        Assert.assertFalse(m3.intersetcs(m1));
+        Assert.assertTrue(m3.intersetcs(m1.reverse()));
+        Assert.assertFalse(m2.intersetcs(m3));
+        Assert.assertFalse(m3.intersetcs(m2));
+        Assert.assertTrue(m2.intersetcs(m3r));
+
+
+        Match i = m1.getIntersection(m2);
+        Assert.assertTrue(((Short)i.getField(MatchType.DL_TYPE).getValue()).equals(ethType));
+        Assert.assertTrue(((InetAddress)i.getField(MatchType.NW_SRC).getValue()).equals(ip2));
+        Assert.assertTrue(((InetAddress)i.getField(MatchType.NW_SRC).getMask()).equals(ipm2));
+
+        i = m2.getIntersection(m3);
+        Assert.assertTrue(i.getMatches() == 0);
+
+        Match m4 = new Match();
+        m4.setField(MatchType.DL_TYPE, ethType);
+        m4.setField(MatchType.NW_PROTO, IPProtocols.TCP.byteValue());
+        Assert.assertTrue(m4.intersetcs(m3));
+
+        Match m5 = new Match();
+        m5.setField(MatchType.DL_TYPE, ethType);
+        m3.setField(MatchType.NW_SRC, ip3, ipm3);
+        m5.setField(MatchType.NW_PROTO, IPProtocols.UDP.byteValue());
+        Assert.assertFalse(m5.intersetcs(m3));
+        Assert.assertFalse(m5.intersetcs(m4));
+        Assert.assertTrue(m5.intersetcs(m5));
+        Assert.assertFalse(m3.intersetcs(m5));
+        Assert.assertFalse(m4.intersetcs(m5));
+
+
+        Match i2 = m4.getIntersection(m3);
+        Assert.assertFalse(i2.getMatches() == 0);
+        Assert.assertFalse(i2.getMatchesList().isEmpty());
+        Assert.assertTrue(((InetAddress)i2.getField(MatchType.NW_SRC).getValue()).equals(ip3));
+        Assert.assertTrue(((InetAddress)i2.getField(MatchType.NW_SRC).getMask()).equals(ipm3));
+        Assert.assertTrue(((Byte)i2.getField(MatchType.NW_PROTO).getValue()).equals(IPProtocols.TCP.byteValue()));
+
+        byte src[] = {(byte)0, (byte)0xab,(byte)0xbc,(byte)0xcd,(byte)0xde,(byte)0xef};
+        byte dst[] = {(byte)0x10, (byte)0x11,(byte)0x12,(byte)0x13,(byte)0x14,(byte)0x15};
+        Short srcPort = (short)1024;
+        Short dstPort = (short)80;
+
+        // Check identity
+        Match m6 = new Match();
+        m6.setField(MatchType.DL_SRC, src);
+        m6.setField(MatchType.DL_DST, dst);
+        m6.setField(MatchType.NW_SRC, ip2, ipm2);
+        m6.setField(MatchType.NW_DST, ip3, ipm3);
+        m6.setField(MatchType.NW_PROTO, IPProtocols.UDP.byteValue());
+        m6.setField(MatchType.TP_SRC, srcPort);
+        m6.setField(MatchType.TP_DST, dstPort);
+        Assert.assertTrue(m6.intersetcs(m6));
+        Assert.assertTrue(m6.getIntersection(m6).equals(m6));
+
+        // Empty match, represents the empty set
+        Match o = new Match();
+        Assert.assertTrue(m6.getIntersection(o).equals(o));
+        Assert.assertTrue(o.getIntersection(m6).equals(o));
+    }
 }
