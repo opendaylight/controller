@@ -38,7 +38,6 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
     private Map<Class<? extends RpcService>, RpcProxyContext> managedProxies = new HashMap();
     private var NotificationBrokerImpl notifyBroker
     private var ServiceRegistration<NotificationProviderService> notifyBrokerRegistration
-    private var DataBrokerImpl dataBroker
     
     @Property
     var BundleContext brokerBundleContext
