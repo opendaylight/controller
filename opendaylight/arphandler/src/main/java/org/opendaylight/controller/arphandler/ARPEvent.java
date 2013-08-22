@@ -56,4 +56,21 @@ public abstract class ARPEvent implements Serializable{
     public InetAddress getTargetIP() {
         return tIP;
     }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ARPEvent [");
+        if (tIP != null) {
+            builder.append("tIP=")
+                    .append(tIP);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
 }
