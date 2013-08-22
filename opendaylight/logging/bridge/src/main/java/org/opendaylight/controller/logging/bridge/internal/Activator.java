@@ -102,12 +102,15 @@ public class Activator implements BundleActivator {
                 this.bundlecontext = ctxt;
         }
 
+        @Override
         public void run () {
             try {
                 this.bundlecontext.getBundle(0).stop();
                 log.debug("shutdown handler thread called");
             } catch (BundleException e) {
                 log.debug("Bundle couldn't be stopped");
+            } catch (Exception e) {
+                log.debug("Unhandled exception");
             }
         }
     }

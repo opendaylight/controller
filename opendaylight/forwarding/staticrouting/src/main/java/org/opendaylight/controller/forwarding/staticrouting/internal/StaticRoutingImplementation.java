@@ -232,6 +232,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
                     if (future != null) {
                         try {
                             host = future.get();
+                        } catch (InterruptedException ioe) {
+                            log.trace("Thread interrupted {}", ioe);
                         } catch (Exception e) {
                             log.error("", e);
                         }
