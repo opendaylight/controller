@@ -34,6 +34,9 @@
   </root>
 
   <!--  Base log level  -->
+  <logger name="org.opendaylight" level="INFO"/>
+
+  <!-- Controller log level -->
   <logger name="org.opendaylight.controller" level="INFO"/>
 
   <!-- OSGi logging bridge -->
