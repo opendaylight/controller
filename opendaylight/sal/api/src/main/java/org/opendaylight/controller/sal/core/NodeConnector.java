@@ -29,7 +29,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
-import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
@@ -39,7 +38,7 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
  * identify an attachment point on the Node in different way.
  *
  */
-@XmlRootElement
+@XmlRootElement(name="nodeconnector")
 @XmlAccessorType(XmlAccessType.NONE)
 public class NodeConnector implements Serializable {
     private static final long serialVersionUID = 1L;

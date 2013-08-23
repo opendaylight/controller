@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * bandwidth as description. It's intended in multiple of bits per
  * seconds.
  */
-@XmlRootElement
+@XmlRootElement(name="advertised-bandwidth")
 @SuppressWarnings("serial")
 public class AdvertisedBandwidth extends Bandwidth {
         public static final String AdvertisedBandwidthPropName = "advertisedBandwidth";
@@ -38,6 +38,7 @@ public class AdvertisedBandwidth extends Bandwidth {
                 this.bandwidthValue = 0;
     }
 
+        @Override
         public AdvertisedBandwidth clone() {
                 return new AdvertisedBandwidth(this.bandwidthValue);
     }

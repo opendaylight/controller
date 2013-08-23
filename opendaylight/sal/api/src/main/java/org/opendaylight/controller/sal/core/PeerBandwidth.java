@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Describes peer Bandwidth of peer element. It's intended in multiple of
  *  bits per seconds.
  */
-@XmlRootElement
+@XmlRootElement(name="peer-bandwidth")
 public class PeerBandwidth extends Bandwidth {
         private static final long serialVersionUID = 1L;
 
@@ -38,6 +38,7 @@ public class PeerBandwidth extends Bandwidth {
                 this.bandwidthValue = 0;
     }
 
+        @Override
         public PeerBandwidth clone() {
                 return new PeerBandwidth(this.bandwidthValue);
     }

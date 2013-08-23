@@ -18,11 +18,11 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 /**
  * The class contains MAC address property.
  */
-@XmlRootElement
+@XmlRootElement(name="macaddress")
 @XmlAccessorType(XmlAccessType.NONE)
 public class MacAddress extends Property implements Cloneable {
     private static final long serialVersionUID = 1L;
-    @XmlElement(name="macAddress")
+    @XmlElement(name="value")
     private final String address;
     public static final String name = "macAddress";
 

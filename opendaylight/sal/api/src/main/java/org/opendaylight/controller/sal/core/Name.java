@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @SuppressWarnings("serial")
 public class Name extends Property {
-    @XmlElement
+    @XmlElement(name="value")
     private String nameValue;
     public static final String NamePropName = "name";
 
@@ -35,6 +35,7 @@ public class Name extends Property {
         this.nameValue = name;
     }
 
+    @Override
     public Name clone() {
         return new Name(this.nameValue);
     }

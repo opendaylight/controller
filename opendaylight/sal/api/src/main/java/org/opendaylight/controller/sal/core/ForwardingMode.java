@@ -6,10 +6,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * The class represents the forwarding mode property of a node.
  */
-@XmlRootElement
+@XmlRootElement(name="forwarding-mode")
 @SuppressWarnings("serial")
 public class ForwardingMode extends Property {
-    @XmlElement
+    @XmlElement(name="value")
     private final int modeValue;
     public static final int REACTIVE_FORWARDING = 0;
     public static final int PROACTIVE_FORWARDING = 1;

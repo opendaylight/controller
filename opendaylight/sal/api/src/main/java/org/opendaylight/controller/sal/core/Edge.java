@@ -36,9 +36,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Edge implements Serializable {
     private static final long serialVersionUID = 1L;
-    @XmlElement
+    @XmlElement(name="tailnodeconnector")
     private NodeConnector tailNodeConnector;
-    @XmlElement
+    @XmlElement(name="headnodeconnector")
     private NodeConnector headNodeConnector;
 
     /**

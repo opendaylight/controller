@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @SuppressWarnings("serial")
 public class Config extends Property {
-    @XmlElement
+    @XmlElement(name="value")
     private short configValue;
 
     public static final short ADMIN_DOWN = 0;
@@ -40,6 +40,7 @@ public class Config extends Property {
         this.configValue = config;
     }
 
+    @Override
     public Config clone() {
         return new Config(this.configValue);
     }
