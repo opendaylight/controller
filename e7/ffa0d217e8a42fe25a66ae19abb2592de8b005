@@ -1,0 +1,8 @@
+Verified+1: Jenkins Controller <jenkins-controller@opendaylight.org>
+Code-Review+2: Andrew Kim <andrekim@cisco.com>
+Verified+1: Andrew Kim <andrekim@cisco.com>
+Submitted-by: Andrew Kim <andrekim@cisco.com>
+Submitted-at: Fri, 23 Aug 2013 17:43:42 +0000
+Reviewed-on: http://git.opendaylight.org/gerrit/975
+Project: controller
+Branch: refs/heads/master
