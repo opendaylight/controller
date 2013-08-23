@@ -575,6 +575,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 Tier tier = new Tier(1);
                 switchManager.setNodeProp(node, tier);
                 topologyManager.updateHostLink(p, h, UpdateType.ADDED, null);
+                // notify ArpHandler to send ARP reply to requestors if necessary
+                if(hostFinder != null)
+                    hostFinder.found(host);
             } else {
                 // No need to reset the tiering if no other hosts are currently
                 // connected

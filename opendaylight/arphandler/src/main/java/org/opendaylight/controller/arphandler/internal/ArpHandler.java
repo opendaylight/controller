@@ -246,11 +246,21 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
          * to generate the reply and send it to these hosts
          */
 
-        if (pkt.getOpCode() != ARP.REQUEST || sourceIP.equals(targetIP)) {
+        if (sourceIP.equals(targetIP)) {
             // Raise a reply event so that any waiting requestors will be sent a reply
             // the true value indicates we should generate replies to requestors across the cluster
-            log.trace("Received ARP reply packet from {}, reply to all requestors.", sourceIP);
+            log.trace("Received ARP reply packet from {}, send reply to requestors.", sourceIP);
             arpRequestReplyEvent.put(new ARPReply(sourceIP, sourceMAC), true);
+            return;
+        }
+
+        /*
+         * ARP Reply Handling:
+         */
+        if (pkt.getOpCode() != ARP.REQUEST) {
+            log.trace("Received ARP reply packet from {}.", sourceIP);
+            // hold off sending reply to requestors until controller actions completed
+            //arpRequestReplyEvent.put(new ARPReply(sourceIP, sourceMAC), true);
             return;
         }
 
@@ -440,6 +450,16 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
 
         // send a broadcast ARP Request to this IP
         arpRequestReplyEvent.put(new ARPRequest(networkAddress, subnet), false);
+    }
+
+    /*
+     * new host learned, send ARP reply to requestor if necessary
+     */
+    public void found(HostNodeConnector hostFound) {
+        log.trace("Send ARP reply packet from {} to all requestors.", hostFound.getNetworkAddress());
+        // Raise a reply event so that any waiting requestors will be sent a reply
+        // the true value indicates we should generate replies to requestors across the cluster
+        arpRequestReplyEvent.put(new ARPReply(hostFound.getNetworkAddress(), hostFound.getDataLayerAddressBytes()), true);
     }
 
     /*

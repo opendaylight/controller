@@ -30,6 +30,15 @@ public interface IHostFinder {
     public void find(InetAddress networkAddress);
 
     /**
+     * This method is called by HostTracker to indicate all actions related
+     * to newly learned host have been completed.
+     *
+     * @param hostFound
+     *            The Host that has been learned
+     */
+    public void found(HostNodeConnector hostFound);
+
+    /**
      * This method is called by HostTracker to see if a learned Host is still in
      * the network. Used mostly for ARP Aging.
      *
