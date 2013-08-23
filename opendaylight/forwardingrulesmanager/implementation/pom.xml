@@ -9,6 +9,11 @@
     <version>1.4.0-SNAPSHOT</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 
   <artifactId>forwardingrulesmanager.implementation</artifactId>
   <version>0.4.0-SNAPSHOT</version>

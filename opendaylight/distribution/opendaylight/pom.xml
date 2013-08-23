@@ -5,10 +5,10 @@
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
-
   <scm>
-    <connection>scm:git:https://git.opendaylight.org/gerrit/p/controller.git</connection>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
   </scm>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
@@ -67,6 +67,7 @@
     <module>../../../third-party/openflowj</module>
     <module>../../../third-party/net.sf.jung2</module>
     <module>../../../third-party/jersey-servlet</module>
+    <module>../../../third-party/commons/thirdparty</module>
 
     <!-- SAL bundles -->
     <module>../../sal/api</module>
@@ -109,10 +110,13 @@
     <module>../../samples/simpleforwarding</module>
     <module>../../samples/loadbalancer</module>
     <module>../../samples/northbound/loadbalancer</module>
+
+    <!-- Parents -->
     <module>../../commons/concepts</module>
     <module>../../commons/integrationtest</module>
     <module>../../commons/checkstyle</module>
     <module>../../commons/opendaylight</module>
+    <module>../../commons/parent</module>
   </modules>
 
   <build>
