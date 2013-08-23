@@ -26,6 +26,21 @@
     </repository>
   </repositories>
 
+  <profiles>
+    <profile>
+      <id>notduringrelease</id>
+      <activation>
+        <property>
+          <name>!DOINGRELEASE</name>
+        </property>
+      </activation>
+      <modules>
+        <!-- MD-SAL bundles -->
+        <module>../../sal/yang-prototype</module>
+      </modules>
+    </profile>
+  </profiles>
+
   <artifactId>distribution.opendaylight</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -79,9 +94,6 @@
     <module>../../sal/connection/implementation</module>
     <module>../../sal/networkconfiguration/api</module>
     <module>../../sal/networkconfiguration/implementation</module>
-
-    <!-- MD-SAL bundles -->
-    <module>../../sal/yang-prototype</module>
 
     <!--  Web bundles -->
     <module>../../web/root</module>

@@ -15,6 +15,11 @@
     <version>1.0.0-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 
   <properties>
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
@@ -48,6 +53,7 @@
     <yang-ext.version>2013.09.07-SNAPSHOT</yang-ext.version>
     <javassist.version>3.17.1-GA</javassist.version>
     <sample-toaster.version>1.0-SNAPSHOT</sample-toaster.version>
+    <releaseplugin.version>2.3.2</releaseplugin.version>
   </properties>
 
   <pluginRepositories>
@@ -59,6 +65,78 @@
   </pluginRepositories>
 
   <profiles>
+    <profile>
+      <id>notduringrelease</id>
+      <activation>
+        <property>
+          <name>!DOINGRELEASE</name>
+        </property>
+      </activation>
+      <dependencies>
+        <!-- yangtools -->
+
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-binding</artifactId>
+          <version>${yang.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-common</artifactId>
+          <version>${yang.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-data-api</artifactId>
+          <version>${yang.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-model-api</artifactId>
+          <version>${yang.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-data-util</artifactId>
+          <version>${yang.version}</version>
+        </dependency>
+
+        <!-- Models -->
+
+        <dependency>
+          <groupId>org.opendaylight.yangtools.model</groupId>
+          <artifactId>ietf-inet-types</artifactId>
+          <version>${ietf-inet-types.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools.model</groupId>
+          <artifactId>ietf-yang-types</artifactId>
+          <version>${ietf-yang-types.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-ext</artifactId>
+          <version>${yang-ext.version}</version>
+        </dependency>
+
+        <!-- Other MDSAL dependencies -->
+
+        <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+          <version>${guava.version}</version>
+          <type>jar</type>
+        </dependency>
+        <dependency>
+          <groupId>org.javassist</groupId>
+          <artifactId>javassist</artifactId>
+          <version>${javassist.version}</version>
+        </dependency>
+      </dependencies>
+      <properties>
+        <build.suffix>${project.version}</build.suffix>
+      </properties>
+    </profile>
     <profile>
       <id>viewbuild</id>
       <activation>
@@ -350,6 +428,11 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${releaseplugin.version}</version>
+        </plugin>
         <!-- Ignore/Execute plugin execution -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -915,66 +998,6 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
       <version>${jersey.version}</version>
-    </dependency>
-
-    <!-- yangtools -->
-
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-binding</artifactId>
-      <version>${yang.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-common</artifactId>
-      <version>${yang.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-data-api</artifactId>
-      <version>${yang.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-model-api</artifactId>
-      <version>${yang.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-data-util</artifactId>
-      <version>${yang.version}</version>
-    </dependency>
-
-    <!-- Models -->
-
-    <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
-      <artifactId>ietf-inet-types</artifactId>
-      <version>${ietf-inet-types.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
-      <artifactId>ietf-yang-types</artifactId>
-      <version>${ietf-yang-types.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-ext</artifactId>
-      <version>${yang-ext.version}</version>
-    </dependency>
-
-    <!-- Other MDSAL dependencies -->
-
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>${guava.version}</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.javassist</groupId>
-      <artifactId>javassist</artifactId>
-      <version>${javassist.version}</version>
     </dependency>
   </dependencies>
 </project>
