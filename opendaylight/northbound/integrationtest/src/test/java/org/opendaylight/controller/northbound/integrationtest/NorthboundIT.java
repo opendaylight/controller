@@ -1127,11 +1127,11 @@ public class NorthboundIT {
                 .append("dstNodeConnector",
                         nodeConnectorType_2 + "|" + nodeConnectorId_2 + "@" + nodeType_2 + "|" + nodeId_2);
         // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "/userLink", "POST", jo.toString());
+        result = getJsonResult(baseURL + "/user-link", "POST", jo.toString());
         Assert.assertTrue(httpResponseCode == 201);
 
         // === test GET method for getUserLinks()
-        result = getJsonResult(baseURL + "/userLink", "GET");
+        result = getJsonResult(baseURL + "/user-link", "GET");
         Assert.assertTrue(httpResponseCode == 200);
         if (debugMsg) {
             System.out.println("result:" + result);
@@ -1176,12 +1176,12 @@ public class NorthboundIT {
 
         // === test DELETE method for deleteUserLink()
         String userName = "userLink_1";
-        result = getJsonResult(baseURL + "/userLink/" + userName, "DELETE");
+        result = getJsonResult(baseURL + "/user-link/" + userName, "DELETE");
         Assert.assertTrue(httpResponseCode == 200);
 
         // execute another getUserLinks() request to verify that userLink_1 is
         // removed
-        result = getJsonResult(baseURL + "/userLink", "GET");
+        result = getJsonResult(baseURL + "/user-link", "GET");
         Assert.assertTrue(httpResponseCode == 200);
         if (debugMsg) {
             System.out.println("result:" + result);
