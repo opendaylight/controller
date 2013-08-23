@@ -208,7 +208,7 @@ public class Troubleshoot implements IDaylightWeb {
                 List<NodeConnectorStatistics> statistics = statisticsManager
                         .getNodeConnectorStatistics(node);
                 for (NodeConnectorStatistics stats : statistics) {
-                    cells.add(this.convertPortsStatistics(stats));
+                    cells.add(this.convertPortsStatistics(stats, containerName));
                 }
             }
         }
@@ -220,11 +220,19 @@ public class Troubleshoot implements IDaylightWeb {
     }
 
     private Map<String, String> convertPortsStatistics(
-            NodeConnectorStatistics ncStats) {
+            NodeConnectorStatistics ncStats, String containerName) {
         Map<String, String> row = new HashMap<String, String>();
 
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
+                .getInstance(ISwitchManager.class, containerName, this);
+        NodeConnector nodeConnector = ncStats.getNodeConnector();
+        Description description = (Description) switchManager.getNodeProp(nodeConnector.getNode(), Description.propertyName);
+        String desc = (description == null) ? "" : description.getValue();
+        String nodeName = desc.equalsIgnoreCase("none") ? nodeConnector.getNode().getNodeIDString() : desc;
+        String nodeConnectorDisplayName = nodeConnector.getType() + "|" + nodeConnector.getID() + "@" + nodeName;
         row.put("nodeConnector",
-                String.valueOf(ncStats.getNodeConnector().toString()));
+                String.valueOf(nodeConnectorDisplayName));
+
         row.put("rxPkts", String.valueOf(ncStats.getReceivePacketCount()));
         row.put("txPkts", String.valueOf(ncStats.getTransmitPacketCount()));
         row.put("rxBytes", String.valueOf(ncStats.getReceiveByteCount()));
