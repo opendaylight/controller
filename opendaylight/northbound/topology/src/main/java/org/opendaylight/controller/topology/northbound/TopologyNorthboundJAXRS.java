@@ -78,16 +78,31 @@ public class TopologyNorthboundJAXRS {
      * Retrieve the Topology
      *
      * @param containerName
-     *            The container for which we want to retrieve the topology
+     *            The container for which we want to retrieve the topology (Eg. 'default')
      *
      * @return A List of EdgeProps each EdgeProp represent an Edge of the grap
      *         with the corresponding properties attached to it.
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/topology/default
+     *
+     * Response in XML:
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;topology&gt;&lt;edgeProperties&gt;&lt;edge&gt;&lt;tailNodeConnector id="2" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:02" type="OF"/&gt;&lt;/tailNodeConnector&gt;&lt;headNodeConnector id="2" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:51" type="OF"/&gt;&lt;/headNodeConnector&gt;&lt;/edge&gt;&lt;properties&gt;&lt;state&gt;&lt;value&gt;1&lt;/value&gt;&lt;/state&gt;&lt;config&gt;&lt;value&gt;1&lt;/value&gt;&lt;/config&gt;&lt;name&gt;&lt;value&gt;C1_2-L2_2&lt;/value&gt;&lt;/name&gt;&lt;timeStamp&gt;&lt;value&gt;1377279422032&lt;/value&gt;&lt;name&gt;creation&lt;/name&gt;&lt;/timeStamp&gt;&lt;/properties&gt;&lt;/edgeProperties&gt;&lt;edgeProperties&gt;&lt;edge&gt;&lt;tailNodeConnector id="2" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:51" type="OF"/&gt;&lt;/tailNodeConnector&gt;&lt;headNodeConnector id="2" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:02" type="OF"/&gt;&lt;/headNodeConnector&gt;&lt;/edge&gt;&lt;properties&gt;&lt;state&gt;&lt;value&gt;1&lt;/value&gt;&lt;/state&gt;&lt;name&gt;&lt;value&gt;L2_2-C1_2&lt;/value&gt;&lt;/name&gt;&lt;config&gt;&lt;value&gt;1&lt;/value&gt;&lt;/config&gt;&lt;timeStamp&gt;&lt;value&gt;1377279423564&lt;/value&gt;&lt;name&gt;creation&lt;/name&gt;&lt;/timeStamp&gt;&lt;/properties&gt;&lt;/edgeProperties&gt;&lt;/topology&gt;
+     *
+     * Response in JSON:
+     * {"edgeProperties":[{"edge":{"tailNodeConnector":{"@id":"2","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:02","@type":"OF"}},"headNodeConnector":{"@id":"2","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:51","@type":"OF"}}},"properties":{"timeStamp":{"value":"1377278961017","name":"creation"}}},{"edge":{"tailNodeConnector":{"@id":"2","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:51","@type":"OF"}},"headNodeConnector":{"@id":"2","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:02","@type":"OF"}}},"properties":{"timeStamp":{"value":"1377278961018","name":"creation"}}}]}
+     *
+     * </pre>
      */
     @Path("/{containerName}")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Topology.class)
-    @StatusCodes({ @ResponseCode(code = 404, condition = "The Container Name passed was not found") })
+    @StatusCodes({ @ResponseCode(code = 404, condition = "The Container Name was not found") })
     public Topology getTopology(@PathParam("containerName") String containerName) {
 
         if (!NorthboundUtils.isAuthorized(
@@ -121,15 +136,30 @@ public class TopologyNorthboundJAXRS {
      * Retrieve the user configured links
      *
      * @param containerName
-     *            The container for which we want to retrieve the user links
+     *            The container for which we want to retrieve the user links (Eg. 'default')
      *
      * @return A List of user configured links
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/topology/default/user-link
+     *
+     * Response in XML:
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;topologyUserLinks&gt;&lt;userLinks&gt;&lt;status&gt;Success&lt;/status&gt;&lt;name&gt;link1&lt;/name&gt;&lt;srcNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:02&lt;/srcNodeConnector&gt;&lt;dstNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:51&lt;/dstNodeConnector&gt;&lt;/userLinks&gt;&lt;/topologyUserLinks&gt;
+     *
+     * Response in JSON:
+     * {"userLinks":{"status":"Success","name":"link1","srcNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:02","dstNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:51"}}
+     *
+     * </pre>
      */
-    @Path("/{containerName}/userLink")
+    @Path("/{containerName}/user-link")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(TopologyUserLinks.class)
-    @StatusCodes({ @ResponseCode(code = 404, condition = "The Container Name passed was not found") })
+    @StatusCodes({ @ResponseCode(code = 404, condition = "The Container Name was not found") })
     public TopologyUserLinks getUserLinks(
             @PathParam("containerName") String containerName) {
 
@@ -161,18 +191,33 @@ public class TopologyNorthboundJAXRS {
      * Add an User Link
      *
      * @param containerName
-     *            Name of the Container. The base Container is "default".
+     *            Name of the Container (Eg. 'default')
      * @param TopologyUserLinkConfig
      *            in JSON or XML format
      * @return Response as dictated by the HTTP Response Status code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/topology/default/user-link/config1-content
+     *
+     * Request in XML:
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;topologyUserLinks&gt;&lt;status&gt;Success&lt;/status&gt;&lt;name&gt;link1&lt;/name&gt;&lt;srcNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:02&lt;/srcNodeConnector&gt;&lt;dstNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:51&lt;/dstNodeConnector&gt;&lt;/topologyUserLinks&gt;
+     *
+     * Request in JSON:
+     * {"status":"Success","name":"link1","srcNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:02","dstNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:51"}
+     *
+     * </pre>
      */
-
-    @Path("/{containerName}/userLink")
+    @Path("/{containerName}/user-link")
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 201, condition = "User Link added successfully"),
-            @ResponseCode(code = 404, condition = "The Container Name passed was not found"),
+            @ResponseCode(code = 404, condition = "The Container Name was not found"),
             @ResponseCode(code = 409, condition = "Failed to add User Link due to Conflicting Name"),
             @ResponseCode(code = 500, condition = "Failed to add User Link. Failure Reason included in HTTP Error response"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
@@ -205,15 +250,24 @@ public class TopologyNorthboundJAXRS {
      * Delete an User Link
      *
      * @param containerName
-     *            Name of the Container. The base Container is "default".
+     *            Name of the Container (Eg. 'default')
      * @param name
-     *            Name of the Link Configuration
+     *            Name of the Link Configuration (Eg. 'config1')
      * @return Response as dictated by the HTTP Response Status code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/topology/default/user-link/config1
+     *
+     * </pre>
      */
-
-    @Path("/{containerName}/userLink/{name}")
+    @Path("/{containerName}/user-link/{name}")
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 404, condition = "The Container Name or Link Configuration Name was not found"),
@@ -242,5 +296,4 @@ public class TopologyNorthboundJAXRS {
         }
         throw new ResourceNotFoundException(ret.getDescription());
     }
-
 }
