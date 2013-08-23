@@ -16,6 +16,24 @@
       "revId": "9c64d2ce6a07250ed0bf832658e20ea6d2110c97",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFH///2I\u003d",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/configuration/logback.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 396
+      },
+      "writtenOn": "2013-08-23T02:22:12Z",
+      "side": 1,
+      "message": "Thank you for the comment. I think we should add one for org.opendaylight.controller. So I will submit a new patch which follows your suggestion.",
+      "parentUuid": "AAAAFH///3k\u003d",
+      "revId": "9c64d2ce6a07250ed0bf832658e20ea6d2110c97",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
