@@ -48,7 +48,8 @@ one.f.address = {
         main : "/main",
         flows : "/node-flows",
         nodes : "/node-ports",
-        flow : "/flow"
+        flow : "/flow",
+        deleteFlows:"/flow/deleteFlows"
     }
 }
 
@@ -251,9 +252,11 @@ one.f.flows = {
     id : {
         dashlet : {
             add : "one_f_flows_id_dashlet_add",
+            removeMultiple : "one_f_flows_id_dashlet_removeMultiple",
             remove : "one_f_flows_id_dashlet_remove",
             toggle : "one_f_flows_id_dashlet_toggle",
-            datagrid: "one_f_flows_id_dashlet_datagrid"
+            datagrid : "one_f_flows_id_dashlet_datagrid",
+            selectAllFlows : "one_f_flows_id_dashlet_selectAllFlows"
         },
         modal : {
             install : "one_f_flows_id_modal_install",
@@ -327,6 +330,36 @@ one.f.flows = {
                     $modal.modal();
                 });
                 $dashlet.append($button);
+                var button = one.lib.dashlet.button.single("Remove Flow Entry", one.f.flows.id.dashlet.removeMultiple, "btn-primary", "btn-mini");
+                var $button = one.lib.dashlet.button.button(button);
+
+                $button.click(function() {
+                    var checkedCheckBoxes = $('.flowEntry[type=checkbox]:checked');
+                    
+                    var requestData = [];
+                    
+                    var resource = {};
+                    checkedCheckBoxes.each(function(index, value) {
+                        var flowEntry = {};
+                        flowEntry['name'] = checkedCheckBoxes[index].name;
+                        flowEntry['node'] = checkedCheckBoxes[index].getAttribute("node");
+                        requestData.push(flowEntry);  
+                    });
+                    resource['body'] = JSON.stringify(requestData);
+
+                    $.post(one.f.address.root+one.f.address.flows.deleteFlows, resource, function(response) {
+                        if(response == "Success") {
+                            one.lib.alert("Flow(s) successfully removed");                            
+                        } else {
+                            one.lib.alert(response);
+                        }
+                        one.main.dashlet.right.bottom.empty();
+                        one.f.detail.dashlet(one.main.dashlet.right.bottom);
+                        one.main.dashlet.left.top.empty();
+                        one.f.flows.dashlet(one.main.dashlet.left.top);
+                    });                    
+                });
+                $dashlet.append($button);
 
             }
 
@@ -339,7 +372,12 @@ one.f.flows = {
             $dashlet.append($gridHTML);
             var dataSource = one.f.flows.data.flowsDataGrid(data);
             $("#" + one.f.flows.id.dashlet.datagrid).datagrid({dataSource: dataSource}).on("loaded", function() {
-                $("#" + one.f.flows.id.dashlet.datagrid).find("tbody tr").each(function(index, tr) {
+                    $("#"+one.f.flows.id.dashlet.datagrid.selectAllFlows).click(function() {
+                                $("#" + one.f.flows.id.dashlet.datagrid).find(':checkbox').prop('checked',
+                                        $("#"+one.f.flows.id.dashlet.datagrid.selectAllFlows).is(':checked'));
+                    });
+                    
+                    $("#" + one.f.flows.id.dashlet.datagrid).find("tbody tr").each(function(index, tr) {
                     $tr = $(tr);
                     $span = $("td span", $tr);
                     var flowstatus = $span.data("flowstatus");
@@ -357,10 +395,22 @@ one.f.flows = {
                     });
                     // attach click event
                     $tr.click(function() {
-                        var $td = $($(this).find("td")[0]);
+                        var $td = $($(this).find("td")[1]);
                         var id = $td.text();
                         var node = $td.find("span").data("nodeid");
-                        one.f.flows.detail(id, node);   
+                        one.f.flows.detail(id, node);
+                    });
+                    $(".flowEntry").click(function(){
+                                if (!$('.flowEntry[type=checkbox]:not(:checked)').length) {
+                            $("#"+one.f.flows.id.dashlet.datagrid.selectAllFlows)
+                                .prop("checked",
+                              true);
+                        } else {
+                            $("#"+one.f.flows.id.dashlet.datagrid.selectAllFlows)
+                                .prop("checked",
+                             false);
+                        }
+                        event.stopPropagation();
                     });
                 });
             });
@@ -1194,6 +1244,11 @@ one.f.flows = {
             var source = new StaticDataSource({
                     columns: [
                         {
+                            property: 'selector',
+                            label: "<input type='checkbox' id='"+one.f.flows.id.dashlet.datagrid.selectAllFlows+"'/>",
+                            sortable: false
+                        },
+                        {
                             property: 'name',
                             label: 'Flow Name',
                             sortable: true
@@ -1207,7 +1262,13 @@ one.f.flows = {
                     data: data.flows,
                     formatter: function(items) {
                         $.each(items, function(index, item) {
-                            item["name"] = '<span data-installInHw=' + item["flow"]["installInHw"] + 
+                                    var $checkbox = document.createElement("input");
+                            $checkbox.setAttribute("type", "checkbox");
+                            $checkbox.setAttribute("name", item.name);
+                            $checkbox.setAttribute("node", item.node);
+                            $checkbox.setAttribute('class','flowEntry')
+                            item.selector = $checkbox.outerHTML;
+                                  item["name"] = '<span data-installInHw=' + item["flow"]["installInHw"] + 
                                 ' data-flowstatus=' + item["flow"]["status"] + 
                                 ' data-nodeId=' + item["nodeId"] + '>' + item["name"] + '</span>';
                         });
@@ -1222,6 +1283,8 @@ one.f.flows = {
             $(data).each(function(index, value) {
                 var tr = {};
                 var entry = [];
+
+                
                 entry.push(value['name']);
                 entry.push(value['node']);
                 if (value['flow']['installInHw'] == 'true' && value['flow']['status'] == 'Success')
@@ -1244,12 +1307,12 @@ one.f.flows = {
             var $table = one.lib.dashlet.table.table(attributes);
 
             var headers = ['Flow Name', 'Node'];
+                
             var $thead = one.lib.dashlet.table.header(headers);
             $table.append($thead);
 
             var $tbody = one.lib.dashlet.table.body(body);
             $table.append($tbody);
-
             return $table;
         }
     }
