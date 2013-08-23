@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.flows.web;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -77,13 +78,16 @@ public class Flows implements IDaylightWeb {
 
     @RequestMapping(value = "/main")
     @ResponseBody
-    public Map<String, Object> getFlows(HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+    public Map<String, Object> getFlows(HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
 
         // Derive the privilege this user has on the current container
         String userName = request.getUserPrincipal().getName();
-        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName, containerName, this);
-        if (privilege  == Privilege.NONE) {
+        Privilege privilege = DaylightWebUtil.getContainerPrivilege(userName,
+                containerName, this);
+        if (privilege == Privilege.NONE) {
             return null;
         }
 
@@ -114,7 +118,7 @@ public class Flows implements IDaylightWeb {
             flowSet.add(entry);
         }
 
-        Map <String, Object> output = new HashMap<String, Object>(2);
+        Map<String, Object> output = new HashMap<String, Object>(2);
         output.put("flows", flowSet);
         output.put("privilege", privilege);
         return output;
@@ -122,12 +126,15 @@ public class Flows implements IDaylightWeb {
 
     @RequestMapping(value = "/node-ports")
     @ResponseBody
-    public Map<String, Object> getNodePorts(HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+    public Map<String, Object> getNodePorts(HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
 
         // Derive the privilege this user has on the current container
         String userName = request.getUserPrincipal().getName();
-        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) == Privilege.NONE) {
+        if (DaylightWebUtil
+                .getContainerPrivilege(userName, containerName, this) == Privilege.NONE) {
             return null;
         }
 
@@ -171,12 +178,15 @@ public class Flows implements IDaylightWeb {
 
     @RequestMapping(value = "/node-flows")
     @ResponseBody
-    public Map<String, Object> getNodeFlows(HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+    public Map<String, Object> getNodeFlows(HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
 
         // Derive the privilege this user has on the current container
         String userName = request.getUserPrincipal().getName();
-        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) == Privilege.NONE) {
+        if (DaylightWebUtil
+                .getContainerPrivilege(userName, containerName, this) == Privilege.NONE) {
             return null;
         }
 
@@ -199,10 +209,12 @@ public class Flows implements IDaylightWeb {
             List<FlowConfig> flows = frm.getStaticFlows(node);
 
             String nodeDesc = node.toString();
-            SwitchConfig config = switchManager.getSwitchConfig(node
-                    .toString());
-            if ((config != null) && (config.getProperty(Description.propertyName) != null)) {
-                nodeDesc = ((Description) config.getProperty(Description.propertyName)).getValue();
+            SwitchConfig config = switchManager
+                    .getSwitchConfig(node.toString());
+            if ((config != null)
+                    && (config.getProperty(Description.propertyName) != null)) {
+                nodeDesc = ((Description) config
+                        .getProperty(Description.propertyName)).getValue();
             }
 
             nodes.put(nodeDesc, flows.size());
@@ -216,12 +228,15 @@ public class Flows implements IDaylightWeb {
     public String actionFlow(@RequestParam(required = true) String action,
             @RequestParam(required = false) String body,
             @RequestParam(required = true) String nodeId,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
 
         // Authorization check
         String userName = request.getUserPrincipal().getName();
-        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
+        if (DaylightWebUtil
+                .getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return "Operation not authorized";
         }
 
@@ -238,7 +253,8 @@ public class Flows implements IDaylightWeb {
         Status result = new Status(StatusCode.BADREQUEST, "Invalid request");
         if (action.equals("add")) {
             result = frm.addStaticFlow(flow);
-            DaylightWebUtil.auditlog("Flow", userName, "added", flow.getName(), containerName);
+            DaylightWebUtil.auditlog("Flow", userName, "added", flow.getName(),
+                    containerName);
         }
 
         return (result.isSuccess()) ? StatusCode.SUCCESS.toString() : result
@@ -250,12 +266,15 @@ public class Flows implements IDaylightWeb {
     public String removeFlow(@PathVariable("nodeId") String nodeId,
             @PathVariable("name") String name,
             @RequestParam(required = true) String action,
-            HttpServletRequest request, @RequestParam(required = false) String container) {
-        String containerName = (container == null) ? GlobalConstants.DEFAULT.toString() : container;
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
 
         // Authorization check
         String userName = request.getUserPrincipal().getName();
-        if (DaylightWebUtil.getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
+        if (DaylightWebUtil
+                .getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
             return "Operation not authorized";
         }
 
@@ -272,13 +291,15 @@ public class Flows implements IDaylightWeb {
         }
         if (action.equals("remove")) {
             result = frm.removeStaticFlow(name, node);
-            if(result.isSuccess()) {
-                DaylightWebUtil.auditlog("Flow", userName, "removed", name, containerName);
+            if (result.isSuccess()) {
+                DaylightWebUtil.auditlog("Flow", userName, "removed", name,
+                        containerName);
             }
         } else if (action.equals("toggle")) {
             result = frm.toggleStaticFlowStatus(name, node);
-            if(result.isSuccess()) {
-                DaylightWebUtil.auditlog("Flow", userName, "toggled", name, containerName);
+            if (result.isSuccess()) {
+                DaylightWebUtil.auditlog("Flow", userName, "toggled", name,
+                        containerName);
             }
         } else {
             result = new Status(StatusCode.BADREQUEST, "Unknown action");
@@ -288,10 +309,58 @@ public class Flows implements IDaylightWeb {
                 .getDescription();
     }
 
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/flow/deleteFlows", method = RequestMethod.POST)
+    @ResponseBody
+    public String removeSelectedFlows(
+            @RequestParam(required = false) String body,
+            HttpServletRequest request,
+            @RequestParam(required = false) String container) {
+        String containerName = (container == null) ? GlobalConstants.DEFAULT
+                .toString() : container;
+
+        // Authorization check
+        String userName = request.getUserPrincipal().getName();
+        if (DaylightWebUtil
+                .getContainerPrivilege(userName, containerName, this) != Privilege.WRITE) {
+            return "Operation not authorized";
+        }
+
+        IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper
+                .getInstance(IForwardingRulesManager.class, containerName, this);
+        if (frm == null) {
+            return "Forwarding Rules Manager is not available";
+        }
+
+        Gson gson = new Gson();
+        List<Map<String, String>> flowList = new ArrayList<Map<String, String>>();
+        flowList = gson.fromJson(body, flowList.getClass());
+        Status result = new Status(StatusCode.BADREQUEST, "Invalid request");
+        String status = "";
+        for (Map<String, String> flowEntry : flowList) {
+            Node node = Node.fromString(flowEntry.get("node"));
+            result = frm.removeStaticFlow(flowEntry.get("name"), node);
+            if (result.isSuccess()) {
+                DaylightWebUtil.auditlog("Flow", userName, "removed",
+                        flowEntry.get("name"), containerName);
+            } else {
+                status = flowEntry.get("name") + ", " + status;
+            }
+        }
+        if (!status.equals("")) {
+            return "Could not remove "
+                    + status.substring(0, status.length() - 2) + " Flow(s)";
+        } else {
+            return "Success";
+        }
+    }
+
     private String getNodeDesc(Node node, ISwitchManager switchManager) {
-        Description desc = (Description) switchManager.getNodeProp(node, Description.propertyName);
+        Description desc = (Description) switchManager.getNodeProp(node,
+                Description.propertyName);
         String description = (desc == null) ? "" : desc.getValue();
-        return (description.isEmpty() || description.equalsIgnoreCase("none")) ? node.toString() : description;
+        return (description.isEmpty() || description.equalsIgnoreCase("none")) ? node
+                .toString() : description;
     }
 
 }
