@@ -287,12 +287,13 @@ public class Match implements Cloneable, Serializable {
      * The result is the match object representing the intersection of the set
      * of packets described by this match with the set of packets described by
      * the filter match. If the intersection of the two sets is empty, the
-     * return match will be empty as well.
+     * return match will be null.
      *
      * @param filter
      *            the match with which attempting the merge
      * @return a new Match object describing the set of packets represented by
-     *         the intersection of this and the filter matches.
+     *         the intersection of this and the filter matches. null if the
+     *         intersection is empty.
      */
     public Match mergeWithFilter(Match filter) {
         return this.getIntersection(filter);
@@ -301,55 +302,70 @@ public class Match implements Cloneable, Serializable {
     /**
      * Return the match representing the intersection of the set of packets
      * described by this match with the set of packets described by the other
-     * match. Such as m.intersect(m) == m and m.intersect(o) == o where o is an
-     * empty match.
+     * match. Such as m.getIntersection(m) == m, m.getIntersection(u) == m and
+     * m.getIntersection(o) == o where u is an empty match (universal set, all
+     * packets) and o is the null match (empty set).
      *
      * @param other
      *            the match with which computing the intersection
      * @return a new Match object representing the intersection of the set of
      *         packets described by this match with the set of packets described
-     *         by the other match.
+     *         by the other match. null when the intersection is the empty set.
      */
     public Match getIntersection(Match other) {
+        // If no intersection, return the empty set
+        if (!this.intersetcs(other)) {
+            return null;
+        }
+        // Check if any of the two is the universal match
+        if (this.getMatches() == 0) {
+            return other.clone();
+        }
+        if (other.getMatches() == 0) {
+            return this.clone();
+        }
+        // Derive the intersection
         Match intersection = new Match();
-        if (this.intersetcs(other)) {
-            for (MatchType type : MatchType.values()) {
-                if (this.isAny(type) && other.isAny(type)) {
-                    continue;
-                }
-                if (this.isAny(type)) {
-                    intersection.setField(other.getField(type).clone());
-                    continue;
-                } else if (other.isAny(type)) {
-                    intersection.setField(this.getField(type).clone());
-                    continue;
-                }
-                // Either they are equal or it is about IP address
-                switch (type) {
-                // When it is about IP address, take the wider prefix address between the twos
-                case NW_SRC:
-                case NW_DST:
-                    MatchField thisField = this.getField(type);
-                    MatchField otherField = other.getField(type);
-                    InetAddress thisAddress = (InetAddress) thisField.getValue();
-                    InetAddress otherAddress = (InetAddress) otherField.getValue();
-                    InetAddress thisMask = (InetAddress) thisField.getMask();
-                    InetAddress otherMask = (InetAddress) otherField.getMask();
+        for (MatchType type : MatchType.values()) {
+            if (this.isAny(type) && other.isAny(type)) {
+                continue;
+            }
+            if (this.isAny(type)) {
+                intersection.setField(other.getField(type).clone());
+                continue;
+            } else if (other.isAny(type)) {
+                intersection.setField(this.getField(type).clone());
+                continue;
+            }
+            // Either they are equal or it is about IP address
+            switch (type) {
+            // When it is about IP address, take the wider prefix address
+            // between the twos
+            case NW_SRC:
+            case NW_DST:
+                MatchField thisField = this.getField(type);
+                MatchField otherField = other.getField(type);
+                InetAddress thisAddress = (InetAddress) thisField.getValue();
+                InetAddress otherAddress = (InetAddress) otherField.getValue();
+                InetAddress thisMask = (InetAddress) thisField.getMask();
+                InetAddress otherMask = (InetAddress) otherField.getMask();
 
-                    int thisMaskLen = (thisMask == null) ? ((thisAddress instanceof Inet4Address) ? 32 : 128)
-                            : NetUtils.getSubnetMaskLength(thisMask);
-                    int otherMaskLen = (otherMask == null) ? ((otherAddress instanceof Inet4Address) ? 32 : 128)
-                            : NetUtils.getSubnetMaskLength(otherMask);
-                    if (otherMaskLen < thisMaskLen) {
-                        intersection.setField(new MatchField(type, NetUtils.getSubnetPrefix(otherAddress, otherMaskLen), otherMask));
-                    } else {
-                        intersection.setField(new MatchField(type, NetUtils.getSubnetPrefix(thisAddress, thisMaskLen), thisMask));
-                    }
-                    break;
-                default:
-                    // this and other match field are equal for this type, pick this match field
-                    intersection.setField(this.getField(type).clone());
+                int thisMaskLen = (thisMask == null) ? ((thisAddress instanceof Inet4Address) ? 32 : 128) : NetUtils
+                        .getSubnetMaskLength(thisMask);
+                int otherMaskLen = (otherMask == null) ? ((otherAddress instanceof Inet4Address) ? 32 : 128) : NetUtils
+                        .getSubnetMaskLength(otherMask);
+                if (otherMaskLen < thisMaskLen) {
+                    intersection.setField(new MatchField(type, NetUtils.getSubnetPrefix(otherAddress, otherMaskLen),
+                            otherMask));
+                } else {
+                    intersection.setField(new MatchField(type, NetUtils.getSubnetPrefix(thisAddress, thisMaskLen),
+                            thisMask));
                 }
+                break;
+            default:
+                // this and other match field are equal for this type, pick this
+                // match field
+                intersection.setField(this.getField(type).clone());
             }
         }
         return intersection;
@@ -372,9 +388,13 @@ public class Match implements Cloneable, Serializable {
      *         is non empty
      */
     public boolean intersetcs(Match other) {
-        if (this.getMatches() == 0 || other.getMatches() == 0) {
-            // No intersection with the empty set
+        // No intersection with the empty set
+        if (other == null) {
             return false;
+        }
+        // Always intersection with the universal set
+        if (this.getMatches() == 0 || other.getMatches() == 0) {
+            return true;
         }
         // Iterate through the MatchType defined in the filter
         for (MatchType type : MatchType.values()) {

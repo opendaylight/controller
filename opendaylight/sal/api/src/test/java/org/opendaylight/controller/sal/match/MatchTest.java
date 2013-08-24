@@ -565,8 +565,9 @@ public class MatchTest {
         Assert.assertTrue(((InetAddress)i.getField(MatchType.NW_SRC).getValue()).equals(ip2));
         Assert.assertTrue(((InetAddress)i.getField(MatchType.NW_SRC).getMask()).equals(ipm2));
 
+        // Empty set
         i = m2.getIntersection(m3);
-        Assert.assertTrue(i.getMatches() == 0);
+        Assert.assertNull(i);
 
         Match m4 = new Match();
         m4.setField(MatchType.DL_TYPE, ethType);
@@ -608,9 +609,12 @@ public class MatchTest {
         Assert.assertTrue(m6.intersetcs(m6));
         Assert.assertTrue(m6.getIntersection(m6).equals(m6));
 
-        // Empty match, represents the empty set
-        Match o = new Match();
-        Assert.assertTrue(m6.getIntersection(o).equals(o));
-        Assert.assertTrue(o.getIntersection(m6).equals(o));
+        // Empty match, represents the universal set (all packets)
+        Match u = new Match();
+        Assert.assertTrue(m6.getIntersection(u).equals(m6));
+        Assert.assertTrue(u.getIntersection(m6).equals(m6));
+
+        // No intersection with null match, empty set
+        Assert.assertNull(m6.getIntersection(null));
     }
 }

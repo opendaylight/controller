@@ -168,14 +168,13 @@ public class FlowEntry implements Cloneable, Serializable {
     public FlowEntry mergeWith(ContainerFlow containerFlow) {
         Match myMatch = flow.getMatch();
 
-        // Based on this flow direction, rearrange the match
-        Match match = containerFlow.getMatch();
+        Match filter = containerFlow.getMatch();
 
         // Merge
-        myMatch.mergeWithFilter(match);
+        Match merge = myMatch.mergeWithFilter(filter);
 
         // Replace this Flow's match with merged version
-        flow.setMatch(myMatch);
+        flow.setMatch(merge);
 
         return this;
     }
