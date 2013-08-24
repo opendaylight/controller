@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn////8\u003d",
+        "filename": "opendaylight/connectionmanager/implementation/src/main/java/org/opendaylight/controller/connectionmanager/internal/ConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-24T18:48:54Z",
+      "side": 1,
+      "message": "hmm. This is ideally not required.\nThe above call to notifyClusterViewChanged should have triggered the protocol plugin to retrigger the node updates towards the connection manager.\nMaybe the Stub plugin has not implemented that and hence it is failing only in the Stub plugin.\n\nTo me, the correct fix is to let the stub plugin implement the above notification and handle it appropriately. That way, if the\nconnection manager is not happy with a given connection, it has a chance to say it so. \n\nWith the getInventories call, there is a possibility that the connection manager assumes it rejected a connection, while the plugin has a different assumption.\nTo make it robust, the getInventories, in addition to calling updateNode(), must also call the disconnectNode of the plugin if the connection Manager has rejected the connection.",
+      "revId": "4b8ee62fd8f0fd6fb9b1ffed543e08e989b543e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
