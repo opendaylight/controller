@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.felix.dm.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Buffers;
@@ -29,7 +29,9 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.Tables;
 import org.opendaylight.controller.sal.core.TimeStamp;
+import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
+import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 
@@ -55,6 +57,22 @@ public class InventoryService implements IPluginInInventoryService {
                                                                                     // global
                                                                                     // container
                                                                                     // only
+    private final Set<IPluginOutInventoryService> pluginOutInventoryServices =
+            new CopyOnWriteArraySet<IPluginOutInventoryService>();
+
+    public void setPluginOutInventoryServices(IPluginOutInventoryService service) {
+        logger.trace("Got a service set request {}", service);
+        if (this.pluginOutInventoryServices != null) {
+            this.pluginOutInventoryServices.add(service);
+        }
+    }
+
+    public void unsetPluginOutInventoryServices(IPluginOutInventoryService service) {
+        logger.trace("Got a service UNset request");
+        if (this.pluginOutInventoryServices != null) {
+            this.pluginOutInventoryServices.remove(service);
+        }
+    }
 
     /**
      * Function called by the dependency manager when all the required
@@ -174,12 +192,36 @@ public class InventoryService implements IPluginInInventoryService {
     }
 
     /**
+     * Method called when the plugin has exposed it's services, this will be
+     * used to publish the updates so connection manager can think the
+     * connection is local
+     */
+    void started() {
+        // update sal and discovery
+        for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+            for (Node node : nodeProps.keySet()) {
+                Set<Property> props = new HashSet<Property>(nodeProps.get(node)
+                        .values());
+                service.updateNode(node, UpdateType.ADDED, props);
+                logger.trace("Adding Node {} with props {}", node, props);
+            }
+            for (NodeConnector nc : nodeConnectorProps.keySet()) {
+                Set<Property> props = new HashSet<Property>(nodeConnectorProps.get(nc)
+                        .values());
+                service.updateNodeConnector(nc, UpdateType.ADDED, props);
+                logger.trace("Adding NodeConnectors {} with props {}", nc, props);
+            }
+        }
+    }
+
+    /**
      * Function called by the dependency manager before the services exported by
      * the component are unregistered, this will be followed by a "destroy ()"
      * calls
      *
      */
     void stop() {
+        pluginOutInventoryServices.clear();
     }
 
     /**
