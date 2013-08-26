@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
@@ -16,7 +15,7 @@ package org.opendaylight.controller.protocol_plugin.openflow;
  *                      to be fetched from the plugin
  *
  * For example, an application that has been started late, will want to
- * be up to date with the latest topology.  Hence, it requests for a
+ * be up to date with the latest topology. Hence, it requests for a
  * topology refresh from the plugin.
  */
 
@@ -29,6 +28,7 @@ public interface IRefreshInternalProvider {
 
     /**
      * @param containerName
+     *            Name of the container for the topology
      */
     public void requestRefresh(String containerName);
 }
