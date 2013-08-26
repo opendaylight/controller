@@ -47,13 +47,15 @@ public interface IResourceAuthorization {
     public List<String> getRoles();
 
     /**
-     * Returns the application role level for the specified role
-     * If the role is not known to this application <code>NOUSER<code>
-     * will be returned as specified in {@link AppRoleLevel}
+     * Returns the application role level for the specified role. If the role is
+     * not known to this application NOUSER will be returned as specified in
+     * {@link AppRoleLevel}
      *
-     * @param roleName the role name to query
-     * @return the application level of the given role in the application context as specified by {@link AppRoleLevel}
-     *                  if the role is not part of this application's roles, <code>NOUSER<code> is returned
+     * @param roleName
+     *            the role name to query
+     * @return the application level of the given role in the application
+     *         context as specified by {@link AppRoleLevel}. If the role is not
+     *         part of this application's roles, NOUSER is returned.
      */
     public AppRoleLevel getApplicationRoleLevel(String roleName);
 
@@ -114,18 +116,18 @@ public interface IResourceAuthorization {
     /**
      * Unassign the passed resource group from the specified role
      *
-     * @param group
-     * @param role
+     * @param groupName the name of the resource group
+     * @param role the role name
      * @return the status of the request
      */
-    public Status unassignResourceGroupFromRole(String group, String role);
+    public Status unassignResourceGroupFromRole(String groupName, String role);
 
     /**
      * Returns the list of resource groups the given Role is authorized to use
      * The returning object expresses the resource group name and the access
      * its privilege for the given user role
      *
-     * @param role
+     * @param role  the role name
      * @return list of resources
      */
     public List<ResourceGroup> getAuthorizedGroups(String role);
@@ -141,7 +143,7 @@ public interface IResourceAuthorization {
     /**
      * Returns the list of authorized resources for the given role
      * For each resource only the highest privilege occurrence is returned
-     * @param role
+     * @param role  the role name
      * @return the list of Resource
      */
     public List<Resource> getAuthorizedResources(String role);
@@ -179,8 +181,8 @@ public interface IResourceAuthorization {
      * Returns the highest privilege that the user has on the specified
      * resource in this application context
      *
-     * @param userName
-     * @param resource
+     * @param userName the user name
+     * @param resource the given resource
      * @return the privilege the user has on the passed resource
      */
     public Privilege getResourcePrivilege(String userName, Object resource);

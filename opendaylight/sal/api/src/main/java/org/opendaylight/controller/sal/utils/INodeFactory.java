@@ -12,9 +12,7 @@ package org.opendaylight.controller.sal.utils;
 import org.opendaylight.controller.sal.core.Node;
 
 /**
- * @file   INodeFactory.java
- *
- * @brief  Define the interface to be called when looking up custom node types
+ * This interface defines the methods to be called when looking up custom node types
  *
  */
 
@@ -22,6 +20,14 @@ public interface INodeFactory {
     /**
      * Method to get custom node types from protocol plugins
      *
+     * @param nodeType
+     *            {@Link org.opendaylight.controller.sal.core.Node} type
+     *            string
+     * @param nodeId
+     *            {@Link org.opendaylight.controller.sal.core.Node} ID
+     *            string
+     * @return the custom {@Link
+     *         org.opendaylight.controller.sal.core.Node}
      */
     public Node fromString(String nodeType, String nodeId);
 }

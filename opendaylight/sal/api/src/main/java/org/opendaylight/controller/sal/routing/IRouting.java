@@ -17,32 +17,48 @@ import org.opendaylight.controller.sal.core.Path;
 
 /**
  * This interface provides APIs to manage and query the routing information
-  *
+ *
  */
 public interface IRouting {
 
     /**
      * Returns a Path leading from the source to the destination
-     * @param src: source Node
-     * @param dst: destination Node
-     * @return: Path
+     *
+     * @param src
+     *            source {@link org.opendaylight.controller.sal.core.Node}
+     *
+     * @param dst
+     *            destination
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @return: the {@link org.opendaylight.controller.sal.core.Path}
      */
     public Path getRoute(Node src, Node dst);
 
     /**
      * Returns a Max ThroughPut Path leading from the source to the destination
-     * @param src: source Node
-     * @param dst: destination Node
-     * @return: MTPath
+     *
+     * @param src
+     *            source {@link org.opendaylight.controller.sal.core.Node}
+     *
+     * @param dst
+     *            destination
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @return: the max throughput {@link org.opendaylight.controller.sal.core.Path}
      */
     public Path getMaxThroughputRoute(Node src, Node dst);
 
     /**
-     * Returns a Path leading from the source to the destination that meets the specified bandwidth
-     * @param src: source Node
-     * @param dst: destination Node
-     * @param Bw: bandwidth
-     * @return: Path
+     * Returns a Path leading from the source to the destination that meets the
+     * specified bandwidth
+     *
+     * @param src
+     *            source {@link org.opendaylight.controller.sal.core.Node}
+     *
+     * @param dst
+     *            destination {@link org.opendaylight.controller.sal.core.Node}
+     * @param Bw
+     *            the bandwidth
+     * @return: the {@link org.opendaylight.controller.sal.core.Path}
      */
     public Path getRoute(Node src, Node dst, Short Bw);
 
@@ -58,9 +74,12 @@ public interface IRouting {
 
     /**
      * Initialization For Max Throughput
-     * @param EdgeWeightMap: Map containing Edge and Corresponding
-     * Weight. Optional Param - if null, implementation specific weight
-     * calculation will be used.
+     *
+     * @param EdgeWeightMap
+     *            Map containing
+     *            {@link org.opendaylight.controller.sal.core.Edge} and
+     *            Corresponding Weight. Optional Param - if null, implementation
+     *            specific weight calculation will be used.
      */
     public void initMaxThroughput(Map<Edge, Number> EdgeWeightMap);
 

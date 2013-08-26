@@ -119,6 +119,8 @@ public interface ISwitch {
      *
      * @param msg
      *            The OF message to be sent
+     * @param xid
+     *            The XID to be used in the message
      * @return The XID used
      */
     public Integer asyncFastSend(OFMessage msg, int xid);
@@ -175,6 +177,7 @@ public interface ISwitch {
      * Returns True if the port is enabled,
      *
      * @param portNumber
+     *            the port ID
      * @return True if the port is enabled
      */
     public boolean isPortEnabled(short portNumber);
@@ -183,6 +186,7 @@ public interface ISwitch {
      * Returns True if the port is enabled.
      *
      * @param port
+     *            the OpenFlow port
      * @return True if the port is enabled
      */
     public boolean isPortEnabled(OFPhysicalPort port);
@@ -220,12 +224,12 @@ public interface ISwitch {
      * Send Barrier message synchronously. The caller will be blocked until the
      * Barrier reply arrives.
      */
-    Object syncSendBarrierMessage();
+    public Object syncSendBarrierMessage();
 
     /**
      * Send Barrier message asynchronously. The caller is not blocked. The
      * Barrier message will be sent in a transmit thread which will be blocked
      * until the Barrier reply arrives.
      */
-    Object asyncSendBarrierMessage();
+    public Object asyncSendBarrierMessage();
 }
