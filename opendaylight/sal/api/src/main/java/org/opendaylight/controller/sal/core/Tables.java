@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Tables extends Property {
         private static final long serialVersionUID = 1L;
-    @XmlElement
+    @XmlElement(name="value")
     private byte tablesValue;
 
     public static final String TablesPropName = "tables";
@@ -45,6 +45,7 @@ public class Tables extends Property {
         this.tablesValue = 0;
     }
 
+    @Override
     public Tables clone() {
         return new Tables(this.tablesValue);
     }

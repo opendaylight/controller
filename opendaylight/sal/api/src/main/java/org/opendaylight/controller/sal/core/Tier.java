@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @SuppressWarnings("serial")
 public class Tier extends Property {
-    @XmlElement
+    @XmlElement(name="value")
     private int tierValue;
     public static final String TierPropName = "tier";
 
@@ -37,6 +37,7 @@ public class Tier extends Property {
         this.tierValue = 0;
     }
 
+    @Override
     public Tier clone() {
         return new Tier(this.tierValue);
     }
