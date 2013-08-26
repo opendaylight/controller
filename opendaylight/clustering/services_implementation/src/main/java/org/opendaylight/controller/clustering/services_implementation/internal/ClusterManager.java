@@ -227,7 +227,8 @@ public class ClusterManager implements IClusterServices, IContainerAware {
         if (amIGossipRouter) {
             logger.info("I'm a GossipRouter will listen on port {}",
                     gossipRouterPort);
-            res = new GossipRouter(gossipRouterPort);
+            // Start a GossipRouter with JMX support
+            res = new GossipRouter(gossipRouterPort, null, true);
         }
         return res;
     }
