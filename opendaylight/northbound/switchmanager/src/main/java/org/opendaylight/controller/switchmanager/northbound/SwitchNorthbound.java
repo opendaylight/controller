@@ -107,11 +107,56 @@ public class SwitchNorthbound {
      * Retrieve a list of all the nodes and their properties in the network
      *
      * @param containerName
-     *            The container for which we want to retrieve the list
+     *            Name of the Container (Eg. 'default')
      * @return A list of Pair each pair represents a
      *         {@link org.opendaylight.controller.sal.core.Node} and Set of
      *         {@link org.opendaylight.controller.sal.core.Property} attached to
      *         it.
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://.../default/nodes
+     *
+     * Response in XML:
+     * &lt;list&gt;
+     *     &#x20;&#x20;&#x20;&lt;nodeProperties&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node type="OF" id="00:00:00:00:00:00:00:02"/&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;properties&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;tables&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;-1&lt;/value&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/tables&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;description&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;Switch2&lt;/value&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/description&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;actions&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;4095&lt;/value&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/actions&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;macAddress&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;00:00:00:00:00:02&lt;/value&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/macAddress&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;capabilities&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;199&lt;/value&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/capabilities&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;timeStamp&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;1377291227877&lt;/value&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;connectedSince&lt;/name&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/timeStamp&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;buffers&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;256&lt;/value&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/buffers&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/properties&gt;
+     *     &#x20;&#x20;&#x20;&lt;/nodeProperties&gt;
+     * &lt;/list&gt;
+     *
+     * Response in JSON:
+     * {"nodeProperties":[{"node":{"@type":"OF","@id":"00:00:00:00:00:00:00:02"},"properties":{"tables":{"value":"-1"},
+     * "description":{"value":"None"},"actions":{"value":"4095"},"macAddress":{"value":"00:00:00:00:00:02"},"capabilities"
+     * :{"value":"199"},"timeStamp":{"value":"1377291227877","name":"connectedSince"},"buffers":{"value":"256"}}}]}
+     *
+     * </pre>
      */
     @Path("/{containerName}/nodes")
     @GET
@@ -119,6 +164,7 @@ public class SwitchNorthbound {
     @TypeHint(Nodes.class)
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Nodes getNodes(@PathParam("containerName") String containerName) {
@@ -161,49 +207,54 @@ public class SwitchNorthbound {
     }
 
     /**
-     * Add a Name, Tier and Forwarding mode property to a node.
-     *
-     * <pre>
-     * Example Request:
-     *  http://localhost:8080/controller/nb/v2/switch/red/node/OF/00:00:00:00:00:03/property/description/Switch3
-     *  (Valid properties that can be configured are: description, forwarding(only for default container) and tier)
-     * </pre>
+     * Add a Description, Tier and Forwarding mode property to a node.
      *
      * @param containerName
-     *            Name of the Container
+     *            Name of the Container (Eg. 'default')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
      *            Node Identifier as specified by
      *            {@link org.opendaylight.controller.sal.core.Node}
-     * @param propName
-     *            Name of the Property specified by
-     *            {@link org.opendaylight.controller.sal.core.Property} and its
-     *            extended classes
-     * @param propValue
-     *            Value of the Property specified by
-     *            {@link org.opendaylight.controller.sal.core.Property} and its
-     *            extended classes
+     *            (Eg. '00:00:00:00:00:00:00:03')
+     * @param propertyName
+     *            Name of the Property. Properties that can be
+     *            configured are: description, forwarding(only for default
+     *            container) and tier
+     * @param propertyValue
+     *            Value of the Property. Description can be any string (Eg. 'Node1'),
+     *            valid values for tier are 0, 1 and 2, and valid values for forwarding are 0 for
+     *            reactive and 1 for proactive forwarding.
      * @return Response as dictated by the HTTP Response Status code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://.../default/node/OF/00:00:00:00:00:00:00:03/property/description/Switch3
+     *
+     * </pre>
      */
 
-    @Path("/{containerName}/node/{nodeType}/{nodeId}/property/{propName}/{propValue}")
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/property/{propertyName}/{propertyValue}")
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Response.class)
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 201, condition = "Operation successful"),
             @ResponseCode(code = 400, condition = "The nodeId or configuration is invalid"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The Container Name or node or configuration name is not found"),
             @ResponseCode(code = 406, condition = "The property cannot be configured in non-default container"),
-            @ResponseCode(code = 409, condition = "Unable to update configuration due to cluster conflict"),
+            @ResponseCode(code = 409, condition = "Unable to update configuration due to cluster conflict or conflicting description property"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addNodeProperty(
             @PathParam("containerName") String containerName,
             @PathParam("nodeType") String nodeType,
             @PathParam("nodeId") String nodeId,
-            @PathParam("propName") String propName,
-            @PathParam("propValue") String propValue) {
+            @PathParam("propertyName") String propertyName,
+            @PathParam("propertyValue") String propertyValue) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
@@ -222,9 +273,9 @@ public class SwitchNorthbound {
 
         handleNodeAvailability(containerName, nodeType, nodeId);
         Node node = Node.fromString(nodeType, nodeId);
-        Property prop = switchManager.createProperty(propName, propValue);
+        Property prop = switchManager.createProperty(propertyName, propertyValue);
         if (prop == null) {
-            throw new ResourceNotFoundException("Property with name " + propName + " does not exist.");
+            throw new ResourceNotFoundException("Property with name " + propertyName + " does not exist.");
         }
         SwitchConfig switchConfig = switchManager.getSwitchConfig(node.toString());
         Map<String, Property> nodeProperties = (switchConfig == null) ? new HashMap<String, Property>()
@@ -232,29 +283,36 @@ public class SwitchNorthbound {
         nodeProperties.put(prop.getName(), prop);
         SwitchConfig newSwitchConfig = new SwitchConfig(node.toString(), nodeProperties);
         Status status = switchManager.updateNodeConfig(newSwitchConfig);
+        if (status.isSuccess()) {
+            return Response.status(Response.Status.CREATED).build();
+        }
         return NorthboundUtils.getResponse(status);
     }
 
     /**
      * Delete a property of a node
      *
-     * <pre>
-     * Example Request:
-     *  http://localhost:8080/controller/nb/v2/switch/default/node/OF/00:00:00:00:00:03/property/forwarding
-     * </pre>
-     *
      * @param containerName
-     *            Name of the Container
+     *            Name of the Container (Eg. 'SliceRed')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
      *            Node Identifier as specified by
      *            {@link org.opendaylight.controller.sal.core.Node}
+     *            (Eg. '00:00:00:00:00:03:01:02')
      * @param propertyName
-     *            Name of the Property specified by
-     *            {@link org.opendaylight.controller.sal.core.Property} and its
-     *            extended classes
+     *            Name of the Property. Properties that can be deleted are
+     *            description, forwarding(only in default container) and tier.
      * @return Response as dictated by the HTTP Response Status code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://.../default/node/OF/00:00:00:00:00:00:00:03/property/forwarding
+     *
+     * </pre>
      */
 
     @Path("/{containerName}/node/{nodeType}/{nodeId}/property/{propertyName}")
@@ -263,6 +321,7 @@ public class SwitchNorthbound {
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
             @ResponseCode(code = 400, condition = "The nodeId or configuration is invalid"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
             @ResponseCode(code = 409, condition = "Unable to delete property due to cluster conflict"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
@@ -313,21 +372,56 @@ public class SwitchNorthbound {
 
     /**
      *
-     * Retrieve a list of all the node connectors and their properties in a
+     * Retrieve a list of all the nodeconnectors and their properties in a
      * given node
      *
      * @param containerName
-     *            The container for which we want to retrieve the list
+     *            The container for which we want to retrieve the list (Eg.
+     *            'default')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
      *            Node Identifier as specified by
-     *            {@link org.opendaylight.controller.sal.core.Node}
+     *            {@link org.opendaylight.controller.sal.core.Node} (Eg.
+     *            '00:00:00:00:00:00:00:03')
      * @return A List of Pair each pair represents a
      *         {@link org.opendaylight.controller.sal.core.NodeConnector} and
      *         its corresponding
      *         {@link org.opendaylight.controller.sal.core.Property} attached to
      *         it.
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://.../default/node/OF/00:00:00:00:00:00:00:01
+     *
+     * Response in XML:
+     * &lt;list&gt;
+     *     &#x20;&#x20;&#x20;&lt;nodeConnectorProperties&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nodeconnector type="OF" id="2"&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node type="OF" id="00:00:00:00:00:00:00:01"/&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/nodeconnector&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;properties&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;state&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;1&lt;/value&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/state&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;config&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;1&lt;/value&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/config&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;L1_2-C2_1&lt;/value&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/name&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/properties&gt;
+     *     &#x20;&#x20;&#x20;&lt;/nodeConnectorProperties&gt;
+     * &lt;/list&gt;
+     *
+     * Response in JSON:
+     * {"nodeConnectorProperties":[{"nodeconnector":{"@type":"OF","@id":"2","node":{"@type":"OF","@id":"00:00:00:00:00:00:00:01"}},
+     * "properties":{"state":{"value":"1"},"config":{"value":"1"},"name":{"value":"L1_2-C2_1"}}}]}
+     *
+     * </pre>
      */
     @Path("/{containerName}/node/{nodeType}/{nodeId}")
     @GET
@@ -335,6 +429,7 @@ public class SwitchNorthbound {
     @TypeHint(NodeConnectors.class)
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public NodeConnectors getNodeConnectors(
@@ -382,37 +477,51 @@ public class SwitchNorthbound {
     }
 
     /**
-     * Add a Name/Bandwidth property to a node connector
+     * Add Bandwidth property to a node connector
      *
      * @param containerName
-     *            Name of the Container
+     *            Name of the Container (Eg. 'default')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
      *            Node Identifier as specified by
      *            {@link org.opendaylight.controller.sal.core.Node}
+     *            (Eg. '00:00:00:00:00:00:00:03')
      * @param nodeConnectorType
-     *            Type of the node connector being programmed
+     *            Type of the node connector being programmed (Eg. 'OF')
      * @param nodeConnectorId
      *            NodeConnector Identifier as specified by
      *            {@link org.opendaylight.controller.sal.core.NodeConnector}
-     * @param propName
+     *            (Eg. '2')
+     * @param propertyName
      *            Name of the Property specified by
      *            {@link org.opendaylight.controller.sal.core.Property} and its
      *            extended classes
-     * @param propValue
+     *            Property that can be configured is bandwidth
+     * @param propertyValue
      *            Value of the Property specified by
      *            {@link org.opendaylight.controller.sal.core.Property} and its
      *            extended classes
      * @return Response as dictated by the HTTP Response Status code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://.../default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth/1
+     *
+     * </pre>
      */
 
-    @Path("/{containerName}/nodeconnector/{nodeType}/{nodeId}/{nodeConnectorType}/{nodeConnectorId}/property/{propName}/{propValue}")
+    @Path("/{containerName}/nodeconnector/{nodeType}/{nodeId}/{nodeConnectorType}/{nodeConnectorId}/property/{propertyName}/{propertyValue}")
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 201, condition = "Operation successful"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
+            @ResponseCode(code = 409, condition = "Unable to add property due to cluster conflict"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addNodeConnectorProperty(
             @PathParam("containerName") String containerName,
@@ -420,8 +529,8 @@ public class SwitchNorthbound {
             @PathParam("nodeId") String nodeId,
             @PathParam("nodeConnectorType") String nodeConnectorType,
             @PathParam("nodeConnectorId") String nodeConnectorId,
-            @PathParam("propName") String propName,
-            @PathParam("propValue") String propValue) {
+            @PathParam("propertyName") String propertyName,
+            @PathParam("propertyValue") String propertyValue) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
@@ -447,7 +556,7 @@ public class SwitchNorthbound {
         NodeConnector nc = NodeConnector
                 .fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
 
-        Property prop = switchManager.createProperty(propName, propValue);
+        Property prop = switchManager.createProperty(propertyName, propertyValue);
         if (prop == null) {
             throw new ResourceNotFoundException(
                     RestMessages.INVALIDDATA.toString());
@@ -464,22 +573,33 @@ public class SwitchNorthbound {
      * Delete a property of a node connector
      *
      * @param containerName
-     *            Name of the Container
+     *            Name of the Container (Eg. 'default')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
      *            Node Identifier as specified by
      *            {@link org.opendaylight.controller.sal.core.Node}
+     *            (Eg. '00:00:00:00:00:00:00:01')
      * @param nodeConnectorType
-     *            Type of the node connector being programmed
+     *            Type of the node connector being programmed (Eg. 'OF')
      * @param nodeConnectorId
      *            NodeConnector Identifier as specified by
      *            {@link org.opendaylight.controller.sal.core.NodeConnector}
+     *            (Eg. '1')
      * @param propertyName
      *            Name of the Property specified by
      *            {@link org.opendaylight.controller.sal.core.Property} and its
-     *            extended classes
+     *            extended classes. Property that can be deleted is bandwidth
      * @return Response as dictated by the HTTP Response Status code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://.../default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth
+     *
+     * </pre>
      */
 
     @Path("/{containerName}/nodeconnector/{nodeType}/{nodeId}/{nodeConnectorType}/{nodeConnectorId}/property/{propertyName}")
@@ -487,6 +607,7 @@ public class SwitchNorthbound {
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response deleteNodeConnectorProperty(
@@ -528,125 +649,30 @@ public class SwitchNorthbound {
         throw new ResourceNotFoundException(ret.getDescription());
     }
 
-    /*    *//**
-     * Retrieve a list of Span ports that were configured previously.
-     *
-     * @param containerName
-     *            Name of the Container
-     * @return list of
-     *         {@link org.opendaylight.controller.switchmanager.SpanConfig}
-     *         resources
-     */
-    /*
-     * @Path("/span-config/{containerName}")
-     *
-     * @GET
-     *
-     * @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-     *
-     * @StatusCodes( {
-     *
-     * @ResponseCode(code = 200, condition = "Operation successful"),
-     *
-     * @ResponseCode(code = 404, condition = "The containerName is not found"),
-     *
-     * @ResponseCode(code = 503, condition =
-     * "One or more of Controller Services are unavailable") }) public
-     * List<SpanConfig> getSpanConfigList(@PathParam("containerName") String
-     * containerName) { ISwitchManager switchManager = (ISwitchManager)
-     * getIfSwitchManagerService(containerName); if (switchManager == null) {
-     * throw new ServiceUnavailableException("Switch Manager " +
-     * RestMessages.SERVICEUNAVAILABLE.toString()); }
-     *
-     * return switchManager.getSpanConfigList(); }
-     *//**
-     * Add a span configuration
-     *
-     * @param containerName
-     *            Name of the Container
-     * @param config
-     *            {@link org.opendaylight.controller.switchmanager.SpanConfig}
-     *            in JSON or XML format
-     * @return Response as dictated by the HTTP Response Status code
-     */
-    /*
-     * @Path("/span-config/{containerName}")
-     *
-     * @PUT
-     *
-     * @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-     *
-     * @StatusCodes( {
-     *
-     * @ResponseCode(code = 200, condition = "Operation successful"),
-     *
-     * @ResponseCode(code = 404, condition = "The containerName is not found"),
-     *
-     * @ResponseCode(code = 503, condition =
-     * "One or more of Controller Services are unavailable") }) public Response
-     * addSpanConfig(@PathParam("containerName") String containerName,
-     *
-     * @TypeHint(SubnetConfig.class) JAXBElement<SpanConfig> config) {
-     * ISwitchManager switchManager = (ISwitchManager)
-     * getIfSwitchManagerService(containerName); if (switchManager == null) {
-     * throw new ServiceUnavailableException("Switch Manager " +
-     * RestMessages.SERVICEUNAVAILABLE.toString()); }
-     *
-     * String ret = switchManager.addSpanConfig(config.getValue()); if
-     * (ret.equals(ReturnString.SUCCESS.toString())) { return
-     * Response.status(Response.Status.CREATED).build(); } throw new
-     * InternalServerErrorException(ret); }
-     *//**
-     * Delete a span configuration
-     *
-     * @param containerName
-     *            Name of the Container
-     * @param config
-     *            {@link org.opendaylight.controller.switchmanager.SpanConfig}
-     *            in JSON or XML format
-     * @return Response as dictated by the HTTP Response Status code
-     */
-    /*
-     * @Path("/span-config/{containerName}")
-     *
-     * @DELETE
-     *
-     * @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-     *
-     * @StatusCodes( {
-     *
-     * @ResponseCode(code = 200, condition = "Operation successful"),
-     *
-     * @ResponseCode(code = 404, condition = "The containerName is not found"),
-     *
-     * @ResponseCode(code = 503, condition =
-     * "One or more of Controller Services are unavailable") }) public Response
-     * deleteSpanConfig(@PathParam("containerName") String containerName,
-     *
-     * @TypeHint(SubnetConfig.class) JAXBElement<SpanConfig> config) {
-     * ISwitchManager switchManager = (ISwitchManager)
-     * getIfSwitchManagerService(containerName); if (switchManager == null) {
-     * throw new ServiceUnavailableException("Switch Manager " +
-     * RestMessages.SERVICEUNAVAILABLE.toString()); }
-     *
-     * String ret = switchManager.removeSpanConfig(config.getValue()); if
-     * (ret.equals(ReturnString.SUCCESS.toString())) { return
-     * Response.ok().build(); } throw new ResourceNotFoundException(ret); }
-     */
-
     /**
      * Save the current switch configurations
      *
      * @param containerName
-     *            Name of the Container
+     *            Name of the Container (Eg. 'default')
      * @return Response as dictated by the HTTP Response Status code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://.../default/switch-config
+     *
+     * </pre>
      */
     @Path("/{containerName}/switch-config")
     @POST
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
+            @ResponseCode(code = 500, condition = "Failed to save switch configuration. Failure Reason included in HTTP Error response"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Response saveSwitchConfig(
             @PathParam("containerName") String containerName) {
