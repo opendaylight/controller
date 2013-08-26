@@ -8,8 +8,8 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
- * @file IPluginInConfigurationService.java
- *
+ * This interface defines bridge domain configuration service methods to be
+ * implemented by protocol plugins
  */
 public interface IPluginInBridgeDomainConfigService {
     /**

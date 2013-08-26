@@ -33,6 +33,11 @@
 
 package org.opendaylight.controller.sal.utils;
 
+/**
+ * This interface defines the methods for callback ordering
+ *
+ */
+
 public interface IListener<T> {
     public enum Command {
         CONTINUE, STOP
@@ -41,7 +46,7 @@ public interface IListener<T> {
     /**
      * The name assigned to this listener
      *
-     * @return
+     * @return the name string
      */
     public String getName();
 
