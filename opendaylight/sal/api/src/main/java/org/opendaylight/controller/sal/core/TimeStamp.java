@@ -25,9 +25,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class TimeStamp extends Property {
     private static final long serialVersionUID = 1L;
-    @XmlElement
+    @XmlElement(name = "value")
     private long timestamp;
-    @XmlElement
+    @XmlElement(name = "name")
     private String timestampName;
 
     public static final String TimeStampPropName = "timeStamp";
@@ -57,6 +57,7 @@ public class TimeStamp extends Property {
         this.timestampName = null;
     }
 
+    @Override
     public TimeStamp clone() {
         return new TimeStamp(this.timestamp, this.timestampName);
     }

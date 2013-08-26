@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @SuppressWarnings("serial")
 public class Description extends Property {
-    @XmlElement
+    @XmlElement(name="value")
     private String descriptionValue;
     public static final String propertyName = "description";
 
@@ -26,6 +26,7 @@ public class Description extends Property {
         this.descriptionValue = description;
     }
 
+    @Override
     public Description clone() {
         return new Description(this.descriptionValue);
     }
