@@ -237,13 +237,12 @@ public abstract class AbstractScheme {
                  * with this controller to take hold of a Node.
                  */
                 if (isConnectionAllowed(node)) {
-                    if (!nodeConnections.replace(node, oldControllers, newControllers)) {
+                    if (oldControllers == null || !nodeConnections.replace(node, oldControllers, newControllers)) {
                         clusterServices.trollback();
                         try {
                             Thread.sleep(100);
                         } catch ( InterruptedException e) {}
-                        log.debug("Replace failed... old={} with new={} for {} to {}", oldControllers.toString(), newControllers.toString(),
-                                controller.getHostAddress(), node.toString());
+                        log.debug("Retrying ... {} with {}", controller.getHostAddress(), node.toString());
                         return putNodeToController(node, controller);
                     } else {
                         log.debug("Replace successful old={} with new={} for {} to {}", oldControllers.toString(), newControllers.toString(),
