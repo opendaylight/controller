@@ -23,6 +23,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
@@ -44,16 +45,26 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
- * Static Routing Northbound APIs
+ * <p>Static Routing Northbound API allows for the management of the static
+ * routes.</p>
+ * </br>
+ * An example request/response for retrieving the static routes may look like this: </br>
+ * <pre>
+ * GET http://localhost:8080/controller/nb/v2/staticroute/default HTTP/1.1
+ * Accept: application/json
+ *
+ * HTTP/1.1 200 OK
+ * Content-Type: application/json
+ *
+ * {"staticRoute":{"name":"route-1","prefix":"10.10.1.0/24","nextHop":"1.1.1.1"}}
+ *
+ * </pre>
  *
  * <br><br>
  * Authentication scheme : <b>HTTP Basic</b><br>
  * Authentication realm : <b>opendaylight</b><br>
  * Transport : <b>HTTP and HTTPS</b><br>
  * <br>
- * HTTPS Authentication is disabled by default. Administrator can enable it in tomcat-server.xml after adding
- * a proper keystore / SSL certificate from a trusted authority.<br>
- * More info : http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
  */
 @Path("/")
 public class StaticRoutingNorthbound {
@@ -93,10 +104,30 @@ public class StaticRoutingNorthbound {
     }
 
     /**
-     * Returns a list of static routes present on the given container
+     * Get a list of static routes present on the given container.
      *
      * @param containerName Name of the Container. The Container name for the base controller is "default".
      * @return List of configured static routes on the given container
+     *
+     * <pre>
+     * Example:
+     *
+     * Request URL:
+     * GET http://localhost:8080/controller/nb/v2/staticroute/default
+     *
+     * Response in XML:
+     *  &lt;list&gt;
+     *   &lt;staticRoute&gt;
+     *     &lt;name&gt;route-1&lt;/name&gt;
+     *     &lt;prefix&gt;10.10.1.0/24&lt;/prefix&gt;
+     *     &lt;nextHop&gt;1.1.1.1&lt;/nextHop&gt;
+     *   &lt;/staticRoute&gt;
+     *  &lt;/list&gt;
+     *
+     * Response in JSON:
+     * {"staticRoute":{"name":"route-1","prefix":"10.10.1.0/24","nextHop":"1.1.1.1"}}
+     *
+     * </pre>
      */
     @Path("/{containerName}")
     @GET
@@ -121,10 +152,29 @@ public class StaticRoutingNorthbound {
      * Returns the static route for the provided configuration name on a given container
      *
      * @param containerName Name of the Container. The Container name for the base controller is "default".
-     * @param name Name of the Static Route configuration
+     * @param route Name of the Static Route configuration
      * @return Static route configured with the supplied Name.
+     *
+     * <pre>
+     * Example:
+     *
+     * Request URL:
+     * GET http://localhost:8080/controller/nb/v2/staticroute/default/route/route-1
+     *
+     * Response in XML:
+     *
+     *   &lt;staticRoute&gt;
+     *     &lt;name&gt;route-1&lt;/name&gt;
+     *     &lt;prefix&gt;10.10.1.0/24&lt;/prefix&gt;
+     *     &lt;nextHop&gt;1.1.1.1&lt;/nextHop&gt;
+     *   &lt;/staticRoute&gt;
+     *
+     * Response in JSON:
+     * {"name":"route-1","prefix":"10.10.1.0/24","nextHop":"1.1.1.1"}
+     *
+     * </pre>
      */
-    @Path("/{containerName}/{name}")
+    @Path("/{containerName}/route/{route}")
     @GET
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(StaticRoute.class)
@@ -133,7 +183,7 @@ public class StaticRoutingNorthbound {
             @ResponseCode(code = 404, condition = "The Container Name or Static Route Configuration name passed was not found") })
     public StaticRoute getStaticRoute(
             @PathParam("containerName") String containerName,
-            @PathParam("name") String name) {
+            @PathParam("route") String route) {
 
         if(!NorthboundUtils.isAuthorized(getUserName(), containerName,
                 Privilege.WRITE, this)){
@@ -142,9 +192,9 @@ public class StaticRoutingNorthbound {
                             + containerName);
         }
         List<StaticRoute> routes = this.getStaticRoutesInternal(containerName);
-        for (StaticRoute route : routes) {
-            if (route.getName().equalsIgnoreCase(name)) {
-                return route;
+        for (StaticRoute r : routes) {
+            if (r.getName().equalsIgnoreCase(route)) {
+                return r;
             }
         }
 
@@ -157,10 +207,21 @@ public class StaticRoutingNorthbound {
      * Add a new Static Route
      *
      * @param containerName Name of the Container. The Container name for the base controller is "default".
-     * @param name Name of the Static Route configuration
+     * @param route Name of the Static Route configuration
      * @return Response as dictated by the HTTP Response code
+     *
+     * <pre>
+     * Example:
+     *
+     * Request URL:
+     * POST http://localhost:8080/controller/nb/v2/staticroute/default/route/route-1
+     *
+     * Request payload in JSON:
+     * {"name":"route-1","prefix":"10.10.1.0/24","nextHop":"1.1.1.1"}
+     *
+     * </pre>
      */
-    @Path("/{containerName}/{name}")
+    @Path("/{containerName}/route/{route}")
     @POST
     @Consumes( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes( {
@@ -169,8 +230,9 @@ public class StaticRoutingNorthbound {
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
             @ResponseCode(code = 409, condition = "Failed to create Static Route entry due to Conflicting Name or Prefix."), })
     public Response addStaticRoute(
+            @Context UriInfo uriInfo,
             @PathParam(value = "containerName") String containerName,
-            @PathParam(value = "name") String name,
+            @PathParam(value = "route") String route,
             @TypeHint(StaticRoute.class) JAXBElement<StaticRoute> staticRouteData) {
 
 
@@ -196,8 +258,8 @@ public class StaticRoutingNorthbound {
                 sRoute.getPrefix(), sRoute.getNextHop());
         Status response = staticRouting.addStaticRoute(cfgObject);
         if (response.isSuccess()) {
-            NorthboundUtils.auditlog("Static Route", username, "added", name, containerName);
-            return Response.status(Response.Status.CREATED).build();
+            NorthboundUtils.auditlog("Static Route", username, "added", route, containerName);
+            return Response.created(uriInfo.getRequestUri()).build();
         }
         throw new ResourceConflictException(response.getDescription());
     }
@@ -207,12 +269,19 @@ public class StaticRoutingNorthbound {
      * Delete a Static Route
      *
      * @param containerName Name of the Container. The Container name for the base controller is "default".
-     * @param name Name of the Static Route configuration to be removed
+     * @param route Name of the Static Route configuration to be removed
      *
      * @return Response as dictated by the HTTP Response code
+     *
+     * <pre>
+     * Example:
+     *
+     * Request URL:
+     * DELETE http://localhost:8080/controller/nb/v2/staticroute/default/route/route-1
+     *
+     * </pre>
      */
-
-    @Path("/{containerName}/{name}")
+    @Path("/{containerName}/route/{route}")
     @DELETE
     @StatusCodes( {
             @ResponseCode(code = 200, condition = "Operation successful"),
@@ -220,7 +289,7 @@ public class StaticRoutingNorthbound {
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active") })
     public Response removeStaticRoute(
             @PathParam(value = "containerName") String containerName,
-            @PathParam(value = "name") String name) {
+            @PathParam(value = "route") String route) {
 
         if(!NorthboundUtils.isAuthorized(getUserName(), containerName,
                 Privilege.WRITE, this)){
@@ -239,9 +308,9 @@ public class StaticRoutingNorthbound {
                     .toString());
         }
 
-        Status status = staticRouting.removeStaticRoute(name);
+        Status status = staticRouting.removeStaticRoute(route);
         if (status.isSuccess()) {
-            NorthboundUtils.auditlog("Static Route", username, "removed", name, containerName);
+            NorthboundUtils.auditlog("Static Route", username, "removed", route, containerName);
             return Response.ok().build();
         }
         throw new ResourceNotFoundException(status.getDescription());

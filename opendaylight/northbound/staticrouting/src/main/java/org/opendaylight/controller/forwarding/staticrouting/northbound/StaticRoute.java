@@ -14,21 +14,32 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
 /**
- * This class contains static route data  that is returned as a response to the NorthBound GET request.
- *
- *
+ * StaticRoute represents the static route data that is returned as a response to
+ * the NorthBound GET request.
  *
  */
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.NONE)
 public class StaticRoute {
+    /**
+     * The name of the static route.
+     */
     @XmlElement
     private String name;
+
+    /**
+     * The prefix for the route.
+     * Format: A.B.C.D/MM  Where A.B.C.D is the Default Gateway IP (L3) or ARP Querier IP (L2)
+     */
     @XmlElement
-    private String prefix; // A.B.C.D/MM  Where A.B.C.D is the Default Gateway IP (L3) or ARP Querier IP (L2)
+    private String prefix;
+
+    /**
+     * NextHop IP-Address (or) datapath ID/port list: xx:xx:xx:xx:xx:xx:xx:xx/a,b,c-m,r-t,y
+     */
     @XmlElement
-    private String nextHop; // NextHop IP-Address (or) datapath ID/port list: xx:xx:xx:xx:xx:xx:xx:xx/a,b,c-m,r-t,y
+    private String nextHop;
 
     public StaticRoute() {
     }

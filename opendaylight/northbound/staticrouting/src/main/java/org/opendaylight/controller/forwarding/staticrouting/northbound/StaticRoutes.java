@@ -17,9 +17,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 
-@XmlRootElement
+/**
+ * This class represents a list of static routes.
+ */
+@XmlRootElement(name = "list")
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class StaticRoutes {
         @XmlElement
         List<StaticRoute> staticRoute;
