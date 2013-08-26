@@ -9,25 +9,13 @@
 package org.opendaylight.controller.sal.topology;
 
 import java.util.List;
-import java.util.Set;
-
 import org.opendaylight.controller.sal.core.Edge;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.UpdateType;
 
 /**
- * @file   IPluginOutTopologyService.java
- *
- * @brief  Methods that are invoked from Protocol Plugin toward SAL
- *
- * Every time a protocol plugin update the topology, it will call this
- * service provided by SAL so the update can migrate upward toward the
- * applications
- */
-
-/**
- * Methods that are invoked from Protocol Plugin toward SAL
- *
+ * This interface defines the methods that are invoked from Protocol Plugin
+ * toward SAL. Every time a protocol plugin update the topology, it will call
+ * this service provided by SAL so the update can migrate upward toward the
+ * applications.
  */
 public interface IPluginOutTopologyService {
 
@@ -45,7 +33,8 @@ public interface IPluginOutTopologyService {
      * on the controller
      *
      * @param edge
-     */
+      *            The edge which bandwidth usage is above the safety level
+    */
     public void edgeOverUtilized(Edge edge);
 
     /**
@@ -53,6 +42,7 @@ public interface IPluginOutTopologyService {
      * threshold level configured on the controller
      *
      * @param edge
+     *            The edge which bandwidth usage is back to normal
      */
     public void edgeUtilBackToNormal(Edge edge);
 }

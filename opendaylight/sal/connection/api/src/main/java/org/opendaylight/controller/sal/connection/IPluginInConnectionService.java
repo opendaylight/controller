@@ -14,16 +14,14 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
- * @file IPluginInConnectionService.java
- *
- * @brief Connection interface to be implemented by protocol plugins
+ * The interface describes methods to be implemented by protocol plugins
  */
 public interface IPluginInConnectionService {
     /**
      * Disconnect a Node that is connected to this Controller.
      *
      * @param node
-     * @param flow
+     *            the given node {@link org.opendaylight.controller.sal.core.Node}
      */
     public Status disconnect(Node node);
 
@@ -46,6 +44,9 @@ public interface IPluginInConnectionService {
 
     /**
      * Node Disconnected from the node's master controller.
+     *
+     * @param node
+     *            the given node {@link org.opendaylight.controller.sal.core.Node}
      */
     public void notifyNodeDisconnectFromMaster(Node node);
 
