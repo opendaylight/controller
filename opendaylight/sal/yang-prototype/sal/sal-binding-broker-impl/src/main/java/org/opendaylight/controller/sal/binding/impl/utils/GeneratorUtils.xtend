@@ -8,6 +8,8 @@
 package org.opendaylight.controller.sal.binding.impl.utils
 
 import javassist.ClassPool
+import javassist.NotFoundException
+import javassist.LoaderClassPath
 
 class GeneratorUtils {
 
@@ -16,8 +18,13 @@ class GeneratorUtils {
     public static def generatedName(Class<?> cls, String suffix) {
         '''«PREFIX»«cls.package.name».«cls.simpleName»$«suffix»'''.toString()
     }
-    
-    public static def get(ClassPool pool,Class<?> cls) {
-        pool.get(cls.name);
+
+    public static def get(ClassPool pool, Class<?> cls) {
+        try {
+            return pool.get(cls.name)
+        } catch (NotFoundException e) {
+            pool.appendClassPath(new LoaderClassPath(cls.classLoader));
+            return pool.get(cls.name)
+        }
     }
 }
