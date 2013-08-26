@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///4M\u003d",
+        "filename": "opendaylight/northbound/flowprogrammer/src/main/java/org/opendaylight/controller/flowprogrammer/northbound/FlowProgrammerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-26T22:02:38Z",
+      "side": 1,
+      "message": "More complete URL will make it more readable",
+      "revId": "a758277d431de123e1bdbc7f0cea3dc16ac155eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///4I\u003d",
+        "filename": "opendaylight/northbound/flowprogrammer/src/main/java/org/opendaylight/controller/flowprogrammer/northbound/FlowProgrammerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-26T22:02:38Z",
+      "side": 1,
+      "message": "It is prefered if we can qualify the resource with its identifier.\nFor example : use node/{nodeType}/{nodeId}.\n\nThis comment applies for other APIs as well",
+      "revId": "a758277d431de123e1bdbc7f0cea3dc16ac155eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
