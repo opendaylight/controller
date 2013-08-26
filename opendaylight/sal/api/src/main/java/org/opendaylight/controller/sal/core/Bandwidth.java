@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Bandwidth extends Property {
     private static final long serialVersionUID = 1L;
 
-    @XmlElement
+    @XmlElement(name="value")
     protected long bandwidthValue;
 
     public static final long BWUNK = 0;
@@ -71,6 +71,7 @@ public class Bandwidth extends Property {
         super(name);
     }
 
+    @Override
     public Bandwidth clone() {
         return new Bandwidth(this.bandwidthValue);
     }

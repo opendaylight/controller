@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Capabilities extends Property {
         private static final long serialVersionUID = 1L;
-    @XmlElement
+    @XmlElement(name="value")
     private int capabilitiesValue;
 
     public enum CapabilitiesType {
@@ -63,6 +63,7 @@ public class Capabilities extends Property {
         this.capabilitiesValue = 0;
     }
 
+    @Override
     public Capabilities clone() {
         return new Capabilities(this.capabilitiesValue);
     }
