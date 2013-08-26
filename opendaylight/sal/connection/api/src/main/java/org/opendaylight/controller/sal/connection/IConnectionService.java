@@ -27,10 +27,9 @@ public interface IConnectionService {
      * plugins and is an opaque value for SAL. Typical values keyed inside this params are
      * Management IP-Address, Username, Password, Security Keys, etc...
      *
-     *  @return Node
+     * @return Node {@link org.opendaylight.controller.sal.core.Node}
      */
     public Node connect (String type, String connectionIdentifier, Map<ConnectionConstants, String> params);
-
 
     /**
      * Discover the node type and Connect to the first plugin that is able to connect with the specified parameters.
@@ -41,7 +40,7 @@ public interface IConnectionService {
      * plugins and is an opaque value for SAL. Typical values keyed inside this params are
      * Management IP-Address, Username, Password, Security Keys, etc...
      *
-     *  @return Node
+     * @return Node {@link org.opendaylight.controller.sal.core.Node}
      */
     public Node connect (String connectionIdentifier, Map<ConnectionConstants, String> params);
 
@@ -49,12 +48,16 @@ public interface IConnectionService {
      * Disconnect a Node that is connected to this Controller.
      *
      * @param node
-     * @param flow
+     *            the node {@link org.opendaylight.controller.sal.core.Node}
+     * @return Status {@link org.opendaylight.controller.sal.utils.Status}
      */
     public Status disconnect(Node node);
 
     /**
      * View Change notification
+     *
+     * @param node
+     *            the node {@link org.opendaylight.controller.sal.core.Node}
      */
     public void notifyNodeDisconnectFromMaster(Node node);
 

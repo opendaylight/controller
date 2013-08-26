@@ -21,8 +21,8 @@
 package org.opendaylight.controller.sal.core;
 
 /**
- *
- * Interface used to retrieve the status of a given Container
+ * The interface describes methods used to retrieve the status of a given
+ * Container
  */
 public interface IContainerListener {
     /**
@@ -42,38 +42,54 @@ public interface IContainerListener {
     /**
      * Notification raised when the container flow layout changes
      *
-     * @param containerName container for which the update has been raised
-     * @param previousFlow previous value of the container flow under
-     * update, differs from the currentFlow only and only if it's an
-     * update operation
-     * @param currentFlow current version of the container flow differs from
-     * the previousFlow only in case of update
-     * @param t type of update
+     * @param containerName
+     *            container for which the update has been raised
+     * @param previousFlow
+     *            previous value of the container flow
+     *            {@link org.opendaylight.controller.sal.core.ContainerFlow}
+     *            under update, differs from the currentFlow only and only if
+     *            it's an update operation
+     * @param currentFlow
+     *            current version of the container flow
+     *            {@link org.opendaylight.controller.sal.core.ContainerFlow}
+     *            differs from the previousFlow only in case of update
+     * @param t
+     *            type of update
+     *            {@link org.opendaylight.controller.sal.core.UpdateType}
      */
     public void containerFlowUpdated(String containerName,
             ContainerFlow previousFlow, ContainerFlow currentFlow, UpdateType t);
 
     /**
-     * Notification raised when a NodeConnector is added or removed in
-     * the container.
+     * Notification raised when a NodeConnector is added or removed in the
+     * container.
      *
-     * @param containerName container for which the update has been raised
-     * @param p NodeConnector being updated
-     * @param t type of modification, but among the types the modify
-     * operation is not expected to be raised because the
-     * nodeConnectors are anyway immutable so this is only used to
-     * add/delete
+     * @param containerName
+     *            container for which the update has been raised
+     * @param p
+     *            NodeConnector
+     *            {@link org.opendaylight.controller.sal.core.NodeConnector}
+     *            being updated
+     * @param t
+     *            type of modification
+     *            {@link org.opendaylight.controller.sal.core.UpdateType}, but
+     *            among the types the modify operation is not expected to be
+     *            raised because the nodeConnectors are anyway immutable so this
+     *            is only used to add/delete
      */
     public void nodeConnectorUpdated(String containerName, NodeConnector p,
             UpdateType t);
 
     /**
-     * Notification raised when the container mode has changed
-     * This notification is needed for some bundle in the default container
-     * to cleanup some HW state when switching from non-slicing to
-     * slicing case and vice-versa
+     * Notification raised when the container mode has changed This notification
+     * is needed for some bundle in the default container to cleanup some HW
+     * state when switching from non-slicing to slicing case and vice-versa
      *
-     * @param t  ADDED when first container is created, REMOVED when last container is removed
+     * @param t
+     *            type of modification
+     *            {@link org.opendaylight.controller.sal.core.UpdateType}. ADDED
+     *            when first container is created, REMOVED when last container
+     *            is removed
      */
     public void containerModeUpdated(UpdateType t);
 }

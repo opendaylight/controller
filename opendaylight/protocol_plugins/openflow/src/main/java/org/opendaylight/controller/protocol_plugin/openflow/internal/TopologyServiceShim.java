@@ -730,17 +730,36 @@ public class TopologyServiceShim implements IDiscoveryListener,
     }
 
     /**
+     * Retrieve/construct edge map for a given container
+     *
+     * @param containerName
+     *            the container name
+     * @return the edges and their properties
+     */
+    private Map<NodeConnector, Pair<Edge, Set<Property>>> getEdgeMap(String containerName) {
+        Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropMap = null;
+
+        /*
+         * When container is freshly created, need to construct map based on global map.
+         */
+        edgePropMap = edgeMap.get(containerName);
+
+        return edgePropMap;
+    }
+
+    /**
      * Reading the current topology database, the method will replay all the
      * edge updates for the ITopologyServiceShimListener instance in the given
      * container, which will in turn publish them toward SAL.
      *
      * @param containerName
+     *            the container name
      */
     private void TopologyBulkUpdate(String containerName) {
         Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropMap = null;
 
         logger.debug("Try bulk update for container:{}", containerName);
-        edgePropMap = edgeMap.get(containerName);
+        edgePropMap = getEdgeMap(containerName);
         if (edgePropMap == null) {
             logger.debug("No edges known for container:{}", containerName);
             return;
