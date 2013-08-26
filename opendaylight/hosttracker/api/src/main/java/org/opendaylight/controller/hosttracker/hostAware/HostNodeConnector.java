@@ -35,7 +35,7 @@ public class HostNodeConnector extends Host implements Serializable {
     private short vlan;
     @XmlElement
     private boolean staticHost;
-    private transient short arpSendCountDown;
+    private short arpSendCountDown;
 
     /**
      * Private constructor used for JAXB mapping
