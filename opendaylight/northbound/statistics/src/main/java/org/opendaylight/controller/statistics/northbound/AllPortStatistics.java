@@ -17,13 +17,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class AllPortStatistics {
         @XmlElement
         List<PortStatistics> portStatistics;
         //To satisfy JAXB
-        private AllPortStatistics() {
-        }
+        @SuppressWarnings("unused")
+        private AllPortStatistics() {}
 
         public AllPortStatistics(List<PortStatistics> portStatistics) {
                 this.portStatistics = portStatistics;

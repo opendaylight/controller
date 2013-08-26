@@ -18,13 +18,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 
-@XmlRootElement
+@XmlRootElement(name = "nodePortStatistic")
 @XmlAccessorType(XmlAccessType.NONE)
 public class PortStatistics {
     @XmlElement
     private Node node;
-    @XmlElement(name="portStat")
-    private List<NodeConnectorStatistics> portStats;
+    @XmlElement
+    private List<NodeConnectorStatistics> portStatistic;
 
     // To satisfy JAXB
     @SuppressWarnings("unused")
@@ -34,7 +34,7 @@ public class PortStatistics {
     public PortStatistics(Node node, List<NodeConnectorStatistics> portStats) {
         super();
         this.node = node;
-        this.portStats = portStats;
+        this.portStatistic = portStats;
     }
 
     public Node getNode() {
@@ -46,11 +46,11 @@ public class PortStatistics {
     }
 
     public List<NodeConnectorStatistics> getPortStats() {
-        return portStats;
+        return portStatistic;
     }
 
     public void setFlowStats(List<NodeConnectorStatistics> portStats) {
-        this.portStats = portStats;
+        this.portStatistic = portStats;
     }
 
 }

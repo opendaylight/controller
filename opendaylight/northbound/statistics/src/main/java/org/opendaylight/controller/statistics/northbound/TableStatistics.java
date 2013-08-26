@@ -5,7 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.opendaylight.controller.statistics.northbound;
+
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -16,13 +18,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 
-@XmlRootElement
+@XmlRootElement(name = "nodeTableStatistic")
 @XmlAccessorType(XmlAccessType.NONE)
 public class TableStatistics {
     @XmlElement
     private Node node;
-    @XmlElement(name="tableStat")
-    private List<NodeTableStatistics> tableStats;
+    @XmlElement
+    private List<NodeTableStatistics> tableStatistic;
 
     // To satisfy JAXB
     @SuppressWarnings("unused")
@@ -32,7 +34,7 @@ public class TableStatistics {
     public TableStatistics(Node node, List<NodeTableStatistics> tableStats) {
         super();
         this.node = node;
-        this.tableStats = tableStats;
+        this.tableStatistic = tableStats;
     }
 
     public Node getNode() {
@@ -44,11 +46,11 @@ public class TableStatistics {
     }
 
     public List<NodeTableStatistics> getTableStats() {
-        return tableStats;
+        return tableStatistic;
     }
 
     public void setTableStats(List<NodeTableStatistics> tableStats) {
-        this.tableStats = tableStats;
+        this.tableStatistic = tableStats;
     }
 
 }
