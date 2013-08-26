@@ -12,16 +12,23 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
- * @file IPluginOutFlowProgrammer.java
- *
- * @brief Flow programmer interface to be implemented by protocol plugins
+ * This interface defines the flow programmer methods to be implemented by
+ * protocol plugins
  */
 public interface IPluginInFlowProgrammerService {
     /**
      * Synchronously add a flow to the network node
      *
      * @param node
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node} on which the
+     *            flow got added
      * @param flow
+     *            the flow
+     *            {@link org.opendaylight.controller.sal.flowprogrammer.Flow}
+     *            that got added
+     * @return Status the operation status
+     *         {@link org.opendaylight.controller.sal.utils.Status}
      */
     Status addFlow(Node node, Flow flow);
 
@@ -29,7 +36,15 @@ public interface IPluginInFlowProgrammerService {
      * Synchronously modify existing flow on the switch
      *
      * @param node
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node} on which the
+     *            flow got modified
      * @param flow
+     *            the flow
+     *            {@link org.opendaylight.controller.sal.flowprogrammer.Flow}
+     *            that got modified
+     * @return Status the operation status
+     *         {@link org.opendaylight.controller.sal.utils.Status}
      */
     Status modifyFlow(Node node, Flow oldFlow, Flow newFlow);
 
@@ -37,7 +52,15 @@ public interface IPluginInFlowProgrammerService {
      * Synchronously remove the flow from the network node
      *
      * @param node
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node} on which the
+     *            flow got removed
      * @param flow
+     *            the flow
+     *            {@link org.opendaylight.controller.sal.flowprogrammer.Flow}
+     *            that got removed
+     * @return Status the operation status
+     *         {@link org.opendaylight.controller.sal.utils.Status}
      */
     Status removeFlow(Node node, Flow flow);
 
@@ -45,8 +68,17 @@ public interface IPluginInFlowProgrammerService {
      * Asynchronously add a flow to the network node
      *
      * @param node
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node} on which the
+     *            flow got added
      * @param flow
+     *            the flow
+     *            {@link org.opendaylight.controller.sal.flowprogrammer.Flow}
+     *            that got added
      * @param rid
+     *            the request id
+     * @return Status the operation status
+     *         {@link org.opendaylight.controller.sal.utils.Status}
      */
     Status addFlowAsync(Node node, Flow flow, long rid);
 
@@ -54,8 +86,19 @@ public interface IPluginInFlowProgrammerService {
      * Asynchronously modify existing flow on the switch
      *
      * @param node
-     * @param flow
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node} on which the
+     *            flow got modified
+     * @param oldFlow
+     *            the original flow
+     *            {@link org.opendaylight.controller.sal.flowprogrammer.Flow}
+     * @param newFlow
+     *            the new flow
+     *            {@link org.opendaylight.controller.sal.flowprogrammer.Flow}
      * @param rid
+     *            the request id
+     * @return Status the operation status
+     *         {@link org.opendaylight.controller.sal.utils.Status}
      */
     Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow, long rid);
 
@@ -63,8 +106,17 @@ public interface IPluginInFlowProgrammerService {
      * Asynchronously remove the flow from the network node
      *
      * @param node
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node} on which the
+     *            flow got removed
      * @param flow
+     *            the flow
+     *            {@link org.opendaylight.controller.sal.flowprogrammer.Flow}
+     *            that got removed
      * @param rid
+     *            the request id
+     * @return Status the operation status
+     *         {@link org.opendaylight.controller.sal.utils.Status}
      */
     Status removeFlowAsync(Node node, Flow flow, long rid);
 
@@ -72,6 +124,11 @@ public interface IPluginInFlowProgrammerService {
      * Remove all flows present on the network node
      *
      * @param node
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node} on which the
+     *            flow got removed
+     * @return Status the operation status
+     *         {@link org.opendaylight.controller.sal.utils.Status}
      */
     Status removeAllFlows(Node node);
 
@@ -80,6 +137,10 @@ public interface IPluginInFlowProgrammerService {
      * Barrier reply arrives.
      *
      * @param node
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @return Status the operation status
+     *         {@link org.opendaylight.controller.sal.utils.Status}
      */
     Status syncSendBarrierMessage(Node node);
 
@@ -87,6 +148,10 @@ public interface IPluginInFlowProgrammerService {
      * Send Barrier message asynchronously. The caller is not blocked.
      *
      * @param node
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @return Status the operation status
+     *         {@link org.opendaylight.controller.sal.utils.Status}
      */
     Status asyncSendBarrierMessage(Node node);
 }

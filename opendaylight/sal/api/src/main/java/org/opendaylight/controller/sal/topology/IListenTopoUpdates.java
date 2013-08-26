@@ -13,19 +13,10 @@ import java.util.List;
 import org.opendaylight.controller.sal.core.Edge;
 
 /**
- * @file   IListenTopoUpdates.java
- *
- * @brief  Topology notifications provided by SAL toward the application
- *
- * For example an application that wants to keep up to date with the
- * updates coming from SAL it will register in the OSGi service
- * registry this interface (on a per-container base) and SAL will call it
- * providing the update
- */
-
-/**
- * Topology notifications provided by SAL toward the application
- *
+ * This interface defines the methods for topology notifications provided by SAL
+ * toward the application. For example an application that wants to keep up to
+ * date with the updates coming from SAL it will register in the OSGi service
+ * registry on a per-container base. SAL will call it to provide the update.
  */
 public interface IListenTopoUpdates {
     /**
@@ -51,6 +42,7 @@ public interface IListenTopoUpdates {
      * threshold level configured on the controller
      *
      * @param edge
+     *            The edge which bandwidth usage is back to normal
      */
     public void edgeUtilBackToNormal(Edge edge);
 }
