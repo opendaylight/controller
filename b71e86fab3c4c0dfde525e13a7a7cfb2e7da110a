@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///6Q\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/AllFlowStatistics.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-26T19:15:05Z",
+      "side": 1,
+      "message": "As a convention, such wrapper elements are tagged as \"list\" so that it is consistent with JSON and makes it convenient for the clients to parse.\nPlease refer to Switch manager northbound changes.\n\nThis comment is applicable for all the custom List elements defined in this gerrit request.",
+      "revId": "b71e86fab3c4c0dfde525e13a7a7cfb2e7da110a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///6Y\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/StatisticsNorthbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-26T19:15:05Z",
+      "side": 1,
+      "message": "Enunciate is not generating documents properly if the whitespaces are not escaped. Please refer to switchmanager and do your changes accordingly\n\nThis comment is applicable for all the APIs in this gerrit request.",
+      "revId": "b71e86fab3c4c0dfde525e13a7a7cfb2e7da110a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///6U\u003d",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/StatisticsNorthbound.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-26T19:15:05Z",
+      "side": 1,
+      "message": "Isnt this nodeFlowStatistics ?\n\nPlease make sure that the example is the actual data returned to the client from the NB-API after all the JAXB conversions, etc...",
+      "revId": "b71e86fab3c4c0dfde525e13a7a7cfb2e7da110a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
