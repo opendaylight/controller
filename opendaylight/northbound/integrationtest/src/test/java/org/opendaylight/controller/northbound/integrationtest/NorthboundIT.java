@@ -208,29 +208,29 @@ public class NorthboundIT {
         if (timestamp == null || timestampName == null) {
             Assert.assertFalse(properties.has("timeStamp"));
         } else {
-            Assert.assertEquals(timestamp, (Integer) properties.getJSONObject("timeStamp").getInt("timestamp"));
-            Assert.assertEquals(timestampName, properties.getJSONObject("timeStamp").getString("timestampName"));
+            Assert.assertEquals(timestamp, (Integer) properties.getJSONObject("timeStamp").getInt("value"));
+            Assert.assertEquals(timestampName, properties.getJSONObject("timeStamp").getString("name"));
         }
         if (actionsValue == null) {
             Assert.assertFalse(properties.has("actions"));
         } else {
-            Assert.assertEquals(actionsValue, (Integer) properties.getJSONObject("actions").getInt("actionsValue"));
+            Assert.assertEquals(actionsValue, (Integer) properties.getJSONObject("actions").getInt("value"));
         }
         if (capabilitiesValue == null) {
             Assert.assertFalse(properties.has("capabilities"));
         } else {
             Assert.assertEquals(capabilitiesValue,
-                    (Integer) properties.getJSONObject("capabilities").getInt("capabilitiesValue"));
+                    (Integer) properties.getJSONObject("capabilities").getInt("value"));
         }
         if (tablesValue == null) {
             Assert.assertFalse(properties.has("tables"));
         } else {
-            Assert.assertEquals(tablesValue, (Integer) properties.getJSONObject("tables").getInt("tablesValue"));
+            Assert.assertEquals(tablesValue, (Integer) properties.getJSONObject("tables").getInt("value"));
         }
         if (buffersValue == null) {
             Assert.assertFalse(properties.has("buffers"));
         } else {
-            Assert.assertEquals(buffersValue, (Integer) properties.getJSONObject("buffers").getInt("buffersValue"));
+            Assert.assertEquals(buffersValue, (Integer) properties.getJSONObject("buffers").getInt("value"));
         }
     }
 
@@ -249,18 +249,18 @@ public class NorthboundIT {
         if (state == null) {
             Assert.assertFalse(properties.has("state"));
         } else {
-            Assert.assertEquals(state, (Integer) properties.getJSONObject("state").getInt("stateValue"));
+            Assert.assertEquals(state, (Integer) properties.getJSONObject("state").getInt("value"));
         }
         if (capabilities == null) {
             Assert.assertFalse(properties.has("capabilities"));
         } else {
             Assert.assertEquals(capabilities,
-                    (Integer) properties.getJSONObject("capabilities").getInt("capabilitiesValue"));
+                    (Integer) properties.getJSONObject("capabilities").getInt("value"));
         }
         if (bandwidth == null) {
             Assert.assertFalse(properties.has("bandwidth"));
         } else {
-            Assert.assertEquals(bandwidth, (Integer) properties.getJSONObject("bandwidth").getInt("bandwidthValue"));
+            Assert.assertEquals(bandwidth, (Integer) properties.getJSONObject("bandwidth").getInt("value"));
         }
 
     }
@@ -499,8 +499,8 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         node = getJsonInstance(json, "nodeProperties", nodeId_1);
         Assert.assertNotNull(node);
-        Assert.assertEquals(1001, node.getJSONObject("properties").getJSONObject("tier").getInt("tierValue"));
-        Assert.assertEquals("node1", node.getJSONObject("properties").getJSONObject("description").getString("descriptionValue"));
+        Assert.assertEquals(1001, node.getJSONObject("properties").getJSONObject("tier").getInt("value"));
+        Assert.assertEquals("node1", node.getJSONObject("properties").getJSONObject("description").getString("value"));
 
         // Test delete nodeConnector property
         // Delete state property of nodeconnector1
@@ -1091,9 +1091,9 @@ public class NorthboundIT {
                 Assert.assertEquals(tailNode.getString("@type"),nodeType);
                 Assert.assertEquals(tailNode.getString("@type"), nodeConnType);
                 Assert.assertEquals(tailNC.getLong("@id"), tailNC1_nodeConnId);
-                Assert.assertEquals(bandw.getLong("bandwidthValue"), bw_1);
-                Assert.assertTrue((short) stt.getInt("stateValue") == state_1);
-                Assert.assertEquals(ltc.getLong("latencyValue"), lat_1);
+                Assert.assertEquals(bandw.getLong("value"), bw_1);
+                Assert.assertTrue((short) stt.getInt("value") == state_1);
+                Assert.assertEquals(ltc.getLong("value"), lat_1);
             } else if (headNC.getInt("@id") == headNC2_nodeConnId) {
                 Assert.assertEquals(headNode.getString("@type"),nodeType);
                 Assert.assertEquals(headNode.getLong("@id"), headNC2_nodeId);
@@ -1102,9 +1102,9 @@ public class NorthboundIT {
                 Assert.assertTrue(tailNode.getInt("@id") == tailNC2_nodeId);
                 Assert.assertEquals(tailNC.getString("@type"), nodeConnType);
                 Assert.assertEquals(tailNC.getLong("@id"), tailNC2_nodeConnId);
-                Assert.assertEquals(bandw.getLong("bandwidthValue"), bw_2);
-                Assert.assertTrue((short) stt.getInt("stateValue") == state_2);
-                Assert.assertEquals(ltc.getLong("latencyValue"), lat_2);
+                Assert.assertEquals(bandw.getLong("value"), bw_2);
+                Assert.assertTrue((short) stt.getInt("value") == state_2);
+                Assert.assertEquals(ltc.getLong("value"), lat_2);
             }
         }
 

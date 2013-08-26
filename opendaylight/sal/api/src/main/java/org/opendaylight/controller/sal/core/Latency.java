@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Latency extends Property {
     private static final long serialVersionUID = 1L;
 
-    @XmlElement
+    @XmlElement(name="value")
     private long latencyValue;
 
     public static final long LATENCYUNK = 0;
@@ -61,6 +61,7 @@ public class Latency extends Property {
         this.latencyValue = (long) latency;
     }
 
+    @Override
     public Latency clone() {
         return new Latency(this.latencyValue);
     }

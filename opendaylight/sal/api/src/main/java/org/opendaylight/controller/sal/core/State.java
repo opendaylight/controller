@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @SuppressWarnings("serial")
 public class State extends Property {
-    @XmlElement
+    @XmlElement(name="value")
     private short stateValue;
 
     public static final short EDGE_DOWN = 0;
@@ -41,6 +41,7 @@ public class State extends Property {
         this.stateValue = state;
     }
 
+    @Override
     public State clone() {
         return new State(this.stateValue);
     }

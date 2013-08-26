@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Buffers extends Property {
         private static final long serialVersionUID = 1L;
-    @XmlElement
+    @XmlElement(name="value")
     private int buffersValue;
 
     public static final String BuffersPropName = "buffers";
@@ -46,6 +46,7 @@ public class Buffers extends Property {
         this.buffersValue = 0;
     }
 
+    @Override
     public Buffers clone() {
         return new Buffers(this.buffersValue);
     }

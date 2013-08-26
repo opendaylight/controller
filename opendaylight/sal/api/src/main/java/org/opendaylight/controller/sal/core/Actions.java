@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Actions extends Property {
         private static final long serialVersionUID = 1L;
-    @XmlElement
+    @XmlElement(name="value")
     private int actionsValue;
 
     public enum ActionType {
@@ -69,6 +69,7 @@ public class Actions extends Property {
         this.actionsValue = 0;
     }
 
+    @Override
     public Actions clone() {
         return new Actions(this.actionsValue);
     }
