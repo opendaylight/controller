@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///7I\u003d",
+        "filename": "opendaylight/northbound/switchmanager/src/main/java/org/opendaylight/controller/switchmanager/northbound/NodeConnectors.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-26T18:52:42Z",
+      "side": 1,
+      "message": "This make sense to me. \nHaving an explicit List type defined as a top level tag helps with the XML clients to expect a List type. Without such explicit generic tags, the Client would have to invest in understanding each top level tags.",
+      "revId": "48238a15a5d1fb46a7248d3fe276df71898f7c2a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///7U\u003d",
+        "filename": "opendaylight/northbound/switchmanager/src/main/java/org/opendaylight/controller/switchmanager/northbound/SwitchNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-26T18:52:42Z",
+      "side": 1,
+      "message": "The formatting stuffs \u0026lt;, \u0026#x20; makes it extremely hard to read the example.\nBut, I understand the  intention behind such a change. It aids in the auto-generated Enunciate REST-API documentation.\n\nBut, the \u003cpre\u003e tag can tolerate white-spaces and am surprised that we had to spoon feed it.\n\nThis seems like an Enunciate bug which removes White-spaces.\nSo, with the pros \u0026 cons, I am okay to leave these formatting changes in place. Once we get a chance to resolve these Enunciate issues, we can simply search \u0026 replace all these formatting fixes and hence the Docs can be intact.",
+      "revId": "48238a15a5d1fb46a7248d3fe276df71898f7c2a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
