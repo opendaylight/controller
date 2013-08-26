@@ -1161,11 +1161,11 @@ one.f.switchmanager.spanPortConfig = {
             // bind onchange
             $select.change(function() {
                 // retrieve port value
-                var node = $(this).find('option:selected').attr('value');
-                one.f.switchmanager.spanPortConfig.registry['currentNode'] = node;
+                var nodeId = $(this).find('option:selected').attr('value');
+                one.f.switchmanager.spanPortConfig.registry['currentNode'] = nodeId;
                 var $ports = $('#' + one.f.switchmanager.spanPortConfig.id.modal.form.port);
-                var ports = nodeports[node];
-                one.lib.form.select.inject($ports, ports);
+                var ports = one.f.switchmanager.spanPortConfig.registry['nodePorts'][nodeId]
+                one.lib.form.select.inject($ports, ports); 
             });
 
             $fieldset.append($label).append($select);
@@ -1182,10 +1182,14 @@ one.f.switchmanager.spanPortConfig = {
         ajax: {
             nodes: function(callback) {
                 $.getJSON(one.f.switchmanager.rootUrl + "/nodeports", function(data) {
-                    var nodes = one.f.switchmanager.spanPortConfig.modal.data.nodes(data);
-                    var nodeports = data;
-                    one.f.switchmanager.spanPortConfig.registry['nodeports'] = nodeports;
-                    callback(nodes, nodeports);
+                    var nodes = {};
+                    var nodePorts = {};
+                    $(data).each(function(index, node) {
+                        nodes[node.nodeId] = node.nodeName;
+                        nodePorts[node.nodeId] = node.nodePorts;
+                    });
+                    one.f.switchmanager.spanPortConfig.registry['nodePorts'] = nodePorts;
+                    callback(nodes, nodePorts);
                 });
             },
             saveSpanPortConfig: function(requestData, callback) {
@@ -1194,15 +1198,6 @@ one.f.switchmanager.spanPortConfig = {
                 $.getJSON(one.f.switchmanager.rootUrl + "/spanPorts/add", resource, function(data) {
                     callback(data);
                 });
-            }
-        },
-        data : {
-            nodes : function(data) {
-                result = {};
-                $.each(data, function(key, value) {
-                    result[key] = key;
-                });
-                return result;
             }
         },
         footer : function() {

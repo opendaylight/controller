@@ -636,7 +636,7 @@ public class Devices implements IDaylightWeb {
 
     @RequestMapping(value = "/nodeports")
     @ResponseBody
-    public Map<String, Object> getNodePorts(HttpServletRequest request,
+    public List<NodeJsonBean> getNodePorts(HttpServletRequest request,
             @RequestParam(required = false) String container) {
         String containerName = (container == null) ? GlobalConstants.DEFAULT
                 .toString() : container;
@@ -647,18 +647,16 @@ public class Devices implements IDaylightWeb {
             return null;
         }
 
-
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                 .getInstance(ISwitchManager.class, containerName, this);
         if (switchManager == null) {
             return null;
         }
-
-        Map<String, Object> nodes = new HashMap<String, Object>();
-        Map<Short, String> port;
+        List<NodeJsonBean> nodeJsonBeans = new ArrayList<NodeJsonBean>();
 
         for (Switch node : switchManager.getNetworkDevices()) {
-            port = new HashMap<Short, String>(); // new port
+            NodeJsonBean nodeJsonBean = new NodeJsonBean();
+            List<String> port = new ArrayList<String>();
             Set<NodeConnector> nodeConnectorSet = node.getNodeConnectors();
 
             if (nodeConnectorSet != null) {
@@ -666,15 +664,17 @@ public class Devices implements IDaylightWeb {
                     String nodeConnectorName = ((Name) switchManager
                             .getNodeConnectorProp(nodeConnector,
                                     Name.NamePropName)).getValue();
-                    port.put((Short) nodeConnector.getID(), nodeConnectorName
+                    port.add(nodeConnectorName
                             + "(" + nodeConnector.getID() + ")");
                 }
             }
-
-            nodes.put(node.getNode().toString(), port);
+            nodeJsonBean.setNodeId(node.getNode().toString());
+            nodeJsonBean.setNodeName(getNodeDesc(node.getNode().toString(), containerName));
+            nodeJsonBean.setNodePorts(port);
+            nodeJsonBeans.add(nodeJsonBean);
         }
 
-        return nodes;
+        return nodeJsonBeans;
     }
 
     @RequestMapping(value = "/spanPorts/add", method = RequestMethod.GET)
