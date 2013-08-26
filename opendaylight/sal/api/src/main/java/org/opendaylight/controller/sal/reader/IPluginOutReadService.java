@@ -14,36 +14,60 @@ import java.util.List;
 import org.opendaylight.controller.sal.core.Node;
 
 /**
- * @file   IPluginOutReadService.java
- *
- * @brief  Hardware statistics updates service to be offered by protocol plugins
+ * The interface defines hardware statistics updates service to be offered by
+ * protocol plugins
  */
 public interface IPluginOutReadService {
 
     /**
-     * Notifies the hardware view of all the flow installed on the specified network node
+     * Notifies the hardware view of all the flow installed on the specified
+     * network node
+     *
      * @param node
-     * @return
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @param flowStatsList
+     *            the hardware view of all the flow
+     *            {@link org.opendaylight.controller.sal.reader.FlowOnNode}
+     *            installed on the specified network node
      */
     public void nodeFlowStatisticsUpdated(Node node, List<FlowOnNode> flowStatsList);
 
     /**
-     * Notifies the hardware view of the specified network node connector
+     * Notifies the hardware view of the specified network node
+     *
      * @param node
-     * @return
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @param ncStatsList
+     *            the statistics
+     *            {@link org.opendaylight.controller.sal.reader.NodeConnectorStatistics}
+     *            for all node connectors in a given node
      */
     public void nodeConnectorStatisticsUpdated(Node node, List<NodeConnectorStatistics> ncStatsList);
 
     /**
      * Notifies all the table statistics for a node
+     *
      * @param node
-     * @return
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @param tableStatsList
+     *            the statistics
+     *            {@link org.opendaylight.controller.sal.reader.NodeTableStatistics}
+     *            for all the tables in a given node
      */
     public void nodeTableStatisticsUpdated(Node node, List<NodeTableStatistics> tableStatsList);
+
     /**
      * Notifies the hardware view of node description changes
+     *
      * @param node
-     * @return
+     *            the network node
+     *            {@link org.opendaylight.controller.sal.core.Node}
+     * @param nodeDescription
+     *            the node description
+     *            {@link org.opendaylight.controller.sal.reader.NodeDescription}
      */
     public void descriptionStatisticsUpdated(Node node, NodeDescription nodeDescription );
 

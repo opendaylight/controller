@@ -10,12 +10,8 @@
 package org.opendaylight.controller.sal.core;
 
 /**
- * @file   IContainerAware.java
- *
- * @brief  Define the interface to be called when the Container is being
+ * The interface describes methods to be called when the Container is being
  * created/destroyed
- *
- *
  */
 
 public interface IContainerAware {
