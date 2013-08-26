@@ -33,6 +33,7 @@ import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
+import org.opendaylight.controller.northbound.commons.exception.MethodNotAllowedException;
 import org.opendaylight.controller.northbound.commons.exception.NotAcceptableException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
@@ -149,9 +150,36 @@ public class FlowProgrammerNorthbound {
      * Returns a list of Flows configured on the given container
      *
      * @param containerName
-     *            Name of the Container. The Container name for the base
-     *            controller is "default".
-     * @return List of configured flows configured on a given container
+     *            Name of the Container (Eg. 'default')
+     * @return List of flows configured on a given container
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/flow/default
+     *
+     * Response in XML:
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+     * &lt;list&gt;
+     *     &#x20;&#x20;&#x20;&lt;flowConfig&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;flow1&lt;/name&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;ingressPort&gt;1&lt;/ingressPort&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;priority&gt;500&lt;/priority&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;etherType&gt;0x800&lt;/etherType&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nwSrc&gt;9.9.1.1&lt;/nwSrc&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;actions&gt;OUTPUT=2&lt;/actions&gt;
+     *     &#x20;&#x20;&#x20;&lt;/flowConfig&gt;
+     * &lt;/list&gt;
+     *
+     * Response in JSON:
+     * {"flowConfig":{"installInHw":"true","name":"flow1","node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"},
+     * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}}
+     *
+     * </pre>
      */
     @Path("/{containerName}")
     @GET
@@ -159,6 +187,7 @@ public class FlowProgrammerNorthbound {
     @TypeHint(FlowConfigs.class)
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public FlowConfigs getStaticFlows(
@@ -179,20 +208,48 @@ public class FlowProgrammerNorthbound {
      * Returns a list of Flows configured on a Node in a given container
      *
      * @param containerName
-     *            Name of the Container. The Container name for the base
-     *            controller is "default".
+     *            Name of the Container (Eg. 'default')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
-     *            Node Identifier
-     * @return List of configured flows configured on a Node in a container
+     *            Node Identifier (Eg. '00:00:00:00:00:00:00:01')
+     * @return List of flows configured on a Node in a container
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01
+     *
+     * Response in XML:
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+     * &lt;list&gt;
+     *     &#x20;&#x20;&#x20;&lt;flowConfig&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;flow1&lt;/name&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;ingressPort&gt;1&lt;/ingressPort&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;priority&gt;500&lt;/priority&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;etherType&gt;0x800&lt;/etherType&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nwSrc&gt;9.9.1.1&lt;/nwSrc&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;actions&gt;OUTPUT=2&lt;/actions&gt;
+     *     &#x20;&#x20;&#x20;&lt;/flowConfig&gt;
+     * &lt;/list&gt;
+     *
+     * Response in JSON:
+     * {"flowConfig":{"installInHw":"true","name":"flow1","node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"},
+     * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}}
+     *
+     * </pre>
      */
-    @Path("/{containerName}/{nodeType}/{nodeId}")
+    @Path("/{containerName}/node/{nodeType}/{nodeId}")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(FlowConfigs.class)
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The containerName or nodeId is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public FlowConfigs getStaticFlows(
@@ -219,22 +276,48 @@ public class FlowProgrammerNorthbound {
      * on a given Container.
      *
      * @param containerName
-     *            Name of the Container. The Container name for the base
-     *            controller is "default".
+     *            Name of the Container (Eg. 'default')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
-     *            Node Identifier
+     *            Node Identifier (Eg. '00:00:00:00:00:00:00:01')
      * @param name
-     *            Human-readable name for the configured flow.
+     *            Human-readable name for the configured flow (Eg. 'Flow1')
      * @return Flow configuration matching the name and nodeId on a Container
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01/static-flow/flow1
+     *
+     * Response in XML:
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+     * &lt;flowConfig&gt;
+     *     &#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
+     *     &#x20;&#x20;&#x20;&lt;name&gt;flow1&lt;/name&gt;
+     *     &#x20;&#x20;&#x20;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;
+     *     &#x20;&#x20;&#x20;&lt;ingressPort&gt;1&lt;/ingressPort&gt;
+     *     &#x20;&#x20;&#x20;&lt;priority&gt;500&lt;/priority&gt;
+     *     &#x20;&#x20;&#x20;&lt;etherType&gt;0x800&lt;/etherType&gt;
+     *     &#x20;&#x20;&#x20;&lt;nwSrc&gt;9.9.1.1&lt;/nwSrc&gt;
+     *     &#x20;&#x20;&#x20;&lt;actions&gt;OUTPUT=2&lt;/actions&gt;
+     * &lt;/flowConfig&gt;
+     *
+     * Response in JSON:
+     * {"installInHw":"true","name":"flow1","node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"},
+     * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}
+     *
+     * </pre>
      */
-    @Path("/{containerName}/{nodeType}/{nodeId}/{name}")
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/static-flow/{name}")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(FlowConfig.class)
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The containerName or NodeId or Configuration name is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public FlowConfig getStaticFlow(
@@ -268,27 +351,53 @@ public class FlowProgrammerNorthbound {
      * Add a flow configuration
      *
      * @param containerName
-     *            Name of the Container. The Container name for the base
-     *            controller is "default".
+     *            Name of the Container (Eg. 'default')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
-     *            Node Identifier
+     *            Node Identifier (Eg. '00:00:00:00:00:00:00:01')
      * @param name
-     *            Name of the Static Flow configuration
+     *            Name of the Static Flow configuration (Eg. 'Flow2')
      * @param FlowConfig
      *            Flow Configuration in JSON or XML format
      * @return Response as dictated by the HTTP Response Status code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01/static-flow/flow1
+     *
+     * Request in XML:
+     * &lt;flowConfig&gt;
+     *         &#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
+     *         &#x20;&#x20;&#x20;&lt;name&gt;flow1&lt;/name&gt;
+     *         &#x20;&#x20;&#x20;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;
+     *         &#x20;&#x20;&#x20;&lt;ingressPort&gt;1&lt;/ingressPort&gt;
+     *         &#x20;&#x20;&#x20;&lt;priority&gt;500&lt;/priority&gt;
+     *         &#x20;&#x20;&#x20;&lt;etherType&gt;0x800&lt;/etherType&gt;
+     *         &#x20;&#x20;&#x20;&lt;nwSrc&gt;9.9.1.1&lt;/nwSrc&gt;
+     *         &#x20;&#x20;&#x20;&lt;actions&gt;OUTPUT=2&lt;/actions&gt;
+     * &lt;/flowConfig&gt;
+     *
+     * Request in JSON:
+     * {"installInHw":"true","name":"flow1","node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"},
+     * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}
+     *
+     * </pre>
      */
 
-    @Path("/{containerName}/{nodeType}/{nodeId}/{name}")
-    @POST
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/static-flow/{name}")
+    @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 201, condition = "Flow Config processed successfully"),
-            @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
+            @ResponseCode(code = 400, condition = "Failed to create Static Flow entry due to invalid flow configuration"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+            @ResponseCode(code = 404, condition = "The Container Name or nodeId is not found"),
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
-            @ResponseCode(code = 409, condition = "Failed to create Static Flow entry due to Conflicting Name"),
+            @ResponseCode(code = 409, condition = "Failed to create Static Flow entry due to Conflicting Name or configuration"),
             @ResponseCode(code = 500, condition = "Failed to create Static Flow entry. Failure Reason included in HTTP Error response"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addFlow(
@@ -304,6 +413,8 @@ public class FlowProgrammerNorthbound {
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
+        handleResourceCongruence(name, flowConfig.getValue().getName());
+        handleResourceCongruence(nodeId, flowConfig.getValue().getNode().getNodeIDString());
         handleDefaultDisabled(containerName);
 
         IForwardingRulesManager frm = getForwardingRulesManagerService(containerName);
@@ -325,35 +436,42 @@ public class FlowProgrammerNorthbound {
 
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Flow", username, "added", name, containerName);
-            return Response.status(Response.Status.CREATED).build();
+            return Response.status(Response.Status.CREATED).entity("Success").build();
         }
-        throw new InternalServerErrorException(status.getDescription());
+        return NorthboundUtils.getResponse(status);
     }
 
     /**
      * Delete a Flow configuration
      *
-     * DELETE /flows/{containerName}/{nodeType}/{nodeId}/{name}
-     *
      * @param containerName
-     *            Name of the Container. The Container name for the base
-     *            controller is "default".
+     *            Name of the Container (Eg. 'default')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
-     *            Node Identifier
+     *            Node Identifier (Eg. '00:00:00:00:00:00:00:01')
      * @param name
-     *            Name of the Static Flow configuration
+     *            Name of the Static Flow configuration (Eg. 'Flow1')
      * @return Response as dictated by the HTTP Response code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01/static-flow/flow1
+     *
+     * </pre>
      */
 
-    @Path("/{containerName}/{nodeType}/{nodeId}/{name}")
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/static-flow/{name}")
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Flow Config deleted successfully"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The Container Name or Node-id or Flow Name passed is not found"),
-            @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
+            @ResponseCode(code = 406, condition = "Failed to delete Flow config due to invalid operation. Failure details included in HTTP Error response"),
             @ResponseCode(code = 500, condition = "Failed to delete Flow config. Failure Reason included in HTTP Error response"),
             @ResponseCode(code = 503, condition = "One or more of Controller service is unavailable") })
     public Response deleteFlow(
@@ -388,33 +506,40 @@ public class FlowProgrammerNorthbound {
         Status status = frm.removeStaticFlow(name, node);
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Flow", username, "removed", name, containerName);
-            return Response.ok().build();
         }
-        throw new InternalServerErrorException(status.getDescription());
+        return NorthboundUtils.getResponse(status);
     }
 
     /**
      * Toggle a Flow configuration
      *
      * @param containerName
-     *            Name of the Container. The Container name for the base
-     *            controller is "default".
+     *            Name of the Container (Eg. 'default')
      * @param nodeType
-     *            Type of the node being programmed
+     *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
-     *            Node Identifier
+     *            Node Identifier (Eg. '00:00:00:00:00:00:00:01')
      * @param name
-     *            Name of the Static Flow configuration
+     *            Name of the Static Flow configuration (Eg. 'Flow1')
      * @return Response as dictated by the HTTP Response code
+     *
+     * <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01/static-flow/flow1
+     *
+     * </pre>
      */
-
-    @Path("/{containerName}/{nodeType}/{nodeId}/{name}")
-    @PUT
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/static-flow/{name}")
+    @POST
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Flow Config deleted successfully"),
+            @ResponseCode(code = 200, condition = "Flow Config processed successfully"),
+            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The Container Name or Node-id or Flow Name passed is not found"),
-            @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
+            @ResponseCode(code = 406, condition = "Failed to delete Flow config due to invalid operation. Failure details included in HTTP Error response"),
             @ResponseCode(code = 500, condition = "Failed to delete Flow config. Failure Reason included in HTTP Error response"),
             @ResponseCode(code = 503, condition = "One or more of Controller service is unavailable") })
     public Response toggleFlow(
@@ -450,9 +575,8 @@ public class FlowProgrammerNorthbound {
         Status status = frm.toggleStaticFlowStatus(staticFlow);
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Flow", username, "toggled", name, containerName);
-            return Response.ok().build();
         }
-        throw new InternalServerErrorException(status.getDescription());
+        return NorthboundUtils.getResponse(status);
     }
 
     private Node handleNodeAvailability(String containerName, String nodeType,
@@ -490,6 +614,12 @@ public class FlowProgrammerNorthbound {
                 && containerManager.hasNonDefaultContainer()) {
             throw new NotAcceptableException(
                     RestMessages.DEFAULTDISABLED.toString());
+        }
+    }
+
+    private void handleResourceCongruence(String resource, String configured) {
+        if (!resource.equals(configured)) {
+            throw new MethodNotAllowedException("Path's resource name conflicts with payload's resource name");
         }
     }
 

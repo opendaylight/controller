@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 
-@XmlRootElement
+@XmlRootElement (name = "list")
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class FlowConfigs {
