@@ -489,9 +489,9 @@ public class NorthboundIT {
         // Test add property to node
         // Add Tier and Description property to node1
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1 + "/property/tier/1001", "PUT");
-        Assert.assertEquals(200, httpResponseCode.intValue());
+        Assert.assertEquals(201, httpResponseCode.intValue());
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1 + "/property/description/node1", "PUT");
-        Assert.assertEquals(200, httpResponseCode.intValue());
+        Assert.assertEquals(201, httpResponseCode.intValue());
 
         // Test for first node
         result = getJsonResult(baseURL + "nodes");
