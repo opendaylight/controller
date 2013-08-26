@@ -11,6 +11,7 @@ package org.opendaylight.controller.devices.web;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -145,7 +146,6 @@ public class Devices implements IDaylightWeb {
                         State portState = ((State) switchManager
                                 .getNodeConnectorProp(nodeConnector,
                                         State.StatePropName));
-
                         String nodeConnectorName = (ncName != null) ? ncName
                                 .getValue() : "";
                         nodeConnectorName += " (" + nodeConnector.getID() + ")";
@@ -416,7 +416,22 @@ public class Devices implements IDaylightWeb {
                     Map<String, String> subnet = new HashMap<String, String>();
                     subnet.put("name", conf.getName());
                     subnet.put("subnet", conf.getSubnet());
-                    subnet.put("json", gson.toJson(conf));
+                    List<SubnetGatewayPortBean> portsList = new ArrayList<SubnetGatewayPortBean>();
+                    Iterator<NodeConnector> itor = conf.getSubnetNodeConnectors().iterator();
+                    while(itor.hasNext()) {
+                        SubnetGatewayPortBean bean = new SubnetGatewayPortBean();
+                        NodeConnector nodeConnector = itor.next();
+                        String nodeName = getNodeDesc(nodeConnector.getNode().toString(), containerName);
+                        Name ncName = ((Name) switchManager.getNodeConnectorProp(nodeConnector, Name.NamePropName));
+                        String nodeConnectorName = (ncName != null) ? ncName.getValue() : "";
+                        nodeConnectorName += " (" + nodeConnector.getID() + ")";
+                        bean.setNodeName(nodeName);
+                        bean.setNodePortName(nodeConnectorName);
+                        bean.setNodeId(nodeConnector.getNode().toString());
+                        bean.setNodePortId(nodeConnector.getID().toString());
+                        portsList.add(bean);
+                    }
+                    subnet.put("nodePorts", gson.toJson(portsList));
                     subnets.add(subnet);
                 }
             }

@@ -351,7 +351,7 @@ one.f.switchmanager.nodesLearnt = {
                         },
                         {
                             property: 'mac',
-                            label: 'Mac',
+                            label: 'MAC',
                             sortable: true
                         },
                         {
@@ -714,7 +714,7 @@ one.f.switchmanager.subnetGatewayConfig = {
                             sortable: true
                         },
                         {
-                            property: 'json',
+                            property: 'nodePorts',
                             label: 'Node/Ports',
                             sortable: false
                         }
@@ -723,19 +723,20 @@ one.f.switchmanager.subnetGatewayConfig = {
                     formatter: function(items) {
                         $.each(items, function(index, tableRow) {
                             tableRow["selector"] = '<input type="checkbox" id=' + tableRow["name"] + '></input>';
-                            var json = tableRow["json"];
-                            var subnetConfigObject = JSON.parse(json);
+                            var json = tableRow["nodePorts"];
+                            var nodePorts = JSON.parse(json);
                             var nodePortHtml = "<div>";
-                            $.each(subnetConfigObject.nodePorts, function(index, nodePort) {
-                                nodePortHtml += nodePort;
+                            $.each(nodePorts, function(index, nodePort) {
+                                var nodePortID = nodePort["nodeId"] + "/" + nodePort["nodePortId"]; 
+                                nodePortHtml += nodePort["nodeName"] + " / " + nodePort["nodePortName"];
                                 nodePortHtml += "&nbsp;";
-                                nodePortHtml += '<a href="#" id=' + encodeURIComponent(nodePort) + 
+                                nodePortHtml += '<a href="#" id=' + encodeURIComponent(nodePortID) + 
                                     ' gatewayName=' + tableRow["name"] + 
                                     ' onclick="javascript:one.f.switchmanager.subnetGatewayConfig.actions.deleteNodePort(this);">Delete</a>';
                                 nodePortHtml += "<br/>";
                             });
                             nodePortHtml += "</div>";
-                            tableRow["json"] = nodePortHtml;
+                            tableRow["nodePorts"] = nodePortHtml;
                         });
 
                     },
