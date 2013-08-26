@@ -118,6 +118,7 @@ public class NodeTable implements Serializable {
     /**
      * Private constructor used for JAXB mapping
      */
+    @SuppressWarnings("unused")
     private NodeTable() {
         this.nodeTableIDString = null;
         this.nodeTableID = null;
@@ -207,7 +208,7 @@ public class NodeTable implements Serializable {
      */
     @XmlAttribute(name = "id")
     public String getNodeTableIDString() {
-        return this.nodeTableIDString.toString();
+        return this.nodeTableIDString != null? this.nodeTableIDString : nodeTableID.toString();
     }
 
     /**

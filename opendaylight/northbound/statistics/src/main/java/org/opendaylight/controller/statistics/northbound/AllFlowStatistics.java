@@ -17,13 +17,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class AllFlowStatistics {
         @XmlElement
         List<FlowStatistics> flowStatistics;
         //To satisfy JAXB
-        private AllFlowStatistics() {
-        }
+        @SuppressWarnings("unused")
+        private AllFlowStatistics() {}
 
         public AllFlowStatistics(List<FlowStatistics> flowStatistics) {
                 this.flowStatistics = flowStatistics;
