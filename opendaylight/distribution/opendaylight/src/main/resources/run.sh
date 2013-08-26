@@ -40,7 +40,7 @@ JVM at path ${JAVA_HOME}/bin/java check your JAVA_HOME" && exit -1;
 basedir=`dirname ${fullpath}`
 
 function usage {
-    echo "Usage: $0 [-debug] [-debugsuspend] [-debugport <num>] [-start [<console port>]] [-stop] [-status] [-console] [-help] [<other args will automatically be used for the JVM>]"
+    echo "Usage: $0 [-jmx] [-jmxport <num>] [-debug] [-debugsuspend] [-debugport <num>] [-start [<console port>]] [-stop] [-status] [-console] [-help] [<other args will automatically be used for the JVM>]"
     exit 1
 }
 
@@ -56,6 +56,9 @@ debugportread=""
 startdaemon=0
 daemonport=2400
 daemonportread=""
+jmxport=1088
+jmxportread=""
+startjmx=0
 stopdaemon=0
 statusdaemon=0
 consolestart=1
@@ -65,8 +68,10 @@ unknown_option=0
 while true ; do
     case "$1" in
         -debug) debug=1; shift ;;
+        -jmx) startjmx=1; shift ;;
         -debugsuspend) debugsuspend=1; shift ;;
         -debugport) shift; debugportread="$1"; if [[ "${debugportread}" =~ ^[0-9]+$ ]] ; then debugport=${debugportread}; shift; else echo "-debugport expects a number but was not found"; exit -1; fi;;
+        -jmxport) shift; jmxportread="$1"; if [[ "${jmxportread}" =~ ^[0-9]+$ ]] ; then jmxport=${jmxportread}; shift; else echo "-jmxport expects a number but was not found"; exit -1; fi;;
         -start) startdaemon=1; shift; daemonportread="$1"; if [[ "${daemonportread}" =~ ^[0-9]+$ ]] ; then daemonport=${daemonportread}; shift; fi;;
         -stop) stopdaemon=1; shift ;;
         -status) statusdaemon=1; shift ;;
@@ -100,11 +105,22 @@ if [[ "${daemonport}" -lt 1024 ]] || [[ "${daemonport}" -gt 65535 ]]; then
     exit -1
 fi
 
+# Validate jmx port
+if [[ "${jmxport}" -lt 1024 ]] || [[ "${jmxport}" -gt 65535 ]]; then
+    echo "JMX Port not in the range [1024,65535] value is ${jmxport}"
+    exit -1
+fi
+
 # Debug options
 if [ "${debugsuspend}" -eq 1 ]; then
     extraJVMOpts="${extraJVMOpts} -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=${debugport}"
 elif [ "${debug}" -eq 1 ]; then
     extraJVMOpts="${extraJVMOpts} -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=${debugport}"
+fi
+
+# Add JMX support
+if [ "${startjmx}" -eq 1 ]; then
+    extraJVMOpts="${extraJVMOpts} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=${jmxport} -Dcom.sun.management.jmxremote"
 fi
 
 ########################################
