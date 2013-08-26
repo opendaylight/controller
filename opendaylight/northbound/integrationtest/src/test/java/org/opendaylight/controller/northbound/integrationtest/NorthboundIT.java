@@ -734,16 +734,16 @@ public class NorthboundIT {
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/flow/default/";
         // Attempt to get a flow that doesn't exit. Should return 404
         // status.
-        String result = getJsonResult(baseURL + "STUB/51966/test1", "GET");
+        String result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "GET");
         Assert.assertTrue(result.equals("404"));
 
         // test add flow1
         String fc = "{\"dynamic\":\"false\", \"name\":\"test1\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
-        result = getJsonResult(baseURL + "STUB/51966/test1", "POST", fc);
+        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
         // test get returns flow that was added.
-        result = getJsonResult(baseURL + "STUB/51966/test1", "GET");
+        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "GET");
         // check that result came out fine.
         Assert.assertTrue(httpResponseCode == 200);
         JSONTokener jt = new JSONTokener(result);
@@ -756,21 +756,21 @@ public class NorthboundIT {
         Assert.assertEquals(node.getString("@id"), "51966");
         // test adding same flow again fails due to repeat name..return 409
         // code
-        result = getJsonResult(baseURL + "STUB/51966/test1", "POST", fc);
+        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "PUT", fc);
         Assert.assertTrue(result.equals("409"));
 
         fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
-        result = getJsonResult(baseURL + "STUB/51966/test2", "POST", fc);
-        // test should return 500 for error due to same flow being added.
-        Assert.assertTrue(result.equals("500"));
+        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "PUT", fc);
+        // test should return 409 for error due to same flow being added.
+        Assert.assertTrue(result.equals("409"));
 
         // add second flow that's different
         fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"nwSrc\":\"1.1.1.1\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
-        result = getJsonResult(baseURL + "STUB/51966/test2", "POST", fc);
+        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
         // check that request returns both flows given node.
-        result = getJsonResult(baseURL + "STUB/51966/", "GET");
+        result = getJsonResult(baseURL + "node/STUB/51966/", "GET");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
         Assert.assertTrue(json.get("flowConfig") instanceof JSONArray);
@@ -788,10 +788,10 @@ public class NorthboundIT {
         Assert.assertTrue(count == 2);
 
         // delete a flow, check that it's no longer in list.
-        result = getJsonResult(baseURL + "STUB/51966/test2", "DELETE");
+        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "DELETE");
         Assert.assertTrue(httpResponseCode == 200);
 
-        result = getJsonResult(baseURL + "STUB/51966/test2", "GET");
+        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "GET");
         Assert.assertTrue(result.equals("404"));
     }
 
