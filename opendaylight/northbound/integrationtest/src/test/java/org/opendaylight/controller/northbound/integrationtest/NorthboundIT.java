@@ -558,7 +558,7 @@ public class NorthboundIT {
 
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/statistics/default/";
 
-        String result = getJsonResult(baseURL + "flowstats");
+        String result = getJsonResult(baseURL + "flow");
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
         JSONObject flowStatistics = getJsonInstance(json, "flowStatistics", 0xCAFE);
@@ -568,7 +568,7 @@ public class NorthboundIT {
         Assert.assertEquals(node.getString("@type"), "STUB");
 
         // test that flow statistics results are correct
-        JSONArray flowStats = flowStatistics.getJSONArray("flowStat");
+        JSONArray flowStats = flowStatistics.getJSONArray("flowStatistic");
         for (int i = 0; i < flowStats.length(); i++) {
 
             JSONObject flowStat = flowStats.getJSONObject(i);
@@ -576,8 +576,8 @@ public class NorthboundIT {
 
         }
 
-        // for /controller/nb/v2/statistics/default/portstats
-        result = getJsonResult(baseURL + "portstats");
+        // for /controller/nb/v2/statistics/default/port
+        result = getJsonResult(baseURL + "port");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
         JSONObject portStatistics = getJsonInstance(json, "portStatistics", 0xCAFE);
@@ -587,7 +587,7 @@ public class NorthboundIT {
         Assert.assertEquals(node2.getString("@type"), "STUB");
 
         // test that port statistic results are correct
-        JSONObject portStat = portStatistics.getJSONObject("portStat");
+        JSONObject portStat = portStatistics.getJSONObject("portStatistic");
         Assert.assertTrue(portStat.getInt("receivePackets") == 250);
         Assert.assertTrue(portStat.getInt("transmitPackets") == 500);
         Assert.assertTrue(portStat.getInt("receiveBytes") == 1000);
@@ -602,7 +602,7 @@ public class NorthboundIT {
         Assert.assertTrue(portStat.getInt("collisionCount") == 4);
 
         // test for getting one specific node's stats
-        result = getJsonResult(baseURL + "flowstats/STUB/51966");
+        result = getJsonResult(baseURL + "flow/node/STUB/51966");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
         node = json.getJSONObject("node");
@@ -611,13 +611,13 @@ public class NorthboundIT {
         Assert.assertEquals(node.getString("@type"), "STUB");
 
         // test that flow statistics results are correct
-        flowStats = json.getJSONArray("flowStat");
+        flowStats = json.getJSONArray("flowStatistic");
         for (int i = 0; i < flowStats.length(); i++) {
             JSONObject flowStat = flowStats.getJSONObject(i);
             testFlowStat(flowStat, actionTypes[i], i);
         }
 
-        result = getJsonResult(baseURL + "portstats/STUB/51966");
+        result = getJsonResult(baseURL + "port/node/STUB/51966");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
         node2 = json.getJSONObject("node");
@@ -626,7 +626,7 @@ public class NorthboundIT {
         Assert.assertEquals(node2.getString("@type"), "STUB");
 
         // test that port statistic results are correct
-        portStat = json.getJSONObject("portStat");
+        portStat = json.getJSONObject("portStatistic");
         Assert.assertTrue(portStat.getInt("receivePackets") == 250);
         Assert.assertTrue(portStat.getInt("transmitPackets") == 500);
         Assert.assertTrue(portStat.getInt("receiveBytes") == 1000);
