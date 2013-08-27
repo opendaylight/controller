@@ -61,7 +61,7 @@ public class DaylightWebUtil {
     public static void auditlog(String moduleName, String user, String action, String resource,
             String containerName) {
         String auditMsg = "";
-        String mode = "WEB";
+        String mode = "UI";
         if (containerName != null) {
             auditMsg = "Mode: " + mode + " User " + user + " "  + action + " " + moduleName + " " + resource + " in container "
                     + containerName;

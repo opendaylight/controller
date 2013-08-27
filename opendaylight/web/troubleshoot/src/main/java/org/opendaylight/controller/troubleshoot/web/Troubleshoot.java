@@ -21,7 +21,15 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Output;
+import org.opendaylight.controller.sal.action.SetDlDst;
+import org.opendaylight.controller.sal.action.SetDlSrc;
+import org.opendaylight.controller.sal.action.SetNwDst;
+import org.opendaylight.controller.sal.action.SetNwSrc;
+import org.opendaylight.controller.sal.action.SetNwTos;
+import org.opendaylight.controller.sal.action.SetTpDst;
+import org.opendaylight.controller.sal.action.SetTpSrc;
 import org.opendaylight.controller.sal.action.SetVlanId;
+import org.opendaylight.controller.sal.action.SetVlanPcp;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.opendaylight.controller.sal.core.Description;
@@ -56,7 +64,7 @@ public class Troubleshoot implements IDaylightWeb {
     private static final List<String> flowStatsColumnNames = Arrays.asList("Node", "In Port",
             "DL Src", "DL Dst", "DL Type", "DL Vlan", "NW Src", "NW Dst",
             "NW Proto", "TP Src", "TP Dst", "Actions", "Bytes", "Packets",
-            "Time (s)", "Timeout (s)", "Out Port(s)", "Out Vlan",
+            "Time (s)", "Timeout (s)",
             "Priority");
     private static final List<String> portStatsColumnNames = Arrays.asList("Node Connector",
             "Rx Pkts", "Tx Pkts", "Rx Bytes", "Tx Bytes", "Rx Drops",
@@ -346,29 +354,60 @@ public class Troubleshoot implements IDaylightWeb {
 
         StringBuffer actions = new StringBuffer();
         StringBuffer outPorts = new StringBuffer();
-        String outVlanId = null;
         for (Action action : flow.getActions()) {
-            actions.append(action.getType().toString() + "\n");
+
             if (action instanceof Output) {
                 Output ao = (Output) action;
                 if (outPorts.length() > 0) {
                     outPorts.append(" ");
                 }
-                outPorts.append(ao.getPort().getNodeConnectorIdAsString());
+                actions.append(action.getType().toString() + " = "
+                        + ao.getPort().getNodeConnectorIdAsString() + "<br>");
             } else if (action instanceof SetVlanId) {
                 SetVlanId av = (SetVlanId) action;
-                outVlanId = String.valueOf(av.getVlanId());
+                String outVlanId = String.valueOf(av.getVlanId());
+                actions.append(action.getType().toString() + " = " + outVlanId
+                        + "<br>");
+            } else if (action instanceof SetDlSrc) {
+                SetDlSrc ads = (SetDlSrc) action;
+                actions.append(action.getType().toString() + " = "
+                        + HexEncode.bytesToHexStringFormat(ads.getDlAddress()) + "<br>");
+            } else if (action instanceof SetDlDst) {
+                SetDlDst add = (SetDlDst) action;
+                actions.append(action.getType().toString() + " = "
+                        + HexEncode.bytesToHexStringFormat(add.getDlAddress())
+                        + "<br>");
+            } else if (action instanceof SetNwSrc) {
+                SetNwSrc ans = (SetNwSrc) action;
+                actions.append(action.getType().toString() + " = "
+                        + ans.getAddressAsString() + "<br>");
+            } else if (action instanceof SetNwDst) {
+                SetNwDst and = (SetNwDst) action;
+                actions.append(action.getType().toString() + " = "
+                        + and.getAddressAsString() + "<br>");
+            } else if (action instanceof SetNwTos) {
+                SetNwTos ant = (SetNwTos) action;
+                actions.append(action.getType().toString() + " = "
+                        + ant.getNwTos() + "<br>");
+            } else if (action instanceof SetTpSrc) {
+                SetTpSrc ads = (SetTpSrc) action;
+                actions.append(action.getType().toString() + " = "
+                        + ads.getPort() + "<br>");
+            } else if (action instanceof SetTpDst) {
+                SetTpDst atd = (SetTpDst) action;
+                actions.append(action.getType().toString() + " = "
+                        + atd.getPort() + "<br>");
+            } else if (action instanceof SetVlanPcp) {
+                SetVlanPcp avp = (SetVlanPcp) action;
+                actions.append(action.getType().toString() + " = "
+                        + avp.getPcp() + "<br>");
+                // } else if (action instanceof SetDlSrc) {
+                // SetDlSrc ads = (SetDlSrc) action;
+            } else {
+                actions.append(action.getType().toString() + "<br>");
             }
         }
-        if (outPorts.length() == 0) {
-            outPorts.append("*");
-        }
-        if (outVlanId == null) {
-            outVlanId = "*";
-        }
         row.put("actions", actions.toString());
-        row.put("outPorts", outPorts.toString());
-        row.put("outVlanId", outVlanId);
         row.put("durationSeconds",
                 ((Integer) flowOnNode.getDurationSeconds()).toString());
         row.put("idleTimeout", ((Short) flow.getIdleTimeout()).toString());

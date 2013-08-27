@@ -401,16 +401,6 @@ one.f.troubleshooting.existingNodes = {
                             sortable: true
                         },
                         {
-                            property: 'outPorts',
-                            label: 'Out Ports',
-                            sortable: true
-                        },
-                        {
-                            property: 'outVlanId',
-                            label: 'Out VlanId',
-                            sortable: true
-                        },
-                        {
                             property: 'priority',
                             label: 'Priority',
                             sortable: true
@@ -442,8 +432,6 @@ one.f.troubleshooting.existingNodes = {
                     entry.push(value["packetCount"]);
                     entry.push(value["durationSeconds"]);
                     entry.push(value["idleTimeout"]);
-                    entry.push(value["outPorts"]);
-                    entry.push(value["outVlanId"]);
                     entry.push(value["priority"]);
                     tr.entry = entry;
                     result.push(tr);
