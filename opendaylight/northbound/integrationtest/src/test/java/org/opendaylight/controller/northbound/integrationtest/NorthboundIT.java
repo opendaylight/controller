@@ -868,21 +868,19 @@ public class NorthboundIT {
 
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/host/default";
 
-        // test POST method: addHost()
-        String queryParameter = new QueryParameter("dataLayerAddress", dataLayerAddress_1).add("nodeType", nodeType_1)
-                .add("nodeId", nodeId_1.toString()).add("nodeConnectorType", nodeConnectorType_1)
-                .add("nodeConnectorId", nodeConnectorId_1.toString()).add("vlan", vlan_1).getString();
+        // test PUT method: addHost()
+        String fc = "{\"dataLayerAddress\":\"" + dataLayerAddress_1 + "\",\"nodeType\":\"" + nodeType_1
+                + "\",\"nodeId\":\"" + nodeId_1 + "\"," + "\"nodeConnectorType\":\"" + nodeType_1
+                + "\",\"nodeConnectorId\":\"" + nodeConnectorId_1.toString() + "\",\"vlan\":\"" + vlan_1 + "\"}";
 
-        String result = getJsonResult(baseURL + "/" + networkAddress_1 + queryParameter, "POST");
+        String result = getJsonResult(baseURL + "/" + networkAddress_1, "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
-        // vlan is not passed through query parameter but should be
-        // defaulted to "0"
-        queryParameter = new QueryParameter("dataLayerAddress", dataLayerAddress_2).add("nodeType", nodeType_2)
-                .add("nodeId", nodeId_2.toString()).add("nodeConnectorType", nodeConnectorType_2)
-                .add("nodeConnectorId", nodeConnectorId_2.toString()).getString();
+        fc = "{\"dataLayerAddress\":\"" + dataLayerAddress_2 + "\",\"nodeType\":\"" + nodeType_2 + "\",\"nodeId\":\""
+                + nodeId_2 + "\"," + "\"nodeConnectorType\":\"" + nodeType_2 + "\",\"nodeConnectorId\":\""
+                + nodeConnectorId_2.toString() + "\",\"vlan\":\"" + vlan_2 + "\"}";
 
-        result = getJsonResult(baseURL + "/" + networkAddress_2 + queryParameter, "POST");
+        result = getJsonResult(baseURL + "/" + networkAddress_2 , "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
         // define variables for decoding returned strings

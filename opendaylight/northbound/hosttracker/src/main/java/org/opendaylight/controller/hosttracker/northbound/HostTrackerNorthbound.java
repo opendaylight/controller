@@ -14,9 +14,8 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -25,6 +24,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -124,6 +124,44 @@ public class HostTrackerNorthbound {
      *            Name of the Container. The Container name for the base
      *            controller is "default".
      * @return List of Active Hosts.
+     *         <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     *
+     * http://localhost:8080//controller/nb/v2/host/default
+     *
+     * Response in XML
+     *
+     * &lt;hosts&gt;
+     * &#x20;&lt;host&gt;
+     * &#x20;&#x20;&lt;dataLayerAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ethernetAddress"&gt;
+     * &#x20;&#x20;&lt;macAddress&gt;00:00:00:00:01:01&lt;/macAddress&gt;&lt;/dataLayerAddress&gt;
+     * &#x20;&#x20;&lt;networkAddress&gt;1.1.1.1&lt;/networkAddress&gt;
+     * &#x20;&#x20;&lt;nodeConnector id="9" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;&lt;/nodeConnector&gt;
+     * &#x20;&#x20;&lt;vlan&gt;0&lt;/vlan&gt;
+     * &#x20;&#x20;&lt;staticHost&gt;false&lt;/staticHost&gt;
+     * &#x20;&#x20;&lt;/host&gt;
+     * &#x20;&#x20;&lt;host&gt;
+     * &#x20;&#x20;&lt;dataLayerAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ethernetAddress"&gt;
+     * &#x20;&#x20;&lt;macAddress&gt;00:00:00:00:02:02&lt;/macAddress&gt;&lt;/dataLayerAddress&gt;
+     * &#x20;&#x20;&lt;networkAddress&gt;2.2.2.1&lt;/networkAddress&gt;
+     * &#x20;&#x20;&lt;nodeConnector id="5" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:02" type="OF"/&gt;&lt;/nodeConnector&gt;
+     * &#x20;&#x20;&lt;vlan&gt;0&lt;/vlan&gt;
+     * &#x20;&#x20;&lt;staticHost&gt;false&lt;/staticHost&gt;
+     * &#x20;&#x20;&lt;/host&gt;
+     * &lt;/hosts&gt;
+     *
+     * Response in JSON:
+     *
+     * {"host":[{"dataLayerAddress":{"@type":"ethernetAddress","macAddress":"00:00:00:00:01:01"},
+     * "networkAddress":"1.1.1.1","nodeConnector":{"@id":"9","@type":"OF",
+     * "node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"}},"vlan":"0","staticHost":"false"},
+     * {"dataLayerAddress":{"@type":"ethernetAddress","macAddress":"00:00:00:00:02:02"},
+     * "networkAddress":"2.2.2.1","nodeConnector":{"@id":"5","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:02","@type":"OF"}},
+     * "vlan":"0","staticHost":"false"}]}
+     * </pre>
      */
     @Path("/{containerName}")
     @GET
@@ -158,6 +196,44 @@ public class HostTrackerNorthbound {
      *            Name of the Container. The Container name for the base
      *            controller is "default".
      * @return List of inactive Hosts.
+     *     <pre>
+     *
+     * Example:
+     *
+     * RequestURL:
+     *
+     * http://localhost:8080//controller/nb/v2/host/default/inactive
+     *
+     * Response in XML
+     *
+     * &lt;hosts&gt;
+     * &#x20;&lt;host&gt;
+     * &#x20;&#x20;&lt;dataLayerAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ethernetAddress"&gt;
+     * &#x20;&#x20;&lt;macAddress&gt;00:00:00:00:01:01&lt;/macAddress&gt;&lt;/dataLayerAddress&gt;
+     * &#x20;&#x20;&lt;networkAddress&gt;1.1.1.1&lt;/networkAddress&gt;
+     * &#x20;&#x20;&lt;nodeConnector id="9" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;&lt;/nodeConnector&gt;
+     * &#x20;&#x20;&lt;vlan&gt;0&lt;/vlan&gt;
+     * &#x20;&#x20;&lt;staticHost&gt;true&lt;/staticHost&gt;
+     * &#x20;&#x20;&lt;/host&gt;
+     * &#x20;&#x20;&lt;host&gt;
+     * &#x20;&#x20;&lt;dataLayerAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ethernetAddress"&gt;
+     * &#x20;&#x20;&lt;macAddress&gt;00:00:00:00:02:02&lt;/macAddress&gt;&lt;/dataLayerAddress&gt;
+     * &#x20;&#x20;&lt;networkAddress&gt;2.2.2.1&lt;/networkAddress&gt;
+     * &#x20;&#x20;&lt;nodeConnector id="5" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:02" type="OF"/&gt;&lt;/nodeConnector&gt;
+     * &#x20;&#x20;&lt;vlan&gt;0&lt;/vlan&gt;
+     * &#x20;&#x20;&lt;staticHost&gt;true&lt;/staticHost&gt;
+     * &#x20;&#x20;&lt;/host&gt;
+     * &lt;/hosts&gt;
+     *
+     * Response in JSON:
+     *
+     * {"host":[{"dataLayerAddress":{"@type":"ethernetAddress","macAddress":"00:00:00:00:01:01"},
+     * "networkAddress":"3.3.3.1","nodeConnector":{"@id":"9","@type":"OF",
+     * "node":{"@id":"00:00:00:00:00:00:03:03","@type":"OF"}},"vlan":"0","staticHost":"true"},
+     * {"dataLayerAddress":{"@type":"ethernetAddress","macAddress":"00:00:00:00:04:04"},
+     * "networkAddress":"4.4.4.1","nodeConnector":{"@id":"5","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:02","@type":"OF"}},
+     * "vlan":"0","staticHost":"true"}]}
+     * </pre>
      */
     @Path("/{containerName}/inactive")
     @GET
@@ -193,6 +269,34 @@ public class HostTrackerNorthbound {
      * @param networkAddress
      *            IP Address being looked up
      * @return host that matches the IP Address
+     *
+     *  <pre>
+     *
+     *  Example:
+     *
+     *  RequestURL:
+     *
+     *  http://localhost:8080/controller/nb/v2/host/default/1.1.1.1
+     *
+     *  Response in XML
+     *
+     *  &lt;host&gt;
+     *  &#x20;&#x20;&lt;dataLayerAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ethernetAddress"&gt;
+     *  &#x20;&#x20;&lt;macAddress&gt;00:00:00:00:01:01&lt;/macAddress&gt;&lt;/dataLayerAddress&gt;
+     *  &#x20;&#x20;&lt;networkAddress&gt;1.1.1.1&lt;/networkAddress&gt;
+     *  &#x20;&#x20;&lt;nodeConnector id="9" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;&lt;/nodeConnector&gt;
+     *  &#x20;&#x20;&lt;vlan&gt;0&lt;/vlan&gt;
+     *  &#x20;&#x20;&lt;staticHost&gt;false&lt;/staticHost&gt;
+     *  &lt;/host&gt;
+     *
+     * Response in JSON
+     *
+     *  {"dataLayerAddress":{"@type":"ethernetAddress","macAddress":"00:00:00:00:01:04"},
+     *  "networkAddress":"3.3.3.4",
+     *  "nodeConnector":{"@id":"9","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"}},
+     *  "vlan":"0",
+     * "staticHost":"true"}
+     *
      */
     @Path("/{containerName}/{networkAddress}")
     @GET
@@ -254,10 +358,28 @@ public class HostTrackerNorthbound {
      * @param vlan
      *            Vlan number
      * @return Response as dictated by the HTTP Response Status code
+     *
+     * Example:
+     *
+     *  RequestURL:
+     *
+     *  http://localhost:8080/controller/nb/v2/host/default/3.3.3.6
+     *
+     *  Request in XML
+     *
+     *  &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+     *  &lt;hostConfig&gt;
+     *  &#x20;&#x20;&lt;dataLayerAddress&gt;00:00:00:00:01:06&lt;/dataLayerAddress&gt;
+     *  &#x20;&#x20;&lt;nodeType&gt;OF&lt;/nodeType&gt;
+     *  &#x20;&#x20;&lt;nodeId&gt;00:00:00:00:00:00:00:01&lt;/nodeId&gt;
+     *  &#x20;&#x20;&lt;nodeConnectorType&gt;OF&lt;/nodeConnectorType&gt;
+     *  &#x20;&#x20;&lt;nodeConnectorId&gt;9&lt;/nodeConnectorId&gt;
+     *  &#x20;&#x20;&lt;vlan&gt;0&lt;/vlan&gt;
+     *  &lt;/hostConfig&gt;
      */
 
     @Path("/{containerName}/{networkAddress}")
-    @POST
+    @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 201, condition = "Static host created successfully"),
@@ -268,12 +390,7 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addHost(@PathParam("containerName") String containerName,
             @PathParam("networkAddress") String networkAddress,
-            @QueryParam("dataLayerAddress") String dataLayerAddress,
-            @QueryParam("nodeType") String nodeType,
-            @QueryParam("nodeId") String nodeId,
-            @QueryParam("nodeConnectorType") String nodeConnectorType,
-            @QueryParam("nodeConnectorId") String nodeConnectorId,
-            @DefaultValue("0") @QueryParam("vlan") String vlan) {
+            @TypeHint(HostConfig.class) JAXBElement<HostConfig> hostConfig) {
 
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.WRITE, this)) {
@@ -289,7 +406,8 @@ public class HostTrackerNorthbound {
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = handleNodeAvailability(containerName, nodeType, nodeId);
+        HostConfig hc = hostConfig.getValue();
+        Node node = handleNodeAvailability(containerName, hc.getNodeType(), hc.getNodeId());
         if (node == null) {
             throw new InternalServerErrorException(
                     RestMessages.NONODE.toString());
@@ -301,14 +419,13 @@ public class HostTrackerNorthbound {
             throw new UnsupportedMediaTypeException(networkAddress + " "
                     + RestMessages.INVALIDADDRESS.toString());
         }
-        NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType,
-                nodeConnectorId, node);
+        NodeConnector nc = NodeConnector.fromStringNoNode(hc.getNodeConnectorType(), hc.getNodeConnectorId(), node);
         if (nc == null) {
-            throw new ResourceNotFoundException(nodeConnectorType + "|"
-                    + nodeConnectorId + " : " + RestMessages.NONODE.toString());
+            throw new ResourceNotFoundException(hc.getNodeConnectorType() + "|"
+                    + hc.getNodeConnectorId() + " : " + RestMessages.NONODE.toString());
         }
         Status status = hostTracker.addStaticHost(networkAddress,
-                dataLayerAddress, nc, vlan);
+                hc.getDataLayerAddress(), nc, hc.getVlan());
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Static Host", username, "added", networkAddress, containerName);
             return Response.status(Response.Status.CREATED).build();
