@@ -37,8 +37,6 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 
-import java.lang.Exception;
-import java.lang.IllegalArgumentException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -234,7 +232,7 @@ public class DijkstraImplementation implements IRouting, ITopologyManagerCluster
     @Override
     public synchronized void clearMaxThroughput() {
         if (mtp != null) {
-            mtp.reset(); // reset maxthruput path
+            mtp.reset(); // reset max throughput path
         }
     }
 
