@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///vk\u003d",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-27T19:39:34Z",
+      "side": 1,
+      "message": "Given one of the parameters is an explicit function evaluation, this will get executed every time regardless of the log level set.\nThis path may not be as critical as others, but I think it is good practice to wrap this log in a\nif (log.isTraceEnabled() {}",
+      "revId": "7c7a940f227533d2bfd03567002de0a64a1017c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///vg\u003d",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 684,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-27T19:39:34Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "7c7a940f227533d2bfd03567002de0a64a1017c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
