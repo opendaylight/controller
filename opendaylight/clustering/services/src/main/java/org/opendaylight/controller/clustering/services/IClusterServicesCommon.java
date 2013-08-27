@@ -10,7 +10,7 @@
 /**
  * @file   IClusterServicesCommon.java
  *
- * @brief  : Set of services and application will expect from the
+ * @brief  : Set of services an application will expect from the
  * clustering services provider. This interface is going to be the
  * base for per-container and Global services and so the container
  * parameter is omitted but who uses knows about it
@@ -35,11 +35,12 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 
 /**
- * @deprecated for internal use
- * Set of services and application will expect from the
- * clustering services provider. This interface is going to be the
- * base for per-container and Global services and so the container
- * parameter is omitted but who uses knows about it
+ * This WILL NOT BE USED DIRECTLY, but VIA SUBCLASS
+ *
+ * Set of services and application will expect from the clustering services
+ * provider. This interface is going to be the base for per-container and Global
+ * services and so the container parameter is omitted but who uses knows about
+ * it
  *
  */
 public interface IClusterServicesCommon {
