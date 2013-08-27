@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///vs\u003d",
+        "filename": "opendaylight/northbound/hosttracker/src/main/java/org/opendaylight/controller/hosttracker/northbound/HostConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-27T18:52:02Z",
+      "side": 1,
+      "message": "Please add Host IP-Address and a boolean to indicate it as Static Host or not.\n\nThese 2 variables need not be used during the POST. But it is better to add a validation check to make sure the ip-address defined inside the object is same as the URL.\nAlso, any POST call with HostConfig must have the staticHost flag set to TRUE (or it can be ignored).",
+      "revId": "9fa36fda6aab97d06a9cd89902dc4376401ee714",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///v0\u003d",
+        "filename": "opendaylight/northbound/hosttracker/src/main/java/org/opendaylight/controller/hosttracker/northbound/HostTrackerNorthbound.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-27T18:52:02Z",
+      "side": 1,
+      "message": "As a convention, we are returning \u003clist\u003e in place of such custom types. Please take a look @ switchmanager as an example.\n\nThis comment is applicable to other Rest-APIs in this changeset as well.",
+      "revId": "9fa36fda6aab97d06a9cd89902dc4376401ee714",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///vw\u003d",
+        "filename": "opendaylight/northbound/hosttracker/src/main/java/org/opendaylight/controller/hosttracker/northbound/HostTrackerNorthbound.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-27T18:52:02Z",
+      "side": 1,
+      "message": "It is not intuitive to have GET return an object and POST/PUT accept a different object that addresses the same functionality.\n\nI would recommend this to change to HostConfig as well and include the IP-address and staticHost boolean to the HostConfig.",
+      "revId": "9fa36fda6aab97d06a9cd89902dc4376401ee714",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
