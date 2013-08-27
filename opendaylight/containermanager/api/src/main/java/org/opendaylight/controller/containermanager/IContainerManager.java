@@ -14,8 +14,7 @@ import java.util.List;
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
- * Container Manager interface
- *
+ * Container Manager Interface - provides methods to get information on existing OSGI containers
  *
  */
 public interface IContainerManager {
@@ -23,14 +22,14 @@ public interface IContainerManager {
     /**
      * Returns true if there are any non-default Containers present.
      *
-     * @return  true, if any non-default container is present, else false
+     * @return  true if any non-default container is present false otherwise.
      */
     public boolean hasNonDefaultContainer();
 
     /**
-     * Returns a list of Containers that currently exist.
+     * Returns a list of the existing containers.
      *
-     * @return  array of String Container names
+     * @return  List of Container name strings.
      */
     public List<String> getContainerNames();
 
@@ -41,5 +40,6 @@ public interface IContainerManager {
      *
      * @return  status code
      */
+    @Deprecated
     public Status saveContainerConfig();
 }

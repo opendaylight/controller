@@ -15,15 +15,14 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+@XmlRootElement(name = "list")
 @XmlAccessorType(XmlAccessType.NONE)
-
 public class AllFlowStatistics {
         @XmlElement
         List<FlowStatistics> flowStatistics;
         //To satisfy JAXB
-        private AllFlowStatistics() {
-        }
+        @SuppressWarnings("unused")
+        private AllFlowStatistics() {}
 
         public AllFlowStatistics(List<FlowStatistics> flowStatistics) {
                 this.flowStatistics = flowStatistics;

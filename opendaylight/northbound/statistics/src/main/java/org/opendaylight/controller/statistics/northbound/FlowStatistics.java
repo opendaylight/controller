@@ -14,26 +14,27 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
 
-@XmlRootElement
+@XmlRootElement(name = "nodeFlowStatistics")
 @XmlAccessorType(XmlAccessType.NONE)
 public class FlowStatistics {
     @XmlElement
     private Node node;
-    @XmlElement(name="flowStat")
-    private List<FlowOnNode> flowStat;
+    @XmlElement
+    private List<FlowOnNode> flowStatistic;
 
     // To satisfy JAXB
     @SuppressWarnings("unused")
-        private FlowStatistics() {
+    private FlowStatistics() {
     }
 
     public FlowStatistics(Node node, List<FlowOnNode> flowStat) {
         super();
         this.node = node;
-        this.flowStat = flowStat;
+        this.flowStatistic = flowStat;
     }
 
     public Node getNode() {
@@ -45,10 +46,10 @@ public class FlowStatistics {
     }
 
     public List<FlowOnNode> getFlowStats() {
-        return flowStat;
+        return flowStatistic;
     }
 
     public void setFlowStats(List<FlowOnNode> flowStats) {
-        this.flowStat = flowStats;
+        this.flowStatistic = flowStats;
     }
 }

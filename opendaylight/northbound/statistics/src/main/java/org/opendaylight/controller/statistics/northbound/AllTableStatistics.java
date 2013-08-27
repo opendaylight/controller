@@ -14,14 +14,14 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+@XmlRootElement(name = "list")
 @XmlAccessorType(XmlAccessType.NONE)
 public class AllTableStatistics {
     @XmlElement
     List<TableStatistics> tableStatistics;
     //To satisfy JAXB
-    private AllTableStatistics() {
-    }
+    @SuppressWarnings("unused")
+    private AllTableStatistics() {}
 
     public AllTableStatistics(List<TableStatistics> tableStatistics) {
         this.tableStatistics = tableStatistics;
