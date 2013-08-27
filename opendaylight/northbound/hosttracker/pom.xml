@@ -51,6 +51,7 @@
               org.opendaylight.controller.northbound.commons.exception,
               org.opendaylight.controller.northbound.commons.utils,
               org.opendaylight.controller.sal.authorization,
+              org.opendaylight.controller.sal.packet.address,
               javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind.annotation,

@@ -15,24 +15,22 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
-
-@XmlRootElement
+@XmlRootElement(name="list")
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class Hosts {
-        @XmlElement (name="host")
-        Set<HostNodeConnector> hostNodeConnector;
+        @XmlElement
+        Set<HostConfig> hostConfig;
 
         public Hosts() {
         }
-        public Hosts (Set<HostNodeConnector> hostNodeConnector) {
-                this.hostNodeConnector = hostNodeConnector;
+        public Hosts (Set<HostConfig> hostConfig) {
+                this.hostConfig = hostConfig;
         }
-        public Set<HostNodeConnector> getHostNodeConnector() {
-                return hostNodeConnector;
+        public Set<HostConfig> getHostConfig() {
+                return hostConfig;
         }
-        public void setHostNodeConnector(Set<HostNodeConnector> hostNodeConnector) {
-                this.hostNodeConnector = hostNodeConnector;
+        public void setHostConfig(Set<HostConfig> hostConfig) {
+                this.hostConfig = hostConfig;
         }
 }

@@ -868,21 +868,31 @@ public class NorthboundIT {
 
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/host/default";
 
-        // test POST method: addHost()
-        String queryParameter = new QueryParameter("dataLayerAddress", dataLayerAddress_1).add("nodeType", nodeType_1)
-                .add("nodeId", nodeId_1.toString()).add("nodeConnectorType", nodeConnectorType_1)
-                .add("nodeConnectorId", nodeConnectorId_1.toString()).add("vlan", vlan_1).getString();
+        // test PUT method: addHost()
+        JSONObject fc_json = new JSONObject();
+        fc_json.put("dataLayerAddress", dataLayerAddress_1);
+        fc_json.put("nodeType", nodeType_1);
+        fc_json.put("nodeId", nodeId_1);
+        fc_json.put("nodeConnectorType", nodeType_1);
+        fc_json.put("nodeConnectorId", nodeConnectorId_1.toString());
+        fc_json.put("vlan", vlan_1);
+        fc_json.put("staticHost", "true");
+        fc_json.put("networkAddress", networkAddress_1);
 
-        String result = getJsonResult(baseURL + "/" + networkAddress_1 + queryParameter, "POST");
+        String result = getJsonResult(baseURL + "/" + networkAddress_1, "PUT", fc_json.toString());
         Assert.assertTrue(httpResponseCode == 201);
 
-        // vlan is not passed through query parameter but should be
-        // defaulted to "0"
-        queryParameter = new QueryParameter("dataLayerAddress", dataLayerAddress_2).add("nodeType", nodeType_2)
-                .add("nodeId", nodeId_2.toString()).add("nodeConnectorType", nodeConnectorType_2)
-                .add("nodeConnectorId", nodeConnectorId_2.toString()).getString();
+        fc_json = new JSONObject();
+        fc_json.put("dataLayerAddress", dataLayerAddress_2);
+        fc_json.put("nodeType", nodeType_2);
+        fc_json.put("nodeId", nodeId_2);
+        fc_json.put("nodeConnectorType", nodeType_2);
+        fc_json.put("nodeConnectorId", nodeConnectorId_2.toString());
+        fc_json.put("vlan", vlan_2);
+        fc_json.put("staticHost", "true");
+        fc_json.put("networkAddress", networkAddress_2);
 
-        result = getJsonResult(baseURL + "/" + networkAddress_2 + queryParameter, "POST");
+        result = getJsonResult(baseURL + "/" + networkAddress_2 , "PUT", fc_json.toString());
         Assert.assertTrue(httpResponseCode == 201);
 
         // define variables for decoding returned strings
@@ -897,32 +907,30 @@ public class NorthboundIT {
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
         // there should be at least two hosts in the DB
-        Assert.assertTrue(json.get("host") instanceof JSONArray);
-        JSONArray ja = json.getJSONArray("host");
+        Assert.assertTrue(json.get("hostConfig") instanceof JSONArray);
+        JSONArray ja = json.getJSONArray("hostConfig");
         Integer count = ja.length();
         Assert.assertTrue(count == 2);
 
         for (int i = 0; i < count; i++) {
             host_jo = ja.getJSONObject(i);
-            dl_jo = host_jo.getJSONObject("dataLayerAddress");
-            nc_jo = host_jo.getJSONObject("nodeConnector");
-            node_jo = nc_jo.getJSONObject("node");
-
             networkAddress = host_jo.getString("networkAddress");
             if (networkAddress.equalsIgnoreCase(networkAddress_1)) {
-                Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_1));
-                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_1));
-                Assert.assertTrue(nc_jo.getInt("@id") == nodeConnectorId_1);
-                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(nodeType_1));
-                Assert.assertTrue(node_jo.getInt("@id") == nodeId_1);
+                Assert.assertTrue(host_jo.getString("dataLayerAddress").equalsIgnoreCase(dataLayerAddress_1));
+                Assert.assertTrue(host_jo.getString("nodeConnectorType").equalsIgnoreCase(nodeConnectorType_1));
+                Assert.assertTrue(host_jo.getInt("nodeConnectorId") == nodeConnectorId_1);
+                Assert.assertTrue(host_jo.getString("nodeType").equalsIgnoreCase(nodeType_1));
+                Assert.assertTrue(host_jo.getInt("nodeId") == nodeId_1);
                 Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(vlan_1));
+                Assert.assertTrue(host_jo.getBoolean("staticHost"));
             } else if (networkAddress.equalsIgnoreCase(networkAddress_2)) {
-                Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_2));
-                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_2));
-                Assert.assertTrue(nc_jo.getInt("@id") == nodeConnectorId_2);
-                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(nodeType_2));
-                Assert.assertTrue(node_jo.getInt("@id") == nodeId_2);
+                Assert.assertTrue(host_jo.getString("dataLayerAddress").equalsIgnoreCase(dataLayerAddress_2));
+                Assert.assertTrue(host_jo.getString("nodeConnectorType").equalsIgnoreCase(nodeConnectorType_2));
+                Assert.assertTrue(host_jo.getInt("nodeConnectorId") == nodeConnectorId_2);
+                Assert.assertTrue(host_jo.getString("nodeType").equalsIgnoreCase(nodeType_2));
+                Assert.assertTrue(host_jo.getInt("nodeId") == nodeId_2);
                 Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(vlan_2));
+                Assert.assertTrue(host_jo.getBoolean("staticHost"));
             } else {
                 Assert.assertTrue(false);
             }
@@ -969,17 +977,13 @@ public class NorthboundIT {
 
         Assert.assertFalse(json.length() == 0);
 
-        dl_jo = json.getJSONObject("dataLayerAddress");
-        nc_jo = json.getJSONObject("nodeConnector");
-        node_jo = nc_jo.getJSONObject("node");
-
-        Assert.assertTrue(json.getString("networkAddress").equalsIgnoreCase(networkAddress_1));
-        Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_1));
-        Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_1));
-        Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
-        Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(nodeType_1));
-        Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
+        Assert.assertTrue(json.getString("dataLayerAddress").equalsIgnoreCase(dataLayerAddress_1));
+        Assert.assertTrue(json.getString("nodeConnectorType").equalsIgnoreCase(nodeConnectorType_1));
+        Assert.assertTrue(json.getInt("nodeConnectorId") == nodeConnectorId_1);
+        Assert.assertTrue(json.getString("nodeType").equalsIgnoreCase(nodeType_1));
+        Assert.assertTrue(json.getInt("nodeId") == nodeId_1);
         Assert.assertTrue(json.getString("vlan").equalsIgnoreCase(vlan_1));
+        Assert.assertTrue(json.getBoolean("staticHost"));
 
         // test DELETE method for deleteFlow()
 
@@ -1004,8 +1008,8 @@ public class NorthboundIT {
         if (json.length() == 0) {
             return false;
         }
-        if (json.get("host") instanceof JSONArray) {
-            JSONArray ja = json.getJSONArray("host");
+        if (json.get("hostConfig") instanceof JSONArray) {
+            JSONArray ja = json.getJSONArray("hostConfig");
             for (int i = 0; i < ja.length(); i++) {
                 String na = ja.getJSONObject(i).getString("networkAddress");
                 if (na.equalsIgnoreCase(hostIp))
@@ -1013,7 +1017,8 @@ public class NorthboundIT {
             }
             return false;
         } else {
-            String na = json.getJSONObject("host").getString("networkAddress");
+            JSONObject ja = json.getJSONObject("hostConfig");
+            String na = ja.getString("networkAddress");
             return (na.equalsIgnoreCase(hostIp)) ? true : false;
         }
     }
