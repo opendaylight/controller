@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///vU\u003d",
+        "filename": "opendaylight/clustering/services/src/main/java/org/opendaylight/controller/clustering/services/IClusterGlobalServices.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-27T19:44:34Z",
+      "side": 1,
+      "message": "Trailing space.",
+      "revId": "98b676a12ff4e49ac7195541641131b41a0faded",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///vQ\u003d",
+        "filename": "opendaylight/forwarding/staticrouting/src/main/java/org/opendaylight/controller/forwarding/staticrouting/internal/StaticRoutingImplementation.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-27T19:44:34Z",
+      "side": 1,
+      "message": "This is very minor, but add up in the sonar report.\nA log would make sonar happy.",
+      "revId": "98b676a12ff4e49ac7195541641131b41a0faded",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
