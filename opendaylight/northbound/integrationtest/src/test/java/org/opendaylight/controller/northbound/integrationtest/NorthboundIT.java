@@ -353,11 +353,11 @@ public class NorthboundIT {
         // Test insert static route
         String requestBody = "{\"name\":\"" + name1 + "\", \"prefix\":\"" + prefix1 + "\", \"nextHop\":\"" + nextHop1
                 + "\"}";
-        result = getJsonResult(baseURL + "default/" + name1, "POST", requestBody);
+        result = getJsonResult(baseURL + "default/route/" + name1, "POST", requestBody);
         Assert.assertEquals(201, httpResponseCode.intValue());
 
         requestBody = "{\"name\":\"" + name2 + "\", \"prefix\":\"" + prefix2 + "\", \"nextHop\":\"" + nextHop2 + "\"}";
-        result = getJsonResult(baseURL + "default/" + name2, "POST", requestBody);
+        result = getJsonResult(baseURL + "default/route/" + name2, "POST", requestBody);
         Assert.assertEquals(201, httpResponseCode.intValue());
 
         // Test Get all static routes
@@ -382,7 +382,7 @@ public class NorthboundIT {
         }
 
         // Test get specific static route
-        result = getJsonResult(baseURL + "default/" + name1);
+        result = getJsonResult(baseURL + "default/route/" + name1);
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
 
@@ -390,7 +390,7 @@ public class NorthboundIT {
         Assert.assertEquals(prefix1, json.getString("prefix"));
         Assert.assertEquals(nextHop1, json.getString("nextHop"));
 
-        result = getJsonResult(baseURL + "default/" + name2);
+        result = getJsonResult(baseURL + "default/route/" + name2);
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
 
@@ -399,7 +399,7 @@ public class NorthboundIT {
         Assert.assertEquals(nextHop2, json.getString("nextHop"));
 
         // Test delete static route
-        result = getJsonResult(baseURL + "default/" + name1, "DELETE");
+        result = getJsonResult(baseURL + "default/route/" + name1, "DELETE");
         Assert.assertEquals(200, httpResponseCode.intValue());
 
         result = getJsonResult(baseURL + "default");
