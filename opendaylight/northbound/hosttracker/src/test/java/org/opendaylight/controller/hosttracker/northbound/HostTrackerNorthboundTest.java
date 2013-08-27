@@ -15,22 +15,22 @@ public class HostTrackerNorthboundTest {
     @Test
     public void testHosts() throws UnknownHostException, ConstructionException {
         Hosts h1 = new Hosts();
-        Assert.assertNull(h1.getHostNodeConnector());
+        Assert.assertNull(h1.getHostConfig());
 
         Hosts h2 = new Hosts(null);
-        Assert.assertNull(h2.getHostNodeConnector());
+        Assert.assertNull(h2.getHostConfig());
 
-        Set<HostNodeConnector> conn = new HashSet<HostNodeConnector>();
+        Set<HostConfig> conn = new HashSet<HostConfig>();
         InetAddress addr = InetAddress.getByName("10.1.1.1");
         HostNodeConnector c1 = new HostNodeConnector(addr);
-        conn.add(c1);
-        h1.setHostNodeConnector(conn);
-        Assert.assertTrue(h1.getHostNodeConnector().equals(conn));
+        conn.add(HostConfig.convert(c1));
+        h1.setHostConfig(conn);
+        Assert.assertTrue(h1.getHostConfig().equals(conn));
 
         Hosts h3 = new Hosts(conn);
-        Assert.assertTrue(h3.getHostNodeConnector().equals(conn));
-        h3.setHostNodeConnector(null);
-        Assert.assertNull(h3.getHostNodeConnector());
+        Assert.assertTrue(h3.getHostConfig().equals(conn));
+        h3.setHostConfig(null);
+        Assert.assertNull(h3.getHostConfig());
 
     }
 }
