@@ -13,6 +13,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.HexEncode;
 /*
  * ARP Reply event wrapper
  */
@@ -91,5 +92,37 @@ public class ARPReply extends ARPEvent {
 
     public NodeConnector getPort() {
         return port;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ARPReply [");
+        if (port != null) {
+            builder.append("port=")
+                    .append(port)
+                    .append(", ");
+        }
+        if (tMac != null) {
+            builder.append("tMac=")
+                    .append(HexEncode.bytesToHexString(tMac))
+                    .append(", ");
+        }
+        if (sMac != null) {
+            builder.append("sMac=")
+                    .append(HexEncode.bytesToHexString(sMac))
+                    .append(", ");
+        }
+        if (sIP != null) {
+            builder.append("sIP=")
+                    .append(sIP);
+        }
+        builder.append("]");
+        return builder.toString();
     }
 }

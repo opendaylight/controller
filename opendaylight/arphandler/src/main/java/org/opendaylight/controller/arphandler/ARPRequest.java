@@ -82,4 +82,26 @@ public class ARPRequest extends ARPEvent {
     public HostNodeConnector getHost() {
         return host;
     }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ARPRequest [");
+        if (subnet != null) {
+            builder.append("subnet=")
+                    .append(subnet)
+                    .append(", ");
+        }
+        if (host != null) {
+            builder.append("host=")
+                    .append(host);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
 }
