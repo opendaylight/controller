@@ -6,66 +6,28 @@
         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
         version="3.0">
 
-        <filter>
-          <filter-name>CorsFilter</filter-name>
-          <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
-          <init-param>
-            <param-name>cors.allowed.origins</param-name>
-            <param-value>*</param-value>
-          </init-param>
-          <init-param>
-            <param-name>cors.allowed.methods</param-name>
-            <param-value>GET,POST,HEAD,OPTIONS,PUT</param-value>
-          </init-param>
-          <init-param>
-            <param-name>cors.allowed.headers</param-name>
-            <param-value>Content-Type,X-Requested-With,accept,authorization, origin,Origin,Access-Control-Request-Method,Access-Control-Request-Headers</param-value>
-          </init-param>
-          <init-param>
-            <param-name>cors.exposed.headers</param-name>
-            <param-value>Access-Control-Allow-Origin,Access-Control-Allow-Credentials</param-value>
-          </init-param>
-          <init-param>
-            <param-name>cors.support.credentials</param-name>
-            <param-value>true</param-value>
-          </init-param>
-          <init-param>
-            <param-name>cors.preflight.maxage</param-name>
-            <param-value>10</param-value>
-          </init-param>
-        </filter>
-        <filter-mapping>
-          <filter-name>CorsFilter</filter-name>
-          <url-pattern>/*</url-pattern>
-        </filter-mapping>
-
         <security-constraint>
-          <web-resource-collection>
-             <web-resource-name>free access</web-resource-name>
-             <url-pattern>/js/*</url-pattern>
-             <url-pattern>/images/*</url-pattern>
-             <url-pattern>/css/*</url-pattern>
-             <url-pattern>/favicon.ico</url-pattern>
-          </web-resource-collection>
+                <web-resource-collection>
+                        <web-resource-name>free access</web-resource-name>
+                        <url-pattern>/js/*</url-pattern>
+                        <url-pattern>/images/*</url-pattern>
+                        <url-pattern>/css/*</url-pattern>
+                        <url-pattern>/favicon.ico</url-pattern>
+                </web-resource-collection>
         </security-constraint>
 
         <security-constraint>
-           <display-name>RootApp</display-name>
-           <web-resource-collection>
-              <web-resource-name>RootGUI</web-resource-name>
-              <url-pattern>/*</url-pattern>
-              <http-method>POST</http-method>
-              <http-method>GET</http-method>
-              <http-method>PUT</http-method>
-              <http-method>DELETE</http-method>
-              <http-method>HEAD</http-method>
-           </web-resource-collection>
-           <auth-constraint>
-               <role-name>System-Admin</role-name>
-               <role-name>Network-Admin</role-name>
-               <role-name>Network-Operator</role-name>
-               <role-name>Container-User</role-name>
-           </auth-constraint>
+                <display-name>RootApp</display-name>
+                <web-resource-collection>
+                        <web-resource-name>RootGUI</web-resource-name>
+                        <url-pattern>/*</url-pattern>
+                </web-resource-collection>
+                <auth-constraint>
+                        <role-name>System-Admin</role-name>
+                        <role-name>Network-Admin</role-name>
+                        <role-name>Network-Operator</role-name>
+                        <role-name>Container-User</role-name>
+                </auth-constraint>
         </security-constraint>
 
         <security-role>

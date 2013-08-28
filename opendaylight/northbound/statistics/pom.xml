@@ -58,7 +58,6 @@
                 javax.xml.bind.annotation,
                 javax.xml.bind,
                 org.slf4j,
-                org.apache.catalina.filters,
                 !org.codehaus.enunciate.jaxrs
               </Import-Package>
             <Export-Package>
@@ -100,11 +99,6 @@
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-core-annotations</artifactId>
       <version>${enunciate.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.thirdparty</groupId>
-      <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
-      <version>7.0.42-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

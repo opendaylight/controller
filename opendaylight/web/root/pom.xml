@@ -73,8 +73,7 @@
               org.springframework.web.servlet.view.json,
               org.springframework.web.filter,
               org.springframework.web.context,
-              org.springframework.util,
-              org.apache.catalina.filters
+              org.springframework.util
             </Import-Package>
             <Export-Package>
               org.opendaylight.controller.web
@@ -148,11 +147,6 @@
       <artifactId>spring-webmvc</artifactId>
       <version>3.2.1.RELEASE</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.thirdparty</groupId>
-      <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
-      <version>7.0.42-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
