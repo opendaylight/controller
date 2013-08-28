@@ -449,7 +449,8 @@ one.f.switchmanager.subnetGatewayConfig = {
             addIPAddress: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_addIP",
             addPorts: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_addPorts",
             removeIPAddress: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_removeIP",
-            datagrid: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_datagrid"
+            datagrid: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_datagrid",
+            selectAll: "one_f_switchmanager_subnetGatewayConfig_id_dashlet_selectAll"
         }, 
         modal: {
             modal: "one_f_switchmanager_subnetGatewayConfig_id_modal_modal",
@@ -496,11 +497,12 @@ one.f.switchmanager.subnetGatewayConfig = {
                         var url = one.f.switchmanager.rootUrl + "/subnetGateway/delete";
                         one.f.switchmanager.subnetGatewayConfig.ajax.main(url, requestData, function(response) {
                             if (response.status == true) {
-                                // refresh dashlet by passing dashlet div as param
-                                one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
+                                // refresh dashlet by passing dashlet div as param 
+                                one.lib.alert("Subnet Gateway(s) successfully removed");
                             } else {
-                                alert(response.message);
+                                one.lib.alert(response.message);
                             }
+                            one.f.switchmanager.subnetGatewayConfig.dashlet($("#right-bottom .dashlet"));
                         });
                     }
                 });
@@ -524,7 +526,25 @@ one.f.switchmanager.subnetGatewayConfig = {
                 }, "table-striped table-condensed");
             $dashlet.append($gridHTML);
             var dataSource = one.f.switchmanager.subnetGatewayConfig.data.devicesgrid(content);
-            $("#" + one.f.switchmanager.subnetGatewayConfig.id.dashlet.datagrid).datagrid({dataSource: dataSource});
+            $("#" + one.f.switchmanager.subnetGatewayConfig.id.dashlet.datagrid).datagrid({dataSource: dataSource})
+            .on("loaded", function() {
+                $("#"+one.f.switchmanager.subnetGatewayConfig.id.dashlet.selectAll).click(function() {
+                    $("#" + one.f.switchmanager.subnetGatewayConfig.id.dashlet.datagrid).find(':checkbox').prop('checked',
+                        $("#"+one.f.switchmanager.subnetGatewayConfig.id.dashlet.selectAll).is(':checked'));
+                });
+                $(".subnetGatewayConfig").click(function(){
+                    if (!$('.subnetGatewayConfig[type=checkbox]:not(:checked)').length) {
+                        $("#"+one.f.switchmanager.subnetGatewayConfig.id.dashlet.selectAll)
+                            .prop("checked",
+                          true);
+                    } else {
+                        $("#"+one.f.switchmanager.subnetGatewayConfig.id.dashlet.selectAll)
+                            .prop("checked",
+                         false);
+                    }
+                    event.stopPropagation();
+                });
+             });
         });
     },
     ajax : {
@@ -700,7 +720,8 @@ one.f.switchmanager.subnetGatewayConfig = {
                     columns: [
                         {
                             property: 'selector',
-                            label: ' ',
+                            label: "<input type='checkbox'  id='"
+                                +one.f.switchmanager.subnetGatewayConfig.id.dashlet.selectAll+"'/>",
                             sortable: false
                         },
                         {
@@ -722,7 +743,8 @@ one.f.switchmanager.subnetGatewayConfig = {
                     data: data.nodeData,
                     formatter: function(items) {
                         $.each(items, function(index, tableRow) {
-                            tableRow["selector"] = '<input type="checkbox" id=' + tableRow["name"] + '></input>';
+                            tableRow["selector"] = '<input type="checkbox" class="subnetGatewayConfig" id=' 
+                                + tableRow["name"] + '></input>';
                             var json = tableRow["nodePorts"];
                             var nodePorts = JSON.parse(json);
                             var nodePortHtml = "<div>";
@@ -831,7 +853,8 @@ one.f.switchmanager.staticRouteConfig = {
         dashlet: {
             add: "one_f_switchmanager_staticRouteConfig_id_dashlet_add",
             remove: "one_f_switchmanager_staticRouteConfig_id_dashlet_remove",
-            datagrid: "one_f_switchmanager_staticRouteConfig_id_dashlet_datagrid"
+            datagrid: "one_f_switchmanager_staticRouteConfig_id_dashlet_datagrid",
+            selectAll: "one_f_switchmanager_staticRouteConfig_id_dashlet_selectAll"
         }, 
         modal: {
             modal: "one_f_switchmanager_staticRouteConfig_id_modal_modal",
@@ -875,11 +898,12 @@ one.f.switchmanager.staticRouteConfig = {
                         var url = one.f.switchmanager.rootUrl + "/staticRoute/delete";
                         one.f.switchmanager.staticRouteConfig.ajax.main(url, requestData, function(response) {
                             if (response.status == true) {
-                                // refresh dashlet by passing dashlet div as param
-                                one.f.switchmanager.staticRouteConfig.dashlet($("#left-bottom .dashlet"));
+                                // refresh dashlet by passing dashlet div as param 
+                                one.lib.alert("Static Routes(s) successfully removed");
                             } else {
-                                alert(response.message);
+                                one.lib.alert(response.message);
                             }
+                            one.f.switchmanager.staticRouteConfig.dashlet($("#left-bottom .dashlet"));
                         });
                     }
                 });
@@ -893,7 +917,25 @@ one.f.switchmanager.staticRouteConfig = {
                 }, "table-striped table-condensed");
             $dashlet.append($gridHTML);
             var dataSource = one.f.switchmanager.staticRouteConfig.data.staticRouteConfigGrid(content);
-            $("#" + one.f.switchmanager.staticRouteConfig.id.dashlet.datagrid).datagrid({dataSource: dataSource});
+            $("#" + one.f.switchmanager.staticRouteConfig.id.dashlet.datagrid).datagrid({dataSource: dataSource})
+            .on("loaded", function() {
+                $("#"+one.f.switchmanager.staticRouteConfig.id.dashlet.selectAll).click(function() {
+                    $("#" + one.f.switchmanager.staticRouteConfig.id.dashlet.datagrid).find(':checkbox').prop('checked',
+                        $("#"+one.f.switchmanager.staticRouteConfig.id.dashlet.selectAll).is(':checked'));
+                });
+                $(".staticRoute").click(function(){
+                    if (!$('.staticRoute[type=checkbox]:not(:checked)').length) {
+                        $("#"+one.f.switchmanager.staticRouteConfig.id.dashlet.selectAll)
+                            .prop("checked",
+                          true);
+                    } else {
+                        $("#"+one.f.switchmanager.staticRouteConfig.id.dashlet.selectAll)
+                            .prop("checked",
+                         false);
+                    }
+                    event.stopPropagation();
+                });
+             });
         });
     },
     // device ajax calls
@@ -981,7 +1023,8 @@ one.f.switchmanager.staticRouteConfig = {
                     columns: [
                         {
                             property: 'selector',
-                            label: ' ',
+                            label: "<input type='checkbox'  id='"
+                                +one.f.switchmanager.staticRouteConfig.id.dashlet.selectAll+"'/>",
                             sortable: false
                         },
                         {
@@ -1003,7 +1046,7 @@ one.f.switchmanager.staticRouteConfig = {
                     data: data.nodeData,
                     formatter: function(items) {
                         $.each(items, function(index, item) {
-                            item["selector"] = '<input type="checkbox" id=' + item["name"] + '></input>';
+                            item["selector"] = '<input type="checkbox" class="staticRoute" id=' + item["name"] + '></input>';
                         });
 
                     },
@@ -1037,7 +1080,8 @@ one.f.switchmanager.spanPortConfig = {
         dashlet: {
             add: "one_f_switchmanager_spanPortConfig_id_dashlet_add",
             remove: "one_f_switchmanager_spanPortConfig_id_dashlet_remove",
-            datagrid: "one_f_switchmanager_spanPortConfig_id_dashlet_datagrid"
+            datagrid: "one_f_switchmanager_spanPortConfig_id_dashlet_datagrid",
+            selectAllFlows: "one_f_switchmanager_spanPortConfig_id_dashlet_selectAllFlows"
         }, 
         modal: {
             modal: "one_f_switchmanager_spanPortConfig_id_modal_modal",
@@ -1087,10 +1131,11 @@ one.f.switchmanager.spanPortConfig = {
                         one.f.switchmanager.spanPortConfig.ajax.main(url, requestData, function(response) {
                             if (response.status == true) {
                                 // refresh dashlet by passing dashlet div as param
-                                one.f.switchmanager.spanPortConfig.dashlet($("#right-bottom .dashlet"));
+                                one.lib.alert("Span Port(s) successfully removed");
                             } else {
-                                alert(response.message);
+                                one.lib.alert(response.message);
                             }
+                            one.f.switchmanager.spanPortConfig.dashlet($("#right-bottom .dashlet"));
                         });
                     }
                 });
@@ -1104,10 +1149,25 @@ one.f.switchmanager.spanPortConfig = {
                 }, "table-striped table-condensed");
             $dashlet.append($gridHTML);
             var dataSource = one.f.switchmanager.spanPortConfig.data.spanPortConfigGrid(content);
-            $("#" + one.f.switchmanager.spanPortConfig.id.dashlet.datagrid).datagrid({dataSource: dataSource});
-
-
-
+            $("#" + one.f.switchmanager.spanPortConfig.id.dashlet.datagrid).datagrid({dataSource: dataSource})
+            .on("loaded", function() {
+                $("#"+one.f.switchmanager.spanPortConfig.id.dashlet.selectAll).click(function() {
+                    $("#" + one.f.switchmanager.spanPortConfig.id.dashlet.datagrid).find(':checkbox').prop('checked',
+                        $("#"+one.f.switchmanager.spanPortConfig.id.dashlet.selectAll).is(':checked'));
+                });
+                $(".spanPortConfig").click(function(){
+                    if (!$('.spanPortConfig[type=checkbox]:not(:checked)').length) {
+                        $("#"+one.f.switchmanager.spanPortConfig.id.dashlet.selectAll)
+                            .prop("checked",
+                          true);
+                    } else {
+                        $("#"+one.f.switchmanager.spanPortConfig.id.dashlet.selectAll)
+                            .prop("checked",
+                         false);
+                    }
+                    event.stopPropagation();
+                });
+             });
         });
     },
     // device ajax calls
@@ -1216,7 +1276,8 @@ one.f.switchmanager.spanPortConfig = {
                     columns: [
                         {
                             property: 'selector',
-                            label: ' ',
+                            label: "<input type='checkbox'  id='"
+                                +one.f.switchmanager.spanPortConfig.id.dashlet.selectAll+"'/>",
                             sortable: false
                         },
                         {
@@ -1233,7 +1294,7 @@ one.f.switchmanager.spanPortConfig = {
                     data: data.nodeData,
                     formatter: function(items) {
                         $.each(items, function(index, item) {
-                            item["selector"] = '<input type="checkbox" spanPort=' + encodeURIComponent(item["json"]) + '></input>';
+                            item["selector"] = '<input type="checkbox" class="spanPortConfig" spanPort=' + encodeURIComponent(item["json"]) + '></input>';
                         });
                     },
                     delay: 0
