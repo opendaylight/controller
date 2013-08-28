@@ -22,5 +22,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>opendaylight/distribution/opendaylight</module>
+    <module>opendaylight/archetypes</module>
   </modules>
 </project>
