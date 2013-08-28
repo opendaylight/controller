@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///pE\u003d",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/implementation/data/FlowEntryDistributionOrder.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-28T23:42:04Z",
+      "side": 1,
+      "message": "Missing Copyright notice for this new file.",
+      "revId": "06cc9320ccb996881adba19db502d7066daf6ac1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///pA\u003d",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/FlowEntryDistributionOrderFutureTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-08-28T23:42:04Z",
+      "side": 1,
+      "message": "Missing Copyright notice",
+      "revId": "06cc9320ccb996881adba19db502d7066daf6ac1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
