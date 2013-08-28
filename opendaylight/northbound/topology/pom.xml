@@ -54,6 +54,7 @@
               javax.xml.bind,
               javax.xml.bind.annotation,
               org.slf4j,
+              org.apache.catalina.filters,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Web-ContextPath>/controller/nb/v2/topology</Web-ContextPath>
@@ -93,6 +94,11 @@
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>com.sun.jersey.jersey-servlet</artifactId>
       <version>1.17-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.thirdparty</groupId>
+      <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
+      <version>7.0.42-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
