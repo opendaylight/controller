@@ -8,6 +8,12 @@
 	</parent>
 	<packaging>pom</packaging>
 	<artifactId>sal-samples</artifactId>
+    <scm>
+      <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+      <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
+    </scm>
+
 	<modules>
 		<module>toaster</module>
 		<module>toaster-consumer</module>

@@ -6,6 +6,11 @@
         <groupId>org.opendaylight.controller.model</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+    <scm>
+      <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+      <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
+    </scm>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>model-inventory</artifactId>

@@ -3,4 +3,31 @@
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>checkstyle</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
+
+  <properties>
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
+  </properties>
+  <distributionManagement>
+    <!-- OpenDayLight Released artifact -->
+    <repository>
+      <id>opendaylight-release</id>
+      <url>${nexusproxy}/repositories/opendaylight.release/</url>
+    </repository>
+    <!-- OpenDayLight Snapshot artifact -->
+    <snapshotRepository>
+      <id>opendaylight-snapshot</id>
+      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+    </snapshotRepository>
+    <!-- Site deployment -->
+    <site>
+      <id>website</id>
+      <url>${sitedeploy}</url>
+    </site>
+  </distributionManagement>
 </project>

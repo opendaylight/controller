@@ -9,6 +9,11 @@
   <artifactId>commons.thirdparty</artifactId>
   <version>1.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 
   <properties>
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
@@ -19,6 +24,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <compiler.version>2.3.2</compiler.version>
     <surefire.version>2.13</surefire.version>
+    <releaseplugin.version>2.3.2</releaseplugin.version>
   </properties>
 
   <pluginRepositories>
@@ -79,6 +85,11 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${releaseplugin.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
