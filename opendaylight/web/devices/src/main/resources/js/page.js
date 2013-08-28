@@ -14,7 +14,7 @@ one.f = {};
 one.f.dashlet = {
     nodesLearnt : {
         id : 'nodesLearnt',
-        name : 'Nodes Learnt'
+        name : 'Nodes Learned'
     },
     staticRouteConfig : {
         id : 'staticRouteConfig',
@@ -150,7 +150,7 @@ one.f.switchmanager.nodesLearnt = {
                 });
             },
             popout: function() {
-                var h3 = "Nodes Learnt";
+                var h3 = "Nodes Learned";
                 var footer = one.f.switchmanager.nodesLearnt.modal.footer.popout();
                 var $modal = one.lib.modal.spawn(one.f.switchmanager.nodesLearnt.id.modal.modal, h3, "", footer);
                 var $body = one.f.switchmanager.nodesLearnt.modal.body.popout($modal);
