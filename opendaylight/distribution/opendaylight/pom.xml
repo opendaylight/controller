@@ -68,6 +68,7 @@
     <module>../../../third-party/net.sf.jung2</module>
     <module>../../../third-party/jersey-servlet</module>
     <module>../../../third-party/commons/thirdparty</module>
+    <module>../../../third-party/org.apache.catalina.filters.CorsFilter</module>
 
     <!-- SAL bundles -->
     <module>../../sal/api</module>

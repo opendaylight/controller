@@ -1366,6 +1366,8 @@ public class NorthboundIT {
                 mavenBundle("org.ow2.chameleon.management", "chameleon-mbeans", "1.0.0"),
                 mavenBundle("org.opendaylight.controller.thirdparty", "net.sf.jung2", "2.0.1-SNAPSHOT"),
                 mavenBundle("org.opendaylight.controller.thirdparty", "com.sun.jersey.jersey-servlet", "1.17-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller.thirdparty", "org.apache.catalina.filters.CorsFilter",
+                            "7.0.42-SNAPSHOT").noStart(),
 
                 // Jersey needs to be started before the northbound application
                 // bundles, using a lower start level
