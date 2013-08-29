@@ -22,7 +22,7 @@
     <pluginRepository>
       <id>central2</id>
       <name>central2</name>
-      <url>${nexusproxy}/repositories/central2/</url>
+      <url>http://repo2.maven.org/maven2</url>
     </pluginRepository>
   </pluginRepositories>
   <dependencies>

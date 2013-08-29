@@ -28,10 +28,10 @@
   </properties>
 
   <pluginRepositories>
-    <pluginRepository>
+    <pluginRepository>    
       <id>central2</id>
       <name>central2</name>
-      <url>${nexusproxy}/repositories/central2/</url>
+      <url>http://repo2.maven.org/maven2</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -161,17 +161,15 @@
   </build>
 
   <repositories>
-    <!-- Maven repo2 mirror -->
     <repository>
       <id>central2</id>
       <name>central2</name>
-      <url>${nexusproxy}/repositories/central2/</url>
+      <url>http://repo2.maven.org/maven2</url>
     </repository>
-    <!-- Maven repo1 mirror -->
     <repository>
       <id>central</id>
       <name>central</name>
-      <url>${nexusproxy}/repositories/central/</url>
+      <url>http://repo1.maven.org/maven2</url>
     </repository>
     <!-- Third Packages hosted in local maven because not available in
          other places -->
