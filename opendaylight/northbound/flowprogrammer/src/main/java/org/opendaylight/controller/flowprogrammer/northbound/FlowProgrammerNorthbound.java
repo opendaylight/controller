@@ -166,7 +166,10 @@ public class FlowProgrammerNorthbound {
      *     &#x20;&#x20;&#x20;&lt;flowConfig&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;flow1&lt;/name&gt;
-     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;type&gt;OF&lt;/type&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/node&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;ingressPort&gt;1&lt;/ingressPort&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;priority&gt;500&lt;/priority&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;etherType&gt;0x800&lt;/etherType&gt;
@@ -176,7 +179,7 @@ public class FlowProgrammerNorthbound {
      * &lt;/list&gt;
      *
      * Response in JSON:
-     * {"flowConfig":{"installInHw":"true","name":"flow1","node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"},
+     * {"flowConfig":{"installInHw":"true","name":"flow1","node":{"id":"00:00:00:00:00:00:00:01","type":"OF"},
      * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}}
      *
      * </pre>
@@ -228,7 +231,10 @@ public class FlowProgrammerNorthbound {
      *     &#x20;&#x20;&#x20;&lt;flowConfig&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;flow1&lt;/name&gt;
-     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;type&gt;OF&lt;/type&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/node&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;ingressPort&gt;1&lt;/ingressPort&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;priority&gt;500&lt;/priority&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;etherType&gt;0x800&lt;/etherType&gt;
@@ -238,7 +244,7 @@ public class FlowProgrammerNorthbound {
      * &lt;/list&gt;
      *
      * Response in JSON:
-     * {"flowConfig":{"installInHw":"true","name":"flow1","node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"},
+     * {"flowConfig":{"installInHw":"true","name":"flow1","node":{"id":"00:00:00:00:00:00:00:01","type":"OF"},
      * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}}
      *
      * </pre>
@@ -297,7 +303,10 @@ public class FlowProgrammerNorthbound {
      * &lt;flowConfig&gt;
      *     &#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
      *     &#x20;&#x20;&#x20;&lt;name&gt;flow1&lt;/name&gt;
-     *     &#x20;&#x20;&#x20;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;
+     *     &#x20;&#x20;&#x20;&lt;node&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;type&gt;OF&lt;/type&gt;
+     *     &#x20;&#x20;&#x20;&lt;/node&gt;
      *     &#x20;&#x20;&#x20;&lt;ingressPort&gt;1&lt;/ingressPort&gt;
      *     &#x20;&#x20;&#x20;&lt;priority&gt;500&lt;/priority&gt;
      *     &#x20;&#x20;&#x20;&lt;etherType&gt;0x800&lt;/etherType&gt;
@@ -306,7 +315,7 @@ public class FlowProgrammerNorthbound {
      * &lt;/flowConfig&gt;
      *
      * Response in JSON:
-     * {"installInHw":"true","name":"flow1","node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"},
+     * {"installInHw":"true","name":"flow1","node":{"id":"00:00:00:00:00:00:00:01","type":"OF"},
      * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}
      *
      * </pre>
@@ -373,7 +382,10 @@ public class FlowProgrammerNorthbound {
      * &lt;flowConfig&gt;
      *         &#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
      *         &#x20;&#x20;&#x20;&lt;name&gt;flow1&lt;/name&gt;
-     *         &#x20;&#x20;&#x20;&lt;node id="00:00:00:00:00:00:00:01" type="OF"/&gt;
+     *         &#x20;&#x20;&#x20;&lt;node&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;type&gt;OF&lt;/type&gt;
+     *         &#x20;&#x20;&#x20;&lt;/node&gt;
      *         &#x20;&#x20;&#x20;&lt;ingressPort&gt;1&lt;/ingressPort&gt;
      *         &#x20;&#x20;&#x20;&lt;priority&gt;500&lt;/priority&gt;
      *         &#x20;&#x20;&#x20;&lt;etherType&gt;0x800&lt;/etherType&gt;
@@ -382,7 +394,7 @@ public class FlowProgrammerNorthbound {
      * &lt;/flowConfig&gt;
      *
      * Request in JSON:
-     * {"installInHw":"true","name":"flow1","node":{"@id":"00:00:00:00:00:00:00:01","@type":"OF"},
+     * {"installInHw":"true","name":"flow1","node":{"id":"00:00:00:00:00:00:00:01","type":"OF"},
      * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}
      *
      * </pre>
