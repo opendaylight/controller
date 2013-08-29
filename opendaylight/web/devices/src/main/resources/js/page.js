@@ -492,8 +492,8 @@ one.f.switchmanager.subnetGatewayConfig = {
                 $dashlet.append($button);
 
                 // Delete gateway ip address button
-                var button = one.lib.dashlet.button.single("Delete Gateway IP Address(es)",
-                    one.f.switchmanager.subnetGatewayConfig.id.dashlet.removeIPAddress, "btn-primary", "btn-mini");
+                var button = one.lib.dashlet.button.single("Delete Gateway IP Address",
+                    one.f.switchmanager.subnetGatewayConfig.id.dashlet.removeIPAddress, "btn-danger", "btn-mini");
                 var $button = one.lib.dashlet.button.button(button);
                 $button.click(function() {
                     var requestData = {};
@@ -502,6 +502,10 @@ one.f.switchmanager.subnetGatewayConfig = {
                     checkedCheckBoxes.each(function(index, value) {
                         gatewaysToDelete.push(checkedCheckBoxes[index].id);
                     });
+                    if (checkedCheckBoxes.size() === 0) {
+                    	alert('Please select at least one gateway');
+                    	return false;
+                    }
                     if (gatewaysToDelete.length > 0) {
                         requestData["gatewaysToDelete"] = gatewaysToDelete.toString();
                         var url = one.f.switchmanager.rootUrl + "/subnetGateway/delete";
@@ -542,7 +546,7 @@ one.f.switchmanager.subnetGatewayConfig = {
                     $("#" + one.f.switchmanager.subnetGatewayConfig.id.dashlet.datagrid).find(':checkbox').prop('checked',
                         $("#"+one.f.switchmanager.subnetGatewayConfig.id.dashlet.selectAll).is(':checked'));
                 });
-                $(".subnetGatewayConfig").click(function(){
+                $(".subnetGatewayConfig").click(function(e){
                     if (!$('.subnetGatewayConfig[type=checkbox]:not(:checked)').length) {
                         $("#"+one.f.switchmanager.subnetGatewayConfig.id.dashlet.selectAll)
                             .prop("checked",
@@ -552,7 +556,7 @@ one.f.switchmanager.subnetGatewayConfig = {
                             .prop("checked",
                          false);
                     }
-                    event.stopPropagation();
+                    e.stopPropagation();
                 });
              });
         });
@@ -893,7 +897,7 @@ one.f.switchmanager.staticRouteConfig = {
                 $dashlet.append($button);
 
                 // Delete static route button
-                var button = one.lib.dashlet.button.single("Delete Static Route(s)", one.f.switchmanager.staticRouteConfig.id.dashlet.remove, "btn-primary", "btn-mini");
+                var button = one.lib.dashlet.button.single("Delete Static Route(s)", one.f.switchmanager.staticRouteConfig.id.dashlet.remove, "btn-danger", "btn-mini");
                 var $button = one.lib.dashlet.button.button(button);
                 $button.click(function() {
                     var requestData = {};
@@ -903,6 +907,10 @@ one.f.switchmanager.staticRouteConfig = {
                     checkedCheckBoxes.each(function(index, value) {
                         routesToDelete.push(checkedCheckBoxes[index].id);
                     });
+                    if (checkedCheckBoxes.size() === 0) {
+                    	alert('Please select at least one static route');
+                    	return false;
+                    }
                     if (routesToDelete.length > 0) {
                         requestData["routesToDelete"] = routesToDelete.toString();
                         var url = one.f.switchmanager.rootUrl + "/staticRoute/delete";
@@ -933,7 +941,7 @@ one.f.switchmanager.staticRouteConfig = {
                     $("#" + one.f.switchmanager.staticRouteConfig.id.dashlet.datagrid).find(':checkbox').prop('checked',
                         $("#"+one.f.switchmanager.staticRouteConfig.id.dashlet.selectAll).is(':checked'));
                 });
-                $(".staticRoute").click(function(){
+                $(".staticRoute").click(function(e){
                     if (!$('.staticRoute[type=checkbox]:not(:checked)').length) {
                         $("#"+one.f.switchmanager.staticRouteConfig.id.dashlet.selectAll)
                             .prop("checked",
@@ -943,7 +951,7 @@ one.f.switchmanager.staticRouteConfig = {
                             .prop("checked",
                          false);
                     }
-                    event.stopPropagation();
+                    e.stopPropagation();
                 });
              });
         });
@@ -1124,7 +1132,7 @@ one.f.switchmanager.spanPortConfig = {
                 $dashlet.append($button);
 
                 // Delete span port button
-                var button = one.lib.dashlet.button.single("Delete SPAN Port(s)", one.f.switchmanager.spanPortConfig.id.dashlet.remove, "btn-primary", "btn-mini");
+                var button = one.lib.dashlet.button.single("Delete SPAN Port(s)", one.f.switchmanager.spanPortConfig.id.dashlet.remove, "btn-danger", "btn-mini");
                 var $button = one.lib.dashlet.button.button(button);
                 $button.click(function() {
 
@@ -1134,6 +1142,10 @@ one.f.switchmanager.spanPortConfig = {
                         checkedCheckBoxes.each(function(index, value) {
                             spanPortsToDelete += decodeURIComponent(checkedCheckBoxes[index].getAttribute("spanPort")) + "###";
                         });
+                        if (checkedCheckBoxes.size() === 0) {
+                        	alert('Please select at least one SPAN port');
+                        	return false;
+                        }
 
                         var requestData = {};
                         requestData["spanPortsToDelete"] = spanPortsToDelete;
@@ -1165,7 +1177,7 @@ one.f.switchmanager.spanPortConfig = {
                     $("#" + one.f.switchmanager.spanPortConfig.id.dashlet.datagrid).find(':checkbox').prop('checked',
                         $("#"+one.f.switchmanager.spanPortConfig.id.dashlet.selectAll).is(':checked'));
                 });
-                $(".spanPortConfig").click(function(){
+                $(".spanPortConfig").click(function(e){
                     if (!$('.spanPortConfig[type=checkbox]:not(:checked)').length) {
                         $("#"+one.f.switchmanager.spanPortConfig.id.dashlet.selectAll)
                             .prop("checked",
@@ -1175,7 +1187,7 @@ one.f.switchmanager.spanPortConfig = {
                             .prop("checked",
                          false);
                     }
-                    event.stopPropagation();
+                    e.stopPropagation();
                 });
              });
         });
