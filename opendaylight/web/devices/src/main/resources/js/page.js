@@ -321,9 +321,14 @@ one.f.switchmanager.nodesLearnt = {
                         ' privilege=' + data.privilege + '>' + nodeNameEntry + '</a>';
                         
                         var ports = item.ports;
+                        var portsMatch = ports.match(/<\/span>/g);
+                        var portsLength = 0;
+                        if (portsMatch != null) {
+                            portsLength = portsMatch.length;
+                        }
                         item.ports = '<span class="nodePorts" style="cursor:pointer;color: #08c" ports='+encodeURIComponent(JSON.stringify(item.ports)) + ' nodeId=' + item.nodeId 
                             + ' nodeName=' + nodeName  
-                            + '>' + ports.match(/<\/span>/g).length+'</span>';
+                            + '>' + portsLength +'</span>';
                     }); 
                     },
                     delay: 0
@@ -364,9 +369,14 @@ one.f.switchmanager.nodesLearnt = {
                     formatter: function(items) {
                         $.each(items, function (index, item) {
                             var ports = item.ports;
+                            var portsMatch = ports.match(/<\/span>/g);
+                            var portsLength = 0;
+                            if (portsMatch != null) {
+                                portsLength = portsMatch.length;
+                            }
                             item.ports = '<span class="nodePorts" style="cursor: pointer;color: #08c" ports='+encodeURIComponent(JSON.stringify(item.ports)) + ' nodeId=' + item.nodeId 
                                 + ' nodeName=' + item.nodeName  
-                                + '>' + ports.match(/<\/span>/g).length+'</span>';
+                                + '>' + portsLength +'</span>';
                         }); 
                     },
                     delay: 0
