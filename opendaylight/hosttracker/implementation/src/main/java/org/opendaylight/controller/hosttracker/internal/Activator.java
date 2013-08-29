@@ -38,6 +38,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * are done by the ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
     }
 
@@ -46,6 +47,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
     }
 
@@ -58,6 +60,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *         instantiated in order to get an fully working implementation
      *         Object
      */
+    @Override
     public Object[] getImplementations() {
         Object[] res = { HostTracker.class };
         return res;
@@ -78,6 +81,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      *            per-container different behavior if needed, usually should not
      *            be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(HostTracker.class)) {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
@@ -114,38 +118,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IfNewHostNotify.class)
                     .setCallbacks("setnewHostNotify", "unsetnewHostNotify")
                     .setRequired(false));
-        }
-    }
-
-    /**
-     * Method which tells how many Global implementations are supported by the
-     * bundle. This way we can tune the number of components created. This
-     * components will be created ONLY at the time of bundle startup and will be
-     * destroyed only at time of bundle destruction, this is the major
-     * difference with the implementation retrieved via getImplementations where
-     * all of them are assumed to be in a container !
-     *
-     *
-     * @return The list of implementations the bundle will support, in Global
-     *         version
-     */
-    protected Object[] getGlobalImplementations() {
-        return null;
-    }
-
-    /**
-     * Configure the dependency for a given instance Global
-     *
-     * @param c
-     *            Component assigned for this instance, this will be what will
-     *            be used for configuration
-     * @param imp
-     *            implementation to be configured
-     * @param containerName
-     *            container on which the configuration happens
-     */
-    protected void configureGlobalInstance(Component c, Object imp) {
-        if (imp.equals(HostTracker.class)) {
         }
     }
 }

@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.hosttracker.hostAware;
 
-import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -27,7 +26,7 @@ import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 
 @XmlRootElement(name = "host")
 @XmlAccessorType(XmlAccessType.NONE)
-public class HostNodeConnector extends Host implements Serializable {
+public class HostNodeConnector extends Host {
     private static final long serialVersionUID = 1L;
     @XmlElement
     private NodeConnector nodeConnector;
@@ -136,22 +135,29 @@ public class HostNodeConnector extends Host implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         HostNodeConnector other = (HostNodeConnector) obj;
         if (nodeConnector == null) {
-            if (other.nodeConnector != null)
+            if (other.nodeConnector != null) {
                 return false;
-        } else if (!nodeConnector.equals(other.nodeConnector))
+            }
+        } else if (!nodeConnector.equals(other.nodeConnector)) {
             return false;
-        if (staticHost != other.staticHost)
+        }
+        if (staticHost != other.staticHost) {
             return false;
-        if (vlan != other.vlan)
+        }
+        if (vlan != other.vlan) {
             return false;
+        }
         return true;
     }
 
@@ -167,8 +173,9 @@ public class HostNodeConnector extends Host implements Serializable {
             EthernetAddress e = (EthernetAddress) getDataLayerAddress();
             macaddr = e.getValue();
         }
-        if (macaddr == null)
+        if (macaddr == null) {
             return false;
+        }
         return !Arrays.equals(emptyArray, macaddr);
     }
 
