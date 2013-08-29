@@ -19,7 +19,6 @@ import java.util.Set;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -42,14 +41,23 @@ public class SubnetConfig implements Cloneable, Serializable {
 
     // Order matters: JSP file expects following fields in the
     // following order
-    @XmlAttribute
-    private String name;
-    @XmlAttribute
-    private String subnet; // A.B.C.D/MM  Where A.B.C.D is the Default
-                           // Gateway IP (L3) or ARP Querier IP (L2
+    /**
+     * Name of the subnet
+     */
     @XmlElement
-    private Set<String> nodePorts; // datapath ID/port list:
-                                    // xx:xx:xx:xx:xx:xx:xx:xx/a,b,c-m,r-t,y
+    private String name;
+    /**
+     * A.B.C.D/MM  Where A.B.C.D is the Default
+     * Gateway IP (L3) or ARP Querier IP (L2)
+     */
+    @XmlElement
+    private String subnet;
+    /**
+     * node ID/port list:
+     *<node-id>/a,b,c-m,r-t,y
+     */
+    @XmlElement
+    private Set<String> nodePorts;
 
     public SubnetConfig() {
     }
@@ -185,13 +193,13 @@ public class SubnetConfig implements Cloneable, Serializable {
     //NodeConnectors learnt from a string
     private void getNodeConnectorsFromString(String codedNodeConnectors,
             Set<NodeConnector> sp) {
-        if (codedNodeConnectors == null) {
+        if (codedNodeConnectors == null || codedNodeConnectors.isEmpty()) {
             return;
         }
         if (sp == null) {
             return;
         }
-        // codedNodeConnectors = xx:xx:xx:xx:xx:xx:xx:xx/a,b,c-m,r-t,y
+        // codedNodeConnectors = nodeId/a,b,c-m,r-t,y
         String pieces[] = codedNodeConnectors.split("/");
         for (Short port : getPortList(pieces[1])) {
             Node n = Node.fromString(pieces[0]);
@@ -218,7 +226,7 @@ public class SubnetConfig implements Cloneable, Serializable {
     }
 
     public Set<NodeConnector> getNodeConnectors(String codedNodeConnectors) {
-        // codedNodeConnectors = xx:xx:xx:xx:xx:xx:xx:xx/a,b,c-m,r-t,y
+        // codedNodeConnectors = nodeId/a,b,c-m,r-t,y
         Set<NodeConnector> sp = new HashSet<NodeConnector>();
         getNodeConnectorsFromString(codedNodeConnectors, sp);
         return sp;

@@ -272,50 +272,99 @@ public class NorthboundIT {
 
         String name1 = "testSubnet1";
         String subnet1 = "1.1.1.1/24";
+
         String name2 = "testSubnet2";
         String subnet2 = "2.2.2.2/24";
+        String[] nodePorts2 = {"2/1", "2/2", "2/3", "2/4"};
+        StringBuilder nodePortsJson2 = new StringBuilder();
+        nodePortsJson2.append(nodePorts2[0] + "," + nodePorts2[1]  + "," + nodePorts2[2] + "," + nodePorts2[3]);
+
+        String name3 = "testSubnet3";
+        String subnet3 = "3.3.3.3/24";
+        String[] nodePorts3 = {"3/1", "3/2", "3/3"};
+        StringBuilder nodePortsJson3 = new StringBuilder();
+        nodePortsJson3.append(nodePorts3[0] + "," + nodePorts3[1]  + "," + nodePorts3[2]);
+        StringBuilder nodePortsJson3_1 = new StringBuilder();
+        nodePortsJson3_1.append(nodePortsJson3).append(",").append(nodePortsJson2);
 
         // Test GET subnets in default container
-        String result = getJsonResult(baseURL + "default");
+        String result = getJsonResult(baseURL + "default/subnet/all");
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
         Assert.assertEquals("{}", result);
 
         // Test GET subnet1 expecting 404
-        result = getJsonResult(baseURL + "default/" + name1);
+        result = getJsonResult(baseURL + "default/subnet/" + name1);
         Assert.assertEquals(404, httpResponseCode.intValue());
 
         // Test POST subnet1
-        String queryParameter = new QueryParameter("subnetName", name1).add("subnet", subnet1).getString();
-        result = getJsonResult(baseURL + "default/" + name1 + queryParameter, "POST");
-        Assert.assertEquals(201, httpResponseCode.intValue());
+        JSONObject jo = new JSONObject().append("name", name1).append("subnet", subnet1);
+        // execute HTTP request and verify response code
+        result = getJsonResult(baseURL + "default/subnet/" + name1, "POST", jo.toString());
+        Assert.assertTrue(httpResponseCode == 201);
 
         // Test GET subnet1
-        result = getJsonResult(baseURL + "default/" + name1);
+        result = getJsonResult(baseURL + "default/subnet/" + name1);
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
         Assert.assertEquals(200, httpResponseCode.intValue());
-        Assert.assertEquals(name1, json.getString("@name"));
-        Assert.assertEquals(subnet1, json.getString("@subnet"));
+        Assert.assertEquals(name1, json.getString("name"));
+        Assert.assertEquals(subnet1, json.getString("subnet"));
 
         // Test POST subnet2
-        queryParameter = new QueryParameter("subnetName", name2).add("subnet", subnet2).getString();
-        result = getJsonResult(baseURL + "default/" + name2 + queryParameter, "POST");
+        JSONObject jo2 = new JSONObject().append("name", name2).append("subnet", subnet2);
+        // execute HTTP request and verify response code
+        result = getJsonResult(baseURL + "default/subnet/" + name2, "POST", jo2.toString());
         Assert.assertEquals(201, httpResponseCode.intValue());
+        // Test POST nodePorts
+        jo2.append("nodePorts", nodePortsJson2);
+        // execute HTTP request and verify response code
+        result = getJsonResult(baseURL + "default/subnet/" + name2 + "/node-ports", "POST", jo2.toString());
+        Assert.assertEquals(200, httpResponseCode.intValue());
+        // Test POST subnet3
+        JSONObject jo3 = new JSONObject().append("name", name3).append("subnet", subnet3);
+        // execute HTTP request and verify response code
+        result = getJsonResult(baseURL + "default/subnet/" + name3, "POST", jo3.toString());
+        Assert.assertEquals(201, httpResponseCode.intValue());
+        // Test POST nodePorts
+        jo3.append("nodePorts", nodePortsJson3);
+        // execute HTTP request and verify response code
+        result = getJsonResult(baseURL + "default/subnet/" + name3 + "/node-ports", "POST", jo3.toString());
+        Assert.assertEquals(200, httpResponseCode.intValue());
+        // Test PUT nodePorts
+        jo3.remove("nodePorts");
+        jo3.append("nodePorts", nodePortsJson3_1);
+        result = getJsonResult(baseURL + "default/subnet/" + name3 + "/node-ports", "PUT", jo3.toString());
+        Assert.assertEquals(200, httpResponseCode.intValue());
 
         // Test GET all subnets in default container
-        result = getJsonResult(baseURL + "default");
+        result = getJsonResult(baseURL + "default/subnet/all");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
         JSONArray subnetConfigArray = json.getJSONArray("subnetConfig");
         JSONObject subnetConfig;
-        Assert.assertEquals(2, subnetConfigArray.length());
+        Assert.assertEquals(3, subnetConfigArray.length());
         for (int i = 0; i < subnetConfigArray.length(); i++) {
             subnetConfig = subnetConfigArray.getJSONObject(i);
-            if (subnetConfig.getString("@name").equals(name1)) {
-                Assert.assertEquals(subnet1, subnetConfig.getString("@subnet"));
-            } else if (subnetConfig.getString("@name").equals(name2)) {
-                Assert.assertEquals(subnet2, subnetConfig.getString("@subnet"));
+            if (subnetConfig.getString("name").equals(name1)) {
+                Assert.assertEquals(subnet1, subnetConfig.getString("subnet"));
+            } else if (subnetConfig.getString("name").equals(name2)) {
+                Assert.assertEquals(subnet2, subnetConfig.getString("subnet"));
+                String[] nodePortsGet2 = subnetConfig.getString("nodePorts").split(",");
+                Assert.assertEquals(nodePorts2[0], nodePortsGet2[0]);
+                Assert.assertEquals(nodePorts2[1], nodePortsGet2[1]);
+                Assert.assertEquals(nodePorts2[2], nodePortsGet2[2]);
+                Assert.assertEquals(nodePorts2[3], nodePortsGet2[3]);
+            } else if (subnetConfig.getString("name").equals(name3)) {
+                Assert.assertEquals(subnet3, subnetConfig.getString("subnet"));
+                String[] nodePortsGet = subnetConfig.getString("nodePorts").split(",");
+                Assert.assertEquals(nodePorts3[0], nodePortsGet[0]);
+                Assert.assertEquals(nodePorts3[1], nodePortsGet[1]);
+                Assert.assertEquals(nodePorts3[2], nodePortsGet[2]);
+                Assert.assertEquals(nodePorts2[0], nodePortsGet[3]);
+                Assert.assertEquals(nodePorts2[1], nodePortsGet[4]);
+                Assert.assertEquals(nodePorts2[2], nodePortsGet[5]);
+                Assert.assertEquals(nodePorts2[3], nodePortsGet[6]);
             } else {
                 // Unexpected config name
                 Assert.assertTrue(false);
@@ -323,14 +372,13 @@ public class NorthboundIT {
         }
 
         // Test DELETE subnet1
-        result = getJsonResult(baseURL + "default/" + name1, "DELETE");
-        Assert.assertEquals(200, httpResponseCode.intValue());
+        result = getJsonResult(baseURL + "default/subnet/" + name1, "DELETE");
+        Assert.assertEquals(204, httpResponseCode.intValue());
 
         // Test GET deleted subnet1
-        result = getJsonResult(baseURL + "default/" + name1);
+        result = getJsonResult(baseURL + "default/subnet/" + name1);
         Assert.assertEquals(404, httpResponseCode.intValue());
-
-    }
+  }
 
     @Test
     public void testStaticRoutingNorthbound() throws JSONException {

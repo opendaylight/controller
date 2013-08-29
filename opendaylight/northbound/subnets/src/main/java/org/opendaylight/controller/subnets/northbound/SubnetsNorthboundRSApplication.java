@@ -9,6 +9,7 @@ package org.opendaylight.controller.subnets.northbound;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.ws.rs.core.Application;
 
 /**
@@ -22,7 +23,7 @@ public class SubnetsNorthboundRSApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(SubnetsNorthboundJAXRS.class);
+        classes.add(SubnetsNorthbound.class);
         return classes;
     }
 }
