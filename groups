@@ -4,5 +4,4 @@
 2373512464abcee3eaf50f265c4a4e428dab634e	Administrators
 global:Anonymous-Users                  	Anonymous Users
 global:Registered-Users                 	Registered Users
-ldap:cn=gerrit-controller-access,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-controller-access
 ldap:cn=gerrit-controller-commiters,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-controller-commiters
