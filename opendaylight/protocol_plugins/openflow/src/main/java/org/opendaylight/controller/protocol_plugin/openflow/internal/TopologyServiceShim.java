@@ -9,7 +9,9 @@
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -400,6 +402,92 @@ public class TopologyServiceShim implements IDiscoveryListener,
         }
     }
 
+    private void updateContainerMap(List<String> containers, NodeConnector p) {
+        if (containers.isEmpty()) {
+            // Do cleanup to reduce memory footprint if no
+            // elements to be tracked
+            this.containerMap.remove(p);
+        } else {
+            this.containerMap.put(p, containers);
+        }
+    }
+
+    /**
+     * From a given edge map, retrieve the edge sourced by the port and update
+     * the local cache in the container
+     *
+     * @param container
+     *            the container name
+     * @param nodeConnector
+     *            the node connector
+     * @param edges
+     *            the given edge map
+     * @return the found edge
+     */
+    private Edge addEdge(String container, NodeConnector nodeConnector,
+            Map<NodeConnector, Pair<Edge, Set<Property>>> edges) {
+        logger.debug("Search edge sourced by port {} in container {}", nodeConnector, container);
+
+        // Retrieve the associated edge
+        Pair<Edge, Set<Property>> edgeProps = edges.get(nodeConnector);
+        if (edgeProps == null) {
+            logger.debug("edgePros is null for port {} in container {}", nodeConnector, container);
+            return null;
+        }
+
+        Edge edge = edgeProps.getLeft();
+        if (edge == null) {
+            logger.debug("edge is null for port {} in container {}", nodeConnector, container);
+            return null;
+        }
+
+        // Make sure the peer port is in the same container
+        NodeConnector peerConnector = edge.getHeadNodeConnector();
+        List<String> containers = this.containerMap.get(peerConnector);
+        if ((containers == null) || !containers.contains(container)) {
+            logger.debug("peer port {} of edge {} is not part of the container {}", new Object[] { peerConnector, edge,
+                    container });
+            return null;
+        }
+
+        // Update the local cache
+        updateLocalEdgeMap(container, edge, UpdateType.ADDED, edgeProps.getRight());
+        logger.debug("Added edge {} to local cache in container {}", edge, container);
+
+        return edge;
+    }
+
+    private void addNodeConnector(String container,
+            NodeConnector nodeConnector) {
+        // Use the global edge map for the newly added port in a container
+        Map<NodeConnector, Pair<Edge, Set<Property>>> globalEdgeMap = edgeMap.get(GlobalConstants.DEFAULT
+                .toString());
+        if (globalEdgeMap == null) {
+            return;
+        }
+
+        // Get the edge and update local cache in the container
+        Edge edge1, edge2;
+        edge1 = addEdge(container, nodeConnector, globalEdgeMap);
+        if (edge1 == null) {
+            return;
+        }
+
+        // Get the edge in reverse direction and update local cache in the container
+        NodeConnector peerConnector = edge1.getHeadNodeConnector();
+        edge2 = addEdge(container, peerConnector, globalEdgeMap);
+
+        // Send notification upwards in one shot
+        List<TopoEdgeUpdate> teuList = new ArrayList<TopoEdgeUpdate>();
+        teuList.add(new TopoEdgeUpdate(edge1, null, UpdateType.ADDED));
+        logger.debug("Notify edge1: {} in container {}", edge1, container);
+        if (edge2 != null) {
+            teuList.add(new TopoEdgeUpdate(edge2, null, UpdateType.ADDED));
+            logger.debug("Notify edge2: {} in container {}", edge2, container);
+        }
+        notifyEdge(container, teuList);
+    }
+
     private void removeNodeConnector(String container,
             NodeConnector nodeConnector) {
         List<TopoEdgeUpdate> teuList = new ArrayList<TopoEdgeUpdate>();
@@ -613,32 +701,23 @@ public class TopologyServiceShim implements IDiscoveryListener,
         if (containers == null) {
             containers = new CopyOnWriteArrayList<String>();
         }
-        boolean updateMap = false;
         switch (t) {
         case ADDED:
             if (!containers.contains(containerName)) {
                 containers.add(containerName);
-                updateMap = true;
+                updateContainerMap(containers, p);
+                addNodeConnector(containerName, p);
             }
             break;
         case REMOVED:
             if (containers.contains(containerName)) {
                 containers.remove(containerName);
-                updateMap = true;
+                updateContainerMap(containers, p);
                 removeNodeConnector(containerName, p);
             }
             break;
         case CHANGED:
             break;
-        }
-        if (updateMap) {
-            if (containers.isEmpty()) {
-                // Do cleanup to reduce memory footprint if no
-                // elements to be tracked
-                this.containerMap.remove(p);
-            } else {
-                this.containerMap.put(p, containers);
-            }
         }
     }
 
@@ -730,21 +809,19 @@ public class TopologyServiceShim implements IDiscoveryListener,
     }
 
     /**
-     * Retrieve/construct edge map for a given container
+     * Retrieve the edges for a given container
      *
      * @param containerName
      *            the container name
      * @return the edges and their properties
      */
-    private Map<NodeConnector, Pair<Edge, Set<Property>>> getEdgeMap(String containerName) {
+    private Collection<Pair<Edge, Set<Property>>> getEdgeProps(String containerName) {
         Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropMap = null;
-
-        /*
-         * When container is freshly created, need to construct map based on global map.
-         */
         edgePropMap = edgeMap.get(containerName);
-
-        return edgePropMap;
+        if (edgePropMap == null) {
+            return null;
+        }
+        return edgePropMap.values();
     }
 
     /**
@@ -756,11 +833,11 @@ public class TopologyServiceShim implements IDiscoveryListener,
      *            the container name
      */
     private void TopologyBulkUpdate(String containerName) {
-        Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropMap = null;
+        Collection<Pair<Edge, Set<Property>>> edgeProps = null;
 
         logger.debug("Try bulk update for container:{}", containerName);
-        edgePropMap = getEdgeMap(containerName);
-        if (edgePropMap == null) {
+        edgeProps = getEdgeProps(containerName);
+        if (edgeProps == null) {
             logger.debug("No edges known for container:{}", containerName);
             return;
         }
@@ -773,12 +850,12 @@ public class TopologyServiceShim implements IDiscoveryListener,
         }
         int i = 0;
         List<TopoEdgeUpdate> teuList = new ArrayList<TopoEdgeUpdate>();
-        for (Pair<Edge, Set<Property>> edgeProps : edgePropMap.values()) {
-            if (edgeProps != null) {
+        for (Pair<Edge, Set<Property>> edgeProp : edgeProps) {
+            if (edgeProp != null) {
                 i++;
-                teuList.add(new TopoEdgeUpdate(edgeProps.getLeft(), edgeProps
+                teuList.add(new TopoEdgeUpdate(edgeProp.getLeft(), edgeProp
                         .getRight(), UpdateType.ADDED));
-                logger.trace("Add edge {}", edgeProps.getLeft());
+                logger.trace("Add edge {}", edgeProp.getLeft());
             }
         }
         if (i > 0) {
