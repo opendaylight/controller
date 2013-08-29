@@ -111,17 +111,20 @@ public class StatisticsNorthbound {
      *            controller is "default".
      * @return List of FlowStatistics from all the Nodes
      *
-     *         <pre>
+     * <pre>
+     *
      * Example:
-     * Request URL: localhost:8080/controller/nb/v2/statistics/default/flow
+     *
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/statistics/default/flow
      *
      * Response in JSON:
      * {
      *     "flowStatistics": [
      *         {
      *             "node": {
-     *                 "@type": "OF",
-     *                 "@id": "00:00:00:00:00:00:00:02"
+     *                 "id":"00:00:00:00:00:00:00:02",
+     *                 "type":"OF"
      *             },
      *             "flowStatistic": [
      *                 {
@@ -142,11 +145,13 @@ public class StatisticsNorthbound {
      *                         "actions": {
      *                             "@type": "output",
      *                             "port": {
-     *                                 "@type": "OF",
-     *                                 "@id": "3",
-     *                                 "node": {
-     *                                     "@type": "OF",
-     *                                     "@id": "00:00:00:00:00:00:00:02"
+     *                                 {
+     *                                      "node":{
+     *                                          "id":"00:00:00:00:00:00:00:02",
+     *                                          "type":"OF"
+     *                                       },
+     *                                       "id":"3",
+     *                                       "type":"OF"
      *                                 }
      *                             }
      *                         },
@@ -171,11 +176,15 @@ public class StatisticsNorthbound {
      *
      *     ]
      * }
+     *
      * Response in XML:
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      * &lt;list&gt;
      *     &lt;flowStatistics&gt;
-     *         &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:02&quot;/&gt;
+     *         &lt;node&gt;
+     *             &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *             &lt;type&gt;OF&lt;/type&gt;
+     *         &lt;/node&gt;
      *         &lt;flowStatistic&gt;
      *             &lt;flow&gt;
      *                 &lt;match&gt;
@@ -191,8 +200,13 @@ public class StatisticsNorthbound {
      *                 &lt;/match&gt;
      *                 &lt;actions
      *                     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:type=&quot;output&quot;&gt;
-     *                     &lt;port type=&quot;OF&quot; id=&quot;3&quot;&gt;
-     *                         &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:02&quot;/&gt;
+     *                     &lt;port&gt;
+     *                         &lt;node&gt;
+     *                             &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *                             &lt;type&gt;OF&lt;/type&gt;
+     *                         &lt;/node&gt;
+     *                         &lt;id&gt;3&lt;/id&gt;
+     *                         &lt;type&gt;OF&lt;/type&gt;
      *                     &lt;/port&gt;
      *                 &lt;/actions&gt;
      *                 &lt;priority&gt;1&lt;/priority&gt;
@@ -272,16 +286,18 @@ public class StatisticsNorthbound {
      *            Node Identifier
      * @return List of Flow Statistics for a given Node. *
      *
-     *         <pre>
+     * <pre>
+     *
      * Example:
+     *
      * Request URL:
-     * http://host:8080/controller/nb/v2/statistics/default/flow/node/OF/00:00:00:00:00:00:00:01
+     * http://localhost:8080/controller/nb/v2/statistics/default/flow/node/OF/00:00:00:00:00:00:00:01
      *
      * Response in JSON:
      * {
      *     "node": {
-     *         "@type": "OF",
-     *         "@id": "00:00:00:00:00:00:00:01"
+     *         "id":"00:00:00:00:00:00:00:01",
+     *         "type":"OF"
      *     },
      *     "flowStatistic": [
      *         {
@@ -306,13 +322,13 @@ public class StatisticsNorthbound {
      *                     },
      *                     {
      *                         "@type": "output",
-     *                         "port": {
-     *                             "@type": "OF",
-     *                             "@id": "5",
-     *                             "node": {
-     *                                 "@type": "OF",
-     *                                 "@id": "00:00:00:00:00:00:00:01"
-     *                             }
+     *                         "port":{
+     *                             "node":{
+     *                                 "id":"00:00:00:00:00:00:00:01",
+     *                                 "type":"OF"
+     *                              },
+     *                              "id":"5",
+     *                              "type":"OF"
      *                         }
      *                     }
      *                 ],
@@ -330,11 +346,13 @@ public class StatisticsNorthbound {
      *     ]
      * }
      *
-     *
      * Response in XML:
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      *     &lt;nodeFlowStatistics&gt;
-     *         &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:02&quot;/&gt;
+     *         &lt;node&gt;
+     *             &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *             &lt;type&gt;OF&lt;/type&gt;
+     *         &lt;/node&gt;
      *         &lt;flowStatistic&gt;
      *             &lt;flow&gt;
      *                 &lt;match&gt;
@@ -350,8 +368,13 @@ public class StatisticsNorthbound {
      *                 &lt;/match&gt;
      *                 &lt;actions
      *                     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:type=&quot;output&quot;&gt;
-     *                     &lt;port type=&quot;OF&quot; id=&quot;3&quot;&gt;
-     *                         &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:02&quot;/&gt;
+     *                     &lt;port&gt;
+     *                         &lt;node&gt;
+     *                             &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *                             &lt;type&gt;OF&lt;/type&gt;
+     *                         &lt;/node&gt;
+     *                         &lt;id&gt;3&lt;/id&gt;
+     *                         &lt;type&gt;OF&lt;/type&gt;
      *                     &lt;/port&gt;
      *                 &lt;/actions&gt;
      *                 &lt;priority&gt;1&lt;/priority&gt;
@@ -380,8 +403,13 @@ public class StatisticsNorthbound {
      *                 &lt;/match&gt;
      *                 &lt;actions
      *                     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:type=&quot;output&quot;&gt;
-     *                     &lt;port type=&quot;OF&quot; id=&quot;3&quot;&gt;
-     *                         &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:02&quot;/&gt;
+     *                     &lt;port&gt;
+     *                         &lt;node&gt;
+     *                             &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *                             &lt;type&gt;OF&lt;/type&gt;
+     *                         &lt;/node&gt;
+     *                         &lt;id&gt;3&lt;/id&gt;
+     *                         &lt;type&gt;OF&lt;/type&gt;
      *                     &lt;/port&gt;
      *                 &lt;/actions&gt;
      *                 &lt;priority&gt;1&lt;/priority&gt;
@@ -445,28 +473,30 @@ public class StatisticsNorthbound {
      * @return List of all the Port Statistics across all the NodeConnectors on
      *         all the Nodes.
      *
-     *         <pre>
+     * <pre>
+     *
      * Example:
      *
-     * Requset URL: http://host:8080/controller/nb/v2/statistics/default/port
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/statistics/default/port
      *
      * Response in JSON:
      * {
      *     "portStatistics": [
      *         {
      *             "node": {
-     *                 "@type": "OF",
-     *                 "@id": "00:00:00:00:00:00:00:02"
+     *                  "id":"00:00:00:00:00:00:00:02",
+     *                  "type":"OF"
      *             },
      *             "portStatistic": [
      *                 {
-     *                     "nodeConnector": {
-     *                         "@type": "OF",
-     *                         "@id": "3",
-     *                         "node": {
-     *                             "@type": "OF",
-     *                             "@id": "00:00:00:00:00:00:00:02"
-     *                         }
+     *                     "nodeConnector":{
+     *                          "node":{
+     *                                 "id":"00:00:00:00:00:00:00:02",
+     *                                 "type":"OF"
+     *                           },
+     *                           "id":"3",
+     *                           "type":"OF"
      *                     },
      *                     "receivePackets": "182",
      *                     "transmitPackets": "173",
@@ -483,12 +513,12 @@ public class StatisticsNorthbound {
      *                 },
      *                 {
      *                     "nodeConnector": {
-     *                         "@type": "OF",
-     *                         "@id": "2",
-     *                         "node": {
-     *                             "@type": "OF",
-     *                             "@id": "00:00:00:00:00:00:00:02"
-     *                         }
+     *                          "node":{
+     *                                  "id":"00:00:00:00:00:00:00:02",
+     *                                  "type":"OF"
+     *                           },
+     *                           "id":"2",
+     *                           "type":"OF"
      *                     },
      *                     "receivePackets": "174",
      *                     "transmitPackets": "181",
@@ -508,8 +538,8 @@ public class StatisticsNorthbound {
      *         },
      *         {
      *             "node": {
-     *                 "@type": "OF",
-     *                 "@id": "00:00:00:00:00:00:00:03"
+     *                  "id":"00:00:00:00:00:00:00:03",
+     *                  "type":"OF"
      *             },
      *             "portStatistic": [
      *                  ..................
@@ -524,10 +554,18 @@ public class StatisticsNorthbound {
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      * &lt;list&gt;
      *     &lt;portStatistics&gt;
-     *         &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:02&quot;/&gt;
-     *         &lt;portStatistic&gt;
-     *             &lt;nodeConnector type=&quot;OF&quot; id=&quot;3&quot;&gt;
-     *                 &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:02&quot;/&gt;
+     *          &lt;node&gt;
+     *             &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *             &lt;type&gt;OF&lt;/type&gt;
+     *          &lt;/node&gt;
+     *          &lt;portStatistic&gt;
+     *             &lt;nodeConnector&gt;
+     *                &lt;node&gt;
+     *                   &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *                   &lt;type&gt;OF&lt;/type&gt;
+     *                &lt;/node&gt;
+     *                &lt;id&gt;3&lt;/id&gt;
+     *                &lt;type&gt;OF&lt;/type&gt;
      *             &lt;/nodeConnector&gt;
      *             &lt;receivePackets&gt;181&lt;/receivePackets&gt;
      *             &lt;transmitPackets&gt;172&lt;/transmitPackets&gt;
@@ -543,8 +581,13 @@ public class StatisticsNorthbound {
      *             &lt;collisionCount&gt;0&lt;/collisionCount&gt;
      *         &lt;/portStatistic&gt;
      *         &lt;portStatistic&gt;
-     *             &lt;nodeConnector type=&quot;OF&quot; id=&quot;2&quot;&gt;
-     *                 &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:02&quot;/&gt;
+     *             &lt;nodeConnector&gt;
+     *                &lt;node&gt;
+     *                   &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *                   &lt;type&gt;OF&lt;/type&gt;
+     *                &lt;/node&gt;
+     *                &lt;id&gt;2&lt;/id&gt;
+     *                &lt;type&gt;OF&lt;/type&gt;
      *             &lt;/nodeConnector&gt;
      *             &lt;receivePackets&gt;173&lt;/receivePackets&gt;
      *             &lt;transmitPackets&gt;180&lt;/transmitPackets&gt;
@@ -559,7 +602,6 @@ public class StatisticsNorthbound {
      *             &lt;receiveCrcError&gt;0&lt;/receiveCrcError&gt;
      *             &lt;collisionCount&gt;0&lt;/collisionCount&gt;
      *         &lt;/portStatistic&gt;
-     *
      *     &lt;/portStatistics&gt;
      * &lt;/list&gt;
      * </pre>
@@ -619,27 +661,28 @@ public class StatisticsNorthbound {
      * @return Returns a list of all the Port Statistics across all the
      *         NodeConnectors in a given Node.
      *
-     *         <pre>
+     * <pre>
+     *
      * Example:
      *
      * Request URL:
-     * http://host:8080/controller/nb/v2/statistics/default/port/node/OF/00:00:00:00:00:00:00:01
+     * http://localhost:8080/controller/nb/v2/statistics/default/port/node/OF/00:00:00:00:00:00:00:01
      *
      * Response in JSON:
      * {
      *     "node": {
-     *         "@type": "OF",
-     *         "@id": "00:00:00:00:00:00:00:01"
+     *         "id":"00:00:00:00:00:00:00:01",
+     *         "type":"OF"
      *     },
      *     "portStatistic": [
      *         {
      *             "nodeConnector": {
-     *                 "@type": "OF",
-     *                 "@id": "3",
-     *                 "node": {
-     *                     "@type": "OF",
-     *                     "@id": "00:00:00:00:00:00:00:01"
-     *                 }
+     *                 "node":{
+     *                     "id":"00:00:00:00:00:00:00:01",
+     *                     "type":"OF"
+     *                 },
+     *                 "id":"3",
+     *                 "type":"OF"
      *             },
      *             "receivePackets": "171",
      *             "transmitPackets": "2451",
@@ -656,12 +699,12 @@ public class StatisticsNorthbound {
      *         },
      *         {
      *             "nodeConnector": {
-     *                 "@type": "OF",
-     *                 "@id": "2",
-     *                 "node": {
-     *                     "@type": "OF",
-     *                     "@id": "00:00:00:00:00:00:00:01"
-     *                 }
+     *                 "node":{
+     *                     "id":"00:00:00:00:00:00:00:01",
+     *                     "type":"OF"
+     *                 },
+     *                 "id":"2",
+     *                 "type":"OF"
      *             },
      *             "receivePackets": "179",
      *             "transmitPackets": "2443",
@@ -682,10 +725,18 @@ public class StatisticsNorthbound {
      * Response in XML:
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      * &lt;nodePortStatistics&gt;
-     *     &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *     &lt;node&gt;
+     *         &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *         &lt;type&gt;OF&lt;/type&gt;
+     *     &lt;/node&gt;
      *     &lt;portStatistic&gt;
-     *         &lt;nodeConnector type=&quot;OF&quot; id=&quot;2&quot;&gt;
-     *             &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *         &lt;nodeConnector&gt;
+     *             &lt;node&gt;
+     *                 &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *                 &lt;type&gt;OF&lt;/type&gt;
+     *             &lt;/node&gt;
+     *             &lt;id&gt;2&lt;/id&gt;
+     *             &lt;type&gt;OF&lt;/type&gt;
      *         &lt;/nodeConnector&gt;
      *         &lt;receivePackets&gt;180&lt;/receivePackets&gt;
      *         &lt;transmitPackets&gt;2594&lt;/transmitPackets&gt;
@@ -701,8 +752,13 @@ public class StatisticsNorthbound {
      *         &lt;collisionCount&gt;0&lt;/collisionCount&gt;
      *     &lt;/portStatistic&gt;
      *     &lt;portStatistic&gt;
-     *         &lt;nodeConnector type=&quot;OF&quot; id=&quot;5&quot;&gt;
-     *             &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *         &lt;nodeConnector&gt;
+     *             &lt;node&gt;
+     *                 &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *                 &lt;type&gt;OF&lt;/type&gt;
+     *             &lt;/node&gt;
+     *             &lt;id&gt;5&lt;/id&gt;
+     *             &lt;type&gt;OF&lt;/type&gt;
      *         &lt;/nodeConnector&gt;
      *         &lt;receivePackets&gt;2542&lt;/receivePackets&gt;
      *         &lt;transmitPackets&gt;2719&lt;/transmitPackets&gt;
@@ -768,30 +824,29 @@ public class StatisticsNorthbound {
      *
      * @return Returns a list of all the Table Statistics in a given Node.
      *
-     *         <pre>
+     * <pre>
      *
-     *  Example:
+     * Example:
      *
-     *  Request URL:
-     *  http://host:8080/controller/nb/v2/statistics/default/table
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/statistics/default/table
      *
-     *  Response in JSON:
-     *
+     * Response in JSON:
      * {
      *     "tableStatistics": [
      *         {
      *             "node": {
-     *                 "@type": "OF",
-     *                 "@id": "00:00:00:00:00:00:00:02"
+     *                 "id":"00:00:00:00:00:00:00:02",
+     *                 "type":"OF"
      *             },
      *             "tableStatistic": [
      *                 {
      *                     "nodeTable": {
-     *                         "@id": "0",
-     *                         "node": {
-     *                             "@type": "OF",
-     *                             "@id": "00:00:00:00:00:00:00:02"
-     *                         }
+     *                        "node":{
+     *                           "id":"00:00:00:00:00:00:00:02",
+     *                           "type":"OF"
+     *                         },
+     *                         "id":"0"
      *                     },
      *                     "activeCount": "11",
      *                     "lookupCount": "816",
@@ -808,31 +863,45 @@ public class StatisticsNorthbound {
      *     ]
      * }
      *
-     *
      *  Response in XML:
      *  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      *  &lt;list&gt;
      *  &lt;tableStatistics&gt;
-     *      &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *      &lt;node&gt;
+     *          &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *          &lt;type&gt;OF&lt;/type&gt;
+     *      &lt;/node&gt;
      *      &lt;tableStatistic&gt;
-     *          &lt;nodeTable id=&quot;0&quot;&gt;
-     *              &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *          &lt;nodeTable&gt;
+     *              &lt;node&gt;
+     *                  &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *                  &lt;type&gt;OF&lt;/type&gt;
+     *              &lt;/node&gt;
+     *              &lt;id&gt;0&lt;/id&gt;
      *          &lt;/nodeTable&gt;
      *          &lt;activeCount&gt;12&lt;/activeCount&gt;
      *          &lt;lookupCount&gt;10935&lt;/lookupCount&gt;
      *          &lt;matchedCount&gt;10084&lt;/matchedCount&gt;
      *      &lt;/tableStatistic&gt;
      *      &lt;tableStatistic&gt;
-     *          &lt;nodeTable id=&quot;1&quot;&gt;
-     *              &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *          &lt;nodeTable&gt;
+     *              &lt;node&gt;
+     *                  &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *                  &lt;type&gt;OF&lt;/type&gt;
+     *              &lt;/node&gt;
+     *              &lt;id&gt;1&lt;/id&gt;
      *          &lt;/nodeTable&gt;
      *          &lt;activeCount&gt;0&lt;/activeCount&gt;
      *          &lt;lookupCount&gt;0&lt;/lookupCount&gt;
      *          &lt;matchedCount&gt;0&lt;/matchedCount&gt;
      *      &lt;/tableStatistic&gt;
      *      &lt;tableStatistic&gt;
-     *          &lt;nodeTable id=&quot;2&quot;&gt;
-     *              &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *          &lt;nodeTable&gt;
+     *              &lt;node&gt;
+     *                  &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *                  &lt;type&gt;OF&lt;/type&gt;
+     *              &lt;/node&gt;
+     *              &lt;id&gt;2&lt;/id&gt;
      *          &lt;/nodeTable&gt;
      *          &lt;activeCount&gt;0&lt;/activeCount&gt;
      *          &lt;lookupCount&gt;0&lt;/lookupCount&gt;
@@ -900,27 +969,27 @@ public class StatisticsNorthbound {
      *            Identifier (e.g. MAC address)
      * @return Returns a list of all the Table Statistics in a given Node.
      *
-     *         <pre>
+     * <pre>
      *
      * Example:
      *
      * Request URL:
-     * http://host:8080/controller/nb/v2/statistics/default/table/node/OF/00:00:00:00:00:00:00:01
+     * http://localhost:8080/controller/nb/v2/statistics/default/table/node/OF/00:00:00:00:00:00:00:01
      *
      * Response in JSON:
      * {
      *     "node": {
-     *         "@type": "OF",
-     *         "@id": "00:00:00:00:00:00:00:01"
+     *         "id":"00:00:00:00:00:00:00:01",
+     *         "type":"OF"
      *     },
      *     "tableStatistic": [
      *         {
      *             "nodeTable": {
-     *                 "@id": "0",
-     *                 "node": {
-     *                     "@type": "OF",
-     *                     "@id": "00:00:00:00:00:00:00:01"
-     *                 }
+     *                 "node":{
+     *                     "id":"00:00:00:00:00:00:00:01",
+     *                     "type":"OF"
+     *                 },
+     *                 "id":"0"
      *             },
      *             "activeCount": "12",
      *             "lookupCount": "11382",
@@ -928,11 +997,11 @@ public class StatisticsNorthbound {
      *         },
      *         {
      *             "nodeTable": {
-     *                 "@id": "1",
-     *                 "node": {
-     *                     "@type": "OF",
-     *                     "@id": "00:00:00:00:00:00:00:01"
-     *                 }
+     *                 "node":{
+     *                     "id":"00:00:00:00:00:00:00:01",
+     *                     "type":"OF"
+     *                 },
+     *                 "id":"1"
      *             },
      *             "activeCount": "0",
      *             "lookupCount": "0",
@@ -944,33 +1013,47 @@ public class StatisticsNorthbound {
      * Response in XML:
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      * &lt;nodeTableStatistics&gt;
-     *     &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *     &lt;node&gt;
+     *          &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *          &lt;type&gt;OF&lt;/type&gt;
+     *     &lt;/node&gt;
      *     &lt;tableStatistic&gt;
-     *         &lt;nodeTable id=&quot;0&quot;&gt;
-     *             &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *         &lt;nodeTable&gt;
+     *             &lt;node&gt;
+     *                 &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *                 &lt;type&gt;OF&lt;/type&gt;
+     *             &lt;/node&gt;
+     *             &lt;id&gt;0&lt;/id&gt;
      *         &lt;/nodeTable&gt;
      *         &lt;activeCount&gt;12&lt;/activeCount&gt;
      *         &lt;lookupCount&gt;10935&lt;/lookupCount&gt;
      *         &lt;matchedCount&gt;10084&lt;/matchedCount&gt;
      *     &lt;/tableStatistic&gt;
      *     &lt;tableStatistic&gt;
-     *         &lt;nodeTable id=&quot;1&quot;&gt;
-     *             &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *         &lt;nodeTable&gt;
+     *             &lt;node&gt;
+     *                 &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *                 &lt;type&gt;OF&lt;/type&gt;
+     *             &lt;/node&gt;
+     *             &lt;id&gt;1&lt;/id&gt;
      *         &lt;/nodeTable&gt;
      *         &lt;activeCount&gt;0&lt;/activeCount&gt;
      *         &lt;lookupCount&gt;0&lt;/lookupCount&gt;
      *         &lt;matchedCount&gt;0&lt;/matchedCount&gt;
      *     &lt;/tableStatistic&gt;
      *     &lt;tableStatistic&gt;
-     *         &lt;nodeTable id=&quot;2&quot;&gt;
-     *             &lt;node type=&quot;OF&quot; id=&quot;00:00:00:00:00:00:00:01&quot;/&gt;
+     *         &lt;nodeTable&gt;
+     *             &lt;node&gt;
+     *                 &lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *                 &lt;type&gt;OF&lt;/type&gt;
+     *             &lt;/node&gt;
+     *             &lt;id&gt;2&lt;/id&gt;
      *         &lt;/nodeTable&gt;
      *         &lt;activeCount&gt;0&lt;/activeCount&gt;
      *         &lt;lookupCount&gt;0&lt;/lookupCount&gt;
      *         &lt;matchedCount&gt;0&lt;/matchedCount&gt;
      *     &lt;/tableStatistic&gt;
      * &lt;/nodeTableStatistics&gt;
-     *
      *
      * </pre>
      */

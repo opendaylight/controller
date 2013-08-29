@@ -200,8 +200,8 @@ public class NorthboundIT {
             Integer buffersValue) throws JSONException {
 
         JSONObject nodeInfo = node.getJSONObject("node");
-        Assert.assertEquals(nodeId, (Integer) nodeInfo.getInt("@id"));
-        Assert.assertEquals(nodeType, nodeInfo.getString("@type"));
+        Assert.assertEquals(nodeId, (Integer) nodeInfo.getInt("id"));
+        Assert.assertEquals(nodeType, nodeInfo.getString("type"));
 
         JSONObject properties = node.getJSONObject("properties");
 
@@ -242,10 +242,10 @@ public class NorthboundIT {
         JSONObject node = nodeConnector.getJSONObject("node");
         JSONObject properties = nodeConnectorProperties.getJSONObject("properties");
 
-        Assert.assertEquals(ncId, (Integer) nodeConnector.getInt("@id"));
-        Assert.assertEquals(ncType, nodeConnector.getString("@type"));
-        Assert.assertEquals(nodeId, (Integer) node.getInt("@id"));
-        Assert.assertEquals(nodeType, node.getString("@type"));
+        Assert.assertEquals(ncId, (Integer) nodeConnector.getInt("id"));
+        Assert.assertEquals(ncType, nodeConnector.getString("type"));
+        Assert.assertEquals(nodeId, (Integer) node.getInt("id"));
+        Assert.assertEquals(nodeType, node.getString("type"));
         if (state == null) {
             Assert.assertFalse(properties.has("state"));
         } else {
@@ -564,8 +564,8 @@ public class NorthboundIT {
         JSONObject flowStatistics = getJsonInstance(json, "flowStatistics", 0xCAFE);
         JSONObject node = flowStatistics.getJSONObject("node");
         // test that node was returned properly
-        Assert.assertTrue(node.getInt("@id") == 0xCAFE);
-        Assert.assertEquals(node.getString("@type"), "STUB");
+        Assert.assertTrue(node.getInt("id") == 0xCAFE);
+        Assert.assertEquals(node.getString("type"), "STUB");
 
         // test that flow statistics results are correct
         JSONArray flowStats = flowStatistics.getJSONArray("flowStatistic");
@@ -583,8 +583,8 @@ public class NorthboundIT {
         JSONObject portStatistics = getJsonInstance(json, "portStatistics", 0xCAFE);
         JSONObject node2 = portStatistics.getJSONObject("node");
         // test that node was returned properly
-        Assert.assertTrue(node2.getInt("@id") == 0xCAFE);
-        Assert.assertEquals(node2.getString("@type"), "STUB");
+        Assert.assertTrue(node2.getInt("id") == 0xCAFE);
+        Assert.assertEquals(node2.getString("type"), "STUB");
 
         // test that port statistic results are correct
         JSONObject portStat = portStatistics.getJSONObject("portStatistic");
@@ -607,8 +607,8 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         node = json.getJSONObject("node");
         // test that node was returned properly
-        Assert.assertTrue(node.getInt("@id") == 0xCAFE);
-        Assert.assertEquals(node.getString("@type"), "STUB");
+        Assert.assertTrue(node.getInt("id") == 0xCAFE);
+        Assert.assertEquals(node.getString("type"), "STUB");
 
         // test that flow statistics results are correct
         flowStats = json.getJSONArray("flowStatistic");
@@ -622,8 +622,8 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         node2 = json.getJSONObject("node");
         // test that node was returned properly
-        Assert.assertTrue(node2.getInt("@id") == 0xCAFE);
-        Assert.assertEquals(node2.getString("@type"), "STUB");
+        Assert.assertTrue(node2.getInt("id") == 0xCAFE);
+        Assert.assertEquals(node2.getString("type"), "STUB");
 
         // test that port statistic results are correct
         portStat = json.getJSONObject("portStatistic");
@@ -665,10 +665,10 @@ public class NorthboundIT {
         if (act.getString("@type").equals("output")) {
             JSONObject port = act.getJSONObject("port");
             JSONObject port_node = port.getJSONObject("node");
-            Assert.assertTrue(port.getInt("@id") == 51966);
-            Assert.assertTrue(port.getString("@type").equals("STUB"));
-            Assert.assertTrue(port_node.getInt("@id") == 51966);
-            Assert.assertTrue(port_node.getString("@type").equals("STUB"));
+            Assert.assertTrue(port.getInt("id") == 51966);
+            Assert.assertTrue(port.getString("type").equals("STUB"));
+            Assert.assertTrue(port_node.getInt("id") == 51966);
+            Assert.assertTrue(port_node.getString("type").equals("STUB"));
         }
 
         if (act.getString("@type").equals("setDlSrc")) {
@@ -738,7 +738,7 @@ public class NorthboundIT {
         Assert.assertTrue(result.equals("404"));
 
         // test add flow1
-        String fc = "{\"dynamic\":\"false\", \"name\":\"test1\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
+        String fc = "{\"dynamic\":\"false\", \"name\":\"test1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
@@ -752,20 +752,20 @@ public class NorthboundIT {
         Assert.assertEquals(json.getString("actions"), "DROP");
         Assert.assertEquals(json.getString("installInHw"), "true");
         JSONObject node = json.getJSONObject("node");
-        Assert.assertEquals(node.getString("@type"), "STUB");
-        Assert.assertEquals(node.getString("@id"), "51966");
+        Assert.assertEquals(node.getString("type"), "STUB");
+        Assert.assertEquals(node.getString("id"), "51966");
         // test adding same flow again fails due to repeat name..return 409
         // code
         result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "PUT", fc);
         Assert.assertTrue(result.equals("409"));
 
-        fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
+        fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "PUT", fc);
         // test should return 409 for error due to same flow being added.
         Assert.assertTrue(result.equals("409"));
 
         // add second flow that's different
-        fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"nwSrc\":\"1.1.1.1\", \"node\":{\"@id\":\"51966\",\"@type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
+        fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"nwSrc\":\"1.1.1.1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
@@ -806,13 +806,13 @@ public class NorthboundIT {
             JSONArray json_array = json.getJSONArray(array_name);
             for (int i = 0; i < json_array.length(); i++) {
                 result = json_array.getJSONObject(i);
-                Integer nid = result.getJSONObject("node").getInt("@id");
+                Integer nid = result.getJSONObject("node").getInt("id");
                 if (nid.equals(nodeId))
                     break;
             }
         } else {
             result = json.getJSONObject(array_name);
-            Integer nid = result.getJSONObject("node").getInt("@id");
+            Integer nid = result.getJSONObject("node").getInt("id");
             if (!nid.equals(nodeId))
                 result = null;
         }
@@ -911,17 +911,17 @@ public class NorthboundIT {
             networkAddress = host_jo.getString("networkAddress");
             if (networkAddress.equalsIgnoreCase(networkAddress_1)) {
                 Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_1));
-                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_1));
-                Assert.assertTrue(nc_jo.getInt("@id") == nodeConnectorId_1);
-                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(nodeType_1));
-                Assert.assertTrue(node_jo.getInt("@id") == nodeId_1);
+                Assert.assertTrue(nc_jo.getString("type").equalsIgnoreCase(nodeConnectorType_1));
+                Assert.assertTrue(nc_jo.getInt("id") == nodeConnectorId_1);
+                Assert.assertTrue(node_jo.getString("type").equalsIgnoreCase(nodeType_1));
+                Assert.assertTrue(node_jo.getInt("id") == nodeId_1);
                 Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(vlan_1));
             } else if (networkAddress.equalsIgnoreCase(networkAddress_2)) {
                 Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_2));
-                Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_2));
-                Assert.assertTrue(nc_jo.getInt("@id") == nodeConnectorId_2);
-                Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(nodeType_2));
-                Assert.assertTrue(node_jo.getInt("@id") == nodeId_2);
+                Assert.assertTrue(nc_jo.getString("type").equalsIgnoreCase(nodeConnectorType_2));
+                Assert.assertTrue(nc_jo.getInt("id") == nodeConnectorId_2);
+                Assert.assertTrue(node_jo.getString("type").equalsIgnoreCase(nodeType_2));
+                Assert.assertTrue(node_jo.getInt("id") == nodeId_2);
                 Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(vlan_2));
             } else {
                 Assert.assertTrue(false);
@@ -975,10 +975,10 @@ public class NorthboundIT {
 
         Assert.assertTrue(json.getString("networkAddress").equalsIgnoreCase(networkAddress_1));
         Assert.assertTrue(dl_jo.getString("macAddress").equalsIgnoreCase(dataLayerAddress_1));
-        Assert.assertTrue(nc_jo.getString("@type").equalsIgnoreCase(nodeConnectorType_1));
-        Assert.assertTrue(Integer.parseInt(nc_jo.getString("@id")) == nodeConnectorId_1);
-        Assert.assertTrue(node_jo.getString("@type").equalsIgnoreCase(nodeType_1));
-        Assert.assertTrue(Integer.parseInt(node_jo.getString("@id")) == nodeId_1);
+        Assert.assertTrue(nc_jo.getString("type").equalsIgnoreCase(nodeConnectorType_1));
+        Assert.assertTrue(Integer.parseInt(nc_jo.getString("id")) == nodeConnectorId_1);
+        Assert.assertTrue(node_jo.getString("type").equalsIgnoreCase(nodeType_1));
+        Assert.assertTrue(Integer.parseInt(node_jo.getString("id")) == nodeId_1);
         Assert.assertTrue(json.getString("vlan").equalsIgnoreCase(vlan_1));
 
         // test DELETE method for deleteFlow()
@@ -1084,24 +1084,24 @@ public class NorthboundIT {
             JSONObject stt = Props.getJSONObject("state");
             JSONObject ltc = Props.getJSONObject("latency");
 
-            if (headNC.getInt("@id") == headNC1_nodeConnId) {
-                Assert.assertEquals(headNode.getString("@type"), nodeType);
-                Assert.assertEquals(headNode.getLong("@id"), headNC1_nodeId);
-                Assert.assertEquals(headNC.getString("@type"), nodeConnType);
-                Assert.assertEquals(tailNode.getString("@type"),nodeType);
-                Assert.assertEquals(tailNode.getString("@type"), nodeConnType);
-                Assert.assertEquals(tailNC.getLong("@id"), tailNC1_nodeConnId);
+            if (headNC.getInt("id") == headNC1_nodeConnId) {
+                Assert.assertEquals(headNode.getString("type"), nodeType);
+                Assert.assertEquals(headNode.getLong("id"), headNC1_nodeId);
+                Assert.assertEquals(headNC.getString("type"), nodeConnType);
+                Assert.assertEquals(tailNode.getString("type"),nodeType);
+                Assert.assertEquals(tailNode.getString("type"), nodeConnType);
+                Assert.assertEquals(tailNC.getLong("id"), tailNC1_nodeConnId);
                 Assert.assertEquals(bandw.getLong("value"), bw_1);
                 Assert.assertTrue((short) stt.getInt("value") == state_1);
                 Assert.assertEquals(ltc.getLong("value"), lat_1);
-            } else if (headNC.getInt("@id") == headNC2_nodeConnId) {
-                Assert.assertEquals(headNode.getString("@type"),nodeType);
-                Assert.assertEquals(headNode.getLong("@id"), headNC2_nodeId);
-                Assert.assertEquals(headNC.getString("@type"), nodeConnType);
-                Assert.assertEquals(tailNode.getString("@type"), nodeType);
-                Assert.assertTrue(tailNode.getInt("@id") == tailNC2_nodeId);
-                Assert.assertEquals(tailNC.getString("@type"), nodeConnType);
-                Assert.assertEquals(tailNC.getLong("@id"), tailNC2_nodeConnId);
+            } else if (headNC.getInt("id") == headNC2_nodeConnId) {
+                Assert.assertEquals(headNode.getString("type"),nodeType);
+                Assert.assertEquals(headNode.getLong("id"), headNC2_nodeId);
+                Assert.assertEquals(headNC.getString("type"), nodeConnType);
+                Assert.assertEquals(tailNode.getString("type"), nodeType);
+                Assert.assertTrue(tailNode.getInt("id") == tailNC2_nodeId);
+                Assert.assertEquals(tailNC.getString("type"), nodeConnType);
+                Assert.assertEquals(tailNC.getLong("id"), tailNC2_nodeConnId);
                 Assert.assertEquals(bandw.getLong("value"), bw_2);
                 Assert.assertTrue((short) stt.getInt("value") == state_2);
                 Assert.assertEquals(ltc.getLong("value"), lat_2);
@@ -1127,7 +1127,7 @@ public class NorthboundIT {
                 .append("dstNodeConnector",
                         nodeConnectorType_2 + "|" + nodeConnectorId_2 + "@" + nodeType_2 + "|" + nodeId_2);
         // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "/user-link", "POST", jo.toString());
+        result = getJsonResult(baseURL + "/user-link", "PUT", jo.toString());
         Assert.assertTrue(httpResponseCode == 201);
 
         // === test GET method for getUserLinks()

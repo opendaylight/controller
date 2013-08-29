@@ -279,7 +279,7 @@ public class NodeConnector implements Serializable {
      *
      * @return the NodeConnectorType of this object
      */
-    @XmlAttribute(name = "type")
+    @XmlElement(name = "type")
     public String getType() {
         return this.nodeConnectorType;
     }
@@ -362,7 +362,7 @@ public class NodeConnector implements Serializable {
      *
      * @return the NodeConnector ID of this object in String format
      */
-    @XmlAttribute(name = "id")
+    @XmlElement(name = "id")
     public String getNodeConnectorIDString() {
         return this.nodeConnectorID.toString();
     }

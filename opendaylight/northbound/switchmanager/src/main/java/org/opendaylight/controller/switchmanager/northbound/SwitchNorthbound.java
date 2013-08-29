@@ -118,12 +118,16 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://.../default/nodes
+     * http://localhost:8080/controller/nb/v2/switch/default/nodes
      *
      * Response in XML:
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
      * &lt;list&gt;
      *     &#x20;&#x20;&#x20;&lt;nodeProperties&gt;
-     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node type="OF" id="00:00:00:00:00:00:00:02"/&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;type&gt;OF&lt;/type&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/node&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;properties&gt;
      *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;tables&gt;
      *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;value&gt;-1&lt;/value&gt;
@@ -152,7 +156,7 @@ public class SwitchNorthbound {
      * &lt;/list&gt;
      *
      * Response in JSON:
-     * {"nodeProperties":[{"node":{"@type":"OF","@id":"00:00:00:00:00:00:00:02"},"properties":{"tables":{"value":"-1"},
+     * {"nodeProperties":[{"node":{"id":"00:00:00:00:00:00:00:02","type":"OF"},"properties":{"tables":{"value":"-1"},
      * "description":{"value":"None"},"actions":{"value":"4095"},"macAddress":{"value":"00:00:00:00:00:02"},"capabilities"
      * :{"value":"199"},"timeStamp":{"value":"1377291227877","name":"connectedSince"},"buffers":{"value":"256"}}}]}
      *
@@ -232,7 +236,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://.../default/node/OF/00:00:00:00:00:00:00:03/property/description/Switch3
+     * http://localhost:8080/controller/nb/v2/switch/default/node/OF/00:00:00:00:00:00:00:03/property/description/Switch3
      *
      * </pre>
      */
@@ -310,7 +314,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://.../default/node/OF/00:00:00:00:00:00:00:03/property/forwarding
+     * http://localhost:8080/controller/nb/v2/switch/default/node/OF/00:00:00:00:00:00:00:03/property/forwarding
      *
      * </pre>
      */
@@ -372,8 +376,8 @@ public class SwitchNorthbound {
 
     /**
      *
-     * Retrieve a list of all the nodeconnectors and their properties in a
-     * given node
+     * Retrieve a list of all the nodeconnectors and their properties in a given
+     * node
      *
      * @param containerName
      *            The container for which we want to retrieve the list (Eg.
@@ -395,13 +399,19 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://.../default/node/OF/00:00:00:00:00:00:00:01
+     * http://localhost:8080/controller/nb/v2/switch/default/node/OF/00:00:00:00:00:00:00:01
      *
      * Response in XML:
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
      * &lt;list&gt;
      *     &#x20;&#x20;&#x20;&lt;nodeConnectorProperties&gt;
-     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nodeconnector type="OF" id="2"&gt;
-     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node type="OF" id="00:00:00:00:00:00:00:01"/&gt;
+     *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nodeconnector&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;node&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;id&gt;00:00:00:00:00:00:00:01&lt;/id&gt;
+     *                 &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;type&gt;OF&lt;/type&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/node&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;id&gt;2&lt;/id&gt;
+     *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;type&gt;OF&lt;/type&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;/nodeconnector&gt;
      *         &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;properties&gt;
      *             &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;state&gt;
@@ -418,7 +428,7 @@ public class SwitchNorthbound {
      * &lt;/list&gt;
      *
      * Response in JSON:
-     * {"nodeConnectorProperties":[{"nodeconnector":{"@type":"OF","@id":"2","node":{"@type":"OF","@id":"00:00:00:00:00:00:00:01"}},
+     * {"nodeConnectorProperties":[{"nodeconnector":{"node":{"id":"00:00:00:00:00:00:00:01","type":"OF"},"id":"2","type":"OF"},
      * "properties":{"state":{"value":"1"},"config":{"value":"1"},"name":{"value":"L1_2-C2_1"}}}]}
      *
      * </pre>
@@ -509,7 +519,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://.../default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth/1
+     * http://localhost:8080/controller/nb/v2/switch/default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth/1
      *
      * </pre>
      */
@@ -597,7 +607,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://.../default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth
+     * http://localhost:8080/controller/nb/v2/switch/default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth
      *
      * </pre>
      */
@@ -661,7 +671,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://.../default/switch-config
+     * http://localhost:8080/controller/nb/v2/switch/default/switch-config
      *
      * </pre>
      */

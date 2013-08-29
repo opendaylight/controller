@@ -43,7 +43,7 @@
               org.opendaylight.controller.northbound.commons.utils,
               org.opendaylight.controller.sal.authorization,
               org.opendaylight.controller.usermanager,
-                          com.sun.jersey.spi.container.servlet,
+              com.sun.jersey.spi.container.servlet,
               javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind.annotation,

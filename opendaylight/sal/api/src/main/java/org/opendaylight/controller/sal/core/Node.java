@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -197,7 +198,7 @@ public class Node implements Serializable {
      *
      * @return The node Type for this Node object
      */
-    @XmlAttribute(name = "type")
+    @XmlElement(name = "type")
     public String getType() {
         return this.nodeType;
     }
@@ -266,7 +267,7 @@ public class Node implements Serializable {
      *
      * @return The nodeID in string format
      */
-    @XmlAttribute(name = "id")
+    @XmlElement(name = "id")
     public String getNodeIDString() {
         if (this.nodeType.equals(NodeIDType.OPENFLOW)) {
             return HexEncode.longToHexString((Long) this.nodeID);
