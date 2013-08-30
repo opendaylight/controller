@@ -27,7 +27,10 @@ module opendaylight-inventory {
                 type node-id;
             }
             list node-connector {
-                type node-connector-id;
+                key "id";
+                leaf id {
+                    type node-connector-id;
+                }
             }
         }
     }
