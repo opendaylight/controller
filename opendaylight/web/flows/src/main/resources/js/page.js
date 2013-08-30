@@ -330,11 +330,15 @@ one.f.flows = {
                     $modal.modal();
                 });
                 $dashlet.append($button);
-                var button = one.lib.dashlet.button.single("Remove Flow Entry", one.f.flows.id.dashlet.removeMultiple, "btn-primary", "btn-mini");
+                var button = one.lib.dashlet.button.single("Remove Flow Entry", one.f.flows.id.dashlet.removeMultiple, "btn-danger", "btn-mini");
                 var $button = one.lib.dashlet.button.button(button);
 
                 $button.click(function() {
                     var checkedCheckBoxes = $('.flowEntry[type=checkbox]:checked');
+                    if (checkedCheckBoxes.size() === 0) {
+                    	alert('Please select at least one flow');
+                    	return false;
+                    }
                     
                     var requestData = [];
                     
@@ -400,7 +404,7 @@ one.f.flows = {
                         var node = $td.find("span").data("nodeid");
                         one.f.flows.detail(id, node);
                     });
-                    $(".flowEntry").click(function(){
+                    $(".flowEntry").click(function(e){
                                 if (!$('.flowEntry[type=checkbox]:not(:checked)').length) {
                             $("#"+one.f.flows.id.dashlet.datagrid.selectAllFlows)
                                 .prop("checked",
@@ -410,7 +414,7 @@ one.f.flows = {
                                 .prop("checked",
                              false);
                         }
-                        event.stopPropagation();
+                        e.stopPropagation();
                     });
                 });
             });
