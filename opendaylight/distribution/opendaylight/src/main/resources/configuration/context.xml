@@ -1,1 +1,1 @@
-<Context crossContext="true" sessionCookiePath="/"/>
+<Context crossContext="true" sessionCookiePath="/" useHttpOnly="false"/>

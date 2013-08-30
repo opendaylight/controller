@@ -78,7 +78,7 @@ public class HostTrackerNorthbound {
 
     @Context
     public void setSecurityContext(SecurityContext context) {
-        username = context.getUserPrincipal().getName();
+        if (context != null && context.getUserPrincipal() != null) username = context.getUserPrincipal().getName();
     }
 
     protected String getUserName() {
