@@ -1,46 +1,24 @@
-module opendaylight-flow {
-    namespace "urn:opendaylight:flow:service";
-    prefix flow;
+module opendaylight-flow-base {
+    namespace "urn:opendaylight:flow:base";
+    prefix "flowbase";
 
     import yang-ext {prefix ext;}
     import ietf-inet-types {prefix inet;}
     import ietf-yang-types {prefix yang;}
     import opendaylight-inventory {prefix inv;}
+    import opendaylight-l2-types {prefix l2t;}
 
     revision "2013-08-19" {
         description "Initial revision of flow service";
     }
 
-    /** Base structure **/
-    container flows {
-        list flow {
-            leaf node {
-                type inv:node-id;
-            }
-            container match {
-                // Match is empty
-                leaf input-node-connector {
-                    type inv:node-connector-id; //
-                }
-            }
-            list action {
-                key id;
-                leaf id {
-                    type string;
-                }
-                choice action {
-                
-                }
-            }
-        }
-    }
-
-    /** Matches **/
-    augment "/flows/flow/match" {
-        ext:augment-identifier "ethernet-match";
+     /** Match Groupings **/
+    grouping "ethernet-match-fields" {
         container ethernet-source {
-            description "Ethernet source address.";
+            //description "Ethernet source address.";
+            //presence "Match field is active and set";
             leaf address {
+                mandatory true;
                 type yang:mac-address;
             }
             leaf mask {
@@ -49,14 +27,19 @@ module opendaylight-flow {
         }
         container ethernet-destination {
             description "Ethernet destination address.";
+            presence "Match field is active and set";
             leaf address {
+                mandatory true;
                 type yang:mac-address;
             }
         }
         container ethernet-type {
             description "Ethernet frame type.";
+            presence "Match field is active and set";
+            
             leaf type {
-                type uint16; // Needs to define that as general model
+                mandatory true;
+                type l2t:ether-type; // Needs to define that as general model
             }
             leaf mask {
                 type binary;
@@ -64,13 +47,14 @@ module opendaylight-flow {
         }
     }
 
-    augment "/flows/flow/match" {
-        ext:augment-identifier "vlan-match";
-
+    grouping "vlan-match-fields" {
         container vlan-id {
             description "VLAN id.";
+            presence "Match field is active and set";
+            
             leaf vlan-id {
-                type uint16; // TODO: Define proper vlan id type.
+                mandatory true;
+                type l2t:vlan-id; 
             }
             leaf mask {
                 type binary;
@@ -78,15 +62,13 @@ module opendaylight-flow {
         }
         leaf vlan-pcp {
             description "VLAN priority.";
-            type uint8; // TODO: Define PCP type
+            type l2t:vlan-pcp;
         }
         
 
     }
 
-    augment "/flows/flow/match" {
-        ext:augment-identifier "ip-match";
-
+    grouping "ip-match-fields" {
         leaf ip-protocol {
                 description "IP protocol.";
                 type uint8; // TODO define IP protocol number
@@ -102,8 +84,7 @@ module opendaylight-flow {
         }
     }
 
-    augment "/flows/flow/match" {
-        ext:augment-identifier "ipv4-match";
+    grouping "ipv4-match-fields" {
         leaf ipv4-source {
             description "IPv4 source address.";
             type inet:ipv4-prefix;
@@ -114,8 +95,7 @@ module opendaylight-flow {
         }
     }
 
-    augment "/flows/flow/match" {
-        ext:augment-identifier "ipv6-match";
+    grouping "ipv6-match-fields" {
         leaf ipv6-source {
             description "IPv6 source address.";
             type inet:ipv6-prefix;
@@ -127,9 +107,7 @@ module opendaylight-flow {
     }
 
 
-    augment "/flows/flow/match" {
-        ext:augment-identifier "udp-match";
-        
+    grouping "udp-match-fields" {
         leaf udp-source-port {
             description "UDP source port.";
             type inet:port-number;
@@ -140,8 +118,7 @@ module opendaylight-flow {
         }
     }
 
-    augment "/flows/flow/match" {
-        ext:augment-identifier "tcp-match";
+    grouping "tcp-match-fields" {
         leaf tcp-source-port {
             description "TCP source port.";
             type inet:port-number;
@@ -152,8 +129,7 @@ module opendaylight-flow {
         }
     }
 
-    augment "/flows/flow/match" {
-        ext:augment-identifier "sctp-match";
+    grouping "sctp-match-fields" {
         leaf sctp-source-port {
             description "SCTP source port.";
             type inet:port-number;
@@ -164,8 +140,7 @@ module opendaylight-flow {
         }
     }
 
-    augment "/flows/flow/match" {
-        ext:augment-identifier "icmpv4-match";
+    grouping "icmpv4-match-fields" {
         leaf icmpv4-type {
         description "ICMP type.";
             type uint8; // Define ICMP Type
@@ -176,9 +151,7 @@ module opendaylight-flow {
         }
     }
 
-    augment "/flows/flow/match" {
-        ext:augment-identifier "arp-match";
-            
+    grouping "arp-match-fields" {     
         leaf arp-source-transport-address {
             description "ARP source IPv4 address.";
             type inet:ipv4-prefix;
@@ -190,7 +163,9 @@ module opendaylight-flow {
         }
         container arp-source-hardware-address {
             description "ARP source hardware address.";
+            presence "Match field is active and set";
             leaf address {
+                mandatory true;
                 type yang:mac-address;
             }
             leaf mask {
@@ -199,7 +174,9 @@ module opendaylight-flow {
         }
         container arp-target-hardware-address {
             description "ARP target hardware address.";
+            presence "Match field is active and set";
             leaf address {
+                mandatory true;
                 type yang:mac-address;
             }
             leaf mask {
@@ -208,59 +185,104 @@ module opendaylight-flow {
         }
     }
 
-    /** Actions **/
-    augment "/flows/flow/action/action" {
-        case output-action {
-            leaf output-node-connector {
-                type string;
-            }
-        }
-
-        case controller-action {
-            leaf max-length {
-                type uint16 {
-                    range "0..65294";
+    grouping action {
+        choice action {
+            case output-action {
+                leaf output-node-connector {
+                    type string;
                 }
             }
-        }
 
-        case set-queue-action {
-            leaf queue {
-                type string; // TODO: define queues
-            }
-        }
-
-        case pop-mpls-action {
-            container pop-mpls {
-                leaf ethernet-type {
-                    type uint16; // TODO: define ethertype type
+            case controller-action {
+                leaf max-length {
+                    type uint16 {
+                        range "0..65294";
+                    }
                 }
             }
-        }
 
-        case set-mpls-ttl-action {
-            leaf mpls-ttl {
-                type uint8;
+            case set-queue-action {
+                leaf queue {
+                    type string; // TODO: define queues
+                }
             }
-        }
 
-        case set-nw-ttl-action {
-            leaf nw-ttl {
-                type uint8;
+            case pop-mpls-action {
+                container pop-mpls {
+                    leaf ethernet-type {
+                        type uint16; // TODO: define ethertype type
+                    }
+                }
             }
-        }
 
-        case push-pbb-action {
+            case set-mpls-ttl-action {
+                leaf mpls-ttl {
+                    type uint8;
+                }
+            }
 
-        }
+            case set-nw-ttl-action {
+                leaf nw-ttl {
+                    type uint8;
+                }
+            }
 
-        case push-mpls-action {
+            case push-pbb-action {
 
-        }
+            }
 
-        case push-vlan-action {
+            case push-mpls-action {
 
+            }
+
+            case push-vlan-action {
+
+            }
         }
     }
 
+    grouping flow {
+        leaf node {
+            type inv:node-id;
+        }
+        container match {
+            container "ethernet-match" {
+                uses "ethernet-match-fields";
+            }
+            container "vlan-match" {
+                uses "vlan-match-fields";
+            }
+            container "ip-match" {
+                uses "ip-match-fields";
+            }
+            container "ipv4-match" {
+                uses "ipv4-match-fields";
+            }
+            container "ipv6-match" {
+                uses "ipv6-match-fields";
+            }
+            container "udp-match" {
+                uses "udp-match-fields";
+            }
+            container "tcp-match" {
+                uses "tcp-match-fields";
+            }
+            container "sctp-match" {
+                uses "sctp-match-fields";
+            }
+            container "icmpv4-match" {
+                uses "icmpv4-match-fields";
+            }
+            container "arp-match" {
+                uses "arp-match-fields";
+            }
+        }
+        list action {
+            key "order";
+            leaf order {
+                type int32;
+            }
+            uses action;
+        }
+    }
 }
