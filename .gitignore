@@ -1,6 +1,6 @@
 *.class
 **/target
-**/bin
+bin/
 dist
 **/logs
 products
