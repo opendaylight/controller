@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -78,12 +78,13 @@ public class TopologyNorthboundJAXRS {
      * Retrieve the Topology
      *
      * @param containerName
-     *            The container for which we want to retrieve the topology (Eg. 'default')
+     *            The container for which we want to retrieve the topology (Eg.
+     *            'default')
      *
      * @return A List of EdgeProps each EdgeProp represent an Edge of the grap
      *         with the corresponding properties attached to it.
      *
-     * <pre>
+     *         <pre>
      *
      * Example:
      *
@@ -91,10 +92,87 @@ public class TopologyNorthboundJAXRS {
      * http://localhost:8080/controller/nb/v2/topology/default
      *
      * Response in XML:
-     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;topology&gt;&lt;edgeProperties&gt;&lt;edge&gt;&lt;tailNodeConnector id="2" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:02" type="OF"/&gt;&lt;/tailNodeConnector&gt;&lt;headNodeConnector id="2" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:51" type="OF"/&gt;&lt;/headNodeConnector&gt;&lt;/edge&gt;&lt;properties&gt;&lt;state&gt;&lt;value&gt;1&lt;/value&gt;&lt;/state&gt;&lt;config&gt;&lt;value&gt;1&lt;/value&gt;&lt;/config&gt;&lt;name&gt;&lt;value&gt;C1_2-L2_2&lt;/value&gt;&lt;/name&gt;&lt;timeStamp&gt;&lt;value&gt;1377279422032&lt;/value&gt;&lt;name&gt;creation&lt;/name&gt;&lt;/timeStamp&gt;&lt;/properties&gt;&lt;/edgeProperties&gt;&lt;edgeProperties&gt;&lt;edge&gt;&lt;tailNodeConnector id="2" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:51" type="OF"/&gt;&lt;/tailNodeConnector&gt;&lt;headNodeConnector id="2" type="OF"&gt;&lt;node id="00:00:00:00:00:00:00:02" type="OF"/&gt;&lt;/headNodeConnector&gt;&lt;/edge&gt;&lt;properties&gt;&lt;state&gt;&lt;value&gt;1&lt;/value&gt;&lt;/state&gt;&lt;name&gt;&lt;value&gt;L2_2-C1_2&lt;/value&gt;&lt;/name&gt;&lt;config&gt;&lt;value&gt;1&lt;/value&gt;&lt;/config&gt;&lt;timeStamp&gt;&lt;value&gt;1377279423564&lt;/value&gt;&lt;name&gt;creation&lt;/name&gt;&lt;/timeStamp&gt;&lt;/properties&gt;&lt;/edgeProperties&gt;&lt;/topology&gt;
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+     * &lt;topology&gt;
+     *     &lt;edgeProperties&gt;
+     *         &lt;edge&gt;
+     *             &lt;tailNodeConnector&gt;
+     *                 &lt;node&gt;
+     *                     &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *                     &lt;type&gt;OF&lt;/type&gt;
+     *                 &lt;/node&gt;
+     *                 &lt;id&gt;2&lt;/id&gt;
+     *                 &lt;type&gt;OF&lt;/type&gt;
+     *             &lt;/tailNodeConnector&gt;
+     *             &lt;headNodeConnector&gt;
+     *                 &lt;node&gt;
+     *                     &lt;id&gt;00:00:00:00:00:00:00:51&lt;/id&gt;
+     *                     &lt;type&gt;OF&lt;/type&gt;
+     *                 &lt;/node&gt;
+     *                 &lt;id&gt;2&lt;/id&gt;
+     *                 &lt;type&gt;OF&lt;/type&gt;
+     *             &lt;/headNodeConnector&gt;
+     *         &lt;/edge&gt;
+     *         &lt;properties&gt;
+     *             &lt;state&gt;
+     *                 &lt;value&gt;1&lt;/value&gt;
+     *             &lt;/state&gt;
+     *             &lt;config&gt;
+     *                 &lt;value&gt;1&lt;/value&gt;
+     *             &lt;/config&gt;
+     *             &lt;name&gt;
+     *                 &lt;value&gt;C1_2-L2_2&lt;/value&gt;
+     *             &lt;/name&gt;
+     *             &lt;timeStamp&gt;
+     *                 &lt;value&gt;1377279422032&lt;/value&gt;
+     *                 &lt;name&gt;creation&lt;/name&gt;
+     *             &lt;/timeStamp&gt;
+     *         &lt;/properties&gt;
+     *     &lt;/edgeProperties&gt;
+     *     &lt;edgeProperties&gt;
+     *         &lt;edge&gt;
+     *             &lt;tailNodeConnector&gt;
+     *                 &lt;node&gt;
+     *                     &lt;id&gt;00:00:00:00:00:00:00:51&lt;/id&gt;
+     *                     &lt;type&gt;OF&lt;/type&gt;
+     *                 &lt;/node&gt;
+     *                 &lt;id&gt;2&lt;/id&gt;
+     *                 &lt;type&gt;OF&lt;/type&gt;
+     *             &lt;/tailNodeConnector&gt;
+     *             &lt;headNodeConnector&gt;
+     *                 &lt;node&gt;
+     *                     &lt;id&gt;00:00:00:00:00:00:00:02&lt;/id&gt;
+     *                     &lt;type&gt;OF&lt;/type&gt;
+     *                 &lt;/node&gt;
+     *                 &lt;id&gt;2&lt;/id&gt;
+     *                 &lt;type&gt;OF&lt;/type&gt;
+     *             &lt;/headNodeConnector&gt;
+     *         &lt;/edge&gt;
+     *         &lt;properties&gt;
+     *             &lt;state&gt;
+     *                 &lt;value&gt;1&lt;/value&gt;
+     *             &lt;/state&gt;
+     *             &lt;name&gt;
+     *                 &lt;value&gt;L2_2-C1_2&lt;/value&gt;
+     *             &lt;/name&gt;
+     *             &lt;config&gt;
+     *                 &lt;value&gt;1&lt;/value&gt;
+     *             &lt;/config&gt;
+     *             &lt;timeStamp&gt;
+     *                 &lt;value&gt;1377279423564&lt;/value&gt;
+     *                 &lt;name&gt;creation&lt;/name&gt;
+     *             &lt;/timeStamp&gt;
+     *         &lt;/properties&gt;
+     *     &lt;/edgeProperties&gt;
+     * &lt;/topology&gt;
      *
      * Response in JSON:
-     * {"edgeProperties":[{"edge":{"tailNodeConnector":{"@id":"2","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:02","@type":"OF"}},"headNodeConnector":{"@id":"2","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:51","@type":"OF"}}},"properties":{"timeStamp":{"value":"1377278961017","name":"creation"}}},{"edge":{"tailNodeConnector":{"@id":"2","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:51","@type":"OF"}},"headNodeConnector":{"@id":"2","@type":"OF","node":{"@id":"00:00:00:00:00:00:00:02","@type":"OF"}}},"properties":{"timeStamp":{"value":"1377278961018","name":"creation"}}}]}
+     * {"edgeProperties":[{"edge":{"tailNodeConnector":{"node":{"id":"00:00:00:00:00:00:00:02","type":"OF"},
+     * "id":"2","type":"OF"},"headNodeConnector":{"node":{"id":"00:00:00:00:00:00:00:51","type":"OF"},"id":
+     * "2","type":"OF"}},"properties":{"timeStamp":{"value":"1377278961017","name":"creation"}}},
+     * {"edge":{"tailNodeConnector":{"node":{"id":"00:00:00:00:00:00:00:51","type":"OF"},"id":
+     * "2","type":"OF"}},"headNodeConnector":{"node":{"id":"00:00:00:00:00:00:00:02","type":"OF"},
+     * "id":"2","type":"OF"}},"properties":{"timeStamp":{"value":"1377278961018","name":"creation"}}}]}
      *
      * </pre>
      */
@@ -148,10 +226,19 @@ public class TopologyNorthboundJAXRS {
      * http://localhost:8080/controller/nb/v2/topology/default/user-link
      *
      * Response in XML:
-     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;topologyUserLinks&gt;&lt;userLinks&gt;&lt;status&gt;Success&lt;/status&gt;&lt;name&gt;link1&lt;/name&gt;&lt;srcNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:02&lt;/srcNodeConnector&gt;&lt;dstNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:51&lt;/dstNodeConnector&gt;&lt;/userLinks&gt;&lt;/topologyUserLinks&gt;
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+     * &lt;topologyUserLinks&gt;
+     * &lt;userLinks&gt;
+     * &lt;status&gt;Success&lt;/status&gt;
+     * &lt;name&gt;link1&lt;/name&gt;
+     * &lt;srcNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:02&lt;/srcNodeConnector&gt;
+     * &lt;dstNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:51&lt;/dstNodeConnector&gt;
+     * &lt;/userLinks&gt;
+     * &lt;/topologyUserLinks&gt;
      *
      * Response in JSON:
-     * {"userLinks":{"status":"Success","name":"link1","srcNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:02","dstNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:51"}}
+     * {"userLinks":{"status":"Success","name":"link1","srcNodeConnector":
+     * "OF|2@OF|00:00:00:00:00:00:00:02","dstNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:51"}}
      *
      * </pre>
      */
@@ -201,10 +288,16 @@ public class TopologyNorthboundJAXRS {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/topology/default/user-link/config1-content
+     * http://localhost:8080/controller/nb/v2/topology/default/user-link
      *
      * Request in XML:
-     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;topologyUserLinks&gt;&lt;status&gt;Success&lt;/status&gt;&lt;name&gt;link1&lt;/name&gt;&lt;srcNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:02&lt;/srcNodeConnector&gt;&lt;dstNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:51&lt;/dstNodeConnector&gt;&lt;/topologyUserLinks&gt;
+     * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+     * &lt;topologyUserLinks&gt;
+     * &lt;status&gt;Success&lt;/status&gt;
+     * &lt;name&gt;link1&lt;/name&gt;
+     * &lt;srcNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:02&lt;/srcNodeConnector&gt;
+     * &lt;dstNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:51&lt;/dstNodeConnector&gt;
+     * &lt;/topologyUserLinks&gt;
      *
      * Request in JSON:
      * {"status":"Success","name":"link1","srcNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:02","dstNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:51"}
@@ -212,7 +305,7 @@ public class TopologyNorthboundJAXRS {
      * </pre>
      */
     @Path("/{containerName}/user-link")
-    @POST
+    @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({

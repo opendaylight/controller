@@ -206,7 +206,7 @@ public class NodeTable implements Serializable {
     /**
      * @return the nodeTableIDString
      */
-    @XmlAttribute(name = "id")
+    @XmlElement(name = "id")
     public String getNodeTableIDString() {
         return this.nodeTableIDString != null? this.nodeTableIDString : nodeTableID.toString();
     }

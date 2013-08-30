@@ -29,10 +29,10 @@ import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.northbound.commons.exception.NotAcceptableException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
-import org.opendaylight.controller.sal.networkconfig.bridgedomain.IBridgeDomainConfigService;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.IBridgeDomainConfigService;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
@@ -76,11 +76,23 @@ public class BridgeDomainNorthbound {
      * If a Network Configuration Service needs a special Management Connection and if the
      * Node Type is unknown, use this REST api to connect to the management session.
      * <pre>
+     *
      * Example :
-     * Request : PUT http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/connect/mgmt1/1.1.1.1/6634
-     * Response : Node :
-     *                  xml : &lt;node type="STUB" id="mgmt1"/&gt;
-     *                  json: {"@type": "STUB","@id": "mgmt1"}
+     *
+     * Request :
+     * http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/connect/mgmt1/1.1.1.1/6634
+     *
+     * Response :
+     * Node :
+     * xml :
+     * &lt;node&gt;
+     *    &lt;id&gt;mgmt1&lt;/id&gt;
+     *    &lt;type&gt;STUB&lt;/type&gt;
+     * &lt;/node&gt;
+     *
+     * json:
+     * {"id": "mgmt1","type": "STUB"}
+     *
      *</pre>
      * @param nodeName User-Defined name of the node to connect with. This can be any alpha numeric value
      * @param ipAddress IP Address of the Node to connect with.
@@ -137,11 +149,22 @@ public class BridgeDomainNorthbound {
      * If a Network Configuration Service needs a special Management Connection, and if the
      * node Type is known, the user can choose to use this REST api to connect to the management session.
      * <pre>
+     *
      * Example :
-     * Request : PUT http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/connect/STUB/mgmt1/1.1.1.1/6634
+     *
+     * Request :
+     * http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/connect/STUB/mgmt1/1.1.1.1/6634
+     *
      * Response : Node :
-     *                  xml : &lt;node type="STUB" id="mgmt1"/&gt;
-     *                  json: {"@type": "STUB","@id": "mgmt1"}
+     * xml :
+     * &lt;node&gt;
+     *    &lt;id&gt;mgmt1&lt;/id&gt;
+     *    &lt;type&gt;STUB&lt;/type&gt;
+     * &lt;/node&gt;
+     *
+     * json:
+     * {"id": "mgmt1","type": "STUB"}
+     *
      *</pre>
      * @param nodeName User-Defined name of the node to connect with. This can be any alpha numeric value
      * @param ipAddress IP Address of the Node to connect with.
@@ -198,8 +221,12 @@ public class BridgeDomainNorthbound {
     /**
      * Create a Bridge.
      * <pre>
+     *
      * Example :
-     * Request : POST http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/bridge/STUB/mgmt1/bridge1
+     *
+     * Request :
+     * http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/bridge/STUB/mgmt1/bridge1
+     *
      *</pre>
      * @param nodeType Node Type of the node with the management session.
      * @param nodeId Node Identifier of the node with the management session.
@@ -239,8 +266,12 @@ public class BridgeDomainNorthbound {
    /**
     * Add a Port to a Bridge
     * <pre>
+    *
     * Example :
-    * Request : POST http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/port/STUB/mgmt1/bridge1/port1
+    *
+    * Request :
+    * http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/port/STUB/mgmt1/bridge1/port1
+    *
     *</pre>
     * @param nodeType Node Type of the node with the management session.
     * @param nodeId Node Identifier of the node with the management session.
@@ -282,9 +313,12 @@ public class BridgeDomainNorthbound {
    /**
     * Add a Port,Vlan to a Bridge
     * <pre>
+    *
     * Example :
-    * Request : POST http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/port/STUB/mgmt1/bridge1/port2/200
-    *</pre>
+    * Request :
+    * http://localhost:8080/controller/nb/v2/networkconfig/bridgedomain/port/STUB/mgmt1/bridge1/port2/200
+    *
+    * </pre>
     * @param nodeType Node Type of the node with the management session.
     * @param nodeId Node Identifier of the node with the management session.
     * @param bridgeName Name / Identifier of the bridge to which a Port is being added.
