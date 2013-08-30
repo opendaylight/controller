@@ -10,13 +10,10 @@ package org.opendaylight.controller.hosttracker.internal;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.Future;
-
 import junit.framework.TestCase;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 
 public class HostTrackerTest extends TestCase {
 
@@ -36,7 +33,7 @@ public class HostTrackerTest extends TestCase {
 
         long count = htCallable.latch.getCount();
         htCallable.wakeup();
-        Assert.assertTrue(htCallable.latch.getCount() == --count);
+        Assert.assertTrue(htCallable.latch.getCount() == (count - 1));
     }
 
     @Test
@@ -47,8 +44,8 @@ public class HostTrackerTest extends TestCase {
 
         InetAddress hostIP_1 = InetAddress.getByName("192.168.0.8");
         InetAddress hostIP_2 = InetAddress.getByName("192.168.0.18");
-        Future<HostNodeConnector> dschost = hostTracker.discoverHost(hostIP_1);
-        dschost = hostTracker.discoverHost(hostIP_2);
+        hostTracker.discoverHost(hostIP_1);
+        hostTracker.discoverHost(hostIP_2);
         hostTracker.nonClusterObjectCreate();
     }
 
