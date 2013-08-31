@@ -354,7 +354,7 @@ public class Match implements Cloneable, Serializable {
                         .getSubnetMaskLength(thisMask);
                 int otherMaskLen = (otherMask == null) ? ((otherAddress instanceof Inet4Address) ? 32 : 128) : NetUtils
                         .getSubnetMaskLength(otherMask);
-                if (otherMaskLen < thisMaskLen) {
+                if (thisMaskLen < otherMaskLen) {
                     intersection.setField(new MatchField(type, NetUtils.getSubnetPrefix(otherAddress, otherMaskLen),
                             otherMask));
                 } else {

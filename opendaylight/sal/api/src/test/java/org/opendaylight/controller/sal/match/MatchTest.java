@@ -532,6 +532,8 @@ public class MatchTest {
         InetAddress ipm2 = InetAddress.getByName("255.255.255.0");
         InetAddress ip3 = InetAddress.getByName("1.3.0.0");
         InetAddress ipm3 = InetAddress.getByName("255.255.0.0");
+        InetAddress ip4 = InetAddress.getByName("1.3.4.4");
+        InetAddress ipm4 = InetAddress.getByName("255.255.255.0");
 
         Match m1 = new Match();
         m1.setField(MatchType.DL_TYPE, ethType);
@@ -562,8 +564,9 @@ public class MatchTest {
 
         Match i = m1.getIntersection(m2);
         Assert.assertTrue(((Short)i.getField(MatchType.DL_TYPE).getValue()).equals(ethType));
-        Assert.assertTrue(((InetAddress)i.getField(MatchType.NW_SRC).getValue()).equals(ip2));
-        Assert.assertTrue(((InetAddress)i.getField(MatchType.NW_SRC).getMask()).equals(ipm2));
+        // Verify intersection of IP addresses is correct
+        Assert.assertTrue(((InetAddress)i.getField(MatchType.NW_SRC).getValue()).equals(ip1));
+        Assert.assertNull(i.getField(MatchType.NW_SRC).getMask());
 
         // Empty set
         i = m2.getIntersection(m3);
@@ -572,7 +575,13 @@ public class MatchTest {
         Match m4 = new Match();
         m4.setField(MatchType.DL_TYPE, ethType);
         m4.setField(MatchType.NW_PROTO, IPProtocols.TCP.byteValue());
+        m3.setField(MatchType.NW_SRC, ip4, ipm4);
         Assert.assertTrue(m4.intersetcs(m3));
+
+        // Verify intersection of IP and IP mask addresses is correct
+        Match ii = m3.getIntersection(m4);
+        Assert.assertTrue(((InetAddress)ii.getField(MatchType.NW_SRC).getValue()).equals(ip4));
+        Assert.assertTrue(((InetAddress)ii.getField(MatchType.NW_SRC).getMask()).equals(ipm4));
 
         Match m5 = new Match();
         m5.setField(MatchType.DL_TYPE, ethType);
