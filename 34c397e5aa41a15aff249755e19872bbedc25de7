@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_dfd78bbe",
+        "filename": "opendaylight/distribution/opendaylight/opendaylight-assembleit-fast.launch",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-09-02T11:14:43Z",
+      "side": 1,
+      "message": "why is this property needed in this patch?",
+      "revId": "34c397e5aa41a15aff249755e19872bbedc25de7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
