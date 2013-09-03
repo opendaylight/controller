@@ -125,7 +125,6 @@
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
           <version>${guava.version}</version>
-          <type>jar</type>
         </dependency>
         <dependency>
           <groupId>org.javassist</groupId>
@@ -210,11 +209,23 @@
       <id>central2</id>
       <name>central2</name>
       <url>http://repo2.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <enabled>true</enabled>
+      </releases>
     </repository>
     <repository>
       <id>central</id>
       <name>central</name>
       <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <enabled>true</enabled>
+      </releases>
     </repository>
     <!-- Pax mirror -->
     <!-- https://oss.sonatype.org/content/repositories/ops4j-releases -->

@@ -93,7 +93,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>

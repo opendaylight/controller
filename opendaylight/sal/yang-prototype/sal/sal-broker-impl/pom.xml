@@ -36,7 +36,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <type>jar</type>
         </dependency>
     </dependencies>
 </project>

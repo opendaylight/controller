@@ -139,6 +139,12 @@
       <id>central2</id>
       <name>central2</name>
       <url>http://repo2.maven.org/maven2</url>
+       <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
     </pluginRepository>
     <pluginRepository>
       <id>opendaylight.snapshot</id>
@@ -166,11 +172,23 @@
       <id>central2</id>
       <name>central2</name>
       <url>http://repo2.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
     </repository>
     <repository>
       <id>central</id>
       <name>central</name>
       <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
     </repository>
     <!-- Pax mirror -->
     <!-- https://oss.sonatype.org/content/repositories/ops4j-releases -->
