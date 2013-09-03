@@ -44,10 +44,10 @@ function usage {
     exit 1
 }
 
-if [ -v "TMP" ]; then
-    pidfile="${TMP}/opendaylight.PID"
-else
+if [ -z ${TMP} ]; then
     pidfile="/tmp/opendaylight.PID"
+else
+    pidfile="${TMP}/opendaylight.PID"
 fi
 debug=0
 debugsuspend=0
