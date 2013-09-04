@@ -57,17 +57,35 @@ import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
+/**
+ * This class implements basic L3 forwarding within the managed devices.
+ * Forwarding is only done within configured subnets.</br>
+ * <br/>
+ * The basic flow is that the module listens for new hosts from the
+ * {@link org.opendaylight.controller.hosttracker.IfIptoHost HostTracker}
+ * service and on discovering a new host it first calls
+ * <tt>preparePerHostRules()</tt> to create a set of new rules that must be
+ * installed in the network. This is done by repeatedly calling
+ * <tt>updatePerHostRuleInSW()</tt> for each switch in the network. Then it
+ * installs those rules using <tt>installPerHostRules()</tt>.
+ */
 public class SimpleForwardingImpl implements IfNewHostNotify,
         IListenRoutingUpdates, IInventoryListener {
     private static Logger log = LoggerFactory
             .getLogger(SimpleForwardingImpl.class);
     private static short DEFAULT_IPSWITCH_PRIORITY = 1;
+    private static String FORWARDING_RULES_CACHE_NAME = "forwarding.ipswitch.rules";
     private IfIptoHost hostTracker;
     private IForwardingRulesManager frm;
     private ITopologyManager topologyManager;
     private IRouting routing;
+
+    /**
+     * The set of all forwarding rules: (host) -> (switch -> flowmod). Note that
+     * the host includes an attachment point and that while the switch appears
+     * to be a switch's port, in actuality it is a special port which just
+     * represents the switch.
+     */
     private ConcurrentMap<HostNodePair, HashMap<NodeConnector, FlowEntry>> rulesDB;
     private Map<Node, List<FlowEntry>> tobePrunedPos = new HashMap<Node, List<FlowEntry>>();
     private IClusterContainerServices clusterContainerService = null;
@@ -75,7 +93,6 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
 
     /**
      * Return codes from the programming of the perHost rules in HW
-     *
      */
     public enum RulesProgrammingReturnCode {
         SUCCESS, FAILED_FEW_SWITCHES, FAILED_ALL_SWITCHES, FAILED_WRONG_PARAMS
@@ -157,7 +174,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         }
 
         try {
-            clusterContainerService.createCache("forwarding.ipswitch.rules",
+            clusterContainerService.createCache(FORWARDING_RULES_CACHE_NAME,
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
             log.error("\nCache already exists - destroy and recreate if needed");
@@ -174,7 +191,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         }
 
         rulesDB = (ConcurrentMap<HostNodePair, HashMap<NodeConnector, FlowEntry>>) clusterContainerService
-                .getCache("forwarding.ipswitch.rules");
+                .getCache(FORWARDING_RULES_CACHE_NAME);
         if (rulesDB == null) {
             log.error("\nFailed to get rulesDB handle");
         }
@@ -187,90 +204,102 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
             return;
         }
 
-        clusterContainerService.destroyCache("forwarding.ipswitch.rules");
+        clusterContainerService.destroyCache(FORWARDING_RULES_CACHE_NAME);
     }
 
-    @SuppressWarnings("unused")
+    /**
+     * Populates <tt>rulesDB</tt> with rules specifying how to reach
+     * <tt>host</tt> from <tt>currNode</tt> assuming that:
+     * <ul>
+     * <li><tt>host</tt> is attached to <tt>rootNode</tt>
+     * <li><tt>link</tt> is the next part of the path to reach <tt>rootNode</tt>
+     * from <tt>currNode</tt>
+     * <li><tt>rulesDB.get(key)</tt> represents the list of rules stored about
+     * <tt>host</tt> at <tt>currNode</tt>
+     * </ul>
+     *
+     * @param host
+     *            The host to be reached.
+     * @param currNode
+     *            The current node being processed.
+     * @param rootNode
+     *            The node to be reached. Really, the switch which host is
+     *            attached to.
+     * @param link
+     *            The link to follow from curNode to get to rootNode
+     * @param key
+     *            The key to store computed rules at in the rulesDB. For now,
+     *            this is a {@link HostNodePair} of host and currNode.
+     */
     private void updatePerHostRuleInSW(HostNodeConnector host, Node currNode,
-            Node rootNode, Edge link, HostNodePair key,
-            Set<NodeConnector> passedPorts) {
+            Node rootNode, Edge link, HostNodePair key) {
 
-        // link parameter it's optional
+        // only the link parameter is optional
         if (host == null || key == null || currNode == null || rootNode == null) {
             return;
         }
-        Set<NodeConnector> ports = passedPorts;
-        // TODO: Replace this with SAL equivalent when available
-        //if (container == null) {
-        ports = new HashSet<NodeConnector>();
+
+        Set<NodeConnector> ports = new HashSet<NodeConnector>();
+        // add a special port of type ALL and port 0 to represent the node
+        // without specifying a port on that node
         ports.add(NodeConnectorCreator.createNodeConnector(
                 NodeConnectorIDType.ALL, NodeConnector.SPECIALNODECONNECTORID,
                 currNode));
-        //}
 
         HashMap<NodeConnector, FlowEntry> pos = this.rulesDB.get(key);
         if (pos == null) {
             pos = new HashMap<NodeConnector, FlowEntry>();
         }
-        if (ports == null) {
-            log.debug("Empty port list, nothing to do");
-            return;
-        }
+
         for (NodeConnector inPort : ports) {
-            /*
-             * skip the port connected to the target host
-             */
+            // skip the port connected to the target host
             if (currNode.equals(rootNode)
                     && (host.getnodeConnector().equals(inPort))) {
                 continue;
             }
+
+            // remove the current rule, if any
             FlowEntry removed_po = pos.remove(inPort);
             Match match = new Match();
             List<Action> actions = new ArrayList<Action>();
-            // IP destination based forwarding
-            //on /32 entries only!
+
+            // IP destination based forwarding on /32 entries only!
             match.setField(MatchType.DL_TYPE, EtherTypes.IPv4.shortValue());
             match.setField(MatchType.NW_DST, host.getNetworkAddress());
 
-            //Action for the policy if to
-            //forward to a port except on the
-            //switch where the host sits,
-            //which is to rewrite also the MAC
-            //and to forward on the Host port
+            /* Action for the policy is to forward to a port except on the
+             * switch where the host sits, which is to rewrite also the MAC
+             * and to forward on the Host port */
             NodeConnector outPort = null;
 
             if (currNode.equals(rootNode)) {
+                /* If we're at the root node, then rewrite the DL addr and
+                 * possibly pop the VLAN tag. This allows for MAC rewriting
+                 * in the core of the network assuming we can uniquely ID
+                 * packets based on IP address. */
+
                 outPort = host.getnodeConnector();
                 if (inPort.equals(outPort)) {
-                    /*
-                     * skip the host port
-                     */
+                    // TODO: isn't this code skipped already by the above continue?
+                    // skip the host port
                     continue;
                 }
                 actions.add(new SetDlDst(host.getDataLayerAddressBytes()));
 
-                if (!inPort.getType().equals(
-                        NodeConnectorIDType.ALL)) {
-                    /*
-                     * Container mode: at the destination switch, we need to strip out the tag (VLAN)
-                     */
+                if (!inPort.getType().equals(NodeConnectorIDType.ALL)) {
+                    // Container mode: at the destination switch, we need to strip out the tag (VLAN)
                     actions.add(new PopVlan());
                 }
             } else {
-                /*
-                 * currNode is NOT the rootNode
-                 */
+                // currNode is NOT the rootNode, find the next hop and create a rule
                 if (link != null) {
                     outPort = link.getTailNodeConnector();
                     if (inPort.equals(outPort)) {
-                        /*
-                         * skip the outgoing port
-                         */
+                        // skip the outgoing port
                         continue;
                     }
-                    /*
-                     *  If outPort is network link, add VLAN tag
-                     */
+
+                    // If outPort is network link, add VLAN tag
                     if (topologyManager.isInternal(outPort)) {
                         log.debug("outPort {}/{} is internal uplink port",
                                 currNode, outPort);
@@ -279,11 +308,10 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                                 currNode, outPort);
                     }
 
-                    if ((!inPort.getType().equals(
-                            NodeConnectorIDType.ALL))
-                            && (topologyManager.isInternal(outPort))) {
+                    if ((!inPort.getType().equals(NodeConnectorIDType.ALL))
+                        && (topologyManager.isInternal(outPort))) {
                         Node nextNode = link.getHeadNodeConnector()
-                                .getNode();
+                                            .getNode();
                         // TODO: Replace this with SAL equivalent
                         //short tag = container.getTag((Long)nextNode.getNodeID());
                         short tag = 0;
@@ -303,9 +331,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                 actions.add(new Output(outPort));
             }
             if (!inPort.getType().equals(NodeConnectorIDType.ALL)) {
-                /*
-                 * include input port in the flow match field
-                 */
+                // include input port in the flow match field
                 match.setField(MatchType.IN_PORT, inPort);
 
                 if (topologyManager.isInternal(inPort)) {
@@ -315,9 +341,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                     log.debug("inPort {}/{} is host facing port", currNode,
                             inPort);
                 }
-                /*
-                 * for incoming network link; if the VLAN tag is defined, include it for incoming flow matching
-                 */
+
+                // for incoming network link; if the VLAN tag is defined, include it for incoming flow matching
                 if (topologyManager.isInternal(inPort)) {
                     // TODO: Replace this with SAL equivalent
                     //short tag = container.getTag((Long)currNode.getNodeID());
@@ -349,9 +374,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                     + currNode + "]";
             FlowEntry po = new FlowEntry(policyName, flowName, flow, currNode);
 
-            // Now save the rule in the DB rule,
-            // so on updates from topology we can
-            // selectively
+            /* Now save the rule in the DB rule, so on updates from topology we
+             * can selectively */
             pos.put(inPort, po);
             this.rulesDB.put(key, pos);
             if (!inPort.getType().equals(NodeConnectorIDType.ALL)) {
@@ -395,6 +419,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         if (host == null) {
             return null;
         }
+
+        //TODO: race condition! unset* functions can make these null.
         if (this.routing == null) {
             return null;
         }
@@ -412,6 +438,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         HashMap<NodeConnector, FlowEntry> pos;
         FlowEntry po;
 
+        // for all nodes in the system
         for (Node node : nodes) {
             if (node.equals(rootNode)) {
                 // We skip it because for the node with host attached
@@ -422,8 +449,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
             List<Edge> links;
             Path res = this.routing.getRoute(node, rootNode);
             if ((res == null) || ((links = res.getEdges()) == null)) {
-                // Still the path that connect node to rootNode
-                // doesn't exists
+                // No route from node to rootNode can be found, back out any
+                // existing forwarding rules if they exist.
                 log.debug("NO Route/Path between SW[{}] --> SW[{}] cleaning " +
                         "potentially existing entries", node, rootNode);
                 key = new HostNodePair(host, node);
@@ -432,7 +459,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
                     for (Map.Entry<NodeConnector, FlowEntry> e : pos.entrySet()) {
                         po = e.getValue();
                         if (po != null) {
-                            //Uninstall the policy
+                            // uninstall any existing rules we put in the
+                            // ForwardingRulesManager
                             this.frm.uninstallFlowEntry(po);
                         }
                     }
@@ -442,31 +470,27 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
             }
 
             log.debug("Route between SW[{}] --> SW[{}]", node, rootNode);
-            Integer curr;
             Node currNode = node;
             key = new HostNodePair(host, currNode);
-            Edge link;
-            for (curr = 0; curr < links.size(); curr++) {
-                link = links.get(curr);
+
+            // for each link in the route from here to there
+            for (Edge link : links) {
                 if (link == null) {
                     log.error("Could not retrieve the Link");
+                    // TODO: should we keep going?
                     continue;
                 }
 
                 log.debug(link.toString());
 
                 // Index all the switches to be programmed
-                // switchesToProgram.add(currNode);
-                Set<NodeConnector> ports = null;
-                ports = switchManager.getUpNodeConnectors(currNode);
-                updatePerHostRuleInSW(host, currNode, rootNode, link, key,
-                        ports);
+                updatePerHostRuleInSW(host, currNode, rootNode, link, key);
                 if ((this.rulesDB.get(key)) != null) {
-                    /*
-                     * Calling updatePerHostRuleInSW() doesn't guarantee that rules will be
-                     * added in currNode (e.g, there is only one link from currNode to rootNode
-                     * This check makes sure that there are some rules in the rulesDB for the
-                     * given key prior to adding switch to switchesToProgram
+                    /* Calling updatePerHostRuleInSW() doesn't guarantee that
+                     * rules will be added in currNode (e.g, there is only one
+                     * link from currNode to rootNode This check makes sure that
+                     * there are some rules in the rulesDB for the given key
+                     * prior to adding switch to switchesToProgram
                      */
                     switchesToProgram.add(currNode);
                 }
@@ -480,10 +504,8 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         // multiple hosts attached to it but not yet connected to the
         // rest of the world
         switchesToProgram.add(rootNode);
-        Set<NodeConnector> ports = switchManager
-                .getUpNodeConnectors(rootNode);
-        updatePerHostRuleInSW(host, rootNode, rootNode, null, new HostNodePair(
-                host, rootNode), ports);
+        updatePerHostRuleInSW(host, rootNode, rootNode, null,
+                              new HostNodePair(host, rootNode));
 
         //      log.debug("Getting out at the end!");
         return switchesToProgram;
@@ -491,7 +513,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
 
     /**
      * Calculate the per-Host rules to be installed in the rulesDB
-     * from  a specific switch when a host facing port comes up.
+     * from a specific switch when a host facing port comes up.
      * These rules will later on be installed in HW. This routine
      * will implicitly calculate the shortest path from the switch
      * where the port has come up to the switch where host is ,
@@ -524,14 +546,11 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         HostNodePair key;
         Map<NodeConnector, FlowEntry> pos;
         FlowEntry po;
-        Set<NodeConnector> ports = new HashSet<NodeConnector>();
-        ports.add(swport);
         List<Edge> links;
 
         Path res = this.routing.getRoute(node, rootNode);
         if ((res == null) || ((links = res.getEdges()) == null)) {
-            // Still the path that connect node to rootNode
-            // doesn't exists
+            // the routing service doesn't know how to get there from here
             log.debug("NO Route/Path between SW[{}] --> SW[{}] cleaning " +
                     "potentially existing entries", node, rootNode);
             key = new HostNodePair(host, node);
@@ -568,7 +587,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
 
             // Index all the switches to be programmed
             switchesToProgram.add(currNode);
-            updatePerHostRuleInSW(host, currNode, rootNode, link, key, ports);
+            updatePerHostRuleInSW(host, currNode, rootNode, link, key);
             break; // come out of the loop for port up case, interested only in programming one switch
         }
 
@@ -720,6 +739,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
     public void recalculateDone() {
         if (this.hostTracker == null) {
             //Not yet ready to process all the updates
+            //TODO: we should make sure that this call is executed eventually
             return;
         }
         Set<HostNodeConnector> allHosts = this.hostTracker.getAllHosts();
@@ -768,7 +788,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         }
     }
 
-    /*
+    /**
      * A Host facing port has come up in a container. Add rules on the switch where this
      * port has come up for all the known hosts to the controller.
      * @param swId switch id of the port where port came up
