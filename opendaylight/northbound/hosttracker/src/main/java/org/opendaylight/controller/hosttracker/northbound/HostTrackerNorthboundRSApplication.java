@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.core.Application;
 
+import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
+
 /**
  * This class is an instance of javax.ws.rs.core.Application used to return the classes
  * that will be instantiated for JAXRS processing, this is necessary
@@ -25,6 +27,7 @@ public class HostTrackerNorthboundRSApplication extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(HostTrackerNorthbound.class);
+        classes.add(JacksonJaxbJsonProvider.class);
         return classes;
     }
 }
