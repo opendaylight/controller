@@ -1,4 +1,4 @@
-module toaster {
+  module toaster {
 
     yang-version 1;
 
@@ -23,7 +23,7 @@ module toaster {
 
     identity toast-type {
       description
-          "Base for all bread types supported by the toaster.
+        "Base for all bread types supported by the toaster.
            New bread types not listed here nay be added in the 
            future.";
     }
@@ -59,7 +59,9 @@ module toaster {
     }
 
     typedef DisplayString {
-      type string;
+      type string {
+        length "0 .. 255";
+      }
       description
         "YANG version of the SMIv2 DisplayString TEXTUAL-CONVENTION.";
       reference
