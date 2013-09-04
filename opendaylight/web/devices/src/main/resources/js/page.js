@@ -464,6 +464,7 @@ one.f.switchmanager.subnetGatewayConfig = {
         }, 
         modal: {
             modal: "one_f_switchmanager_subnetGatewayConfig_id_modal_modal",
+			ports : "one_f_switchmanager_subnetGatewayConfig_id_modal_ports",
             save: "one_f_switchmanager_subnetGatewayConfig_id_modal_save",
             form: {
                 name : "one_f_switchmanager_subnetGatewayConfig_id_modal_form_gatewayname",
@@ -586,7 +587,7 @@ one.f.switchmanager.subnetGatewayConfig = {
             ports: function() {
                 var h3 = "Add Ports";
                 var footer = one.f.switchmanager.subnetGatewayConfig.modal.footer();
-                var $modal = one.lib.modal.spawn(one.f.switchmanager.subnetGatewayConfig.id.modal.modal, h3, "", footer);
+                var $modal = one.lib.modal.spawn(one.f.switchmanager.subnetGatewayConfig.id.modal.ports, h3, "", footer);
                 // bind save button
                 $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.save, $modal).click(function() {
                     one.f.switchmanager.subnetGatewayConfig.modal.save.ports($modal);
