@@ -27,6 +27,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -254,6 +255,7 @@ public class SwitchNorthbound {
             @ResponseCode(code = 409, condition = "Unable to update configuration due to cluster conflict or conflicting description property"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addNodeProperty(
+            @Context UriInfo uriInfo,
             @PathParam("containerName") String containerName,
             @PathParam("nodeType") String nodeType,
             @PathParam("nodeId") String nodeId,
@@ -288,7 +290,7 @@ public class SwitchNorthbound {
         SwitchConfig newSwitchConfig = new SwitchConfig(node.toString(), nodeProperties);
         Status status = switchManager.updateNodeConfig(newSwitchConfig);
         if (status.isSuccess()) {
-            return Response.status(Response.Status.CREATED).build();
+            return Response.created(uriInfo.getRequestUri()).build();
         }
         return NorthboundUtils.getResponse(status);
     }
@@ -534,6 +536,7 @@ public class SwitchNorthbound {
             @ResponseCode(code = 409, condition = "Unable to add property due to cluster conflict"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addNodeConnectorProperty(
+            @Context UriInfo uriInfo,
             @PathParam("containerName") String containerName,
             @PathParam("nodeType") String nodeType,
             @PathParam("nodeId") String nodeId,
@@ -574,7 +577,7 @@ public class SwitchNorthbound {
 
         Status ret = switchManager.addNodeConnectorProp(nc, prop);
         if (ret.isSuccess()) {
-            return Response.status(Response.Status.CREATED).build();
+            return Response.created(uriInfo.getRequestUri()).build();
         }
         throw new InternalServerErrorException(ret.getDescription());
     }
