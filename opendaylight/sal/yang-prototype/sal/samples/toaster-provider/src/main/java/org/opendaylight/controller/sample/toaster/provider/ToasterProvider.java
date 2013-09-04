@@ -9,7 +9,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev20091120.ToasterService;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
