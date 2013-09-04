@@ -60,7 +60,7 @@
     <pluginRepository>
       <id>central2</id>
       <name>central2</name>
-      <url>${nexusproxy}/repositories/central2/</url>
+      <url>http://repo2.maven.org/maven2</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -206,19 +206,15 @@
       <name>ebr-bundles-external</name>
       <url>${nexusproxy}/repositories/ebr-bundles-external/</url>
     </repository>
-    <!-- Maven repo2 mirror -->
-    <!-- http://repo2.maven.org/maven2 -->
     <repository>
       <id>central2</id>
       <name>central2</name>
-      <url>${nexusproxy}/repositories/central2/</url>
+      <url>http://repo2.maven.org/maven2</url>
     </repository>
-    <!-- Maven repo1 mirror -->
-    <!-- http://repo1.maven.org/maven2 -->
     <repository>
       <id>central</id>
       <name>central</name>
-      <url>${nexusproxy}/repositories/central/</url>
+      <url>http://repo1.maven.org/maven2</url>
     </repository>
     <!-- Pax mirror -->
     <!-- https://oss.sonatype.org/content/repositories/ops4j-releases -->
