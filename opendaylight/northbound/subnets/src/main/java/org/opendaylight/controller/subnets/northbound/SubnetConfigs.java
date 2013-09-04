@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.switchmanager.SubnetConfig;
 
-@XmlRootElement
+@XmlRootElement (name = "list")
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class SubnetConfigs {

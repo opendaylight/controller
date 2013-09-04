@@ -57,6 +57,7 @@
               javax.xml.bind,
               org.slf4j,
               org.apache.catalina.filters,
+              org.codehaus.jackson.jaxrs,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Web-ContextPath>/controller/nb/v2/switch</Web-ContextPath>
