@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_05414639",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-04T14:11:04Z",
+      "side": 1,
+      "message": "Why for central2 implicitely relay on releases being enabled while for central no? Any reason?",
+      "revId": "4e247cd68fd8612d71131cead4612649941f58be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
