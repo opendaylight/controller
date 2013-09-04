@@ -71,19 +71,19 @@ public interface IClusterServices {
      */
     public enum cacheProps {
         /**
-         * The property returned describe the caracteristics of the
+         * The property returned describe the characteristics of the
          * transaction setup for the cache it was retrieved.
          */
         TRANSACTION_PROP,
         /**
          * The property returned report the clustering
-         * caracteristics of the cache for which property was
+         * characteristics of the cache for which property was
          * queried.
          */
         CLUSTERING_PROP,
         /**
          * The property returned reports the locking
-         * caracteristics of the cache for which the property was
+         * characteristics of the cache for which the property was
          * queried
          */
         LOCKING_PROP;
