@@ -903,7 +903,7 @@ public class NorthboundIT {
         Integer nodeId_1 = 3366;
         String nodeConnectorType_1 = "STUB";
         Integer nodeConnectorId_1 = 12;
-        String vlan_1 = "4";
+        String vlan_1 = "";
 
         // 2nd host
         String networkAddress_2 = "10.1.1.1";
@@ -912,7 +912,7 @@ public class NorthboundIT {
         Integer nodeId_2 = 4477;
         String nodeConnectorType_2 = "STUB";
         Integer nodeConnectorId_2 = 34;
-        String vlan_2 = "0";
+        String vlan_2 = "123";
 
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/host/default";
 
@@ -969,7 +969,7 @@ public class NorthboundIT {
                 Assert.assertTrue(host_jo.getInt("nodeConnectorId") == nodeConnectorId_1);
                 Assert.assertTrue(host_jo.getString("nodeType").equalsIgnoreCase(nodeType_1));
                 Assert.assertTrue(host_jo.getInt("nodeId") == nodeId_1);
-                Assert.assertTrue(host_jo.getString("vlan").equalsIgnoreCase(vlan_1));
+                Assert.assertTrue(host_jo.getString("vlan").equals("0"));
                 Assert.assertTrue(host_jo.getBoolean("staticHost"));
             } else if (networkAddress.equalsIgnoreCase(networkAddress_2)) {
                 Assert.assertTrue(host_jo.getString("dataLayerAddress").equalsIgnoreCase(dataLayerAddress_2));
@@ -1030,13 +1030,13 @@ public class NorthboundIT {
         Assert.assertTrue(json.getInt("nodeConnectorId") == nodeConnectorId_1);
         Assert.assertTrue(json.getString("nodeType").equalsIgnoreCase(nodeType_1));
         Assert.assertTrue(json.getInt("nodeId") == nodeId_1);
-        Assert.assertTrue(json.getString("vlan").equalsIgnoreCase(vlan_1));
+        Assert.assertTrue(json.getString("vlan").equals("0"));
         Assert.assertTrue(json.getBoolean("staticHost"));
 
         // test DELETE method for deleteFlow()
 
         result = getJsonResult(baseURL + "/" + networkAddress_1, "DELETE");
-        Assert.assertTrue(httpResponseCode == 200);
+        Assert.assertTrue(httpResponseCode == 204);
 
         // verify host_1 removed from active host DB
         // test GET method: getActiveHosts() - no host expected
