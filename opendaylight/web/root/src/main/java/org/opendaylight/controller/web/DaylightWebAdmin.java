@@ -8,14 +8,24 @@
 
 package org.opendaylight.controller.web;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
+import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.sal.authorization.UserLevel;
+import org.opendaylight.controller.sal.core.Description;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.controller.usermanager.UserConfig;
 import org.springframework.stereotype.Controller;
@@ -30,14 +40,92 @@ import com.google.gson.Gson;
 @Controller
 @RequestMapping("/admin")
 public class DaylightWebAdmin {
+    Gson gson = new Gson();
 
+    /**
+     * Returns list of clusters Highlights "this" controller and if controller
+     * is coordinator
+     * @return List<ClusterBean>
+     */
+    @RequestMapping("/cluster")
+    @ResponseBody
+    public String getClusters() {
+        IClusterGlobalServices clusterServices = (IClusterGlobalServices) ServiceHelper.getGlobalInstance(
+                IClusterGlobalServices.class, this);
+        if (clusterServices == null) {
+            return null;
+        }
 
+        List<ClusterBean> clusters = new ArrayList<ClusterBean>();
+
+        List<InetAddress> controllers = clusterServices.getClusteredControllers();
+        for (InetAddress controller : controllers) {
+            ClusterBean.Builder clusterBeanBuilder = new ClusterBean.Builder(controller);
+            if (controller.equals(clusterServices.getMyAddress())) {
+                clusterBeanBuilder.highlightMe();
+            }
+            if (clusterServices.amICoordinator()) {
+                clusterBeanBuilder.iAmCoordinator();
+            }
+
+            clusters.add(clusterBeanBuilder.build());
+        }
+
+        return gson.toJson(clusters);
+    }
+
+    /**
+     * Return nodes connected to controller {cluster}
+     * @param cluster
+     *            - byte[] of the address of the controller
+     * @return List<NodeBean>
+     */
+    @RequestMapping("/cluster/{cluster}")
+    @ResponseBody
+    public String getClusterNodes(@PathVariable("cluster") String cluster) {
+        IClusterGlobalServices clusterServices = (IClusterGlobalServices) ServiceHelper.getGlobalInstance(
+                IClusterGlobalServices.class, this);
+        if (clusterServices == null) {
+            return null;
+        }
+        IConnectionManager connectionManager = (IConnectionManager) ServiceHelper.getGlobalInstance(
+                IConnectionManager.class, this);
+        if (connectionManager == null) {
+            return null;
+        }
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class,
+                GlobalConstants.DEFAULT.toString(), this);
+
+        byte[] address = gson.fromJson(cluster, byte[].class);
+        InetAddress clusterAddress = null;
+        try {
+            clusterAddress = InetAddress.getByAddress(address);
+        } catch (UnknownHostException e) {
+            return null;
+        }
+        InetAddress thisCluster = clusterServices.getMyAddress();
+
+        List<NodeBean> result = new ArrayList<NodeBean>();
+
+        Set<Node> nodes = connectionManager.getNodes(thisCluster);
+        for (Node node : nodes) {
+            Description description = (Description) switchManager.getNodeProp(node, Description.propertyName);
+            NodeBean nodeBean;
+            if (description == null || description.getValue().equals("None")) {
+                nodeBean = new NodeBean(node);
+            } else {
+                nodeBean = new NodeBean(node, description.getValue());
+            }
+            result.add(nodeBean);
+        }
+
+        return gson.toJson(result);
+    }
 
     @RequestMapping("/users")
     @ResponseBody
     public List<UserConfig> getUsers() {
-        IUserManager userManager = (IUserManager) ServiceHelper
-                .getGlobalInstance(IUserManager.class, this);
+        IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
             return null;
         }
@@ -52,13 +140,10 @@ public class DaylightWebAdmin {
      */
     @RequestMapping(value = "/users", method = RequestMethod.POST)
     @ResponseBody
-    public String saveLocalUserConfig(
-            @RequestParam(required = true) String json,
-            @RequestParam(required = true) String action,
-            HttpServletRequest request) {
+    public String saveLocalUserConfig(@RequestParam(required = true) String json,
+            @RequestParam(required = true) String action, HttpServletRequest request) {
 
-        IUserManager userManager = (IUserManager) ServiceHelper
-                .getGlobalInstance(IUserManager.class, this);
+        IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
             return "Internal Error";
         }
@@ -70,10 +155,9 @@ public class DaylightWebAdmin {
         Gson gson = new Gson();
         UserConfig config = gson.fromJson(json, UserConfig.class);
 
-        Status result = (action.equals("add")) ? userManager
-                .addLocalUser(config) : userManager.removeLocalUser(config);
-        if(result.getCode().equals(StatusCode.SUCCESS)) {
-            String userAction=(action.equals("add")) ? "added":"removed";
+        Status result = (action.equals("add")) ? userManager.addLocalUser(config) : userManager.removeLocalUser(config);
+        if (result.isSuccess()) {
+            String userAction = (action.equals("add")) ? "added" : "removed";
             DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), userAction, config.getUser());
             return "Success";
         }
@@ -82,16 +166,14 @@ public class DaylightWebAdmin {
 
     @RequestMapping(value = "/users/{username}", method = RequestMethod.POST)
     @ResponseBody
-    public String removeLocalUser(@PathVariable("username") String userName,
-            HttpServletRequest request) {
+    public String removeLocalUser(@PathVariable("username") String userName, HttpServletRequest request) {
 
         String username = request.getUserPrincipal().getName();
         if (username.equals(userName)) {
             return "Invalid Request: User cannot delete itself";
         }
 
-        IUserManager userManager = (IUserManager) ServiceHelper
-                .getGlobalInstance(IUserManager.class, this);
+        IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
             return "Internal Error";
         }
@@ -101,7 +183,7 @@ public class DaylightWebAdmin {
         }
 
         Status result = userManager.removeLocalUser(userName);
-        if(result.getCode().equals(StatusCode.SUCCESS)) {
+        if (result.isSuccess()) {
             DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), "removed", userName);
             return "Success";
         }
@@ -112,8 +194,7 @@ public class DaylightWebAdmin {
     @ResponseBody
     public Status changePassword(@PathVariable("username") String username, HttpServletRequest request,
             @RequestParam("currentPassword") String currentPassword, @RequestParam("newPassword") String newPassword) {
-        IUserManager userManager = (IUserManager) ServiceHelper
-                .getGlobalInstance(IUserManager.class, this);
+        IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
             return new Status(StatusCode.GONE, "User Manager not found");
         }
@@ -127,7 +208,7 @@ public class DaylightWebAdmin {
         }
 
         Status status = userManager.changeLocalUserPassword(username, currentPassword, newPassword);
-        if(status.isSuccess()){
+        if (status.isSuccess()) {
             DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), "changed password for", username);
         }
         return status;
@@ -135,11 +216,9 @@ public class DaylightWebAdmin {
 
     /**
      * Is the operation permitted for the given level
-     *
      * @param level
      */
-    private boolean authorize(IUserManager userManager, UserLevel level,
-            HttpServletRequest request) {
+    private boolean authorize(IUserManager userManager, UserLevel level, HttpServletRequest request) {
         String username = request.getUserPrincipal().getName();
         UserLevel userLevel = userManager.getUserLevel(username);
         return userLevel.toNumber() <= level.toNumber();
