@@ -175,12 +175,9 @@ one.main.admin = {
         },
         footer : function() {
             var footer = [];
-
-            var closeButton = one.lib.dashlet.button.single("Close",
-                    one.main.admin.id.modal.close, "", "");
+            var closeButton = one.lib.dashlet.button.single('Close', one.main.admin.id.modal.close, '', '');
             var $closeButton = one.lib.dashlet.button.button(closeButton);
             footer.push($closeButton);
-
             return footer;
         }
     },
@@ -257,76 +254,53 @@ one.main.admin = {
                 var $body = one.main.admin.remove.body();
                 var $modal = one.lib.modal.spawn(one.main.admin.id.modal.user,
                         h3, $body, footer);
-
                 // close binding
-                $('#' + one.main.admin.id.modal.remove.close, $modal).click(
-                        function() {
-                            $modal.modal('hide');
-                        });
-
+                $('#'+one.main.admin.id.modal.remove.close, $modal).click(function() {
+					$modal.modal('hide');
+				});
                 // remove binding
-                $('#' + one.main.admin.id.modal.remove.user, $modal)
-                        .click(
-                                function() {
-                                    one.main.admin.remove.modal
-                                            .ajax(
-                                                    id,
-                                                    function(result) {
-                                                        if (result == 'Success') {
-                                                            $modal
-                                                                    .modal('hide');
-                                                            // body inject
-                                                            var $admin = $('#'
-                                                                    + one.main.admin.id.modal.main);
-                                                            one.main.admin.ajax
-                                                                    .users(function($body) {
-                                                                        one.lib.modal.inject
-                                                                                .body(
-                                                                                        $admin,
-                                                                                        $body);
-                                                                    });
-                                                        } else
-                                                            alert("Failed to remove user: "
-                                                                    + result);
-                                                    });
-                                });
-
+                $('#' + one.main.admin.id.modal.remove.user, $modal).click(function() {
+					one.main.admin.remove.modal.ajax(id, function(result) {
+						if (result == 'Success') {
+							$modal.modal('hide');
+							// body inject
+							var $admin = $('#'+one.main.admin.id.modal.main);
+							one.main.admin.ajax.users(function($body) {
+								one.lib.modal.inject.body($admin, $body);
+							});
+						} else {
+							alert("Failed to remove user: " + result);
+						}
+					});
+				});
 				// change password binding
 				$('#' + one.main.admin.id.modal.remove.password, $modal).click(function() {
 					one.main.admin.password.initialize(id, function() {
 						$modal.modal('hide');
 					});
 				});
-
                 $modal.modal();
             },
             ajax : function(id, callback) {
-                $.post(one.main.admin.address.root
-                        + one.main.admin.address.users + '/' + id,
-                        function(data) {
-                            callback(data);
-                        });
+                $.post(one.main.admin.address.root + one.main.admin.address.users + '/' + id, function(data) {
+                	callback(data);
+                });
             },
         },
-
         footer : function() {
             var footer = [];
-
             var removeButton = one.lib.dashlet.button.single("Remove User",
                     one.main.admin.id.modal.remove.user, "btn-danger", "");
             var $removeButton = one.lib.dashlet.button.button(removeButton);
             footer.push($removeButton);
-
 			var change = one.lib.dashlet.button.single('Change Password',
 					one.main.admin.id.modal.remove.password, 'btn-success', '');
 			var $change = one.lib.dashlet.button.button(change);
 			footer.push($change);
-
             var closeButton = one.lib.dashlet.button.single("Close",
                     one.main.admin.id.modal.remove.close, "", "");
             var $closeButton = one.lib.dashlet.button.button(closeButton);
             footer.push($closeButton);
-
             return footer;
         },
         body : function() {
@@ -343,40 +317,25 @@ one.main.admin = {
                 var $body = one.main.admin.add.body();
                 var $modal = one.lib.modal.spawn(one.main.admin.id.modal.user,
                         h3, $body, footer);
-
                 // close binding
-                $('#' + one.main.admin.id.modal.add.close, $modal).click(
-                        function() {
-                            $modal.modal('hide');
-                        });
-
+                $('#' + one.main.admin.id.modal.add.close, $modal).click(function() {
+					$modal.modal('hide');
+				});
                 // add binding
-                $('#' + one.main.admin.id.modal.add.user, $modal)
-                        .click(
-                                function() {
-                                    one.main.admin.add.modal
-                                            .add(
-                                                    $modal,
-                                                    function(result) {
-                                                        if (result == 'Success') {
-                                                            $modal
-                                                                    .modal('hide');
-                                                            // body inject
-                                                            var $admin = $('#'
-                                                                    + one.main.admin.id.modal.main);
-                                                            one.main.admin.ajax
-                                                                    .users(function($body) {
-                                                                        one.lib.modal.inject
-                                                                                .body(
-                                                                                        $admin,
-                                                                                        $body);
-                                                                    });
-                                                        } else
-                                                            alert("Failed to add user: "
-                                                                    + result);
-                                                    });
-                                });
-
+                $('#' + one.main.admin.id.modal.add.user, $modal).click(function() {
+					one.main.admin.add.modal.add($modal, function(result) {
+						if (result == 'Success') {
+							$modal.modal('hide');
+							// body inject
+							var $admin = $('#'+one.main.admin.id.modal.main);
+							one.main.admin.ajax.users(function($body) {
+								one.lib.modal.inject.body($admin, $body);
+							});
+						} else {
+							alert("Failed to add user: "+result);
+						}
+					});
+				});
                 $modal.modal();
             },
             add : function($modal, callback) {
@@ -550,6 +509,153 @@ one.main.admin = {
 	}
 }
 
+one.main.cluster = {
+	id : { // one.main.cluster.id
+		modal : 'one-main-cluster-id-modal',
+		close : 'one-main-cluster-id-close',
+		datagrid : 'one-main-cluster-id-datagrid'
+	},
+	registry : { // one.main.cluster.registry
+		cluster : undefined
+	},
+	initialize : function() {
+		var h3 = 'Cluster Management';
+		var footer = one.main.cluster.footer();
+		var $body = '';
+		var $modal = one.lib.modal.spawn(one.main.cluster.id.modal, h3, $body, footer); 
+
+		// close
+		$('#'+one.main.cluster.id.close, $modal).click(function() {
+			$modal.modal('hide');
+		});
+
+		// body
+		$.getJSON('/admin/cluster', function(data) {
+			var $gridHTML = one.lib.dashlet.datagrid.init(one.main.cluster.id.datagrid, {
+				searchable: true,
+				filterable: false,
+				pagination: true,
+				flexibleRowsPerPage: true
+			}, 'table-striped table-condensed table-cursor');
+			var source = one.main.cluster.data(data);
+			$gridHTML.datagrid({dataSource : source}).on('loaded', function() {
+				$(this).find('tbody tr').click(function() {
+					var $tr = $(this);
+					if ($tr.find('td:nth-child(1)').attr('colspan') === '1') {
+						return false;
+					}
+					var address = one.main.cluster.registry.cluster[$tr.index()];
+					one.main.cluster.nodes.initialize(address);
+				});
+			});
+			one.lib.modal.inject.body($modal, $gridHTML);
+		});
+
+		$modal.modal();
+	},
+	data : function(data) {
+		var tdata = [];
+		var registry = [];
+		$(data).each(function(idx, val) {
+			var name = val.name;
+			name = one.lib.dashlet.label(name, null)[0].outerHTML;
+			if (val.me === true) {
+				var me = one.lib.dashlet.label('*', 'label-inverse')[0].outerHTML;
+				name += '&nbsp;'+me;
+			}
+			if (val.coordinator === true) {
+				var coord = one.lib.dashlet.label('C')[0].outerHTML;
+				name += '&nbsp;'+coord;
+			}
+			tdata.push({
+				'controller' : name
+			});
+			registry.push(val.address);
+		});
+		one.main.cluster.registry.cluster = registry;
+		var source = new StaticDataSource({
+			columns : [
+				{
+					property : 'controller',
+					label : 'Controller',
+					sortable : true
+				}
+			],
+			data : tdata,
+			delay : 0
+		});
+		return source;
+	},
+	footer : function() {
+		var footer = [];
+		var close = one.lib.dashlet.button.single('Close', one.main.cluster.id.close, '', '');
+		var $close = one.lib.dashlet.button.button(close);
+		footer.push($close);
+		return footer;
+	}
+}
+
+one.main.cluster.nodes = {
+	id : { // one.main.cluster.nodes.id
+		modal : 'one-main-cluster-nodes-id-modal',
+		close : 'one-main-cluster-nodes-id-close',
+		datagrid : 'one-main-cluser-nodes-id-datagrid'
+	},
+	initialize : function(address) { // one.main.cluster.nodes.initialize
+		var h3 = 'Connected Nodes';
+		var footer = one.main.cluster.nodes.footer();
+		var $body = '';
+		var $modal = one.lib.modal.spawn(one.main.cluster.nodes.id.modal, h3, $body, footer);
+
+		// close
+		$('#'+one.main.cluster.nodes.id.close, $modal).click(function() {
+			$modal.modal('hide');
+		});
+		
+		// body
+		$.getJSON('/admin/cluster/controller/'+JSON.stringify(address), function(data) {
+			var $gridHTML = one.lib.dashlet.datagrid.init(one.main.cluster.nodes.id.datagrid, {
+				searchable: true,
+				filterable: false,
+				pagination: true,
+				flexibleRowsPerPage: true
+			}, 'table-striped table-condensed');
+			var source = one.main.cluster.nodes.data(data);
+			$gridHTML.datagrid({dataSource : source});
+			one.lib.modal.inject.body($modal, $gridHTML);
+		});
+
+		$modal.modal();
+	},
+	data : function(data) {
+		var tdata = [];
+		$(data).each(function(idx, val) {
+			tdata.push({
+				'node' : val.description
+			});
+		});
+		var source = new StaticDataSource({
+			columns : [
+				{
+					property : 'node',
+					label : 'Node',
+					sortable : true
+				}
+			],
+			data : tdata,
+			delay : 0
+		});
+		return source;
+	},
+	footer : function() { // one.main.cluster.nodes.footer
+		var footer = [];
+		var close = one.lib.dashlet.button.single('Close', one.main.cluster.nodes.id.close, '', '');
+		var $close = one.lib.dashlet.button.button(close);
+		footer.push($close);
+		return footer;
+	}
+}
+
 one.main.dashlet = {
     left : {
         top : $("#left-top .dashlet"),
@@ -579,6 +685,11 @@ $("#admin").click(function() {
     one.main.admin.modal.initialize(function($modal) {
         $modal.modal();
     });
+});
+
+// cluster
+$('#cluster').click(function() {
+	one.main.cluster.initialize();
 });
 
 // save

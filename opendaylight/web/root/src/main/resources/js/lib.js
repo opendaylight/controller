@@ -26,6 +26,17 @@ one.lib.dashlet = {
         $h4.text(header);
         return $h4;
     },
+    label : function(name, type) {
+    	var $span = $(document.createElement('span'));
+    	$span.addClass('label');
+    	if (type !== undefined) {
+    		$span.addClass(type);
+    	} else if (type !== null) {
+    		$span.addClass('label-info');
+    	}
+    	$span.append(name);
+    	return $span;
+    },
     list : function(list) {
         var $ul = $(document.createElement('ul'));
         $(list).each(function(index, value) {
