@@ -15,7 +15,7 @@ public enum RestMessages {
             "Operation failed due to Resource Conflict"), NODEFAULT("Container default is not a custom container"), DEFAULTDISABLED(
             "Container(s) are configured. Container default is not operational"), NOTALLOWEDONDEFAULT(
             "Container default is a static resource, no modification allowed on it"), UNKNOWNACTION("Unknown action"), INVALIDJSON(
-            "JSON message is invalid"), INVALIDADDRESS("invalid InetAddress"), AVAILABLESOON(
+            "JSON message is invalid"), INVALIDADDRESS("Invalid InetAddress"), AVAILABLESOON(
             "Resource is not implemented yet"), INTERNALERROR("Internal Error"), SERVICEUNAVAILABLE(
             "Service is not available. Could be down for maintanence"), INVALIDDATA(
             "Data is invalid or conflicts with URI");
