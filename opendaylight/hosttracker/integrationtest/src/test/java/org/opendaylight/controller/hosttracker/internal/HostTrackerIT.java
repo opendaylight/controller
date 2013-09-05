@@ -69,13 +69,13 @@ public class HostTrackerIT {
                 // Set the systemPackages (used by clustering)
                 systemPackages("sun.reflect", "sun.reflect.misc", "sun.misc"),
                 // List framework bundles
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.console", "1.0.0.v20120522-1841"),
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.util", "1.0.400.v20120522-2049"),
-                mavenBundle("equinoxSDK381", "org.eclipse.osgi.services","3.3.100.v20120522-1822"),
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.ds", "1.4.0.v20120522-1841"),
-                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.command", "0.8.0.v201108120515"),
-                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.runtime", "0.8.0.v201108120515"),
-                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell", "0.8.0.v201110170705"),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.console").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.util").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.eclipse.osgi.services").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.ds").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.command").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.runtime").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell").versionAsInProject(),
                 // List logger bundles
                 mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(),

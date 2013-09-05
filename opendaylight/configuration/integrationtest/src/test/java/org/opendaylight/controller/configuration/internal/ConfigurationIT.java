@@ -16,7 +16,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.Status;
@@ -38,7 +37,6 @@ public class ConfigurationIT {
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
-    private IClusterServices clusterService = null;
     private IConfigurationService configService = null;
 
     // Configure the OSGi container
@@ -53,59 +51,34 @@ public class ConfigurationIT {
                 // Set the systemPackages (used by clustering)
                 systemPackages("sun.reflect", "sun.reflect.misc", "sun.misc"),
                 // List framework bundles
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.console",
-                        "1.0.0.v20120522-1841"),
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.util",
-                        "1.0.400.v20120522-2049"),
-                mavenBundle("equinoxSDK381", "org.eclipse.osgi.services",
-                        "3.3.100.v20120522-1822"),
-                mavenBundle("equinoxSDK381", "org.eclipse.equinox.ds",
-                        "1.4.0.v20120522-1841"),
-                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.command",
-                        "0.8.0.v201108120515"),
-                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.runtime",
-                        "0.8.0.v201108120515"),
-                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell",
-                        "0.8.0.v201110170705"),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.console").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.util").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.eclipse.osgi.services").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.eclipse.equinox.ds").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.command").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.runtime").versionAsInProject(),
+                mavenBundle("equinoxSDK381", "org.apache.felix.gogo.shell").versionAsInProject(),
                 // List logger bundles
-                mavenBundle("org.slf4j", "slf4j-api", "1.7.2"),
-                mavenBundle("org.slf4j", "log4j-over-slf4j", "1.7.2"),
-                mavenBundle("ch.qos.logback", "logback-core", "1.0.9"),
-                mavenBundle("ch.qos.logback", "logback-classic", "1.0.9"),
-                mavenBundle("org.apache.commons", "commons-lang3", "3.1"),
-                mavenBundle("org.jboss.spec.javax.transaction",
-                        "jboss-transaction-api_1.1_spec", "1.0.1.Final"),
+                mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
+                mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(),
+                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(),
+                mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(),
+                mavenBundle("org.jboss.spec.javax.transaction", "jboss-transaction-api_1.1_spec").versionAsInProject(),
                 mavenBundle("eclipselink", "javax.resource").versionAsInProject(),
-                mavenBundle("org.apache.felix",
-                        "org.apache.felix.dependencymanager", "3.1.0"),
+                mavenBundle("org.apache.felix", "org.apache.felix.dependencymanager").versionAsInProject(),
                 // List all the bundles on which the test case depends
-                mavenBundle("org.opendaylight.controller", "sal",
-                        "0.5.0-SNAPSHOT"), // SAL connects the protocols
-                                           // plug-ins to other stuff
-                mavenBundle("org.opendaylight.controller",
-                        "sal.implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "protocol_plugins.stub", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "sal").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "protocol_plugins.stub").versionAsInProject(),
                 // needed bundles by switchmanager
-                mavenBundle("org.opendaylight.controller", "containermanager",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "containermanager.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "containermanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "containermanager.implementation").versionAsInProject(),
                 // needed bundles by configuration
-                mavenBundle("org.opendaylight.controller",
-                        "clustering.services", "0.4.0-SNAPSHOT"), // what are
-                                                                  // the
-                                                                  // clustering
-                                                                  // services
-                                                                  // for
-                mavenBundle("org.opendaylight.controller", "clustering.stub",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "clustering.services-implementation", "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller", "configuration",
-                        "0.4.0-SNAPSHOT"),
-                mavenBundle("org.opendaylight.controller",
-                        "configuration.implementation", "0.4.0-SNAPSHOT"),
+                mavenBundle("org.opendaylight.controller", "clustering.services").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "clustering.stub").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration.implementation").versionAsInProject(),
                 junitBundles());
     }
 
@@ -143,14 +116,6 @@ public class ConfigurationIT {
 
         // Assert if true, if false we are good to go!
         assertFalse(debugit);
-        ServiceReference r = bc.getServiceReference(IClusterServices.class
-                .getName());
-        if (r != null) {
-            this.clusterService = (IClusterServices) bc.getService(r);
-        }
-        // If StatisticsManager is null, cannot run tests.
-        assertNotNull(this.clusterService);
-
     }
 
     @Before
