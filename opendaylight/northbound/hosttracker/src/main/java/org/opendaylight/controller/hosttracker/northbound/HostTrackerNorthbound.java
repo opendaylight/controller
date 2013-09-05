@@ -25,6 +25,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
@@ -34,12 +35,11 @@ import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.northbound.commons.RestMessages;
-import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
+import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
-import org.opendaylight.controller.northbound.commons.exception.UnsupportedMediaTypeException;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
@@ -47,7 +47,6 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 
 /**
@@ -86,11 +85,10 @@ public class HostTrackerNorthbound {
     }
 
     private IfIptoHost getIfIpToHostService(String containerName) {
-        IContainerManager containerManager = (IContainerManager) ServiceHelper
-                .getGlobalInstance(IContainerManager.class, this);
+        IContainerManager containerManager = (IContainerManager) ServiceHelper.getGlobalInstance(
+                IContainerManager.class, this);
         if (containerManager == null) {
-            throw new ServiceUnavailableException("Container "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Container " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         boolean found = false;
@@ -98,20 +96,17 @@ public class HostTrackerNorthbound {
         for (String cName : containerNames) {
             if (cName.trim().equalsIgnoreCase(containerName.trim())) {
                 found = true;
+                break;
             }
         }
 
-        if (found == false) {
-            throw new ResourceNotFoundException(containerName + " "
-                    + RestMessages.NOCONTAINER.toString());
+        if (!found) {
+            throw new ResourceNotFoundException(containerName + " " + RestMessages.NOCONTAINER.toString());
         }
 
-        IfIptoHost hostTracker = (IfIptoHost) ServiceHelper.getInstance(
-                IfIptoHost.class, containerName, this);
-
+        IfIptoHost hostTracker = (IfIptoHost) ServiceHelper.getInstance(IfIptoHost.class, containerName, this);
         if (hostTracker == null) {
-            throw new ServiceUnavailableException("Host Tracker "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Host Tracker " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         return hostTracker;
@@ -207,17 +202,11 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Hosts getActiveHosts(@PathParam("containerName") String containerName) {
 
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.READ, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
-        if (hostTracker == null) {
-            throw new ServiceUnavailableException("Host Tracker "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
-        }
         return convertHosts(hostTracker.getAllHosts());
     }
 
@@ -300,17 +289,11 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Hosts getInactiveHosts(
             @PathParam("containerName") String containerName) {
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.READ, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
-        if (hostTracker == null) {
-            throw new ServiceUnavailableException("Host Tracker "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
-        }
         return convertHosts(hostTracker.getInactiveStaticHosts());
     }
 
@@ -364,30 +347,23 @@ public class HostTrackerNorthbound {
     @TypeHint(HostConfig.class)
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 400, condition = "Invalid IP specified in networkAddress parameter"),
             @ResponseCode(code = 404, condition = "The containerName is not found"),
-            @ResponseCode(code = 415, condition = "Invalid IP Address passed in networkAddress parameter"),
             @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public HostConfig getHostDetails(
             @PathParam("containerName") String containerName,
             @PathParam("networkAddress") String networkAddress) {
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.READ, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
-        if (hostTracker == null) {
-            throw new ServiceUnavailableException("Host Tracker "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
-        }
 
         InetAddress ip;
         try {
             ip = InetAddress.getByName(networkAddress);
         } catch (UnknownHostException e) {
-            throw new UnsupportedMediaTypeException(networkAddress + " "
-                    + RestMessages.INVALIDADDRESS.toString());
+            throw new BadRequestException(RestMessages.INVALIDADDRESS.toString() + " " + networkAddress);
         }
         for (HostNodeConnector host : hostTracker.getAllHosts()) {
             if (host.getNetworkAddress().equals(ip)) {
@@ -450,63 +426,44 @@ public class HostTrackerNorthbound {
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 201, condition = "Static host created successfully"),
-            @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
-            @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
-            @ResponseCode(code = 415, condition = "Invalid IP Address passed in networkAddress parameter"),
-            @ResponseCode(code = 500, condition = "Failed to create Static Host entry. Failure Reason included in HTTP Error response"),
+            @ResponseCode(code = 400, condition = "Invalid parameters specified, see response body for details"),
+            @ResponseCode(code = 404, condition = "The container or resource is not found"),
+            @ResponseCode(code = 409, condition = "Resource conflict, see response body for details"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
-    public Response addHost(@PathParam("containerName") String containerName,
+    public Response addHost(@Context UriInfo uriInfo, @PathParam("containerName") String containerName,
             @PathParam("networkAddress") String networkAddress,
             @TypeHint(HostConfig.class) JAXBElement<HostConfig> hostConfig) {
 
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.WRITE, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("User is not authorized to perform this operation on container " + containerName)
+                    .build();
         }
         handleDefaultDisabled(containerName);
 
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
-        if (hostTracker == null) {
-            throw new ServiceUnavailableException("Host Tracker "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
-        }
 
         HostConfig hc = hostConfig.getValue();
+        if (!networkAddress.equals(hc.getNetworkAddress())) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity("Resource name in config object doesn't match URI")
+                    .build();
+        }
+        if (!hc.isStaticHost()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Can only add static host.")
+                    .build();
+        }
         Node node = handleNodeAvailability(containerName, hc.getNodeType(), hc.getNodeId());
-        if (node == null) {
-            throw new InternalServerErrorException(
-                    RestMessages.NONODE.toString());
-        }
-
-        try {
-            InetAddress.getByName(networkAddress);
-        } catch (UnknownHostException e) {
-            throw new UnsupportedMediaTypeException(networkAddress + " "
-                    + RestMessages.INVALIDADDRESS.toString());
-        }
-        if(!networkAddress.equals(hc.getNetworkAddress())) {
-            throw new UnsupportedMediaTypeException(networkAddress + " is not the same as "
-                    + hc.getNetworkAddress());
-        }
-        if(!hc.isStaticHost()) {
-            throw new UnsupportedMediaTypeException("StaticHost flag must be true");
-        }
         NodeConnector nc = NodeConnector.fromStringNoNode(hc.getNodeConnectorType(), hc.getNodeConnectorId(), node);
-        if (nc == null) {
-            throw new ResourceNotFoundException(hc.getNodeConnectorType() + "|"
-                    + hc.getNodeConnectorId() + " : " + RestMessages.NONODE.toString());
-        }
-        Status status = hostTracker.addStaticHost(networkAddress,
-                hc.getDataLayerAddress(), nc, hc.getVlan());
+
+        Status status = hostTracker.addStaticHost(networkAddress, hc.getDataLayerAddress(), nc, hc.getVlan());
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Static Host", username, "added", networkAddress, containerName);
-            return Response.status(Response.Status.CREATED).build();
-        } else if (status.getCode().equals(StatusCode.BADREQUEST)) {
-            throw new UnsupportedMediaTypeException(status.getDescription());
+            return Response.created(uriInfo.getRequestUri()).build();
         }
-        throw new InternalServerErrorException(status.getDescription());
+
+        return NorthboundUtils.getResponse(status);
     }
 
     /**
@@ -524,42 +481,28 @@ public class HostTrackerNorthbound {
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Flow Config deleted successfully"),
-            @ResponseCode(code = 404, condition = "The Container Name or Node-id or Flow Name passed is not found"),
+            @ResponseCode(code = 204, condition = "Static host deleted successfully"),
+            @ResponseCode(code = 404, condition = "The container or a specified resource was not found"),
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active"),
-            @ResponseCode(code = 415, condition = "Invalid IP Address passed in networkAddress parameter"),
-            @ResponseCode(code = 500, condition = "Failed to delete Flow config. Failure Reason included in HTTP Error response"),
             @ResponseCode(code = 503, condition = "One or more of Controller service is unavailable") })
-    public Response deleteFlow(
+    public Response deleteHost(
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "networkAddress") String networkAddress) {
 
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.WRITE, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("User is not authorized to perform this operation on container " + containerName)
+                    .build();
         }
         handleDefaultDisabled(containerName);
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
-        if (hostTracker == null) {
-            throw new ServiceUnavailableException("Host Tracker "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
-        }
-
-        try {
-            InetAddress.getByName(networkAddress);
-        } catch (UnknownHostException e) {
-            throw new UnsupportedMediaTypeException(networkAddress + " "
-                    + RestMessages.INVALIDADDRESS.toString());
-        }
 
         Status status = hostTracker.removeStaticHost(networkAddress);
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Static Host", username, "removed", networkAddress, containerName);
-            return Response.ok().build();
+            return Response.noContent().build();
         }
-        throw new InternalServerErrorException(status.getDescription());
+        return NorthboundUtils.getResponse(status);
 
     }
 
@@ -567,8 +510,8 @@ public class HostTrackerNorthbound {
         IContainerManager containerManager = (IContainerManager) ServiceHelper
                 .getGlobalInstance(IContainerManager.class, this);
         if (containerManager == null) {
-            throw new InternalServerErrorException(
-                    RestMessages.INTERNALERROR.toString());
+            throw new ServiceUnavailableException(
+                    RestMessages.SERVICEUNAVAILABLE.toString());
         }
         if (containerName.equals(GlobalConstants.DEFAULT.toString())
                 && containerManager.hasNonDefaultContainer()) {
@@ -577,8 +520,7 @@ public class HostTrackerNorthbound {
         }
     }
 
-    private Node handleNodeAvailability(String containerName, String nodeType,
-            String nodeId) {
+    private Node handleNodeAvailability(String containerName, String nodeType, String nodeId) {
 
         Node node = Node.fromString(nodeType, nodeId);
         if (node == null) {
