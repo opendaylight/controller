@@ -307,7 +307,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     @Override
     public Future<HostNodeConnector> discoverHost(InetAddress networkAddress) {
         if (executor == null) {
-            logger.error("discoverHost: Null executor");
+            logger.debug("discoverHost: Null executor");
             return null;
         }
         Callable<HostNodeConnector> worker = new HostTrackerCallable(this, networkAddress);
@@ -348,12 +348,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
 
     @Override
     public Set<HostNodeConnector> getAllHosts() {
-        Set<HostNodeConnector> allHosts = new HashSet<HostNodeConnector>();
-        for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
-            HostNodeConnector host = entry.getValue();
-            allHosts.add(host);
-        }
-        logger.debug("Exiting getAllHosts, Found {} Hosts", allHosts.size());
+        Set<HostNodeConnector> allHosts = new HashSet<HostNodeConnector>(hostsDB.values());
         return allHosts;
     }
 
@@ -366,17 +361,12 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 list.add(host);
             }
         }
-        logger.debug("getActiveStaticHosts(): Found {} Hosts", list.size());
         return list;
     }
 
     @Override
     public Set<HostNodeConnector> getInactiveStaticHosts() {
-        Set<HostNodeConnector> list = new HashSet<HostNodeConnector>();
-        for (Entry<NodeConnector, HostNodeConnector> entry : inactiveStaticHosts.entrySet()) {
-            list.add(entry.getValue());
-        }
-        logger.debug("getInactiveStaticHosts(): Found {} Hosts", list.size());
+        Set<HostNodeConnector> list = new HashSet<HostNodeConnector>(inactiveStaticHosts.values());
         return list;
     }
 
@@ -549,7 +539,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                             ta.notifyHTClientHostRemoved(host);
                         }
                     } catch (Exception e) {
-                        logger.error("Exception on callback", e);
+                        logger.error("Exception on new host notification", e);
                     }
                 }
             }
@@ -1034,7 +1024,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                          * probe. However, continue the age out the hosts since
                          * we don't know if the host is indeed out there or not.
                          */
-                        logger.warn("ARPHandler is not avaialable, can't send the probe");
+                        logger.trace("ARPHandler is not avaialable, can't send the probe");
                         continue;
                     }
                     hostFinder.probe(host);
@@ -1062,7 +1052,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      *         indicating the result of this action.
      */
 
-    public Status addStaticHostReq(InetAddress networkAddr, byte[] dataLayerAddress, NodeConnector nc, short vlan) {
+    protected Status addStaticHostReq(InetAddress networkAddr, byte[] dataLayerAddress, NodeConnector nc, short vlan) {
         if (dataLayerAddress.length != NetUtils.MACAddrLengthInBytes) {
             return new Status(StatusCode.BADREQUEST, "Invalid MAC address");
         }
@@ -1078,13 +1068,13 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 // northbound request
                 HostNodeConnector transHost = hostsDB.get(networkAddr);
                 transHost.setStaticHost(true);
-                return new Status(StatusCode.SUCCESS, null);
+                return new Status(StatusCode.SUCCESS);
             }
 
             if (hostsDB.get(networkAddr) != null) {
                 // There is already a host with this IP address (but behind
                 // a different (switch, port, vlan) tuple. Return an error
-                return new Status(StatusCode.CONFLICT, "Existing IP, Use PUT to update");
+                return new Status(StatusCode.CONFLICT, "Host with this IP already exists.");
             }
             host.setStaticHost(true);
             /*
@@ -1108,7 +1098,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 logger.debug("Switch or switchport is not up, adding host {} to inactive list",
                         networkAddr.getHostName());
             }
-            return new Status(StatusCode.SUCCESS, null);
+            return new Status(StatusCode.SUCCESS);
         } catch (ConstructionException e) {
             logger.error("", e);
             return new Status(StatusCode.INTERNALERROR, "Host could not be created");
@@ -1291,25 +1281,33 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     public Status addStaticHost(String networkAddress, String dataLayerAddress, NodeConnector nc, String vlan) {
         try {
             InetAddress ip = InetAddress.getByName(networkAddress);
-            if (nc == null) {
-                return new Status(StatusCode.BADREQUEST, "Invalid NodeId");
+            short vl = 0;
+            if (vlan != null && vlan.isEmpty()) {
+                vl = Short.decode(vlan);
+                if (vl < 1 || vl > 4095) {
+                    return new Status(StatusCode.BADREQUEST, "Host vlan out of range [1 - 4095]");
+                }
             }
-            return addStaticHostReq(ip, HexEncode.bytesFromHexString(dataLayerAddress), nc, Short.valueOf(vlan));
+
+            return addStaticHostReq(ip, HexEncode.bytesFromHexString(dataLayerAddress), nc, vl);
+
         } catch (UnknownHostException e) {
-            logger.error("", e);
-            return new Status(StatusCode.BADREQUEST, "Invalid Address");
+            logger.debug("Invalid host IP specified when adding static host", e);
+            return new Status(StatusCode.BADREQUEST, "Invalid Host IP Address");
+        } catch (NumberFormatException nfe) {
+            logger.debug("Invalid host vlan or MAC specified when adding static host", nfe);
+            return new Status(StatusCode.BADREQUEST, "Invalid Host vLan/MAC");
         }
     }
 
     @Override
     public Status removeStaticHost(String networkAddress) {
-        InetAddress address;
         try {
-            address = InetAddress.getByName(networkAddress);
+            InetAddress address = InetAddress.getByName(networkAddress);
             return removeStaticHostReq(address);
         } catch (UnknownHostException e) {
-            logger.error("", e);
-            return new Status(StatusCode.BADREQUEST, "Invalid Address");
+            logger.debug("Invalid IP Address when trying to remove host", e);
+            return new Status(StatusCode.BADREQUEST, "Invalid IP Address when trying to remove host");
         }
     }
 
@@ -1317,11 +1315,11 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         ARPPending arphost;
         HostNodeConnector host = null;
 
-        logger.debug("handleNodeConnectorStatusUp {}", nodeConnector);
+        logger.trace("handleNodeConnectorStatusUp {}", nodeConnector);
 
         for (Entry<InetAddress, ARPPending> entry : failedARPReqList.entrySet()) {
             arphost = entry.getValue();
-            logger.debug("Sending the ARP from FailedARPReqList fors IP: {}", arphost.getHostIP().getHostAddress());
+            logger.trace("Sending the ARP from FailedARPReqList fors IP: {}", arphost.getHostIP().getHostAddress());
             if (hostFinder == null) {
                 logger.warn("ARPHandler is not available at interface  up");
                 logger.warn("Since this event is missed, host(s) connected to interface {} may not be discovered",
@@ -1340,7 +1338,6 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                         arphost.getHostIP(), nodeConnector);
                 logger.error("", e);
             }
-            logger.debug("Done. handleNodeConnectorStatusUp {}", nodeConnector);
         }
 
         host = inactiveStaticHosts.get(nodeConnector);
@@ -1353,7 +1350,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     }
 
     private void handleNodeConnectorStatusDown(NodeConnector nodeConnector) {
-        logger.debug("handleNodeConnectorStatusDown {}", nodeConnector);
+        logger.trace("handleNodeConnectorStatusDown {}", nodeConnector);
 
         for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
             HostNodeConnector host = entry.getValue();
