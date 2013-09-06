@@ -56,7 +56,7 @@ public class DaylightWebAdmin {
             return null;
         }
 
-        List<ClusterNodeBean> clusters = new ArrayList<ClusterNodeBean>();
+        List<ClusterNodeBean> clusterNodes = new ArrayList<ClusterNodeBean>();
 
         List<InetAddress> controllers = clusterServices.getClusteredControllers();
         for (InetAddress controller : controllers) {
@@ -64,25 +64,24 @@ public class DaylightWebAdmin {
             if (controller.equals(clusterServices.getMyAddress())) {
                 clusterBeanBuilder.highlightMe();
             }
-            if (clusterServices.amICoordinator()) {
+            if (clusterServices.getCoordinatorAddress().equals(controller)) {
                 clusterBeanBuilder.iAmCoordinator();
             }
-
-            clusters.add(clusterBeanBuilder.build());
+            clusterNodes.add(clusterBeanBuilder.build());
         }
 
-        return gson.toJson(clusters);
+        return gson.toJson(clusterNodes);
     }
 
     /**
      * Return nodes connected to controller {controller}
-     * @param cluster
+     * @param controller
      *            - byte[] of the address of the controller
      * @return List<NodeBean>
      */
     @RequestMapping("/cluster/controller/{controller}")
     @ResponseBody
-    public String getNodesConnectedToController(@PathVariable("controller") String cluster) {
+    public String getNodesConnectedToController(@PathVariable("controller") String controller) {
         IClusterGlobalServices clusterServices = (IClusterGlobalServices) ServiceHelper.getGlobalInstance(
                 IClusterGlobalServices.class, this);
         if (clusterServices == null) {
@@ -99,18 +98,20 @@ public class DaylightWebAdmin {
             return null;
         }
 
-        byte[] address = gson.fromJson(cluster, byte[].class);
-        InetAddress clusterAddress = null;
+        byte[] address = gson.fromJson(controller, byte[].class);
+        InetAddress controllerAddress = null;
         try {
-            clusterAddress = InetAddress.getByAddress(address);
+            controllerAddress = InetAddress.getByAddress(address);
         } catch (UnknownHostException e) {
             return null;
         }
-        InetAddress thisCluster = clusterServices.getMyAddress();
 
         List<NodeBean> result = new ArrayList<NodeBean>();
 
-        Set<Node> nodes = connectionManager.getNodes(thisCluster);
+        Set<Node> nodes = connectionManager.getNodes(controllerAddress);
+        if (nodes == null) {
+            return gson.toJson(result);
+        }
         for (Node node : nodes) {
             Description description = (Description) switchManager.getNodeProp(node, Description.propertyName);
             NodeBean nodeBean;

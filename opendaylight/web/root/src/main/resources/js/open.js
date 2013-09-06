@@ -515,9 +515,6 @@ one.main.cluster = {
 		close : 'one-main-cluster-id-close',
 		datagrid : 'one-main-cluster-id-datagrid'
 	},
-	registry : { // one.main.cluster.registry
-		cluster : undefined
-	},
 	initialize : function() {
 		var h3 = 'Cluster Management';
 		var footer = one.main.cluster.footer();
@@ -544,7 +541,7 @@ one.main.cluster = {
 					if ($tr.find('td:nth-child(1)').attr('colspan') === '1') {
 						return false;
 					}
-					var address = one.main.cluster.registry.cluster[$tr.index()];
+					var address = $tr.find('.ux-id').text();
 					one.main.cluster.nodes.initialize(address);
 				});
 			});
@@ -558,7 +555,14 @@ one.main.cluster = {
 		var registry = [];
 		$(data).each(function(idx, val) {
 			var name = val.name;
+			var address = val.address;
+			var $registry = $(document.createElement('span'));
+			$registry
+				.append(JSON.stringify(address))
+				.css('display', 'none')
+				.addClass('ux-id');
 			name = one.lib.dashlet.label(name, null)[0].outerHTML;
+			name += $registry[0].outerHTML;
 			if (val.me === true) {
 				var me = one.lib.dashlet.label('*', 'label-inverse')[0].outerHTML;
 				name += '&nbsp;'+me;
@@ -570,9 +574,7 @@ one.main.cluster = {
 			tdata.push({
 				'controller' : name
 			});
-			registry.push(val.address);
 		});
-		one.main.cluster.registry.cluster = registry;
 		var source = new StaticDataSource({
 			columns : [
 				{
@@ -613,7 +615,7 @@ one.main.cluster.nodes = {
 		});
 		
 		// body
-		$.getJSON('/admin/cluster/controller/'+JSON.stringify(address), function(data) {
+		$.getJSON('/admin/cluster/controller/'+address, function(data) {
 			var $gridHTML = one.lib.dashlet.datagrid.init(one.main.cluster.nodes.id.datagrid, {
 				searchable: true,
 				filterable: false,
