@@ -120,7 +120,7 @@ public interface IfIptoHost {
      * @param nc
      *            NodeConnector to which the host is attached
      * @param vlan
-     *            VLAN the host belongs to
+     *            VLAN the host belongs to (null or empty for no vlan)
      * @return The status object as described in {@code Status} indicating the
      *         result of this action.
      */

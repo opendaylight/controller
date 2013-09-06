@@ -174,9 +174,9 @@ public class HostTrackerIT {
         NodeConnector nc1_2 = NodeConnectorCreator.createOFNodeConnector((short) 2, node1);
 
         // test addStaticHost(), store into inactive host DB
-        Status st = this.hosttracker.addStaticHost("192.168.0.8", "11:22:33:44:55:66", nc1_1, "0");
+        Status st = this.hosttracker.addStaticHost("192.168.0.8", "11:22:33:44:55:66", nc1_1, null);
         Assert.assertTrue(st.isSuccess());
-        st = this.hosttracker.addStaticHost("192.168.0.13", "11:22:33:44:55:77", nc1_2, "0");
+        st = this.hosttracker.addStaticHost("192.168.0.13", "11:22:33:44:55:77", nc1_2, "");
         Assert.assertTrue(st.isSuccess());
 
         // check inactive DB
@@ -213,8 +213,11 @@ public class HostTrackerIT {
         NodeConnector nc1_2 = NodeConnectorCreator.createOFNodeConnector((short) 2, node1);
 
         // test addStaticHost(), put into inactive host DB if not verifiable
-        Status st = this.hosttracker.addStaticHost("192.168.0.8", "11:22:33:44:55:66", nc1_1, "0");
+        Status st = this.hosttracker.addStaticHost("192.168.0.8", "11:22:33:44:55:66", nc1_1, null);
+        Assert.assertTrue(st.isSuccess());
         st = this.hosttracker.addStaticHost("192.168.0.13", "11:22:33:44:55:77", nc1_2, "0");
+        Assert.assertFalse(st.isSuccess());
+
 
         this.invtoryListener.notifyNodeConnector(nc1_1, UpdateType.ADDED, null);
 
@@ -251,8 +254,8 @@ public class HostTrackerIT {
         NodeConnector nc1_2 = NodeConnectorCreator.createOFNodeConnector((short) 2, node1);
 
         // test addStaticHost(), put into inactive host DB if not verifiable
-        Status st = this.hosttracker.addStaticHost("192.168.0.8", "11:22:33:44:55:66", nc1_1, "0");
-        st = this.hosttracker.addStaticHost("192.168.0.13", "11:22:33:44:55:77", nc1_2, "0");
+        Status st = this.hosttracker.addStaticHost("192.168.0.8", "11:22:33:44:55:66", nc1_1, null);
+        st = this.hosttracker.addStaticHost("192.168.0.13", "11:22:33:44:55:77", nc1_2, "");
 
         HostNodeConnector hnc_1 = this.hosttracker.hostFind(InetAddress.getByName("192.168.0.8"));
         assertNull(hnc_1);
