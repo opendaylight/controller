@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_80ee448a",
+        "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebAdmin.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-09-06T16:17:29Z",
+      "side": 1,
+      "message": "I think there is a confusion in the naming convention.\nCluster is made of Cluster nodes ( or Controllers).\nEach Controller has network-elements connected to it (network elements are aka nodes).\nSo the word Node is overloaded to be Controller (when we talk about a Cluster) and for switches/routers (when we talk about a Controller).\n\nEssentially this function should be called as getClusteredControllers().\n\nAnd the the variable name : clusters, is also not appropriate because we are dealing with a single cluster which is made of multiple Controller nodes.",
+      "revId": "4da9604c29614673191f524ddb0d532742a06147",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_005ed445",
+        "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebAdmin.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-09-06T16:17:29Z",
+      "side": 1,
+      "message": "This function name must be changed to getNodesConnectedToController and the path variable must be controller and so is the URL above.\n\nThe functionality of it looks good. Just that the naming is misleading.",
+      "revId": "4da9604c29614673191f524ddb0d532742a06147",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
