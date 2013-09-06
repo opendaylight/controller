@@ -251,7 +251,7 @@ one.lib.modal = {
 one.lib.form = {
     // create select-option form element
     select : {
-        create : function(options, multiple) {
+        create : function(options, multiple, sort) {
             // assert - auto assign
             if (options == undefined)
                 options = {};
@@ -261,6 +261,24 @@ one.lib.form = {
                 $select.attr("multiple", "multiple");
             }
             var optionArray = one.lib.form.select.options(options);
+
+            // If specified, sort the option elements based on their text field
+            if (sort == true && optionArray.length > 1) {
+                var shifted = true;
+                var limit = optionArray.length;
+                while (shifted) {
+                    shifted = false;
+                    for ( var i = 1; i < limit; i++) {
+                        if (optionArray[i - 1].text() > optionArray[i].text()) {
+                            var swap = optionArray[i - 1];
+                            optionArray[i - 1] = optionArray[i];
+                            optionArray[i] = swap;
+                            shifted = true;
+                        }
+                    }
+                }
+            }
+
             $(optionArray).each(function(index, value) {
                 $select.append(value);
             });
