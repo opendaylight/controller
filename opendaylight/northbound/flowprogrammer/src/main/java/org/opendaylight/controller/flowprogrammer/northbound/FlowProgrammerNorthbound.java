@@ -425,6 +425,10 @@ public class FlowProgrammerNorthbound {
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
+        if (flowConfig.getValue().getNode() == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Configuration. Node is null or empty")
+                    .build();
+        }
         handleResourceCongruence(name, flowConfig.getValue().getName());
         handleResourceCongruence(nodeId, flowConfig.getValue().getNode().getNodeIDString());
         handleDefaultDisabled(containerName);

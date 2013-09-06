@@ -832,127 +832,128 @@ public class FlowConfig implements Serializable {
             }
 
             Matcher sstr;
-            if (actions != null && !actions.isEmpty()) {
-                for (String actiongrp : actions) {
-                    // check output ports
-                    sstr = Pattern.compile("OUTPUT=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        for (String t : sstr.group(1).split(",")) {
-                            Matcher n = Pattern.compile("(?:(\\d+))").matcher(t);
-                            if (n.matches()) {
-                                if (n.group(1) != null) {
-                                    Short port = Short.parseShort(n.group(1));
-                                    if (isPortValid(sw, port) == false) {
-                                        String msg = String.format("Output port %d is not valid for this switch", port);
-                                        if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                                            msg += " in Container " + containerName;
-                                        }
-                                        return new Status(StatusCode.BADREQUEST, msg);
+            if (actions == null || actions.isEmpty()) {
+                return new Status(StatusCode.BADREQUEST, "Actions value is null or empty");
+            }
+            for (String actiongrp : actions) {
+                // check output ports
+                sstr = Pattern.compile("OUTPUT=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    for (String t : sstr.group(1).split(",")) {
+                        Matcher n = Pattern.compile("(?:(\\d+))").matcher(t);
+                        if (n.matches()) {
+                            if (n.group(1) != null) {
+                                Short port = Short.parseShort(n.group(1));
+                                if (isPortValid(sw, port) == false) {
+                                    String msg = String.format("Output port %d is not valid for this switch", port);
+                                    if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                                        msg += " in Container " + containerName;
                                     }
+                                    return new Status(StatusCode.BADREQUEST, msg);
                                 }
                             }
                         }
-                        continue;
                     }
-                    // Check src IP
-                    sstr = Pattern.compile(ActionType.FLOOD.toString()).matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "flood is not allowed in container %s", containerName));
-                        }
-                        continue;
+                    continue;
+                }
+                // Check src IP
+                sstr = Pattern.compile(ActionType.FLOOD.toString()).matcher(actiongrp);
+                if (sstr.matches()) {
+                    if (!containerName.equals(GlobalConstants.DEFAULT.toString())) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "flood is not allowed in container %s", containerName));
                     }
-                    // Check src IP
-                    sstr = Pattern.compile(ActionType.SET_NW_SRC.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if (!NetUtils.isIPv4AddressValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format("IP source address %s is not valid",
-                                    sstr.group(1)));
-                        }
-                        continue;
+                    continue;
+                }
+                // Check src IP
+                sstr = Pattern.compile(ActionType.SET_NW_SRC.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if (!NetUtils.isIPv4AddressValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format("IP source address %s is not valid",
+                                sstr.group(1)));
                     }
-                    // Check dst IP
-                    sstr = Pattern.compile(ActionType.SET_NW_DST.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if (!NetUtils.isIPv4AddressValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "IP destination address %s is not valid", sstr.group(1)));
-                        }
-                        continue;
+                    continue;
+                }
+                // Check dst IP
+                sstr = Pattern.compile(ActionType.SET_NW_DST.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if (!NetUtils.isIPv4AddressValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "IP destination address %s is not valid", sstr.group(1)));
                     }
+                    continue;
+                }
 
-                    sstr = Pattern.compile(ActionType.SET_VLAN_ID.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null) && !isVlanIdValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "Vlan ID %s is not in the range 0 - 4095", sstr.group(1)));
-                        }
-                        continue;
+                sstr = Pattern.compile(ActionType.SET_VLAN_ID.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if ((sstr.group(1) != null) && !isVlanIdValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "Vlan ID %s is not in the range 0 - 4095", sstr.group(1)));
                     }
+                    continue;
+                }
 
-                    sstr = Pattern.compile(ActionType.SET_VLAN_PCP.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null) && !isVlanPriorityValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "Vlan priority %s is not in the range 0 - 7", sstr.group(1)));
-                        }
-                        continue;
+                sstr = Pattern.compile(ActionType.SET_VLAN_PCP.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if ((sstr.group(1) != null) && !isVlanPriorityValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "Vlan priority %s is not in the range 0 - 7", sstr.group(1)));
                     }
+                    continue;
+                }
 
-                    sstr = Pattern.compile(ActionType.SET_DL_SRC.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null) && !isL2AddressValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
-                                    sstr.group(1)));
-                        }
-                        continue;
+                sstr = Pattern.compile(ActionType.SET_DL_SRC.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if ((sstr.group(1) != null) && !isL2AddressValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "Ethernet source address %s is not valid. Example: 00:05:b9:7c:81:5f",
+                                sstr.group(1)));
                     }
-                    sstr = Pattern.compile(ActionType.SET_DL_DST.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null) && !isL2AddressValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
-                                    sstr.group(1)));
-                        }
-                        continue;
+                    continue;
+                }
+                sstr = Pattern.compile(ActionType.SET_DL_DST.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if ((sstr.group(1) != null) && !isL2AddressValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "Ethernet destination address %s is not valid. Example: 00:05:b9:7c:81:5f",
+                                sstr.group(1)));
                     }
+                    continue;
+                }
 
-                    sstr = Pattern.compile(ActionType.SET_NW_TOS.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null) && !isTOSBitsValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "IP ToS bits %s is not in the range 0 - 63", sstr.group(1)));
-                        }
-                        continue;
+                sstr = Pattern.compile(ActionType.SET_NW_TOS.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if ((sstr.group(1) != null) && !isTOSBitsValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "IP ToS bits %s is not in the range 0 - 63", sstr.group(1)));
                     }
+                    continue;
+                }
 
-                    sstr = Pattern.compile(ActionType.SET_TP_SRC.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null) && !isTpPortValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "Transport source port %s is not valid", sstr.group(1)));
-                        }
-                        continue;
+                sstr = Pattern.compile(ActionType.SET_TP_SRC.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if ((sstr.group(1) != null) && !isTpPortValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "Transport source port %s is not valid", sstr.group(1)));
                     }
+                    continue;
+                }
 
-                    sstr = Pattern.compile(ActionType.SET_TP_DST.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if ((sstr.group(1) != null) && !isTpPortValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "Transport destination port %s is not valid", sstr.group(1)));
-                        }
-                        continue;
+                sstr = Pattern.compile(ActionType.SET_TP_DST.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if ((sstr.group(1) != null) && !isTpPortValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "Transport destination port %s is not valid", sstr.group(1)));
                     }
-                    sstr = Pattern.compile(ActionType.SET_NEXT_HOP.toString() + "=(.*)").matcher(actiongrp);
-                    if (sstr.matches()) {
-                        if (!NetUtils.isIPAddressValid(sstr.group(1))) {
-                            return new Status(StatusCode.BADREQUEST, String.format(
-                                    "IP destination address %s is not valid", sstr.group(1)));
-                        }
-                        continue;
+                    continue;
+                }
+                sstr = Pattern.compile(ActionType.SET_NEXT_HOP.toString() + "=(.*)").matcher(actiongrp);
+                if (sstr.matches()) {
+                    if (!NetUtils.isIPAddressValid(sstr.group(1))) {
+                        return new Status(StatusCode.BADREQUEST, String.format(
+                                "IP destination address %s is not valid", sstr.group(1)));
                     }
+                    continue;
                 }
             }
             // Check against the container flow

@@ -19,8 +19,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
-import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
@@ -523,6 +521,12 @@ public class frmTest {
         Assert.assertTrue(status.getDescription().contains("Node is null"));
 
         fc.setNode(Node.fromString(Node.NodeIDType.OPENFLOW, "1"));
+        Assert.assertFalse(fc.validate(null).isSuccess());
+        List<String> actions = new ArrayList<String>();
+        fc.setActions(actions);
+        Assert.assertFalse(fc.validate(null).isSuccess());
+        actions.add("OUTPUT=2");
+        fc.setActions(actions);
         Assert.assertTrue(fc.validate(null).isSuccess());
 
         fc.setPriority("-1");
