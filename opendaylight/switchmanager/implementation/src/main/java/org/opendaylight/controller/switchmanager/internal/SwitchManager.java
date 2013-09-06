@@ -1104,7 +1104,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     @Override
     public Set<Node> getNodes() {
         return (nodeProps != null) ? new HashSet<Node>(nodeProps.keySet())
-                : null;
+                : new HashSet<Node>();
     }
 
     /*
