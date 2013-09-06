@@ -105,24 +105,25 @@ public class Bandwidth extends Property {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        return "BandWidth[" + getStringValue() + "]";
+    }
 
-        sb.append("BandWidth[");
+    @Override
+    public String getStringValue() {
         if (this.bandwidthValue == 0) {
-            sb.append("UnKnown");
+            return("UnKnown");
         } else if (this.bandwidthValue < BW1Kbps) {
-            sb.append(this.bandwidthValue + "bps");
+            return(this.bandwidthValue + "bps");
         } else if (this.bandwidthValue < BW1Mbps) {
-            sb.append(Long.toString(this.bandwidthValue / BW1Kbps) + "Kbps");
+            return(Long.toString(this.bandwidthValue / BW1Kbps) + "Kbps");
         } else if (this.bandwidthValue < BW1Gbps) {
-            sb.append(Long.toString(this.bandwidthValue / BW1Mbps) + "Mbps");
+            return(Long.toString(this.bandwidthValue / BW1Mbps) + "Mbps");
         } else if (this.bandwidthValue < BW1Tbps) {
-            sb.append(Long.toString(this.bandwidthValue / BW1Gbps) + "Gbps");
+            return(Long.toString(this.bandwidthValue / BW1Gbps) + "Gbps");
         } else if (this.bandwidthValue < BW1Pbps) {
-            sb.append(Long.toString(this.bandwidthValue / BW1Tbps) + "Tbps");
+            return(Long.toString(this.bandwidthValue / BW1Tbps) + "Tbps");
+        } else {
+            return(this.bandwidthValue + "bps");
         }
-
-        sb.append("]");
-        return sb.toString();
     }
 }

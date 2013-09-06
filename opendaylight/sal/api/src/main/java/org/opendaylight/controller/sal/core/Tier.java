@@ -72,4 +72,9 @@ public class Tier extends Property {
     public String toString() {
         return "Tier[" + tierValue + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        return String.valueOf(tierValue);
+    }
 }

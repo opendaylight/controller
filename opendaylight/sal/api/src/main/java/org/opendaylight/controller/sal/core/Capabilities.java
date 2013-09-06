@@ -98,4 +98,9 @@ public class Capabilities extends Property {
     public String toString() {
         return "Capabilities[" + capabilitiesValue + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        return Integer.toHexString(capabilitiesValue);
+    }
 }

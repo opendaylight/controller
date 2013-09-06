@@ -80,4 +80,9 @@ public class Tables extends Property {
     public String toString() {
         return "Tables[" + tablesValue + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        return String.format("%02x", tablesValue);
+    }
 }

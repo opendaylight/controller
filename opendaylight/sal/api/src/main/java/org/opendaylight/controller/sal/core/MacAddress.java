@@ -109,4 +109,9 @@ public class MacAddress extends Property implements Cloneable {
     public String toString() {
         return "MacAddress[" + address + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        return address;
+    }
 }

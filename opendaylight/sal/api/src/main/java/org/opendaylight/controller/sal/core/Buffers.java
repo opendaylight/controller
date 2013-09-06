@@ -81,4 +81,9 @@ public class Buffers extends Property {
     public String toString() {
         return "Buffers[" + buffersValue + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        return Integer.toHexString(buffersValue);
+    }
 }

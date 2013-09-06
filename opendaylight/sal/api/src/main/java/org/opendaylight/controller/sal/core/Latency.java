@@ -112,4 +112,21 @@ public class Latency extends Property {
         sb.append("]");
         return sb.toString();
     }
+
+    @Override
+    public String getStringValue() {
+        if (this.latencyValue == 0) {
+            return("UnKnown");
+        } else if (this.latencyValue < LATENCY1ns) {
+            return(this.latencyValue + "psec");
+        } else if (this.latencyValue < LATENCY1us) {
+            return(Long.toString(this.latencyValue / LATENCY1ns) + "nsec");
+        } else if (this.latencyValue < LATENCY1ms) {
+            return(Long.toString(this.latencyValue / LATENCY1us) + "usec");
+        } else if (this.latencyValue < LATENCY1s) {
+            return(Long.toString(this.latencyValue / LATENCY1ms) + "msec");
+        } else {
+            return Long.toString(this.latencyValue) + "sec";
+        }
+    }
 }

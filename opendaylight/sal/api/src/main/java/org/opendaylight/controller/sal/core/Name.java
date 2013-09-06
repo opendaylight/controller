@@ -74,4 +74,9 @@ public class Name extends Property {
     public String toString() {
         return "Name[" + nameValue + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        return nameValue;
+    }
 }
