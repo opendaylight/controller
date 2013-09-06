@@ -9,6 +9,8 @@
 
 package org.opendaylight.controller.sal.core;
 
+import java.util.Date;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -102,5 +104,10 @@ public class TimeStamp extends Property {
     @Override
     public String toString() {
         return "TimeStamp[" + timestampName + ": " + timestamp +"]";
+    }
+
+    @Override
+    public String getStringValue() {
+        return timestampName + ": " + new Date(timestamp);
     }
 }

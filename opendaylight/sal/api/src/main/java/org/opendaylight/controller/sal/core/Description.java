@@ -65,4 +65,9 @@ public class Description extends Property {
     public String toString() {
         return "Description[" + descriptionValue + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        return descriptionValue;
+    }
 }

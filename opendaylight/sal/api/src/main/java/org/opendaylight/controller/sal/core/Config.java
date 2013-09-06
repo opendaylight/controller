@@ -75,4 +75,17 @@ public class Config extends Property {
     public String toString() {
         return "Config["+ configValue +"]";
     }
+
+    @Override
+    public String getStringValue() {
+        if (configValue == 0) {
+            return "ADMIN_DOWN";
+        } else if (configValue == 1) {
+            return "ADMIN_UP";
+        } else if (configValue == 0x7fff) {
+            return "ADMIN_UNDEF";
+        } else {
+            return String.valueOf(configValue);
+        }
+    }
 }

@@ -772,6 +772,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                         propMap.put(Description.propertyName, desc);
                     }
                     continue;
+                } else if (prop.equals(ForwardingMode.name)) {
+                    Property defaultMode = new ForwardingMode(ForwardingMode.REACTIVE_FORWARDING);
+                    propMap.put(ForwardingMode.name, defaultMode);
+                    continue;
                 }
                 propMap.remove(prop);
             }
@@ -911,8 +915,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             }
         }
 
-        // copy node properties from config
         boolean proactiveForwarding = false;
+        // copy node properties from config
         if (nodeConfigList != null) {
             String nodeId = node.toString();
             SwitchConfig conf = nodeConfigList.get(nodeId);
@@ -926,6 +930,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             }
         }
 
+        if (!propMap.containsKey(ForwardingMode.name)) {
+            Property defaultMode = new ForwardingMode(ForwardingMode.REACTIVE_FORWARDING);
+            propMap.put(ForwardingMode.name, defaultMode);
+        }
         boolean result = false;
         if (propMapCurr == null) {
             if (nodeProps.putIfAbsent(node, propMap) == null) {
@@ -1758,45 +1766,12 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---Switch Manager---\n");
-        help.append("\t pns                    - Print connected nodes\n");
-        help.append("\t pncs <node id>         - Print node connectors for a given node\n");
         help.append("\t pencs <node id>        - Print enabled node connectors for a given node\n");
         help.append("\t pdm <node id>          - Print switch ports in device map\n");
         help.append("\t snt <node id> <tier>   - Set node tier number\n");
         help.append("\t hostRefresh <on/off/?> - Enable/Disable/Query host refresh\n");
         help.append("\t hostRetry <count>      - Set host retry count\n");
         return help.toString();
-    }
-
-    public void _pns(CommandInterpreter ci) {
-        ci.println("           Node               Type           MAC            Name      Tier");
-        if (nodeProps == null) {
-            return;
-        }
-        Set<Node> nodeSet = nodeProps.keySet();
-        if (nodeSet == null) {
-            return;
-        }
-        List<String> nodeArray = new ArrayList<String>();
-        for (Node node : nodeSet) {
-            nodeArray.add(node.toString());
-        }
-        Collections.sort(nodeArray);
-        for (String str: nodeArray) {
-            Node node = Node.fromString(str);
-            Description desc = ((Description) getNodeProp(node,
-                    Description.propertyName));
-            Tier tier = ((Tier) getNodeProp(node, Tier.TierPropName));
-            String nodeName = (desc == null) ? "" : desc.getValue();
-            MacAddress mac = (MacAddress) getNodeProp(node,
-                    MacAddress.name);
-            String macAddr = (mac == null) ? "" : HexEncode
-                    .bytesToHexStringFormat(mac.getMacAddress());
-            int tierNum = (tier == null) ? 0 : tier.getValue();
-            ci.println(node + "     " + node.getType() + "     " + macAddr
-                    + "     " + nodeName + "     " + tierNum);
-        }
-        ci.println("Total number of Nodes: " + nodeSet.size());
     }
 
     public void _pencs(CommandInterpreter ci) {
@@ -1821,43 +1796,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                 continue;
             }
             ci.println(nodeConnector);
-        }
-        ci.println("Total number of NodeConnectors: " + nodeConnectorSet.size());
-    }
-
-    public void _pncs(CommandInterpreter ci) {
-        String st = ci.nextArgument();
-        if (st == null) {
-            ci.println("Please enter node id");
-            return;
-        }
-
-        Node node = Node.fromString(st);
-        if (node == null) {
-            ci.println("Please enter node id");
-            return;
-        }
-
-        ci.println("          NodeConnector               BandWidth(Gbps)     Admin     State");
-        Set<NodeConnector> nodeConnectorSet = getNodeConnectors(node);
-        if (nodeConnectorSet == null) {
-            return;
-        }
-        for (NodeConnector nodeConnector : nodeConnectorSet) {
-            if (nodeConnector == null) {
-                continue;
-            }
-            Map<String, Property> propMap = getNodeConnectorProps(nodeConnector);
-            Bandwidth bw = (Bandwidth) propMap.get(Bandwidth.BandwidthPropName);
-            Config config = (Config) propMap.get(Config.ConfigPropName);
-            State state = (State) propMap.get(State.StatePropName);
-            String out = nodeConnector + "           ";
-            out += (bw != null) ? bw.getValue() / Math.pow(10, 9) : "    ";
-            out += "             ";
-            out += (config != null) ? config.getValue() : " ";
-            out += "          ";
-            out += (state != null) ? state.getValue() : " ";
-            ci.println(out);
         }
         ci.println("Total number of NodeConnectors: " + nodeConnectorSet.size());
     }

@@ -76,4 +76,17 @@ public class State extends Property {
     public String toString() {
         return "State[" + stateValue + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        if (stateValue == 0) {
+            return ("EDGE_DOWN");
+        } else if (stateValue == 1) {
+            return ("EDGE_UP");
+        } else if (stateValue == 0x7fff) {
+            return ("EDGE_UNK");
+        } else {
+            return String.valueOf(stateValue);
+        }
+    }
 }

@@ -71,4 +71,9 @@ public class ForwardingMode extends Property {
     public String toString() {
         return "Mode[" + modeValue + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        return (modeValue == ForwardingMode.PROACTIVE_FORWARDING) ? "Proactive" : "Reactive";
+    }
 }

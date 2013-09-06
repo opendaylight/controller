@@ -53,6 +53,8 @@ abstract public class Property implements Serializable, Cloneable {
         return this.name;
     }
 
+    public abstract String getStringValue();
+
     /**
      * Used to copy the Property in a polymorphic way
      *

@@ -105,4 +105,9 @@ public class Actions extends Property {
     public String toString() {
         return "Actions[" + actionsValue + "]";
     }
+
+    @Override
+    public String getStringValue() {
+        return Integer.toHexString(actionsValue);
+    }
 }
