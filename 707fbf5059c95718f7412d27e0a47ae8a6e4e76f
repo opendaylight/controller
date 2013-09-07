@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_942685b9",
+        "filename": "opendaylight/web/root/src/main/java/org/opendaylight/controller/web/DaylightWebAdmin.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-09-07T10:31:38Z",
+      "side": 1,
+      "message": "Looks good. But as we discussed in IRC, shall we instead use the getCoordinatorAddress() so that every controller can know exactly who the coordinator is in the UI.",
+      "revId": "707fbf5059c95718f7412d27e0a47ae8a6e4e76f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
