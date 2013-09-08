@@ -74,11 +74,12 @@ import org.openflow.util.HexString;
 		
 		public void setNextHop(InetAddress address) {
 			short actionLen;
-			if (address instanceof Inet4Address) 
-				actionLen = (short)ONHLength.ONH_LEN_IPV4.getValue();
-			else
-				actionLen = (short)ONHLength.ONH_LEN_IPV6.getValue();
-			super.setLength(actionLen);
+			if (address instanceof Inet4Address) {
+                actionLen = (short)ONHLength.ONH_LEN_IPV4.getValue();
+            } else {
+                actionLen = (short)ONHLength.ONH_LEN_IPV6.getValue();
+            }
+            super.setLength(actionLen);
 			this.address = address;
 		}
 		public InetAddress getNextHop() {

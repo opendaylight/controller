@@ -244,10 +244,12 @@ public class Entity implements Comparable<Entity> {
     @Override
     public int compareTo(Entity o) {
         int r;
-        if (port == null)
+        if (port == null) {
             r = o.port == null ? 0 : -1;
-        else if (o.port == null)
+        }
+        else if (o.port == null) {
             r = 1;
+        }
         else {
             // XXX - the node id is only defined as an object rather
             // than something useful. We're just going to have to
