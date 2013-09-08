@@ -19,8 +19,6 @@
  */
 package org.opendaylight.controller.sal.core;
 
-import java.lang.Exception;
-
 public class ConstructionException extends Exception {
     private static final long serialVersionUID = 1L;
 

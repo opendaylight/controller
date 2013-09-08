@@ -18,8 +18,6 @@
  */
 package org.opendaylight.controller.clustering.services;
 
-import java.lang.Exception;
-
 /**
  * Describe an exception that is raised when the cache being
  * allocated has configuration errors, like mismatch parameters are
