@@ -128,10 +128,11 @@ public class OFError extends OFMessage implements OFMessageFactoryAware {
         // OVS apparently sends partial messages in errors
         // need to be careful of that AND can't use data.limit() as
         // a packet boundary because there could be more data queued
-        if (messages.size() > 0)
+        if (messages.size() > 0) {
             return messages.get(0);
-        else
+        } else {
             return null;
+        }
     }
 
     /**
