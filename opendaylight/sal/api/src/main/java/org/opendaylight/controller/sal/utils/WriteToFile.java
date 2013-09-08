@@ -26,10 +26,8 @@ public class WriteToFile {
     .getLogger(WriteToFile.class);
     private FileWriter fstream;
     private BufferedWriter bufferOut;
-    private String fileName;
 
-    public WriteToFile(String name) throws IOException {
-        fileName = name;
+    public WriteToFile(String fileName) throws IOException {
         fstream = new FileWriter(fileName);
         bufferOut = new BufferedWriter(fstream);
     }

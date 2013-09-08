@@ -20,20 +20,16 @@ import java.io.*;
  */
 public class ReadFromFile {
     private FileInputStream fileStream;
-    private DataInputStream dataInput;
-    private BufferedReader bufferedReader;
-    private String fileName;
     private File filePointer;
 
-    public ReadFromFile(String name) throws FileNotFoundException {
-        fileName = name;
-        fileStream = new FileInputStream(this.fileName);
+    public ReadFromFile(String fileName) throws FileNotFoundException {
+        fileStream = new FileInputStream(fileName);
         filePointer = new File(fileName); //needed to allow file deletion
     }
 
     public ArrayList<String> readFile() throws IOException {
-        dataInput = new DataInputStream(this.fileStream);
-        bufferedReader = new BufferedReader(new InputStreamReader(dataInput));
+        DataInputStream dataInput = new DataInputStream(this.fileStream);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(dataInput));
 
         ArrayList<String> lineList = new ArrayList<String>();
         String line;
