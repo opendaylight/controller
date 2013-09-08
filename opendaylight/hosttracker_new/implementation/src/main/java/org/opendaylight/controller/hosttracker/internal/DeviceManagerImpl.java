@@ -385,11 +385,11 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
             long newDomain = 0;
             boolean newBD = false;
 
-            if (oldDomain < newDomain)
-                return -1;
-            else if (oldDomain > newDomain)
+            if (oldDomain < newDomain) {
+               return -1;
+            } else if (oldDomain > newDomain) {
                 return 1;
-
+            }
             // Give preference to OFPP_LOCAL always
             if (!oldAP.getPort().getType().equals(NodeConnectorIDType.SWSTACK)
                     && newAP.getPort().getType()
