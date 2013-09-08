@@ -16,6 +16,24 @@
       "revId": "4e247cd68fd8612d71131cead4612649941f58be",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_f43dc9bc",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-09-08T08:38:59Z",
+      "side": 1,
+      "message": "good catch - I missed it. thanks.",
+      "parentUuid": "1a2f8d8d_05414639",
+      "revId": "4e247cd68fd8612d71131cead4612649941f58be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
