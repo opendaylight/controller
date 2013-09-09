@@ -232,6 +232,17 @@
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>bundlescanner</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>bundlescanner.implementation</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
@@ -564,6 +575,11 @@
       <artifactId>pax-url-aether</artifactId>
       <version>${url.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-all</artifactId>
+      <version>4.1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
