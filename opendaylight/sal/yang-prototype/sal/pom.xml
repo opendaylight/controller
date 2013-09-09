@@ -28,6 +28,7 @@
 		<yang.version>0.5.7-SNAPSHOT</yang.version>
 		<maven.bundle.version>2.4.0</maven.bundle.version>
         <releaseplugin.version>2.3.2</releaseplugin.version>
+        <guava.version>14.0.1</guava.version>
 	</properties>
 
     <pluginRepositories>
@@ -35,6 +36,12 @@
           <id>central2</id>
           <name>central2</name>
           <url>http://repo2.maven.org/maven2</url>
+          <snapshots>
+              <enabled>false</enabled>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
         </pluginRepository>
         <pluginRepository>
             <id>opendaylight.snapshot</id>
@@ -49,11 +56,23 @@
         <id>central2</id>
         <name>central2</name>
         <url>http://repo2.maven.org/maven2</url>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
       </repository>
       <repository>
         <id>central</id>
         <name>central</name>
         <url>http://repo1.maven.org/maven2</url>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
       </repository>
 		<!-- EBR release -->
 		<!-- http://repository.springsource.com/maven/bundles/release -->
@@ -128,8 +147,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>14.0.1</version>
-				<type>jar</type>
+                <version>${guava.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
