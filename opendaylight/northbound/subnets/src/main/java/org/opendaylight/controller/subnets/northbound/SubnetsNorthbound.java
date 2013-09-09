@@ -254,7 +254,7 @@ public class SubnetsNorthbound {
             @ResponseCode(code = 503, condition = "Service unavailable") })
     public Response addSubnet(@PathParam("containerName") String containerName,
             @PathParam("subnetName") String subnetName,
-            @TypeHint(SubnetConfig.class) JAXBElement<SubnetConfig> subnetConfigData) {
+            @TypeHint(SubnetConfig.class) SubnetConfig subnetConfigData) {
 
         handleContainerDoesNotExist(containerName);
 
@@ -262,7 +262,7 @@ public class SubnetsNorthbound {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
                     + containerName);
         }
-        SubnetConfig cfgObject = subnetConfigData.getValue();
+        SubnetConfig cfgObject = subnetConfigData;
         handleNameMismatch(cfgObject.getName(), subnetName);
 
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName, this);
@@ -377,7 +377,7 @@ public class SubnetsNorthbound {
             @ResponseCode(code = 503, condition = "Service unavailable") })
     public Response modifySubnet(@PathParam("containerName") String containerName,
             @PathParam("subnetName") String subnetName,
-            @TypeHint(SubnetConfig.class) JAXBElement<SubnetConfig> subnetConfigData) {
+            @TypeHint(SubnetConfig.class) SubnetConfig subnetConfigData) {
 
         handleContainerDoesNotExist(containerName);
 
@@ -385,7 +385,7 @@ public class SubnetsNorthbound {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
                     + containerName);
         }
-        handleNameMismatch(subnetConfigData.getValue().getName(), subnetName);
+        handleNameMismatch(subnetConfigData.getName(), subnetName);
 
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName,
                 this);
@@ -393,7 +393,7 @@ public class SubnetsNorthbound {
             throw new ServiceUnavailableException("SwitchManager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        SubnetConfig subnetConf = subnetConfigData.getValue();
+        SubnetConfig subnetConf = subnetConfigData;
         SubnetConfig existingConf = switchManager.getSubnetConfig(subnetName);
 
         boolean successful = true;
@@ -488,7 +488,7 @@ public class SubnetsNorthbound {
             @ResponseCode(code = 503, condition = "Service unavailable") })
     public Response addNodePorts(@PathParam("containerName") String containerName,
             @PathParam("subnetName") String subnetName,
-            @TypeHint(SubnetConfig.class) JAXBElement<SubnetConfig> subnetConfigData) {
+            @TypeHint(SubnetConfig.class) SubnetConfig subnetConfigData) {
 
         handleContainerDoesNotExist(containerName);
 
@@ -496,9 +496,9 @@ public class SubnetsNorthbound {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
                     + containerName);
         }
-        handleNameMismatch(subnetConfigData.getValue().getName(), subnetName);
+        handleNameMismatch(subnetConfigData.getName(), subnetName);
 
-        SubnetConfig subnetConf = subnetConfigData.getValue();
+        SubnetConfig subnetConf = subnetConfigData;
 
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName,
                 this);
@@ -586,7 +586,7 @@ public class SubnetsNorthbound {
             @ResponseCode(code = 503, condition = "Service unavailable") })
     public Response deleteNodePorts(@PathParam("containerName") String containerName,
             @PathParam("subnetName") String subnetName,
-            @TypeHint(SubnetConfig.class) JAXBElement<SubnetConfig> subnetConfigData) {
+            @TypeHint(SubnetConfig.class) SubnetConfig subnetConfigData) {
 
         handleContainerDoesNotExist(containerName);
 
@@ -594,9 +594,9 @@ public class SubnetsNorthbound {
             throw new UnauthorizedException("User is not authorized to perform this operation on container "
                     + containerName);
         }
-        handleNameMismatch(subnetConfigData.getValue().getName(), subnetName);
+        handleNameMismatch(subnetConfigData.getName(), subnetName);
 
-        SubnetConfig subnetConf = subnetConfigData.getValue();
+        SubnetConfig subnetConf = subnetConfigData;
 
         if (subnetConf.getNodePorts() == null || subnetConf.getNodePorts().isEmpty()) {
             throw new BadRequestException(RestMessages.INVALIDDATA.toString() + " : invalid node ports");

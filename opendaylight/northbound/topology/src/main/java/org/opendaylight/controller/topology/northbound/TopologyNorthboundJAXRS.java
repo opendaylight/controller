@@ -200,8 +200,7 @@ public class TopologyNorthboundJAXRS {
         if (topo != null) {
             List<EdgeProperties> res = new ArrayList<EdgeProperties>();
             for (Map.Entry<Edge, Set<Property>> entry : topo.entrySet()) {
-                EdgeProperties el = new EdgeProperties(entry.getKey(),
-                        entry.getValue());
+                EdgeProperties el = new EdgeProperties(entry.getKey(), entry.getValue());
                 res.add(el);
             }
             return new Topology(res);
@@ -316,7 +315,7 @@ public class TopologyNorthboundJAXRS {
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addUserLink(
             @PathParam(value = "containerName") String containerName,
-            @TypeHint(TopologyUserLinkConfig.class) JAXBElement<TopologyUserLinkConfig> userLinkConfig) {
+            @TypeHint(TopologyUserLinkConfig.class) TopologyUserLinkConfig userLinkConfig) {
 
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.WRITE, this)) {
@@ -331,9 +330,9 @@ public class TopologyNorthboundJAXRS {
                     RestMessages.NOCONTAINER.toString());
         }
 
-        Status status = topologyManager.addUserLink(userLinkConfig.getValue());
+        Status status = topologyManager.addUserLink(userLinkConfig);
         if (status.isSuccess()) {
-            NorthboundUtils.auditlog("User Link", username, "added", userLinkConfig.getValue().getName(), containerName);
+            NorthboundUtils.auditlog("User Link", username, "added", userLinkConfig.getName(), containerName);
             return Response.status(Response.Status.CREATED).build();
         }
         throw new InternalServerErrorException(status.getDescription());

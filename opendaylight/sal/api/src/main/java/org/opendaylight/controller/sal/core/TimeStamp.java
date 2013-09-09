@@ -29,7 +29,7 @@ public class TimeStamp extends Property {
     private static final long serialVersionUID = 1L;
     @XmlElement(name = "value")
     private long timestamp;
-    @XmlElement(name = "name")
+    @XmlElement(name = "timestampName")
     private String timestampName;
 
     public static final String TimeStampPropName = "timeStamp";
