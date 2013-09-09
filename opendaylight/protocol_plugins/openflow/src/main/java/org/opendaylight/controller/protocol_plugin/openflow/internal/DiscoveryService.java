@@ -131,6 +131,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
     class DiscoveryTransmit implements Runnable {
         private final BlockingQueue<NodeConnector> transmitQ;
+        private int count = 0;
 
         DiscoveryTransmit(BlockingQueue<NodeConnector> transmitQ) {
             this.transmitQ = transmitQ;
@@ -144,6 +145,9 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                     RawPacket outPkt = createDiscoveryPacket(nodeConnector);
                     sendDiscoveryPacket(nodeConnector, outPkt);
                     nodeConnector = null;
+                    if ((++count & 0x7f) == 0) {
+                        Thread.sleep(10);
+                    }
                 } catch (InterruptedException e1) {
                     logger.warn("DiscoveryTransmit interupted", e1.getMessage());
                     if (shuttingDown) {
@@ -1679,7 +1683,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
      */
     private int getDiscoveryBatchMaxPorts() {
         String val = System.getProperty("of.discoveryBatchMaxPorts");
-        int ports = 1024;
+        int ports = 512;
 
         if (val != null) {
             try {
