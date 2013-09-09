@@ -60,6 +60,8 @@
               javax.xml.bind.annotation,
               org.slf4j,
               org.apache.catalina.filters,
+              org.codehaus.jackson.jaxrs,
+              org.codehaus.jackson.annotate,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Web-ContextPath>/controller/nb/v2/topology</Web-ContextPath>

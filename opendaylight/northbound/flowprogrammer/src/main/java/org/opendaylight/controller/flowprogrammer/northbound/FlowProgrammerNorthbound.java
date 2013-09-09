@@ -417,7 +417,7 @@ public class FlowProgrammerNorthbound {
             @PathParam(value = "name") String name,
             @PathParam("nodeType") String nodeType,
             @PathParam(value = "nodeId") String nodeId,
-            @TypeHint(FlowConfig.class) JAXBElement<FlowConfig> flowConfig) {
+            @TypeHint(FlowConfig.class) FlowConfig flowConfig) {
 
         if (!NorthboundUtils.isAuthorized(
                 getUserName(), containerName, Privilege.WRITE, this)) {
@@ -425,8 +425,8 @@ public class FlowProgrammerNorthbound {
                     "User is not authorized to perform this operation on container "
                             + containerName);
         }
-        handleResourceCongruence(name, flowConfig.getValue().getName());
-        handleResourceCongruence(nodeId, flowConfig.getValue().getNode().getNodeIDString());
+        handleResourceCongruence(name, flowConfig.getName());
+        handleResourceCongruence(nodeId, flowConfig.getNode().getNodeIDString());
         handleDefaultDisabled(containerName);
 
         IForwardingRulesManager frm = getForwardingRulesManagerService(containerName);
@@ -444,7 +444,7 @@ public class FlowProgrammerNorthbound {
                     + RestMessages.RESOURCECONFLICT.toString());
         }
 
-        Status status = frm.addStaticFlow(flowConfig.getValue());
+        Status status = frm.addStaticFlow(flowConfig);
 
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Flow", username, "added", name, containerName);

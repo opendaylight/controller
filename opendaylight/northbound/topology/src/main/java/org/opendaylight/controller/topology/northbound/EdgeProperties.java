@@ -18,6 +18,7 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.annotate.JsonUnwrapped;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Property;
 
