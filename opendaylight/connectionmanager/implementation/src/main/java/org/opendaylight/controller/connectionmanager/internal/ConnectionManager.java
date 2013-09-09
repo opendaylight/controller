@@ -363,7 +363,7 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
             else ci.println(this.getNodes(address).toString());
             return;
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+           logger.error("An error occured",e);
         }
     }
 

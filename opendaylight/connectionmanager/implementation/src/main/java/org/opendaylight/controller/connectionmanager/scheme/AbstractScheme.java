@@ -313,7 +313,7 @@ public abstract class AbstractScheme {
         } catch (CacheConfigException cce) {
             log.error("\nCache configuration invalid - check cache mode");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("An error occured",e);
         }
     }
 }

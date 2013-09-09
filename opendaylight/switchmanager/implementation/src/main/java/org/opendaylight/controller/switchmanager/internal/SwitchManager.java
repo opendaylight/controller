@@ -1382,7 +1382,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                         try {
                             map.put(s, new NodeConnector(entry.getValue()));
                         } catch (ConstructionException e) {
-                            e.printStackTrace();
+                            log.error("An error occured",e);
                         }
                     }
                 }
@@ -1444,7 +1444,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                             try {
                                 map.put(s, new NodeConnector(entry.getValue()));
                             } catch (ConstructionException e) {
-                                e.printStackTrace();
+                                log.error("An error occured",e);
                             }
                         }
                         map.remove(name.getValue());
@@ -1481,7 +1481,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                         try {
                             map.put(s, new NodeConnector(entry.getValue()));
                         } catch (ConstructionException e) {
-                            e.printStackTrace();
+                            log.error("An error occured",e);
                         }
                     }
                     map.remove(name.getValue());
