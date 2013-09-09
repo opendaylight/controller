@@ -336,32 +336,18 @@ one.f.flows = {
                 $button.click(function() {
                     var checkedCheckBoxes = $('.flowEntry[type=checkbox]:checked');
                     if (checkedCheckBoxes.size() === 0) {
-                    	alert('Please select at least one flow');
-                    	return false;
+                        return false;
                     }
                     
                     var requestData = [];
                     
-                    var resource = {};
                     checkedCheckBoxes.each(function(index, value) {
                         var flowEntry = {};
                         flowEntry['name'] = checkedCheckBoxes[index].name;
                         flowEntry['node'] = checkedCheckBoxes[index].getAttribute("node");
                         requestData.push(flowEntry);  
                     });
-                    resource['body'] = JSON.stringify(requestData);
-
-                    $.post(one.f.address.root+one.f.address.flows.deleteFlows, resource, function(response) {
-                        if(response == "Success") {
-                            one.lib.alert("Flow(s) successfully removed");                            
-                        } else {
-                            one.lib.alert(response);
-                        }
-                        one.main.dashlet.right.bottom.empty();
-                        one.f.detail.dashlet(one.main.dashlet.right.bottom);
-                        one.main.dashlet.left.top.empty();
-                        one.f.flows.dashlet(one.main.dashlet.left.top);
-                    });                    
+                    one.f.flows.modal.removeMultiple.dialog(requestData);
                 });
                 $dashlet.append($button);
 
@@ -491,7 +477,7 @@ one.f.flows = {
     modal : {
         dialog : {
             initialize : function(id, node) {
-                var h3 = "Remove Flow?";
+                var h3 = "Remove Flow";
                 var $p = one.f.flows.modal.dialog.body(id);
                 var footer = one.f.flows.modal.dialog.footer();
                 var $modal = one.lib.modal.spawn(one.f.flows.id.modal.dialog.modal, h3, $p, footer);
@@ -622,7 +608,7 @@ one.f.flows = {
             one.f.flows.modal.ajax.saveflow(resource, function(data) {
                 if (data == "Success") {
                     $modal.modal('hide');
-                    one.lib.alert('Flow added');
+                    one.lib.alert('Flow Entry added');
                     one.main.dashlet.left.top.empty();
                     one.f.flows.dashlet(one.main.dashlet.left.top);
                 } else {
@@ -1232,6 +1218,67 @@ one.f.flows = {
             footer.push($closeButton);
 
             return footer;
+        },
+        removeMultiple: {
+            dialog: function(flows) {
+                var h3 = 'Remove Flow Entry';
+                var flowList = [];
+                for (var i = 0; i < flows.length; i++) {
+                    flowList.push(flows[i]["name"]);
+                }
+                var footer = one.f.flows.modal.removeMultiple.footer();
+                var $body = one.f.flows.modal.removeMultiple.body(flowList);
+                var $modal = one.lib.modal.spawn(one.f.flows.id.modal.dialog.modal, h3, $body, footer);
+
+                // bind close button
+                $('#'+one.f.flows.id.modal.dialog.close, $modal).click(function() {
+                    $modal.modal('hide');
+                });
+
+                // bind remove rule button
+                $('#'+one.f.flows.id.modal.dialog.remove, $modal).click(this, function(e) {
+                    var resource = {};
+                    resource['body'] = JSON.stringify(flows);
+
+                    $.post(one.f.address.root+one.f.address.flows.deleteFlows, resource, function(response) {
+                        $modal.modal('hide');
+                        if(response == "Success") {
+                            one.lib.alert("Flow Entry(s) successfully removed");
+                        } else {
+                            one.lib.alert(response);
+                        }
+                        one.main.dashlet.right.bottom.empty();
+                        one.f.detail.dashlet(one.main.dashlet.right.bottom);
+                        one.main.dashlet.left.top.empty();
+                        one.f.flows.dashlet(one.main.dashlet.left.top);
+                    });
+                });
+                $modal.modal();
+            },
+            footer : function() {
+                var footer = [];
+                var remove = one.lib.dashlet.button.single('Remove Flow Entry',one.f.flows.id.modal.dialog.remove, 'btn-danger', '');
+                var $remove = one.lib.dashlet.button.button(remove);
+                footer.push($remove);
+
+                var cancel = one.lib.dashlet.button.single('Cancel', one.f.flows.id.modal.dialog.close, '', '');
+                var $cancel = one.lib.dashlet.button.button(cancel);
+                footer.push($cancel);
+
+                return footer;
+            },
+            body : function (flows) {
+                var $p = $(document.createElement('p'));
+                var p = 'Remove the following Flow Entry(s)?';
+                //creata a BS label for each rule and append to list
+                $(flows).each(function(){
+                    var $span = $(document.createElement('span'));
+                    $span.append(this);
+                    p += '<br/>' + $span[0].outerHTML;
+                });
+                $p.append(p);
+                return $p;
+            }
         }
     },
     ajax : {
