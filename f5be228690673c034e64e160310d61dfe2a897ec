@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_74943937",
+        "filename": "opendaylight/northbound/statistics/src/main/java/org/opendaylight/controller/statistics/northbound/StatisticsNorthboundRSApplication.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-09T19:40:23Z",
+      "side": 1,
+      "message": "Seems unused code",
+      "revId": "f5be228690673c034e64e160310d61dfe2a897ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_d4752d33",
+        "filename": "opendaylight/northbound/topology/src/main/java/org/opendaylight/controller/topology/northbound/EdgeProperties.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-09T19:40:23Z",
+      "side": 1,
+      "message": "Unnecessary import, please remove",
+      "revId": "f5be228690673c034e64e160310d61dfe2a897ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_b472a147",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/action/Action.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-09T19:40:23Z",
+      "side": 1,
+      "message": "Seems unnecessary this import",
+      "revId": "f5be228690673c034e64e160310d61dfe2a897ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_948fa523",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Property.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-09T19:40:23Z",
+      "side": 1,
+      "message": "Seems unnecessary this import",
+      "revId": "f5be228690673c034e64e160310d61dfe2a897ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
