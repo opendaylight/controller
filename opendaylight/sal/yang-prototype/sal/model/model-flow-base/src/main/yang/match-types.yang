@@ -1,37 +1,36 @@
-module opendaylight-flow-base {
-    namespace "urn:opendaylight:flow:base";
-    prefix "flowbase";
+module opendaylight-match-types {
+    namespace "urn:opendaylight:model:match:types";
+    prefix "match";
 
-    import yang-ext {prefix ext;}
     import ietf-inet-types {prefix inet;}
     import ietf-yang-types {prefix yang;}
-    import opendaylight-inventory {prefix inv;}
     import opendaylight-l2-types {prefix l2t;}
 
     revision "2013-08-19" {
         description "Initial revision of flow service";
     }
 
+    grouping "mac-address-filter" {
+        leaf address {
+            mandatory true;
+            type yang:mac-address;
+        }
+        leaf mask {
+            type binary;
+        }
+    }
+
      /** Match Groupings **/
     grouping "ethernet-match-fields" {
         container ethernet-source {
-            //description "Ethernet source address.";
-            //presence "Match field is active and set";
-            leaf address {
-                mandatory true;
-                type yang:mac-address;
-            }
-            leaf mask {
-                type binary;
-            }
+            description "Ethernet source address.";
+            presence "Match field is active and set";
+            uses mac-address-filter;
         }
         container ethernet-destination {
             description "Ethernet destination address.";
             presence "Match field is active and set";
-            leaf address {
-                mandatory true;
-                type yang:mac-address;
-            }
+            uses mac-address-filter;
         }
         container ethernet-type {
             description "Ethernet frame type.";
@@ -64,8 +63,6 @@ module opendaylight-flow-base {
             description "VLAN priority.";
             type l2t:vlan-pcp;
         }
-        
-
     }
 
     grouping "ip-match-fields" {
@@ -105,7 +102,6 @@ module opendaylight-flow-base {
             type inet:ipv6-prefix;
         }
     }
-
 
     grouping "udp-match-fields" {
         leaf udp-source-port {
@@ -151,7 +147,7 @@ module opendaylight-flow-base {
         }
     }
 
-    grouping "arp-match-fields" {     
+    grouping "arp-match-fields" {
         leaf arp-source-transport-address {
             description "ARP source IPv4 address.";
             type inet:ipv4-prefix;
@@ -164,31 +160,19 @@ module opendaylight-flow-base {
         container arp-source-hardware-address {
             description "ARP source hardware address.";
             presence "Match field is active and set";
-            leaf address {
-                mandatory true;
-                type yang:mac-address;
-            }
-            leaf mask {
-                type binary;
-            }
+        uses mac-address-filter;
         }
         container arp-target-hardware-address {
             description "ARP target hardware address.";
             presence "Match field is active and set";
-            leaf address {
-                mandatory true;
-                type yang:mac-address;
-            }
-            leaf mask {
-                type binary;
-            }
+        uses mac-address-filter;
         }
     }
 
     grouping action {
         choice action {
             case output-action {
-                leaf output-node-connector {
+                leaf-list output-node-connector {
                     type string;
                 }
             }
@@ -241,48 +225,43 @@ module opendaylight-flow-base {
         }
     }
 
-    grouping flow {
-        leaf node {
-            type inv:node-id;
+
+    grouping match {
+        container "ethernet-match" {
+            uses "ethernet-match-fields";
         }
-        container match {
-            container "ethernet-match" {
-                uses "ethernet-match-fields";
-            }
-            container "vlan-match" {
-                uses "vlan-match-fields";
-            }
-            container "ip-match" {
-                uses "ip-match-fields";
-            }
-            container "ipv4-match" {
+        container "vlan-match" {
+            uses "vlan-match-fields";
+        }
+        container "ip-match" {
+            uses "ip-match-fields";
+        }
+        
+        choice layer-3-match {
+            case "ipv4-match" {
                 uses "ipv4-match-fields";
             }
-            container "ipv6-match" {
+            case "ipv6-match" {
                 uses "ipv6-match-fields";
             }
-            container "udp-match" {
-                uses "udp-match-fields";
-            }
-            container "tcp-match" {
-                uses "tcp-match-fields";
-            }
-            container "sctp-match" {
-                uses "sctp-match-fields";
-            }
-            container "icmpv4-match" {
-                uses "icmpv4-match-fields";
-            }
-            container "arp-match" {
+            case "arp-match" {
                 uses "arp-match-fields";
             }
         }
-        list action {
-            key "order";
-            leaf order {
-                type int32;
+        
+        choice layer-4-match {
+            case "udp-match" {
+                uses "udp-match-fields";
             }
-            uses action;
+            case "tcp-match" {
+                uses "tcp-match-fields";
+            }
+            case "sctp-match" {
+                uses "sctp-match-fields";
+            }
+        }
+        container "icmpv4-match" {
+            uses "icmpv4-match-fields";
         }
     }
 }

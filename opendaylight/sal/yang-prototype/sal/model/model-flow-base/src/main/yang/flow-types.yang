@@ -1,0 +1,113 @@
+module opendaylight-flow-types {
+    namespace "urn:opendaylight:flow:types";
+    prefix flow;
+
+    import ietf-inet-types {prefix inet;}
+    import opendaylight-match-types {prefix match;}
+    import ietf-yang-types {prefix yang;}
+
+
+    revision "2013-08-19" {
+        description "Initial revision of flow service";
+    }
+
+    grouping action {
+        choice action {
+            case output-action {
+                leaf-list output-node-connector {
+                    type inet:uri;
+                }
+            }
+
+            case controller-action {
+                leaf max-length {
+                    type uint16 {
+                        range "0..65294";
+                    }
+                }
+            }
+
+            case set-queue-action {
+                leaf queue {
+                    type string; // TODO: define queues
+                }
+            }
+
+            case pop-mpls-action {
+                leaf ethernet-type {
+                        type uint16; // TODO: define ethertype type
+                }
+            }
+
+            case set-mpls-ttl-action {
+                leaf mpls-ttl {
+                    type uint8;
+                }
+            }
+
+            case set-nw-ttl-action {
+                leaf nw-ttl {
+                    type uint8;
+                }
+            }
+
+            case push-pbb-action {
+
+            }
+
+            case push-mpls-action {
+
+            }
+
+            case push-vlan-action {
+
+            }
+        }
+    }
+
+    grouping flow {
+        container match {
+            uses match:match;
+        }
+        list action {
+            key "order";
+            leaf order {
+                type int32;
+            }
+            uses action;
+        }
+    }
+
+    grouping flow-statistics {
+        leaf packet-count {
+            type yang:counter64;
+        } 
+
+        leaf byte-count {
+            type yang:counter64;
+        }
+
+        container duration {
+            leaf second {
+                type yang:counter64;
+            }
+            leaf nanosecond {
+                type yang:counter64;
+            }
+        }
+    }
+
+    grouping flow-table-statistics {
+        leaf active {
+            type yang:counter64;
+        } 
+
+        leaf lookup {
+            type yang:counter64;
+        }
+
+        leaf matched {
+            type yang:counter64;   
+        }
+    }
+}

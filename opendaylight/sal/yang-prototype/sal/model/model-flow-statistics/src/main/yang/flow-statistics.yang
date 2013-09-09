@@ -1,0 +1,70 @@
+module opendaylight-flow-statistics {
+    namespace "urn:opendaylight:flow:statistics";
+    prefix flowstat;
+
+    import yang-ext {prefix ext;}
+    import opendaylight-inventory {prefix inv;}
+    import opendaylight-flow-types {prefix flow-types;}
+    import sal-flow {prefix flow;}
+    import opendaylight-statistics-types {prefix stat-types;}
+
+    revision "2013-08-19" {
+        description "Initial revision of flow service";
+    }
+
+    rpc get-node-connector-statistics {
+        input {
+            leaf node {
+                ext:context-reference "node-context";
+                type inv:node-ref;
+            }
+            leaf node-connector {
+                type inv:node-connector-ref;
+            }
+        }
+        output {
+            uses stat-types:node-connector-statistics;
+        }
+    }
+
+    notification node-connector-statistics-updated {
+        uses stat-types:node-connector-statistics;
+    }
+
+    rpc get-flow-statistics {
+        input {
+            leaf node {
+                ext:context-reference "node-context";
+                type inv:node-ref;
+            }
+            uses flow-types:flow;
+        }
+        output {
+            uses flow-types:flow-statistics;
+        }
+    }
+
+    notification flow-statistics-updated {
+        uses flow-types:flow-statistics;
+    }
+
+    rpc get-flow-table-statistics {
+        input {
+            leaf node {
+                ext:context-reference "node-context";
+                type inv:node-ref;
+            }
+        }
+        output {
+            uses flow-types:flow-table-statistics;
+        }
+    }
+
+    notification flow-table-statistics-updated {
+        leaf flow-table {
+            type flow:flow-table-ref;
+        }
+        uses flow-types:flow-table-statistics;
+    }
+
+}
