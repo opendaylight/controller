@@ -1,0 +1,46 @@
+module packet-processing {
+    namespace "urn:opendaylight:packet:service";
+    prefix flow;
+
+    import opendaylight-inventory {prefix inv;}
+    import ietf-inet-types {prefix inet;}
+    import ietf-yang-types {prefix yang;} 
+    import opendaylight-l2-types {prefix types;}
+    
+    revision "2013-07-09" {
+        description "";
+    }
+
+    grouping raw-packet {
+    	leaf ingress {
+    		type inv:node-connector-ref;
+    	}
+    	leaf payload {
+    		type binary;
+    	}
+    }
+
+    grouping ethernet-packet {
+    	leaf source {
+    		type yang:mac-address;
+    	}
+
+    	leaf destination {
+    		type yang:mac-address;
+    	}
+    }
+
+
+    notification packet-received {
+    	uses raw-packet;
+    }
+
+    rpc transmit-packet {
+    	input {
+    		leaf egress {
+    			type inv:node-connector-ref;
+    		}
+    		uses raw-packet;
+    	}
+    }
+}

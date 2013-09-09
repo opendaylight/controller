@@ -1,0 +1,81 @@
+module sal-flow {
+    namespace "urn:opendaylight:flow:service";
+    prefix flow;
+
+    import yang-ext {prefix ext;}
+    import opendaylight-inventory {prefix inv;}
+    import ietf-inet-types {prefix inet;}
+    import opendaylight-flow-types {prefix types;}
+
+
+    revision "2013-08-19" {
+        description "Initial revision of flow service";
+    }
+
+
+    typedef flow-table-ref {
+        type instance-identifier;
+    }
+    
+    grouping node-flow {
+        leaf node {
+            type inv:node-ref;
+        }
+        leaf flow-table {
+            type flow-table-ref;
+        }
+        uses types:flow;
+    }
+
+    /** Base configuration structure **/
+    grouping flow-update {
+        container original-flow {
+            uses types:flow;
+        }
+        container updated-flow {
+            uses types:flow;
+        }
+    }
+
+    rpc add-flow {
+        input {
+            uses node-flow;
+        }
+    }
+
+    rpc remove-flow {
+        input {
+            uses node-flow;
+        }
+    }
+
+    rpc update-flow {
+        input {
+            uses node-flow;
+        }
+    }
+
+    notification flow-added {
+        uses node-flow;
+    }
+
+    notification flow-updated {
+        uses node-flow;
+    }
+
+    notification flow-removed {
+        uses node-flow;
+    }
+
+    augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "flow-capable-node";
+        container flow-tables {
+            list table {
+                key "id";
+                leaf "id" {
+                    type inet:uri;
+                }
+            }
+        }
+    }
+}
