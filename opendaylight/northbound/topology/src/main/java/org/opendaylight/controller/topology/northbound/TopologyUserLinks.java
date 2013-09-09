@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
 
-@XmlRootElement
+@XmlRootElement (name = "list")
 @XmlAccessorType(XmlAccessType.NONE)
 
 public class TopologyUserLinks {

@@ -12,6 +12,7 @@ import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
@@ -34,7 +35,7 @@ public abstract class Action implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
     private static boolean debug = false; // Enable to find where in the code an
     // invalid assignment is made
-    @XmlTransient
+    @XmlElement
     protected ActionType type;
     private transient boolean isValid = true;
 

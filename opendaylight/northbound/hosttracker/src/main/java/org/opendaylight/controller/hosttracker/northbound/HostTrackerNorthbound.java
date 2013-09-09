@@ -432,7 +432,7 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addHost(@Context UriInfo uriInfo, @PathParam("containerName") String containerName,
             @PathParam("networkAddress") String networkAddress,
-            @TypeHint(HostConfig.class) JAXBElement<HostConfig> hostConfig) {
+            @TypeHint(HostConfig.class) HostConfig hostConfig) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
             return Response.status(Response.Status.UNAUTHORIZED)
@@ -443,7 +443,7 @@ public class HostTrackerNorthbound {
 
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
 
-        HostConfig hc = hostConfig.getValue();
+        HostConfig hc = hostConfig;
         if (!networkAddress.equals(hc.getNetworkAddress())) {
             return Response.status(Response.Status.CONFLICT)
                     .entity("Resource name in config object doesn't match URI")

@@ -208,9 +208,9 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 409, condition = "VIP already exist"),
         @ResponseCode(code = 415, condition = "Invalid input data")})
     public Response addVIP(@PathParam("containerName") String containerName,
-            @TypeHint(VIP.class) JAXBElement<VIP> inVIP){
+            @TypeHint(VIP.class) VIP inVIP){
 
-        VIP vipInput = inVIP.getValue();
+        VIP vipInput = inVIP;
         String name = vipInput.getName();
         String ip = vipInput.getIp();
         String protocol = vipInput.getProtocol();
@@ -253,9 +253,9 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 405, condition = "Pool already attached to the VIP"),
         @ResponseCode(code = 415, condition = "Invalid input name")})
     public Response updateVIP(@PathParam("containerName") String containerName,
-            @TypeHint(VIP.class) JAXBElement<VIP> inVIP) {
+            @TypeHint(VIP.class) VIP inVIP) {
 
-        VIP vipInput = inVIP.getValue();
+        VIP vipInput = inVIP;
         String name = vipInput.getName();
         String poolName = vipInput.getPoolName();
         if(name.isEmpty() ||
@@ -325,9 +325,9 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 409, condition = "Pool already exist"),
         @ResponseCode(code = 415, condition = "Invalid input data")})
     public Response addPool(@PathParam("containerName") String containerName,
-            @TypeHint(Pool.class) JAXBElement<Pool> inPool) {
+            @TypeHint(Pool.class) Pool inPool) {
 
-        Pool poolInput = inPool.getValue();
+        Pool poolInput = inPool;
         String name = poolInput.getName();
         String lbMethod =poolInput.getLbMethod();
         if(name.isEmpty() ||
@@ -398,9 +398,9 @@ public class LoadBalancerNorthbound {
         @ResponseCode(code = 409, condition = "Pool member already exist"),
         @ResponseCode(code = 415, condition = "Invalid input data")})
     public Response addPoolMember(@PathParam("containerName") String containerName,
-            @TypeHint(PoolMember.class) JAXBElement<PoolMember> inPoolMember){
+            @TypeHint(PoolMember.class) PoolMember inPoolMember){
 
-        PoolMember pmInput = inPoolMember.getValue();
+        PoolMember pmInput = inPoolMember;
         String name = pmInput.getName();
         String memberIP = pmInput.getIp();
         String poolName = pmInput.getPoolName();

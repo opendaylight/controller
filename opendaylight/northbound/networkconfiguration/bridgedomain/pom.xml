@@ -58,6 +58,7 @@
               javax.xml.bind.annotation,
               javax.xml.bind,
               org.apache.catalina.filters,
+              org.codehaus.jackson.jaxrs,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Export-Package>

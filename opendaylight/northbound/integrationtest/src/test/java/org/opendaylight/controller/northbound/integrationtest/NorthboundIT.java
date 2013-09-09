@@ -189,6 +189,9 @@ public class NorthboundIT {
             }
             is.close();
             connection.disconnect();
+            if (debugMsg) {
+                System.out.println("Response : "+sb.toString());
+            }
             return sb.toString();
         } catch (Exception e) {
             return null;
@@ -203,34 +206,47 @@ public class NorthboundIT {
         Assert.assertEquals(nodeId, (Integer) nodeInfo.getInt("id"));
         Assert.assertEquals(nodeType, nodeInfo.getString("type"));
 
-        JSONObject properties = node.getJSONObject("properties");
+        JSONArray propsArray = node.getJSONArray("properties");
 
-        if (timestamp == null || timestampName == null) {
-            Assert.assertFalse(properties.has("timeStamp"));
-        } else {
-            Assert.assertEquals(timestamp, (Integer) properties.getJSONObject("timeStamp").getInt("value"));
-            Assert.assertEquals(timestampName, properties.getJSONObject("timeStamp").getString("name"));
-        }
-        if (actionsValue == null) {
-            Assert.assertFalse(properties.has("actions"));
-        } else {
-            Assert.assertEquals(actionsValue, (Integer) properties.getJSONObject("actions").getInt("value"));
-        }
-        if (capabilitiesValue == null) {
-            Assert.assertFalse(properties.has("capabilities"));
-        } else {
-            Assert.assertEquals(capabilitiesValue,
-                    (Integer) properties.getJSONObject("capabilities").getInt("value"));
-        }
-        if (tablesValue == null) {
-            Assert.assertFalse(properties.has("tables"));
-        } else {
-            Assert.assertEquals(tablesValue, (Integer) properties.getJSONObject("tables").getInt("value"));
-        }
-        if (buffersValue == null) {
-            Assert.assertFalse(properties.has("buffers"));
-        } else {
-            Assert.assertEquals(buffersValue, (Integer) properties.getJSONObject("buffers").getInt("value"));
+        for (int j = 0; j < propsArray.length(); j++) {
+            JSONObject properties = propsArray.getJSONObject(j);
+            String propName = properties.getString("name");
+            if (propName.equals("timeStamp")) {
+                if (timestamp == null || timestampName == null) {
+                    Assert.assertFalse("Timestamp exist", true);
+                } else {
+                    Assert.assertEquals(timestamp, (Integer) properties.getInt("value"));
+                    Assert.assertEquals(timestampName, properties.getString("timestampName"));
+                }
+            }
+            if (propName.equals("actions")) {
+                if (actionsValue == null) {
+                    Assert.assertFalse("Actions exist", true);
+                } else {
+                    Assert.assertEquals(actionsValue, (Integer) properties.getInt("value"));
+                }
+            }
+            if (propName.equals("capabilities")) {
+                if (capabilitiesValue == null) {
+                    Assert.assertFalse("Capabilities exist", true);
+                } else {
+                    Assert.assertEquals(capabilitiesValue, (Integer) properties.getInt("value"));
+                }
+            }
+            if (propName.equals("tables")) {
+                if (tablesValue == null) {
+                    Assert.assertFalse("Tables exist", true);
+                } else {
+                    Assert.assertEquals(tablesValue, (Integer) properties.getInt("value"));
+                }
+            }
+            if (propName.equals("buffers")) {
+                if (buffersValue == null) {
+                    Assert.assertFalse("Buffers exist", true);
+                } else {
+                    Assert.assertEquals(buffersValue, (Integer) properties.getInt("value"));
+                }
+            }
         }
     }
 
@@ -240,29 +256,38 @@ public class NorthboundIT {
 
         JSONObject nodeConnector = nodeConnectorProperties.getJSONObject("nodeconnector");
         JSONObject node = nodeConnector.getJSONObject("node");
-        JSONObject properties = nodeConnectorProperties.getJSONObject("properties");
 
         Assert.assertEquals(ncId, (Integer) nodeConnector.getInt("id"));
         Assert.assertEquals(ncType, nodeConnector.getString("type"));
         Assert.assertEquals(nodeId, (Integer) node.getInt("id"));
         Assert.assertEquals(nodeType, node.getString("type"));
-        if (state == null) {
-            Assert.assertFalse(properties.has("state"));
-        } else {
-            Assert.assertEquals(state, (Integer) properties.getJSONObject("state").getInt("value"));
-        }
-        if (capabilities == null) {
-            Assert.assertFalse(properties.has("capabilities"));
-        } else {
-            Assert.assertEquals(capabilities,
-                    (Integer) properties.getJSONObject("capabilities").getInt("value"));
-        }
-        if (bandwidth == null) {
-            Assert.assertFalse(properties.has("bandwidth"));
-        } else {
-            Assert.assertEquals(bandwidth, (Integer) properties.getJSONObject("bandwidth").getInt("value"));
-        }
 
+        JSONArray propsArray = nodeConnectorProperties.getJSONArray("properties");
+        for (int j = 0; j < propsArray.length(); j++) {
+            JSONObject properties = propsArray.getJSONObject(j);
+            String propName = properties.getString("name");
+            if (propName.equals("state")) {
+                if (state == null) {
+                    Assert.assertFalse("State exist", true);
+                } else {
+                    Assert.assertEquals(state, (Integer) properties.getInt("value"));
+                }
+            }
+            if (propName.equals("capabilities")) {
+                if (capabilities == null) {
+                    Assert.assertFalse("Capabilities exist", true);
+                } else {
+                    Assert.assertEquals(capabilities, (Integer) properties.getInt("value"));
+                }
+            }
+            if (propName.equals("bandwidth")) {
+                if (bandwidth == null) {
+                    Assert.assertFalse("bandwidth exist", true);
+                } else {
+                    Assert.assertEquals(bandwidth, (Integer) properties.getInt("value"));
+                }
+            }
+        }
     }
 
     @Test
@@ -291,14 +316,15 @@ public class NorthboundIT {
         String result = getJsonResult(baseURL + "default/subnet/all");
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
-        Assert.assertEquals("{}", result);
+        JSONArray subnetConfigs = json.getJSONArray("subnetConfig");
+        Assert.assertEquals(subnetConfigs.length(), 0);
 
         // Test GET subnet1 expecting 404
         result = getJsonResult(baseURL + "default/subnet/" + name1);
         Assert.assertEquals(404, httpResponseCode.intValue());
 
         // Test POST subnet1
-        JSONObject jo = new JSONObject().append("name", name1).append("subnet", subnet1);
+        JSONObject jo = new JSONObject().put("name", name1).put("subnet", subnet1);
         // execute HTTP request and verify response code
         result = getJsonResult(baseURL + "default/subnet/" + name1, "POST", jo.toString());
         Assert.assertTrue(httpResponseCode == 201);
@@ -312,7 +338,7 @@ public class NorthboundIT {
         Assert.assertEquals(subnet1, json.getString("subnet"));
 
         // Test POST subnet2
-        JSONObject jo2 = new JSONObject().append("name", name2).append("subnet", subnet2);
+        JSONObject jo2 = new JSONObject().put("name", name2).put("subnet", subnet2);
         // execute HTTP request and verify response code
         result = getJsonResult(baseURL + "default/subnet/" + name2, "POST", jo2.toString());
         Assert.assertEquals(201, httpResponseCode.intValue());
@@ -322,7 +348,7 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "default/subnet/" + name2 + "/node-ports", "POST", jo2.toString());
         Assert.assertEquals(200, httpResponseCode.intValue());
         // Test POST subnet3
-        JSONObject jo3 = new JSONObject().append("name", name3).append("subnet", subnet3);
+        JSONObject jo3 = new JSONObject().put("name", name3).put("subnet", subnet3);
         // execute HTTP request and verify response code
         result = getJsonResult(baseURL + "default/subnet/" + name3, "POST", jo3.toString());
         Assert.assertEquals(201, httpResponseCode.intValue());
@@ -350,14 +376,14 @@ public class NorthboundIT {
                 Assert.assertEquals(subnet1, subnetConfig.getString("subnet"));
             } else if (subnetConfig.getString("name").equals(name2)) {
                 Assert.assertEquals(subnet2, subnetConfig.getString("subnet"));
-                String[] nodePortsGet2 = subnetConfig.getString("nodePorts").split(",");
+                String[] nodePortsGet2 = subnetConfig.getJSONArray("nodePorts").getString(0).split(",");
                 Assert.assertEquals(nodePorts2[0], nodePortsGet2[0]);
                 Assert.assertEquals(nodePorts2[1], nodePortsGet2[1]);
                 Assert.assertEquals(nodePorts2[2], nodePortsGet2[2]);
                 Assert.assertEquals(nodePorts2[3], nodePortsGet2[3]);
             } else if (subnetConfig.getString("name").equals(name3)) {
                 Assert.assertEquals(subnet3, subnetConfig.getString("subnet"));
-                String[] nodePortsGet = subnetConfig.getString("nodePorts").split(",");
+                String[] nodePortsGet = subnetConfig.getJSONArray("nodePorts").getString(0).split(",");
                 Assert.assertEquals(nodePorts3[0], nodePortsGet[0]);
                 Assert.assertEquals(nodePorts3[1], nodePortsGet[1]);
                 Assert.assertEquals(nodePorts3[2], nodePortsGet[2]);
@@ -396,7 +422,8 @@ public class NorthboundIT {
         String result = getJsonResult(baseURL + "default");
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
-        Assert.assertEquals("{}", result);
+        JSONArray staticRoutes = json.getJSONArray("staticRoute");
+        Assert.assertEquals(staticRoutes.length(), 0);
 
         // Test insert static route
         String requestBody = "{\"name\":\"" + name1 + "\", \"prefix\":\"" + prefix1 + "\", \"nextHop\":\"" + nextHop1
@@ -412,8 +439,8 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "default");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
-        JSONArray staticRoutes = json.getJSONArray("staticRoute");
-        Assert.assertEquals(2, staticRoutes.length());
+        JSONArray staticRouteArray = json.getJSONArray("staticRoute");
+        Assert.assertEquals(2, staticRouteArray.length());
         JSONObject route;
         for (int i = 0; i < staticRoutes.length(); i++) {
             route = staticRoutes.getJSONObject(i);
@@ -453,7 +480,9 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "default");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
-        JSONObject singleStaticRoute = json.getJSONObject("staticRoute");
+
+        staticRouteArray = json.getJSONArray("staticRoute");
+        JSONObject singleStaticRoute = staticRouteArray.getJSONObject(0);
         Assert.assertEquals(name2, singleStaticRoute.getString("name"));
 
     }
@@ -511,7 +540,8 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
-        JSONObject nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
+        JSONArray nodeConnectorPropertiesArray = json.getJSONArray("nodeConnectorProperties");
+        JSONObject nodeConnectorProperties = nodeConnectorPropertiesArray.getJSONObject(0);
 
         testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1, ncType, nodeId_1, nodeType, ncState,
                 ncCapabilities, ncBandwidth);
@@ -520,7 +550,10 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
-        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
+
+        nodeConnectorPropertiesArray = json.getJSONArray("nodeConnectorProperties");
+        nodeConnectorProperties = nodeConnectorPropertiesArray.getJSONObject(0);
+
 
         testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_2, ncType, nodeId_2, nodeType, ncState,
                 ncCapabilities, ncBandwidth);
@@ -530,7 +563,8 @@ public class NorthboundIT {
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
 
-        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
+        nodeConnectorPropertiesArray = json.getJSONArray("nodeConnectorProperties");
+        nodeConnectorProperties = nodeConnectorPropertiesArray.getJSONObject(0);
         testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_3, ncType, nodeId_3, nodeType, ncState,
                 ncCapabilities, ncBandwidth);
 
@@ -547,8 +581,19 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         node = getJsonInstance(json, "nodeProperties", nodeId_1);
         Assert.assertNotNull(node);
-        Assert.assertEquals(1001, node.getJSONObject("properties").getJSONObject("tier").getInt("value"));
-        Assert.assertEquals("node1", node.getJSONObject("properties").getJSONObject("description").getString("value"));
+
+        JSONArray propsArray = node.getJSONArray("properties");
+
+        for (int j = 0; j < propsArray.length(); j++) {
+            JSONObject properties = propsArray.getJSONObject(j);
+            String propName = properties.getString("name");
+            if (propName.equals("tier")) {
+                Assert.assertEquals(1001, properties.getInt("value"));
+            }
+            if (propName.equals("description")) {
+                Assert.assertEquals("node1", properties.getString("value"));
+            }
+        }
 
         // Test delete nodeConnector property
         // Delete state property of nodeconnector1
@@ -559,7 +604,8 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
-        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
+        nodeConnectorPropertiesArray = json.getJSONArray("nodeConnectorProperties");
+        nodeConnectorProperties = nodeConnectorPropertiesArray.getJSONObject(0);
 
         testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_1, ncType, nodeId_1, nodeType, null,
                 ncCapabilities, ncBandwidth);
@@ -572,7 +618,8 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
-        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
+        nodeConnectorPropertiesArray = json.getJSONArray("nodeConnectorProperties");
+        nodeConnectorProperties = nodeConnectorPropertiesArray.getJSONObject(0);
 
         testNodeConnectorProperties(nodeConnectorProperties, nodeConnectorId_2, ncType, nodeId_2, nodeType, ncState,
                 null, ncBandwidth);
@@ -588,7 +635,8 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
-        nodeConnectorProperties = json.getJSONObject("nodeConnectorProperties");
+        nodeConnectorPropertiesArray = json.getJSONArray("nodeConnectorProperties");
+        nodeConnectorProperties = nodeConnectorPropertiesArray.getJSONObject(0);
 
         // Check for new bandwidth value, state value removed from previous
         // test
@@ -599,9 +647,9 @@ public class NorthboundIT {
 
     @Test
     public void testStatistics() throws JSONException {
-        final String actionTypes[] = { "drop", "loopback", "flood", "floodAll", "controller", "swPath", "hwPath", "output",
-                "setDlSrc", "setDlDst", "setDlType", "setVlanId", "setVlanPcp", "setVlanCfi", "popVlan", "pushVlan",
-                "setNwSrc", "setNwDst", "setNwTos", "setTpSrc", "setTpDst" };
+        final String actionTypes[] = { "DROP", "LOOPBACK", "FLOOD", "FLOOD_ALL", "CONTROLLER", "SW_PATH", "HW_PATH", "OUTPUT",
+                "SET_DL_SRC", "SET_DL_DST", "SET_DL_TYPE", "SET_VLAN_ID", "SET_VLAN_PCP", "SET_VLAN_CFI", "POP_VLAN", "PUSH_VLAN",
+                "SET_NW_SRC", "SET_NW_DST", "SET_NW_TOS", "SET_TP_SRC", "SET_TP_DST" };
         System.out.println("Starting Statistics JAXB client.");
 
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/statistics/default/";
@@ -635,7 +683,8 @@ public class NorthboundIT {
         Assert.assertEquals(node2.getString("type"), "STUB");
 
         // test that port statistic results are correct
-        JSONObject portStat = portStatistics.getJSONObject("portStatistic");
+        JSONArray portStatArray = portStatistics.getJSONArray("portStatistic");
+        JSONObject portStat = portStatArray.getJSONObject(0);
         Assert.assertTrue(portStat.getInt("receivePackets") == 250);
         Assert.assertTrue(portStat.getInt("transmitPackets") == 500);
         Assert.assertTrue(portStat.getInt("receiveBytes") == 1000);
@@ -674,7 +723,9 @@ public class NorthboundIT {
         Assert.assertEquals(node2.getString("type"), "STUB");
 
         // test that port statistic results are correct
-        portStat = json.getJSONObject("portStatistic");
+        portStatArray = json.getJSONArray("portStatistic");
+        portStat = portStatArray.getJSONObject(0);
+
         Assert.assertTrue(portStat.getInt("receivePackets") == 250);
         Assert.assertTrue(portStat.getInt("transmitPackets") == 500);
         Assert.assertTrue(portStat.getInt("receiveBytes") == 1000);
@@ -703,14 +754,18 @@ public class NorthboundIT {
         Assert.assertTrue(flow.getInt("hardTimeout") == 2000);
         Assert.assertTrue(flow.getInt("id") == 12345);
 
-        JSONObject match = (flow.getJSONObject("match").getJSONObject("matchField"));
+        JSONArray matches = (flow.getJSONObject("match").getJSONArray("matchField"));
+        Assert.assertEquals(matches.length(), 1);
+        JSONObject match = matches.getJSONObject(0);
         Assert.assertTrue(match.getString("type").equals("NW_DST"));
         Assert.assertTrue(match.getString("value").equals("1.1.1.1"));
 
-        JSONObject act = flow.getJSONObject("actions");
-        Assert.assertTrue(act.getString("@type").equals(actionType));
+        JSONArray actionsArray = flow.getJSONArray("actions");
+        Assert.assertEquals(actionsArray.length(), 1);
+        JSONObject act = actionsArray.getJSONObject(0);
+        Assert.assertTrue(act.getString("type").equals(actionType));
 
-        if (act.getString("@type").equals("output")) {
+        if (act.getString("type").equals("OUTPUT")) {
             JSONObject port = act.getJSONObject("port");
             JSONObject port_node = port.getJSONObject("node");
             Assert.assertTrue(port.getInt("id") == 51966);
@@ -719,7 +774,7 @@ public class NorthboundIT {
             Assert.assertTrue(port_node.getString("type").equals("STUB"));
         }
 
-        if (act.getString("@type").equals("setDlSrc")) {
+        if (act.getString("type").equals("SET_DL_SRC")) {
             byte srcMatch[] = { (byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1 };
             String src = act.getString("address");
             byte srcBytes[] = new byte[5];
@@ -731,7 +786,7 @@ public class NorthboundIT {
             Assert.assertTrue(Arrays.equals(srcBytes, srcMatch));
         }
 
-        if (act.getString("@type").equals("setDlDst")) {
+        if (act.getString("type").equals("SET_DL_DST")) {
             byte dstMatch[] = { (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5 };
             String dst = act.getString("address");
             byte dstBytes[] = new byte[5];
@@ -742,21 +797,21 @@ public class NorthboundIT {
             dstBytes[4] = Byte.parseByte(dst.substring(8, 10));
             Assert.assertTrue(Arrays.equals(dstBytes, dstMatch));
         }
-        if (act.getString("@type").equals("setDlType"))
+        if (act.getString("type").equals("SET_DL_TYPE"))
             Assert.assertTrue(act.getInt("dlType") == 10);
-        if (act.getString("@type").equals("setVlanId"))
+        if (act.getString("type").equals("SET_VLAN_ID"))
             Assert.assertTrue(act.getInt("vlanId") == 2);
-        if (act.getString("@type").equals("setVlanPcp"))
+        if (act.getString("type").equals("SET_VLAN_PCP"))
             Assert.assertTrue(act.getInt("pcp") == 3);
-        if (act.getString("@type").equals("setVlanCfi"))
+        if (act.getString("type").equals("SET_VLAN_CFI"))
             Assert.assertTrue(act.getInt("cfi") == 1);
 
-        if (act.getString("@type").equals("setNwSrc"))
+        if (act.getString("type").equals("SET_NW_SRC"))
             Assert.assertTrue(act.getString("address").equals("2.2.2.2"));
-        if (act.getString("@type").equals("setNwDst"))
+        if (act.getString("type").equals("SET_NW_DST"))
             Assert.assertTrue(act.getString("address").equals("1.1.1.1"));
 
-        if (act.getString("@type").equals("pushVlan")) {
+        if (act.getString("type").equals("PUSH_VLAN")) {
             int head = act.getInt("VlanHeader");
             // parsing vlan header
             int id = head & 0xfff;
@@ -768,11 +823,11 @@ public class NorthboundIT {
             Assert.assertTrue(pcp == 1);
             Assert.assertTrue(tag == 0x8100);
         }
-        if (act.getString("@type").equals("setNwTos"))
+        if (act.getString("type").equals("SET_NW_TOS"))
             Assert.assertTrue(act.getInt("tos") == 16);
-        if (act.getString("@type").equals("setTpSrc"))
+        if (act.getString("type").equals("SET_TP_SRC"))
             Assert.assertTrue(act.getInt("port") == 4201);
-        if (act.getString("@type").equals("setTpDst"))
+        if (act.getString("type").equals("SET_TP_DST"))
             Assert.assertTrue(act.getInt("port") == 8080);
     }
 
@@ -786,7 +841,7 @@ public class NorthboundIT {
         Assert.assertTrue(result.equals("404"));
 
         // test add flow1
-        String fc = "{\"dynamic\":\"false\", \"name\":\"test1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
+        String fc = "{\"name\":\"test1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
@@ -797,7 +852,8 @@ public class NorthboundIT {
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
         Assert.assertEquals(json.getString("name"), "test1");
-        Assert.assertEquals(json.getString("actions"), "DROP");
+        JSONArray actionsArray = json.getJSONArray("actions");
+        Assert.assertEquals(actionsArray.getString(0), "DROP");
         Assert.assertEquals(json.getString("installInHw"), "true");
         JSONObject node = json.getJSONObject("node");
         Assert.assertEquals(node.getString("type"), "STUB");
@@ -807,13 +863,13 @@ public class NorthboundIT {
         result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "PUT", fc);
         Assert.assertTrue(result.equals("409"));
 
-        fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
+        fc = "{\"name\":\"test2\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "PUT", fc);
         // test should return 409 for error due to same flow being added.
         Assert.assertTrue(result.equals("409"));
 
         // add second flow that's different
-        fc = "{\"dynamic\":\"false\", \"name\":\"test2\", \"nwSrc\":\"1.1.1.1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
+        fc = "{\"name\":\"test2\", \"nwSrc\":\"1.1.1.1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
         result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
@@ -1132,10 +1188,20 @@ public class NorthboundIT {
 
             JSONObject headNC = edge.getJSONObject("headNodeConnector");
             JSONObject headNode = headNC.getJSONObject("node");
-            JSONObject Props = edgeProp.getJSONObject("properties");
-            JSONObject bandw = Props.getJSONObject("bandwidth");
-            JSONObject stt = Props.getJSONObject("state");
-            JSONObject ltc = Props.getJSONObject("latency");
+
+            JSONArray propsArray = edgeProp.getJSONArray("properties");
+
+            JSONObject bandw = null;
+            JSONObject stt = null;
+            JSONObject ltc = null;
+
+            for (int j = 0; j < propsArray.length(); j++) {
+                JSONObject props = propsArray.getJSONObject(j);
+                String propName = props.getString("name");
+                if (propName.equals("bandwidth")) bandw = props;
+                if (propName.equals("state")) stt = props;
+                if (propName.equals("latency")) ltc = props;
+            }
 
             if (headNC.getInt("id") == headNC1_nodeConnId) {
                 Assert.assertEquals(headNode.getString("type"), nodeType);
@@ -1174,10 +1240,10 @@ public class NorthboundIT {
         Integer nodeConnectorId_2 = 34;
 
         JSONObject jo = new JSONObject()
-                .append("name", "userLink_1")
-                .append("srcNodeConnector",
+                .put("name", "userLink_1")
+                .put("srcNodeConnector",
                         nodeConnectorType_1 + "|" + nodeConnectorId_1 + "@" + nodeType_1 + "|" + nodeId_1)
-                .append("dstNodeConnector",
+                .put("dstNodeConnector",
                         nodeConnectorType_2 + "|" + nodeConnectorId_2 + "@" + nodeType_2 + "|" + nodeId_2);
         // execute HTTP request and verify response code
         result = getJsonResult(baseURL + "/user-link", "PUT", jo.toString());
@@ -1331,6 +1397,7 @@ public class NorthboundIT {
                 mavenBundle("org.codehaus.jackson", "jackson-mapper-asl").versionAsInProject(),
                 mavenBundle("org.codehaus.jackson", "jackson-core-asl").versionAsInProject(),
                 mavenBundle("org.codehaus.jackson", "jackson-jaxrs").versionAsInProject(),
+                mavenBundle("org.codehaus.jackson", "jackson-xc").versionAsInProject(),
                 mavenBundle("org.codehaus.jettison", "jettison").versionAsInProject(),
 
                 mavenBundle("commons-io", "commons-io").versionAsInProject(),

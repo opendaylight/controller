@@ -233,7 +233,7 @@ public class StaticRoutingNorthbound {
             @Context UriInfo uriInfo,
             @PathParam(value = "containerName") String containerName,
             @PathParam(value = "route") String route,
-            @TypeHint(StaticRoute.class) JAXBElement<StaticRoute> staticRouteData) {
+            @TypeHint(StaticRoute.class) StaticRoute staticRouteData) {
 
 
         if(!NorthboundUtils.isAuthorized(getUserName(), containerName,
@@ -253,7 +253,7 @@ public class StaticRoutingNorthbound {
                     .toString());
         }
 
-        StaticRoute sRoute = staticRouteData.getValue();
+        StaticRoute sRoute = staticRouteData;
         StaticRouteConfig cfgObject = new StaticRouteConfig(sRoute.getName(),
                 sRoute.getPrefix(), sRoute.getNextHop());
         Status response = staticRouting.addStaticRoute(cfgObject);
