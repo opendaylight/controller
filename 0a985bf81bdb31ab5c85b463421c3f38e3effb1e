@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_772b1b83",
+        "filename": "opendaylight/northbound/switchmanager/src/main/java/org/opendaylight/controller/switchmanager/northbound/SwitchNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-09-10T22:06:14Z",
+      "side": 1,
+      "message": "Please change \"Static route\" to reflect the correct resource being audited here",
+      "revId": "0a985bf81bdb31ab5c85b463421c3f38e3effb1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
