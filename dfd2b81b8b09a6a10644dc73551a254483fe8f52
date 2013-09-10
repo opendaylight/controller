@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_54b6dd8b",
+        "filename": "opendaylight/hosttracker_new/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/Device.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-10T10:40:30Z",
+      "side": 1,
+      "message": "The else should be on the previous line",
+      "revId": "dfd2b81b8b09a6a10644dc73551a254483fe8f52",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_74c1d9e3",
+        "filename": "opendaylight/hosttracker_new/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/Device.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-10T10:40:30Z",
+      "side": 1,
+      "message": "Seems not indented properly",
+      "revId": "dfd2b81b8b09a6a10644dc73551a254483fe8f52",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_34bb5174",
+        "filename": "opendaylight/hosttracker_new/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/DeviceManagerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-10T10:40:30Z",
+      "side": 1,
+      "message": "The else should be on the previous line",
+      "revId": "dfd2b81b8b09a6a10644dc73551a254483fe8f52",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
