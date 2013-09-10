@@ -16,8 +16,6 @@
  */
 package org.opendaylight.controller.clustering.services;
 
-import java.lang.Exception;
-
 /**
  * Describe an exception that is raised when the cache
  * Listener being added fails for any reason

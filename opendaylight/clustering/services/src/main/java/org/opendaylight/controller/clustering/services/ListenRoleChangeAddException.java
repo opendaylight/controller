@@ -16,8 +16,6 @@
  */
 package org.opendaylight.controller.clustering.services;
 
-import java.lang.Exception;
-
 /**
  * @deprecated for internal use
  * The Class ListenRoleChangeAddException.
