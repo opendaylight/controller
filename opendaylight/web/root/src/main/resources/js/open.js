@@ -9,6 +9,9 @@ one.main.constants = {
 }
 
 one.main.menu = {
+	registry : {
+		load : false
+	},
     load : function() {
         one.main.menu.ajax(function(data) {
             // reparse the ajax data
@@ -20,6 +23,10 @@ one.main.menu = {
             // binding all menu items
             var $menu = $("#menu .nav a");
             $menu.click(function() {
+				if (one.main.menu.registry.load === true) {
+					return false;
+				}
+				one.main.menu.registry.load = true;
                 var href = $(this).attr('href').substring(1);
                 one.main.page.load(href);
                 var $li = $(this).parent();
@@ -92,8 +99,10 @@ one.main.page = {
         $('.dashlet', '#main').empty();
         $('.nav', '#main').empty();
         // fetch page's js
-        $.getScript(one.main.constants.address.prefix + "/" + page
-                + "/js/page.js");
+        $.getScript(one.main.constants.address.prefix+"/"+page+"/js/page.js")
+			.success(function() {
+				one.main.menu.registry.load = false;
+			});
 
         $.ajaxSetup({
             data : {
