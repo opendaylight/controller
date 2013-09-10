@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_94dd6517",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/utils/SysUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-09-10T06:33:00Z",
+      "side": 1,
+      "message": "Doesn\u0027t this intrinsically break portability?",
+      "revId": "f4a9f5d32d6aac6a8ace34eba165e83320ab7bc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
