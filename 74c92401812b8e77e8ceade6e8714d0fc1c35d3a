@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_b73063e9",
+        "filename": "opendaylight/web/root/src/main/resources/js/open.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-09-10T23:33:57Z",
+      "side": 0,
+      "message": "Could you fix the formatting (tabs -\u003e spaces)?",
+      "revId": "74c92401812b8e77e8ceade6e8714d0fc1c35d3a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
