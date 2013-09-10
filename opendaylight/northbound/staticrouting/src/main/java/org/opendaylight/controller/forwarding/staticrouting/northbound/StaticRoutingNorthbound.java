@@ -16,6 +16,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -113,7 +114,7 @@ public class StaticRoutingNorthbound {
      * Example:
      *
      * Request URL:
-     * GET http://localhost:8080/controller/nb/v2/staticroute/default
+     * GET http://localhost:8080/controller/nb/v2/staticroute/default/routes
      *
      * Response in XML:
      *  &lt;list&gt;
@@ -129,7 +130,7 @@ public class StaticRoutingNorthbound {
      *
      * </pre>
      */
-    @Path("/{containerName}")
+    @Path("/{containerName}/routes")
     @GET
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(StaticRoutes.class)
@@ -204,7 +205,8 @@ public class StaticRoutingNorthbound {
 
     /**
      *
-     * Add a new Static Route
+     * Add a new Static Route. If a route by the given name already exists, this
+     * method will return a non-successful status response.
      *
      * @param containerName Name of the Container. The Container name for the base controller is "default".
      * @param route Name of the Static Route configuration
@@ -214,7 +216,7 @@ public class StaticRoutingNorthbound {
      * Example:
      *
      * Request URL:
-     * POST http://localhost:8080/controller/nb/v2/staticroute/default/route/route-1
+     * PUT http://localhost:8080/controller/nb/v2/staticroute/default/route/route-1
      *
      * Request payload in JSON:
      * {"name":"route-1","prefix":"10.10.1.0/24","nextHop":"1.1.1.1"}
@@ -222,7 +224,7 @@ public class StaticRoutingNorthbound {
      * </pre>
      */
     @Path("/{containerName}/route/{route}")
-    @POST
+    @PUT
     @Consumes( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes( {
             @ResponseCode(code = 201, condition = "Created Static Route successfully"),
@@ -284,7 +286,7 @@ public class StaticRoutingNorthbound {
     @Path("/{containerName}/route/{route}")
     @DELETE
     @StatusCodes( {
-            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 204, condition = "Static route removed successfully"),
             @ResponseCode(code = 404, condition = "Container Name or Configuration Name not found"),
             @ResponseCode(code = 406, condition = "Cannot operate on Default Container when other Containers are active") })
     public Response removeStaticRoute(
@@ -311,9 +313,9 @@ public class StaticRoutingNorthbound {
         Status status = staticRouting.removeStaticRoute(route);
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Static Route", username, "removed", route, containerName);
-            return Response.ok().build();
+            return Response.noContent().build();
         }
-        throw new ResourceNotFoundException(status.getDescription());
+        return NorthboundUtils.getResponse(status);
     }
 
     private void handleDefaultDisabled(String containerName) {

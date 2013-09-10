@@ -3,10 +3,10 @@
     xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.26.xsd">
 
   <services>
-    <rest defaultRestSubcontext="/controller/nb/v2/subnet"/>
+    <rest defaultRestSubcontext="/controller/nb/v2/subnetservice"/>
   </services>
 
   <modules>
-    <docs docsDir="rest" title="REST API" includeExampleXml="true" includeExampleJson="true"/>
+    <docs docsDir="rest" title="Subnet Service REST API" includeExampleXml="true" includeExampleJson="true"/>
   </modules>
 </enunciate>

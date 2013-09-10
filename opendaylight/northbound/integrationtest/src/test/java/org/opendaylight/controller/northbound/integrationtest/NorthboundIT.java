@@ -293,7 +293,7 @@ public class NorthboundIT {
     @Test
     public void testSubnetsNorthbound() throws JSONException {
         System.out.println("Starting Subnets JAXB client.");
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/subnet/";
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/subnetservice/";
 
         String name1 = "testSubnet1";
         String subnet1 = "1.1.1.1/24";
@@ -313,7 +313,7 @@ public class NorthboundIT {
         nodePortsJson3_1.append(nodePortsJson3).append(",").append(nodePortsJson2);
 
         // Test GET subnets in default container
-        String result = getJsonResult(baseURL + "default/subnet/all");
+        String result = getJsonResult(baseURL + "default/subnets");
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
         JSONArray subnetConfigs = json.getJSONArray("subnetConfig");
@@ -326,7 +326,7 @@ public class NorthboundIT {
         // Test POST subnet1
         JSONObject jo = new JSONObject().put("name", name1).put("subnet", subnet1);
         // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "default/subnet/" + name1, "POST", jo.toString());
+        result = getJsonResult(baseURL + "default/subnet/" + name1, "PUT", jo.toString());
         Assert.assertTrue(httpResponseCode == 201);
 
         // Test GET subnet1
@@ -340,31 +340,31 @@ public class NorthboundIT {
         // Test POST subnet2
         JSONObject jo2 = new JSONObject().put("name", name2).put("subnet", subnet2);
         // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "default/subnet/" + name2, "POST", jo2.toString());
+        result = getJsonResult(baseURL + "default/subnet/" + name2, "PUT", jo2.toString());
         Assert.assertEquals(201, httpResponseCode.intValue());
         // Test POST nodePorts
         jo2.append("nodePorts", nodePortsJson2);
         // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "default/subnet/" + name2 + "/node-ports", "POST", jo2.toString());
+        result = getJsonResult(baseURL + "default/subnet/" + name2 + "/nodePorts", "PUT", jo2.toString());
         Assert.assertEquals(200, httpResponseCode.intValue());
         // Test POST subnet3
         JSONObject jo3 = new JSONObject().put("name", name3).put("subnet", subnet3);
         // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "default/subnet/" + name3, "POST", jo3.toString());
+        result = getJsonResult(baseURL + "default/subnet/" + name3, "PUT", jo3.toString());
         Assert.assertEquals(201, httpResponseCode.intValue());
         // Test POST nodePorts
         jo3.append("nodePorts", nodePortsJson3);
         // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "default/subnet/" + name3 + "/node-ports", "POST", jo3.toString());
+        result = getJsonResult(baseURL + "default/subnet/" + name3 + "/nodePorts", "PUT", jo3.toString());
         Assert.assertEquals(200, httpResponseCode.intValue());
         // Test PUT nodePorts
         jo3.remove("nodePorts");
         jo3.append("nodePorts", nodePortsJson3_1);
-        result = getJsonResult(baseURL + "default/subnet/" + name3 + "/node-ports", "PUT", jo3.toString());
+        result = getJsonResult(baseURL + "default/subnet/" + name3 + "/nodePorts", "POST", jo3.toString());
         Assert.assertEquals(200, httpResponseCode.intValue());
 
         // Test GET all subnets in default container
-        result = getJsonResult(baseURL + "default/subnet/all");
+        result = getJsonResult(baseURL + "default/subnets");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
         JSONArray subnetConfigArray = json.getJSONArray("subnetConfig");
@@ -419,7 +419,7 @@ public class NorthboundIT {
         String nextHop2 = "1.1.1.1";
 
         // Test GET static routes in default container, expecting no results
-        String result = getJsonResult(baseURL + "default");
+        String result = getJsonResult(baseURL + "default/routes");
         JSONTokener jt = new JSONTokener(result);
         JSONObject json = new JSONObject(jt);
         JSONArray staticRoutes = json.getJSONArray("staticRoute");
@@ -428,15 +428,15 @@ public class NorthboundIT {
         // Test insert static route
         String requestBody = "{\"name\":\"" + name1 + "\", \"prefix\":\"" + prefix1 + "\", \"nextHop\":\"" + nextHop1
                 + "\"}";
-        result = getJsonResult(baseURL + "default/route/" + name1, "POST", requestBody);
+        result = getJsonResult(baseURL + "default/route/" + name1, "PUT", requestBody);
         Assert.assertEquals(201, httpResponseCode.intValue());
 
         requestBody = "{\"name\":\"" + name2 + "\", \"prefix\":\"" + prefix2 + "\", \"nextHop\":\"" + nextHop2 + "\"}";
-        result = getJsonResult(baseURL + "default/route/" + name2, "POST", requestBody);
+        result = getJsonResult(baseURL + "default/route/" + name2, "PUT", requestBody);
         Assert.assertEquals(201, httpResponseCode.intValue());
 
         // Test Get all static routes
-        result = getJsonResult(baseURL + "default");
+        result = getJsonResult(baseURL + "default/routes");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
         JSONArray staticRouteArray = json.getJSONArray("staticRoute");
@@ -475,9 +475,9 @@ public class NorthboundIT {
 
         // Test delete static route
         result = getJsonResult(baseURL + "default/route/" + name1, "DELETE");
-        Assert.assertEquals(200, httpResponseCode.intValue());
+        Assert.assertEquals(204, httpResponseCode.intValue());
 
-        result = getJsonResult(baseURL + "default");
+        result = getJsonResult(baseURL + "default/routes");
         jt = new JSONTokener(result);
         json = new JSONObject(jt);
 
@@ -490,7 +490,7 @@ public class NorthboundIT {
     @Test
     public void testSwitchManager() throws JSONException {
         System.out.println("Starting SwitchManager JAXB client.");
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/switch/default/";
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/switchmanager/default/";
 
         // define Node/NodeConnector attributes for test
         int nodeId_1 = 51966;
@@ -599,7 +599,7 @@ public class NorthboundIT {
         // Delete state property of nodeconnector1
         result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_1 + "/STUB/" + nodeConnectorId_1
                 + "/property/state", "DELETE");
-        Assert.assertEquals(200, httpResponseCode.intValue());
+        Assert.assertEquals(204, httpResponseCode.intValue());
 
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_1);
         jt = new JSONTokener(result);
@@ -613,7 +613,7 @@ public class NorthboundIT {
         // Delete capabilities property of nodeconnector2
         result = getJsonResult(baseURL + "nodeconnector/STUB/" + nodeId_2 + "/STUB/" + nodeConnectorId_2
                 + "/property/capabilities", "DELETE");
-        Assert.assertEquals(200, httpResponseCode.intValue());
+        Assert.assertEquals(204, httpResponseCode.intValue());
 
         result = getJsonResult(baseURL + "node/STUB/" + nodeId_2);
         jt = new JSONTokener(result);
@@ -834,19 +834,19 @@ public class NorthboundIT {
     @Test
     public void testFlowProgrammer() throws JSONException {
         System.out.println("Starting FlowProgrammer JAXB client.");
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/flow/default/";
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/flowprogrammer/default/";
         // Attempt to get a flow that doesn't exit. Should return 404
         // status.
-        String result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "GET");
+        String result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test1", "GET");
         Assert.assertTrue(result.equals("404"));
 
         // test add flow1
         String fc = "{\"name\":\"test1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
-        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "PUT", fc);
+        result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test1", "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
         // test get returns flow that was added.
-        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "GET");
+        result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test1", "GET");
         // check that result came out fine.
         Assert.assertTrue(httpResponseCode == 200);
         JSONTokener jt = new JSONTokener(result);
@@ -860,17 +860,17 @@ public class NorthboundIT {
         Assert.assertEquals(node.getString("id"), "51966");
         // test adding same flow again fails due to repeat name..return 409
         // code
-        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test1", "PUT", fc);
+        result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test1", "PUT", fc);
         Assert.assertTrue(result.equals("409"));
 
         fc = "{\"name\":\"test2\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
-        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "PUT", fc);
+        result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test2", "PUT", fc);
         // test should return 409 for error due to same flow being added.
         Assert.assertTrue(result.equals("409"));
 
         // add second flow that's different
         fc = "{\"name\":\"test2\", \"nwSrc\":\"1.1.1.1\", \"node\":{\"id\":\"51966\",\"type\":\"STUB\"}, \"actions\":[\"DROP\"]}";
-        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "PUT", fc);
+        result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test2", "PUT", fc);
         Assert.assertTrue(httpResponseCode == 201);
 
         // check that request returns both flows given node.
@@ -892,10 +892,10 @@ public class NorthboundIT {
         Assert.assertTrue(count == 2);
 
         // delete a flow, check that it's no longer in list.
-        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "DELETE");
-        Assert.assertTrue(httpResponseCode == 200);
+        result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test2", "DELETE");
+        Assert.assertTrue(httpResponseCode == 204);
 
-        result = getJsonResult(baseURL + "node/STUB/51966/static-flow/test2", "GET");
+        result = getJsonResult(baseURL + "node/STUB/51966/staticFlow/test2", "GET");
         Assert.assertTrue(result.equals("404"));
     }
 
@@ -970,7 +970,7 @@ public class NorthboundIT {
         Integer nodeConnectorId_2 = 34;
         String vlan_2 = "123";
 
-        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/host/default";
+        String baseURL = "http://127.0.0.1:8080/controller/nb/v2/hosttracker/default";
 
         // test PUT method: addHost()
         JSONObject fc_json = new JSONObject();
@@ -983,7 +983,7 @@ public class NorthboundIT {
         fc_json.put("staticHost", "true");
         fc_json.put("networkAddress", networkAddress_1);
 
-        String result = getJsonResult(baseURL + "/" + networkAddress_1, "PUT", fc_json.toString());
+        String result = getJsonResult(baseURL + "/address/" + networkAddress_1, "PUT", fc_json.toString());
         Assert.assertTrue(httpResponseCode == 201);
 
         fc_json = new JSONObject();
@@ -996,7 +996,7 @@ public class NorthboundIT {
         fc_json.put("staticHost", "true");
         fc_json.put("networkAddress", networkAddress_2);
 
-        result = getJsonResult(baseURL + "/" + networkAddress_2 , "PUT", fc_json.toString());
+        result = getJsonResult(baseURL + "/address/" + networkAddress_2 , "PUT", fc_json.toString());
         Assert.assertTrue(httpResponseCode == 201);
 
         // define variables for decoding returned strings
@@ -1005,7 +1005,7 @@ public class NorthboundIT {
 
         // the two hosts should be in inactive host DB
         // test GET method: getInactiveHosts()
-        result = getJsonResult(baseURL + "/inactive", "GET");
+        result = getJsonResult(baseURL + "/hosts/inactive", "GET");
         Assert.assertTrue(httpResponseCode == 200);
 
         JSONTokener jt = new JSONTokener(result);
@@ -1041,7 +1041,7 @@ public class NorthboundIT {
         }
 
         // test GET method: getActiveHosts() - no host expected
-        result = getJsonResult(baseURL, "GET");
+        result = getJsonResult(baseURL + "/hosts/active", "GET");
         Assert.assertTrue(httpResponseCode == 200);
 
         jt = new JSONTokener(result);
@@ -1063,7 +1063,7 @@ public class NorthboundIT {
 
         // verify the host shows up in active host DB
 
-        result = getJsonResult(baseURL, "GET");
+        result = getJsonResult(baseURL + "/hosts/active", "GET");
         Assert.assertTrue(httpResponseCode == 200);
 
         jt = new JSONTokener(result);
@@ -1073,7 +1073,7 @@ public class NorthboundIT {
 
         // test GET method for getHostDetails()
 
-        result = getJsonResult(baseURL + "/" + networkAddress_1, "GET");
+        result = getJsonResult(baseURL + "/address/" + networkAddress_1, "GET");
         Assert.assertTrue(httpResponseCode == 200);
 
         jt = new JSONTokener(result);
@@ -1091,13 +1091,13 @@ public class NorthboundIT {
 
         // test DELETE method for deleteFlow()
 
-        result = getJsonResult(baseURL + "/" + networkAddress_1, "DELETE");
+        result = getJsonResult(baseURL + "/address/" + networkAddress_1, "DELETE");
         Assert.assertTrue(httpResponseCode == 204);
 
         // verify host_1 removed from active host DB
         // test GET method: getActiveHosts() - no host expected
 
-        result = getJsonResult(baseURL, "GET");
+        result = getJsonResult(baseURL + "/hosts/active", "GET");
         Assert.assertTrue(httpResponseCode == 200);
 
         jt = new JSONTokener(result);
@@ -1246,11 +1246,11 @@ public class NorthboundIT {
                 .put("dstNodeConnector",
                         nodeConnectorType_2 + "|" + nodeConnectorId_2 + "@" + nodeType_2 + "|" + nodeId_2);
         // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "/user-link", "PUT", jo.toString());
+        result = getJsonResult(baseURL + "/userLink/userLink_1", "PUT", jo.toString());
         Assert.assertTrue(httpResponseCode == 201);
 
         // === test GET method for getUserLinks()
-        result = getJsonResult(baseURL + "/user-link", "GET");
+        result = getJsonResult(baseURL + "/userLinks", "GET");
         Assert.assertTrue(httpResponseCode == 200);
         if (debugMsg) {
             System.out.println("result:" + result);
@@ -1295,12 +1295,12 @@ public class NorthboundIT {
 
         // === test DELETE method for deleteUserLink()
         String userName = "userLink_1";
-        result = getJsonResult(baseURL + "/user-link/" + userName, "DELETE");
-        Assert.assertTrue(httpResponseCode == 200);
+        result = getJsonResult(baseURL + "/userLink/" + userName, "DELETE");
+        Assert.assertTrue(httpResponseCode == 204);
 
         // execute another getUserLinks() request to verify that userLink_1 is
         // removed
-        result = getJsonResult(baseURL + "/user-link", "GET");
+        result = getJsonResult(baseURL + "/userLinks", "GET");
         Assert.assertTrue(httpResponseCode == 200);
         if (debugMsg) {
             System.out.println("result:" + result);

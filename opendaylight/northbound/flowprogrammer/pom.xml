@@ -60,7 +60,7 @@
             </Import-Package>
             <Export-Package>
             </Export-Package>
-            <Web-ContextPath>/controller/nb/v2/flow</Web-ContextPath>
+            <Web-ContextPath>/controller/nb/v2/flowprogrammer</Web-ContextPath>
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>

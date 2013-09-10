@@ -48,7 +48,7 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 
 /**
- * Flow Configuration Northbound API
+ * Flow Configuration Northbound API provides capabilities to program flows.
  *
  * <br>
  * <br>
@@ -56,11 +56,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
  * Authentication realm : <b>opendaylight</b><br>
  * Transport : <b>HTTP and HTTPS</b><br>
  * <br>
- * HTTPS Authentication is disabled by default. Administrator can enable it in
- * tomcat-server.xml after adding a proper keystore / SSL certificate from a
- * trusted authority.<br>
- * More info :
- * http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
+ * HTTPS Authentication is disabled by default.
  *
  */
 @Path("/")
@@ -158,7 +154,7 @@ public class FlowProgrammerNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/flow/default
+     * http://localhost:8080/controller/nb/v2/flowprogrammer/default
      *
      * Response in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
@@ -223,7 +219,7 @@ public class FlowProgrammerNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01
+     * http://localhost:8080/controller/nb/v2/flowprogrammer/default/node/OF/00:00:00:00:00:00:00:01
      *
      * Response in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
@@ -296,7 +292,7 @@ public class FlowProgrammerNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01/static-flow/flow1
+     * http://localhost:8080/controller/nb/v2/flowprogrammer/default/node/OF/00:00:00:00:00:00:00:01/staticFlow/flow1
      *
      * Response in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
@@ -320,7 +316,7 @@ public class FlowProgrammerNorthbound {
      *
      * </pre>
      */
-    @Path("/{containerName}/node/{nodeType}/{nodeId}/static-flow/{name}")
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/staticFlow/{name}")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(FlowConfig.class)
@@ -357,7 +353,8 @@ public class FlowProgrammerNorthbound {
     }
 
     /**
-     * Add a flow configuration
+     * Add a flow configuration. If a flow by the given name already
+     * exists, this method will respond with a non-successful status response.
      *
      * @param containerName
      *            Name of the Container (Eg. 'default')
@@ -376,7 +373,7 @@ public class FlowProgrammerNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01/static-flow/flow1
+     * http://localhost:8080/controller/nb/v2/flowprogrammer/default/node/OF/00:00:00:00:00:00:00:01/staticFlow/flow1
      *
      * Request in XML:
      * &lt;flowConfig&gt;
@@ -400,7 +397,7 @@ public class FlowProgrammerNorthbound {
      * </pre>
      */
 
-    @Path("/{containerName}/node/{nodeType}/{nodeId}/static-flow/{name}")
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/staticFlow/{name}")
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
@@ -476,16 +473,16 @@ public class FlowProgrammerNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01/static-flow/flow1
+     * http://localhost:8080/controller/nb/v2/flowprogrammer/default/node/OF/00:00:00:00:00:00:00:01/staticFlow/flow1
      *
      * </pre>
      */
 
-    @Path("/{containerName}/node/{nodeType}/{nodeId}/static-flow/{name}")
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/staticFlow/{name}")
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Flow Config deleted successfully"),
+            @ResponseCode(code = 204, condition = "Flow Config deleted successfully"),
             @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The Container Name or Node-id or Flow Name passed is not found"),
             @ResponseCode(code = 406, condition = "Failed to delete Flow config due to invalid operation. Failure details included in HTTP Error response"),
@@ -523,6 +520,7 @@ public class FlowProgrammerNorthbound {
         Status status = frm.removeStaticFlow(name, node);
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Flow", username, "removed", name, containerName);
+            return Response.noContent().build();
         }
         return NorthboundUtils.getResponse(status);
     }
@@ -545,11 +543,11 @@ public class FlowProgrammerNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/flow/default/node/OF/00:00:00:00:00:00:00:01/static-flow/flow1
+     * http://localhost:8080/controller/nb/v2/flowprogrammer/default/node/OF/00:00:00:00:00:00:00:01/staticFlow/flow1
      *
      * </pre>
      */
-    @Path("/{containerName}/node/{nodeType}/{nodeId}/static-flow/{name}")
+    @Path("/{containerName}/node/{nodeType}/{nodeId}/staticFlow/{name}")
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({

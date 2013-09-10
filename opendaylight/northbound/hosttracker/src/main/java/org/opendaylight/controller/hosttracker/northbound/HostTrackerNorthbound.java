@@ -62,11 +62,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
  * Authentication realm : <b>opendaylight</b><br>
  * Transport : <b>HTTP and HTTPS</b><br>
  * <br>
- * HTTPS Authentication is disabled by default. Administrator can enable it in
- * tomcat-server.xml after adding a proper keystore / SSL certificate from a
- * trusted authority.<br>
- * More info :
- * http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
+ * HTTPS Authentication is disabled by default.
  *
  */
 
@@ -137,7 +133,7 @@ public class HostTrackerNorthbound {
      *
      * RequestURL:
      *
-     * http://localhost:8080/controller/nb/v2/host/default
+     * http://localhost:8080/controller/nb/v2/hosttracker/default/hosts/active
      *
      * Response in XML
      *
@@ -192,7 +188,7 @@ public class HostTrackerNorthbound {
      * }
      * </pre>
      */
-    @Path("/{containerName}")
+    @Path("/{containerName}/hosts/active")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Hosts.class)
@@ -224,7 +220,7 @@ public class HostTrackerNorthbound {
      *
      * RequestURL:
      *
-     * http://localhost:8080/controller/nb/v2/host/default/inactive
+     * http://localhost:8080/controller/nb/v2/hosttracker/default/hosts/inactive
      *
      * Response in XML
      *
@@ -279,7 +275,7 @@ public class HostTrackerNorthbound {
      * }
      * </pre>
      */
-    @Path("/{containerName}/inactive")
+    @Path("/{containerName}/hosts/inactive")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Hosts.class)
@@ -312,7 +308,7 @@ public class HostTrackerNorthbound {
      *
      * RequestURL:
      *
-     * http://localhost:8080/controller/nb/v2/host/default/1.1.1.1
+     * http://localhost:8080/controller/nb/v2/hosttracker/default/address/1.1.1.1
      *
      * Response in XML
      *
@@ -341,7 +337,7 @@ public class HostTrackerNorthbound {
      * }
      * </pre>
      */
-    @Path("/{containerName}/{networkAddress}")
+    @Path("/{containerName}/address/{networkAddress}")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(HostConfig.class)
@@ -374,7 +370,8 @@ public class HostTrackerNorthbound {
     }
 
     /**
-     * Add a Static Host configuration
+     * Add a Static Host configuration. If a host by the given address already
+     * exists, this method will respond with a non-successful status response.
      *
      * @param containerName
      *            Name of the Container. The Container name for the base
@@ -391,7 +388,7 @@ public class HostTrackerNorthbound {
      *
      * RequestURL:
      *
-     * http://localhost:8080/controller/nb/v2/host/default/1.1.1.1
+     * http://localhost:8080/controller/nb/v2/hosttracker/default/address/1.1.1.1
      *
      * Request in XML
      *
@@ -421,7 +418,7 @@ public class HostTrackerNorthbound {
      * </pre>
      */
 
-    @Path("/{containerName}/{networkAddress}")
+    @Path("/{containerName}/address/{networkAddress}")
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
@@ -477,7 +474,7 @@ public class HostTrackerNorthbound {
      * @return Response as dictated by the HTTP Response code.
      */
 
-    @Path("/{containerName}/{networkAddress}")
+    @Path("/{containerName}/address/{networkAddress}")
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
