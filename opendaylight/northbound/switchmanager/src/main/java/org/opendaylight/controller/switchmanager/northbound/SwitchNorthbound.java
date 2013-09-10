@@ -119,7 +119,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/switch/default/nodes
+     * http://localhost:8080/controller/nb/v2/switchmanager/default/nodes
      *
      * Response in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
@@ -194,7 +194,7 @@ public class SwitchNorthbound {
         List<NodeProperties> res = new ArrayList<NodeProperties>();
         Set<Node> nodes = switchManager.getNodes();
         if (nodes == null) {
-            return null;
+            return new Nodes(res);
         }
 
         for (Node node : nodes) {
@@ -212,7 +212,9 @@ public class SwitchNorthbound {
     }
 
     /**
-     * Add a Description, Tier and Forwarding mode property to a node.
+     * Add a Description, Tier and Forwarding mode property to a node. This
+     * method returns a non-successful response if a node by that name already
+     * exists.
      *
      * @param containerName
      *            Name of the Container (Eg. 'default')
@@ -237,7 +239,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/switch/default/node/OF/00:00:00:00:00:00:00:03/property/description/Switch3
+     * http://localhost:8080/controller/nb/v2/switchmanager/default/node/OF/00:00:00:00:00:00:00:03/property/description/Switch3
      *
      * </pre>
      */
@@ -316,7 +318,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/switch/default/node/OF/00:00:00:00:00:00:00:03/property/forwarding
+     * http://localhost:8080/controller/nb/v2/switchmanager/default/node/OF/00:00:00:00:00:00:00:03/property/forwarding
      *
      * </pre>
      */
@@ -325,7 +327,7 @@ public class SwitchNorthbound {
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 204, condition = "Property removed successfully"),
             @ResponseCode(code = 400, condition = "The nodeId or configuration is invalid"),
             @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
@@ -369,7 +371,8 @@ public class SwitchNorthbound {
                 SwitchConfig newSwitchConfig = new SwitchConfig(node.toString(), nodeProperties);
                 status = switchManager.updateNodeConfig(newSwitchConfig);
                 if(status.isSuccess()){
-                    NorthboundUtils.auditlog("Static Route", username, "updated", nodeId, containerName);
+                    NorthboundUtils.auditlog("Node Property", username, "removed", propertyName  + " from " + nodeId, containerName);
+                    return Response.noContent().build();
                 }
             }
         }
@@ -401,7 +404,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/switch/default/node/OF/00:00:00:00:00:00:00:01
+     * http://localhost:8080/controller/nb/v2/switchmanager/default/node/OF/00:00:00:00:00:00:00:01
      *
      * Response in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
@@ -489,7 +492,9 @@ public class SwitchNorthbound {
     }
 
     /**
-     * Add Bandwidth property to a node connector
+     * Add node-connector property to a node connector. This method returns a
+     * non-successful response if a node connector by the given name already
+     * exists.
      *
      * @param containerName
      *            Name of the Container (Eg. 'default')
@@ -521,7 +526,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/switch/default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth/1
+     * http://localhost:8080/controller/nb/v2/switchmanager/default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth/1
      *
      * </pre>
      */
@@ -610,7 +615,7 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/switch/default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth
+     * http://localhost:8080/controller/nb/v2/switchmanager/default/nodeconnector/OF/00:00:00:00:00:00:00:01/OF/2/property/bandwidth
      *
      * </pre>
      */
@@ -619,7 +624,7 @@ public class SwitchNorthbound {
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 204, condition = "Property removed successfully"),
             @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
@@ -657,7 +662,7 @@ public class SwitchNorthbound {
         Status ret = switchManager.removeNodeConnectorProp(nc, propertyName);
         if (ret.isSuccess()) {
             NorthboundUtils.auditlog("Node Connector Property", username, "removed", nc + " from " + nodeConnectorId, containerName);
-            return Response.ok().build();
+            return Response.noContent().build();
         }
         throw new ResourceNotFoundException(ret.getDescription());
     }
@@ -674,11 +679,11 @@ public class SwitchNorthbound {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/switch/default/switch-config
+     * http://localhost:8080/controller/nb/v2/switchmanager/default/save
      *
      * </pre>
      */
-    @Path("/{containerName}/switch-config")
+    @Path("/{containerName}/save")
     @POST
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({

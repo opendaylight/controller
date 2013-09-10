@@ -28,12 +28,14 @@
           <instructions>
             <Export-Package>
               org.opendaylight.controller.northbound.commons.exception,
+              org.opendaylight.controller.northbound.commons.types,
               org.opendaylight.controller.northbound.commons.utils,
               org.opendaylight.controller.northbound.commons
             </Export-Package>
             <Import-Package>
               javax.ws.rs,
               javax.ws.rs.core,
+              javax.xml.bind.annotation,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.authorization,
               org.opendaylight.controller.containermanager,

@@ -61,7 +61,7 @@
               org.codehaus.jackson.jaxrs,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
-            <Web-ContextPath>/controller/nb/v2/host</Web-ContextPath>
+            <Web-ContextPath>/controller/nb/v2/hosttracker</Web-ContextPath>
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>

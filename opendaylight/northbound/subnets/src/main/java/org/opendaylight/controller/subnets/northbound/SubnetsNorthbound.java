@@ -8,6 +8,7 @@
 package org.opendaylight.controller.subnets.northbound;
 
 import java.util.HashSet;
+
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +45,19 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.SubnetConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+/**
+ * This class provides REST APIs to manage subnets.
+ *
+ * <br>
+ * <br>
+ * Authentication scheme : <b>HTTP Basic</b><br>
+ * Authentication realm : <b>opendaylight</b><br>
+ * Transport : <b>HTTP and HTTPS</b><br>
+ * <br>
+ * HTTPS Authentication is disabled by default.
+ *
+ */
 
 @Path("/")
 public class SubnetsNorthbound {
@@ -100,7 +114,7 @@ public class SubnetsNorthbound {
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnet/default/subnet/all
+     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnets
      *
      * Response in XML:
      * &lt;subnetConfig&gt;
@@ -131,7 +145,7 @@ public class SubnetsNorthbound {
      * }
      * </pre>
      */
-    @Path("/{containerName}/subnet/all")
+    @Path("/{containerName}/subnets")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({ @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
@@ -165,7 +179,7 @@ public class SubnetsNorthbound {
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnet/default/subnet/subnet1
+     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1
      *
      * Response in XML:
      * &lt;subnetConfig&gt;
@@ -213,7 +227,8 @@ public class SubnetsNorthbound {
     }
 
     /**
-     * Add a subnet to a container
+     * Add a subnet to a container. If a subnet by the given name already exists
+     * this method will return a non-successful response.
      *
      * @param containerName
      *            name of the container to which subnet needs to be added
@@ -227,7 +242,7 @@ public class SubnetsNorthbound {
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnet/default/subnet/subnet1
+     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1
      *
      * Request XML:
      *  &lt;subnetConfig&gt;
@@ -244,7 +259,7 @@ public class SubnetsNorthbound {
      */
 
     @Path("/{containerName}/subnet/{subnetName}")
-    @POST
+    @PUT
     @StatusCodes({ @ResponseCode(code = 201, condition = "Subnet created successfully"),
             @ResponseCode(code = 400, condition = "Invalid data passed"),
             @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
@@ -297,7 +312,7 @@ public class SubnetsNorthbound {
      *
      *         <pre>
      * Example:
-     *            Request URL: http://localhost:8080/controller/nb/v2/subnet/default/subnet/subnet1
+     *            Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1
      *
      * </pre>
      */
@@ -345,7 +360,7 @@ public class SubnetsNorthbound {
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnet/default/subnet/subnet1/node-ports
+     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1/nodePorts
      *
      *  Request in XML:
      *  &lt;subnetConfig&gt;
@@ -364,8 +379,8 @@ public class SubnetsNorthbound {
      * }
      * </pre>
      */
-    @Path("/{containerName}/subnet/{subnetName}/node-ports")
-    @PUT
+    @Path("/{containerName}/subnet/{subnetName}/nodePorts")
+    @POST
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Ports replaced successfully"),
@@ -442,7 +457,7 @@ public class SubnetsNorthbound {
     }
 
     /**
-     * Add ports to a subnet in the container
+     * Add ports to a subnet in the container.
      *
      * @param containerName
      *            name of the container that has the subnet to which node ports
@@ -455,7 +470,7 @@ public class SubnetsNorthbound {
      *
      *         <pre>
      * Example:
-     *            Request URL: http://localhost:8080/controller/nb/v2/subnet/default/subnet/subnet1/node-ports
+     *            Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1/nodePorts
      *
      * Request XML:
      *  &lt;subnetConfig&gt;
@@ -475,8 +490,8 @@ public class SubnetsNorthbound {
      *
      * </pre>
      */
-    @Path("/{containerName}/subnet/{subnetName}/node-ports")
-    @POST
+    @Path("/{containerName}/subnet/{subnetName}/nodePorts")
+    @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
             @ResponseCode(code = 200, condition = "Added node ports to subnet successfully"),
@@ -557,7 +572,7 @@ public class SubnetsNorthbound {
      *
      *         <pre>
      * Example:
-     *            Request URL: http://localhost:8080/controller/nb/v2/subnet/default/subnet/subnet1/node-ports
+     *            Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1/nodePorts
      *
      * Request XML:
      *  &lt;subnetConfig&gt;
@@ -573,7 +588,7 @@ public class SubnetsNorthbound {
      *
      * </pre>
      */
-    @Path("/{containerName}/subnet/{subnetName}/node-ports")
+    @Path("/{containerName}/subnet/{subnetName}/nodePorts")
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
@@ -635,7 +650,7 @@ public class SubnetsNorthbound {
             }
         }
         if (successful) {
-            return Response.status(Response.Status.NO_CONTENT).build();
+            return Response.noContent().build();
         }
         throw new InternalServerErrorException(RestMessages.INTERNALERROR.toString());
     }

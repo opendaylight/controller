@@ -52,11 +52,7 @@ import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
  * Authentication realm : <b>opendaylight</b><br>
  * Transport : <b>HTTP and HTTPS</b><br>
  * <br>
- * HTTPS Authentication is disabled by default. Administrator can enable it in
- * tomcat-server.xml after adding a proper keystore / SSL certificate from a
- * trusted authority.<br>
- * More info :
- * http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration
+ * HTTPS Authentication is disabled by default.
  */
 
 @Path("/")
@@ -81,7 +77,7 @@ public class TopologyNorthboundJAXRS {
      *            The container for which we want to retrieve the topology (Eg.
      *            'default')
      *
-     * @return A List of EdgeProps each EdgeProp represent an Edge of the grap
+     * @return A List of EdgeProps each EdgeProp represent an Edge of the graph
      *         with the corresponding properties attached to it.
      *
      *         <pre>
@@ -222,7 +218,7 @@ public class TopologyNorthboundJAXRS {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/topology/default/user-link
+     * http://localhost:8080/controller/nb/v2/topology/default/userLinks
      *
      * Response in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
@@ -241,7 +237,7 @@ public class TopologyNorthboundJAXRS {
      *
      * </pre>
      */
-    @Path("/{containerName}/user-link")
+    @Path("/{containerName}/userLinks")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(TopologyUserLinks.class)
@@ -278,6 +274,8 @@ public class TopologyNorthboundJAXRS {
      *
      * @param containerName
      *            Name of the Container (Eg. 'default')
+     * @param name
+     *            Name of the user link
      * @param TopologyUserLinkConfig
      *            in JSON or XML format
      * @return Response as dictated by the HTTP Response Status code
@@ -287,7 +285,7 @@ public class TopologyNorthboundJAXRS {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/topology/default/user-link
+     * http://localhost:8080/controller/nb/v2/topology/default/userLink/link1
      *
      * Request in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
@@ -303,7 +301,7 @@ public class TopologyNorthboundJAXRS {
      *
      * </pre>
      */
-    @Path("/{containerName}/user-link")
+    @Path("/{containerName}/userLink/{name}")
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -315,6 +313,7 @@ public class TopologyNorthboundJAXRS {
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response addUserLink(
             @PathParam(value = "containerName") String containerName,
+            @PathParam(value = "name") String name,
             @TypeHint(TopologyUserLinkConfig.class) TopologyUserLinkConfig userLinkConfig) {
 
         if (!NorthboundUtils.isAuthorized(
@@ -352,16 +351,16 @@ public class TopologyNorthboundJAXRS {
      * Example:
      *
      * RequestURL:
-     * http://localhost:8080/controller/nb/v2/topology/default/user-link/config1
+     * http://localhost:8080/controller/nb/v2/topology/default/userLink/config1
      *
      * </pre>
      */
-    @Path("/{containerName}/user-link/{name}")
+    @Path("/{containerName}/userLink/{name}")
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
+            @ResponseCode(code = 204, condition = "User link removed successfully"),
             @ResponseCode(code = 404, condition = "The Container Name or Link Configuration Name was not found"),
             @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
     public Response deleteUserLink(
@@ -384,8 +383,8 @@ public class TopologyNorthboundJAXRS {
         Status ret = topologyManager.deleteUserLink(name);
         if (ret.isSuccess()) {
             NorthboundUtils.auditlog("User Link", username, "removed", name, containerName);
-            return Response.ok().build();
+            return Response.noContent().build();
         }
-        throw new ResourceNotFoundException(ret.getDescription());
+        return NorthboundUtils.getResponse(ret);
     }
 }

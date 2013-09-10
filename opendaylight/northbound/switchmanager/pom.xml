@@ -60,7 +60,7 @@
               org.codehaus.jackson.jaxrs,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
-            <Web-ContextPath>/controller/nb/v2/switch</Web-ContextPath>
+            <Web-ContextPath>/controller/nb/v2/switchmanager</Web-ContextPath>
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>

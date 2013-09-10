@@ -7,6 +7,6 @@
   </services>
 
   <modules>
-    <docs docsDir="rest" title="REST API" includeExampleXml="true" includeExampleJson="true"/>
+    <docs docsDir="rest" title="Topology REST API" includeExampleXml="true" includeExampleJson="true"/>
   </modules>
 </enunciate>
