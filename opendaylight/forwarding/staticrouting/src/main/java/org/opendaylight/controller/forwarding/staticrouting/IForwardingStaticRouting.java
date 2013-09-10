@@ -30,13 +30,13 @@ public interface IForwardingStaticRouting {
      * @param ipAddress (InetAddress) the IP address
      * @return StaticRoute
      */
-    public StaticRoute getBestMatchStaticRoute(InetAddress ipAddress);
+    StaticRoute getBestMatchStaticRoute(InetAddress ipAddress);
 
     /**
      * Returns all the StaticRouteConfig
      * @return all the StaticRouteConfig
      */
-    public ConcurrentMap<String, StaticRouteConfig> getStaticRouteConfigs();
+    ConcurrentMap<String, StaticRouteConfig> getStaticRouteConfigs();
 
     /**
      * Adds a StaticRouteConfig
@@ -44,7 +44,7 @@ public interface IForwardingStaticRouting {
      * @return a text string indicating the result of the operation..
      * If the operation is successful, the return string will be "SUCCESS"
      */
-    public Status addStaticRoute(StaticRouteConfig config);
+    Status addStaticRoute(StaticRouteConfig config);
 
     /**
      * Removes  the named StaticRouteConfig
@@ -52,5 +52,5 @@ public interface IForwardingStaticRouting {
      * @return a text string indicating the result of the operation.
      * If the operation is successful, the return string will be "SUCCESS"
      */
-    public Status removeStaticRoute(String name);
+    Status removeStaticRoute(String name);
 }

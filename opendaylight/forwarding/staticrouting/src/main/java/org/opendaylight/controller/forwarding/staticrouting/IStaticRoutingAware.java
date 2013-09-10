@@ -21,5 +21,5 @@ public interface IStaticRoutingAware {
      * @param s: StaticRoute
      * @param added: boolean true if the static route is added,
      */
-    public void staticRouteUpdate(StaticRoute s, boolean added);
+    void staticRouteUpdate(StaticRoute s, boolean added);
 }

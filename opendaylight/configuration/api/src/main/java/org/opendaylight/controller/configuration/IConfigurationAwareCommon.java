@@ -22,5 +22,5 @@ public interface IConfigurationAwareCommon {
     /**
      * Trigger from configuration component to persist the configuration state.
      */
-    public Status saveConfiguration();
+    Status saveConfiguration();
 }

@@ -30,7 +30,7 @@ public interface PortGroupProvider {
      *            New PortGroupConfig object created by user Configuration.
      * @return true if successful. false otherwise.
      */
-    public boolean createPortGroupConfig(PortGroupConfig config);
+    boolean createPortGroupConfig(PortGroupConfig config);
 
     /**
      * This method is invoked by the Controller towards the Provider when an
@@ -40,7 +40,7 @@ public interface PortGroupProvider {
      *            Existing Port Group Configuration deleted by the user.
      * @return true if successful. false otherwise.
      */
-    public boolean deletePortGroupConfig(PortGroupConfig config);
+    boolean deletePortGroupConfig(PortGroupConfig config);
 
     /**
      * Returns the complete mapping database corresponds to a PortGroup
@@ -54,7 +54,7 @@ public interface PortGroupProvider {
      * @return Database of Switch-Id to PortGroup mapping that corresponds to
      *         the Port Group User Configuration.
      */
-    public Map<Node, PortGroup> getPortGroupData(PortGroupConfig config);
+    Map<Node, PortGroup> getPortGroupData(PortGroupConfig config);
 
     /**
      * Returns PortGroup data for a given Switch and user Configuration. Its the
@@ -70,7 +70,7 @@ public interface PortGroupProvider {
      * @return PortGroup data for a given Openflow switch.
      * @see PortGroup
      */
-    public PortGroup getPortGroupData(PortGroupConfig config, long matrixSwitchId);
+    PortGroup getPortGroupData(PortGroupConfig config, long matrixSwitchId);
 
     /**
      * Registers a Listener for Port Group membership changes based on Custom
@@ -80,7 +80,7 @@ public interface PortGroupProvider {
      *            A Controller module that listens to events from the Custom
      *            Port Grouping Application.
      */
-    public void registerPortGroupChange(PortGroupChangeListener listener);
+    void registerPortGroupChange(PortGroupChangeListener listener);
 
     /**
      * Application returns an Usage string for the Match Criteria User
@@ -91,7 +91,7 @@ public interface PortGroupProvider {
      *
      * @return Usage string.
      */
-    public String getApplicationDrivenMatchCriteriaUsage();
+    String getApplicationDrivenMatchCriteriaUsage();
 
     /**
      * Returns the name of the Custom Application that implements
@@ -99,7 +99,7 @@ public interface PortGroupProvider {
      *
      * @return Provider Name
      */
-    public String getProviderName();
+    String getProviderName();
 
     /**
      * Controller uses this method to check with the Provider supports the
@@ -109,5 +109,5 @@ public interface PortGroupProvider {
      * @return true if the Provider supports the matchCriteria String. false
      *         otherwise.
      */
-    public boolean isMatchCriteriaSupported(String matchCriteria);
+    boolean isMatchCriteriaSupported(String matchCriteria);
 }
