@@ -90,7 +90,7 @@ public class ForwardingRulesManagerIT {
                 mavenBundle("org.opendaylight.controller", "containermanager")
                         .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
-                        "containermanager.implementation").versionAsInProject(),
+                        "containermanager.it.implementation").versionAsInProject(),
 
                 mavenBundle("org.opendaylight.controller",
                         "forwardingrulesmanager").versionAsInProject(),
