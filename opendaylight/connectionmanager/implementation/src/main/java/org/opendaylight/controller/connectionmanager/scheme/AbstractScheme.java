@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.transaction.SystemException;
-
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
@@ -128,7 +126,6 @@ public abstract class AbstractScheme {
         return controllerNodesMap.get(controller);
     }
 
-    @SuppressWarnings("deprecation")
     public Set<Node> getNodes() {
         return getNodes(clusterServices.getMyAddress());
     }
@@ -142,7 +139,6 @@ public abstract class AbstractScheme {
         return nodeConnections;
     }
 
-    @SuppressWarnings("deprecation")
     public boolean isLocal(Node node) {
         if (nodeConnections == null) return false;
         InetAddress myController = clusterServices.getMyAddress();
@@ -150,7 +146,6 @@ public abstract class AbstractScheme {
         return (controllers != null && controllers.contains(myController));
     }
 
-    @SuppressWarnings("deprecation")
     public Status removeNode (Node node) {
         return removeNodeFromController(node, clusterServices.getMyAddress());
     }
