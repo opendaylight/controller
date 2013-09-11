@@ -63,7 +63,9 @@ public class SwitchNorthbound {
 
     @Context
     public void setSecurityContext(SecurityContext context) {
-        if (context != null && context.getUserPrincipal() != null) username = context.getUserPrincipal().getName();
+        if (context != null && context.getUserPrincipal() != null) {
+            username = context.getUserPrincipal().getName();
+        }
     }
 
     protected String getUserName() {
@@ -222,19 +224,19 @@ public class SwitchNorthbound {
      *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
      *            Node Identifier as specified by
-     *            {@link org.opendaylight.controller.sal.core.Node}
-     *            (Eg. '00:00:00:00:00:00:00:03')
+     *            {@link org.opendaylight.controller.sal.core.Node} (Eg.
+     *            '00:00:00:00:00:00:00:03')
      * @param propertyName
-     *            Name of the Property. Properties that can be
-     *            configured are: description, forwarding(only for default
-     *            container) and tier
+     *            Name of the Property. Properties that can be configured are:
+     *            description, forwarding(only for default container) and tier
      * @param propertyValue
-     *            Value of the Property. Description can be any string (Eg. 'Node1'),
-     *            valid values for tier are 0, 1 and 2, and valid values for forwarding are 0 for
-     *            reactive and 1 for proactive forwarding.
+     *            Value of the Property. Description can be any string (Eg.
+     *            'Node1'), valid values for tier are non negative numbers, and
+     *            valid values for forwarding are 0 for reactive and 1 for
+     *            proactive forwarding.
      * @return Response as dictated by the HTTP Response Status code
      *
-     * <pre>
+     *         <pre>
      *
      * Example:
      *

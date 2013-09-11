@@ -13,7 +13,7 @@ import java.util.List;
 public class NodeJsonBean {
     String nodeId;
     String nodeName;
-    List<String> nodePorts;
+    List<PortJsonBean> nodePorts;
 
     public String getNodeId() {
         return nodeId;
@@ -23,7 +23,7 @@ public class NodeJsonBean {
         return nodeName;
     }
 
-    public List<String> getNodePorts() {
+    public List<PortJsonBean> getNodePorts() {
         return nodePorts;
     }
 
@@ -35,7 +35,7 @@ public class NodeJsonBean {
         this.nodeName = nodeName;
     }
 
-    public void setNodePorts(List<String> port) {
+    public void setNodePorts(List<PortJsonBean> port) {
         this.nodePorts = port;
     }
 

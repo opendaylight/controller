@@ -31,7 +31,7 @@ public interface ISwitchManager {
      * Add a subnet configuration
      *
      * @param  configObject refer to {@link Open Declaration org.opendaylight.controller.switchmanager.SubnetConfig}
-     * @return "Success" or failure reason
+     * @return the Status object representing the result of the request
      */
     public Status addSubnet(SubnetConfig configObject);
 
@@ -39,9 +39,17 @@ public interface ISwitchManager {
      * Remove a subnet configuration
      *
      * @param  configObject refer to {@link Open Declaration org.opendaylight.controller.switchmanager.SubnetConfig}
-     * @return "Success" or failure reason
+     * @return the Status object representing the result of the request
      */
     public Status removeSubnet(SubnetConfig configObject);
+
+    /**
+     * Modify a subnet configuration
+     *
+     * @param  configObject refer to {@link Open Declaration org.opendaylight.controller.switchmanager.SubnetConfig}
+     * @return the Status object representing the result of the request
+     */
+    public Status modifySubnet(SubnetConfig configObject);
 
     /**
      * Remove a subnet configuration given the name
@@ -163,20 +171,20 @@ public interface ISwitchManager {
     /**
      * Add node connectors to a subnet
      *
-     * @param name The subnet config name
-     * @param nodeConnectors nodePorts string specified by {@link Open Declaration org.opendaylight.controller.switchmanager.SubnetConfig}
-     * @return "Success" or failure reason
+     * @param name The configured subnet name
+     * @param nodeConnectors list of string each representing a node connector as specified by {@link Open Declaration org.opendaylight.controller.sal.core.NodeConnector}
+     * @return The Status object indicating the result of this request
      */
-    public Status addPortsToSubnet(String name, String nodeConnectors);
+    public Status addPortsToSubnet(String name, List<String> nodeConnectors);
 
     /**
      * Remove node connectors from a subnet
      *
-     * @param name              the subnet config name
-     * @param nodeConnectors    nodePorts string specified by {@link Open Declaration org.opendaylight.controller.switchmanager.SubnetConfig}
-     * @return "Success" or failure reason
+     * @param name              the configured subnet name
+     * @param nodeConnectors    list of string each representing a node connector as specified by {@link Open Declaration org.opendaylight.controller.sal.core.NodeConnector}
+     * @return The Status object indicating the result of this request
      */
-    public Status removePortsFromSubnet(String name, String nodeConnectors);
+    public Status removePortsFromSubnet(String name, List<String> nodeConnectors);
 
     /**
      * Return the set of all the nodes

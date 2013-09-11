@@ -7,11 +7,7 @@
  */
 package org.opendaylight.controller.subnets.northbound;
 
-import java.util.HashSet;
-
 import java.util.List;
-import java.util.Set;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -24,7 +20,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.xml.bind.JAXBElement;
+import javax.ws.rs.core.UriInfo;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -32,7 +28,6 @@ import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
@@ -67,7 +62,9 @@ public class SubnetsNorthbound {
 
     @Context
     public void setSecurityContext(SecurityContext context) {
-        if (context != null && context.getUserPrincipal() != null) username = context.getUserPrincipal().getName();
+        if (context != null && context.getUserPrincipal() != null) {
+            username = context.getUserPrincipal().getName();
+        }
     }
 
     protected String getUserName() {
@@ -118,30 +115,25 @@ public class SubnetsNorthbound {
      *
      * Response in XML:
      * &lt;subnetConfig&gt;
-     *    &lt;name&gt;subnet1&lt;/name&gt;
-     *    &lt;subnet&gt;30.0.0.1/24&lt;/subnet&gt;
-     *    &lt;nodePorts&gt;1/1&gt;/nodePorts&gt;
-     *    &lt;nodePorts&gt;1/2&gt;/nodePorts&gt;
-     *    &lt;nodePorts&gt;1/3&gt;/nodePorts&gt;
+     *    &lt;name&gt;marketingdepartment&lt;/name&gt;
+     *    &lt;subnet&gt;30.31.54.254/24&lt;/subnet&gt;
      * &lt;/subnetConfig&gt;
      * &lt;subnetConfig&gt;
-     *    &lt;name&gt;subnet2&lt;/name&gt;
-     *    &lt;subnet&gt;20.0.0.1/24&lt;/subnet&gt;
-     *    &lt;nodePorts&gt;2/1&gt;/nodePorts&gt;
-     *    &lt;nodePorts&gt;2/2&gt;/nodePorts&gt;
-     *    &lt;nodePorts&gt;2/3&gt;/nodePorts&gt;
+     *    &lt;name&gt;salesdepartment&lt;/name&gt;
+     *    &lt;subnet&gt;20.18.1.254/16&lt;/subnet&gt;
+     *    &lt;nodeConnectors&gt;0F|11@OF|00:00:00:aa:bb:cc:dd:ee&gt;/nodeConnectors&gt;
+     *    &lt;nodeConnectors&gt;0F|13@OF|00:00:00:aa:bb:cc:dd:ee&gt;/nodeConnectors&gt;
      * &lt;/subnetConfig&gt;
      *
      * Response in JSON:
      * {
-     *  "name":"subnet1",
-     *  "subnet":"30.0.0.1/24",
-     *  "nodePorts":["1/1","1/2","1/3"]
+     *  "name":"marketingdepartment",
+     *  "subnet":"30.31.54.254/24",
      * }
      * {
-     *  "name":"subnet2",
-     *  "subnet":"20.0.0.1/24",
-     *  "nodePorts":["2/1","2/2","2/3"]
+     *  "name":"salesdepartment",
+     *  "subnet":"20.18.1.254/16",
+     *  "nodeConnectors":["0F|11@OF|00:00:00:aa:bb:cc:dd:ee", "0F|13@OF|00:00:00:aa:bb:cc:dd:ee"]
      * }
      * </pre>
      */
@@ -179,22 +171,21 @@ public class SubnetsNorthbound {
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1
+     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/marketingdepartment
      *
      * Response in XML:
      * &lt;subnetConfig&gt;
-     *    &lt;name&gt;subnet1&lt;/name&gt;
+     *    &lt;name&gt;marketingdepartment&lt;/name&gt;
      *    &lt;subnet&gt;30.0.0.1/24&lt;/subnet&gt;
-     *    &lt;nodePorts&gt;1/1&gt;/nodePorts&gt;
-     *    &lt;nodePorts&gt;1/2&gt;/nodePorts&gt;
-     *    &lt;nodePorts&gt;1/3&gt;/nodePorts&gt;
+     *    &lt;nodeConnectors&gt;0F|1@OF|00:00:11:22:33:44:55:66&gt;/nodePorts&gt;
+     *    &lt;nodeConnectors&gt;0F|3@OF|00:00:11:22:33:44:55:66&gt;/nodePorts&gt;
      * &lt;/subnetConfig&gt;
      *
      * Response in JSON:
      * {
-     *  "name":"subnet1",
+     *  "name":"marketingdepartment",
      *  "subnet":"30.0.0.1/24",
-     *  "nodePorts":["1/1","1/2","1/3"]
+     *  "nodeConnectors":["0F|1@OF|00:00:11:22:33:44:55:66", "0F|3@OF|00:00:11:22:33:44:55:66"]
      * }
      * </pre>
      */
@@ -221,17 +212,15 @@ public class SubnetsNorthbound {
         SubnetConfig res = switchManager.getSubnetConfig(subnetName);
         if (res == null) {
             throw new ResourceNotFoundException(RestMessages.NOSUBNET.toString());
-        } else {
-            return res;
         }
+        return res;
     }
 
     /**
-     * Add a subnet to a container. If a subnet by the given name already exists
-     * this method will return a non-successful response.
+     * Add a subnet into the specified container context, node connectors are optional
      *
      * @param containerName
-     *            name of the container to which subnet needs to be added
+     *            name of the container context in which the subnet needs to be added
      * @param subnetName
      *            name of new subnet to be added
      * @param subnetConfigData
@@ -242,18 +231,21 @@ public class SubnetsNorthbound {
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1
+     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/salesdepartment
      *
      * Request XML:
      *  &lt;subnetConfig&gt;
-     *      &lt;name&gt;subnet1&lt;/name&gt;
-     *      &lt;subnet&gt;30.0.0.1/24&lt;/subnet&gt;
-     * &lt;/subnetConfig&gt;
+     *      &lt;name&gt;salesdepartment&lt;/name&gt;
+     *      &lt;subnet&gt;172.173.174.254/24&lt;/subnet&gt;
+     *      &lt;nodeConnectors&gt;0F|22@OF|00:00:11:22:33:44:55:66&gt;/nodeConnectors&gt;
+     *      &lt;nodeConnectors&gt;0F|39@OF|00:00:ab:cd:33:44:55:66&gt;/nodeConnectors&gt;
+     *  &lt;/subnetConfig&gt;
      *
      * Request in JSON:
      * {
-     *  "name":"subnet1",
-     *  "subnet":"30.0.0.1/24"
+     *  "name":"salesdepartment",
+     *  "subnet":"172.173.174.254/24"
+     *  "nodeConnectors":["0F|22@OF|00:00:11:22:33:44:55:66", "0F|39@OF|00:00:ab:cd:33:44:55:66"]
      * }
      * </pre>
      */
@@ -284,16 +276,7 @@ public class SubnetsNorthbound {
         if (switchManager == null) {
             throw new ServiceUnavailableException("SwitchManager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        Set<String> ports = cfgObject.getNodePorts();
-        SubnetConfig subnetCfg = null;
-        if (ports == null) {
-            subnetCfg = new SubnetConfig(cfgObject.getName(), cfgObject.getSubnet(), new HashSet<String>(0));
-        } else {
-            subnetCfg = cfgObject;
-        }
-
-        Status status = switchManager.addSubnet(subnetCfg);
-
+        Status status = switchManager.addSubnet(cfgObject);
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Subnet Gateway", username, "added", subnetName, containerName);
             return Response.status(Response.Status.CREATED).build();
@@ -302,17 +285,17 @@ public class SubnetsNorthbound {
     }
 
     /**
-     * Delete a subnet from a container
+     * Delete a subnet from the specified container context
      *
      * @param containerName
-     *            name of the container from which subnet needs to be removed
+     *            name of the container in which subnet needs to be removed
      * @param subnetName
      *            name of new subnet to be deleted
      * @return Response as dictated by the HTTP Response Status code
      *
      *         <pre>
      * Example:
-     *            Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1
+     *            Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/engdepartment
      *
      * </pre>
      */
@@ -346,53 +329,51 @@ public class SubnetsNorthbound {
     }
 
     /**
-     * Modify a subnet. For now only changing the port list is allowed.
+     * Modify a subnet. Replace the existing subnet with the new specified one.
+     * For now only port list modification is allowed. If the respective subnet
+     * configuration does not exist this call is equivalent to a subnet
+     * creation.
      *
      * @param containerName
-     *            Name of the Container
+     *            Name of the Container context
      * @param subnetName
-     *            Name of the SubnetConfig to be modified
+     *            Name of the subnet to be modified
      * @param subnetConfigData
-     *            the {@link SubnetConfig} structure in request body
-     *            parameter
-     * @return If the operation is successful or not
+     *            the {@link SubnetConfig} structure in request body parameter
+     * @return Response as dictated by the HTTP Response Status code
      *
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1/nodePorts
+     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/salesdepartment
      *
      *  Request in XML:
      *  &lt;subnetConfig&gt;
-     *      &lt;name&gt;subnet1&lt;/name&gt;
-     *      &lt;subnet&gt;30.0.0.1/24&lt;/subnet&gt;
-     *      &lt;nodePorts&gt;1/1&lt;/nodePorts&gt;
-     *      &lt;nodePorts&gt;1/2&lt;/nodePorts&gt;
-     *      &lt;nodePorts&gt;1/3&lt;/nodePorts&gt;
-     * &lt;/subnetConfig&gt;
+     *      &lt;name&gt;salesdepartment&lt;/name&gt;
+     *      &lt;subnet&gt;172.173.174.254/24&lt;/subnet&gt;
+     *      &lt;nodeConnectors&gt;0F|22@OF|00:00:11:22:33:44:55:66&gt;/nodeConnectors&gt;
+     *      &lt;nodeConnectors&gt;0F|39@OF|00:00:ab:cd:33:44:55:66&gt;/nodeConnectors&gt;
+     *  &lt;/subnetConfig&gt;
      *
      * Request in JSON:
      * {
-     *  "name":"subnet1",
-     *  "subnet":"30.0.0.1/24",
-     *  "nodePorts":["1/1","1/2","1/3"]
+     *  "name":"salesdepartment",
+     *  "subnet":"172.173.174.254/24"
+     *  "nodeConnectors":["0F|22@OF|00:00:11:22:33:44:55:66", "0F|39@OF|00:00:ab:cd:33:44:55:66"]
      * }
      * </pre>
      */
-    @Path("/{containerName}/subnet/{subnetName}/nodePorts")
+    @Path("/{containerName}/subnet/{subnetName}")
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes({
-            @ResponseCode(code = 200, condition = "Ports replaced successfully"),
-            @ResponseCode(code = 400, condition = "Invalid request to change subnet name or invalid node ports passed"),
+    @StatusCodes({ @ResponseCode(code = 200, condition = "Configuration replaced successfully"),
             @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
             @ResponseCode(code = 409, condition = "Subnet name in url conflicts with name in request body"),
             @ResponseCode(code = 404, condition = "The containerName or subnetName is not found"),
-            @ResponseCode(code = 500, condition = "Internal server error: Modify ports failed"),
+            @ResponseCode(code = 500, condition = "Internal server error: Modify subnet failed"),
             @ResponseCode(code = 503, condition = "Service unavailable") })
-    public Response modifySubnet(@PathParam("containerName") String containerName,
-            @PathParam("subnetName") String subnetName,
-            @TypeHint(SubnetConfig.class) SubnetConfig subnetConfigData) {
+    public Response modifySubnet(@Context UriInfo uriInfo, @PathParam("containerName") String containerName,
+            @PathParam("subnetName") String subnetName, @TypeHint(SubnetConfig.class) SubnetConfig subnetConfigData) {
 
         handleContainerDoesNotExist(containerName);
 
@@ -408,250 +389,19 @@ public class SubnetsNorthbound {
             throw new ServiceUnavailableException("SwitchManager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        SubnetConfig subnetConf = subnetConfigData;
+        // Need to check this until Status does not return a CREATED status code
         SubnetConfig existingConf = switchManager.getSubnetConfig(subnetName);
 
-        boolean successful = true;
+        Status status = switchManager.modifySubnet(subnetConfigData);
 
-        // make sure that the name matches an existing subnet and we're not
-        // changing the name or subnet IP/mask
-        if (existingConf == null) {
-            // don't have a subnet by that name
-            return Response.status(Response.Status.NOT_FOUND).build();
-
-        } else if (!existingConf.getName().equals(subnetConf.getName())
-                || !existingConf.getSubnet().equals(subnetConf.getSubnet())) {
-            // can't change the name of a subnet
-            Response.status(Response.Status.BAD_REQUEST).build();
-        } else {
-            // create a set for fast lookups
-            Set<String> newPorts = new HashSet<String>(subnetConf.getNodePorts());
-
-            // go through the current ports and (1) remove ports that aren't
-            // there anymore and (2) remove ports that are still there from the
-            // set of ports to add
-            for (String s : existingConf.getNodePorts()) {
-                if (newPorts.contains(s)) {
-                    newPorts.remove(s);
-                } else {
-                    Status st = switchManager.removePortsFromSubnet(subnetName, s);
-                    successful = successful && st.isSuccess();
-                }
-            }
-
-            // add any remaining ports
-            for (String s : newPorts) {
-                Status st = switchManager.addPortsToSubnet(subnetName, s);
-                successful = successful && st.isSuccess();
-                if (successful) {
-                    NorthboundUtils.auditlog("Subnet Gateway", username, "added", s + " to " + subnetName,
-                            containerName);
-                }
+        if (status.isSuccess()) {
+            if (existingConf == null) {
+                NorthboundUtils.auditlog("Subnet Gateway", username, "created", subnetName, containerName);
+                return Response.created(uriInfo.getRequestUri()).build();
+            } else {
+                NorthboundUtils.auditlog("Subnet Gateway", username, "modified", subnetName, containerName);
             }
         }
-
-        if (successful) {
-            return Response.status(Response.Status.OK).build();
-        }
-        throw new InternalServerErrorException(RestMessages.INTERNALERROR.toString());
-    }
-
-    /**
-     * Add ports to a subnet in the container.
-     *
-     * @param containerName
-     *            name of the container that has the subnet to which node ports
-     *            need to be added
-     * @param subnetName
-     *            name of subnet to which node ports need to be added
-     * @param SubnetConfig
-     *            the {@link SubnetConfig} structure in request body
-     * @return Response as dictated by the HTTP Response Status code
-     *
-     *         <pre>
-     * Example:
-     *            Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1/nodePorts
-     *
-     * Request XML:
-     *  &lt;subnetConfig&gt;
-     *      &lt;name&gt;subnet1&lt;/name&gt;
-     *      &lt;subnet&gt;30.0.0.1/24&lt;/subnet&gt;
-     *      &lt;nodePorts&gt;1/1&lt;/nodePorts&gt;
-     *      &lt;nodePorts&gt;1/2&lt;/nodePorts&gt;
-     *      &lt;nodePorts&gt;1/3&lt;/nodePorts&gt;
-     * &lt;/subnetConfig&gt;
-     *
-     * Request in JSON:
-     * {
-     *  "name":"subnet1",
-     *  "subnet":"30.0.0.1/24",
-     *  "nodePorts":["1/1","1/2","1/3"]
-     * }
-     *
-     * </pre>
-     */
-    @Path("/{containerName}/subnet/{subnetName}/nodePorts")
-    @PUT
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes({
-            @ResponseCode(code = 200, condition = "Added node ports to subnet successfully"),
-            @ResponseCode(code = 400, condition = "Invalid request to change subnet name or invalid node ports passed"),
-            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-            @ResponseCode(code = 404, condition = "The containerName or subnet is not found"),
-            @ResponseCode(code = 409, condition = "Subnet name in url conflicts with name in request body"),
-            @ResponseCode(code = 500, condition = "Internal server error : Port add failed"),
-            @ResponseCode(code = 503, condition = "Service unavailable") })
-    public Response addNodePorts(@PathParam("containerName") String containerName,
-            @PathParam("subnetName") String subnetName,
-            @TypeHint(SubnetConfig.class) SubnetConfig subnetConfigData) {
-
-        handleContainerDoesNotExist(containerName);
-
-        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
-            throw new UnauthorizedException("User is not authorized to perform this operation on container "
-                    + containerName);
-        }
-        handleNameMismatch(subnetConfigData.getName(), subnetName);
-
-        SubnetConfig subnetConf = subnetConfigData;
-
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName,
-                this);
-        if (switchManager == null) {
-            throw new ServiceUnavailableException("SwitchManager " + RestMessages.SERVICEUNAVAILABLE.toString());
-        }
-
-        SubnetConfig existingConf = switchManager.getSubnetConfig(subnetName);
-
-        // make sure that the name matches an existing subnet and we're not
-        // changing the name or subnet IP/mask
-        if (existingConf == null) {
-            // don't have a subnet by that name
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } else if (!existingConf.getName().equals(subnetConf.getName())
-                || !existingConf.getSubnet().equals(subnetConf.getSubnet())) {
-            // can't change the name of a subnet
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-        Status st;
-        boolean successful = true;
-        Set<String> ports = subnetConf.getNodePorts();
-
-        if (ports == null || ports.isEmpty()) {
-            throw new BadRequestException(RestMessages.INVALIDDATA.toString());
-        }
-
-        // add new ports only
-        if (existingConf.getNodePorts() != null) {
-            ports.removeAll(existingConf.getNodePorts());
-        }
-        for (String port : ports) {
-            st = switchManager.addPortsToSubnet(subnetName, port);
-            successful = successful && st.isSuccess();
-            if (successful) {
-                NorthboundUtils.auditlog("Subnet Gateway", username, "added", st + " to " + subnetName, containerName);
-            }
-        }
-        if (successful) {
-            return Response.status(Response.Status.OK).build();
-        }
-        throw new InternalServerErrorException(RestMessages.INTERNALERROR.toString());
-    }
-
-    /**
-     * Delete ports from a subnet in the container
-     *
-     * @param containerName
-     *            name of the container that has the subnet from which node
-     *            ports need to be deleted
-     * @param subnetName
-     *            name of subnet from which node ports need to be deleted
-     * @param subnetConfigData
-     *            SubnetConfig object to be deleted
-     * @return Response as dictated by the HTTP Response Status code
-     *
-     *         <pre>
-     * Example:
-     *            Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/subnet1/nodePorts
-     *
-     * Request XML:
-     *  &lt;subnetConfig&gt;
-     *      &lt;name&gt;subnet3&lt;/name&gt;
-     *      &lt;subnet&gt;30.0.0.1/24&lt;/subnet&gt;
-     *      &lt;nodePorts&gt;1/1,1/2,1/3&lt;/nodePorts&gt;
-     * &lt;/subnetConfig&gt;
-     *
-     * Request in JSON:
-     * { "name" : "subnet1",
-     *   "subnet" : "30.0.0.1/24",
-     *    nodePorts : ["1/1,1/2,1/3"]}
-     *
-     * </pre>
-     */
-    @Path("/{containerName}/subnet/{subnetName}/nodePorts")
-    @DELETE
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes({
-            @ResponseCode(code = 204, condition = "No content"),
-            @ResponseCode(code = 400, condition = "Invalid request to change subnet name or invalid node ports passed"),
-            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-            @ResponseCode(code = 404, condition = "The containerName or subnet is not found"),
-            @ResponseCode(code = 409, condition = "Subnet name in url conflicts with name in request body"),
-            @ResponseCode(code = 500, condition = "Internal server error : Delete node ports failed"),
-            @ResponseCode(code = 503, condition = "Service unavailable") })
-    public Response deleteNodePorts(@PathParam("containerName") String containerName,
-            @PathParam("subnetName") String subnetName,
-            @TypeHint(SubnetConfig.class) SubnetConfig subnetConfigData) {
-
-        handleContainerDoesNotExist(containerName);
-
-        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
-            throw new UnauthorizedException("User is not authorized to perform this operation on container "
-                    + containerName);
-        }
-        handleNameMismatch(subnetConfigData.getName(), subnetName);
-
-        SubnetConfig subnetConf = subnetConfigData;
-
-        if (subnetConf.getNodePorts() == null || subnetConf.getNodePorts().isEmpty()) {
-            throw new BadRequestException(RestMessages.INVALIDDATA.toString() + " : invalid node ports");
-        }
-
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName,
-                this);
-        if (switchManager == null) {
-            throw new ServiceUnavailableException("SwitchManager " + RestMessages.SERVICEUNAVAILABLE.toString());
-        }
-
-        SubnetConfig existingConf = switchManager.getSubnetConfig(subnetName);
-
-        // make sure that the name matches an existing subnet and we're not
-        // changing the name or subnet IP/mask
-        if (existingConf == null) {
-            // don't have a subnet by that name
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } else if (!existingConf.getName().equals(subnetConf.getName())
-                || !existingConf.getSubnet().equals(subnetConf.getSubnet())) {
-            // can't change the name of a subnet
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-        Status st;
-        boolean successful = true;
-        Set<String> ports = subnetConf.getNodePorts();
-
-        // delete existing ports
-        ports.retainAll(existingConf.getNodePorts());
-        for (String port : ports) {
-            st = switchManager.removePortsFromSubnet(subnetName, port);
-            successful = successful && st.isSuccess();
-            if (successful) {
-                NorthboundUtils.auditlog("Subnet Gateway", username, "removed", st + " from " + subnetName,
-                        containerName);
-            }
-        }
-        if (successful) {
-            return Response.noContent().build();
-        }
-        throw new InternalServerErrorException(RestMessages.INTERNALERROR.toString());
+        return NorthboundUtils.getResponse(status);
     }
 }
