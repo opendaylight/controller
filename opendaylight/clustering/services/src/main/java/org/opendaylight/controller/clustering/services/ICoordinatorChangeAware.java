@@ -28,5 +28,5 @@ public interface ICoordinatorChangeAware {
      * Function that will be called when there is the event of
      * coordinator change in the cluster.
      */
-    public void coordinatorChanged();
+    void coordinatorChanged();
 }

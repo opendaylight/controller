@@ -37,5 +37,5 @@ public interface IListenRoleChange {
      * active-standby milestone is reached, after will be removed.
      *
      */
-    public void newActiveAvailable();
+    void newActiveAvailable();
 }

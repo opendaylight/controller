@@ -17,5 +17,5 @@ import org.opendaylight.controller.sal.utils.Status;
  *
  */
 public interface IConfigurationServiceCommon {
-    public Status saveConfigurations();
+    Status saveConfigurations();
 }
