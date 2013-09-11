@@ -482,8 +482,7 @@ public class InventoryServiceShim implements IContainerListener,
         Set<Property> props = new HashSet<Property>();
         Long sid = (Long) node.getID();
 
-        Date connectedSince = controller.getSwitches().get(sid)
-                .getConnectedDate();
+        Date connectedSince = sw.getConnectedDate();
         Long connectedSinceTime = (connectedSince == null) ? 0 : connectedSince
                 .getTime();
         props.add(new TimeStamp(connectedSinceTime, "connectedSince"));

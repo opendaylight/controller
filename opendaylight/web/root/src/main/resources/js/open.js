@@ -562,9 +562,9 @@ one.main.cluster = {
   data : function(data) {
     var tdata = [];
     var registry = [];
-    $(data).each(function(idx, val) {
-      var name = val.name;
-      var address = val.address;
+    $(data).each(function(idx, controller) {
+      var name = controller.name;
+      var address = controller.address;
       var $registry = $(document.createElement('span'));
       $registry
       .append(JSON.stringify(address))
@@ -572,26 +572,32 @@ one.main.cluster = {
       .addClass('ux-id');
     name = one.lib.dashlet.label(name, null)[0].outerHTML;
     name += $registry[0].outerHTML;
-    if (val.me === true) {
+    if (controller.me === true) {
       var me = one.lib.dashlet.label('*', 'label-inverse')[0].outerHTML;
       name += '&nbsp;'+me;
     }
-    if (val.coordinator === true) {
+    if (controller.coordinator === true) {
       var coord = one.lib.dashlet.label('C')[0].outerHTML;
       name += '&nbsp;'+coord;
     }
     tdata.push({
-      'controller' : name
+      'controller' : name,
+      'numNodes'   : controller.numConnectedNodes
     });
     });
     var source = new StaticDataSource({
-      columns : [
-    {
-      property : 'controller',
-        label : 'Controller',
-        sortable : true
-    }
-    ],
+        columns : [
+            {
+              property : 'controller',
+                label : 'Controller',
+                sortable : true
+            },
+            {
+                property : 'numNodes',
+                label    : 'Nodes',
+                sortable : true
+            }
+        ],
         data : tdata,
         delay : 0
     });

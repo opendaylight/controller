@@ -11,6 +11,7 @@ public class ClusterNodeBean {
     private final String name;
     private final Boolean me;
     private final Boolean coordinator;
+    private final Integer numConnectedNodes;
 
     public static class Builder {
         // required params
@@ -20,6 +21,7 @@ public class ClusterNodeBean {
         // optional params
         private Boolean me = null;
         private Boolean coordinator = null;
+        private Integer numConnectedNodes = null;
 
         public Builder(InetAddress address) {
             this.address = address.getAddress();
@@ -36,6 +38,11 @@ public class ClusterNodeBean {
             return this;
         }
 
+        public Builder nodesConnected(int numNodes) {
+            this.numConnectedNodes = numNodes;
+            return this;
+        }
+
         public ClusterNodeBean build() {
             return new ClusterNodeBean(this);
         }
@@ -46,5 +53,6 @@ public class ClusterNodeBean {
         this.name = builder.name;
         this.me = builder.me;
         this.coordinator = builder.coordinator;
+        this.numConnectedNodes = builder.numConnectedNodes;
     }
 }
