@@ -181,7 +181,8 @@ public class Device implements IDevice {
      * @param newEntity
      *            the entity to add. newEntity must be have the same entity
      *            class as device
-     * @param if positive indicates the index in the entities array were the new
+     * @param insertionpoint
+     *        if positive indicates the index in the entities array were the new
      *        entity should be inserted. If negative we will compute the correct
      *        insertion point
      */
@@ -240,10 +241,11 @@ public class Device implements IDevice {
 
         TreeSet<Short> vals = new TreeSet<Short>();
         for (Entity e : entities) {
-            if (e.getVlan() == null)
+            if (e.getVlan() == null) {
                 vals.add((short) -1);
-            else
+            } else {
                 vals.add(e.getVlan());
+            }
         }
         return vals.toArray(new Short[vals.size()]);
     }
@@ -313,15 +315,16 @@ public class Device implements IDevice {
             return false;
 
         for (AttachmentPoint ap : apList) {
-            if (ap.getLastSeen() + AttachmentPoint.INACTIVITY_INTERVAL < System
-                    .currentTimeMillis())
-                expiredAPs.add(ap);
+            if (ap.getLastSeen() + AttachmentPoint.INACTIVITY_INTERVAL < System.currentTimeMillis()) {
+               expiredAPs.add(ap);
+            }
         }
         if (expiredAPs.size() > 0) {
             apList.removeAll(expiredAPs);
             return true;
-        } else
+        } else {
             return false;
+        }
     }
 
     /**
@@ -410,7 +413,6 @@ public class Device implements IDevice {
      * any change to the list of attachment points for the device -- which
      * indicates a device move.
      *
-     * @param sw
      * @param port
      * @param lastSeen
      * @return
@@ -525,7 +527,6 @@ public class Device implements IDevice {
     /**
      * Delete (sw,port) from the list of list of attachment points and oldAPs.
      *
-     * @param sw
      * @param port
      * @return
      */
@@ -703,10 +704,12 @@ public class Device implements IDevice {
         TreeSet<Short> vals = new TreeSet<Short>();
         for (Entity e : entities) {
             if (e.getPort().equals(swp.getPort())) {
-                if (e.getVlan() == null)
+                if (e.getVlan() == null) {
                     vals.add(VLAN_UNTAGGED);
-                else
+                }
+                else  {
                     vals.add(e.getVlan());
+                }
             }
         }
         return vals.toArray(new Short[vals.size()]);

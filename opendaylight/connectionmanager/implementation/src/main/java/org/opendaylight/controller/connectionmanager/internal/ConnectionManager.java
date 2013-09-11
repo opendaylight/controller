@@ -352,16 +352,21 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
         String controller = ci.nextArgument();
         if (controller == null) {
             ci.println("Nodes connected to this controller : ");
-            if (this.getLocalNodes() == null) ci.println("None");
-            else ci.println(this.getLocalNodes().toString());
+            if (this.getLocalNodes() == null) {
+                ci.println("None");
+            } else {
+                ci.println(this.getLocalNodes().toString());
+            }
             return;
         }
         try {
             InetAddress address = InetAddress.getByName(controller);
             ci.println("Nodes connected to controller "+controller);
-            if (this.getNodes(address) == null) ci.println("None");
-            else ci.println(this.getNodes(address).toString());
-            return;
+            if (this.getNodes(address) == null) {
+                ci.println("None");
+            } else {
+                ci.println(this.getNodes(address).toString());
+            }
         } catch (UnknownHostException e) {
            logger.error("An error occured",e);
         }
