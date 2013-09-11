@@ -1849,27 +1849,38 @@ public class ForwardingRulesManager implements
 
     /**
      * Uninstall all the non-internal Flow Entries present in the software view.
-     * A copy of each entry is stored in the inactive list so that it can be
-     * re-applied when needed. This function is called on the global instance of
-     * FRM only, when the first container is created
+     * If requested, a copy of each original flow entry will be stored in the
+     * inactive list so that it can be re-applied when needed (This is typically
+     * the case when running in the default container and controller moved to
+     * container mode)
+     *
+     * @param preserveFlowEntries
+     *            if true, a copy of each original entry is stored in the
+     *            inactive list
      */
-    private void uninstallAllFlowEntries() {
+    private void uninstallAllFlowEntries(boolean preserveFlowEntries) {
         log.info("Uninstalling all non-internal flows");
+
+        List<FlowEntryInstall> toRemove = new ArrayList<FlowEntryInstall>();
 
         // Store entries / create target list
         for (ConcurrentMap.Entry<FlowEntryInstall, FlowEntryInstall> mapEntry : installedSwView.entrySet()) {
             FlowEntryInstall flowEntries = mapEntry.getValue();
             // Skip internal generated static flows
             if (!flowEntries.isInternal()) {
-                inactiveFlows.put(flowEntries.getOriginal(), flowEntries.getOriginal());
+                toRemove.add(flowEntries);
+                // Store the original entries if requested
+                if (preserveFlowEntries) {
+                    inactiveFlows.put(flowEntries.getOriginal(), flowEntries.getOriginal());
+                }
             }
         }
 
         // Now remove the entries
-        for (FlowEntry flowEntry : inactiveFlows.keySet()) {
-            Status status = this.removeEntry(flowEntry, false);
+        for (FlowEntryInstall flowEntryHw : toRemove) {
+            Status status = this.removeEntryInternal(flowEntryHw, false);
             if (!status.isSuccess()) {
-                log.warn("Failed to remove entry: {}. The failure is: {}", flowEntry, status.getDescription());
+                log.warn("Failed to remove entry: {}. The failure is: {}", flowEntryHw, status.getDescription());
             }
         }
     }
@@ -2472,7 +2483,7 @@ public class ForwardingRulesManager implements
      */
     void stop() {
         stopping = true;
-        uninstallAllFlowEntries();
+        uninstallAllFlowEntries(false);
     }
 
     public void setFlowProgrammerService(IFlowProgrammerService service) {
@@ -2588,8 +2599,15 @@ public class ForwardingRulesManager implements
         }
         switch (update) {
         case ADDED:
+            /*
+             * Controller is moving to container mode. We are in the default
+             * container context, we need to remove all our non-internal flows
+             * to prevent any container isolation breakage. We also need to
+             * preserve our flow so that they can be re-installed if we move
+             * back to non container mode (no containers).
+             */
             this.inContainerMode = true;
-            this.uninstallAllFlowEntries();
+            this.uninstallAllFlowEntries(true);
             break;
         case REMOVED:
             this.inContainerMode = false;
