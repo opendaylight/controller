@@ -680,7 +680,11 @@ one.f.switchmanager.subnetGatewayConfig = {
                     one.f.switchmanager.subnetGatewayConfig.registry['currentNode'] = node;
                     var $ports = $('#' + one.f.switchmanager.subnetGatewayConfig.id.modal.form.ports);
                     var ports = nodeports[node];
-                    one.lib.form.select.inject($ports, ports);
+                    var options = {};
+                    $(ports).each(function(idx, val) {
+                        options[val.internalPortName] = val.portName+' ('+val.portId+')'; 
+                    });
+                    one.lib.form.select.inject($ports, options);
                     one.lib.form.select.prepend($ports, { '' : 'Please Select a Port' });
                     $ports.val($ports.find("option:first").val());
                 });
@@ -797,7 +801,7 @@ one.f.switchmanager.subnetGatewayConfig = {
                         },
                         {
                             property: 'nodePorts',
-                            label: 'Node/Ports',
+                            label: 'Ports',
                             sortable: false
                         }
                     ],
@@ -810,10 +814,9 @@ one.f.switchmanager.subnetGatewayConfig = {
                             var nodePorts = JSON.parse(json);
                             var nodePortHtml = "<div>";
                             $.each(nodePorts, function(index, nodePort) {
-                                var nodePortID = nodePort["nodeId"] + "/" + nodePort["nodePortId"]; 
-                                nodePortHtml += nodePort["nodeName"] + " / " + nodePort["nodePortName"];
+                                nodePortHtml += nodePort["nodePortName"] + " @ " + nodePort["nodeName"];
                                 nodePortHtml += "&nbsp;";
-                                nodePortHtml += '<a href="#" id=' + encodeURIComponent(nodePortID) + 
+                                nodePortHtml += '<a href="#" id=' + encodeURIComponent(nodePort["nodePortId"]) + 
                                     ' gatewayName=' + tableRow["name"] + 
                                     ' onclick="javascript:one.f.switchmanager.subnetGatewayConfig.actions.deleteNodePort(this);">Remove</a>';
                                 nodePortHtml += "<br/>";
@@ -1327,7 +1330,11 @@ one.f.switchmanager.spanPortConfig = {
                 one.f.switchmanager.spanPortConfig.registry['currentNode'] = nodeId;
                 var $ports = $('#' + one.f.switchmanager.spanPortConfig.id.modal.form.port);
                 var ports = one.f.switchmanager.spanPortConfig.registry['nodePorts'][nodeId]
-                one.lib.form.select.inject($ports, ports); 
+                var options = {};
+                $(ports).each(function(idx, val) {
+                    options[val.internalPortName] = val.portName+' ('+val.portId+')'; 
+                });
+                one.lib.form.select.inject($ports, options); 
             });
 
             $fieldset.append($label).append($select);

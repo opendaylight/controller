@@ -19,17 +19,18 @@
 package org.opendaylight.controller.sal.core;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
-import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 /**
@@ -408,28 +409,37 @@ public class NodeConnector implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         NodeConnector other = (NodeConnector) obj;
         if (nodeConnectorID == null) {
-            if (other.nodeConnectorID != null)
+            if (other.nodeConnectorID != null) {
                 return false;
-        } else if (!nodeConnectorID.equals(other.nodeConnectorID))
+            }
+        } else if (!nodeConnectorID.equals(other.nodeConnectorID)) {
             return false;
+        }
         if (nodeConnectorNode == null) {
-            if (other.nodeConnectorNode != null)
+            if (other.nodeConnectorNode != null) {
                 return false;
-        } else if (!nodeConnectorNode.equals(other.nodeConnectorNode))
+            }
+        } else if (!nodeConnectorNode.equals(other.nodeConnectorNode)) {
             return false;
+        }
         if (nodeConnectorType == null) {
-            if (other.nodeConnectorType != null)
+            if (other.nodeConnectorType != null) {
                 return false;
-        } else if (!nodeConnectorType.equals(other.nodeConnectorType))
+            }
+        } else if (!nodeConnectorType.equals(other.nodeConnectorType)) {
             return false;
+        }
         return true;
     }
 
@@ -482,6 +492,27 @@ public class NodeConnector implements Serializable {
             return null;
         }
         return fromStringNoNode(parts[0], n);
+    }
+
+    /**
+     * return a set of NodeConnector from a collection of string
+     *
+     * @param stringCollection Collection of String object to be parsed as a NodeConnector
+     *
+     * @return the Set of unique NodeConnector objects if parse is successful, empty Set otherwise
+     */
+    public static Set<NodeConnector> fromString(Collection<String> stringCollection) {
+        Set<NodeConnector> set = new HashSet<NodeConnector>();
+        if (stringCollection != null) {
+
+            for (String str : stringCollection) {
+                NodeConnector nodeConnector = NodeConnector.fromString(str);
+                if (nodeConnector != null) {
+                    set.add(nodeConnector);
+                }
+            }
+        }
+        return set;
     }
 
     /**
@@ -609,8 +640,9 @@ public class NodeConnector implements Serializable {
             //The protocol plugin being used depends on typeStr.
             INodeConnectorFactory f = (INodeConnectorFactory) ServiceHelper
                     .getGlobalInstance(INodeConnectorFactory.class, new NodeConnector(), "(protocolName="+typeStr+")");
-            if(f==null)
+            if(f==null) {
                 return null;
+            }
             return f.fromStringNoNode(typeStr, IDStr, n);
         }
     }

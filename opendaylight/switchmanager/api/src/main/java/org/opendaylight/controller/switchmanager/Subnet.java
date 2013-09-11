@@ -38,9 +38,9 @@ public class Subnet implements Cloneable, Serializable {
     }
 
     public Subnet(SubnetConfig conf) {
-        networkAddress = conf.getIPnum();
+        networkAddress = conf.getIPAddress();
         subnetMaskLength = conf.getIPMaskLen();
-        nodeConnectors = conf.getSubnetNodeConnectors();
+        nodeConnectors = conf.getNodeConnectors();
     }
 
     public Subnet(Subnet subnet) {
@@ -196,27 +196,36 @@ public class Subnet implements Cloneable, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Subnet other = (Subnet) obj;
         if (networkAddress == null) {
-            if (other.networkAddress != null)
+            if (other.networkAddress != null) {
                 return false;
-        } else if (!networkAddress.equals(other.networkAddress))
+            }
+        } else if (!networkAddress.equals(other.networkAddress)) {
             return false;
+        }
         if (nodeConnectors == null) {
-            if (other.nodeConnectors != null)
+            if (other.nodeConnectors != null) {
                 return false;
-        } else if (!nodeConnectors.equals(other.nodeConnectors))
+            }
+        } else if (!nodeConnectors.equals(other.nodeConnectors)) {
             return false;
-        if (subnetMaskLength != other.subnetMaskLength)
+        }
+        if (subnetMaskLength != other.subnetMaskLength) {
             return false;
-        if (vlan != other.vlan)
+        }
+        if (vlan != other.vlan) {
             return false;
+        }
         return true;
     }
 
@@ -243,8 +252,9 @@ public class Subnet implements Cloneable, Serializable {
 
     public boolean isMutualExclusive(Subnet otherSubnet) {
         if (this.networkAddress.getClass() != otherSubnet.networkAddress
-                .getClass())
+                .getClass()) {
             return true;
+        }
         if (this.isSubnetOf(otherSubnet.getNetworkAddress())) {
             return false;
         }
