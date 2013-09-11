@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.switchmanager.internal;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -32,24 +34,64 @@ public class SwitchManagerTest {
         SwitchManager switchmgr = new SwitchManager();
         switchmgr.startUp();
 
-        Set<String> portList = new HashSet<String>();
-        portList.add("1/1");
-        portList.add("1/2");
-        portList.add("1/3");
+        List<String> portList = new ArrayList<String>();
+        portList.add("OF|1@OF|1");
+        portList.add("OF|2@OF|00:00:00:00:00:00:00:02");
+        portList.add("OF|3@OF|00:00:00:00:00:00:00:01");
 
-        SubnetConfig subnet = new SubnetConfig("subnet", "10.0.0.254/16",
-                portList);
-        // System.out.println("*" + switchmgr.addSubnet(subnet) + "*");
+        SubnetConfig subnet = new SubnetConfig("subnet", "10.0.0.254/16", portList);
         Status addResult = (switchmgr.addSubnet(subnet));
         Assert.assertTrue(addResult.isSuccess());
 
         Status removeResult = (switchmgr.removeSubnet(subnet.getName()));
         Assert.assertTrue(removeResult.isSuccess());
 
-        SubnetConfig subnetConfigResult = switchmgr.getSubnetConfig(subnet
-                .getName());
-        Assert.assertTrue(subnetConfigResult == null);
+        SubnetConfig subnetConfigResult = switchmgr.getSubnetConfig(subnet.getName());
+        Assert.assertNull(subnetConfigResult);
 
+        subnet = new SubnetConfig("hr", "0.0.0.0", portList);
+        Status status = switchmgr.addSubnet(subnet);
+        Assert.assertFalse(status.isSuccess());
+
+        subnet = new SubnetConfig("hr", "12.12.12.254/16", null);
+        status = switchmgr.addSubnet(subnet);
+        Assert.assertTrue(status.isSuccess());
+
+    }
+
+    @Test
+    public void testSwitchManagerAddRemovePortsToSubnet() {
+        SwitchManager switchmgr = new SwitchManager();
+        switchmgr.startUp();
+
+        List<String> portList = new ArrayList<String>();
+        portList.add("OF|1@OF|1");
+        portList.add("OF|2@OF|00:00:00:00:00:00:00:02");
+        portList.add("OF|3@OF|00:00:00:00:00:00:00:01");
+
+        SubnetConfig subnet = new SubnetConfig("eng", "11.1.1.254/16", portList);
+        Status status = (switchmgr.addSubnet(subnet));
+        Assert.assertTrue(status.isSuccess());
+
+
+        // Empty port set
+        List<String> badPortSet = new ArrayList<String>();
+        status = switchmgr.addPortsToSubnet("eng", badPortSet);
+        Assert.assertFalse(status.isSuccess());
+
+        // Non existant subnet
+        status = switchmgr.removePortsFromSubnet("hr", badPortSet);
+        Assert.assertFalse(status.isSuccess());
+
+        // Port set containing non conventional but parsable port
+        badPortSet.add("1/1");
+        status = switchmgr.addPortsToSubnet("eng", badPortSet);
+        Assert.assertTrue(status.isSuccess());
+
+        // Port set containing non parsable port
+        badPortSet.add("OF1/1");
+        status = switchmgr.addPortsToSubnet("eng", badPortSet);
+        Assert.assertTrue(status.isSuccess());
     }
 
     @Test

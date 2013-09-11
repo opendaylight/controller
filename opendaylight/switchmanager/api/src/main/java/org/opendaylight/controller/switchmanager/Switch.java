@@ -66,7 +66,7 @@ public class Switch implements Serializable {
      * @return the nodeConnectors
      */
     public Set<NodeConnector> getNodeConnectors() {
-        return nodeConnectors;
+        return new HashSet<NodeConnector>(nodeConnectors);
     }
 
     /**
@@ -87,7 +87,7 @@ public class Switch implements Serializable {
     }
 
     public List<NodeConnector> getSpanPorts() {
-        return spanPorts;
+        return new ArrayList<NodeConnector>(this.spanPorts);
     }
 
     public Node getNode() {

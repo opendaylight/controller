@@ -13,7 +13,6 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,11 +21,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.packet.BitBufferHelper;
 import org.opendaylight.controller.sal.utils.GUIField;
 import org.opendaylight.controller.sal.utils.NetUtils;
-import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 
 /**
  * The class represents a subnet configuration.
@@ -34,13 +34,10 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class SubnetConfig implements Cloneable, Serializable {
-    //static fields are by default excluded by Gson parser
     private static final long serialVersionUID = 1L;
     private static final String prettyFields[] = { GUIField.NAME.toString(),
             GUIField.GATEWAYIP.toString(), GUIField.NODEPORTS.toString() };
 
-    // Order matters: JSP file expects following fields in the
-    // following order
     /**
      * Name of the subnet
      */
@@ -53,40 +50,40 @@ public class SubnetConfig implements Cloneable, Serializable {
     @XmlElement
     private String subnet;
     /**
-     * node ID/port list:
-     *<node-id>/a,b,c-m,r-t,y
+     * Set of node connectors in the format:
+     * Port Type|Port Id@Node Type|Node Id
      */
     @XmlElement
-    private Set<String> nodePorts;
+    private List<String> nodeConnectors;
 
     public SubnetConfig() {
     }
 
-    public SubnetConfig(String desc, String sub, Set<String> sp) {
-        name = desc;
-        subnet = sub;
-        nodePorts = sp;
+    public SubnetConfig(String name, String subnet, List<String> nodeConnectors) {
+        this.name = name;
+        this.subnet = subnet;
+        this.nodeConnectors = nodeConnectors;
     }
 
     public SubnetConfig(SubnetConfig subnetConfig) {
         name = subnetConfig.name;
         subnet = subnetConfig.subnet;
-        nodePorts = new HashSet<String>(subnetConfig.nodePorts);
+        nodeConnectors = (subnetConfig.nodeConnectors == null) ? null : new ArrayList<String>(subnetConfig.nodeConnectors);
     }
 
     public String getName() {
         return name;
     }
 
-    public Set<String> getNodePorts() {
-        return nodePorts;
+    public List<String> getNodePorts() {
+        return (nodeConnectors == null) ? new ArrayList<String>(0) : new ArrayList<String>(nodeConnectors);
     }
 
     public String getSubnet() {
         return subnet;
     }
 
-    public InetAddress getIPnum() {
+    public InetAddress getIPAddress() {
         InetAddress ip = null;
         try {
             ip = InetAddress.getByName(subnet.split("/")[0]);
@@ -98,87 +95,41 @@ public class SubnetConfig implements Cloneable, Serializable {
 
     public Short getIPMaskLen() {
         Short maskLen = 0;
-        if (hasValidIP()) {
-            String[] s = subnet.split("/");
-            maskLen = (s.length == 2) ? Short.valueOf(s[1]) : 32;
-        }
+        String[] s = subnet.split("/");
+        maskLen = (s.length == 2) ? Short.valueOf(s[1]) : 32;
         return maskLen;
     }
 
-    private Set<Short> getPortList(String ports) {
-        /*
-         * example:
-         *     ports = "1,3,5-12"
-         *     elemArray = ["1" "3" "5-12"]
-         *     elem[2] = "5-12" --> limits = ["5" "12"]
-         *     portList = [1 3 5 6 7 8 9 10 11 12]
-         */
-        Set<Short> portList = new HashSet<Short>();
-        String[] elemArray = ports.split(",");
-        for (String elem : elemArray) {
-            if (elem.contains("-")) {
-                String[] limits = elem.split("-");
-                for (short j = Short.valueOf(limits[0]); j <= Short
-                        .valueOf(limits[1]); j++) {
-                    portList.add(Short.valueOf(j));
+    private Status validateSubnetAddress() {
+        if (!NetUtils.isIPAddressValid(subnet)) {
+            return new Status(StatusCode.BADREQUEST, String.format("Invalid Subnet configuration: Invalid address: %s", subnet));
+        }
+        byte[] bytePrefix = NetUtils.getSubnetPrefix(this.getIPAddress(), this.getIPMaskLen()).getAddress();
+        long prefix = BitBufferHelper.getLong(bytePrefix);
+        if (prefix == 0) {
+            return new Status(StatusCode.BADREQUEST, "Invalid network source address: subnet zero");
+        }
+        return new Status(StatusCode.SUCCESS);
+    }
+
+    public static Status validatePorts(List<String> nodeConnectors) {
+        if (nodeConnectors != null) {
+            for (String port : nodeConnectors) {
+                if (null == NodeConnector.fromString(port)) {
+                    return new Status(StatusCode.BADREQUEST,
+                            "Invalid Subnet configuration: Not parsable node connector: " + port);
                 }
-            } else {
-                portList.add(Short.valueOf(elem));
             }
         }
-        return portList;
+        return new Status(StatusCode.SUCCESS);
     }
 
-    private boolean hasValidIP() {
-        if (subnet != null) {
-            if (NetUtils.isIPv4AddressValid(subnet)) {
-                return true;
-            } else if (NetUtils.isIPv6AddressValid(subnet)) {
-                return true;
-            }
+    public Status validate() {
+        Status status = validateSubnetAddress();
+        if (status.isSuccess()) {
+            status = validatePorts(this.nodeConnectors);
         }
-        return false;
-    }
-
-    private boolean hasValidPorts() {
-        for (String portSet : nodePorts) {
-            if (!portSet.contains("/")) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean isValidSwitchPort(String sp) {
-        return sp.contains("/");
-    }
-
-    public boolean isValidConfig() {
-        return hasValidIP() && hasValidPorts();
-    }
-
-    @Override
-    public int hashCode() {
-        return name.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        /*
-         * Configuration will be stored in collection only if it is valid
-         * Hence we don't check here for uninitialized fields
-         */
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SubnetConfig that = (SubnetConfig) obj;
-        if (this.subnet.equals(that.subnet)) {
-            return true;
-        }
-        return false;
+        return status;
     }
 
     public static List<String> getGuiFieldsNames() {
@@ -189,66 +140,35 @@ public class SubnetConfig implements Cloneable, Serializable {
         return fieldList;
     }
 
-    //Utility method useful for adding to a passed Set all the
-    //NodeConnectors learnt from a string
-    private void getNodeConnectorsFromString(String codedNodeConnectors,
-            Set<NodeConnector> sp) {
-        if (codedNodeConnectors == null || codedNodeConnectors.isEmpty()) {
-            return;
-        }
-        if (sp == null) {
-            return;
-        }
-        // codedNodeConnectors = nodeId/a,b,c-m,r-t,y
-        String pieces[] = codedNodeConnectors.split("/");
-        for (Short port : getPortList(pieces[1])) {
-            Node n = Node.fromString(pieces[0]);
-            if (n == null) {
-                continue;
-            }
-            NodeConnector p = NodeConnectorCreator.createOFNodeConnector(port,
-                    n);
-            if (p == null) {
-                continue;
-            }
-            sp.add(p);
-        }
-    }
-
-    public Set<NodeConnector> getSubnetNodeConnectors() {
-        Set<NodeConnector> sp = new HashSet<NodeConnector>();
-        if (isGlobal())
-            return sp;
-        for (String str : nodePorts) {
-            getNodeConnectorsFromString(str, sp);
-        }
-        return sp;
-    }
-
-    public Set<NodeConnector> getNodeConnectors(String codedNodeConnectors) {
-        // codedNodeConnectors = nodeId/a,b,c-m,r-t,y
-        Set<NodeConnector> sp = new HashSet<NodeConnector>();
-        getNodeConnectorsFromString(codedNodeConnectors, sp);
-        return sp;
+    public Set<NodeConnector> getNodeConnectors() {
+        return NodeConnector.fromString(this.nodeConnectors);
     }
 
     public boolean isGlobal() {
         // If no ports are specified to be part of the domain, then it's a global domain IP
-        return (nodePorts == null || nodePorts.isEmpty());
+        return (nodeConnectors == null || nodeConnectors.isEmpty());
     }
 
-    public void addNodeConnectors(String sp) {
-        nodePorts.add(sp);
+    public void addNodeConnectors(List<String> nc) {
+        if (nc != null) {
+            if (nodeConnectors == null) {
+                nodeConnectors = new ArrayList<String>(nc);
+            } else {
+                nodeConnectors.addAll(nc);
+            }
+        }
     }
 
-    public void removeNodeConnectors(String sp) {
-        nodePorts.remove(sp);
+    public void removeNodeConnectors(List<String> nc) {
+        if (nc != null && nodeConnectors != null) {
+            nodeConnectors.removeAll(nc);
+        }
     }
 
     @Override
     public String toString() {
-        return ("SubnetConfig [Description=" + name + ", Subnet=" + subnet
-                + ", NodeConnectors=" + nodePorts + "]");
+        return ("SubnetConfig [Name=" + name + ", Subnet=" + subnet
+                + ", NodeConnectors=" + nodeConnectors + "]");
     }
 
     /**
@@ -259,4 +179,49 @@ public class SubnetConfig implements Cloneable, Serializable {
         return new SubnetConfig(this);
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((nodeConnectors == null) ? 0 : nodeConnectors.hashCode());
+        result = prime * result + ((subnet == null) ? 0 : subnet.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SubnetConfig other = (SubnetConfig) obj;
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (nodeConnectors == null) {
+            if (other.nodeConnectors != null) {
+                return false;
+            }
+        } else if (!nodeConnectors.equals(other.nodeConnectors)) {
+            return false;
+        }
+        if (subnet == null) {
+            if (other.subnet != null) {
+                return false;
+            }
+        } else if (!subnet.equals(other.subnet)) {
+            return false;
+        }
+        return true;
+    }
 }

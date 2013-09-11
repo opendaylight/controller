@@ -87,7 +87,6 @@ public class SubnetTest {
         Assert.assertTrue(subnet.getVlan() == 100);
 
         Assert.assertTrue(subnet.isFlatLayer2() == false);
-
     }
 
 }
