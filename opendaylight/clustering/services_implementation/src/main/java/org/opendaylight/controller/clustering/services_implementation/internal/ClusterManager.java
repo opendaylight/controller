@@ -33,6 +33,9 @@ import javax.transaction.TransactionManager;
 
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
+import org.infinispan.configuration.global.GlobalConfigurationBuilder;
+import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
+import org.infinispan.configuration.parsing.ParserRegistry;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.notifications.Listener;
@@ -247,8 +250,14 @@ public class ClusterManager implements IClusterServices, IContainerAware {
         }
         logger.info("Starting the ClusterManager");
         try {
-            //FIXME keeps throwing FileNotFoundException
-            this.cm = new DefaultCacheManager("config/infinispan-config.xml");
+            ParserRegistry parser = new ParserRegistry(this.getClass()
+                    .getClassLoader());
+            ConfigurationBuilderHolder holder = parser.parseFile("config/infinispan-config.xml");
+            GlobalConfigurationBuilder globalBuilder = holder.getGlobalConfigurationBuilder();
+            globalBuilder.serialization()
+                    .classResolver(new ClassResolver())
+                    .build();
+            this.cm = new DefaultCacheManager(holder, false);
             logger.debug("Allocated ClusterManager");
             if (this.cm != null) {
                 this.cm.start();
