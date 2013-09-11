@@ -85,7 +85,7 @@ public class StatisticsManagerIT {
                 // needed by statisticsmanager
                 mavenBundle("org.opendaylight.controller", "containermanager")
                     .versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "containermanager.implementation")
+                mavenBundle("org.opendaylight.controller", "containermanager.it.implementation")
                     .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "clustering.services")
                     .versionAsInProject(),

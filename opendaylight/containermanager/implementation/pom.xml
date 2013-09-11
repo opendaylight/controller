@@ -15,7 +15,7 @@
   </scm>
 
   <artifactId>containermanager.implementation</artifactId>
-  <version>0.4.0-SNAPSHOT</version>
+  <version>0.5.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <build>
@@ -29,7 +29,11 @@
           <instructions>
             <Import-Package>
               org.opendaylight.controller.containermanager,
+              org.opendaylight.controller.appauth.authorization,
+              org.opendaylight.controller.usermanager,
+              org.opendaylight.controller.configuration,
               org.opendaylight.controller.clustering.services,
+              org.opendaylight.controller.sal.authorization,
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.core,
@@ -37,6 +41,7 @@
               org.opendaylight.controller.sal.flowprogrammer,
               org.opendaylight.controller.sal.match,
               org.opendaylight.controller.sal.reader,
+              org.opendaylight.controller.topologymanager,
               org.eclipse.osgi.framework.console,
               org.osgi.framework,
               org.slf4j,
@@ -62,12 +67,32 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
+      <version>0.5.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>configuration</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>appauth</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>topologymanager</artifactId>
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
       <version>0.5.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>usermanager</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

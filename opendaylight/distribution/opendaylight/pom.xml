@@ -66,6 +66,7 @@
     <module>../../hosttracker_new/implementation</module>
     <module>../../containermanager/api</module>
     <module>../../containermanager/implementation</module>
+    <module>../../appauth</module>
     <module>../../switchmanager/api</module>
     <module>../../switchmanager/implementation</module>
     <module>../../switchmanager/integrationtest</module>
@@ -111,6 +112,7 @@
     <module>../../northbound/hosttracker</module>
     <module>../../northbound/subnets</module>
     <module>../../northbound/switchmanager</module>
+    <module>../../northbound/containermanager</module>
     <module>../../northbound/networkconfiguration/bridgedomain</module>
 
     <!-- Northbound integration tests -->
