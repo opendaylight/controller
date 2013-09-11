@@ -63,7 +63,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     private static Logger log = LoggerFactory
             .getLogger(StaticRoutingImplementation.class);
     private static String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static final String SAVE = "Save";
     ConcurrentMap<String, StaticRoute> staticRoutes;
     ConcurrentMap<String, StaticRouteConfig> staticRouteConfigs;
     private IfIptoHost hostTracker;
