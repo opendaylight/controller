@@ -73,7 +73,7 @@ public class ConfigurationIT {
                 mavenBundle("org.opendaylight.controller", "protocol_plugins.stub").versionAsInProject(),
                 // needed bundles by switchmanager
                 mavenBundle("org.opendaylight.controller", "containermanager").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "containermanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "containermanager.it.implementation").versionAsInProject(),
                 // needed bundles by configuration
                 mavenBundle("org.opendaylight.controller", "clustering.services").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "clustering.stub").versionAsInProject(),

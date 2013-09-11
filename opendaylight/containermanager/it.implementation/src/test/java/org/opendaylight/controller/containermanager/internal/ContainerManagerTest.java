@@ -29,7 +29,6 @@ public class ContainerManagerTest {
                 assertEquals(GlobalConstants.DEFAULT.toString(), names.get(0));
 
                 assertFalse(cm.hasNonDefaultContainer());
-                assertNull(cm.saveContainerConfig());
 
                 cm.destroy();
 

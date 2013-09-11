@@ -103,7 +103,7 @@ public class ClusteringServicesIT {
                         "sal.implementation").versionAsInProject(),
             mavenBundle("org.opendaylight.controller", "containermanager").versionAsInProject(),
             mavenBundle("org.opendaylight.controller",
-                        "containermanager.implementation").versionAsInProject(),
+                        "containermanager.it.implementation").versionAsInProject(),
             mavenBundle("org.jboss.spec.javax.transaction",
                         "jboss-transaction-api_1.1_spec").versionAsInProject(),
             mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(),
