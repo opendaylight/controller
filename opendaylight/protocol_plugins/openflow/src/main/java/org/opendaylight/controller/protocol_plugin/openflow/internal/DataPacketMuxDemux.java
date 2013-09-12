@@ -9,6 +9,7 @@
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,19 +23,10 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExtern
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
-import org.openflow.protocol.OFMessage;
-import org.openflow.protocol.OFPacketIn;
-import org.openflow.protocol.OFPacketOut;
-import org.openflow.protocol.OFPort;
-import org.openflow.protocol.OFType;
-import org.openflow.protocol.action.OFAction;
-import org.openflow.protocol.action.OFActionOutput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -45,9 +37,18 @@ import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
+import org.openflow.protocol.OFMessage;
+import org.openflow.protocol.OFPacketIn;
+import org.openflow.protocol.OFPacketOut;
+import org.openflow.protocol.OFPort;
+import org.openflow.protocol.OFType;
+import org.openflow.protocol.action.OFAction;
+import org.openflow.protocol.action.OFActionOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DataPacketMuxDemux implements IContainerListener,
-        IMessageListener, IDataPacketMux, IInventoryShimExternalListener {
+        IMessageListener, IDataPacketMux, IInventoryShimExternalListener, IContainerAware {
     protected static final Logger logger = LoggerFactory
             .getLogger(DataPacketMuxDemux.class);
     private IController controller = null;
@@ -375,14 +376,13 @@ public class DataPacketMuxDemux implements IContainerListener,
         }
         switch (t) {
         case ADDED:
-            if (!fSpecs.contains(previousFlow)) {
-                fSpecs.add(previousFlow);
+            if (!fSpecs.contains(currentFlow)) {
+                fSpecs.add(currentFlow);
             }
+            container2FlowSpecs.put(containerName, fSpecs);
             break;
         case REMOVED:
-            if (fSpecs.contains(previousFlow)) {
-                fSpecs.remove(previousFlow);
-            }
+            fSpecs.remove(currentFlow);
             break;
         case CHANGED:
             break;
@@ -451,5 +451,30 @@ public class DataPacketMuxDemux implements IContainerListener,
     public void updateNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Set<Property> props) {
         // do nothing
+    }
+
+    @Override
+    public void containerCreate(String containerName) {
+        // do nothing
+    }
+
+    @Override
+    public void containerDestroy(String containerName) {
+        Set<NodeConnector> removeNodeConnectorSet = new HashSet<NodeConnector>();
+        for (Map.Entry<NodeConnector, List<String>> entry : nc2Container.entrySet()) {
+            List<String> ncContainers = entry.getValue();
+            if (ncContainers.contains(containerName)) {
+                NodeConnector nodeConnector = entry.getKey();
+                removeNodeConnectorSet.add(nodeConnector);
+            }
+        }
+        for (NodeConnector nodeConnector : removeNodeConnectorSet) {
+            List<String> ncContainers = nc2Container.get(nodeConnector);
+            ncContainers.remove(containerName);
+            if (ncContainers.isEmpty()) {
+                nc2Container.remove(nodeConnector);
+            }
+        }
+        container2FlowSpecs.remove(containerName);
     }
 }

@@ -33,17 +33,11 @@ import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
 import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
-import org.openflow.protocol.OFPhysicalPort;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -61,6 +55,11 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.openflow.protocol.OFPhysicalPort;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class describes neighbor discovery service for an OpenFlow network.
@@ -1693,4 +1692,5 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         }
         return ports;
     }
+
 }

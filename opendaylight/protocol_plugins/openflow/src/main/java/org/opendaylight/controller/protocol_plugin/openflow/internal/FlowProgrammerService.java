@@ -25,6 +25,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListene
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
@@ -58,7 +59,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         IMessageListener, IContainerListener, IInventoryShimExternalListener,
-        CommandProvider {
+        CommandProvider, IContainerAware {
     private static final Logger log = LoggerFactory
             .getLogger(FlowProgrammerService.class);
     private IController controller;
@@ -465,8 +466,6 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     @Override
     public void nodeConnectorUpdated(String containerName, NodeConnector p,
             UpdateType type) {
-        Set<NodeConnector> target = null;
-
         switch (type) {
         case ADDED:
             if (!containerToNc.containsKey(containerName)) {
@@ -477,7 +476,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         case CHANGED:
             break;
         case REMOVED:
-            target = containerToNc.get(containerName);
+            Set<NodeConnector> target = containerToNc.get(containerName);
             if (target != null) {
                 target.remove(p);
             }
@@ -799,5 +798,15 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     public void _px2rc(CommandInterpreter ci) {
         ci.println("Max num of async messages sent prior to the Barrier message is "
                 + barrierMessagePriorCount);
+    }
+
+    @Override
+    public void containerCreate(String containerName) {
+        // do nothing
+    }
+
+    @Override
+    public void containerDestroy(String containerName) {
+        containerToNc.remove(containerName);
     }
 }

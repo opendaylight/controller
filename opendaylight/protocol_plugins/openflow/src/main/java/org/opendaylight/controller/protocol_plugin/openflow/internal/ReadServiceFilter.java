@@ -27,6 +27,7 @@ import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -55,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * Read Service shim layer which is in charge of filtering the flow statistics
  * based on container. It is a Global instance.
  */
-public class ReadServiceFilter implements IReadServiceFilter, IContainerListener, IOFStatisticsListener {
+public class ReadServiceFilter implements IReadServiceFilter, IContainerListener, IOFStatisticsListener, IContainerAware {
     private static final Logger logger = LoggerFactory
             .getLogger(ReadServiceFilter.class);
     private IController controller = null;
@@ -631,5 +632,18 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
             // notify listeners
             l.getValue().nodeTableStatisticsUpdated(node, tableStatsList);
         }
+    }
+
+    @Override
+    public void containerCreate(String containerName) {
+        // do nothing
+    }
+
+    @Override
+    public void containerDestroy(String containerName) {
+        containerToNc.remove(containerName);
+        containerToNode.remove(containerName);
+        containerToNt.remove(containerName);
+        containerFlows.remove(containerName);
     }
 }
