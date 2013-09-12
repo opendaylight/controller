@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_17261717",
+        "filename": "opendaylight/northbound/integrationtest/src/test/java/org/opendaylight/controller/northbound/integrationtest/NorthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-12T14:50:27Z",
+      "side": 1,
+      "message": "Instead to harcode the format, what about to allocate a NodeConnector and then to use the toString method to create the appropriate representation? It will shield the testcase from changes in the format of string if any.",
+      "revId": "31ff479dd8da63bbacd21df5b7a474b69ccfed9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_f7226b00",
+        "filename": "opendaylight/switchmanager/api/src/test/java/org/opendaylight/controller/switchmanager/SubnetConfigTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-12T14:50:27Z",
+      "side": 1,
+      "message": "Same story here, i would avoid harcoding the format and generate from the data structure itself",
+      "revId": "31ff479dd8da63bbacd21df5b7a474b69ccfed9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_d71f6fb6",
+        "filename": "opendaylight/switchmanager/implementation/src/test/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-12T14:50:27Z",
+      "side": 1,
+      "message": "Same story here",
+      "revId": "31ff479dd8da63bbacd21df5b7a474b69ccfed9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
