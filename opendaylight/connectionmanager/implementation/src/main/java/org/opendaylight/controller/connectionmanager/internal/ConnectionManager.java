@@ -133,11 +133,17 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
     }
 
     public void init() {
+        String schemeStr = System.getProperty("connection.scheme");
         this.connectionEvents = new LinkedBlockingQueue<ConnectionMgmtEvent>();
         schemes = new ConcurrentHashMap<ConnectionMgmtScheme, AbstractScheme>();
         for (ConnectionMgmtScheme scheme : ConnectionMgmtScheme.values()) {
             AbstractScheme schemeImpl = SchemeFactory.getScheme(scheme, clusterServices);
-            if (schemeImpl != null) schemes.put(scheme, schemeImpl);
+            if (schemeImpl != null) {
+                schemes.put(scheme, schemeImpl);
+                if (scheme.name().equalsIgnoreCase(schemeStr)) {
+                    activeScheme = scheme;
+                }
+            }
         }
     }
 

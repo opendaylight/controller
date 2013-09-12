@@ -801,10 +801,12 @@ public class ContainerManager extends Authorization<String> implements IContaine
      * @param delete
      */
     private void updateResourceGroups(String containerName, boolean delete) {
+        String containerProfile = System.getProperty("container.profile");
+        if (containerProfile == null) containerProfile = "Container";
         // Container Roles and Container Resource Group
-        String groupName = "Container-" + containerName;
-        String containerAdminRole = "Container-" + containerName + "-Admin";
-        String containerOperatorRole = "Container-" + containerName + "-Operator";
+        String groupName = containerProfile+"-" + containerName;
+        String containerAdminRole = containerProfile+"-" + containerName + "-Admin";
+        String containerOperatorRole = containerProfile+"-" + containerName + "-Operator";
         Set<String> allContainerSet = resourceGroups.get(allResourcesGroupName);
         if (delete) {
             resourceGroups.remove(groupName);

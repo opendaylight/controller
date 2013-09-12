@@ -115,7 +115,7 @@ public class ContainerManagerNorthbound {
      * Example:
      *
      * Request URL:
-     * http://localhost:8080/controller/nb/v2/containermanager/all
+     * http://localhost:8080/controller/nb/v2/containermanager/containers
      *
      * Response Payload in XML:
      * &lt;container-config-list&gt;
@@ -142,12 +142,12 @@ public class ContainerManagerNorthbound {
      * &lt;/container-config-list&gt;
      *
      * Response Payload in JSON:
-     * { "container-config" : [ { "name" : "black", "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"], "staticVlan" : "10", "flowSpecs : [{ "name": "udp", "protocol": "UDP" }] } ] }
-     * { "container-config" : [ { "name" : "red", "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"], "staticVlan" : "20", "flowSpecs": [{ "name": "tcp", "protocol": "TCP" }] } ] }
+     * { "container-config" : [ { "container" : "black", "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"], "staticVlan" : "10", "flowSpecs : [{ "name": "udp", "protocol": "UDP" }] } ] }
+     * { "container-config" : [ { "container" : "red", "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"], "staticVlan" : "20", "flowSpecs": [{ "name": "tcp", "protocol": "TCP" }] } ] }
      *
      * </pre>
      */
-    @Path("/all")
+    @Path("/containers")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(ContainerConfigs.class)
@@ -242,7 +242,7 @@ public class ContainerManagerNorthbound {
      * </pre>
      */
     @Path("/container/{container}")
-    @POST
+    @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({ @ResponseCode(code = 201, condition = "Container created successfully"),
             @ResponseCode(code = 400, condition = "Invalid Container configuration."),
@@ -407,7 +407,7 @@ public class ContainerManagerNorthbound {
      *
      * </pre>
      */
-    @Path("/container/{container}/flowspec")
+    @Path("/container/{container}/flowspecs")
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(FlowSpecConfigs.class)

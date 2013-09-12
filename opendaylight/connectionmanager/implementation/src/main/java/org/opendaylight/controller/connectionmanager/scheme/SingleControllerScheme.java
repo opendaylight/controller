@@ -1,7 +1,5 @@
 package org.opendaylight.controller.connectionmanager.scheme;
 
-import java.net.InetAddress;
-import java.util.Set;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.connectionmanager.ConnectionMgmtScheme;
 import org.opendaylight.controller.sal.core.Node;
@@ -25,11 +23,8 @@ class SingleControllerScheme extends AbstractScheme {
     @Override
     public boolean isConnectionAllowedInternal(Node node) {
         if (nodeConnections == null) return true;
-        for (Node existingNode : nodeConnections.keySet()) {
-            Set<InetAddress> controllers = nodeConnections.get(existingNode);
-            if (controllers == null || controllers.size() == 0) continue;
-            if (!controllers.contains(clusterServices.getMyAddress())) return false;
-        }
-        return true;
+        // Lets make it simple. The Cluster Coordinator is the master
+        if (clusterServices.amICoordinator()) return true;
+        return false;
     }
 }
