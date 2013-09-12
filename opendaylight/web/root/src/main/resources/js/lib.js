@@ -241,6 +241,9 @@ one.lib.modal = {
     spawn : function(id, header, $body, footer) {
         var $modal = one.lib.modal.clone(id);
         one.lib.modal.populate($modal, header, $body, footer);
+        $modal.on('hide', function () {
+            $('.modal-body').scrollTop(0);
+        });
         return $modal;
     },
     // empty modal
