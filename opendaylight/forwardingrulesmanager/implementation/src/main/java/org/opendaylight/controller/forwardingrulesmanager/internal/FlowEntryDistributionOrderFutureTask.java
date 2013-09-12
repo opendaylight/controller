@@ -22,6 +22,8 @@ import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.forwardingrulesmanager.implementation.data.FlowEntryDistributionOrder;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class which will monitor the completion of a FlowEntryDistributionOrder it
@@ -33,6 +35,7 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
     private boolean amICancelled;
     private CountDownLatch waitingLatch;
     private Status retStatus;
+    private static final Logger logger = LoggerFactory.getLogger(FlowEntryDistributionOrderFutureTask.class);
 
     /**
      * @param order
@@ -55,14 +58,18 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
 
     @Override
     public Status get() throws InterruptedException, ExecutionException {
+        logger.trace("Getting status for order {}", this.order);
         // If i'm done lets return the status as many times as caller wants
         if (this.waitingLatch.getCount() == 0L) {
+            logger.trace("get returns the status without waiting");
             return retStatus;
         }
 
+        logger.trace("Start waiting for status to come back");
         // Wait till someone signal that we are done
         this.waitingLatch.await();
 
+        logger.trace("Waiting for the status is over, returning it");
         // Return the known status
         return retStatus;
     }
@@ -70,14 +77,18 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
     @Override
     public Status get(long timeout, TimeUnit unit) throws InterruptedException,
             ExecutionException, TimeoutException {
+        logger.trace("Getting status for order {}", this.order);
         // If i'm done lets return the status as many times as caller wants
         if (this.waitingLatch.getCount() == 0L) {
+            logger.trace("get returns the status without waiting");
             return retStatus;
         }
 
+        logger.trace("Start waiting for status to come back");
         // Wait till someone signal that we are done
         this.waitingLatch.await(timeout, unit);
 
+        logger.trace("Waiting for the status is over, returning it");
         // Return the known status, could also be null if didn't return
         return retStatus;
     }
@@ -100,12 +111,16 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
      * @param retStatus
      */
     void gotStatus(FlowEntryDistributionOrder order, Status retStatus) {
-        if (order != this.order) {
+        logger.trace("Got status for order:{} \n Status:{}", order, retStatus);
+        if (!order.equals(this.order)) {
+            logger.error("Didn't get a result for an order we did issue order expected:{}, order received:{}",
+                    this.order, order);
             // Weird we got a call for an order we didn't make
             return;
         }
         this.retStatus = retStatus;
         // Now we are not waiting any longer
         this.waitingLatch.countDown();
+        logger.trace("Unlocked the Future");
     }
 }
