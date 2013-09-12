@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a2f8d8d_375fd374",
+        "filename": "opendaylight/northbound/integrationtest/src/test/java/org/opendaylight/controller/northbound/integrationtest/NorthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-09-12T15:09:30Z",
+      "side": 1,
+      "message": "Thanks. Good point. I will take care of it.",
+      "parentUuid": "1a2f8d8d_17261717",
+      "revId": "31ff479dd8da63bbacd21df5b7a474b69ccfed9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a2f8d8d_f7226b00",
         "filename": "opendaylight/switchmanager/api/src/test/java/org/opendaylight/controller/switchmanager/SubnetConfigTest.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "1a2f8d8d_1754d752",
+        "filename": "opendaylight/switchmanager/api/src/test/java/org/opendaylight/controller/switchmanager/SubnetConfigTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-09-12T15:09:30Z",
+      "side": 1,
+      "message": "Here the purpose was to actually show we can support different NodeConnector String format. And make sure the SubnetConfig.validate() does not block valid supported fomats.\nBut the format check is anyway done internally through NodeConnector.fromString(str) !\u003d null so, I can follow your suggestion here as well.",
+      "parentUuid": "1a2f8d8d_f7226b00",
+      "revId": "31ff479dd8da63bbacd21df5b7a474b69ccfed9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a2f8d8d_d71f6fb6",
         "filename": "opendaylight/switchmanager/implementation/src/test/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerTest.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2013-09-12T14:50:27Z",
       "side": 1,
       "message": "Same story here",
+      "revId": "31ff479dd8da63bbacd21df5b7a474b69ccfed9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_f7502b60",
+        "filename": "opendaylight/switchmanager/implementation/src/test/java/org/opendaylight/controller/switchmanager/internal/SwitchManagerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-09-12T15:09:30Z",
+      "side": 1,
+      "message": "Same, I will take care of it.",
+      "parentUuid": "1a2f8d8d_d71f6fb6",
       "revId": "31ff479dd8da63bbacd21df5b7a474b69ccfed9e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
