@@ -193,7 +193,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     public void shutDown() {
     }
 
-    @SuppressWarnings("deprecation")
     private void allocateCaches() {
         if (this.clusterContainerService == null) {
             this.nonClusterObjectCreate();
@@ -210,9 +209,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             clusterContainerService.createCache("switchmanager.nodeConfigList",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache("switchmanager.subnets",
-                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-            clusterContainerService.createCache(
-                    "switchmanager.configSaveEvent",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
             clusterContainerService.createCache("switchmanager.nodeProps",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
@@ -232,7 +228,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         }
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         if (this.clusterContainerService == null) {
             log.info("un-initialized clusterContainerService, can't create cache");
@@ -378,7 +374,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
     private Status updateDatabase(SubnetConfig conf, boolean add) {
         if (add) {
-            Subnet subnetCurr = subnets.get(conf.getIPnum());
+            Subnet subnetCurr = subnets.get(conf.getIPAddress());
             Subnet subnet;
             if (subnetCurr == null) {
                 subnet = new Subnet(conf);
@@ -388,25 +384,24 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             // In case of API3 call we may receive the ports along with the
             // subnet creation
             if (!conf.isGlobal()) {
-                Set<NodeConnector> sp = conf.getSubnetNodeConnectors();
-                subnet.addNodeConnectors(sp);
+                subnet.addNodeConnectors(conf.getNodeConnectors());
             }
             boolean putNewSubnet = false;
             if(subnetCurr == null) {
-                if(subnets.putIfAbsent(conf.getIPnum(), subnet) == null) {
+                if(subnets.putIfAbsent(conf.getIPAddress(), subnet) == null) {
                     putNewSubnet = true;
                 }
             } else {
-                putNewSubnet = subnets.replace(conf.getIPnum(), subnetCurr, subnet);
+                putNewSubnet = subnets.replace(conf.getIPAddress(), subnetCurr, subnet);
             }
             if(!putNewSubnet) {
-                String msg = "Cluster conflict: Conflict while adding the subnet " + conf.getIPnum();
+                String msg = "Cluster conflict: Conflict while adding the subnet " + conf.getIPAddress();
                 return new Status(StatusCode.CONFLICT, msg);
             }
 
         // Subnet removal case
         } else {
-            subnets.remove(conf.getIPnum());
+            subnets.remove(conf.getIPAddress());
         }
         return new Status(StatusCode.SUCCESS);
     }
@@ -428,11 +423,11 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     private Status addRemoveSubnet(SubnetConfig conf, boolean isAdding) {
-        // Valid config check
-        if (!conf.isValidConfig()) {
-            String msg = "Invalid Subnet configuration";
-            log.warn(msg);
-            return new Status(StatusCode.BADREQUEST, msg);
+        // Valid configuration check
+        Status status = conf.validate();
+        if (!status.isSuccess()) {
+            log.warn(status.getDescription());
+            return status;
         }
 
         if (isAdding) {
@@ -442,24 +437,24 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                         "Subnet with the specified name already configured.");
             }
             // Semantic check
-            Status rc = semanticCheck(conf);
-            if (!rc.isSuccess()) {
-                return rc;
+            status = semanticCheck(conf);
+            if (!status.isSuccess()) {
+                return status;
             }
         }
 
         // Update Database
-        Status rc = updateDatabase(conf, isAdding);
+        status = updateDatabase(conf, isAdding);
 
-        if (rc.isSuccess()) {
+        if (status.isSuccess()) {
             // Update Configuration
-            rc = updateConfig(conf, isAdding);
-            if(!rc.isSuccess()) {
+            status = updateConfig(conf, isAdding);
+            if(!status.isSuccess()) {
                 updateDatabase(conf, (!isAdding));
             }
         }
 
-        return rc;
+        return status;
     }
 
     /**
@@ -485,26 +480,100 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     @Override
-    public Status addPortsToSubnet(String name, String switchPorts) {
+    public Status modifySubnet(SubnetConfig conf) {
+        // Sanity check
+        if (conf == null) {
+            return new Status(StatusCode.BADREQUEST, "Invalid Subnet configuration: null");
+        }
+
+        // Valid configuration check
+        Status status = conf.validate();
+        if (!status.isSuccess()) {
+            log.warn(status.getDescription());
+            return status;
+        }
+
+        // If a subnet configuration with this name does not exist, consider this is a creation
+        SubnetConfig target = subnetsConfigList.get(conf.getName());
+        if (target == null) {
+            return this.addSubnet(conf);
+        }
+
+        // No change
+        if (target.equals(conf)) {
+            return new Status(StatusCode.SUCCESS);
+        }
+
+        // Check not allowed modifications
+        if (!target.getSubnet().equals(conf.getSubnet())) {
+            return new Status(StatusCode.BADREQUEST, "IP address change is not allowed");
+        }
+
+        // Derive the set of node connectors that are being removed
+        Set<NodeConnector> toRemove = target.getNodeConnectors();
+        toRemove.removeAll(conf.getNodeConnectors());
+        List<String> nodeConnectorStrings = null;
+        if (!toRemove.isEmpty()) {
+            nodeConnectorStrings = new ArrayList<String>();
+            for (NodeConnector nc : toRemove) {
+                nodeConnectorStrings.add(nc.toString());
+            }
+            status = this.removePortsFromSubnet(conf.getName(), nodeConnectorStrings);
+            if (!status.isSuccess()) {
+                return status;
+            }
+        }
+
+        // Derive the set of node connectors that are being added
+        Set<NodeConnector> toAdd = conf.getNodeConnectors();
+        toAdd.removeAll(target.getNodeConnectors());
+        if (!toAdd.isEmpty()) {
+            List<String> nodeConnectorStringRemoved = nodeConnectorStrings;
+            nodeConnectorStrings = new ArrayList<String>();
+            for (NodeConnector nc : toAdd) {
+                nodeConnectorStrings.add(nc.toString());
+            }
+            status = this.addPortsToSubnet(conf.getName(), nodeConnectorStrings);
+            if (!status.isSuccess()) {
+                // If any port was removed, add it back as a best recovery effort
+                if (!toRemove.isEmpty()) {
+                    this.addPortsToSubnet(conf.getName(), nodeConnectorStringRemoved);
+                }
+                return status;
+            }
+        }
+
+        // Update Configuration
+        subnetsConfigList.put(conf.getName(), conf);
+
+        return new Status(StatusCode.SUCCESS);
+    }
+
+    @Override
+    public Status addPortsToSubnet(String name, List<String> switchPorts) {
+        if (name == null) {
+            return new Status(StatusCode.BADREQUEST, "Null subnet name");
+        }
         SubnetConfig confCurr = subnetsConfigList.get(name);
         if (confCurr == null) {
             return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
         }
-        if (!confCurr.isValidSwitchPort(switchPorts)) {
-            return new Status(StatusCode.BADREQUEST, "Invalid switchports");
+
+        if (switchPorts == null || switchPorts.isEmpty()) {
+            return new Status(StatusCode.BADREQUEST, "Null or empty port set");
         }
 
-        Subnet subCurr = subnets.get(confCurr.getIPnum());
+        Subnet subCurr = subnets.get(confCurr.getIPAddress());
         if (subCurr == null) {
-            log.debug("Cluster conflict: Subnet entry {} is not present in the subnets cache.", confCurr.getIPnum());
+            log.debug("Cluster conflict: Subnet entry {} is not present in the subnets cache.", confCurr.getIPAddress());
             return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
         }
 
         // Update Database
         Subnet sub = subCurr.clone();
-        Set<NodeConnector> sp = confCurr.getNodeConnectors(switchPorts);
+        Set<NodeConnector> sp = NodeConnector.fromString(switchPorts);
         sub.addNodeConnectors(sp);
-        boolean subnetsReplaced = subnets.replace(confCurr.getIPnum(), subCurr, sub);
+        boolean subnetsReplaced = subnets.replace(confCurr.getIPAddress(), subCurr, sub);
         if (!subnetsReplaced) {
             String msg = "Cluster conflict: Conflict while adding ports to the subnet " + name;
             return new Status(StatusCode.CONFLICT, msg);
@@ -524,23 +593,35 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     @Override
-    public Status removePortsFromSubnet(String name, String switchPorts) {
+    public Status removePortsFromSubnet(String name, List<String> switchPorts) {
+        if (name == null) {
+            return new Status(StatusCode.BADREQUEST, "Null subnet name");
+        }
         SubnetConfig confCurr = subnetsConfigList.get(name);
         if (confCurr == null) {
             return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
         }
 
-        Subnet subCurr = subnets.get(confCurr.getIPnum());
+        if (switchPorts == null || switchPorts.isEmpty()) {
+            return new Status(StatusCode.BADREQUEST, "Null or empty port set");
+        }
+
+        Subnet subCurr = subnets.get(confCurr.getIPAddress());
         if (subCurr == null) {
-            log.debug("Cluster conflict: Subnet entry {} is not present in the subnets cache.", confCurr.getIPnum());
+            log.debug("Cluster conflict: Subnet entry {} is not present in the subnets cache.", confCurr.getIPAddress());
             return new Status(StatusCode.NOTFOUND, "Subnet does not exist");
         }
 
+        // Validation check
+        Status status = SubnetConfig.validatePorts(switchPorts);
+        if (!status.isSuccess()) {
+            return status;
+        }
         // Update Database
         Subnet sub = subCurr.clone();
-        Set<NodeConnector> sp = confCurr.getNodeConnectors(switchPorts);
+        Set<NodeConnector> sp = NodeConnector.fromString(switchPorts);
         sub.deleteNodeConnectors(sp);
-        boolean subnetsReplace = subnets.replace(confCurr.getIPnum(), subCurr, sub);
+        boolean subnetsReplace = subnets.replace(confCurr.getIPAddress(), subCurr, sub);
         if (!subnetsReplace) {
             String msg = "Cluster conflict: Conflict while removing ports from the subnet " + name;
             return new Status(StatusCode.CONFLICT, msg);
@@ -632,6 +713,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void updateSwitchConfig(SwitchConfig cfgObject) {
         // update default container only
@@ -1816,9 +1898,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         Switch sw = getSwitchByNode(node);
 
         ci.println("          NodeConnector                        Name");
-        if (sw == null) {
-            return;
-        }
+
         Set<NodeConnector> nodeConnectorSet = sw.getNodeConnectors();
         String nodeConnectorName;
         if (nodeConnectorSet != null && nodeConnectorSet.size() > 0) {
@@ -2056,6 +2136,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         return null;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public String getNodeDescription(Node node) {
         // Check first if user configured a name

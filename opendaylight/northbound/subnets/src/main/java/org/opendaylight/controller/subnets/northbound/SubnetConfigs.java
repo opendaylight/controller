@@ -24,6 +24,7 @@ public class SubnetConfigs {
         @XmlElement
         List<SubnetConfig> subnetConfig;
         //To satisfy JAXB
+        @SuppressWarnings("unused")
         private SubnetConfigs() {
 
         }

@@ -10,6 +10,7 @@ package org.opendaylight.controller.devices.web;
 public class SubnetGatewayPortBean {
     private String nodeName;
     private String nodeId;
+    private PortJsonBean port;
     private String nodePortId;
     private String nodePortName;
 

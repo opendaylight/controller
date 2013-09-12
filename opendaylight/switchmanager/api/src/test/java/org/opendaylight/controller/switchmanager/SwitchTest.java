@@ -24,10 +24,8 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.Tier;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 public class SwitchTest {
 
@@ -88,13 +86,15 @@ public class SwitchTest {
                 .getSpanPorts();
 
         Assert.assertEquals(node, resultNode);
-        for (int i = 0; i < dlAddress.length; i++)
+        for (int i = 0; i < dlAddress.length; i++) {
             Assert.assertEquals(dlAddress[i], resultdlAddress[i]);
+        }
 
         Assert.assertTrue(ncSet.equals(resultncSet));
 
-        for (int i = 0; i < portList.size(); i++)
+        for (int i = 0; i < portList.size(); i++) {
             Assert.assertEquals(portList.get(i), resultSpanPort.get(i));
+        }
     }
 
     @Test

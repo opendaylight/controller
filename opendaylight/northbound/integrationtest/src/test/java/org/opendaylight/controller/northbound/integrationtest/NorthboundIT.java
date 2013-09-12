@@ -88,10 +88,10 @@ public class NorthboundIT {
         assertNotNull(bc);
         boolean debugit = false;
         Bundle b[] = bc.getBundles();
-        for (int i = 0; i < b.length; i++) {
-            int state = b[i].getState();
+        for (Bundle element : b) {
+            int state = element.getState();
             if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
-                log.debug("Bundle:" + b[i].getSymbolicName() + " state:" + stateToString(state));
+                log.debug("Bundle:" + element.getSymbolicName() + " state:" + stateToString(state));
                 debugit = true;
             }
         }
@@ -143,8 +143,9 @@ public class NorthboundIT {
 
         if (debugMsg) {
             System.out.println("HTTP method: " + method + " url: " + restUrl.toString());
-            if (body != null)
+            if (body != null) {
                 System.out.println("body: " + body);
+            }
         }
 
         try {
@@ -172,8 +173,9 @@ public class NorthboundIT {
 
             // Response code for success should be 2xx
             httpResponseCode = connection.getResponseCode();
-            if (httpResponseCode > 299)
+            if (httpResponseCode > 299) {
                 return httpResponseCode.toString();
+            }
 
             if (debugMsg) {
                 System.out.println("HTTP response code: " + connection.getResponseCode());
@@ -291,7 +293,7 @@ public class NorthboundIT {
     }
 
     @Test
-    public void testSubnetsNorthbound() throws JSONException {
+    public void testSubnetsNorthbound() throws JSONException, ConstructionException {
         System.out.println("Starting Subnets JAXB client.");
         String baseURL = "http://127.0.0.1:8080/controller/nb/v2/subnetservice/";
 
@@ -300,17 +302,34 @@ public class NorthboundIT {
 
         String name2 = "testSubnet2";
         String subnet2 = "2.2.2.2/24";
-        String[] nodePorts2 = {"2/1", "2/2", "2/3", "2/4"};
-        StringBuilder nodePortsJson2 = new StringBuilder();
-        nodePortsJson2.append(nodePorts2[0] + "," + nodePorts2[1]  + "," + nodePorts2[2] + "," + nodePorts2[3]);
 
         String name3 = "testSubnet3";
         String subnet3 = "3.3.3.3/24";
-        String[] nodePorts3 = {"3/1", "3/2", "3/3"};
-        StringBuilder nodePortsJson3 = new StringBuilder();
-        nodePortsJson3.append(nodePorts3[0] + "," + nodePorts3[1]  + "," + nodePorts3[2]);
-        StringBuilder nodePortsJson3_1 = new StringBuilder();
-        nodePortsJson3_1.append(nodePortsJson3).append(",").append(nodePortsJson2);
+
+        /*
+         * Create the node connector string list for the two subnets as:
+         * portList2 = {"OF|1@OF|00:00:00:00:00:00:00:02", "OF|2@OF|00:00:00:00:00:00:00:02", "OF|3@OF|00:00:00:00:00:00:00:02", "OF|4@OF|00:00:00:00:00:00:00:02"};
+         * portList3 = {"OF|1@OF|00:00:00:00:00:00:00:03", "OF|2@OF|00:00:00:00:00:00:00:03", "OF|3@OF|00:00:00:00:00:00:00:03"};
+         */
+        Node node2 = new Node(Node.NodeIDType.OPENFLOW, 2L);
+        List<String> portList2 = new ArrayList<String>();
+        NodeConnector nc21 = new NodeConnector(NodeConnector.NodeConnectorIDType.OPENFLOW, (short)1, node2);
+        NodeConnector nc22 = new NodeConnector(NodeConnector.NodeConnectorIDType.OPENFLOW, (short)2, node2);
+        NodeConnector nc23 = new NodeConnector(NodeConnector.NodeConnectorIDType.OPENFLOW, (short)3, node2);
+        NodeConnector nc24 = new NodeConnector(NodeConnector.NodeConnectorIDType.OPENFLOW, (short)3, node2);
+        portList2.add(nc21.toString());
+        portList2.add(nc22.toString());
+        portList2.add(nc23.toString());
+        portList2.add(nc24.toString());
+
+        List<String> portList3 = new ArrayList<String>();
+        Node node3 = new Node(Node.NodeIDType.OPENFLOW, 3L);
+        NodeConnector nc31 = new NodeConnector(NodeConnector.NodeConnectorIDType.OPENFLOW, (short)1, node3);
+        NodeConnector nc32 = new NodeConnector(NodeConnector.NodeConnectorIDType.OPENFLOW, (short)2, node3);
+        NodeConnector nc33 = new NodeConnector(NodeConnector.NodeConnectorIDType.OPENFLOW, (short)3, node3);
+        portList3.add(nc31.toString());
+        portList3.add(nc32.toString());
+        portList3.add(nc33.toString());
 
         // Test GET subnets in default container
         String result = getJsonResult(baseURL + "default/subnets");
@@ -337,30 +356,20 @@ public class NorthboundIT {
         Assert.assertEquals(name1, json.getString("name"));
         Assert.assertEquals(subnet1, json.getString("subnet"));
 
-        // Test POST subnet2
-        JSONObject jo2 = new JSONObject().put("name", name2).put("subnet", subnet2);
+        // Test PUT subnet2
+        JSONObject jo2 = new JSONObject().put("name", name2).put("subnet", subnet2).put("nodeConnectors", portList2);
         // execute HTTP request and verify response code
         result = getJsonResult(baseURL + "default/subnet/" + name2, "PUT", jo2.toString());
         Assert.assertEquals(201, httpResponseCode.intValue());
-        // Test POST nodePorts
-        jo2.append("nodePorts", nodePortsJson2);
-        // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "default/subnet/" + name2 + "/nodePorts", "PUT", jo2.toString());
-        Assert.assertEquals(200, httpResponseCode.intValue());
-        // Test POST subnet3
+        // Test PUT subnet3
         JSONObject jo3 = new JSONObject().put("name", name3).put("subnet", subnet3);
         // execute HTTP request and verify response code
         result = getJsonResult(baseURL + "default/subnet/" + name3, "PUT", jo3.toString());
         Assert.assertEquals(201, httpResponseCode.intValue());
-        // Test POST nodePorts
-        jo3.append("nodePorts", nodePortsJson3);
+        // Test POST subnet3 (modify port list: add)
+        JSONObject jo3New = new JSONObject().put("name", name3).put("subnet", subnet3).put("nodeConnectors", portList3);
         // execute HTTP request and verify response code
-        result = getJsonResult(baseURL + "default/subnet/" + name3 + "/nodePorts", "PUT", jo3.toString());
-        Assert.assertEquals(200, httpResponseCode.intValue());
-        // Test PUT nodePorts
-        jo3.remove("nodePorts");
-        jo3.append("nodePorts", nodePortsJson3_1);
-        result = getJsonResult(baseURL + "default/subnet/" + name3 + "/nodePorts", "POST", jo3.toString());
+        result = getJsonResult(baseURL + "default/subnet/" + name3, "POST", jo3New.toString());
         Assert.assertEquals(200, httpResponseCode.intValue());
 
         // Test GET all subnets in default container
@@ -376,26 +385,41 @@ public class NorthboundIT {
                 Assert.assertEquals(subnet1, subnetConfig.getString("subnet"));
             } else if (subnetConfig.getString("name").equals(name2)) {
                 Assert.assertEquals(subnet2, subnetConfig.getString("subnet"));
-                String[] nodePortsGet2 = subnetConfig.getJSONArray("nodePorts").getString(0).split(",");
-                Assert.assertEquals(nodePorts2[0], nodePortsGet2[0]);
-                Assert.assertEquals(nodePorts2[1], nodePortsGet2[1]);
-                Assert.assertEquals(nodePorts2[2], nodePortsGet2[2]);
-                Assert.assertEquals(nodePorts2[3], nodePortsGet2[3]);
+                JSONArray portListGet = subnetConfig.getJSONArray("nodeConnectors");
+                Assert.assertEquals(portList2.get(0), portListGet.get(0));
+                Assert.assertEquals(portList2.get(1), portListGet.get(1));
+                Assert.assertEquals(portList2.get(2), portListGet.get(2));
+                Assert.assertEquals(portList2.get(3), portListGet.get(3));
             } else if (subnetConfig.getString("name").equals(name3)) {
                 Assert.assertEquals(subnet3, subnetConfig.getString("subnet"));
-                String[] nodePortsGet = subnetConfig.getJSONArray("nodePorts").getString(0).split(",");
-                Assert.assertEquals(nodePorts3[0], nodePortsGet[0]);
-                Assert.assertEquals(nodePorts3[1], nodePortsGet[1]);
-                Assert.assertEquals(nodePorts3[2], nodePortsGet[2]);
-                Assert.assertEquals(nodePorts2[0], nodePortsGet[3]);
-                Assert.assertEquals(nodePorts2[1], nodePortsGet[4]);
-                Assert.assertEquals(nodePorts2[2], nodePortsGet[5]);
-                Assert.assertEquals(nodePorts2[3], nodePortsGet[6]);
+                JSONArray portListGet = subnetConfig.getJSONArray("nodeConnectors");
+                Assert.assertEquals(portList3.get(0), portListGet.get(0));
+                Assert.assertEquals(portList3.get(1), portListGet.get(1));
+                Assert.assertEquals(portList3.get(2), portListGet.get(2));
             } else {
                 // Unexpected config name
                 Assert.assertTrue(false);
             }
         }
+
+        // Test POST subnet2 (modify port list: remove one port only)
+        List<String> newPortList2 = new ArrayList<String>(portList2);
+        newPortList2.remove(3);
+        JSONObject jo2New = new JSONObject().put("name", name2).put("subnet", subnet2).put("nodeConnectors", newPortList2);
+        // execute HTTP request and verify response code
+        result = getJsonResult(baseURL + "default/subnet/" + name2, "POST", jo2New.toString());
+        Assert.assertEquals(200, httpResponseCode.intValue());
+
+        // Test GET subnet2: verify contains only the first three ports
+        result = getJsonResult(baseURL + "default/subnet/" + name2);
+        jt = new JSONTokener(result);
+        subnetConfig = new JSONObject(jt);
+        Assert.assertEquals(200, httpResponseCode.intValue());
+        JSONArray portListGet2 = subnetConfig.getJSONArray("nodeConnectors");
+        Assert.assertEquals(portList2.get(0), portListGet2.get(0));
+        Assert.assertEquals(portList2.get(1), portListGet2.get(1));
+        Assert.assertEquals(portList2.get(2), portListGet2.get(2));
+        Assert.assertTrue(portListGet2.length() == 3);
 
         // Test DELETE subnet1
         result = getJsonResult(baseURL + "default/subnet/" + name1, "DELETE");
@@ -797,19 +821,25 @@ public class NorthboundIT {
             dstBytes[4] = Byte.parseByte(dst.substring(8, 10));
             Assert.assertTrue(Arrays.equals(dstBytes, dstMatch));
         }
-        if (act.getString("type").equals("SET_DL_TYPE"))
+        if (act.getString("type").equals("SET_DL_TYPE")) {
             Assert.assertTrue(act.getInt("dlType") == 10);
-        if (act.getString("type").equals("SET_VLAN_ID"))
+        }
+        if (act.getString("type").equals("SET_VLAN_ID")) {
             Assert.assertTrue(act.getInt("vlanId") == 2);
-        if (act.getString("type").equals("SET_VLAN_PCP"))
+        }
+        if (act.getString("type").equals("SET_VLAN_PCP")) {
             Assert.assertTrue(act.getInt("pcp") == 3);
-        if (act.getString("type").equals("SET_VLAN_CFI"))
+        }
+        if (act.getString("type").equals("SET_VLAN_CFI")) {
             Assert.assertTrue(act.getInt("cfi") == 1);
+        }
 
-        if (act.getString("type").equals("SET_NW_SRC"))
+        if (act.getString("type").equals("SET_NW_SRC")) {
             Assert.assertTrue(act.getString("address").equals("2.2.2.2"));
-        if (act.getString("type").equals("SET_NW_DST"))
+        }
+        if (act.getString("type").equals("SET_NW_DST")) {
             Assert.assertTrue(act.getString("address").equals("1.1.1.1"));
+        }
 
         if (act.getString("type").equals("PUSH_VLAN")) {
             int head = act.getInt("VlanHeader");
@@ -823,12 +853,15 @@ public class NorthboundIT {
             Assert.assertTrue(pcp == 1);
             Assert.assertTrue(tag == 0x8100);
         }
-        if (act.getString("type").equals("SET_NW_TOS"))
+        if (act.getString("type").equals("SET_NW_TOS")) {
             Assert.assertTrue(act.getInt("tos") == 16);
-        if (act.getString("type").equals("SET_TP_SRC"))
+        }
+        if (act.getString("type").equals("SET_TP_SRC")) {
             Assert.assertTrue(act.getInt("port") == 4201);
-        if (act.getString("type").equals("SET_TP_DST"))
+        }
+        if (act.getString("type").equals("SET_TP_DST")) {
             Assert.assertTrue(act.getInt("port") == 8080);
+        }
     }
 
     @Test
@@ -911,14 +944,16 @@ public class NorthboundIT {
             for (int i = 0; i < json_array.length(); i++) {
                 result = json_array.getJSONObject(i);
                 Integer nid = result.getJSONObject("node").getInt("id");
-                if (nid.equals(nodeId))
+                if (nid.equals(nodeId)) {
                     break;
+                }
             }
         } else {
             result = json.getJSONObject(array_name);
             Integer nid = result.getJSONObject("node").getInt("id");
-            if (!nid.equals(nodeId))
+            if (!nid.equals(nodeId)) {
                 result = null;
+            }
         }
         return result;
     }
@@ -1001,7 +1036,7 @@ public class NorthboundIT {
 
         // define variables for decoding returned strings
         String networkAddress;
-        JSONObject host_jo, dl_jo, nc_jo, node_jo;
+        JSONObject host_jo;
 
         // the two hosts should be in inactive host DB
         // test GET method: getInactiveHosts()
@@ -1116,8 +1151,9 @@ public class NorthboundIT {
             JSONArray ja = json.getJSONArray("hostConfig");
             for (int i = 0; i < ja.length(); i++) {
                 String na = ja.getJSONObject(i).getString("networkAddress");
-                if (na.equalsIgnoreCase(hostIp))
+                if (na.equalsIgnoreCase(hostIp)) {
                     return true;
+                }
             }
             return false;
         } else {
@@ -1198,9 +1234,15 @@ public class NorthboundIT {
             for (int j = 0; j < propsArray.length(); j++) {
                 JSONObject props = propsArray.getJSONObject(j);
                 String propName = props.getString("name");
-                if (propName.equals("bandwidth")) bandw = props;
-                if (propName.equals("state")) stt = props;
-                if (propName.equals("latency")) ltc = props;
+                if (propName.equals("bandwidth")) {
+                    bandw = props;
+                }
+                if (propName.equals("state")) {
+                    stt = props;
+                }
+                if (propName.equals("latency")) {
+                    ltc = props;
+                }
             }
 
             if (headNC.getInt("id") == headNC1_nodeConnId) {
@@ -1268,8 +1310,9 @@ public class NorthboundIT {
             int i;
             for (i = 0; i < ja.length(); i++) {
                 userlink = ja.getJSONObject(i);
-                if (userlink.getString("name").equalsIgnoreCase("userLink_1"))
+                if (userlink.getString("name").equalsIgnoreCase("userLink_1")) {
                     break;
+                }
             }
             Assert.assertFalse(i == ja.length());
         } else {
