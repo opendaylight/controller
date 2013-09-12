@@ -252,7 +252,10 @@ public class ClusterManager implements IClusterServices, IContainerAware {
         try {
             ParserRegistry parser = new ParserRegistry(this.getClass()
                     .getClassLoader());
-            ConfigurationBuilderHolder holder = parser.parseFile("config/infinispan-config.xml");
+            String infinispanConfigFile =
+                    System.getProperty("org.infinispan.config.file", "config/infinispan-config.xml");
+            logger.debug("Using configuration file:{}", infinispanConfigFile);
+            ConfigurationBuilderHolder holder = parser.parseFile(infinispanConfigFile);
             GlobalConfigurationBuilder globalBuilder = holder.getGlobalConfigurationBuilder();
             globalBuilder.serialization()
                     .classResolver(new ClassResolver())
