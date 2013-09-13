@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_ea47221c",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2532,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-09-13T15:36:33Z",
+      "side": 1,
+      "message": "Shouldnt this be called before the loadFlowConfiguration ?",
+      "revId": "b8da7c5be9812ce23d54536771225d88df271769",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
