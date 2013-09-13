@@ -2517,6 +2517,9 @@ public class ForwardingRulesManager implements
         // Initialize graceful stop flag
         stopping = false;
 
+        // Allocate the executor service
+        this.executor = Executors.newSingleThreadExecutor();
+
         // Start event handler thread
         frmEventHandler.start();
 
@@ -2527,9 +2530,6 @@ public class ForwardingRulesManager implements
         if (staticFlows.isEmpty()) {
             loadFlowConfiguration();
         }
-
-        // Allocate the executor service
-        this.executor = Executors.newSingleThreadExecutor();
     }
 
     /**
