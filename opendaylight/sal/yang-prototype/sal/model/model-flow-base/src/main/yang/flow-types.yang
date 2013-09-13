@@ -76,6 +76,18 @@ module opendaylight-flow-types {
             }
             uses action;
         }
+        
+        leaf idle-timeout {
+            type uint16;
+        }
+        
+        leaf hard-timeout {
+            type uint16;
+        }
+        
+        leaf cookie {
+            type uint64;
+        }
     }
 
     grouping flow-statistics {
