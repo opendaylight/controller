@@ -31,6 +31,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Contro
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
@@ -273,12 +274,9 @@ public class Activator extends ComponentActivatorAbstractBase {
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
             c.setInterface(
-                    new String[] {
-                            IPluginInFlowProgrammerService.class.getName(),
-                            IMessageListener.class.getName(),
-                            IContainerListener.class.getName(),
-                            IInventoryShimExternalListener.class.getName() },
-                            props);
+                    new String[] { IPluginInFlowProgrammerService.class.getName(), IMessageListener.class.getName(),
+                            IContainerListener.class.getName(), IInventoryShimExternalListener.class.getName(),
+                            IContainerAware.class.getName() }, props);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -300,10 +298,8 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(ReadServiceFilter.class)) {
 
-            c.setInterface(new String[] {
-                    IReadServiceFilter.class.getName(),
-                    IContainerListener.class.getName(),
-                    IOFStatisticsListener.class.getName() }, null);
+            c.setInterface(new String[] { IReadServiceFilter.class.getName(), IContainerListener.class.getName(),
+                    IOFStatisticsListener.class.getName(), IContainerAware.class.getName() }, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -338,9 +334,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(DiscoveryService.class)) {
             // export the service
             c.setInterface(
-                    new String[] {
-                            IInventoryShimExternalListener.class.getName(),
-                            IDataPacketListen.class.getName(),
+                    new String[] { IInventoryShimExternalListener.class.getName(), IDataPacketListen.class.getName(),
                             IContainerListener.class.getName() }, null);
 
             c.add(createServiceDependency()
@@ -369,9 +363,8 @@ public class Activator extends ComponentActivatorAbstractBase {
         // DataPacket mux/demux services, which is teh actual engine
         // doing the packet switching
         if (imp.equals(DataPacketMuxDemux.class)) {
-            c.setInterface(new String[] { IDataPacketMux.class.getName(),
-                    IContainerListener.class.getName(),
-                    IInventoryShimExternalListener.class.getName() }, null);
+            c.setInterface(new String[] { IDataPacketMux.class.getName(), IContainerListener.class.getName(),
+                    IInventoryShimExternalListener.class.getName(), IContainerAware.class.getName() }, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -419,7 +412,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(InventoryServiceShim.class)) {
             c.setInterface(new String[] { IContainerListener.class.getName(),
-                    IOFStatisticsListener.class.getName()}, null);
+                    IOFStatisticsListener.class.getName(), IContainerAware.class.getName() }, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -448,10 +441,9 @@ public class Activator extends ComponentActivatorAbstractBase {
         }
 
         if (imp.equals(TopologyServiceShim.class)) {
-            c.setInterface(new String[] { IDiscoveryListener.class.getName(),
-                    IContainerListener.class.getName(),
-                    IRefreshInternalProvider.class.getName(),
-                    IInventoryShimExternalListener.class.getName() }, null);
+            c.setInterface(new String[] { IDiscoveryListener.class.getName(), IContainerListener.class.getName(),
+                    IRefreshInternalProvider.class.getName(), IInventoryShimExternalListener.class.getName(),
+                    IContainerAware.class.getName() }, null);
           c.add(createServiceDependency()
                     .setService(ITopologyServiceShimListener.class)
                     .setCallbacks("setTopologyServiceShimListener",

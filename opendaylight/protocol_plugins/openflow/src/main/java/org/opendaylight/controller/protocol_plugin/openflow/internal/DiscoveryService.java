@@ -1693,4 +1693,5 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         }
         return ports;
     }
+
 }
