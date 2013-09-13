@@ -1313,10 +1313,10 @@ one.f.flows = {
                     data: data.flows,
                     formatter: function(items) {
                         $.each(items, function(index, item) {
-                                    var $checkbox = document.createElement("input");
+                            var $checkbox = document.createElement("input");
                             $checkbox.setAttribute("type", "checkbox");
                             $checkbox.setAttribute("name", item.name);
-                            $checkbox.setAttribute("node", item.node);
+                            $checkbox.setAttribute("node", item.nodeId);
                             $checkbox.setAttribute('class','flowEntry')
                             item.selector = $checkbox.outerHTML;
                                   item["name"] = '<span data-installInHw=' + item["flow"]["installInHw"] + 
