@@ -52,8 +52,11 @@ public class Flows implements IDaylightWeb {
     private static final String WEB_ID = "flows";
     private static final short WEB_ORDER = 2;
 
+    private final Gson gson;
+
     public Flows() {
         ServiceHelper.registerGlobalService(IDaylightWeb.class, this, null);
+        gson = new Gson();
     }
 
     @Override
@@ -246,8 +249,8 @@ public class Flows implements IDaylightWeb {
             return null;
         }
 
-        Gson gson = new Gson();
         FlowConfig flow = gson.fromJson(body, FlowConfig.class);
+
         Node node = Node.fromString(nodeId);
         flow.setNode(node);
         Status result = new Status(StatusCode.BADREQUEST, "Invalid request");
@@ -332,7 +335,6 @@ public class Flows implements IDaylightWeb {
             return "Forwarding Rules Manager is not available";
         }
 
-        Gson gson = new Gson();
         List<Map<String, String>> flowList = new ArrayList<Map<String, String>>();
         flowList = gson.fromJson(body, flowList.getClass());
         Status result = new Status(StatusCode.BADREQUEST, "Invalid request");

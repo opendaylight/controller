@@ -420,9 +420,9 @@ one.f.flows = {
         var flows = one.f.flows.registry.flows;
         var flow;
         $(flows).each(function(index, value) {
-            if (value['name'] == id) {
-                flow = value;
-            }
+          if (value.name == id && value.nodeId == node) {
+            flow = value;
+          }
         });
         if (one.f.flows.registry.privilege === 'WRITE') {
             // remove button
