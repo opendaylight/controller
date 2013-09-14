@@ -63,6 +63,7 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
             createSecureChannel(socket);
             createBuffers(sslEngine);
         } catch (Exception e) {
+            logger.warn("Failed to setup TLS connection {} {}", socket, e);
             stop();
             throw e;
         }
