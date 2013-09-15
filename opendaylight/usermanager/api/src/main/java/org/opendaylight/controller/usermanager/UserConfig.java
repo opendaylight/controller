@@ -9,6 +9,9 @@
 package org.opendaylight.controller.usermanager;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
+import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.usermanager.AuthResponse;
@@ -27,27 +31,50 @@ import org.opendaylight.controller.usermanager.AuthResponse;
 public class UserConfig implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /*
-     * Clear text password as we are moving to some MD5 digest for when saving
-     * configurations
-     */
     protected String user;
     protected List<String> roles;
     private String password;
     private static final int USERNAME_MAXLENGTH = 32;
     private static final int PASSWORD_MINLENGTH = 5;
     private static final int PASSWORD_MAXLENGTH = 256;
-    private static final Pattern INVALID_USERNAME_CHARACTERS = Pattern
-            .compile("([/\\s\\.\\?#%;\\\\]+)");
+    private static final Pattern INVALID_USERNAME_CHARACTERS = Pattern.compile("([/\\s\\.\\?#%;\\\\]+)");
+    private static MessageDigest oneWayFunction = null;
+    static {
+        try {
+            UserConfig.oneWayFunction = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
 
     public UserConfig() {
     }
 
+    /**
+     * Construct a UserConfig object and takes care of hashing the user password
+     *
+     * @param user
+     *            the user name
+     * @param password
+     *            the plain text password
+     * @param roles
+     *            the list of roles
+     */
     public UserConfig(String user, String password, List<String> roles) {
         this.user = user;
+
         this.password = password;
-        this.roles = (roles == null) ? new ArrayList<String>()
-                : new ArrayList<String>(roles);
+        if (this.validatePassword().isSuccess()) {
+            /*
+             * Only if the password is a valid one, hash it. So in case it is not
+             * valid, when UserConfig.validate() is called, the proper
+             * validation error will be returned to the caller. If we hashed a
+             * priori instead, the mis-configuration would be masked
+             */
+            this.password = hash(this.password);
+        }
+
+        this.roles = (roles == null) ? new ArrayList<String>() : new ArrayList<String>(roles);
     }
 
     public String getUser() {
@@ -75,28 +102,37 @@ public class UserConfig implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         UserConfig other = (UserConfig) obj;
         if (password == null) {
-            if (other.password != null)
+            if (other.password != null) {
                 return false;
-        } else if (!password.equals(other.password))
+            }
+        } else if (!password.equals(other.password)) {
             return false;
+        }
         if (roles == null) {
-            if (other.roles != null)
+            if (other.roles != null) {
                 return false;
-        } else if (!roles.equals(other.roles))
+            }
+        } else if (!roles.equals(other.roles)) {
             return false;
+        }
         if (user == null) {
-            if (other.user != null)
+            if (other.user != null) {
                 return false;
-        } else if (!user.equals(other.user))
+            }
+        } else if (!user.equals(other.user)) {
             return false;
+        }
         return true;
     }
 
@@ -122,8 +158,7 @@ public class UserConfig implements Serializable {
         }
 
         Matcher mUser = UserConfig.INVALID_USERNAME_CHARACTERS.matcher(user);
-        if (user.length() > UserConfig.USERNAME_MAXLENGTH
-                || mUser.find() == true) {
+        if (user.length() > UserConfig.USERNAME_MAXLENGTH || mUser.find() == true) {
             return new Status(StatusCode.BADREQUEST,
                     "Username can have 1-32 non-whitespace "
                             + "alphanumeric characters and any special "
@@ -153,20 +188,19 @@ public class UserConfig implements Serializable {
         return new Status(StatusCode.SUCCESS);
     }
 
-    public Status update(String currentPassword, String newPassword,
-            List<String> newRoles) {
+    public Status update(String currentPassword, String newPassword, List<String> newRoles) {
+
         // To make any changes to a user configured profile, current password
         // must always be provided
-        if (!this.password.equals(currentPassword)) {
-            return new Status(StatusCode.BADREQUEST,
-                    "Current password is incorrect");
+        if (!this.password.equals(hash(currentPassword))) {
+            return new Status(StatusCode.BADREQUEST, "Current password is incorrect");
         }
 
         // Create a new object with the proposed modifications
         UserConfig proposed = new UserConfig();
         proposed.user = this.user;
-        proposed.password = (newPassword != null)? newPassword : this.password;
-        proposed.roles = (newRoles != null)? newRoles : this.roles;
+        proposed.password = (newPassword == null)? this.password : hash(newPassword);
+        proposed.roles = (newRoles == null)? this.roles : newRoles;
 
         // Validate it
         Status status = proposed.validate();
@@ -184,7 +218,7 @@ public class UserConfig implements Serializable {
 
     public AuthResponse authenticate(String clearTextPass) {
         AuthResponse locResponse = new AuthResponse();
-        if (password.equals(clearTextPass)) {
+        if (password.equals(hash(clearTextPass))) {
             locResponse.setStatus(AuthResultEnum.AUTH_ACCEPT_LOC);
             locResponse.addData(getRolesString());
         } else {
@@ -204,5 +238,13 @@ public class UserConfig implements Serializable {
             }
         }
         return buffer.toString();
+    }
+
+    public static String hash(String message) {
+        if (message == null) {
+            return message;
+        }
+        UserConfig.oneWayFunction.reset();
+        return HexEncode.bytesToHexString(UserConfig.oneWayFunction.digest(message.getBytes(Charset.defaultCharset())));
     }
 }

@@ -31,11 +31,11 @@ import org.opendaylight.controller.usermanager.UserConfig;
 import org.opendaylight.controller.usermanager.AuthorizationConfig;
 
 /**
- * Unit Tests for UserManagerImpl
+ * Unit Tests for UserManager
  */
 public class UserManagerImplTest {
 
-    private static UserManagerImpl um;
+    private static UserManager um;
 
     /**
      * @throws java.lang.Exception
@@ -45,10 +45,10 @@ public class UserManagerImplTest {
 
         IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, new Object());
-        if (userManager instanceof UserManagerImpl) {
-            um = (UserManagerImpl) userManager;
+        if (userManager instanceof UserManager) {
+            um = (UserManager) userManager;
         } else {
-            um = new UserManagerImpl();
+            um = new UserManager();
             um.setAuthProviders(new ConcurrentHashMap<String, IAAAProvider>());
 
             // mock up a remote server list with a dummy server
@@ -106,7 +106,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#addAAAProvider(org.opendaylight.controller.usermanager.IAAAProvider)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#addAAAProvider(org.opendaylight.controller.usermanager.IAAAProvider)}
      * .
      */
     @Test
@@ -133,9 +133,9 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#removeAAAProvider(org.opendaylight.controller.usermanager.IAAAProvider)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#removeAAAProvider(org.opendaylight.controller.usermanager.IAAAProvider)}
      * and for for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#getAAAProvider(java.lang.String)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#getAAAProvider(java.lang.String)}
      * .
      */
     @Test
@@ -146,7 +146,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#authenticate(java.lang.String, java.lang.String)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#authenticate(java.lang.String, java.lang.String)}
      * .
      */
     @Test
@@ -161,7 +161,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#addRemoveLocalUser(org.opendaylight.controller.usermanager.org.opendaylight.controller.usermanager.internal.UserConfig, boolean)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#addRemoveLocalUser(org.opendaylight.controller.usermanager.org.opendaylight.controller.usermanager.internal.UserConfig, boolean)}
      * .
      */
     @Test
@@ -178,7 +178,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#changeLocalUserPassword(java.lang.String, java.lang.String, java.lang.String)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#changeLocalUserPassword(java.lang.String, java.lang.String, java.lang.String)}
      * .
      */
     @Test
@@ -188,7 +188,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#userLogout(java.lang.String)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#userLogout(java.lang.String)}
      * .
      */
     @Test
@@ -198,7 +198,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#userTimedOut(java.lang.String)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#userTimedOut(java.lang.String)}
      * .
      */
     @Test
@@ -208,7 +208,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#authenticate(org.springframework.security.core.Authentication)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#authenticate(org.springframework.security.core.Authentication)}
      * .
      */
     @Test
@@ -218,7 +218,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#saveLocalUserList()}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#saveLocalUserList()}
      * .
      */
     @Test
@@ -228,7 +228,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#saveAAAServerList()}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#saveAAAServerList()}
      * .
      */
     @Test
@@ -238,7 +238,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#saveAuthorizationList()}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#saveAuthorizationList()}
      * .
      */
     @Test
@@ -248,7 +248,7 @@ public class UserManagerImplTest {
 
     /**
      * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManagerImpl#readObject(java.io.ObjectInputStream)}
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#readObject(java.io.ObjectInputStream)}
      * .
      */
     @Test

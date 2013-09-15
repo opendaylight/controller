@@ -9,7 +9,6 @@
 package org.opendaylight.controller.usermanager;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.opendaylight.controller.sal.utils.Status;
@@ -42,10 +41,12 @@ public class AuthorizationConfig extends UserConfig {
         return status;
     }
 
+    @Override
     public String toString() {
         return "AuthorizationConfig=[user: " + user + ", roles: " + roles + "]";
     }
 
+    @Override
     public String getRolesString() {
         return super.getRolesString();
     }

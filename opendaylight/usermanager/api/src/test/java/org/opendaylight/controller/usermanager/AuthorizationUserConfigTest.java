@@ -27,7 +27,7 @@ import org.opendaylight.controller.usermanager.UserConfig;
 public class AuthorizationUserConfigTest {
 
     @Test
-    public void AuthorizationConfigTest() {
+    public void authorizationConfigTest() {
         AuthorizationConfig authConfig;
         List<String> roles = new ArrayList<String>();
 
@@ -42,7 +42,7 @@ public class AuthorizationUserConfigTest {
     }
 
     @Test
-    public void UserConfigTest() {
+    public void userConfigTest() {
         UserConfig userConfig;
         List<String> roles = new ArrayList<String>();
 
@@ -75,12 +75,12 @@ public class AuthorizationUserConfigTest {
                 .isSuccess());
 
         // New Password = null, No change in password
-        assertTrue(userConfig.getPassword().equals("ciscocisco"));
+        assertTrue(userConfig.getPassword().equals(UserConfig.hash("ciscocisco")));
 
         // Password changed successfully, no change in user role
         assertTrue(userConfig.update("ciscocisco", "cisco123", roles)
                 .isSuccess());
-        assertTrue(userConfig.getPassword().equals("cisco123"));
+        assertTrue(userConfig.getPassword().equals(UserConfig.hash("cisco123")));
         assertTrue(userConfig.getRoles().get(0).equals(
                 UserLevel.NETWORKOPERATOR.toString()));
 
@@ -89,14 +89,14 @@ public class AuthorizationUserConfigTest {
         roles.add(UserLevel.SYSTEMADMIN.toString());
         assertTrue(userConfig.update("cisco123", "cisco123", roles)
                 .isSuccess());
-        assertTrue(userConfig.getPassword().equals("cisco123"));
+        assertTrue(userConfig.getPassword().equals(UserConfig.hash("cisco123")));
         assertTrue(userConfig.getRoles().get(0)
                 .equals(UserLevel.SYSTEMADMIN.toString()));
 
         // Password and role changed successfully
         assertTrue(userConfig.update("cisco123", "ciscocisco", roles)
                 .isSuccess());
-        assertTrue(userConfig.getPassword().equals("ciscocisco"));
+        assertTrue(userConfig.getPassword().equals(UserConfig.hash("ciscocisco")));
         assertTrue(userConfig.getRoles().get(0)
                 .equals(UserLevel.SYSTEMADMIN.toString()));
 
