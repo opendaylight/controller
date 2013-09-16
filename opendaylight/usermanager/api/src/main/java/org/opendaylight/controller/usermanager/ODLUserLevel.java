@@ -9,6 +9,8 @@
 
 package org.opendaylight.controller.usermanager;
 
+import java.util.Locale;
+
 import org.opendaylight.controller.sal.authorization.UserLevel;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -22,7 +24,7 @@ public class ODLUserLevel implements GrantedAuthority {
 
     @Override
     public String getAuthority() {
-        return "ROLE_" + this.userLevel.toString().toUpperCase();
+        return "ROLE_" + this.userLevel.toString().toUpperCase(Locale.ENGLISH);
     }
 
 }

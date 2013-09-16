@@ -9,11 +9,6 @@
 
 package org.opendaylight.controller.usermanager.internal;
 
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
-
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.configuration.IConfigurationAware;
@@ -40,6 +35,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * ComponentActivatorAbstractBase.
      *
      */
+    @Override
     public void init() {
 
     }
@@ -49,6 +45,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * cleanup done by ComponentActivatorAbstractBase
      *
      */
+    @Override
     public void destroy() {
 
     }
@@ -62,6 +59,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getImplementations() {
         return null;
     }
@@ -79,6 +77,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      * also optional per-container different behavior if needed, usually
      * should not be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
     }
 
@@ -95,8 +94,9 @@ public class Activator extends ComponentActivatorAbstractBase {
      * @return The list of implementations the bundle will support,
      * in Global version
      */
+    @Override
     protected Object[] getGlobalImplementations() {
-        Object[] res = { UserManagerImpl.class };
+        Object[] res = { UserManager.class };
         return res;
     }
 
@@ -108,8 +108,9 @@ public class Activator extends ComponentActivatorAbstractBase {
      * @param imp implementation to be configured
      * @param containerName container on which the configuration happens
      */
+    @Override
     protected void configureGlobalInstance(Component c, Object imp) {
-        if (imp.equals(UserManagerImpl.class)) {
+        if (imp.equals(UserManager.class)) {
 
             // export the service
             c.setInterface(new String[] {

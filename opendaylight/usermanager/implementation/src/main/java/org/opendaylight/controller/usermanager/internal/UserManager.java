@@ -69,16 +69,13 @@ import org.springframework.security.web.context.SecurityContextRepository;
 /**
  * The internal implementation of the User Manager.
  */
-public class UserManagerImpl implements IUserManager, IObjectReader,
+public class UserManager implements IUserManager, IObjectReader,
         IConfigurationAware, CommandProvider, AuthenticationProvider {
-    private static final Logger logger = LoggerFactory
-            .getLogger(UserManagerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserManager.class);
     private static final String defaultAdmin = "admin";
     private static final String defaultAdminPassword = "admin";
-    private static final String defaultAdminRole = UserLevel.NETWORKADMIN
-            .toString();
+    private static final String defaultAdminRole = UserLevel.NETWORKADMIN.toString();
     private static final String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static final String SAVE = "save";
     private static final String usersFileName = ROOT + "users.conf";
     private static final String serversFileName = ROOT + "servers.conf";
     private static final String authFileName = ROOT + "authorization.conf";
@@ -88,8 +85,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     private ConcurrentMap<String, AuthorizationConfig> authorizationConfList;
     private ConcurrentMap<String, AuthenticatedUser> activeUsers;
     private ConcurrentMap<String, IAAAProvider> authProviders;
-    private ConcurrentMap<Long, String> localUserListSaveConfigEvent,
-    remoteServerSaveConfigEvent, authorizationSaveConfigEvent;
     private IClusterGlobalServices clusterGlobalService = null;
     private SecurityContextRepository securityContextRepo = new UserSecurityContextRepository();
     private IContainerAuthorization containerAuthorizationClient;
@@ -122,10 +117,8 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         return authProviders.keySet();
     }
 
-    @SuppressWarnings("deprecation")
     private void allocateCaches() {
-        this.applicationAuthorizationClients = Collections
-                .synchronizedSet(new HashSet<IResourceAuthorization>());
+        this.applicationAuthorizationClients = Collections.synchronizedSet(new HashSet<IResourceAuthorization>());
         if (clusterGlobalService == null) {
             logger.error("un-initialized clusterGlobalService, can't create cache");
             return;
@@ -145,18 +138,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
             clusterGlobalService.createCache("usermanager.activeUsers",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-
-            clusterGlobalService.createCache(
-                    "usermanager.localUserSaveConfigEvent",
-                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-
-            clusterGlobalService.createCache(
-                    "usermanager.remoteServerSaveConfigEvent",
-                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-
-            clusterGlobalService.createCache(
-                    "usermanager.authorizationSaveConfigEvent",
-                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheConfigException cce) {
             logger.error("Cache configuration invalid - check cache mode");
         } catch (CacheExistException ce) {
@@ -164,7 +145,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         }
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         if (clusterGlobalService == null) {
             logger.error("un-initialized clusterService, can't retrieve cache");
@@ -194,24 +175,6 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         if (authorizationConfList == null) {
             logger.error("Failed to get cache for authorizationConfList");
         }
-
-        localUserListSaveConfigEvent = (ConcurrentMap<Long, String>) clusterGlobalService
-                .getCache("usermanager.localUserSaveConfigEvent");
-        if (localUserListSaveConfigEvent == null) {
-            logger.error("Failed to get cache for localUserSaveConfigEvent");
-        }
-
-        remoteServerSaveConfigEvent = (ConcurrentMap<Long, String>) clusterGlobalService
-                .getCache("usermanager.remoteServerSaveConfigEvent");
-        if (remoteServerSaveConfigEvent == null) {
-            logger.error("Failed to get cache for remoteServerSaveConfigEvent");
-        }
-
-        authorizationSaveConfigEvent = (ConcurrentMap<Long, String>) clusterGlobalService
-                .getCache("usermanager.authorizationSaveConfigEvent");
-        if (authorizationSaveConfigEvent == null) {
-            logger.error("Failed to get cache for authorizationSaveConfigEvent");
-        }
     }
 
     private void loadConfigurations() {
@@ -239,12 +202,11 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
 
     private void checkDefaultNetworkAdmin() {
         // If startup config is not there, it's old or it was deleted,
-        // need to add Default Admin
+        // need to add Default Network Admin User
         if (!localUserConfigList.containsKey(defaultAdmin)) {
             List<String> roles = new ArrayList<String>(1);
             roles.add(defaultAdminRole);
-            localUserConfigList.put(defaultAdmin, new UserConfig(defaultAdmin,
-                    defaultAdminPassword, roles));
+            localUserConfigList.put(defaultAdmin, new UserConfig(defaultAdmin, defaultAdminPassword, roles));
         }
     }
 
@@ -493,7 +455,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         String user = AAAconf.getUser();
 
         // Check default admin user
-        if (user.equals(UserManagerImpl.defaultAdmin)) {
+        if (user.equals(UserManager.defaultAdmin)) {
             String msg = "Invalid Request: Default Network Admin  User cannot be " + ((delete)? "removed" : "added");
             logger.debug(msg);
             return new Status(StatusCode.NOTALLOWED, msg);
@@ -632,8 +594,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
     }
 
     @Override
-    public Status changeLocalUserPassword(String user, String curPassword,
-            String newPassword) {
+    public Status changeLocalUserPassword(String user, String curPassword, String newPassword) {
         UserConfig targetConfigEntry = null;
 
         // update configuration entry
@@ -641,8 +602,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
         if (targetConfigEntry == null) {
             return new Status(StatusCode.NOTFOUND, "User not found");
         }
-        Status status = targetConfigEntry
-                .update(curPassword, newPassword, null);
+        Status status = targetConfigEntry.update(curPassword, newPassword, null);
         if (!status.isSuccess()) {
             return status;
         }
@@ -701,8 +661,7 @@ public class UserManagerImpl implements IUserManager, IObjectReader,
             role = ci.nextArgument();
         }
 
-        if (userName == null || userName.trim().isEmpty() || password == null
-                || password.trim().isEmpty() || roles == null
+        if (userName == null || userName.trim().isEmpty() || password == null || password.trim().isEmpty()
                 || roles.isEmpty()) {
             ci.println("Invalid Arguments");
             ci.println("umAddUser <user_name> <password> <user_role>");

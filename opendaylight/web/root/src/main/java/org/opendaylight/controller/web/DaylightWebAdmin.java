@@ -171,7 +171,9 @@ public class DaylightWebAdmin {
         }
 
         Gson gson = new Gson();
-        UserConfig config = gson.fromJson(json, UserConfig.class);
+        UserConfig plainConfig = gson.fromJson(json, UserConfig.class);
+        // Recreate using the proper constructor which will hash the password
+        UserConfig config = new UserConfig(plainConfig.getUser(), plainConfig.getPassword(), plainConfig.getRoles());
 
         Status result = (action.equals("add")) ? userManager.addLocalUser(config) : userManager.removeLocalUser(config);
         if (result.isSuccess()) {
