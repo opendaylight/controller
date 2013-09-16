@@ -340,29 +340,31 @@ public class Topology implements IObjectReader, IConfigurationAware {
             ITopologyManager topology, String containerName) {
         for (Map.Entry<Node, Set<NodeConnector>> e : hostEdges.entrySet()) {
             for (NodeConnector connector : e.getValue()) {
-                Host host = topology.getHostAttachedToNodeConnector(connector);
-                EthernetAddress dmac = (EthernetAddress) host.getDataLayerAddress();
+                List<Host> hosts = topology.getHostsAttachedToNodeConnector(connector);
+                for (Host host : hosts) {
+                    EthernetAddress dmac = (EthernetAddress) host.getDataLayerAddress();
 
-                ByteBuffer addressByteBuffer = ByteBuffer.allocate(8);
-                addressByteBuffer.putShort((short) 0);
-                addressByteBuffer.put(dmac.getValue());
-                addressByteBuffer.rewind();
+                    ByteBuffer addressByteBuffer = ByteBuffer.allocate(8);
+                    addressByteBuffer.putShort((short) 0);
+                    addressByteBuffer.put(dmac.getValue());
+                    addressByteBuffer.rewind();
 
-                long hid = addressByteBuffer.getLong();
-                String hostId = String.valueOf(hid);
+                    long hid = addressByteBuffer.getLong();
+                    String hostId = String.valueOf(hid);
 
-                NodeBean hostBean = new NodeBean(hostId, host.getNetworkAddressAsString(), NodeType.HOST);
-                List<Map<String, Object>> adjacencies = new LinkedList<Map<String, Object>>();
-                EdgeBean edge = new EdgeBean(connector, hid);
-                adjacencies.add(edge.out());
-                hostBean.setLinks(adjacencies);
+                    NodeBean hostBean = new NodeBean(hostId, host.getNetworkAddressAsString(), NodeType.HOST);
+                    List<Map<String, Object>> adjacencies = new LinkedList<Map<String, Object>>();
+                    EdgeBean edge = new EdgeBean(connector, hid);
+                    adjacencies.add(edge.out());
+                    hostBean.setLinks(adjacencies);
 
-                if (metaCache.get(containerName).containsKey(hostId)) {
+                    if (metaCache.get(containerName).containsKey(hostId)) {
                         Map<String, Object> hostEntry = metaCache.get(containerName).get(hostId);
                         hostEntry.put("adjacencies", adjacencies);
                         stagedNodes.put(hostId, hostEntry);
-                } else {
+                    } else {
                         newNodes.put(String.valueOf(hid), hostBean.out());
+                    }
                 }
             }
         }
