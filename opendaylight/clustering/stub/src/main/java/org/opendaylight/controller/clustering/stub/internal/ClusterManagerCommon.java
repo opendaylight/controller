@@ -45,7 +45,7 @@ import org.apache.felix.dm.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract public class ClusterManagerCommon implements IClusterServicesCommon {
+public abstract class ClusterManagerCommon implements IClusterServicesCommon {
     protected String containerName = "";
     protected static final Logger logger = LoggerFactory
             .getLogger(ClusterManagerCommon.class);
