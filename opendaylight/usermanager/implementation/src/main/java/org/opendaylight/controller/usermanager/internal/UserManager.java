@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.usermanager.internal;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -72,13 +74,14 @@ import org.springframework.security.web.context.SecurityContextRepository;
 public class UserManager implements IUserManager, IObjectReader,
         IConfigurationAware, CommandProvider, AuthenticationProvider {
     private static final Logger logger = LoggerFactory.getLogger(UserManager.class);
-    private static final String defaultAdmin = "admin";
-    private static final String defaultAdminPassword = "admin";
-    private static final String defaultAdminRole = UserLevel.NETWORKADMIN.toString();
+    private static final String DEFAULT_ADMIN = "admin";
+    private static final String DEFAULT_ADMIN_PASSWORD = "admin";
+    private static final String DEFAULT_ADMIN_ROLE = UserLevel.NETWORKADMIN.toString();
     private static final String ROOT = GlobalConstants.STARTUPHOME.toString();
-    private static final String usersFileName = ROOT + "users.conf";
-    private static final String serversFileName = ROOT + "servers.conf";
-    private static final String authFileName = ROOT + "authorization.conf";
+    private static final String USERS_FILE_NAME = ROOT + "users.conf";
+    private static final String SERVERS_FILE_NAME = ROOT + "servers.conf";
+    private static final String AUTH_FILE_NAME = ROOT + "authorization.conf";
+    private static final String RECOVERY_FILE = ROOT + "NETWORK_ADMIN_PASSWORD_RECOVERY";
     private ConcurrentMap<String, UserConfig> localUserConfigList;
     private ConcurrentMap<String, ServerConfig> remoteServerConfigList;
     // local authorization info for remotely authenticated users
@@ -203,10 +206,37 @@ public class UserManager implements IUserManager, IObjectReader,
     private void checkDefaultNetworkAdmin() {
         // If startup config is not there, it's old or it was deleted,
         // need to add Default Network Admin User
-        if (!localUserConfigList.containsKey(defaultAdmin)) {
+        if (!localUserConfigList.containsKey(DEFAULT_ADMIN)) {
             List<String> roles = new ArrayList<String>(1);
-            roles.add(defaultAdminRole);
-            localUserConfigList.put(defaultAdmin, new UserConfig(defaultAdmin, defaultAdminPassword, roles));
+            roles.add(DEFAULT_ADMIN_ROLE);
+            localUserConfigList.put(DEFAULT_ADMIN, new UserConfig(DEFAULT_ADMIN, DEFAULT_ADMIN_PASSWORD, roles));
+        }
+    }
+
+    private void checkPasswordRecovery() {
+        final String fileDescription = "Default Network Administrator password recovery file";
+        try {
+            FileInputStream fis = new FileInputStream(UserManager.RECOVERY_FILE);
+            /*
+             * Recovery file detected, remove current default network
+             * administrator entry from local users configuration list.
+             * Warn user and delete recovery file.
+             */
+            this.localUserConfigList.remove(UserManager.DEFAULT_ADMIN);
+            logger.info("Default Network Administrator password has been reset to factory default.");
+            logger.info("Please change the default Network Administrator password as soon as possible");
+            File filePointer = new File(UserManager.RECOVERY_FILE);
+            boolean status = filePointer.delete();
+            if (!status) {
+                logger.warn("Failed to delete {}", fileDescription);
+            } else {
+                logger.trace("{} deleted", fileDescription);
+            }
+            fis.close();
+        } catch (FileNotFoundException fnf) {
+            logger.trace("{} not present", fileDescription);
+        } catch (IOException e) {
+            logger.warn("Failed to close file stream for {}", fileDescription);
         }
     }
 
@@ -363,7 +393,7 @@ public class UserManager implements IUserManager, IObjectReader,
     private Status saveLocalUserListInternal() {
         ObjectWriter objWriter = new ObjectWriter();
         return objWriter.write(new ConcurrentHashMap<String, UserConfig>(
-                localUserConfigList), usersFileName);
+                localUserConfigList), USERS_FILE_NAME);
     }
 
     @Override
@@ -374,7 +404,7 @@ public class UserManager implements IUserManager, IObjectReader,
     private Status saveAAAServerListInternal() {
         ObjectWriter objWriter = new ObjectWriter();
         return objWriter.write(new ConcurrentHashMap<String, ServerConfig>(
-                remoteServerConfigList), serversFileName);
+                remoteServerConfigList), SERVERS_FILE_NAME);
     }
 
     @Override
@@ -386,7 +416,7 @@ public class UserManager implements IUserManager, IObjectReader,
         ObjectWriter objWriter = new ObjectWriter();
         return objWriter.write(
                 new ConcurrentHashMap<String, AuthorizationConfig>(
-                        authorizationConfList), authFileName);
+                        authorizationConfList), AUTH_FILE_NAME);
     }
 
     @Override
@@ -401,7 +431,7 @@ public class UserManager implements IUserManager, IObjectReader,
     private void loadUserConfig() {
         ObjectReader objReader = new ObjectReader();
         ConcurrentMap<String, UserConfig> confList = (ConcurrentMap<String, UserConfig>) objReader
-                .read(this, usersFileName);
+                .read(this, USERS_FILE_NAME);
 
         if (confList == null) {
             return;
@@ -416,7 +446,7 @@ public class UserManager implements IUserManager, IObjectReader,
     private void loadServerConfig() {
         ObjectReader objReader = new ObjectReader();
         ConcurrentMap<String, ServerConfig> confList = (ConcurrentMap<String, ServerConfig>) objReader
-                .read(this, serversFileName);
+                .read(this, SERVERS_FILE_NAME);
 
         if (confList == null) {
             return;
@@ -431,7 +461,7 @@ public class UserManager implements IUserManager, IObjectReader,
     private void loadAuthConfig() {
         ObjectReader objReader = new ObjectReader();
         ConcurrentMap<String, AuthorizationConfig> confList = (ConcurrentMap<String, AuthorizationConfig>) objReader
-                .read(this, authFileName);
+                .read(this, AUTH_FILE_NAME);
 
         if (confList == null) {
             return;
@@ -455,7 +485,7 @@ public class UserManager implements IUserManager, IObjectReader,
         String user = AAAconf.getUser();
 
         // Check default admin user
-        if (user.equals(UserManager.defaultAdmin)) {
+        if (user.equals(UserManager.DEFAULT_ADMIN)) {
             String msg = "Invalid Request: Default Network Admin  User cannot be " + ((delete)? "removed" : "added");
             logger.debug(msg);
             return new Status(StatusCode.NOTALLOWED, msg);
@@ -791,12 +821,14 @@ public class UserManager implements IUserManager, IObjectReader,
         // Read startup configuration and populate databases
         loadConfigurations();
 
+        // Check if a password recovery was triggered for default network admin user
+        checkPasswordRecovery();
+
         // Make sure default Network Admin account is there
         checkDefaultNetworkAdmin();
-        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
-                .getBundleContext();
-        bundleContext.registerService(CommandProvider.class.getName(), this,
-                null);
+
+        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+        bundleContext.registerService(CommandProvider.class.getName(), this, null);
     }
 
     /**
