@@ -119,6 +119,9 @@ one.f.troubleshooting.existingNodes = {
             },
             flows: function(nodeId) {
                 try {
+                    if(one.f.troubleshooting === undefined){
+                        return;
+                    }
                     clearTimeout(one.f.troubleshooting.existingNodes.registry.refreshTimer);
                     $.getJSON(one.main.constants.address.prefix + "/troubleshoot/flowStats?nodeId=" + nodeId, function(content) {
                         $rightBottomDashlet = one.f.troubleshooting.rightBottomDashlet.get();
@@ -150,6 +153,9 @@ one.f.troubleshooting.existingNodes = {
             },
             ports: function(nodeId) {
                 try {
+                    if(one.f.troubleshooting === undefined){
+                        return;
+                    }
                     clearTimeout(one.f.troubleshooting.existingNodes.registry.refreshTimer);
                     $.getJSON(one.main.constants.address.prefix + "/troubleshoot/portStats?nodeId=" + nodeId, function(content) {
                         $rightBottomDashlet = one.f.troubleshooting.rightBottomDashlet.get();
