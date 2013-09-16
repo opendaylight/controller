@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.devices.web;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping("/")
@@ -634,6 +636,11 @@ public class Devices implements IDaylightWeb {
                         // Add switch portName value (non-configuration field)
                         config.put("nodeName",
                                 getNodeDesc(config_data.get("nodeId"), containerName));
+                        NodeConnector spanPortNodeConnector = NodeConnector.fromString(config_data.get("spanPort"));
+                        Name ncName = ((Name) switchManager.getNodeConnectorProp(spanPortNodeConnector,
+                                Name.NamePropName));
+                        String spanPortName = (ncName != null) ? ncName.getValue() : "";
+                        config.put("spanPortName", spanPortName);
                     }
                     config.put("json", config_json);
                     spanConfigs.add(config);
@@ -746,22 +753,21 @@ public class Devices implements IDaylightWeb {
             Gson gson = new Gson();
             ISwitchManager switchManager = (ISwitchManager) ServiceHelper
                     .getInstance(ISwitchManager.class, containerName, this);
-            String[] spans = spanPortsToDelete.split("###");
+            Type collectionType = new TypeToken<List<SpanPortJsonBean>>() {}.getType();
+            List<SpanPortJsonBean> jsonBeanList = gson.fromJson(spanPortsToDelete, collectionType);
+            for (SpanPortJsonBean jsonBean : jsonBeanList) {
+                SpanConfig cfgObject = gson
+                        .fromJson(gson.toJson(jsonBean), SpanConfig.class);
+                Status result = switchManager.removeSpanConfig(cfgObject);
+                if (!result.isSuccess()) {
+                    resultBean.setStatus(false);
+                    resultBean.setMessage(result.getDescription());
+                    break;
+                }
+                DaylightWebUtil.auditlog("SPAN Port", userName, "removed", cfgObject.getNodeId(), containerName);
+            }
             resultBean.setStatus(true);
             resultBean.setMessage("SPAN Port(s) deleted successfully");
-            for (String span : spans) {
-                if (!span.isEmpty()) {
-                    SpanConfig cfgObject = gson
-                            .fromJson(span, SpanConfig.class);
-                    Status result = switchManager.removeSpanConfig(cfgObject);
-                    if (!result.isSuccess()) {
-                        resultBean.setStatus(false);
-                        resultBean.setMessage(result.getDescription());
-                        break;
-                    }
-                    DaylightWebUtil.auditlog("SPAN Port", userName, "removed", cfgObject.getNodeId(), containerName);
-                }
-            }
         } catch (Exception e) {
             resultBean.setStatus(false);
             resultBean.setMessage("Error occurred while deleting span port. "

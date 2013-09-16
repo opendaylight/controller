@@ -40,6 +40,7 @@
               org.opendaylight.controller.usermanager,
               org.opendaylight.controller.web,
               com.google.gson,
+              com.google.gson.reflect,
               javax.annotation,
               javax.naming,
               javax.servlet,

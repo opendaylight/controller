@@ -1239,7 +1239,12 @@ one.f.switchmanager.spanPortConfig = {
                         return false;
                     }
                     checkedCheckBoxes.each(function(index, value) {
-                        spanPortsToDelete.push(decodeURIComponent(checkedCheckBoxes[index].getAttribute("spanPort")));
+                        var spanPortObj = {};
+                        spanPortObj['spanPortJson'] = decodeURIComponent(checkedCheckBoxes[index].getAttribute("spanPort"));
+                        spanPortObj['spanPortNodeName'] = checkedCheckBoxes[index].getAttribute("spanPortNode");
+                        spanPortObj['spanPortPortName'] = checkedCheckBoxes[index].getAttribute("spanPortPort");
+
+                        spanPortsToDelete.push(spanPortObj);
                     });
                     one.f.switchmanager.spanPortConfig.modal.removeMultiple.dialog(spanPortsToDelete);
                 });
@@ -1392,12 +1397,12 @@ one.f.switchmanager.spanPortConfig = {
                 // bind remove rule button
                 $('#'+one.f.switchmanager.spanPortConfig.id.modal.remove, $modal).click(this, function(e) {
                     var requestData = {};
-                    var spanPorts="";
-                    $(spanPortsToDelete).each(function(){
-                        spanPorts = spanPorts + "###" + this.toString();
+                    var spanPorts = [];
+                    $(spanPortsToDelete).each(function(index, spanPort) {
+                        spanPorts.push(JSON.parse(spanPort.spanPortJson));
                     });
-                    requestData["spanPortsToDelete"] = spanPorts.slice(3,spanPorts.length);
-                    
+                    requestData["spanPortsToDelete"] = JSON.stringify(spanPorts);
+
                     var url = one.f.switchmanager.rootUrl + "/spanPorts/delete";
                     one.f.switchmanager.spanPortConfig.ajax.main(url, requestData, function(response) {
                         $modal.modal('hide');
@@ -1429,10 +1434,9 @@ one.f.switchmanager.spanPortConfig = {
                 var p = 'Remove the following Span Port(s)?';
                 //creata a BS label for each rule and append to list
 
-                var spanPortList = JSON.parse("["+spanPortToDelete.toString()+"]");
-                $(spanPortList).each(function(){
+                $(spanPortToDelete).each(function(index, spanPortItem) {
                     var $span = $(document.createElement('span'));
-                    $span.append(this.nodeId+"-"+this.spanPort);
+                    $span.append(this.spanPortNodeName+"-"+this.spanPortPortName);
                     p += '<br/>' + $span[0].outerHTML;
                 });
                 $p.append(p);
@@ -1457,7 +1461,7 @@ one.f.switchmanager.spanPortConfig = {
                             sortable: true
                         },
                         {
-                            property: 'spanPort',
+                            property: 'spanPortName',
                             label: 'SPAN Port',
                             sortable: true
                         },
@@ -1465,7 +1469,7 @@ one.f.switchmanager.spanPortConfig = {
                     data: data.nodeData,
                     formatter: function(items) {
                         $.each(items, function(index, item) {
-                            item["selector"] = '<input type="checkbox" class="spanPortConfig" spanPort=' + encodeURIComponent(item["json"]) + '></input>';
+                            item["selector"] = '<input type="checkbox" class="spanPortConfig" spanPort=' + encodeURIComponent(item["json"]) + ' spanPortNode=' + item["nodeName"] + ' spanPortPort=' + item["spanPortName"] + '></input>';
                         });
                     },
                     delay: 0
