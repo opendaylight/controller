@@ -2096,51 +2096,78 @@ public class ForwardingRulesManager implements
         addStaticFlowInternal(allowARP, true); // skip validation on internal static flow name
     }
 
+    /**
+     * (non-Javadoc)
+     *
+     * @see org.opendaylight.controller.switchmanager.ISwitchManagerAware#modeChangeNotify(org.opendaylight.controller.sal.core.Node,
+     *      boolean)
+     *
+     *      This method can be called from within the OSGi framework context,
+     *      given the programming operation can take sometime, it not good
+     *      pratice to have in it's context operations that can take time,
+     *      hence moving off to a different thread for async processing.
+     */
     @Override
-    public void modeChangeNotify(Node node, boolean proactive) {
-        List<FlowConfig> defaultConfigs = new ArrayList<FlowConfig>();
+    public void modeChangeNotify(final Node node, final boolean proactive) {
+        Callable<Status> modeChangeCallable = new Callable<Status>() {
+            @Override
+            public Status call() throws Exception {
+                List<FlowConfig> defaultConfigs = new ArrayList<FlowConfig>();
 
-        List<String> puntAction = new ArrayList<String>();
-        puntAction.add(ActionType.CONTROLLER.toString());
+                List<String> puntAction = new ArrayList<String>();
+                puntAction.add(ActionType.CONTROLLER.toString());
 
-        FlowConfig allowARP = new FlowConfig();
-        allowARP.setInstallInHw(true);
-        allowARP.setName(FlowConfig.INTERNALSTATICFLOWBEGIN + "Punt ARP" + FlowConfig.INTERNALSTATICFLOWEND);
-        allowARP.setPriority("1");
-        allowARP.setNode(node);
-        allowARP.setEtherType("0x" + Integer.toHexString(EtherTypes.ARP.intValue()).toUpperCase());
-        allowARP.setActions(puntAction);
-        defaultConfigs.add(allowARP);
+                FlowConfig allowARP = new FlowConfig();
+                allowARP.setInstallInHw(true);
+                allowARP.setName(FlowConfig.INTERNALSTATICFLOWBEGIN + "Punt ARP" + FlowConfig.INTERNALSTATICFLOWEND);
+                allowARP.setPriority("1");
+                allowARP.setNode(node);
+                allowARP.setEtherType("0x" + Integer.toHexString(EtherTypes.ARP.intValue())
+                        .toUpperCase());
+                allowARP.setActions(puntAction);
+                defaultConfigs.add(allowARP);
 
-        FlowConfig allowLLDP = new FlowConfig();
-        allowLLDP.setInstallInHw(true);
-        allowLLDP.setName(FlowConfig.INTERNALSTATICFLOWBEGIN + "Punt LLDP" + FlowConfig.INTERNALSTATICFLOWEND);
-        allowLLDP.setPriority("1");
-        allowLLDP.setNode(node);
-        allowLLDP.setEtherType("0x" + Integer.toHexString(EtherTypes.LLDP.intValue()).toUpperCase());
-        allowLLDP.setActions(puntAction);
-        defaultConfigs.add(allowLLDP);
+                FlowConfig allowLLDP = new FlowConfig();
+                allowLLDP.setInstallInHw(true);
+                allowLLDP.setName(FlowConfig.INTERNALSTATICFLOWBEGIN + "Punt LLDP" + FlowConfig.INTERNALSTATICFLOWEND);
+                allowLLDP.setPriority("1");
+                allowLLDP.setNode(node);
+                allowLLDP.setEtherType("0x" + Integer.toHexString(EtherTypes.LLDP.intValue())
+                        .toUpperCase());
+                allowLLDP.setActions(puntAction);
+                defaultConfigs.add(allowLLDP);
 
-        List<String> dropAction = new ArrayList<String>();
-        dropAction.add(ActionType.DROP.toString());
+                List<String> dropAction = new ArrayList<String>();
+                dropAction.add(ActionType.DROP.toString());
 
-        FlowConfig dropAllConfig = new FlowConfig();
-        dropAllConfig.setInstallInHw(true);
-        dropAllConfig.setName(FlowConfig.INTERNALSTATICFLOWBEGIN + "Catch-All Drop" + FlowConfig.INTERNALSTATICFLOWEND);
-        dropAllConfig.setPriority("0");
-        dropAllConfig.setNode(node);
-        dropAllConfig.setActions(dropAction);
-        defaultConfigs.add(dropAllConfig);
+                FlowConfig dropAllConfig = new FlowConfig();
+                dropAllConfig.setInstallInHw(true);
+                dropAllConfig.setName(FlowConfig.INTERNALSTATICFLOWBEGIN + "Catch-All Drop"
+                        + FlowConfig.INTERNALSTATICFLOWEND);
+                dropAllConfig.setPriority("0");
+                dropAllConfig.setNode(node);
+                dropAllConfig.setActions(dropAction);
+                defaultConfigs.add(dropAllConfig);
 
-        log.info("Forwarding mode for node {} set to {}", node, (proactive ? "proactive" : "reactive"));
-        for (FlowConfig fc : defaultConfigs) {
-            Status status = (proactive) ? addStaticFlowInternal(fc, false) : removeStaticFlow(fc);
-            if (status.isSuccess()) {
-                log.info("{} Proactive Static flow: {}", (proactive ? "Installed" : "Removed"), fc.getName());
-            } else {
-                log.warn("Failed to {} Proactive Static flow: {}", (proactive ? "install" : "remove"), fc.getName());
+                log.info("Forwarding mode for node {} set to {}", node, (proactive ? "proactive" : "reactive"));
+                for (FlowConfig fc : defaultConfigs) {
+                    Status status = (proactive) ? addStaticFlowInternal(fc, false) : removeStaticFlow(fc);
+                    if (status.isSuccess()) {
+                        log.info("{} Proactive Static flow: {}", (proactive ? "Installed" : "Removed"), fc.getName());
+                    } else {
+                        log.warn("Failed to {} Proactive Static flow: {}", (proactive ? "install" : "remove"),
+                                fc.getName());
+                    }
+                }
+                return new Status(StatusCode.SUCCESS);
             }
-        }
+        };
+
+        /*
+         * Execute the work outside the caller context, this could be an
+         * expensive operation and we don't want to block the caller for it.
+         */
+        this.executor.submit(modeChangeCallable);
     }
 
     /**
