@@ -63,12 +63,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * It periodically polls the different OF statistics from the OF switches and
- * caches them for quick retrieval for the above layers' modules It also
- * provides an API to directly query the switch about the statistics
+ * Periodically polls the different OF statistics from the OF switches, caches
+ * them, and publishes results towards SAL. It also provides an API to directly
+ * query the switch for any specific statistics.
  */
-public class OFStatisticsManager implements IOFStatisticsManager,
-IInventoryShimExternalListener, CommandProvider {
+public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShimExternalListener, CommandProvider {
     private static final Logger log = LoggerFactory.getLogger(OFStatisticsManager.class);
     private static final int INITIAL_SIZE = 64;
     private static final long FLOW_STATS_PERIOD = 10000;

@@ -30,8 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
@@ -55,6 +53,8 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConnectionManager implements IConnectionManager, IConnectionListener,
                                           ICoordinatorChangeAware, IListenInventoryUpdates,
@@ -123,8 +123,19 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
         }
     }
 
-    public void started() {
-        connectionEventThread = new Thread(new EventHandler(), "ConnectionEvent Thread");
+
+   public void started() {
+       String schemeStr = System.getProperty("connection.scheme");
+       for (ConnectionMgmtScheme scheme : ConnectionMgmtScheme.values()) {
+           AbstractScheme schemeImpl = SchemeFactory.getScheme(scheme, clusterServices);
+           if (schemeImpl != null) {
+               schemes.put(scheme, schemeImpl);
+               if (scheme.name().equalsIgnoreCase(schemeStr)) {
+                   activeScheme = scheme;
+               }
+           }
+       }
+
         connectionEventThread.start();
 
         registerWithOSGIConsole();
@@ -134,21 +145,12 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
     }
 
     public void init() {
-        String schemeStr = System.getProperty("connection.scheme");
+        connectionEventThread = new Thread(new EventHandler(), "ConnectionEvent Thread");
         this.connectionEvents = new LinkedBlockingQueue<ConnectionMgmtEvent>();
         schemes = new ConcurrentHashMap<ConnectionMgmtScheme, AbstractScheme>();
-        for (ConnectionMgmtScheme scheme : ConnectionMgmtScheme.values()) {
-            AbstractScheme schemeImpl = SchemeFactory.getScheme(scheme, clusterServices);
-            if (schemeImpl != null) {
-                schemes.put(scheme, schemeImpl);
-                if (scheme.name().equalsIgnoreCase(schemeStr)) {
-                    activeScheme = scheme;
-                }
-            }
-        }
     }
 
-    public void stop() {
+    public void stopping() {
         connectionEventThread.interrupt();
         Set<Node> localNodes = getLocalNodes();
         if (localNodes != null) {

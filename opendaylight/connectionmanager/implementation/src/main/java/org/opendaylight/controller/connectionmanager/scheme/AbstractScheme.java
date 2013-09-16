@@ -35,15 +35,18 @@ public abstract class AbstractScheme {
      */
     protected ConcurrentMap <Node, Set<InetAddress>> nodeConnections;
     protected abstract boolean isConnectionAllowedInternal(Node node);
-    private String name;
+    private final String name;
+    private final String nodeConnectionsCacheName;
 
     protected AbstractScheme(IClusterGlobalServices clusterServices, ConnectionMgmtScheme type) {
         this.clusterServices = clusterServices;
-        if (type != null) name = type.name();
-        else name = "UNKNOWN";
+        name = (type != null ? type.name() : "UNKNOWN");
+        nodeConnectionsCacheName = "connectionmanager."+name+".nodeconnections";
         if (clusterServices != null) {
             allocateCaches();
             retrieveCaches();
+        } else {
+            log.error("Couldn't retrieve caches for scheme %s. Clustering service unavailable", name);
         }
     }
 
@@ -72,7 +75,6 @@ public abstract class AbstractScheme {
         return isConnectionAllowedInternal(node);
     }
 
-    @SuppressWarnings("deprecation")
     public void handleClusterViewChanged() {
         log.debug("Handling Cluster View changed notification");
         List<InetAddress> controllers = clusterServices.getClusteredControllers();
@@ -122,7 +124,6 @@ public abstract class AbstractScheme {
     }
 
     public Set<Node> getNodes(InetAddress controller) {
-        if (nodeConnections == null) return null;
         ConcurrentMap <InetAddress, Set<Node>> controllerNodesMap = getControllerToNodesMap();
         return controllerNodesMap.get(controller);
     }
@@ -162,7 +163,7 @@ public abstract class AbstractScheme {
 
     protected Status removeNodeFromController (Node node, InetAddress controller) {
         if (node == null || controller == null) {
-            return new Status(StatusCode.BADREQUEST);
+            return new Status(StatusCode.BADREQUEST, "Invalid Node or Controller Address Specified.");
         }
 
         if (clusterServices == null || nodeConnections == null) {
@@ -189,7 +190,7 @@ public abstract class AbstractScheme {
                     }
                     clusterServices.tcommit();
                 } catch (Exception e) {
-                    log.error("Excepion in removing Controller from a Node", e);
+                    log.error("Exception in removing Controller from a Node", e);
                     try {
                         clusterServices.trollback();
                     } catch (Exception e1) {
@@ -210,7 +211,7 @@ public abstract class AbstractScheme {
      */
     private Status putNodeToController (Node node, InetAddress controller) {
         if (clusterServices == null || nodeConnections == null) {
-            return new Status(StatusCode.SUCCESS);
+            return new Status(StatusCode.INTERNALERROR, "Cluster service unavailable, or node connections info missing.");
         }
         log.debug("Trying to Put {} to {}", controller.getHostAddress(), node.toString());
 
@@ -277,7 +278,9 @@ public abstract class AbstractScheme {
         if (node == null || controller == null) {
             return new Status(StatusCode.BADREQUEST);
         }
-        if (isLocal(node)) return new Status(StatusCode.SUCCESS);
+        if (isLocal(node))  {
+            return new Status(StatusCode.SUCCESS);
+        }
         if (isConnectionAllowed(node)) {
             return putNodeToController(node, controller);
         } else {
@@ -285,36 +288,34 @@ public abstract class AbstractScheme {
         }
     }
 
-    @SuppressWarnings("deprecation")
     public Status addNode (Node node) {
         return addNode(node, clusterServices.getMyAddress());
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         if (this.clusterServices == null) {
-            log.error("un-initialized clusterServices, can't retrieve cache");
+            log.error("Un-initialized Cluster Services, can't retrieve caches for scheme: {}", name);
             return;
         }
 
-        nodeConnections = (ConcurrentMap<Node, Set<InetAddress>>) clusterServices.getCache("connectionmanager."+name+".nodeconnections");
+        nodeConnections = (ConcurrentMap<Node, Set<InetAddress>>) clusterServices.getCache(nodeConnectionsCacheName);
 
         if (nodeConnections == null) {
-            log.error("\nFailed to get caches");
+            log.error("\nFailed to get cache: {}", nodeConnectionsCacheName);
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void allocateCaches() {
         if (this.clusterServices == null) {
-            log.error("un-initialized clusterServices, can't create cache");
+            log.error("Un-initialized clusterServices, can't create cache");
             return;
         }
 
         try {
-            clusterServices.createCache("connectionmanager."+name+".nodeconnections", EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
+            clusterServices.createCache(nodeConnectionsCacheName, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheExistException cee) {
-            log.error("\nCache already exists - destroy and recreate if needed");
+            log.debug("\nCache already exists: {}", nodeConnectionsCacheName);
         } catch (CacheConfigException cce) {
             log.error("\nCache configuration invalid - check cache mode");
         } catch (Exception e) {

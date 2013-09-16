@@ -255,8 +255,7 @@ public class InventoryServiceShim implements IContainerListener,
                 props.addAll(prop);
             }
             nodeConnectorProps.put(entry.getKey(), props);
-            notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED,
-                    entry.getValue());
+            notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED, entry.getValue());
         }
 
         // Add this node
@@ -357,15 +356,13 @@ public class InventoryServiceShim implements IContainerListener,
         }
     }
 
-    private void notifyInventoryShimExternalListener(Node node,
-            UpdateType type, Set<Property> props) {
+    private void notifyInventoryShimExternalListener(Node node, UpdateType type, Set<Property> props) {
         for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
             s.updateNode(node, type, props);
         }
     }
 
-    private void notifyInventoryShimExternalListener(
-            NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
+    private void notifyInventoryShimExternalListener(NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
         for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
             s.updateNodeConnector(nodeConnector, type, props);
         }
@@ -373,14 +370,11 @@ public class InventoryServiceShim implements IContainerListener,
 
     private void notifyInventoryShimInternalListener(String container,
             NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
-        IInventoryShimInternalListener inventoryShimInternalListener = inventoryShimInternalListeners
-                .get(container);
+        IInventoryShimInternalListener inventoryShimInternalListener = inventoryShimInternalListeners.get(container);
         if (inventoryShimInternalListener != null) {
-            inventoryShimInternalListener.updateNodeConnector(nodeConnector,
-                    type, props);
-            logger.trace(
-                    "notifyInventoryShimInternalListener {} type {} for container {}",
-                    new Object[] { nodeConnector, type, container });
+            inventoryShimInternalListener.updateNodeConnector(nodeConnector, type, props);
+            logger.trace("notifyInventoryShimInternalListener {} type {} for container {}", new Object[] {
+                    nodeConnector, type, container });
         }
     }
 
@@ -409,7 +403,7 @@ public class InventoryServiceShim implements IContainerListener,
                 notifyInventoryShimInternalListener(container, nodeConnector, type, props);
             }
 
-            // Notify DiscoveryService
+            // Notify plugin listeners (Discovery, DataPacket, OFstats etc.)
             notifyInventoryShimExternalListener(nodeConnector, type, props);
 
             logger.debug("Connection service accepted the inventory notification for {} {}", nodeConnector, type);
@@ -436,13 +430,14 @@ public class InventoryServiceShim implements IContainerListener,
 
         if (isNodeLocal) {
             // Now notify other containers
-            Set<String> containers = (nodeContainerMap.get(node) == null) ? new HashSet<String>() : new HashSet<String>(
-                    nodeContainerMap.get(node));
+            Set<String> containers = (nodeContainerMap.get(node) == null) ? new HashSet<String>()
+                    : new HashSet<String>(nodeContainerMap.get(node));
             containers.add(GlobalConstants.DEFAULT.toString());
             for (String container : containers) {
                 notifyInventoryShimInternalListener(container, node, type, props);
             }
-            // Notify external listener
+
+            // Notify plugin listeners (Discovery, DataPacket, OFstats etc.)
             notifyInventoryShimExternalListener(node, type, props);
 
             logger.debug("Connection service accepted the inventory notification for {} {}", node, type);
@@ -454,9 +449,7 @@ public class InventoryServiceShim implements IContainerListener,
     private void notifyGlobalInventoryShimInternalListener(Node node, UpdateType type, Set<Property> props) {
         for (IInventoryShimInternalListener globalListener : globalInventoryShimInternalListeners) {
             globalListener.updateNode(node, type, props);
-            logger.trace(
-                    "notifyGlobalInventoryShimInternalListener {} type {}",
-                    new Object[] { node, type });
+            logger.trace("notifyGlobalInventoryShimInternalListener {} type {}", new Object[] { node, type });
         }
     }
 

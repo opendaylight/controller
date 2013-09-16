@@ -100,8 +100,7 @@ public class DaylightWeb {
     }
 
     @RequestMapping(value = "logout")
-    public String login(Map<String, Object> model,
-            final HttpServletRequest request) {
+    public String logout(Map<String, Object> model, final HttpServletRequest request) {
 
         IUserManager userManager = (IUserManager) ServiceHelper
                 .getGlobalInstance(IUserManager.class, this);

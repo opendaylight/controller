@@ -414,9 +414,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         }
         for (InetAddress i : IPs) {
             Subnet existingSubnet = subnets.get(i);
-            if ((existingSubnet != null)
-                    && !existingSubnet.isMutualExclusive(newSubnet)) {
-                return new Status(StatusCode.CONFLICT);
+            if ((existingSubnet != null) && !existingSubnet.isMutualExclusive(newSubnet)) {
+                return new Status(StatusCode.CONFLICT, "This subnet conflicts with an existing one.");
             }
         }
         return new Status(StatusCode.SUCCESS);
@@ -434,7 +433,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             // Presence check
             if (subnetsConfigList.containsKey(conf.getName())) {
                 return new Status(StatusCode.CONFLICT,
-                        "Subnet with the specified name already configured.");
+                        "Subnet with the specified name already exists.");
             }
             // Semantic check
             status = semanticCheck(conf);
