@@ -239,6 +239,11 @@ public class InventoryServiceShim implements IContainerListener,
         if (sw == null) {
             return;
         }
+        Node node = NodeCreator.createOFNode(sw.getId());
+        if ((nodeProps.get(node) != null)  && (connectionOutService.isLocal(node))) {
+            logger.debug("Ignore switchAdded {}", sw);
+            return;
+        }
 
         // Add all the nodeConnectors of this switch
         Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper
@@ -437,7 +442,6 @@ public class InventoryServiceShim implements IContainerListener,
             for (String container : containers) {
                 notifyInventoryShimInternalListener(container, node, type, props);
             }
-
             // Notify external listener
             notifyInventoryShimExternalListener(node, type, props);
 
@@ -511,6 +515,11 @@ public class InventoryServiceShim implements IContainerListener,
             props.add(b);
         }
 
+        if ((nodeProps.get(node) == null) &&  (connectionOutService.isLocal(node)))  {
+            // The switch is connected for the first time, flush all flows
+            // that may exist on this switch
+            sw.deleteAllFlows();
+       }
         nodeProps.put(node, props);
         // Notify all internal and external listeners
         notifyInventoryShimListener(node, type, props);

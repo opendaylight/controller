@@ -232,4 +232,9 @@ public interface ISwitch {
      * until the Barrier reply arrives.
      */
     public Object asyncSendBarrierMessage();
+
+    /**
+     * Send a FLOW_MOD message with a wildcard match and action=DELETE.
+     */
+    public void deleteAllFlows();
 }
