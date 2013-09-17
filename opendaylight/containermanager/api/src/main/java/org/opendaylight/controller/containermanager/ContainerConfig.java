@@ -223,7 +223,7 @@ public class ContainerConfig implements Serializable {
      */
     private Status validateName() {
         // No Container configuration allowed to container default
-        return (container.matches(regexName) && !container.equalsIgnoreCase(GlobalConstants.DEFAULT.toString())) ?
+        return ((container != null) && container.matches(regexName) && !container.equalsIgnoreCase(GlobalConstants.DEFAULT.toString())) ?
                 new Status(StatusCode.SUCCESS) : new Status(StatusCode.BADREQUEST, "Invalid container name");
     }
 
