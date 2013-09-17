@@ -16,6 +16,24 @@
       "revId": "6c7e9eaeb39a47103deb9a150035a00f29267caf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_0d3f2827",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-09-17T14:07:26Z",
+      "side": 0,
+      "message": "I didn\u0027t remove it completely, I moved it to this file:\nopendaylight/commons/integrationtest/pom.xml\n\nI did it because several people mentioned it resolved the jacoco.exec error - because of some problematic order of setting the argLine, so they advised to remove it from the root pom and put it lower in the hierarchy - and indeed it seems that it resolved the problem.",
+      "parentUuid": "1a2f8d8d_6d30ec56",
+      "revId": "6c7e9eaeb39a47103deb9a150035a00f29267caf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
