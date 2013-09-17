@@ -192,8 +192,7 @@ public class ContainerManager implements IContainerManager {
 
     @Override
     public boolean doesContainerExist(String ContainerId) {
-        // TODO Auto-generated method stub
-        return false;
+        return GlobalConstants.DEFAULT.toString().equalsIgnoreCase(ContainerId);
     }
 
     @Override
