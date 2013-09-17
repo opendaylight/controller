@@ -7,15 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.impl
 
-class Constants {
+import org.opendaylight.controller.sal.common.DataStoreIdentifier
+import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider
 
-    private new() {
-    }
+class DataProviderContext {
 
-    public static val SAL_SERVICE_TYPE = "salServiceType"
-    public static val SAL_SERVICE_TYPE_CONSUMER_PROXY = "consumerProxy"
-    public static val SAL_SERVICE_TYPE_PROVIDER = "provider"
-    public static val SAL_SERVICE_TYPE_CONNECTOR = "connector"
-
-    public static val PROXY_DIRECT_SUFFIX = "DirectProxy";
+    @Property
+    var DataStoreIdentifier identifier;
+    @Property
+    var RuntimeDataProvider provider;
 }
