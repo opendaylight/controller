@@ -464,9 +464,9 @@ public class NodeConnector implements Serializable {
             .equals(NodeConnectorIDType.SWSTACK) ||
             this.nodeConnectorType
             .equals(NodeConnectorIDType.HWPATH)) {
-            return this.nodeConnectorType.toString();
+            return this.nodeConnectorType;
         } else {
-            return this.nodeConnectorType.toString() + "|"
+            return this.nodeConnectorType + "|"
                     + this.nodeConnectorID.toString();
         }
     }

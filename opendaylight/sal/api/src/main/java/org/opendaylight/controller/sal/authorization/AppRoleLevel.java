@@ -45,9 +45,9 @@ public enum AppRoleLevel implements Serializable {
     }
 
     public static AppRoleLevel fromString(String levelString) {
-        for (AppRoleLevel level : AppRoleLevel.values()) {
-                if (level.toString().equals(levelString)) {
-                        return level;
+        for (AppRoleLevel rolelevel : AppRoleLevel.values()) {
+                if (rolelevel.toString().equals(levelString)) {
+                        return rolelevel;
                 }
         }
         return null;
