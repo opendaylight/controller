@@ -25,7 +25,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<slf4j.version>1.7.2</slf4j.version>
 		<nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-		<yang.version>0.5.7-SNAPSHOT</yang.version>
+		<yang.version>0.5.8-SNAPSHOT</yang.version>
 		<maven.bundle.version>2.4.0</maven.bundle.version>
         <releaseplugin.version>2.3.2</releaseplugin.version>
         <guava.version>14.0.1</guava.version>
