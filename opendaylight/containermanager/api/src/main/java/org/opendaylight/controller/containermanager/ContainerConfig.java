@@ -386,11 +386,38 @@ public class ContainerConfig implements Serializable {
                             config.getName()));
                 }
             }
+        } else {
+            // Check for conflicting names with existing cFlows
+            List<String> conflicting = new ArrayList<String>(existingNames);
+            conflicting.retainAll(proposedNames);
+            if (!conflicting.isEmpty()) {
+                return new Status(StatusCode.CONFLICT,
+                        "Invalid Flow Spec configuration: flow spec name(s) conflict with existing flow specs: "
+                                + conflicting.toString());
+            }
+
+            /*
+             * Check for conflicting flow spec match (we only check for strict
+             * equality). Remove this in case (*) is reintroduced
+             */
+            if (this.containerFlows != null && !this.containerFlows.isEmpty()) {
+                Set<Match> existingMatches = new HashSet<Match>();
+                for (ContainerFlowConfig existing : this.containerFlows) {
+                    existingMatches.addAll(existing.getMatches());
+                }
+                for (ContainerFlowConfig proposed : cFlowConfigs) {
+                    if (existingMatches.removeAll(proposed.getMatches())) {
+                        return new Status(StatusCode.CONFLICT, String.format(
+                                "Invalid Flow Spec configuration: %s conflicts with existing flow spec",
+                                proposed.getName()));
+                    }
+                }
+            }
         }
+
         /*
          * Revisit the following flow-spec confict validation later based on more testing.
-         */
-         /*
+         * (*)
         if (!delete) {
             // Check for overlapping container flows in the request
             int size = cFlowConfigs.size();
