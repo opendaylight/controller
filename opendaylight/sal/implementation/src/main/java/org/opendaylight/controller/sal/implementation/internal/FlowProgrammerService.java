@@ -432,6 +432,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         Flow flow = new Flow(match, actions);
         flow.setPriority((short) 100);
         flow.setHardTimeout((short) 360);
+        flow.setId(1234L);
 
         return flow;
     }
@@ -489,6 +490,7 @@ public class FlowProgrammerService implements IFlowProgrammerService,
         Flow flow = new Flow(match, actions);
         flow.setPriority((short) 300);
         flow.setHardTimeout((short) 240);
+        flow.setId(65536L);
 
         return flow;
     }
