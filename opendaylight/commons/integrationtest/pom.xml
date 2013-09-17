@@ -63,6 +63,7 @@
         <version>${surefire.version}</version>
         <configuration>
           <skipTests>true</skipTests>
+          <argLine>${testvm.argLine}</argLine>
         </configuration>
       </plugin>
       <plugin>
