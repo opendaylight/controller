@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_28e77214",
+        "filename": "opendaylight/sal/implementation/src/main/java/org/opendaylight/controller/sal/implementation/internal/FlowProgrammerService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-09-17T23:12:48Z",
+      "side": 1,
+      "message": "We can do better than having these sample CLIs in the FlowProgrammerService implementation. Rather it would be good to move it to UT, IT.\n\nBut, since this is existing code, i will let it slide.",
+      "revId": "f1f19db0b23d8d470c270cddcd2a6c4eace5f837",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
