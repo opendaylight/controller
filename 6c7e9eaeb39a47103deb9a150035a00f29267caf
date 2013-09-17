@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_6d30ec56",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-17T14:02:33Z",
+      "side": 0,
+      "message": "Why are you removing this from the common surefire settings?",
+      "revId": "6c7e9eaeb39a47103deb9a150035a00f29267caf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
