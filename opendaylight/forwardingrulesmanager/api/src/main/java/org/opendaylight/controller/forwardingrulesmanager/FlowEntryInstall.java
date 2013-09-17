@@ -28,8 +28,8 @@ public class FlowEntryInstall implements Serializable {
     private final FlowEntry original;
     private final ContainerFlow cFlow;
     private final FlowEntry install;
-    transient private long requestId; // async request id
-    transient private boolean deletePending;
+    private transient long requestId; // async request id
+    private transient boolean deletePending;
 
     public FlowEntryInstall(FlowEntry original, ContainerFlow cFlow) {
         this.original = original;

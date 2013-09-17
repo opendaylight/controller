@@ -27,9 +27,9 @@ public final class FlowEntryDistributionOrder implements Serializable {
      * Serialization UID
      */
     private static final long serialVersionUID = 416280377113255147L;
-    final private FlowEntryInstall entry;
-    final private UpdateType upType;
-    final private InetAddress requestorController;
+    private final FlowEntryInstall entry;
+    private final UpdateType upType;
+    private final InetAddress requestorController;
 
     /**
      * @return the entry

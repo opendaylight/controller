@@ -39,7 +39,7 @@ import org.opendaylight.controller.clustering.services.ListenRoleChangeAddExcept
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract public class ClusterManagerCommon implements IClusterServicesCommon {
+public abstract class ClusterManagerCommon implements IClusterServicesCommon {
     protected String containerName = null;
     private IClusterServices clusterService = null;
     protected static final Logger logger = LoggerFactory

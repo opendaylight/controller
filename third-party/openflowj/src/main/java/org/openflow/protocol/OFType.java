@@ -158,7 +158,7 @@ public enum OFType {
      * @param i OpenFlow wire protocol type
      * @param t type
      */
-    static public void addMapping(byte i, OFType t) {
+    public static void addMapping(byte i, OFType t) {
         if (mapping == null)
             mapping = new OFType[32];
         OFType.mapping[i] = t;
@@ -169,7 +169,7 @@ public enum OFType {
      *
      * @param i OpenFlow wire protocol type
      */
-    static public void removeMapping(byte i) {
+    public static void removeMapping(byte i) {
         OFType.mapping[i] = null;
     }
 
@@ -181,7 +181,7 @@ public enum OFType {
      * @return OFType enum type
      */
 
-    static public OFType valueOf(Byte i) {
+    public static OFType valueOf(Byte i) {
         return OFType.mapping[i];
     }
 
