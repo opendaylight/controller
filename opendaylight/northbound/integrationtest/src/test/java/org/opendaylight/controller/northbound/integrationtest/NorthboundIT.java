@@ -1426,6 +1426,8 @@ public class NorthboundIT {
                 mavenBundle("org.opendaylight.controller", "logging.bridge").versionAsInProject(),
 //                mavenBundle("org.opendaylight.controller", "clustering.test").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "forwarding.staticrouting").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "bundlescanner").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "bundlescanner.implementation").versionAsInProject(),
 
                 // Northbound bundles
                 mavenBundle("org.opendaylight.controller", "commons.northbound").versionAsInProject(),
@@ -1507,6 +1509,8 @@ public class NorthboundIT {
                 mavenBundle("org.ops4j.pax.exam", "pax-exam-junit4").versionAsInProject(),
                 mavenBundle("org.ops4j.pax.exam", "pax-exam-link-mvn").versionAsInProject(),
                 mavenBundle("org.ops4j.pax.url", "pax-url-aether").versionAsInProject(),
+
+                mavenBundle("org.ow2.asm", "asm-all").versionAsInProject(),
 
                 mavenBundle("org.springframework", "org.springframework.asm").versionAsInProject(),
                 mavenBundle("org.springframework", "org.springframework.aop").versionAsInProject(),

@@ -64,6 +64,7 @@
             <Export-Package>
             </Export-Package>
             <Web-ContextPath>/controller/nb/v2/networkconfig/bridgedomain</Web-ContextPath>
+            <Jaxrs-Resources>,${classes;ANNOTATION;javax.ws.rs.Path}</Jaxrs-Resources>
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>

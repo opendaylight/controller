@@ -106,6 +106,8 @@
 
     <!-- Northbound bundles -->
     <module>../../northbound/commons</module>
+    <module>../../northbound/bundlescanner/api</module>
+    <module>../../northbound/bundlescanner/implementation</module>
     <module>../../northbound/topology</module>
     <module>../../northbound/staticrouting</module>
     <module>../../northbound/statistics</module>

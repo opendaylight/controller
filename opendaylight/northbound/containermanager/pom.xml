@@ -49,6 +49,7 @@
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Web-ContextPath>/controller/nb/v2/containermanager</Web-ContextPath>
+            <Jaxrs-Resources>,${classes;ANNOTATION;javax.ws.rs.Path}</Jaxrs-Resources>
           </instructions>
         </configuration>
       </plugin>

@@ -7,7 +7,7 @@
     <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
     <init-param>
       <param-name>javax.ws.rs.Application</param-name>
-      <param-value>org.opendaylight.controller.hosttracker.northbound.HostTrackerNorthboundRSApplication</param-value>
+      <param-value>org.opendaylight.controller.northbound.commons.NorthboundApplication</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>

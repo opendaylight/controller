@@ -62,6 +62,7 @@
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Web-ContextPath>/one/nb/v2/lb</Web-ContextPath>
+            <Jaxrs-Resources>,${classes;ANNOTATION;javax.ws.rs.Path}</Jaxrs-Resources>
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>

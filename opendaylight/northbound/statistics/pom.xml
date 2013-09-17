@@ -70,6 +70,7 @@
             <Export-Package>
             </Export-Package>
             <Web-ContextPath>/controller/nb/v2/statistics</Web-ContextPath>
+            <Jaxrs-Resources>,${classes;ANNOTATION;javax.ws.rs.Path}</Jaxrs-Resources>
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>
         </configuration>
