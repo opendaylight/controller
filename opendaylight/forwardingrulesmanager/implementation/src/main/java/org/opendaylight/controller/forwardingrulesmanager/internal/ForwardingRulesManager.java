@@ -1867,9 +1867,13 @@ public class ForwardingRulesManager implements
             }
         }
         if (target != null) {
-            // Program the network node
-            Status status = (target.installInHw()) ? this.uninstallFlowEntry(target.getFlowEntry()) : this
-                    .installFlowEntry(target.getFlowEntry());
+            Status status = target.validate(container);
+            if (!status.isSuccess()) {
+                log.warn(status.getDescription());
+                return status;
+            }
+            status = (target.installInHw()) ? this.uninstallFlowEntry(target.getFlowEntry()) : this
+                                    .installFlowEntry(target.getFlowEntry());
             if (status.isSuccess()) {
                 // Update Configuration database
                 target.setStatus(SUCCESS);
