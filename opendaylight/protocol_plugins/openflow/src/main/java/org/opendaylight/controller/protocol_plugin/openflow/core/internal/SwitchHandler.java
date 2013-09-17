@@ -372,12 +372,6 @@ public class SwitchHandler implements ISwitch {
                 // send feature request
                 OFMessage featureRequest = factory.getMessage(OFType.FEATURES_REQUEST);
                 asyncFastSend(featureRequest);
-                // delete all pre-existing flows
-                OFMatch match = new OFMatch().setWildcards(OFMatch.OFPFW_ALL);
-                OFFlowMod flowMod = (OFFlowMod) factory.getMessage(OFType.FLOW_MOD);
-                flowMod.setMatch(match).setCommand(OFFlowMod.OFPFC_DELETE).setOutPort(OFPort.OFPP_NONE)
-                        .setLength((short) OFFlowMod.MINIMUM_LENGTH);
-                asyncFastSend(flowMod);
                 this.state = SwitchState.WAIT_FEATURES_REPLY;
                 startSwitchTimer();
                 break;
@@ -924,5 +918,15 @@ public class SwitchHandler implements ISwitch {
             worker.wakeup();
             return result;
         }
+    }
+
+    @Override
+    public void deleteAllFlows() {
+        logger.trace("deleteAllFlows on switch {}", HexString.toHexString(this.sid));
+        OFMatch match = new OFMatch().setWildcards(OFMatch.OFPFW_ALL);
+        OFFlowMod flowMod = (OFFlowMod) factory.getMessage(OFType.FLOW_MOD);
+        flowMod.setMatch(match).setCommand(OFFlowMod.OFPFC_DELETE).setOutPort(OFPort.OFPP_NONE)
+                .setLength((short) OFFlowMod.MINIMUM_LENGTH);
+        asyncFastSend(flowMod);
     }
 }
