@@ -68,16 +68,16 @@ module opendaylight-match-types {
     grouping "ip-match-fields" {
         leaf ip-protocol {
                 description "IP protocol.";
-                type uint8; // TODO define IP protocol number
+                type uint8; 
         }
 
         leaf ip-dscp {
             description "IP DSCP (6 bits in ToS field).";
-            type inet:dscp; // TODO: Define DSCP type
+            type inet:dscp; 
         }
         leaf ip-ecn {
             description "IP ECN (2 bits in ToS field).";
-            type uint8; // TODO define ECN
+            type uint8; 
         }
     }
 
@@ -130,7 +130,7 @@ module opendaylight-match-types {
             description "SCTP source port.";
             type inet:port-number;
         }
-        leaf sctp-destination-dst {
+        leaf sctp-destination-port {
             description "SCTP destination port.";
             type inet:port-number;
         }
