@@ -73,11 +73,10 @@ public class SwitchNorthbound {
     }
 
     private ISwitchManager getIfSwitchManagerService(String containerName) {
-        IContainerManager containerManager = (IContainerManager) ServiceHelper
-                .getGlobalInstance(IContainerManager.class, this);
+        IContainerManager containerManager = (IContainerManager) ServiceHelper.getGlobalInstance(
+                IContainerManager.class, this);
         if (containerManager == null) {
-            throw new ServiceUnavailableException("Container "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Container " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         boolean found = false;
@@ -90,16 +89,14 @@ public class SwitchNorthbound {
         }
 
         if (found == false) {
-            throw new ResourceNotFoundException(containerName + " "
-                    + RestMessages.NOCONTAINER.toString());
+            throw new ResourceNotFoundException(containerName + " " + RestMessages.NOCONTAINER.toString());
         }
 
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper
-                .getInstance(ISwitchManager.class, containerName, this);
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName,
+                this);
 
         if (switchManager == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         return switchManager;
@@ -116,7 +113,7 @@ public class SwitchNorthbound {
      *         {@link org.opendaylight.controller.sal.core.Property} attached to
      *         it.
      *
-     * <pre>
+     *         <pre>
      *
      * Example:
      *
@@ -169,28 +166,24 @@ public class SwitchNorthbound {
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Nodes.class)
-    @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-            @ResponseCode(code = 404, condition = "The containerName is not found"),
-            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
     public Nodes getNodes(@PathParam("containerName") String containerName) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
         }
 
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.READ, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
 
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         List<NodeProperties> res = new ArrayList<NodeProperties>();
@@ -251,34 +244,27 @@ public class SwitchNorthbound {
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(Response.class)
     @StatusCodes({
-            @ResponseCode(code = 201, condition = "Operation successful"),
-            @ResponseCode(code = 400, condition = "The nodeId or configuration is invalid"),
-            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-            @ResponseCode(code = 404, condition = "The Container Name or node or configuration name is not found"),
-            @ResponseCode(code = 406, condition = "The property cannot be configured in non-default container"),
-            @ResponseCode(code = 409, condition = "Unable to update configuration due to cluster conflict or conflicting description property"),
-            @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
-    public Response addNodeProperty(
-            @Context UriInfo uriInfo,
-            @PathParam("containerName") String containerName,
-            @PathParam("nodeType") String nodeType,
-            @PathParam("nodeId") String nodeId,
-            @PathParam("propertyName") String propertyName,
-            @PathParam("propertyValue") String propertyValue) {
+        @ResponseCode(code = 201, condition = "Operation successful"),
+        @ResponseCode(code = 400, condition = "The nodeId or configuration is invalid"),
+        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+        @ResponseCode(code = 404, condition = "The Container Name or node or configuration name is not found"),
+        @ResponseCode(code = 406, condition = "The property cannot be configured in non-default container"),
+        @ResponseCode(code = 409, condition = "Unable to update configuration due to cluster conflict or conflicting description property"),
+        @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
+    public Response addNodeProperty(@Context UriInfo uriInfo, @PathParam("containerName") String containerName,
+            @PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
+            @PathParam("propertyName") String propertyName, @PathParam("propertyValue") String propertyValue) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
         }
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.WRITE, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
@@ -294,6 +280,9 @@ public class SwitchNorthbound {
         SwitchConfig newSwitchConfig = new SwitchConfig(node.toString(), nodeProperties);
         Status status = switchManager.updateNodeConfig(newSwitchConfig);
         if (status.isSuccess()) {
+            NorthboundUtils.auditlog("Property " + propertyName, username, "updated",
+                    "of Node " + NorthboundUtils.getNodeDesc(node, switchManager), containerName);
+
             return Response.created(uriInfo.getRequestUri()).build();
         }
         return NorthboundUtils.getResponse(status);
@@ -308,14 +297,14 @@ public class SwitchNorthbound {
      *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
      *            Node Identifier as specified by
-     *            {@link org.opendaylight.controller.sal.core.Node}
-     *            (Eg. '00:00:00:00:00:03:01:02')
+     *            {@link org.opendaylight.controller.sal.core.Node} (Eg.
+     *            '00:00:00:00:00:03:01:02')
      * @param propertyName
      *            Name of the Property. Properties that can be deleted are
      *            description, forwarding(only in default container) and tier.
      * @return Response as dictated by the HTTP Response Status code
      *
-     * <pre>
+     *         <pre>
      *
      * Example:
      *
@@ -328,32 +317,26 @@ public class SwitchNorthbound {
     @Path("/{containerName}/node/{nodeType}/{nodeId}/property/{propertyName}")
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes({
-            @ResponseCode(code = 204, condition = "Property removed successfully"),
-            @ResponseCode(code = 400, condition = "The nodeId or configuration is invalid"),
-            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-            @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
-            @ResponseCode(code = 409, condition = "Unable to delete property due to cluster conflict"),
-            @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
-    public Response deleteNodeProperty(
-            @PathParam("containerName") String containerName,
-            @PathParam("nodeType") String nodeType,
-            @PathParam("nodeId") String nodeId,
+    @StatusCodes({ @ResponseCode(code = 204, condition = "Property removed successfully"),
+        @ResponseCode(code = 400, condition = "The nodeId or configuration is invalid"),
+        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+        @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
+        @ResponseCode(code = 409, condition = "Unable to delete property due to cluster conflict"),
+        @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
+    public Response deleteNodeProperty(@PathParam("containerName") String containerName,
+            @PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
             @PathParam("propertyName") String propertyName) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
         }
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.WRITE, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
@@ -372,8 +355,9 @@ public class SwitchNorthbound {
                 nodeProperties.remove(propertyName.toLowerCase());
                 SwitchConfig newSwitchConfig = new SwitchConfig(node.toString(), nodeProperties);
                 status = switchManager.updateNodeConfig(newSwitchConfig);
-                if(status.isSuccess()){
-                    NorthboundUtils.auditlog("Node Property", username, "removed", propertyName  + " from " + nodeId, containerName);
+                if (status.isSuccess()) {
+                    NorthboundUtils.auditlog("Property " + propertyName, username, "removed", "of Node "
+                            + NorthboundUtils.getNodeDesc(node, switchManager), containerName);
                     return Response.noContent().build();
                 }
             }
@@ -401,7 +385,7 @@ public class SwitchNorthbound {
      *         {@link org.opendaylight.controller.sal.core.Property} attached to
      *         it.
      *
-     * <pre>
+     *         <pre>
      *
      * Example:
      *
@@ -444,30 +428,24 @@ public class SwitchNorthbound {
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @TypeHint(NodeConnectors.class)
-    @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-            @ResponseCode(code = 404, condition = "The containerName is not found"),
-            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
-    public NodeConnectors getNodeConnectors(
-            @PathParam("containerName") String containerName,
-            @PathParam("nodeType") String nodeType,
-            @PathParam("nodeId") String nodeId) {
+    @StatusCodes({ @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public NodeConnectors getNodeConnectors(@PathParam("containerName") String containerName,
+            @PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
         }
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.READ, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.READ, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
 
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
@@ -479,14 +457,12 @@ public class SwitchNorthbound {
         }
 
         for (NodeConnector nc : ncs) {
-            Map<String, Property> propMap = switchManager
-                    .getNodeConnectorProps(nc);
+            Map<String, Property> propMap = switchManager.getNodeConnectorProps(nc);
             if (propMap == null) {
                 continue;
             }
             Set<Property> props = new HashSet<Property>(propMap.values());
-            NodeConnectorProperties ncProps = new NodeConnectorProperties(nc,
-                    props);
+            NodeConnectorProperties ncProps = new NodeConnectorProperties(nc, props);
             res.add(ncProps);
         }
 
@@ -504,8 +480,8 @@ public class SwitchNorthbound {
      *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
      *            Node Identifier as specified by
-     *            {@link org.opendaylight.controller.sal.core.Node}
-     *            (Eg. '00:00:00:00:00:00:00:03')
+     *            {@link org.opendaylight.controller.sal.core.Node} (Eg.
+     *            '00:00:00:00:00:00:00:03')
      * @param nodeConnectorType
      *            Type of the node connector being programmed (Eg. 'OF')
      * @param nodeConnectorId
@@ -515,15 +491,14 @@ public class SwitchNorthbound {
      * @param propertyName
      *            Name of the Property specified by
      *            {@link org.opendaylight.controller.sal.core.Property} and its
-     *            extended classes
-     *            Property that can be configured is bandwidth
+     *            extended classes Property that can be configured is bandwidth
      * @param propertyValue
      *            Value of the Property specified by
      *            {@link org.opendaylight.controller.sal.core.Property} and its
      *            extended classes
      * @return Response as dictated by the HTTP Response Status code
      *
-     * <pre>
+     *         <pre>
      *
      * Example:
      *
@@ -536,54 +511,45 @@ public class SwitchNorthbound {
     @Path("/{containerName}/nodeconnector/{nodeType}/{nodeId}/{nodeConnectorType}/{nodeConnectorId}/property/{propertyName}/{propertyValue}")
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes({
-            @ResponseCode(code = 201, condition = "Operation successful"),
-            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-            @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
-            @ResponseCode(code = 409, condition = "Unable to add property due to cluster conflict"),
-            @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
-    public Response addNodeConnectorProperty(
-            @Context UriInfo uriInfo,
-            @PathParam("containerName") String containerName,
-            @PathParam("nodeType") String nodeType,
-            @PathParam("nodeId") String nodeId,
-            @PathParam("nodeConnectorType") String nodeConnectorType,
-            @PathParam("nodeConnectorId") String nodeConnectorId,
-            @PathParam("propertyName") String propertyName,
+    @StatusCodes({ @ResponseCode(code = 201, condition = "Operation successful"),
+        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+        @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
+        @ResponseCode(code = 409, condition = "Unable to add property due to cluster conflict"),
+        @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
+    public Response addNodeConnectorProperty(@Context UriInfo uriInfo,
+            @PathParam("containerName") String containerName, @PathParam("nodeType") String nodeType,
+            @PathParam("nodeId") String nodeId, @PathParam("nodeConnectorType") String nodeConnectorType,
+            @PathParam("nodeConnectorId") String nodeConnectorId, @PathParam("propertyName") String propertyName,
             @PathParam("propertyValue") String propertyValue) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
         }
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.WRITE, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
 
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
         Node node = Node.fromString(nodeType, nodeId);
 
-        handleNodeConnectorAvailability(containerName, node, nodeConnectorType,
-                nodeConnectorId);
-        NodeConnector nc = NodeConnector
-                .fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
+        handleNodeConnectorAvailability(containerName, node, nodeConnectorType, nodeConnectorId);
+        NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
 
         Property prop = switchManager.createProperty(propertyName, propertyValue);
         if (prop == null) {
-            throw new ResourceNotFoundException(
-                    RestMessages.INVALIDDATA.toString());
+            throw new ResourceNotFoundException(RestMessages.INVALIDDATA.toString());
         }
 
         Status ret = switchManager.addNodeConnectorProp(nc, prop);
         if (ret.isSuccess()) {
+            NorthboundUtils.auditlog("Property " + propertyName, username, "updated", "of Node Connector "
+                    + NorthboundUtils.getPortName(nc, switchManager), containerName);
             return Response.created(uriInfo.getRequestUri()).build();
         }
         throw new InternalServerErrorException(ret.getDescription());
@@ -598,8 +564,8 @@ public class SwitchNorthbound {
      *            Type of the node being programmed (Eg. 'OF')
      * @param nodeId
      *            Node Identifier as specified by
-     *            {@link org.opendaylight.controller.sal.core.Node}
-     *            (Eg. '00:00:00:00:00:00:00:01')
+     *            {@link org.opendaylight.controller.sal.core.Node} (Eg.
+     *            '00:00:00:00:00:00:00:01')
      * @param nodeConnectorType
      *            Type of the node connector being programmed (Eg. 'OF')
      * @param nodeConnectorId
@@ -612,7 +578,7 @@ public class SwitchNorthbound {
      *            extended classes. Property that can be deleted is bandwidth
      * @return Response as dictated by the HTTP Response Status code
      *
-     * <pre>
+     *         <pre>
      *
      * Example:
      *
@@ -625,45 +591,37 @@ public class SwitchNorthbound {
     @Path("/{containerName}/nodeconnector/{nodeType}/{nodeId}/{nodeConnectorType}/{nodeConnectorId}/property/{propertyName}")
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @StatusCodes({
-            @ResponseCode(code = 204, condition = "Property removed successfully"),
-            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-            @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
-            @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
-    public Response deleteNodeConnectorProperty(
-            @PathParam("containerName") String containerName,
-            @PathParam("nodeType") String nodeType,
-            @PathParam("nodeId") String nodeId,
+    @StatusCodes({ @ResponseCode(code = 204, condition = "Property removed successfully"),
+        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+        @ResponseCode(code = 404, condition = "The Container Name or nodeId or configuration name is not found"),
+        @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
+    public Response deleteNodeConnectorProperty(@PathParam("containerName") String containerName,
+            @PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
             @PathParam("nodeConnectorType") String nodeConnectorType,
-            @PathParam("nodeConnectorId") String nodeConnectorId,
-            @PathParam("propertyName") String propertyName) {
+            @PathParam("nodeConnectorId") String nodeConnectorId, @PathParam("propertyName") String propertyName) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
         }
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.WRITE, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
 
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         handleNodeAvailability(containerName, nodeType, nodeId);
         Node node = Node.fromString(nodeType, nodeId);
 
-        handleNodeConnectorAvailability(containerName, node, nodeConnectorType,
-                nodeConnectorId);
-        NodeConnector nc = NodeConnector
-                .fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
+        handleNodeConnectorAvailability(containerName, node, nodeConnectorType, nodeConnectorId);
+        NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
         Status ret = switchManager.removeNodeConnectorProp(nc, propertyName);
         if (ret.isSuccess()) {
-            NorthboundUtils.auditlog("Node Connector Property", username, "removed", nc + " from " + nodeConnectorId, containerName);
+            NorthboundUtils.auditlog("Property " + propertyName, username, "removed", "of Node Connector "
+                    + NorthboundUtils.getPortName(nc, switchManager), containerName);
             return Response.noContent().build();
         }
         throw new ResourceNotFoundException(ret.getDescription());
@@ -676,7 +634,7 @@ public class SwitchNorthbound {
      *            Name of the Container (Eg. 'default')
      * @return Response as dictated by the HTTP Response Status code
      *
-     * <pre>
+     *         <pre>
      *
      * Example:
      *
@@ -689,27 +647,23 @@ public class SwitchNorthbound {
     @POST
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
-            @ResponseCode(code = 200, condition = "Operation successful"),
-            @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
-            @ResponseCode(code = 404, condition = "The containerName is not found"),
-            @ResponseCode(code = 500, condition = "Failed to save switch configuration. Failure Reason included in HTTP Error response"),
-            @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
-    public Response saveSwitchConfig(
-            @PathParam("containerName") String containerName) {
+        @ResponseCode(code = 200, condition = "Operation successful"),
+        @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
+        @ResponseCode(code = 404, condition = "The containerName is not found"),
+        @ResponseCode(code = 500, condition = "Failed to save switch configuration. Failure Reason included in HTTP Error response"),
+        @ResponseCode(code = 503, condition = "One or more of Controller Services are unavailable") })
+    public Response saveSwitchConfig(@PathParam("containerName") String containerName) {
 
         if (!isValidContainer(containerName)) {
             throw new ResourceNotFoundException("Container " + containerName + " does not exist.");
         }
-        if (!NorthboundUtils.isAuthorized(
-                getUserName(), containerName, Privilege.WRITE, this)) {
-            throw new UnauthorizedException(
-                    "User is not authorized to perform this operation on container "
-                            + containerName);
+        if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
+            throw new UnauthorizedException("User is not authorized to perform this operation on container "
+                    + containerName);
         }
         ISwitchManager switchManager = getIfSwitchManagerService(containerName);
         if (switchManager == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         Status ret = switchManager.saveSwitchConfig();
@@ -719,51 +673,41 @@ public class SwitchNorthbound {
         throw new InternalServerErrorException(ret.getDescription());
     }
 
-    private Node handleNodeAvailability(String containerName, String nodeType,
-            String nodeId) {
+    private Node handleNodeAvailability(String containerName, String nodeType, String nodeId) {
 
         Node node = Node.fromString(nodeType, nodeId);
         if (node == null) {
-            throw new ResourceNotFoundException(nodeId + " : "
-                    + RestMessages.NONODE.toString());
+            throw new ResourceNotFoundException(nodeId + " : " + RestMessages.NONODE.toString());
         }
 
-        ISwitchManager sm = (ISwitchManager) ServiceHelper.getInstance(
-                ISwitchManager.class, containerName, this);
+        ISwitchManager sm = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName, this);
 
         if (sm == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         if (!sm.getNodes().contains(node)) {
-            throw new ResourceNotFoundException(node.toString() + " : "
-                    + RestMessages.NONODE.toString());
+            throw new ResourceNotFoundException(node.toString() + " : " + RestMessages.NONODE.toString());
         }
         return node;
     }
 
-    private void handleNodeConnectorAvailability(String containerName,
-            Node node, String nodeConnectorType, String nodeConnectorId) {
+    private void handleNodeConnectorAvailability(String containerName, Node node, String nodeConnectorType,
+            String nodeConnectorId) {
 
-        NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType,
-                nodeConnectorId, node);
+        NodeConnector nc = NodeConnector.fromStringNoNode(nodeConnectorType, nodeConnectorId, node);
         if (nc == null) {
-            throw new ResourceNotFoundException(nc + " : "
-                    + RestMessages.NORESOURCE.toString());
+            throw new ResourceNotFoundException(nc + " : " + RestMessages.NORESOURCE.toString());
         }
 
-        ISwitchManager sm = (ISwitchManager) ServiceHelper.getInstance(
-                ISwitchManager.class, containerName, this);
+        ISwitchManager sm = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, containerName, this);
 
         if (sm == null) {
-            throw new ServiceUnavailableException("Switch Manager "
-                    + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("Switch Manager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         if (!sm.getNodeConnectors(node).contains(nc)) {
-            throw new ResourceNotFoundException(nc.toString() + " : "
-                    + RestMessages.NORESOURCE.toString());
+            throw new ResourceNotFoundException(nc.toString() + " : " + RestMessages.NORESOURCE.toString());
         }
     }
 
@@ -771,15 +715,14 @@ public class SwitchNorthbound {
         if (containerName.equals(GlobalConstants.DEFAULT.toString())) {
             return true;
         }
-        IContainerManager containerManager = (IContainerManager) ServiceHelper
-                .getGlobalInstance(IContainerManager.class, this);
+        IContainerManager containerManager = (IContainerManager) ServiceHelper.getGlobalInstance(
+                IContainerManager.class, this);
         if (containerManager == null) {
-            throw new InternalServerErrorException(
-                    RestMessages.INTERNALERROR.toString());
+            throw new InternalServerErrorException(RestMessages.INTERNALERROR.toString());
         }
         if (containerManager.getContainerNames().contains(containerName)) {
             return true;
-       }
+        }
         return false;
     }
 
