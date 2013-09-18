@@ -14,10 +14,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.utils.GUIField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,32 +114,12 @@ public class SpanConfig implements Serializable {
     }
 
     public ArrayList<NodeConnector> getPortArrayList() {
-        Node node = Node.fromString(nodeId);
         ArrayList<NodeConnector> portList = new ArrayList<NodeConnector>();
         String[] elemArray = spanPort.split(",");
         for (String elem : elemArray) {
-            if (elem.contains("-")) {
-                String[] limits = elem.split("-");
-                for (short j = Short.valueOf(limits[0]); j <= Short
-                        .valueOf(limits[1]); j++) {
-                    try {
-                        portList.add(new NodeConnector(
-                                NodeConnectorIDType.OPENFLOW, Short.valueOf(j),
-                                node));
-                    } catch (ConstructionException e) {
-                        logger.error("",e);
-                    }
-                }
-            } else {
-                try {
-                    portList.add(new NodeConnector(
-                            NodeConnectorIDType.OPENFLOW, Short.valueOf(elem),
-                            node));
-                } catch (NumberFormatException e) {
-                    logger.error("",e);
-                } catch (ConstructionException e) {
-                    logger.error("",e);
-                }
+            NodeConnector nodeConnector = NodeConnector.fromString(elem);
+            if (nodeConnector != null) {
+                portList.add(nodeConnector);
             }
         }
         return portList;
