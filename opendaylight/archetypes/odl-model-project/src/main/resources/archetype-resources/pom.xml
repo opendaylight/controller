@@ -9,7 +9,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-    <yang.version>0.5.7-SNAPSHOT</yang.version>
+    <yang.version>0.5.8-SNAPSHOT</yang.version>
     <maven.bundle.version>2.4.0</maven.bundle.version>
   </properties>
 
@@ -56,7 +56,7 @@
       <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-maven-plugin</artifactId>
-        <version>0.5.7-SNAPSHOT</version>
+        <version>${yang.version}</version>
         <executions>
           <execution>
             <goals>
@@ -79,7 +79,7 @@
           <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>maven-sal-api-gen-plugin</artifactId>
-            <version>0.5.7-SNAPSHOT</version>
+            <version>${yang.version}</version>
             <type>jar</type>
           </dependency>
         </dependencies>
