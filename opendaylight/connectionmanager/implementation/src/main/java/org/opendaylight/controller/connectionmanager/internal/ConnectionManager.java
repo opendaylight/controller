@@ -37,6 +37,7 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.ICoordinatorChangeAware;
+import org.opendaylight.controller.connectionmanager.ConnectionLocality;
 import org.opendaylight.controller.connectionmanager.ConnectionMgmtScheme;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.connectionmanager.scheme.AbstractScheme;
@@ -183,6 +184,13 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
         AbstractScheme scheme = schemes.get(activeScheme);
         if (scheme == null) return false;
         return scheme.isLocal(node);
+    }
+
+    @Override
+    public ConnectionLocality getLocalityStatus(Node node) {
+        AbstractScheme scheme = schemes.get(activeScheme);
+        if (scheme == null) return ConnectionLocality.NOT_CONNECTED;
+        return scheme.getLocalityStatus(node);
     }
 
     @Override
