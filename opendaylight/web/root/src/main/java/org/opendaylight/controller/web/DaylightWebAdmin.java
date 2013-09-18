@@ -45,6 +45,7 @@ public class DaylightWebAdmin {
     /**
      * Returns list of clustered controllers. Highlights "this" controller and
      * if controller is coordinator
+     *
      * @return List<ClusterBean>
      */
     @RequestMapping("/cluster")
@@ -67,17 +68,17 @@ public class DaylightWebAdmin {
         for (InetAddress controller : controllers) {
             ClusterNodeBean.Builder clusterBeanBuilder = new ClusterNodeBean.Builder(controller);
 
-            //get number of connected nodes
+            // get number of connected nodes
             Set<Node> connectedNodes = connectionManager.getNodes(controller);
             int numNodes = connectedNodes == null ? 0 : connectedNodes.size();
             clusterBeanBuilder.nodesConnected(numNodes);
 
-            //determine if this is the executing controller
+            // determine if this is the executing controller
             if (controller.equals(clusterServices.getMyAddress())) {
                 clusterBeanBuilder.highlightMe();
             }
 
-            //determine whether this is coordinator
+            // determine whether this is coordinator
             if (clusterServices.getCoordinatorAddress().equals(controller)) {
                 clusterBeanBuilder.iAmCoordinator();
             }
@@ -89,6 +90,7 @@ public class DaylightWebAdmin {
 
     /**
      * Return nodes connected to controller {controller}
+     *
      * @param controller
      *            - byte[] of the address of the controller
      * @return List<NodeBean>
@@ -178,7 +180,16 @@ public class DaylightWebAdmin {
         Status result = (action.equals("add")) ? userManager.addLocalUser(config) : userManager.removeLocalUser(config);
         if (result.isSuccess()) {
             String userAction = (action.equals("add")) ? "added" : "removed";
-            DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), userAction, config.getUser());
+            if (action.equals("add")) {
+                String userRoles = "";
+                for (String userRole : config.getRoles()) {
+                    userRoles = userRoles + userRole + ",";
+                }
+                DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), userAction, config.getUser()
+                        + " as " + userRoles.substring(0, userRoles.length() - 1));
+            } else {
+                DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), userAction, config.getUser());
+            }
             return "Success";
         }
         return result.getDescription();
@@ -229,13 +240,15 @@ public class DaylightWebAdmin {
 
         Status status = userManager.changeLocalUserPassword(username, currentPassword, newPassword);
         if (status.isSuccess()) {
-            DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), "changed password for", username);
+            DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), " changed password for User ",
+                    username);
         }
         return status;
     }
 
     /**
      * Is the operation permitted for the given level
+     *
      * @param level
      */
     private boolean authorize(IUserManager userManager, UserLevel level, HttpServletRequest request) {
