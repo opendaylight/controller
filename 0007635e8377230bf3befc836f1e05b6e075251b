@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_c3f8d14b",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/authorization/AppRoleLevel.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-18T10:25:13Z",
+      "side": 1,
+      "message": "Sorry what was the PMD error this change is addressing? Seems the code to be exactly the same. Thx",
+      "revId": "0007635e8377230bf3befc836f1e05b6e075251b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
