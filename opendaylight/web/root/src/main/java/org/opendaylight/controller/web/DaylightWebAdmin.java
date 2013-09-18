@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
@@ -212,24 +213,63 @@ public class DaylightWebAdmin {
 
     @RequestMapping(value = "/users/password/{username}", method = RequestMethod.POST)
     @ResponseBody
-    public Status changePassword(@PathVariable("username") String username, HttpServletRequest request,
-            @RequestParam("currentPassword") String currentPassword, @RequestParam("newPassword") String newPassword) {
+    public Status changePassword(
+            @PathVariable("username") String username, HttpServletRequest request,
+            @RequestParam(value = "currentPassword", required=false) String currentPassword,
+            @RequestParam("newPassword") String newPassword) {
         IUserManager userManager = (IUserManager) ServiceHelper.getGlobalInstance(IUserManager.class, this);
         if (userManager == null) {
-            return new Status(StatusCode.GONE, "User Manager not found");
+            return new Status(StatusCode.NOSERVICE, "User Manager unavailable");
         }
 
-        if (!authorize(userManager, UserLevel.NETWORKADMIN, request)) {
-            return new Status(StatusCode.FORBIDDEN, "Operation not permitted");
+        Status status;
+        String requestingUser = request.getUserPrincipal().getName();
+
+        //changing own password
+        if (requestingUser.equals(username) ) {
+            status = userManager.changeLocalUserPassword(username, currentPassword, newPassword);
+            //enforce the user to re-login with new password
+            if (status.isSuccess() && !newPassword.equals(currentPassword)) {
+                userManager.userLogout(username);
+                HttpSession session = request.getSession(false);
+                if ( session != null) {
+                    session.invalidate();
+                }
+            }
+
+        //admin level user resetting other's password
+        } else if (authorize(userManager, UserLevel.NETWORKADMIN, request)) {
+
+            //Since User Manager doesn't have an unprotected password change API,
+            //we re-create the user with the new password (and current roles).
+            List<String> roles = userManager.getUserRoles(username);
+            UserConfig newConfig = new UserConfig(username, newPassword, roles);
+
+            //validate before removing existing config, so we don't remove but fail to add
+            status = newConfig.validate();
+            if (!status.isSuccess()) {
+                return status;
+            }
+
+            userManager.userLogout(username);
+            status = userManager.removeLocalUser(username);
+            if (!status.isSuccess()) {
+                return status;
+            }
+            if (userManager.addLocalUser(newConfig).isSuccess()) {
+                status = new Status(StatusCode.SUCCESS, "Password for user " + username + " reset successfully.");
+            } else {
+                //this is very sad
+                status = new Status(StatusCode.INTERNALERROR, "Failed resetting password for user " + username + ". User is now removed.");
+            }
+
+        //unauthorized
+        } else {
+            status = new Status(StatusCode.UNAUTHORIZED, "Operation not permitted");
         }
 
-        if (newPassword.isEmpty()) {
-            return new Status(StatusCode.BADREQUEST, "Empty passwords not allowed");
-        }
-
-        Status status = userManager.changeLocalUserPassword(username, currentPassword, newPassword);
         if (status.isSuccess()) {
-            DaylightWebUtil.auditlog("User", request.getUserPrincipal().getName(), "changed password for", username);
+            DaylightWebUtil.auditlog("User", requestingUser, "changed password for", username);
         }
         return status;
     }

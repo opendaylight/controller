@@ -443,9 +443,12 @@ one.main.admin = {
       // change password binding
       $('#'+one.main.admin.id.modal.password.submit, $modal).click(function() {
         one.main.admin.password.submit(id, $modal, function(result) {
-          if (result.code == 'SUCCESS') {
-            $modal.modal('hide');
-            successCallback();
+          if (result.success) {
+            //if changed own password, enforce relogin
+            if (id.trim() == $('#currentuser').val().trim()) {
+                alert("Password changed successfully. Please re-login with your new password.");
+                window.location = '/';
+            }
           } else {
             alert(result.code+': '+result.description);
           }
