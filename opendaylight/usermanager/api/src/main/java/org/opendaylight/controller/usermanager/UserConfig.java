@@ -34,9 +34,10 @@ public class UserConfig implements Serializable {
     protected String user;
     protected List<String> roles;
     private String password;
+
+    private static boolean strongPasswordCheck = Boolean.getBoolean("enableStrongPasswordCheck");
     private static final int USERNAME_MAXLENGTH = 32;
-    private static final int PASSWORD_MINLENGTH = 5;
-    private static final int PASSWORD_MAXLENGTH = 256;
+    protected static final String PASSWORD_REGEX = "(?=.*[^\\w])(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,256}$";
     private static final Pattern INVALID_USERNAME_CHARACTERS = Pattern.compile("([/\\s\\.\\?#%;\\\\]+)");
     private static MessageDigest oneWayFunction = null;
     static {
@@ -173,10 +174,10 @@ public class UserConfig implements Serializable {
             return new Status(StatusCode.BADREQUEST, "Password cannot be empty");
         }
 
-        if (password.length() < UserConfig.PASSWORD_MINLENGTH
-                || password.length() > UserConfig.PASSWORD_MAXLENGTH) {
-            return new Status(StatusCode.BADREQUEST,
-                    "Password should have 5-256 characters");
+        if (strongPasswordCheck  && !password.matches(UserConfig.PASSWORD_REGEX)) {
+            return new Status(StatusCode.BADREQUEST, "Password should be 8 to 256 characters long, "
+                    + "contain both upper and lower case letters, at least one number "
+                    + "and at least one non alphanumeric character");
         }
         return new Status(StatusCode.SUCCESS);
     }
@@ -246,5 +247,26 @@ public class UserConfig implements Serializable {
         }
         UserConfig.oneWayFunction.reset();
         return HexEncode.bytesToHexString(UserConfig.oneWayFunction.digest(message.getBytes(Charset.defaultCharset())));
+    }
+
+    /**
+     * Returns UserConfig instance populated with the passed parameters. It does
+     * not run any checks on the passed parameters.
+     *
+     * @param userName
+     *            the user name
+     * @param password
+     *            the plain text password
+     * @param roles
+     *            the list of roles
+     * @return the UserConfig object populated with the passed parameters. No
+     *         validity check is run on the input parameters.
+     */
+    public static UserConfig getUncheckedUserConfig(String userName, String password, List<String> roles) {
+        UserConfig config = new UserConfig();
+        config.user = userName;
+        config.password = hash(password);
+        config.roles = roles;
+        return config;
     }
 }
