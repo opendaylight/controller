@@ -204,12 +204,17 @@ public class UserManager implements IUserManager, IObjectReader,
     }
 
     private void checkDefaultNetworkAdmin() {
-        // If startup config is not there, it's old or it was deleted,
-        // need to add Default Network Admin User
+        /*
+         * If startup config is not there, it's old or it was deleted or if a
+         * password recovery was run, need to add Default Network Admin User
+         */
         if (!localUserConfigList.containsKey(DEFAULT_ADMIN)) {
             List<String> roles = new ArrayList<String>(1);
             roles.add(DEFAULT_ADMIN_ROLE);
-            localUserConfigList.put(DEFAULT_ADMIN, new UserConfig(DEFAULT_ADMIN, DEFAULT_ADMIN_PASSWORD, roles));
+            // Need to skip the strong password check for the default admin
+            UserConfig defaultAdmin = UserConfig.getUncheckedUserConfig(UserManager.DEFAULT_ADMIN,
+                    UserManager.DEFAULT_ADMIN_PASSWORD, roles);
+            localUserConfigList.put(UserManager.DEFAULT_ADMIN, defaultAdmin);
         }
     }
 

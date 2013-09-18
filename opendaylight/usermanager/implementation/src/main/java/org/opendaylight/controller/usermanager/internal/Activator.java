@@ -61,7 +61,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public Object[] getImplementations() {
-        return null;
+        return new Object[]{};
     }
 
     /**

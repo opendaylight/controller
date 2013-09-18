@@ -117,4 +117,41 @@ public class AuthorizationUserConfigTest {
         UserConfig userConfig2 = new UserConfig("uname", "ciscocisco", roles);
         assertEquals(userConfig, userConfig2);
     }
+
+    @Test
+    public void userConfigPasswordTest() {
+
+        String regex = UserConfig.PASSWORD_REGEX;
+        String password = null;
+
+        // Good password
+        password = "aBc@eF#h9";
+        assertTrue(password.matches(regex));
+        password = "^aBc@eF#h9$88ad*o&";
+        assertTrue(password.matches(regex));
+        password = "_^aBc@\":eF#h;9$\\8|8ad*o&-(){}/,.><?+-";
+        assertTrue(password.matches(regex));
+        password = "culonE1)";
+        assertTrue(password.matches(regex));
+
+        // Too short
+        password = "aB3@eF#";
+        assertFalse(password.matches(regex));
+
+        // No number
+        password = "#BeCCC#CeDfDf";
+        assertFalse(password.matches(regex));
+
+        // No lower case
+        password = "AB8C#CC@C4";
+        assertFalse(password.matches(regex));
+
+        // No upper case
+        password = "ab8defg9!";
+        assertFalse(password.matches(regex));
+
+        // No special characters
+        password = "aBc4ef7H8";
+        assertFalse(password.matches(regex));
+    }
 }

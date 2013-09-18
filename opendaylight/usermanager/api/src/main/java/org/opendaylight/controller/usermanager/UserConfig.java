@@ -34,9 +34,11 @@ public class UserConfig implements Serializable {
     protected String user;
     protected List<String> roles;
     private String password;
+
+    private static final boolean strongPasswordCheck = Boolean.getBoolean("enableStrongPasswordCheck");
+    private static final String BAD_PASSWORD = "Bad Password";
     private static final int USERNAME_MAXLENGTH = 32;
-    private static final int PASSWORD_MINLENGTH = 5;
-    private static final int PASSWORD_MAXLENGTH = 256;
+    protected static final String PASSWORD_REGEX = "(?=.*[^\\w])(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,256}$";
     private static final Pattern INVALID_USERNAME_CHARACTERS = Pattern.compile("([/\\s\\.\\?#%;\\\\]+)");
     private static MessageDigest oneWayFunction = null;
     static {
@@ -63,16 +65,12 @@ public class UserConfig implements Serializable {
     public UserConfig(String user, String password, List<String> roles) {
         this.user = user;
 
-        this.password = password;
-        if (this.validatePassword().isSuccess()) {
-            /*
-             * Only if the password is a valid one, hash it. So in case it is not
-             * valid, when UserConfig.validate() is called, the proper
-             * validation error will be returned to the caller. If we hashed a
-             * priori instead, the mis-configuration would be masked
-             */
-            this.password = hash(this.password);
-        }
+        /*
+         * Password validation to be done on clear text password. If fails, mark
+         * the password with a well known label, so that object validation can
+         * report the proper error. Only if password is a valid one, hash it.
+         */
+        this.password = (validatePassword(password).isSuccess()) ? hash(password) : BAD_PASSWORD;
 
         this.roles = (roles == null) ? new ArrayList<String>() : new ArrayList<String>(roles);
     }
@@ -142,12 +140,15 @@ public class UserConfig implements Serializable {
     }
 
     public Status validate() {
-        Status validCheck = validateRoles();
+        Status validCheck = validateUsername();
         if (validCheck.isSuccess()) {
-            validCheck = validateUsername();
+            validCheck = (!password.equals(BAD_PASSWORD)) ? new Status(StatusCode.SUCCESS) : new Status(
+                    StatusCode.BADREQUEST,
+                    "Password should be 8 to 256 characters long, contain both upper and lower case letters, "
+                            + "at least one number and at least one non alphanumeric character");
         }
         if (validCheck.isSuccess()) {
-            validCheck = validatePassword();
+            validCheck = validateRoles();
         }
         return validCheck;
     }
@@ -168,15 +169,15 @@ public class UserConfig implements Serializable {
         return new Status(StatusCode.SUCCESS);
     }
 
-    private Status validatePassword() {
+    private Status validatePassword(String password) {
         if (password == null || password.isEmpty()) {
             return new Status(StatusCode.BADREQUEST, "Password cannot be empty");
         }
 
-        if (password.length() < UserConfig.PASSWORD_MINLENGTH
-                || password.length() > UserConfig.PASSWORD_MAXLENGTH) {
-            return new Status(StatusCode.BADREQUEST,
-                    "Password should have 5-256 characters");
+        if (strongPasswordCheck && !password.matches(UserConfig.PASSWORD_REGEX)) {
+            return new Status(StatusCode.BADREQUEST, "Password should be 8 to 256 characters long, "
+                    + "contain both upper and lower case letters, at least one number "
+                    + "and at least one non alphanumeric character");
         }
         return new Status(StatusCode.SUCCESS);
     }
@@ -246,5 +247,26 @@ public class UserConfig implements Serializable {
         }
         UserConfig.oneWayFunction.reset();
         return HexEncode.bytesToHexString(UserConfig.oneWayFunction.digest(message.getBytes(Charset.defaultCharset())));
+    }
+
+    /**
+     * Returns UserConfig instance populated with the passed parameters. It does
+     * not run any checks on the passed parameters.
+     *
+     * @param userName
+     *            the user name
+     * @param password
+     *            the plain text password
+     * @param roles
+     *            the list of roles
+     * @return the UserConfig object populated with the passed parameters. No
+     *         validity check is run on the input parameters.
+     */
+    public static UserConfig getUncheckedUserConfig(String userName, String password, List<String> roles) {
+        UserConfig config = new UserConfig();
+        config.user = userName;
+        config.password = hash(password);
+        config.roles = roles;
+        return config;
     }
 }
