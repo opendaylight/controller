@@ -48,7 +48,9 @@
               org.osgi.service.packageadmin,
               org.osgi.util.tracker,
               javax.servlet.http,
+              org.codehaus.jackson,
               org.codehaus.jackson.jaxrs,
+              org.codehaus.jackson.map,
               org.slf4j
             </Import-Package>
           </instructions>

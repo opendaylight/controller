@@ -428,6 +428,11 @@ public class NorthboundIT {
         // Test GET deleted subnet1
         result = getJsonResult(baseURL + "default/subnet/" + name1);
         Assert.assertEquals(404, httpResponseCode.intValue());
+
+        // TEST PUT bad subnet, expect 400, validate JSON exception mapper
+        JSONObject joBad = new JSONObject().put("foo", "bar");
+        result = getJsonResult(baseURL + "default/subnet/foo", "PUT", joBad.toString());
+        Assert.assertEquals(400, httpResponseCode.intValue());
   }
 
     @Test

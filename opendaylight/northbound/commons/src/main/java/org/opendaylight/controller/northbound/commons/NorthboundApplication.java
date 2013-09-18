@@ -20,6 +20,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.opendaylight.controller.northbound.bundlescanner.IBundleScanService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -54,7 +55,8 @@ public class NorthboundApplication extends Application {
             }
 
         } );
-        singletons.add(new JacksonJaxbJsonProvider());
+        singletons.add(getJsonProvider());
+        singletons.add(new JacksonJsonProcessingExceptionMapper());
         return singletons;
     }
 
@@ -63,6 +65,13 @@ public class NorthboundApplication extends Application {
         Set<Class<?>> result = new HashSet<Class<?>>();
         result.addAll(findJAXRSResourceClasses());
         return result;
+    }
+
+    private static final JacksonJaxbJsonProvider getJsonProvider() {
+        JacksonJaxbJsonProvider jsonProvider = new JacksonJaxbJsonProvider();
+        jsonProvider.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES,
+                false);
+        return jsonProvider;
     }
 
     private BundleContext getBundleContext() {
