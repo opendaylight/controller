@@ -51,6 +51,8 @@ public class ContainerFlowConfig implements Serializable {
     /** The Constant regexName. */
     private static final String regexName = "^[\\w-+.@]+$";
 
+    private static final String regexNumber = "^[0-9]+$";
+
     /** Flow Spec name. */
     @XmlElement
     private String name;
@@ -529,6 +531,9 @@ public class ContainerFlowConfig implements Serializable {
         if(!hasValidProtocol()) {
             return new Status(StatusCode.BADREQUEST, "Invalid IP protocol");
         }
+        if (!hasValidPorts()) {
+            return new Status(StatusCode.BADREQUEST, "Invalid Source or Destination Port");
+        }
         if (this.getMatches().get(0).getMatches() == 0) {
             return new Status(StatusCode.BADREQUEST, "Flow Spec is empty");
         }
@@ -573,12 +578,57 @@ public class ContainerFlowConfig implements Serializable {
         return new Status(StatusCode.SUCCESS);
     }
 
+    /**
+     * Validate the protocol field. Either it can be a enum defined in IPProtocols.java
+     * or a value between 1 and 255
+     *
+     * @return true if a valid protocol value
+     */
     private boolean hasValidProtocol() {
         if (protocol != null && !protocol.isEmpty()) {
-            return (this.getProtoNum() != 0 || protocol.equalsIgnoreCase("any"));
+            short proto = this.getProtoNum();
+            return (((proto != 0) && (proto > 0) && (proto < 256)) || protocol.equalsIgnoreCase("any"));
         }
         return true;
     }
+
+    /**
+     *
+     * @param tpPort
+     *               String representing the transport protocol port number
+     * @return true if tpPort contains a decimal value between 0 and 65535
+     */
+    private boolean hasValidPort(String tpPort) {
+        if (!tpPort.matches(regexNumber)) {
+            return false;
+        }
+        try {
+            int port = Integer.decode(tpPort);
+            return ((port >= 0) && (port <= 0xffff));
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Validate the transport protocol source and destination ports as
+     * entered by users.
+     *
+     * @return true if ports are defined and are in valid range
+     */
+    private boolean hasValidPorts() {
+        if (tpSrc !=null && !tpSrc.isEmpty()) {
+            if (!hasValidPort(tpSrc)) {
+                return false;
+            }
+        }
+
+        if (tpDst !=null && !tpDst.isEmpty()) {
+            return hasValidPort(tpDst);
+        }
+        return true;
+    }
+
     /**
      * Returns the matches.
      * If unidirectional flag is set, there will be only one match in the list
@@ -624,22 +674,10 @@ public class ContainerFlowConfig implements Serializable {
                     .getProtocolNumberByte(this.protocol));
         }
         if (this.tpSrc != null && !this.tpSrc.trim().isEmpty()) {
-            Short srcPort = 0;
-            try {
-                srcPort = Short.parseShort(tpSrc);
-            } catch (NumberFormatException e) {
-                throw e;
-            }
-            match.setField(MatchType.TP_SRC, srcPort);
+            match.setField(MatchType.TP_SRC, Integer.valueOf(tpSrc).shortValue());
         }
         if (this.tpDst != null && !this.tpDst.trim().isEmpty()) {
-            Short dstPort = 0;
-            try {
-                dstPort = Short.parseShort(tpDst);
-            } catch (NumberFormatException e) {
-                throw e;
-            }
-            match.setField(MatchType.TP_DST, dstPort);
+            match.setField(MatchType.TP_DST, Integer.valueOf(tpDst).shortValue());
         }
 
         matches.add(match);
