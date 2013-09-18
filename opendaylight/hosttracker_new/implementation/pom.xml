@@ -22,7 +22,7 @@
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-    <sonar.jacoco.Reportpath>target/jacoco.exec</sonar.jacoco.Reportpath>
+    <sonar.jacoco.reportpath>target/jacoco.exec</sonar.jacoco.reportpath>
     <sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.language>java</sonar.language>
   </properties>
