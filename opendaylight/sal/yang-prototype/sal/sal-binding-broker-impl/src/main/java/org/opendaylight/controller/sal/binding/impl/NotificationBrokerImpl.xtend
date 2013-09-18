@@ -45,6 +45,7 @@ class NotificationBrokerImpl implements NotificationProviderService {
         notification.class.interfaces.filter[it != Notification && Notification.isAssignableFrom(it)]
     }
 
+    @SuppressWarnings("unchecked")
     def notifyAll(Collection<NotificationListener<?>> listeners, Notification notification) {
         listeners.forEach[(it as NotificationListener).onNotification(notification)]
     }

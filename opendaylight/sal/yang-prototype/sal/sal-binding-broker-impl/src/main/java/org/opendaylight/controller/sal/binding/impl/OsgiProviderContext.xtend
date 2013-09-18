@@ -16,7 +16,8 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcService
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 
-import static extension org.opendaylight.controller.sal.binding.impl.utils.PropertiesUtils.*;
+import static org.opendaylight.controller.sal.binding.impl.osgi.Constants.*;
+import static extension org.opendaylight.controller.sal.binding.impl.osgi.PropertiesUtils.*;
 
 class OsgiProviderContext extends OsgiConsumerContext implements ProviderContext {
 
@@ -32,7 +33,7 @@ class OsgiProviderContext extends OsgiConsumerContext implements ProviderContext
 
         // TODO Auto-generated method stub
         val properties = new Hashtable<String, String>();
-        properties.salServiceType = Constants.SAL_SERVICE_TYPE_PROVIDER
+        properties.salServiceType = SAL_SERVICE_TYPE_PROVIDER
 
         // Fill requirements
         val salReg = broker.registerRpcImplementation(type, implementation, this, properties)

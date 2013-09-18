@@ -11,30 +11,29 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider
 import org.opendaylight.yangtools.yang.binding.RpcService
 import javassist.ClassPool
-import javassist.CtMethod
-import javassist.CtField
 import org.osgi.framework.BundleContext
 import java.util.Map
 import java.util.HashMap
 import javassist.LoaderClassPath
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker
 import java.util.Hashtable
+import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper.*
 
-import static extension org.opendaylight.controller.sal.binding.impl.utils.PropertiesUtils.*
-import static extension org.opendaylight.controller.sal.binding.impl.utils.GeneratorUtils.*
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService
 import org.osgi.framework.ServiceRegistration
-import org.opendaylight.controller.sal.binding.impl.utils.PropertiesUtils
+import static org.opendaylight.controller.sal.binding.impl.osgi.Constants.*
+import static extension org.opendaylight.controller.sal.binding.impl.osgi.PropertiesUtils.*
 import org.opendaylight.controller.sal.binding.api.NotificationService
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext
-import javassist.Modifier
+
 import org.slf4j.LoggerFactory
+import org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator
 
 class BindingAwareBrokerImpl implements BindingAwareBroker {
-    private static val DELEGATE_FIELD = "_delegate"
     private static val log = LoggerFactory.getLogger(BindingAwareBrokerImpl)
     
     private val clsPool = ClassPool.getDefault()
+    private var RuntimeCodeGenerator generator;
     private Map<Class<? extends RpcService>, RpcProxyContext> managedProxies = new HashMap();
     private var NotificationBrokerImpl notifyBroker
     private var ServiceRegistration<NotificationProviderService> notifyBrokerRegistration
@@ -47,7 +46,7 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
 
         // Initialization of notificationBroker
         notifyBroker = new NotificationBrokerImpl(null);
-        val brokerProperties = PropertiesUtils.newProperties();
+        val brokerProperties = newProperties();
         notifyBrokerRegistration = brokerBundleContext.registerService(NotificationProviderService, notifyBroker,
             brokerProperties)
         brokerBundleContext.registerService(NotificationService, notifyBroker, brokerProperties)
@@ -56,7 +55,8 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
     def initGenerator() {
 
         // YANG Binding Class Loader
-        clsPool.appendClassPath(new LoaderClassPath(RpcService.classLoader))
+        clsPool.appendClassPath(new LoaderClassPath(RpcService.classLoader));
+        generator = new RuntimeCodeGenerator(clsPool);
     }
 
     override registerConsumer(BindingAwareConsumer consumer, BundleContext bundleCtx) {
@@ -97,35 +97,16 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         if ((existing = managedProxies.get(service)) != null) {
             return existing.proxy
         }
-        val proxyClass = service.generateDirectProxy()
+        val proxyClass = generator.generateDirectProxy(service)
         val rpcProxyCtx = new RpcProxyContext(proxyClass)
         val properties = new Hashtable<String, String>()
         rpcProxyCtx.proxy = proxyClass.newInstance as RpcService
 
-        properties.salServiceType = Constants.SAL_SERVICE_TYPE_CONSUMER_PROXY
+        properties.salServiceType = SAL_SERVICE_TYPE_CONSUMER_PROXY
         rpcProxyCtx.registration = brokerBundleContext.registerService(service, rpcProxyCtx.proxy as T, properties)
         managedProxies.put(service, rpcProxyCtx)
         return rpcProxyCtx.proxy
     }
-
-    protected def generateDirectProxy(Class<? extends RpcService> delegate) {
-        val targetFqn = delegate.generatedName(Constants.PROXY_DIRECT_SUFFIX)
-        log.debug("Generating DirectProxy for {} Proxy name: {}",delegate,targetFqn);
-        val objCls = clsPool.get(Object)
-        val delegateCls = clsPool.get(delegate)
-        val proxyCls = clsPool.makeClass(targetFqn)
-        proxyCls.addInterface(delegateCls)
-        val delField = new CtField(delegateCls, DELEGATE_FIELD, proxyCls);
-        delField.modifiers = Modifier.PUBLIC
-        proxyCls.addField(delField)
-        delegateCls.methods.filter[it.declaringClass != objCls].forEach [
-            val proxyMethod = new CtMethod(it, proxyCls, null);
-            proxyMethod.body = '''return ($r) «DELEGATE_FIELD».«it.name»($$);'''
-            proxyCls.addMethod(proxyMethod)
-        ]
-        return proxyCls.toClass(delegate.classLoader)
-    }
-
     /**
      * Registers RPC Implementation
      * 
@@ -140,34 +121,4 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         proxy.delegate = service;
         return new RpcServiceRegistrationImpl<T>(type, service, osgiReg);
     }
-    
-    /**
-     * Helper method to return delegate from ManagedDirectedProxy with use of reflection.
-     * 
-     * Note: This method uses reflection, but access to delegate field should be 
-     * avoided and called only if neccessary.
-     * 
-     */
-    def <T extends RpcService> getDelegate(RpcService proxy) {
-        val field = proxy.class.getField(DELEGATE_FIELD)
-        if(field == null) throw new UnsupportedOperationException("Unable to get delegate from proxy");
-        return field.get(proxy) as T
-    }
-    
-        /**
-     * Helper method to set delegate to ManagedDirectedProxy with use of reflection.
-     * 
-     * Note: This method uses reflection, but setting delegate field should not occur too much
-     * to introduce any significant performance hits.
-     * 
-     */
-    def void setDelegate(RpcService proxy, RpcService delegate) {
-        val field = proxy.class.getField(DELEGATE_FIELD)
-        if(field == null) throw new UnsupportedOperationException("Unable to set delegate to proxy");
-        if (field.type.isAssignableFrom(delegate.class)) {
-            field.set(proxy,delegate)
-        } else throw new IllegalArgumentException("delegate class is not assignable to proxy");
-    }
-    
-    
 }
