@@ -1,0 +1,175 @@
+module opendaylight-group-types {
+    namespace "urn:opendaylight:group:types";
+    prefix group;
+
+    import ietf-inet-types {prefix inet;}
+    import ietf-yang-types {prefix yang;}
+	import opendaylight-flow-types {prefix flow-types;}
+
+    revision "2013-09-17" {
+        description "Initial revision of group service";
+    }
+
+	typedef group-ref {
+		type instance-identifier;
+	}
+	
+	grouping group-types {
+		leaf group-type {
+			type enumeration {
+				enum group-all;
+				enum group_select;
+				enum group_indirect;
+				enum group_ff;
+			}
+		}
+	}
+	
+	grouping group {
+        
+        uses group-types;       
+		
+		leaf group-id {
+            type group-ref;
+        }
+		
+		container buckets {
+			list bucket {
+				key "order";
+				leaf order {
+					type int32;
+				}
+				
+				leaf weight {
+					type uint16;
+				}
+				
+				leaf watch_port {
+					type uint32;
+				}
+				
+				leaf watch_group {
+					type uint32;
+				}
+				
+				container actions {
+					list action {
+						key "action-order";
+						leaf action-order {
+							type int32;
+						}
+            
+						uses flow-types:action;
+					}
+				}
+			}
+		}
+    }
+	
+	grouping group-statistics-request {
+		list group-stats {
+			key "group-id";			
+			
+			leaf group-id {
+				type int32;
+			}			
+		}
+	}
+	
+	grouping group-statistics {
+       		
+		leaf group-id {
+            type int32;
+		}
+		
+	    leaf ref-count {
+            type yang:counter32;
+		}
+		
+		leaf packet-count {
+            type yang:counter64;
+        } 
+		
+        leaf byte-count {
+            type yang:counter64;
+        }
+
+        container duration {
+            leaf second {
+                type yang:counter32;
+            }
+            leaf nanosecond {
+                type yang:counter32;
+            }
+        }
+		
+		container buckets {
+			list bucket-counter {
+				key "order";
+				leaf order {
+					type int32;
+				}
+				
+				leaf packet-count {
+					type yang:counter64;
+				} 
+		
+				leaf byte-count {
+					type yang:counter64;
+				}
+			}
+		}		
+    }
+
+	grouping group-statistics-reply {
+		list group-stats {
+			key "group-stats-order";
+			leaf group-stats-order {
+				type int32;
+			}
+			
+			uses group-statistics;
+		}
+	}
+	
+	grouping group-desc-stats {
+		list group-desc-stats {
+			key "order-id";			
+			
+			leaf order-id {
+				type int32;
+			}
+			
+			uses group;
+		}
+	}
+	
+    grouping group-features {
+		list group-features {
+			key "order";
+			leaf order {
+				type int32;
+			}
+			
+			uses group-types;
+			type capabilities {
+				enum select-weight;
+				enum select-liveness;
+				enum chaining;
+				enum chaining-checks;
+			}	
+
+			leaf-list max-groups {
+				type uint32;
+				description "Maximum number of groups for each type";
+				max-elements 4;
+			}
+			
+			leaf-list actions {
+				type uint32;
+				description "Bitmap number OFPAT_* that are supported";
+				max-elements 4;
+			}
+		}
+	}    
+}

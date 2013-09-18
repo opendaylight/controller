@@ -1,0 +1,49 @@
+module sal-group {
+    namespace "urn:opendaylight:group:service";
+    prefix group;
+
+    import yang-ext {prefix ext;}
+    import opendaylight-inventory {prefix inv;}
+    import ietf-inet-types {prefix inet;}
+    import opendaylight-group-types {prefix group-type;}
+
+    revision "2013-09-17" {
+        description "Initial revision of group service";
+    }        
+	
+    grouping node-group {
+        leaf node {
+            type inv:node-ref;
+        }
+        
+        uses group-type:group;
+    }
+
+    /** Base configuration structure **/
+    grouping group-update {
+        container original-group {
+            uses group-type:group;
+        }
+        container updated-group {
+            uses group-type:group;
+        }
+    }
+
+    rpc add-group {
+        input {
+            uses node-group;
+        }
+    }
+
+    rpc remove-group {
+        input {
+            uses node-group;
+        }
+    }
+
+    rpc update-group {
+        input {
+            uses node-group;
+        }
+    }     
+}
