@@ -88,7 +88,7 @@
                   <override>false</override>
                 </artfiact>
                 <artfiact>
-                  <id>org.codehaus.jettison:jettison:1.3.3</id>
+                  <id>org.codehaus.jettison:jettison:${jettison.version}</id>
                   <transitive>false</transitive>
                   <override>false</override>
                 </artfiact>
