@@ -54,11 +54,26 @@ public interface IConnectionManager {
     public Set<Node> getLocalNodes();
 
     /**
+     * @deprecated Use getLocalityStatus(Node node) instead.
+     *
      * Method to test if a node is local to a controller.
      *
-     * @return true if node is local to this controller. false otherwise.
+     * @param node The node for which the locality is being tested
+     * @return true if node is local to this controller.<br>
+     *         false if either node is not connected to this controller or
+     *         not connected to any other controllers in the cluster.
      */
     public boolean isLocal(Node node);
+
+    /**
+     * getLocalityStatus provides the tri-state connectivity status as opposed to the
+     * binary status returned by isLocal.
+     * ConnectionLocality enum that is returned by this method also includes the case of
+     * a Node not connected to any of the controllers in the cluster.
+     * @param node The node for which the locality is being verified
+     * @return ConnectionLocality
+     */
+    public ConnectionLocality getLocalityStatus(Node node);
 
     /**
      * Disconnect a Node from the controller.

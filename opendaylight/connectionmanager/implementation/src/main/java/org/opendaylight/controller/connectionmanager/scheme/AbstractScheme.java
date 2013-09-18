@@ -14,6 +14,7 @@ import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.connectionmanager.ConnectionLocality;
 import org.opendaylight.controller.connectionmanager.ConnectionMgmtScheme;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
@@ -144,6 +145,15 @@ public abstract class AbstractScheme {
         InetAddress myController = clusterServices.getMyAddress();
         Set<InetAddress> controllers = nodeConnections.get(node);
         return (controllers != null && controllers.contains(myController));
+    }
+
+    public ConnectionLocality getLocalityStatus(Node node) {
+        if (nodeConnections == null) return ConnectionLocality.NOT_CONNECTED;
+        Set<InetAddress> controllers = nodeConnections.get(node);
+        if (controllers == null || controllers.size() == 0) return ConnectionLocality.NOT_CONNECTED;
+        InetAddress myController = clusterServices.getMyAddress();
+        return controllers.contains(myController) ? ConnectionLocality.LOCAL:
+                                                    ConnectionLocality.NOT_LOCAL;
     }
 
     public Status removeNode (Node node) {

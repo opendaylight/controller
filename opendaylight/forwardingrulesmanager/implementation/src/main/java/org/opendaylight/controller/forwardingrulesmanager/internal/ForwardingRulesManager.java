@@ -39,6 +39,7 @@ import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
+import org.opendaylight.controller.connectionmanager.ConnectionLocality;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
@@ -273,7 +274,7 @@ public class ForwardingRulesManager implements
         }
 
         Node n = e.getNode();
-        if (!connectionManager.isLocal(n)) {
+        if (connectionManager.getLocalityStatus(n) == ConnectionLocality.NOT_LOCAL) {
             Callable<Future<Status>> worker = new DistributeOrderCallable(e, u, t);
             if (worker != null) {
                 Future<Future<Status>> workerRes = this.executor.submit(worker);
@@ -291,7 +292,7 @@ public class ForwardingRulesManager implements
             }
         }
 
-        logsync.trace("LOCAL Node {} so processing Entry:{} UpdateType:{}", n, e, t);
+        logsync.trace("Node {} could be local. so processing Entry:{} UpdateType:{}", n, e, t);
         return null;
     }
 
@@ -3109,7 +3110,7 @@ public class ForwardingRulesManager implements
                 return;
             }
             Node n = fei.getNode();
-            if (connectionManager.isLocal(n)) {
+            if (connectionManager.getLocalityStatus(n) == ConnectionLocality.LOCAL) {
                 logsync.trace("workOrder for fe {} processed locally", fe);
                 // I'm the controller in charge for the request, queue it for
                 // processing
