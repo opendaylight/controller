@@ -20,9 +20,9 @@
   <version>0.4.0-SNAPSHOT</version>
   <pluginRepositories>
     <pluginRepository>
-      <id>central2</id>
-      <name>central2</name>
-      <url>http://repo2.maven.org/maven2</url>
+      <id>central</id>
+      <name>maven repo1</name>
+      <url>http://repo1.maven.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
