@@ -168,7 +168,8 @@ public enum IPProtocols {
      WESP("WESP",141),
      ROHC("ROHC",142);
      */
-    private static final String regexNumberString = "^[0-9]+$";
+    private static final String regexDecimalString = "^[0-9]{3}$";
+    private static final String regexHexString = "^(0(x|X))[0-9a-fA-F]{2}$";
     private String protocolName;
     private int protocolNumber;
 
@@ -215,7 +216,10 @@ public enum IPProtocols {
     }
 
     public static short getProtocolNumberShort(String name) {
-        if (name.matches(regexNumberString)) {
+        if (name.matches(regexHexString)) {
+            return Short.valueOf(Short.decode(name));
+        }
+        if (name.matches(regexDecimalString)) {
             return Short.valueOf(name);
         }
         for (IPProtocols proto : IPProtocols.values()) {
@@ -227,7 +231,10 @@ public enum IPProtocols {
     }
 
     public static int getProtocolNumberInt(String name) {
-        if (name.matches(regexNumberString)) {
+        if (name.matches(regexHexString)) {
+            return Integer.valueOf(Integer.decode(name));
+        }
+        if (name.matches(regexDecimalString)) {
             return Integer.valueOf(name);
         }
         for (IPProtocols proto : IPProtocols.values()) {
@@ -239,7 +246,10 @@ public enum IPProtocols {
     }
 
     public static byte getProtocolNumberByte(String name) {
-        if (name.matches(regexNumberString)) {
+        if (name.matches(regexHexString)) {
+            return Integer.valueOf(Integer.decode(name)).byteValue();
+        }
+        if (name.matches(regexDecimalString)) {
             return Integer.valueOf(name).byteValue();
         }
         for (IPProtocols proto : IPProtocols.values()) {
