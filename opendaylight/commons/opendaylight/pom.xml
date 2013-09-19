@@ -55,13 +55,14 @@
     <sample-toaster.version>1.0-SNAPSHOT</sample-toaster.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <commons.lang.version>3.1</commons.lang.version>
+    <jacoco.version>0.5.3.201107060350</jacoco.version>
   </properties>
 
   <pluginRepositories>
     <pluginRepository>
-      <id>central2</id>
-      <name>central2</name>
-      <url>http://repo2.maven.org/maven2</url>
+      <id>central</id>
+      <name>maven repo1</name>
+      <url>http://repo1.maven.org/maven2</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -205,17 +206,6 @@
       <id>ebr-bundles-external</id>
       <name>ebr-bundles-external</name>
       <url>${nexusproxy}/repositories/ebr-bundles-external/</url>
-    </repository>
-    <repository>
-      <id>central2</id>
-      <name>central2</name>
-      <url>http://repo2.maven.org/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-          <enabled>true</enabled>
-      </releases>
     </repository>
     <repository>
       <id>central</id>
@@ -438,9 +428,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
-        <configuration>
-          <argLine>${testvm.argLine}</argLine>
-        </configuration>
       </plugin>
     </plugins>
     <pluginManagement>
@@ -650,6 +637,11 @@
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
       <version>1.2.2</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-net</groupId>
+        <artifactId>commons-net</artifactId>
+        <version>3.0.1</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
@@ -1020,6 +1012,26 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
       <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm-all</artifactId>
+        <version>4.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.persistence</groupId>
+        <artifactId>org.eclipse.persistence.moxy</artifactId>
+        <version>2.5.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.persistence</groupId>
+        <artifactId>org.eclipse.persistence.core</artifactId>
+        <version>2.5.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.persistence</groupId>
+        <artifactId>org.eclipse.persistence.antlr</artifactId>
+        <version>2.5.0</version>
     </dependency>
   </dependencies>
 </project>

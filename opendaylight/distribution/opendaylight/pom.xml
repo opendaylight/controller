@@ -74,7 +74,6 @@
     <module>../../statisticsmanager/api</module>
     <module>../../statisticsmanager/implementation</module>
     <module>../../statisticsmanager/integrationtest</module>
-    <module>../../topologymanager</module>
     <module>../../usermanager/api</module>
     <module>../../usermanager/implementation</module>
     <module>../../connectionmanager/api</module>
@@ -103,6 +102,11 @@
     <module>../../web/devices</module>
     <module>../../web/troubleshoot</module>
     <module>../../web/topology</module>
+
+    <!--  Neutron -->
+    <module>../../networkconfiguration/neutron</module>
+    <module>../../networkconfiguration/neutron/implementation</module>
+    <module>../../northbound/networkconfiguration/neutron</module>
 
     <!-- Northbound bundles -->
     <module>../../northbound/commons</module>
