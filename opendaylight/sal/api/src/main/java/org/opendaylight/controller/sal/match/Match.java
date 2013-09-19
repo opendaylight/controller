@@ -441,7 +441,17 @@ public class Match implements Cloneable, Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((fields == null) ? 0 : fields.hashCode());
+        if (this.fields == null) {
+            result = prime * result;
+        } else {
+            int sum = 0;
+            for (MatchType field : this.fields.keySet()) {
+                MatchField f = this.fields.get(field);
+                sum = sum + ((field==null ? 0 : field.calculateConsistentHashCode()) ^
+                             (f==null ? 0 : f.hashCode()));
+            }
+            result = prime * result + sum;
+        }
         result = prime * result + matches;
         return result;
     }

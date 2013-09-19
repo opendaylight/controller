@@ -28,4 +28,12 @@ public enum UpdateType {
     public String getName() {
         return this.name;
     }
+
+    public int calculateConsistentHashCode() {
+        if (this.name != null) {
+            return this.name.hashCode();
+        } else {
+            return 0;
+        }
+    }
 }

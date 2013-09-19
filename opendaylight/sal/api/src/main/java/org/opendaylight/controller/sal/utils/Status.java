@@ -123,7 +123,7 @@ public class Status implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((code == null) ? 0 : code.hashCode());
+        result = prime * result + ((code == null) ? 0 : code.calculateConsistentHashCode());
         return result;
     }
 
