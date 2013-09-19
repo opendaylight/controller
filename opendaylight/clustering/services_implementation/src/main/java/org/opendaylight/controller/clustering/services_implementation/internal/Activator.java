@@ -55,7 +55,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public Object[] getGlobalImplementations() {
-        Object[] res = { ClusterManager.class, ClusterGlobalManager.class };
+        Object[] res = { ClusterManager.class, ClusterGlobalManager.class, ClusterManagerCLI.class };
         return res;
     }
 
