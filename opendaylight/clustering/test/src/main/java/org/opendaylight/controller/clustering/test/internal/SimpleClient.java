@@ -344,7 +344,13 @@ public class SimpleClient implements CommandProvider {
                 containerName, cacheName);
         if (c != null) {
             ci.println("\nAdd mapping " + key + " = " + sValue);
-            c.put(key, new StringContainer(sValue));
+            try {
+                c.put(key, new StringContainer(sValue));
+            } catch (Exception e) {
+                ci.println("Exception raised:" + e);
+                ci.println("\tStacktrace:");
+                e.printStackTrace();
+            }
         } else {
             ci.println("Cache " + cacheName + " on container " + containerName
                     + " not existant!");
