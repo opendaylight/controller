@@ -323,10 +323,10 @@ public class Node implements Serializable {
     @Override
     public String toString() {
         if (this.nodeType.equals(NodeIDType.OPENFLOW)) {
-            return this.nodeType.toString() + "|"
+            return this.nodeType + "|"
                 + HexEncode.longToHexString((Long) this.nodeID);
         } else {
-            return this.nodeType.toString() + "|" + this.nodeID.toString();
+            return this.nodeType + "|" + this.nodeID.toString();
         }
     }
 

@@ -292,7 +292,7 @@ public class NodeTable implements Serializable {
     }
 
     public String getNodeTableIdAsString() {
-        return this.nodeTableType.toString() + "|"
+        return this.nodeTableType + "|"
                 + this.nodeTableID.toString();
     }
 
