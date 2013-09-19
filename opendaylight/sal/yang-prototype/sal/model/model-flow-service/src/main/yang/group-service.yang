@@ -7,10 +7,10 @@ module sal-group {
     import ietf-inet-types {prefix inet;}
     import opendaylight-group-types {prefix group-type;}
 
-    revision "2013-09-17" {
+    revision "2013-09-18" {
         description "Initial revision of group service";
     }        
-	
+    
     grouping node-group {
         leaf node {
             type inv:node-ref;
