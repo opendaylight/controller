@@ -9,6 +9,8 @@
 
 package org.opendaylight.controller.sal.core;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -16,6 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * The class represents the Name property of an element.
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.NONE)
 @SuppressWarnings("serial")
 public class Name extends Property {
     @XmlElement(name="value")

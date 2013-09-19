@@ -208,47 +208,34 @@ public class NorthboundIT {
         Assert.assertEquals(nodeId, (Integer) nodeInfo.getInt("id"));
         Assert.assertEquals(nodeType, nodeInfo.getString("type"));
 
-        JSONArray propsArray = node.getJSONArray("properties");
+        JSONObject properties = node.getJSONObject("properties");
 
-        for (int j = 0; j < propsArray.length(); j++) {
-            JSONObject properties = propsArray.getJSONObject(j);
-            String propName = properties.getString("name");
-            if (propName.equals("timeStamp")) {
-                if (timestamp == null || timestampName == null) {
-                    Assert.assertFalse("Timestamp exist", true);
-                } else {
-                    Assert.assertEquals(timestamp, (Integer) properties.getInt("value"));
-                    Assert.assertEquals(timestampName, properties.getString("timestampName"));
-                }
-            }
-            if (propName.equals("actions")) {
-                if (actionsValue == null) {
-                    Assert.assertFalse("Actions exist", true);
-                } else {
-                    Assert.assertEquals(actionsValue, (Integer) properties.getInt("value"));
-                }
-            }
-            if (propName.equals("capabilities")) {
-                if (capabilitiesValue == null) {
-                    Assert.assertFalse("Capabilities exist", true);
-                } else {
-                    Assert.assertEquals(capabilitiesValue, (Integer) properties.getInt("value"));
-                }
-            }
-            if (propName.equals("tables")) {
-                if (tablesValue == null) {
-                    Assert.assertFalse("Tables exist", true);
-                } else {
-                    Assert.assertEquals(tablesValue, (Integer) properties.getInt("value"));
-                }
-            }
-            if (propName.equals("buffers")) {
-                if (buffersValue == null) {
-                    Assert.assertFalse("Buffers exist", true);
-                } else {
-                    Assert.assertEquals(buffersValue, (Integer) properties.getInt("value"));
-                }
-            }
+        if (timestamp == null || timestampName == null) {
+            Assert.assertFalse(properties.has("timeStamp"));
+        } else {
+            Assert.assertEquals(timestamp, (Integer) properties.getJSONObject("timeStamp").getInt("value"));
+            Assert.assertEquals(timestampName, properties.getJSONObject("timeStamp").getString("name"));
+        }
+        if (actionsValue == null) {
+            Assert.assertFalse(properties.has("actions"));
+        } else {
+            Assert.assertEquals(actionsValue, (Integer) properties.getJSONObject("actions").getInt("value"));
+        }
+        if (capabilitiesValue == null) {
+            Assert.assertFalse(properties.has("capabilities"));
+        } else {
+            Assert.assertEquals(capabilitiesValue,
+                    (Integer) properties.getJSONObject("capabilities").getInt("value"));
+        }
+        if (tablesValue == null) {
+            Assert.assertFalse(properties.has("tables"));
+        } else {
+            Assert.assertEquals(tablesValue, (Integer) properties.getJSONObject("tables").getInt("value"));
+        }
+        if (buffersValue == null) {
+            Assert.assertFalse(properties.has("buffers"));
+        } else {
+            Assert.assertEquals(buffersValue, (Integer) properties.getJSONObject("buffers").getInt("value"));
         }
     }
 
@@ -258,37 +245,27 @@ public class NorthboundIT {
 
         JSONObject nodeConnector = nodeConnectorProperties.getJSONObject("nodeconnector");
         JSONObject node = nodeConnector.getJSONObject("node");
+        JSONObject properties = nodeConnectorProperties.getJSONObject("properties");
 
         Assert.assertEquals(ncId, (Integer) nodeConnector.getInt("id"));
         Assert.assertEquals(ncType, nodeConnector.getString("type"));
         Assert.assertEquals(nodeId, (Integer) node.getInt("id"));
         Assert.assertEquals(nodeType, node.getString("type"));
-
-        JSONArray propsArray = nodeConnectorProperties.getJSONArray("properties");
-        for (int j = 0; j < propsArray.length(); j++) {
-            JSONObject properties = propsArray.getJSONObject(j);
-            String propName = properties.getString("name");
-            if (propName.equals("state")) {
-                if (state == null) {
-                    Assert.assertFalse("State exist", true);
-                } else {
-                    Assert.assertEquals(state, (Integer) properties.getInt("value"));
-                }
-            }
-            if (propName.equals("capabilities")) {
-                if (capabilities == null) {
-                    Assert.assertFalse("Capabilities exist", true);
-                } else {
-                    Assert.assertEquals(capabilities, (Integer) properties.getInt("value"));
-                }
-            }
-            if (propName.equals("bandwidth")) {
-                if (bandwidth == null) {
-                    Assert.assertFalse("bandwidth exist", true);
-                } else {
-                    Assert.assertEquals(bandwidth, (Integer) properties.getInt("value"));
-                }
-            }
+        if (state == null) {
+            Assert.assertFalse(properties.has("state"));
+        } else {
+            Assert.assertEquals(state, (Integer) properties.getJSONObject("state").getInt("value"));
+        }
+        if (capabilities == null) {
+            Assert.assertFalse(properties.has("capabilities"));
+        } else {
+            Assert.assertEquals(capabilities,
+                    (Integer) properties.getJSONObject("capabilities").getInt("value"));
+        }
+        if (bandwidth == null) {
+            Assert.assertFalse(properties.has("bandwidth"));
+        } else {
+            Assert.assertEquals(bandwidth, (Integer) properties.getJSONObject("bandwidth").getInt("value"));
         }
     }
 
@@ -610,19 +587,8 @@ public class NorthboundIT {
         json = new JSONObject(jt);
         node = getJsonInstance(json, "nodeProperties", nodeId_1);
         Assert.assertNotNull(node);
-
-        JSONArray propsArray = node.getJSONArray("properties");
-
-        for (int j = 0; j < propsArray.length(); j++) {
-            JSONObject properties = propsArray.getJSONObject(j);
-            String propName = properties.getString("name");
-            if (propName.equals("tier")) {
-                Assert.assertEquals(1001, properties.getInt("value"));
-            }
-            if (propName.equals("description")) {
-                Assert.assertEquals("node1", properties.getString("value"));
-            }
-        }
+        Assert.assertEquals(1001, node.getJSONObject("properties").getJSONObject("tier").getInt("value"));
+        Assert.assertEquals("node1", node.getJSONObject("properties").getJSONObject("description").getString("value"));
 
         // Test delete nodeConnector property
         // Delete state property of nodeconnector1
@@ -1229,26 +1195,10 @@ public class NorthboundIT {
 
             JSONObject headNC = edge.getJSONObject("headNodeConnector");
             JSONObject headNode = headNC.getJSONObject("node");
-
-            JSONArray propsArray = edgeProp.getJSONArray("properties");
-
-            JSONObject bandw = null;
-            JSONObject stt = null;
-            JSONObject ltc = null;
-
-            for (int j = 0; j < propsArray.length(); j++) {
-                JSONObject props = propsArray.getJSONObject(j);
-                String propName = props.getString("name");
-                if (propName.equals("bandwidth")) {
-                    bandw = props;
-                }
-                if (propName.equals("state")) {
-                    stt = props;
-                }
-                if (propName.equals("latency")) {
-                    ltc = props;
-                }
-            }
+            JSONObject Props = edgeProp.getJSONObject("properties");
+            JSONObject bandw = Props.getJSONObject("bandwidth");
+            JSONObject stt = Props.getJSONObject("state");
+            JSONObject ltc = Props.getJSONObject("latency");
 
             if (headNC.getInt("id") == headNC1_nodeConnId) {
                 Assert.assertEquals(headNode.getString("type"), nodeType);
@@ -1280,7 +1230,6 @@ public class NorthboundIT {
         Integer nodeId_1 = 3366;
         String nodeConnectorType_1 = "STUB";
         Integer nodeConnectorId_1 = 12;
-
         String nodeType_2 = "STUB";
         Integer nodeId_2 = 4477;
         String nodeConnectorType_2 = "STUB";
@@ -1369,7 +1318,6 @@ public class NorthboundIT {
             }
         }
     }
-
     // Configure the OSGi container
     @Configuration
     public Option[] config() {

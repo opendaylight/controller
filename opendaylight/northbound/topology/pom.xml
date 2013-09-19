@@ -54,6 +54,7 @@
               org.opendaylight.controller.usermanager,
               org.opendaylight.controller.topologymanager,
               com.sun.jersey.spi.container.servlet,
+              org.codehaus.jackson.annotate,
               javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind,
