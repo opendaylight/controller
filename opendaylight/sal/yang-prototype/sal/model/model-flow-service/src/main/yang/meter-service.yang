@@ -1,0 +1,49 @@
+module sal-meter {
+    namespace "urn:opendaylight:meter:service";
+    prefix meter;
+
+    import yang-ext {prefix ext;}
+    import opendaylight-inventory {prefix inv;}
+    import ietf-inet-types {prefix inet;}
+    import opendaylight-meter-types {prefix meter-type;}
+
+    revision "2013-09-18" {
+        description "Initial revision of meter service";
+    }        
+    
+    metering node-meter {
+        leaf node {
+            type inv:node-ref;
+        }
+        
+        uses meter-type:meter;
+    }
+
+    /** Base configuration structure **/
+    metering meter-update {
+        container original-meter {
+            uses meter-type:meter;
+        }
+        container updated-meter {
+            uses meter-type:meter;
+        }
+    }
+
+    rpc add-meter {
+        input {
+            uses node-meter;
+        }
+    }
+
+    rpc remove-meter {
+        input {
+            uses node-meter;
+        }
+    }
+
+    rpc update-meter {
+        input {
+            uses node-meter;
+        }
+    }     
+}

@@ -1,0 +1,213 @@
+module opendaylight-meter-types {
+    namespace "urn:opendaylight:meter:types";
+    prefix meter;
+
+    import ietf-inet-types {prefix inet;}
+    import ietf-yang-types {prefix yang;}
+
+
+    revision "2013-09-18" {
+        description "Initial revision of meter service";
+    }
+
+    typedef meter-ref {
+            type instance-identifier;
+    }
+    
+    grouping meter-flags {
+        leaf flags {
+            type enumeration {
+                enum meter-kbps;
+                enum meter_pktps;
+                enum meter_burst;
+                enum meter_stats;
+            }
+        }
+    }
+    
+    grouping meter-band-type {
+        leaf flags {
+            type enumeration {
+                enum ofpmbt-drop;
+                enum ofpmbt-dscp-remark;
+                enum ofpmbt-experimenter;               
+            }
+        }
+    }
+    
+    grouping band-type {
+        choice band-type {
+            case drop {
+                leaf rate {
+                    type uint32;
+                }
+                
+                leaf burst-size {
+                    type uint32;
+                }
+            }
+
+            case dscp-remark {
+                leaf rate {
+                    type uint32;
+                }
+                
+                leaf burst-size {
+                    type uint32;
+                }
+                
+                leaf perc_level {
+                    type uint8;
+                }
+            }
+            
+            case experimenter {
+                leaf rate {
+                    type uint32;
+                }
+                
+                leaf burst-size {
+                    type uint32;
+                }
+                
+                leaf experimenter {
+                    type uint32;
+                }
+            }
+        }
+    }
+    
+    grouping meter {
+        
+        uses meter-flags;        
+        
+        leaf meter-id {
+            type meter-ref;
+        }
+        
+        container meter-band-headers {
+            list meter-band-header {
+                key "order";
+                leaf order {
+                    type int32;
+                }
+                
+                container meter-band-types {
+                    uses meter-band-type;
+                }
+            
+                leaf burst-size {
+                    type uint32;
+                }
+                uses band-type;
+            }
+        }
+    }
+    
+    grouping meter-stats-config-request {
+        list meter-stats {
+            key "meter-id";         
+            
+            leaf meter-id {
+                type int32;
+            }           
+        }
+    }
+    
+    grouping meter-statistics {
+            
+        leaf meter-id {
+            type int32;
+        }
+        
+        leaf flow-count {
+            type yang:counter32;
+        }
+        
+        leaf packet-in-count {
+            type yang:counter64;
+        } 
+        
+        leaf byte-in-count {
+            type yang:counter64;
+        }
+
+        container duration {
+            leaf second {
+                type yang:counter32;
+            }
+            leaf nanosecond {
+                type yang:counter32;
+            }
+        }
+        
+        container meter-band-stats {
+            list band-stat {
+                key "order";
+                leaf order {
+                    type int32;
+                }
+            
+                leaf packet-band-count {
+                    type yang:counter64;
+                } 
+        
+                leaf byte-band-count {
+                    type yang:counter64;
+                }
+            }       
+        }
+    }
+
+    grouping meter-statistics-reply {
+        list meter-stats {
+            key "meter-stats-order";
+            leaf meter-stats-order {
+                type int32;
+            }
+            uses meter-statistics;
+        }
+    }
+    
+    grouping meter-config-stats {
+        list meter-config-stats {
+            key "meter-config-order";
+            
+            leaf meter-config-order {
+                type int32;
+            }
+            
+            uses meter;
+        } 
+    }
+    
+    grouping meter-features {
+        list meter-features {
+            key "meter-feature-order";
+            
+            leaf meter-feature-order {
+                type yang:counter32;
+            }          
+            
+            leaf max_meter {
+                type yang:counter32;
+            }
+            
+            leaf band_types {
+                type yang:counter32;
+            }
+            
+            leaf capabilities {
+                type yang:counter32;
+            }
+            
+            leaf max_bands {
+                type uint8;
+            }
+            
+            leaf max_color {
+                type uint8;
+            }
+        }
+    }    
+}
