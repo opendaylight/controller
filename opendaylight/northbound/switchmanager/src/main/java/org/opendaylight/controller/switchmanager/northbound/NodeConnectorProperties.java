@@ -9,6 +9,9 @@
 
 package org.opendaylight.controller.switchmanager.northbound;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElementRef;
@@ -17,6 +20,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 
@@ -31,6 +36,7 @@ public class NodeConnectorProperties {
     private NodeConnector nodeconnector;
     @XmlElementRef
     @XmlElementWrapper
+    @JsonIgnore
     private Set<Property> properties;
 
     // JAXB required constructor
@@ -42,6 +48,19 @@ public class NodeConnectorProperties {
     public NodeConnectorProperties(NodeConnector nodeconnector, Set<Property> properties) {
         this.nodeconnector = nodeconnector;
         this.properties = properties;
+    }
+
+    @JsonProperty(value="properties")
+    public Map<String, Property> getMapProperties() {
+        Map<String, Property> map = new HashMap<String, Property>();
+        for (Property p : properties) {
+            map.put(p.getName(), p);
+        }
+        return map;
+    }
+
+    public void setMapProperties(Map<String, Property> propertiesMap) {
+        this.properties = new HashSet<Property>(propertiesMap.values());
     }
 
     public Set<Property> getProperties() {

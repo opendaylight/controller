@@ -9,6 +9,8 @@
 
 package org.opendaylight.controller.sal.core;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -21,6 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * seconds.
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.NONE)
 @SuppressWarnings("serial")
 public class AdvertisedBandwidth extends Bandwidth {
         public static final String AdvertisedBandwidthPropName = "advertisedBandwidth";

@@ -1,5 +1,7 @@
 package org.opendaylight.controller.sal.core;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -8,6 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @SuppressWarnings("serial")
+@XmlAccessorType(XmlAccessType.NONE)
 public class Description extends Property {
     @XmlElement(name="value")
     private String descriptionValue;

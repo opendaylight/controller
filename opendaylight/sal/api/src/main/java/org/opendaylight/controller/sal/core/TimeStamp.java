@@ -11,6 +11,8 @@ package org.opendaylight.controller.sal.core;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -25,11 +27,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  * to qualify what are we talking about
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.NONE)
 public class TimeStamp extends Property {
     private static final long serialVersionUID = 1L;
     @XmlElement(name = "value")
     private long timestamp;
-    @XmlElement(name = "timestampName")
+    @XmlElement(name = "name")
     private String timestampName;
 
     public static final String TimeStampPropName = "timeStamp";
