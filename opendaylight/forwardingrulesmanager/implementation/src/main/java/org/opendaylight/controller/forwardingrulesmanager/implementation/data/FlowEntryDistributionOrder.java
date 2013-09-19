@@ -79,7 +79,7 @@ public final class FlowEntryDistributionOrder implements Serializable {
         int result = 1;
         result = (prime * result) + ((entry == null) ? 0 : entry.hashCode());
         result = (prime * result) + ((requestorController == null) ? 0 : requestorController.hashCode());
-        result = (prime * result) + ((upType == null) ? 0 : upType.hashCode());
+        result = (prime * result) + ((upType == null) ? 0 : upType.calculateConsistentHashCode());
         return result;
     }
 

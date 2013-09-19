@@ -75,4 +75,12 @@ public enum ActionType {
             return true;
         }
     }
+
+    public int calculateConsistentHashCode() {
+        if (this.id != null) {
+            return this.id.hashCode();
+        } else {
+            return 0;
+        }
+    }
 }

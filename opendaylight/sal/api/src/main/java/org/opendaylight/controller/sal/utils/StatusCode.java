@@ -41,8 +41,16 @@ public enum StatusCode {
         /**
          * Prints the description associated to the code value
          */
+        @Override
         public String toString() {
                 return description;
         }
 
+    public int calculateConsistentHashCode() {
+        if (this.description != null) {
+            return this.description.hashCode();
+        } else {
+            return 0;
+        }
+    }
 }
