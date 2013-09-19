@@ -235,7 +235,7 @@ public enum MatchType {
     public int hashCode(Object v, Object m) {
         final int prime = 31;
         int result = 1;
-        result = prime * result + this.hashCode();
+        result = prime * result + this.calculateConsistentHashCode();
 
         switch (this) {
         case DL_SRC:
@@ -314,6 +314,14 @@ public enum MatchType {
                     .equals(NetUtils.getSubnetPrefix(otherIP, otherMaskLen));
         default:
             return (this.equalValues(value1, value2) && this.equalMasks(mask1, mask2));
+        }
+    }
+
+    public int calculateConsistentHashCode() {
+        if (this.id != null) {
+            return this.id.hashCode();
+        } else {
+            return 0;
         }
     }
 }
