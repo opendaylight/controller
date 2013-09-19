@@ -655,6 +655,14 @@ public class FlowConfig implements Serializable {
         return ((to >= 0) && (to <= 0xffff));
     }
 
+    public boolean isProtocolValid(String protocol) {
+        int protocol_number = IPProtocols.getProtocolNumberInt(protocol);
+        if (protocol_number < 1 || protocol_number > 255) {
+            return false;
+        }
+        return true;
+    }
+
     private Status conflictWithContainerFlow(IContainer container) {
         // Return true if it's default container
         if (container.getName().equals(GlobalConstants.DEFAULT.toString())) {
@@ -760,6 +768,10 @@ public class FlowConfig implements Serializable {
                         etype = EtherIPType.V6;
                     }
                 }
+            }
+
+            if ((protocol != null) && !isProtocolValid(protocol)) {
+                return new Status(StatusCode.BADREQUEST, String.format("Protocol %s is not valid", protocol));
             }
 
             if ((tosBits != null) && !isTOSBitsValid(tosBits)) {
