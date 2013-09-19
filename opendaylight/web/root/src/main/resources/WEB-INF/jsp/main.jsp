@@ -67,6 +67,7 @@
    </div>
    <div class="span3">
     <div id="toolbar" class="btn-group">
+    <input type="hidden" id="currentuser" value="${username}" data-role="${role}">
      <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
       <div class="icon-user"></div> ${username} <span class="caret"></span>
      </a>
