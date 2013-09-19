@@ -115,6 +115,8 @@
     <module>../../northbound/switchmanager</module>
     <module>../../northbound/containermanager</module>
     <module>../../northbound/networkconfiguration/bridgedomain</module>
+    <module>../../networkconfiguration/neutron</module>
+    <module>../../northbound/networkconfiguration/neutron</module>
 
     <!-- Northbound integration tests -->
     <module>../../northbound/integrationtest</module>
