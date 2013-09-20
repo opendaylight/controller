@@ -35,6 +35,9 @@
             org.opendaylight.controller.sal.core,
             org.apache.felix.dm
           </Import-Package>
+          <Export-Package>
+            org.opendaylight.controller.clustering.test.internal
+          </Export-Package>
           <Bundle-Activator>
             org.opendaylight.controller.clustering.test.internal.Activator
           </Bundle-Activator>
