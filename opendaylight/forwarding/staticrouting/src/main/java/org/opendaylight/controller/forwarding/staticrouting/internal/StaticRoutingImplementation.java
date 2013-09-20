@@ -16,7 +16,6 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -99,11 +98,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     @Override
     public ConcurrentMap<String, StaticRouteConfig> getStaticRouteConfigs() {
         return staticRouteConfigs;
-    }
-
-    public void setStaticRouteConfigs(
-            ConcurrentMap<String, StaticRouteConfig> staticRouteConfigs) {
-        this.staticRouteConfigs = staticRouteConfigs;
     }
 
     @Override
@@ -209,10 +203,13 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
     }
 
     private class NotifyStaticRouteWorker implements Callable<Object> {
+
+        private String name;
         private StaticRoute staticRoute;
         private boolean added;
 
-        public NotifyStaticRouteWorker(StaticRoute s, boolean update) {
+        public NotifyStaticRouteWorker(String name, StaticRoute s, boolean update) {
+            this.name = name;
             this.staticRoute = s;
             this.added = update;
         }
@@ -241,6 +238,10 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
                 if (host != null) {
                     log.debug("Next hop {} is found", nh.getHostAddress());
                     staticRoute.setHost(host);
+                    // static route object has changed
+                    // put the changed object back in the cache
+                    // for it to sync
+                    staticRoutes.put(name, staticRoute);
                     notifyStaticRouteUpdate(staticRoute, added);
                 } else {
                     log.debug("Next hop {}  is still not present, try again later", nh.getHostAddress());
@@ -250,8 +251,8 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         }
     }
 
-    private void checkAndUpdateListeners(StaticRoute staticRoute, boolean added) {
-        NotifyStaticRouteWorker worker = new NotifyStaticRouteWorker(staticRoute, added);
+    private void checkAndUpdateListeners(String name, StaticRoute staticRoute, boolean added) {
+        NotifyStaticRouteWorker worker = new NotifyStaticRouteWorker(name, staticRoute, added);
         try {
             executor.submit(worker);
         } catch (Exception e) {
@@ -263,17 +264,22 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         if (host == null) {
             return;
         }
-        for (StaticRoute s : staticRoutes.values()) {
-            if (s.getType() == StaticRoute.NextHopType.SWITCHPORT) {
+        for (Map.Entry<String, StaticRoute> s : staticRoutes.entrySet()) {
+            StaticRoute route = s.getValue();
+            if (route.getType() == StaticRoute.NextHopType.SWITCHPORT) {
                 continue;
             }
-            if (s.getNextHopAddress().equals(host.getNetworkAddress())) {
+            if (route.getNextHopAddress().equals(host.getNetworkAddress())) {
                 if (added) {
-                    s.setHost(host);
+                    route.setHost(host);
                 } else {
-                    s.setHost(null);
+                    route.setHost(null);
                 }
-                notifyStaticRouteUpdate(s, added);
+                // static route object has changed
+                // put the changed object back in the cache
+                // for it to sync
+                staticRoutes.put(s.getKey(), route);
+                notifyStaticRouteUpdate(route, added);
             }
         }
     }
@@ -384,7 +390,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         staticRouteConfigs.put(config.getName(), config);
 
         // Notify
-        checkAndUpdateListeners(sRoute, true);
+        checkAndUpdateListeners(config.getName(), sRoute, true);
         return status;
     }
 
@@ -393,7 +399,7 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         staticRouteConfigs.remove(name);
         StaticRoute sRoute = staticRoutes.remove(name);
         if (sRoute != null) {
-            checkAndUpdateListeners(sRoute, false);
+            checkAndUpdateListeners(name, sRoute, false);
             return new Status(StatusCode.SUCCESS, null);
         }
         return new Status(StatusCode.NOTFOUND,
@@ -448,10 +454,11 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
         gatewayProbeTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                for (StaticRoute s : staticRoutes.values()) {
-                    if ((s.getType() == StaticRoute.NextHopType.IPADDRESS)
-                            && s.getHost() == null) {
-                        checkAndUpdateListeners(s, true);
+                for (Map.Entry<String, StaticRoute> s : staticRoutes.entrySet()) {
+                    StaticRoute route = s.getValue();
+                    if ((route.getType() == StaticRoute.NextHopType.IPADDRESS)
+                            && route.getHost() == null) {
+                        checkAndUpdateListeners(s.getKey(), route, true);
                     }
                 }
             }
