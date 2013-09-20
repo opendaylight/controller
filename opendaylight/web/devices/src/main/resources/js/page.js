@@ -1326,6 +1326,7 @@ one.f.switchmanager.spanPortConfig = {
             var $label = one.lib.form.label("Node");
             var $select = one.lib.form.select.create(nodes);
             one.lib.form.select.prepend($select, { '' : 'Please Select a Node' });
+            $select.val($select.find("option:first").val());
             $select.attr('id', one.f.switchmanager.spanPortConfig.id.modal.form.nodes);
             
             // bind onchange
