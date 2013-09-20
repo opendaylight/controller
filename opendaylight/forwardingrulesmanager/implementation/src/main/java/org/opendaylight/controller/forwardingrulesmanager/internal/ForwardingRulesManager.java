@@ -57,6 +57,7 @@ import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.PopVlan;
+import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.IContainerListener;
@@ -102,7 +103,7 @@ public class ForwardingRulesManager implements
         IConfigurationContainerAware,
         IInventoryListener,
         IObjectReader,
-        ICacheUpdateAware,
+        ICacheUpdateAware<Object,Object>,
         CommandProvider,
         IFlowProgrammerListener {
     private static final String NODEDOWN = "Node is Down";
@@ -1312,7 +1313,6 @@ public class ForwardingRulesManager implements
         retrieveCaches();
     }
 
-    @SuppressWarnings("deprecation")
     private void allocateCaches() {
         if (this.clusterContainerService == null) {
             log.warn("Un-initialized clusterContainerService, can't create cache");
@@ -1368,7 +1368,7 @@ public class ForwardingRulesManager implements
         }
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         ConcurrentMap<?, ?> map;
 
@@ -2174,7 +2174,99 @@ public class ForwardingRulesManager implements
 
     @Override
     public void notifyNodeConnector(NodeConnector nodeConnector, UpdateType type, Map<String, Property> propMap) {
+        boolean updateStaticFlowCluster = false;
 
+        switch (type) {
+        case ADDED:
+            break;
+        case CHANGED:
+            Config config = (propMap == null) ? null : (Config) propMap.get(Config.ConfigPropName);
+            if (config != null) {
+                switch (config.getValue()) {
+                case Config.ADMIN_DOWN:
+                    log.trace("Port {} is administratively down: uninstalling interested flows", nodeConnector);
+                    updateStaticFlowCluster = removeFlowsOnNodeConnectorDown(nodeConnector);
+                    break;
+                case Config.ADMIN_UP:
+                    log.trace("Port {} is administratively up: installing interested flows", nodeConnector);
+                    updateStaticFlowCluster = installFlowsOnNodeConnectorUp(nodeConnector);
+                    break;
+                case Config.ADMIN_UNDEF:
+                    break;
+                default:
+                }
+            }
+            break;
+        case REMOVED:
+            // This is the case where a switch port is removed from the SDN agent space
+            log.trace("Port {} was removed from our control: uninstalling interested flows", nodeConnector);
+            updateStaticFlowCluster = removeFlowsOnNodeConnectorDown(nodeConnector);
+            break;
+        default:
+
+        }
+
+        if (updateStaticFlowCluster) {
+            refreshClusterStaticFlowsStatus(nodeConnector.getNode());
+        }
+    }
+
+    /*
+     * It goes through the static flows configuration, it identifies the ones
+     * which have the specified node connector as input or output port and
+     * install them on the network node if they are marked to be installed in
+     * hardware and their status shows they were not installed yet
+     */
+    private boolean installFlowsOnNodeConnectorUp(NodeConnector nodeConnector) {
+        boolean updated = false;
+        List<FlowConfig> flowConfigForNode = getStaticFlows(nodeConnector.getNode());
+        for (FlowConfig flowConfig : flowConfigForNode) {
+            if (doesFlowContainNodeConnector(flowConfig.getFlow(), nodeConnector)) {
+                if (flowConfig.installInHw() && !flowConfig.getStatus().equals(SUCCESS)) {
+                    Status status = this.installFlowEntry(flowConfig.getFlowEntry());
+                    if (!status.isSuccess()) {
+                        flowConfig.setStatus(status.getDescription());
+                    } else {
+                        flowConfig.setStatus(SUCCESS);
+                    }
+                    updated = true;
+                }
+            }
+        }
+        return updated;
+    }
+
+    /*
+     * Remove from the network node all the flows which have the specified node
+     * connector as input or output port. If any of the flow entry is a static
+     * flow, it updates the correspondent configuration.
+     */
+    private boolean removeFlowsOnNodeConnectorDown(NodeConnector nodeConnector) {
+        boolean updated = false;
+        List<FlowEntryInstall> nodeFlowEntries = nodeFlows.get(nodeConnector.getNode());
+        if (nodeFlowEntries == null) {
+            return updated;
+        }
+        for (FlowEntryInstall fei : new ArrayList<FlowEntryInstall>(nodeFlowEntries)) {
+            if (doesFlowContainNodeConnector(fei.getInstall().getFlow(), nodeConnector)) {
+                Status status = this.removeEntryInternal(fei, true);
+                if (!status.isSuccess()) {
+                    continue;
+                }
+                /*
+                 * If the flow entry is a static flow, then update its
+                 * configuration
+                 */
+                if (fei.getGroupName().equals(FlowConfig.STATICFLOWGROUP)) {
+                    FlowConfig flowConfig = getStaticFlow(fei.getFlowName(), fei.getNode());
+                    if (flowConfig != null) {
+                        flowConfig.setStatus(PORTREMOVED);
+                        updated = true;
+                    }
+                }
+            }
+        }
+        return updated;
     }
 
     private FlowConfig getDerivedFlowConfig(FlowConfig original, String configName, Short port) {
@@ -2582,56 +2674,21 @@ public class ForwardingRulesManager implements
 
         switch (t) {
         case REMOVED:
-
-            List<FlowEntryInstall> nodeFlowEntries = nodeFlows.get(nc.getNode());
-            if (nodeFlowEntries == null) {
-                return;
-            }
-            for (FlowEntryInstall fei : new ArrayList<FlowEntryInstall>(nodeFlowEntries)) {
-                if (doesFlowContainNodeConnector(fei.getInstall().getFlow(), nc)) {
-                    Status status = this.removeEntryInternal(fei, true);
-                    if (!status.isSuccess()) {
-                        continue;
-                    }
-                    /*
-                     * If the flow entry is a static flow, then update its
-                     * configuration
-                     */
-                    if (fei.getGroupName().equals(FlowConfig.STATICFLOWGROUP)) {
-                        FlowConfig flowConfig = getStaticFlow(fei.getFlowName(), fei.getNode());
-                        if (flowConfig != null) {
-                            flowConfig.setStatus(PORTREMOVED);
-                            updateStaticFlowCluster = true;
-                        }
-                    }
-                }
-            }
-            if (updateStaticFlowCluster) {
-                refreshClusterStaticFlowsStatus(nc.getNode());
-            }
+            log.trace("Port {} was removed from container: uninstalling interested flows", nc);
+            updateStaticFlowCluster = removeFlowsOnNodeConnectorDown(nc);
             break;
         case ADDED:
-            List<FlowConfig> flowConfigForNode = getStaticFlows(nc.getNode());
-            for (FlowConfig flowConfig : flowConfigForNode) {
-                if (doesFlowContainNodeConnector(flowConfig.getFlow(), nc)) {
-                    if (flowConfig.installInHw()) {
-                        Status status = this.installFlowEntry(flowConfig.getFlowEntry());
-                        if (!status.isSuccess()) {
-                            flowConfig.setStatus(status.getDescription());
-                        } else {
-                            flowConfig.setStatus(SUCCESS);
-                        }
-                        updateStaticFlowCluster = true;
-                    }
-                }
-            }
-            if (updateStaticFlowCluster) {
-                refreshClusterStaticFlowsStatus(nc.getNode());
-            }
+            log.trace("Port {} was added to container: reinstall interested flows", nc);
+            updateStaticFlowCluster = installFlowsOnNodeConnectorUp(nc);
+
             break;
         case CHANGED:
             break;
         default:
+        }
+
+        if (updateStaticFlowCluster) {
+            refreshClusterStaticFlowsStatus(nc.getNode());
         }
     }
 
