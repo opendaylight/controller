@@ -90,13 +90,10 @@ one.f.troubleshooting.existingNodes = {
             modal: "one_f_troubleshooting_existingNodes_id_modal",
             existingNodesDataGrid: "one_f_troubleshooting_existingNodes_id_datagrid",
             portsDataGrid: "one_f_troubleshooting_existingNodes_id_portsDataGrid",
-            flowsDataGrid: "one_f_troubleshooting_existingNodes_id_flowsDataGrid"
-        },
-        // TODO: Make these values configurable.
-        autoRefreshInterval: {
-            flows: 10000,
-            ports: 10000,
-            refreshRateInterval: 5000
+            flowsDataGrid: "one_f_troubleshooting_existingNodes_id_flowsDataGrid",
+            refreshFlowsButton:"one_f_troubleshooting_existingNodes_id_refreshFlowsButton",
+            refreshPortsButton:"one_f_troubleshooting_existingNodes_id_refreshPortsButton"
+
         },
         load: {
             main: function($dashlet) {
@@ -122,13 +119,18 @@ one.f.troubleshooting.existingNodes = {
                     if(one.f.troubleshooting === undefined){
                         return;
                     }
-                    clearTimeout(one.f.troubleshooting.existingNodes.registry.refreshTimer);
                     $.getJSON(one.main.constants.address.prefix + "/troubleshoot/flowStats?nodeId=" + nodeId, function(content) {
                         $rightBottomDashlet = one.f.troubleshooting.rightBottomDashlet.get();
                         one.f.troubleshooting.rightBottomDashlet.setDashletHeader("Flows");
                         one.lib.dashlet.empty($rightBottomDashlet);
                         $rightBottomDashlet.append(one.lib.dashlet.header("Flow Details"));
-
+                        var button = one.lib.dashlet.button.single("Refresh",
+                                one.f.troubleshooting.existingNodes.id.refreshFlowsButton, "btn-primary", "btn-mini");
+                        var $button = one.lib.dashlet.button.button(button);
+                        $button.click(function() {
+                            one.f.troubleshooting.existingNodes.load.flows(nodeId);
+                        });
+                        $rightBottomDashlet.append($button);
                         var $gridHTML = one.lib.dashlet.datagrid.init(one.f.troubleshooting.existingNodes.id.flowsDataGrid, {
                             searchable: true,
                             filterable: false,
@@ -138,16 +140,6 @@ one.f.troubleshooting.existingNodes = {
                         $rightBottomDashlet.append($gridHTML);
                         var dataSource = one.f.troubleshooting.existingNodes.data.flowsGrid(content);
                         $("#" + one.f.troubleshooting.existingNodes.id.flowsDataGrid).datagrid({dataSource: dataSource});
-
-                        var numberOfFlows = content.nodeData.length;
-                        var refreshRate = one.f.troubleshooting.existingNodes.autoRefreshInterval.flows;
-                        if (numberOfFlows > 0) {
-                            refreshRate += Math.floor(numberOfFlows / 500) *
-                                one.f.troubleshooting.existingNodes.autoRefreshInterval.refreshRateInterval;
-                        }
-                        one.f.troubleshooting.existingNodes.registry.refreshTimer = setTimeout(
-                                one.f.troubleshooting.existingNodes.load.flows,
-                                refreshRate, nodeId);
                     });
                 } catch(e) {}
             },
@@ -156,13 +148,18 @@ one.f.troubleshooting.existingNodes = {
                     if(one.f.troubleshooting === undefined){
                         return;
                     }
-                    clearTimeout(one.f.troubleshooting.existingNodes.registry.refreshTimer);
                     $.getJSON(one.main.constants.address.prefix + "/troubleshoot/portStats?nodeId=" + nodeId, function(content) {
                         $rightBottomDashlet = one.f.troubleshooting.rightBottomDashlet.get();
                         one.f.troubleshooting.rightBottomDashlet.setDashletHeader("Ports");
                         one.lib.dashlet.empty($rightBottomDashlet);
                         $rightBottomDashlet.append(one.lib.dashlet.header("Port Details"));
-
+                        var button = one.lib.dashlet.button.single("Refresh",
+                                one.f.troubleshooting.existingNodes.id.refreshPortsButton, "btn-primary", "btn-mini");
+                        var $button = one.lib.dashlet.button.button(button);
+                        $button.click(function() {
+                            one.f.troubleshooting.existingNodes.load.ports(nodeId);
+                        });
+                        $rightBottomDashlet.append($button);
                         var $gridHTML = one.lib.dashlet.datagrid.init(one.f.troubleshooting.existingNodes.id.portsDataGrid, {
                             searchable: true,
                             filterable: false,
@@ -172,16 +169,6 @@ one.f.troubleshooting.existingNodes = {
                         $rightBottomDashlet.append($gridHTML);
                         var dataSource = one.f.troubleshooting.existingNodes.data.portsGrid(content);
                         $("#" + one.f.troubleshooting.existingNodes.id.portsDataGrid).datagrid({dataSource: dataSource});
-
-                        var numberOfPorts = content.nodeData.length;
-                        var refreshRate = one.f.troubleshooting.existingNodes.autoRefreshInterval.ports;
-                        if (numberOfPorts > 0) {
-                            refreshRate += Math.floor(numberOfPorts / 500) *
-                                one.f.troubleshooting.existingNodes.autoRefreshInterval.refreshRateInterval;
-                        }
-                        one.f.troubleshooting.existingNodes.registry.refreshTimer = setTimeout(
-                                one.f.troubleshooting.existingNodes.load.ports,
-                                refreshRate, nodeId);
                     });
                 } catch(e) {}
             } 
@@ -296,7 +283,7 @@ one.f.troubleshooting.existingNodes = {
                         }
                     ],
                     data: data.nodeData,
-                    delay: 200
+                    delay: 0
                 });
                 return source;
             },
