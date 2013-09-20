@@ -291,10 +291,10 @@ public class ContainerManager extends Authorization<String> implements IContaine
             for (Match match : conf.getMatches()) {
                 ContainerFlow cFlow = new ContainerFlow(match);
                 if (delete) {
-                    logger.trace("Removing Flow Spec %s from Container {}", conf.getName(), containerName);
+                    logger.trace("Removing Flow Spec {} from Container {}", conf.getName(), containerName);
                     container.deleteFlowSpec(cFlow);
                 } else {
-                    logger.trace("Adding Flow Spec %s to Container {}", conf.getName(), containerName);
+                    logger.trace("Adding Flow Spec {} to Container {}", conf.getName(), containerName);
                     container.addFlowSpec(cFlow);
 
                 }
