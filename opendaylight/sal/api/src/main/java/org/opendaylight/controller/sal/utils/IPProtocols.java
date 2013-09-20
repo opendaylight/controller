@@ -13,24 +13,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * It represents the most common IP protocols numbers
- * It provides the binding between IP protocol names and numbers
- * and provides APIs to read and parse them in either of the two forms
+ * Enum represents the most common IP protocols numbers It provides the binding
+ * between IP protocol names and numbers and provides APIs to read and parse
+ * them in either of the two forms
  *
+ * NOTE: Openflow 1.0 supports the IP Proto match only for ICMP, TCP and UDP
  *
- *
+ * references:
+ * http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
  */
-// Openflow 1.0 supports the IP Proto match only for ICMP, TCP and UDP
 public enum IPProtocols {
-    ANY("any", 0),
-    /*  HOPOPT("HOPOPT",0),
-     */ICMP("ICMP", 1),
-    /*  IGMP("IGMP",2),
+     ANY("any", -1),
+     HOPOPT("HOPOPT",0),
+     ICMP("ICMP", 1),
+     IGMP("IGMP",2),
      GGP("GGP",3),
      IPV4("IPv4",4),
      ST("ST",5),
-     */TCP("TCP", 6),
-    /*  CBT("CBT",7),
+     TCP("TCP", 6),
+     CBT("CBT",7),
      EGP("EGP",8),
      IGP("IGP",9),
      BBNRCCMON("BBN-RCC-MON",10),
@@ -40,8 +41,8 @@ public enum IPProtocols {
      EMCON("EMCON",14),
      XNET("XNET",15),
      CHAOS("CHAOS",16),
-     */UDP("UDP", 17),
-    /*  MUX("MUX",18),
+     UDP("UDP", 17),
+     MUX("MUX",18),
      DCNMEAS("DCN-MEAS",19),
      HMP("HMP",20),
      PRM("PRM",21),
@@ -81,8 +82,8 @@ public enum IPProtocols {
      MOBILE("MOBILE",55),
      TLSP("TLSP",56),
      SKIP("SKIP",57),
-     */IPV6ICMP("IPv6-ICMP", 58);
-    /*  IPV6NoNxt("IPv6-NoNxt",59),
+     IPV6ICMP("IPv6-ICMP", 58),
+     IPV6NoNxt("IPv6-NoNxt",59),
      IPV6Opts("IPv6-Opts",60),
      ANYHOST("ANY-HOST",61),
      CFTP("CFTP",62),
@@ -166,10 +167,15 @@ public enum IPProtocols {
      HIP("HIP",139),
      SHIM6("Shim6",140),
      WESP("WESP",141),
-     ROHC("ROHC",142);
-     */
-    private static final String regexDecimalString = "^[0-9]{3}$";
-    private static final String regexHexString = "^(0(x|X))[0-9a-fA-F]{2}$";
+     ROHC("ROHC",142),
+     /*143-252 Unassigned by IANA*/
+
+     //Experimebtal protocol numbers (http://tools.ietf.org/html/rfc3692)
+     EXP1("Experimental1", 253),
+     EXP2("Experimental2", 254),
+
+     RESERVED("RESERVED",255);
+
     private String protocolName;
     private int protocolNumber;
 
@@ -190,6 +196,7 @@ public enum IPProtocols {
         return ((Integer) protocolNumber).byteValue();
     }
 
+    @Override
     public String toString() {
         return protocolName;
     }
@@ -199,11 +206,11 @@ public enum IPProtocols {
     }
 
     public static String getProtocolName(short number) {
-        return getProtocolNameInternal((int) number & 0xffff);
+        return getProtocolNameInternal(number & 0xffff);
     }
 
     public static String getProtocolName(byte number) {
-        return getProtocolNameInternal((int) number & 0xff);
+        return getProtocolNameInternal(number & 0xff);
     }
 
     private static String getProtocolNameInternal(int number) {
@@ -212,52 +219,35 @@ public enum IPProtocols {
                 return proto.toString();
             }
         }
+        //TODO: this is for backwards compatibility
         return "0x" + Integer.toHexString(number);
     }
 
     public static short getProtocolNumberShort(String name) {
-        if (name.matches(regexHexString)) {
-            return Short.valueOf(Short.decode(name));
+        IPProtocols p = fromString(name);
+        if (p != null) {
+            return p.shortValue();
         }
-        if (name.matches(regexDecimalString)) {
-            return Short.valueOf(name);
-        }
-        for (IPProtocols proto : IPProtocols.values()) {
-            if (proto.protocolName.equalsIgnoreCase(name)) {
-                return proto.shortValue();
-            }
-        }
-        return 0;
+        //This method should be called after validation only
+        throw new IllegalArgumentException("Illegal IP protocol value: " + name);
     }
 
     public static int getProtocolNumberInt(String name) {
-        if (name.matches(regexHexString)) {
-            return Integer.valueOf(Integer.decode(name));
+        IPProtocols p = fromString(name);
+        if (p != null) {
+            return p.intValue();
         }
-        if (name.matches(regexDecimalString)) {
-            return Integer.valueOf(name);
-        }
-        for (IPProtocols proto : IPProtocols.values()) {
-            if (proto.protocolName.equalsIgnoreCase(name)) {
-                return proto.intValue();
-            }
-        }
-        return 0;
+        //This method should be called after validation only
+        throw new IllegalArgumentException("Illegal IP protocol value: " + name);
     }
 
     public static byte getProtocolNumberByte(String name) {
-        if (name.matches(regexHexString)) {
-            return Integer.valueOf(Integer.decode(name)).byteValue();
+        IPProtocols p = fromString(name);
+        if (p != null) {
+            return p.byteValue();
         }
-        if (name.matches(regexDecimalString)) {
-            return Integer.valueOf(name).byteValue();
-        }
-        for (IPProtocols proto : IPProtocols.values()) {
-            if (proto.protocolName.equalsIgnoreCase(name)) {
-                return proto.byteValue();
-            }
-        }
-        return 0;
+        //This method should be called after validation only
+        throw new IllegalArgumentException("Illegal IP protocol value: " + name);
     }
 
     public static List<String> getProtocolNameList() {
@@ -266,5 +256,48 @@ public enum IPProtocols {
             protoList.add(proto.toString());
         }
         return protoList;
+    }
+
+    /**
+     * Method to parse an IPProtocol from a numeric string
+     * (see: {@link Java.Lang.Integer.decode(java.lang.String)} for parsable strings),
+     * or this enum's name string.
+     *
+     * @param s
+     *            The string to be parsed
+     * @return The protocol enum value
+     */
+    public static IPProtocols fromString(String s) {
+        // null/empty/any/* evaluates to ANY
+        if (s == null || s.isEmpty() || s.equalsIgnoreCase("any") || s.equals("*")) {
+            return IPProtocols.ANY;
+        }
+
+        // Try parsing numeric and map to a name
+        try {
+            int protoNum = Integer.decode(s);
+            for (IPProtocols protoEnum : IPProtocols.values()) {
+                if (protoEnum.protocolNumber == protoNum || protoEnum.toString().equalsIgnoreCase(s)) {
+                    return protoEnum;
+                }
+            }
+            // At this point it's an invalid number (e.g. out of range)
+            return null;
+        } catch (NumberFormatException nfe) {
+            // numeric failed try by NAME
+            try {
+                return valueOf(s);
+            } catch(IllegalArgumentException e) {
+                // Neither numeric nor enum NAME, attempt human readable name
+                for (IPProtocols protoEnum : IPProtocols.values()) {
+                    if (protoEnum.toString().equalsIgnoreCase(s)) {
+                        return protoEnum;
+                    }
+                }
+                //couldn't parse, signifies invalid proto field!
+                return null;
+            }
+
+        }
     }
 }

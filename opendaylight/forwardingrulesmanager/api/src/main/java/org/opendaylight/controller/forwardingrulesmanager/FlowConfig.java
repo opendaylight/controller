@@ -656,11 +656,8 @@ public class FlowConfig implements Serializable {
     }
 
     public boolean isProtocolValid(String protocol) {
-        int protocol_number = IPProtocols.getProtocolNumberInt(protocol);
-        if (protocol_number < 1 || protocol_number > 255) {
-            return false;
-        }
-        return true;
+        IPProtocols proto = IPProtocols.fromString(protocol);
+        return (proto != null);
     }
 
     private Status conflictWithContainerFlow(IContainer container) {
@@ -1033,7 +1030,7 @@ public class FlowConfig implements Serializable {
             mask = NetUtils.getInetNetworkMask(maskLen, ip instanceof Inet6Address);
             match.setField(MatchType.NW_DST, ip, mask);
         }
-        if (this.protocol != null) {
+        if (IPProtocols.fromString(this.protocol) != IPProtocols.ANY) {
             match.setField(MatchType.NW_PROTO, IPProtocols.getProtocolNumberByte(this.protocol));
         }
         if (this.tosBits != null) {

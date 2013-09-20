@@ -479,12 +479,12 @@ public class ContainerFlowConfig implements Serializable {
     }
 
     /**
-     * Returns the protocol
+     * Get the IP protocol value
      *
      * @return the protocol
      */
     public Short getProtoNum() {
-        return protocol == null ? IPProtocols.ANY.shortValue() : IPProtocols.getProtocolNumberShort(protocol);
+        return protocol == null ? null : IPProtocols.getProtocolNumberShort(protocol);
     }
 
     /**
@@ -578,16 +578,15 @@ public class ContainerFlowConfig implements Serializable {
 
     /**
      * Validate the protocol field. Either it can be a enum defined in IPProtocols.java
-     * or a value between 1 and 255
+     * or a valid IP proto value between 0 and 255, see:
+     * http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+     * for more details.
      *
      * @return true if a valid protocol value
      */
     private boolean hasValidProtocol() {
-        if (protocol != null && !protocol.isEmpty()) {
-            short proto = this.getProtoNum();
-            return (((proto != 0) && (proto > 0) && (proto < 256)) || protocol.equalsIgnoreCase("any"));
-        }
-        return true;
+        IPProtocols p = IPProtocols.fromString(protocol);
+        return p != null;
     }
 
     /**
@@ -664,9 +663,8 @@ public class ContainerFlowConfig implements Serializable {
             mask = NetUtils.getInetNetworkMask(maskLen, ip instanceof Inet6Address);
             match.setField(MatchType.NW_DST, ip, mask);
         }
-        if (this.protocol != null && !this.protocol.trim().isEmpty() && !this.protocol.equalsIgnoreCase("any")) {
-            match.setField(MatchType.NW_PROTO, IPProtocols
-                    .getProtocolNumberByte(this.protocol));
+        if (IPProtocols.fromString(this.protocol) != IPProtocols.ANY) {
+            match.setField(MatchType.NW_PROTO, IPProtocols.getProtocolNumberByte(this.protocol));
         }
         if (this.tpSrc != null && !this.tpSrc.trim().isEmpty()) {
             match.setField(MatchType.TP_SRC, Integer.valueOf(tpSrc).shortValue());

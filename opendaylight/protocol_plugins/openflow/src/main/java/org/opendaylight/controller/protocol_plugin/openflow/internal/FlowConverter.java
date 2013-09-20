@@ -557,6 +557,7 @@ public class FlowConverter {
                         byte tos = (byte) (dscp >> 2);
                         salMatch.setField(MatchType.NW_TOS, tos);
                     }
+                    //TODO: NW protocol 0 is a valid protocol
                     if (ofMatch.getNetworkProtocol() != 0) {
                         salMatch.setField(MatchType.NW_PROTO,
                                 ofMatch.getNetworkProtocol());
