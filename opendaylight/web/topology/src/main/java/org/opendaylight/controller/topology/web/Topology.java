@@ -114,6 +114,7 @@ public class Topology implements IObjectReader, IConfigurationAware {
         Map<Node, Set<Edge>> nodeEdges = topologyManager.getNodeEdges();
         Map<Node, Set<NodeConnector>> hostEdges = topologyManager
                 .getNodesWithNodeConnectorHost();
+        int hostEdgesHashCode = getHostHashCode(hostEdges, topologyManager);
         List<Switch> nodes = switchManager.getNetworkDevices();
 
         List<SwitchConfig> switchConfigurations = new ArrayList<SwitchConfig>();
@@ -136,14 +137,14 @@ public class Topology implements IObjectReader, IConfigurationAware {
         // return cache if topology hasn't changed
         if (
                 (metaNodeHash.get(containerName) != null && metaHostHash.get(containerName) != null && metaNodeSingleHash.get(containerName) != null && metaNodeConfigurationHash.get(containerName) != null) &&
-                metaNodeHash.get(containerName).equals(nodeEdges.hashCode()) && metaHostHash.get(containerName).equals(hostEdges.hashCode()) && metaNodeSingleHash.get(containerName).equals(nodes.hashCode()) && metaNodeConfigurationHash.get(containerName).equals(switchConfigurations.hashCode())
+                metaNodeHash.get(containerName).equals(nodeEdges.hashCode()) && metaHostHash.get(containerName).equals(hostEdgesHashCode) && metaNodeSingleHash.get(containerName).equals(nodes.hashCode()) && metaNodeConfigurationHash.get(containerName).equals(switchConfigurations.hashCode())
         ) {
                 return metaCache.get(containerName).values();
         }
 
         // cache has changed, we must assign the new values
         metaNodeHash.put(containerName, nodeEdges.hashCode());
-        metaHostHash.put(containerName, hostEdges.hashCode());
+        metaHostHash.put(containerName, hostEdgesHashCode);
         metaNodeSingleHash.put(containerName, nodes.hashCode());
         metaNodeConfigurationHash.put(containerName, switchConfigurations.hashCode());
 
@@ -328,6 +329,29 @@ public class Topology implements IObjectReader, IConfigurationAware {
                 newNodes.put(node.id(), node.out());
             }
         }
+    }
+
+    /**
+     * Calculate the total host hashcode
+     *
+     * This is to handle cases where there are multiple hosts per NodeConnector
+     *
+     * @param hostEdges
+     *            - hostEdges data structure
+     * @param topology
+     *            - topology bundle
+     * @return this topology's host hashcode
+     */
+    private int getHostHashCode(Map<Node, Set<NodeConnector>> hostEdges, ITopologyManager topology) {
+        List<Host> hosts = new ArrayList<Host>();
+        for (Set<NodeConnector> nodeConnectors : hostEdges.values()) {
+            for (NodeConnector nodeConnector : nodeConnectors) {
+                List<Host> theseHosts = topology.getHostsAttachedToNodeConnector(nodeConnector);
+                hosts.addAll(theseHosts);
+            }
+        }
+
+        return hosts.hashCode();
     }
 
     /**
