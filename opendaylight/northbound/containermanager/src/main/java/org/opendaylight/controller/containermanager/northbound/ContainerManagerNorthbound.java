@@ -18,7 +18,6 @@ import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -28,12 +27,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
+import org.opendaylight.controller.containermanager.ContainerConfig;
+import org.opendaylight.controller.containermanager.ContainerFlowConfig;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
+import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
 import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
@@ -48,10 +49,6 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.usermanager.IUserManager;
-
-import org.opendaylight.controller.containermanager.ContainerFlowConfig;
-import org.opendaylight.controller.containermanager.IContainerManager;
-import org.opendaylight.controller.containermanager.ContainerConfig;
 
 /**
  * Container Manager Northbound API
@@ -117,7 +114,7 @@ public class ContainerManagerNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/containermanager/containers
      *
-     * Response Payload in XML:
+     * Response body in XML:
      * &lt;container-config-list&gt;
      *    &#x20;&#x20;&#x20;&lt;container-config&gt;
      *    &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;container&gt;black&lt;/container&gt;
@@ -141,10 +138,32 @@ public class ContainerManagerNorthbound {
      *  &#x20;&#x20;&#x20;&#x20;&lt;/container-config&gt;
      * &lt;/container-config-list&gt;
      *
-     * Response Payload in JSON:
-     * { "container-config" : [ { "container" : "black", "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"], "staticVlan" : "10", "flowSpecs : [{ "name": "udp", "protocol": "UDP" }] } ] }
-     * { "container-config" : [ { "container" : "red", "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"], "staticVlan" : "20", "flowSpecs": [{ "name": "tcp", "protocol": "TCP" }] } ] }
-     *
+     * Response body in JSON:
+     * { "container-config" : [
+     *     { "container" : "black",
+     *       "nodeConnectors" : [
+     *          "OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"
+     *       ],
+     *       "staticVlan" : "10",
+     *       "flowSpecs : [
+     *          { "name": "udp",
+     *            "protocol": "UDP" }
+     *       ]
+     *     },
+     *     { "container" : "red",
+     *       "nodeConnectors" : [
+     *          "OF|1@OF|00:00:00:00:00:00:00:01",
+     *          "OF|23@OF|00:00:00:00:00:00:20:21"
+     *       ],
+     *       "staticVlan" : "20",
+     *       "flowSpecs": [
+     *          { "name": "tcp",
+     *            "protocol": "TCP"
+     *          }
+     *       ]
+     *     }
+     *   ]
+     * }
      * </pre>
      */
     @Path("/containers")
@@ -177,7 +196,7 @@ public class ContainerManagerNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/containermanager/container/blue
      *
-     * Response Payload in XML:
+     * Response body in XML:
      * &lt;container-config&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;container&gt;blue&lt;/container&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;staticVlan&gt;10&lt;/staticVlan&gt;
@@ -185,9 +204,20 @@ public class ContainerManagerNorthbound {
      *  &#x20;&#x20;&#x20;&#x20;&lt;nodeConnectors&gt;OF|23@OF|00:00:00:00:00:00:20:21&lt;/nodeConnectors&gt;
      * &lt;/container-config&gt;
      *
-     * Response Payload in JSON:
-     * { "container" : "blue", "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"], "staticVlan" : "10" }
-     *
+     * Response body in JSON:
+     * {
+     *    "container-config": [
+     *       {
+     *        "container": "yellow",
+     *        "staticVlan": "10",
+     *        "nodeConnectors": [
+     *           "OF|1@OF|00:00:00:00:00:00:00:01",
+     *           "OF|2@OF|00:00:00:00:00:00:00:02"
+     *        ],
+     *        "flowSpecs": []
+     *       }
+     *    ]
+     * }
      * </pre>
      */
     @Path("/container/{container}")
@@ -229,15 +259,22 @@ public class ContainerManagerNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/containermanager/container/yellow
      *
-     * Request Payload in XML:
+     * Request body in XML:
      * &lt;container-config&gt;
      *   &#x20;&#x20;&#x20;&#x20;&lt;container&gt;yellow&lt;/container&gt;
      *   &#x20;&#x20;&#x20;&#x20;&lt;staticVlan&gt;10&lt;/staticVlan&gt;
      *   &#x20;&#x20;&#x20;&#x20;&lt;nodeConnectors&gt;&lt;/nodeConnectors&gt;
      * &lt;/container-config&gt;
      *
-     * Request Payload in JSON:
-     * { "container" : "yellow", "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|23@OF|00:00:00:00:00:00:20:21"], "staticVlan" : "10"}
+     * Request body in JSON:
+     * {
+     *    "container" : "yellow",
+     *    "nodeConnectors" : [
+     *       "OF|1@OF|00:00:00:00:00:00:00:01",
+     *       "OF|23@OF|00:00:00:00:00:00:20:21"
+     *    ],
+     *    "staticVlan" : "10"
+     * }
      *
      * </pre>
      */
@@ -324,18 +361,25 @@ public class ContainerManagerNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/containermanager/container/green/flowspec/ssh
      *
-     * Response Payload in XML:
-     * &lt;container-flowconfig&gt;
+     * Response body in XML:
+     * &lt;flow-spec-config&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;name&gt;ssh&lt;/name&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;nwSrc&gt;10.0.0.101&lt;/nwSrc&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;nwDst&gt;10.0.0.102&lt;/nwDst&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;protocol&gt;IPv4&lt;/protocol&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;tpSrc&gt;80&lt;/tpSrc&gt;
      *  &#x20;&#x20;&#x20;&#x20;&lt;tpDst&gt;100&lt;/tpDst&gt;
-     * &lt;/container-flowconfig&gt;
+     * &lt;/flow-spec-config&gt;
      *
-     * Response Payload in JSON:
-     * { "protocol" : "IPv4", "nwDst" : "10.0.0.102", "name" : "ssh", "nwSrc" : "10.0.0.101", "tpSrc" : "80", "tpDst" : "100" }
+     * Response body in JSON:
+     * {
+     *    "protocol" : "IPv4",
+     *    "nwDst" : "10.0.0.102",
+     *    "name" : "ssh",
+     *    "nwSrc" : "10.0.0.101",
+     *    "tpSrc" : "80",
+     *    "tpDst" : "100"
+     * }
      *
      * </pre>
      */
@@ -381,29 +425,47 @@ public class ContainerManagerNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/containermanager/container/red/flowspec
      *
-     * Response Payload in XML:
-     * &lt;container-flowconfigs&gt;
-     *   &#x20;&#x20;&#x20;&#x20;&lt;container-flowconfig&gt;
+     * Response body in XML:
+     * &lt;flow-spec-configs&gt;
+     *   &#x20;&#x20;&#x20;&#x20;&lt;flow-spec-config&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;ssh&lt;/name&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nwSrc&gt;10.0.0.101&lt;/nwSrc&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nwDst&gt;10.0.0.102&lt;/nwDst&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;protocol&gt;IPv4&lt;/protocol&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;tpSrc&gt;23&lt;/tpSrc&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;tpDst&gt;100&lt;/tpDst&gt;
-     *   &#x20;&#x20;&#x20;&#x20;&lt;/container-flowconfig&gt;
-     *   &#x20;&#x20;&#x20;&#x20;&lt;container-flowconfig&gt;
+     *   &#x20;&#x20;&#x20;&#x20;&lt;/flow-spec-config&gt;
+     *   &#x20;&#x20;&#x20;&#x20;&lt;flow-spec-config&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;name&gt;http2&lt;/name&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nwSrc&gt;10.0.0.201&lt;/nwSrc&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;nwDst&gt;10.0.0.202&lt;/nwDst&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;protocol&gt;&lt;/protocol&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;tpSrc&gt;80&lt;/tpSrc&gt;
      *     &#x20;&#x20;&#x20;&#x20;&#x20;&#x20;&lt;tpDst&gt;100&lt;/tpDst&gt;
-     *   &#x20;&#x20;&#x20;&#x20;&lt;/container-flowconfig&gt;
-     * &lt;/container-flowconfigs&gt;
+     *   &#x20;&#x20;&#x20;&#x20;&lt;/flow-spec-config&gt;
+     * &lt;/flow-spec-configs&gt;
      *
-     * Response Payload in JSON:
-     * { "protocol" : "IPv4", "nwDst" : "10.0.0.102", "name" : "ssh" , "nwSrc" : "10.0.0.101", "tpSrc" : "23", "tpDst" : "100" }
-     * { "protocol" : "", "nwDst" : "10.0.0.202", "name" : "http" , "nwSrc" : "10.0.0.201", "tpSrc" : "80", "tpDst" : "100" }
+      * Response body in JSON:
+     * {
+     *   "flow-spec-config": [
+     *     {
+     *       "name": "http",
+     *       "nwSrc": "10.0.0.201",
+     *       "nwDst": "10.0.0.202",
+     *       "protocol": "",
+     *       "tpSrc": "80",
+     *       "tpDst": "100"
+     *     },
+     *     {
+     *       "name": "ssh",
+     *       "nwSrc": "10.0.0.101",
+     *       "nwDst": "10.0.0.102",
+     *       "protocol": "IPv4",
+     *       "tpSrc": "23",
+     *       "tpDst": "100"
+     *     }
+     *   ]
+     * }
      *
      * </pre>
      */
@@ -446,18 +508,25 @@ public class ContainerManagerNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/containermanager/container/purple/flowspec/http
      *
-     * Request Payload in XML:
-     *   &lt;container-flowconfig&gt;
+     * Request body in XML:
+     *   &lt;flow-spec-config&gt;
      *     &#x20;&#x20;&#x20;&#x20;&lt;name&gt;http&lt;/name&gt;
      *     &#x20;&#x20;&#x20;&#x20;&lt;nwSrc&gt;10.0.0.101&lt;/nwSrc&gt;
      *     &#x20;&#x20;&#x20;&#x20;&lt;nwDst&gt;10.0.0.102&lt;/nwDst&gt;
      *     &#x20;&#x20;&#x20;&#x20;&lt;protocol&gt;&lt;/protocol&gt;
      *     &#x20;&#x20;&#x20;&#x20;&lt;tpSrc&gt;80&lt;/tpSrc&gt;
      *     &#x20;&#x20;&#x20;&#x20;&lt;tpDst&gt;100&lt;/tpDst&gt;
-     *   &lt;/container-flowconfig&gt;
+     *   &lt;/flow-spec-config&gt;
      *
-     * Request Payload in JSON:
-     * { "protocol" : "", "nwDst" : "10.0.0.102", "name" : "http", "nwSrc" : "10.0.0.101", "tpSrc" : "80", "tpDst" : "100" }
+     * Request body in JSON:
+     * {
+     *    "protocol" : "",
+     *    "nwDst" : "10.0.0.102",
+     *    "name" : "http",
+     *    "nwSrc" : "10.0.0.101",
+     *    "tpSrc" : "80",
+     *    "tpDst" : "100"
+     * }
      *
      * </pre>
      */
@@ -554,16 +623,23 @@ public class ContainerManagerNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/containermanager/container/green/nodeconnector
      *
-     * Request Payload in XML:
-     * &lt;list&gt;
+     * Request body in XML:
+     * &lt;nodeConnectors&gt;
      *     &lt;nodeConnectors&gt;OF|1@OF|00:00:00:00:00:00:00:01&lt;/nodeConnectors&gt;
      *     &lt;nodeConnectors&gt;OF|2@OF|00:00:00:00:00:00:00:01&lt;/nodeConnectors&gt;
      *     &lt;nodeConnectors&gt;OF|3@OF|00:00:00:00:00:00:00:22&lt;/nodeConnectors&gt;
      *     &lt;nodeConnectors&gt;OF|4@OF|00:00:00:00:00:00:00:22&lt;/nodeConnectors&gt;
-     * &lt;/list&gt;
+     * &lt;/nodeConnectors&gt;
      *
-     * Request Payload in JSON:
-     * { "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|2@OF|00:00:00:00:00:00:00:01", "OF|3@OF|00:00:00:00:00:00:00:22", "OF|4@OF|00:00:00:00:00:00:00:22" }
+     * Request body in JSON:
+     * {
+     *    "nodeConnectors" : [
+     *       "OF|1@OF|00:00:00:00:00:00:00:01",
+     *       "OF|2@OF|00:00:00:00:00:00:00:01",
+     *       "OF|3@OF|00:00:00:00:00:00:00:22",
+     *       "OF|4@OF|00:00:00:00:00:00:00:22"
+     *    ]
+     * }
      *
      * </pre>
      */
@@ -609,16 +685,23 @@ public class ContainerManagerNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/containermanager/container/red/nodeconnector
      *
-     * Request Payload in XML:
-     * &lt;list&gt;
+     * Request body in XML:
+     * &lt;nodeConnectors&gt;
      *     &lt;nodeConnectors&gt;OF|1@OF|00:00:00:00:00:00:00:01&lt;/nodeConnectors&gt;
      *     &lt;nodeConnectors&gt;OF|2@OF|00:00:00:00:00:00:00:01&lt;/nodeConnectors&gt;
      *     &lt;nodeConnectors&gt;OF|3@OF|00:00:00:00:00:00:00:22&lt;/nodeConnectors&gt;
      *     &lt;nodeConnectors&gt;OF|4@OF|00:00:00:00:00:00:00:22&lt;/nodeConnectors&gt;
-     * &lt;/list&gt;
+     * &lt;/nodeConnectors&gt;
      *
-     * Request Payload in JSON:
-     * { "nodeConnectors" : ["OF|1@OF|00:00:00:00:00:00:00:01", "OF|2@OF|00:00:00:00:00:00:00:01", "OF|3@OF|00:00:00:00:00:00:00:22", "OF|4@OF|00:00:00:00:00:00:00:22" }
+     * Request body in JSON:
+     * {
+     *    "nodeConnectors" : [
+     *       "OF|1@OF|00:00:00:00:00:00:00:01",
+     *       "OF|2@OF|00:00:00:00:00:00:00:01",
+     *       "OF|3@OF|00:00:00:00:00:00:00:22",
+     *       "OF|4@OF|00:00:00:00:00:00:00:22"
+     *       ]
+     * }
      *
      * </pre>
      */

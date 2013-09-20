@@ -86,10 +86,10 @@ public class TopologyNorthboundJAXRS {
      *
      * Example:
      *
-     * RequestURL:
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/topology/default
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
      * &lt;topology&gt;
      *     &lt;edgeProperties&gt;
@@ -164,14 +164,75 @@ public class TopologyNorthboundJAXRS {
      *     &lt;/edgeProperties&gt;
      * &lt;/topology&gt;
      *
-     * Response in JSON:
-     * {"edgeProperties":[{"edge":{"tailNodeConnector":{"node":{"id":"00:00:00:00:00:00:00:02","type":"OF"},
-     * "id":"2","type":"OF"},"headNodeConnector":{"node":{"id":"00:00:00:00:00:00:00:51","type":"OF"},"id":
-     * "2","type":"OF"}},"properties":{"timeStamp":{"value":"1377278961017","name":"creation"}}},
-     * {"edge":{"tailNodeConnector":{"node":{"id":"00:00:00:00:00:00:00:51","type":"OF"},"id":
-     * "2","type":"OF"}},"headNodeConnector":{"node":{"id":"00:00:00:00:00:00:00:02","type":"OF"},
-     * "id":"2","type":"OF"}},"properties":{"timeStamp":{"value":"1377278961018","name":"creation"}}}]}
-     *
+     * Response body in JSON:
+     * {
+     *    "edgeProperties":[
+     *       {
+     *          "edge":{
+     *             "tailNodeConnector":{
+     *                "node":{
+     *                   "id":"00:00:00:00:00:00:00:02",
+     *                   "type":"OF"
+     *                },
+     *                "id":"2",
+     *                "type":"OF"
+     *             },
+     *             "headNodeConnector":{
+     *                "node":{
+     *                   "id":"00:00:00:00:00:00:00:51",
+     *                   "type":"OF"
+     *                },
+     *                "id":"2",
+     *                "type":"OF"
+     *             }
+     *          },
+     *          "properties":{
+     *             "timeStamp": {
+     *                "value": 1379527162648,
+     *                "name": "creation",
+     *             },
+     *             "name": {
+     *                "value": "s2-eth3"
+     *             },
+     *             "state": {
+     *                "value": 1
+     *             },
+     *             "config": {
+     *                "value": 1
+     *             },
+     *             "bandwidth": {
+     *                "value": 10000000000
+     *             }
+     *          }
+     *       },
+     *       {
+     *          "edge":{
+     *             "tailNodeConnector":{
+     *                "node":{
+     *                   "id":"00:00:00:00:00:00:00:51",
+     *                   "type":"OF"
+     *                },
+     *                "id":"2",
+     *                "type":"OF"
+     *             },
+     *             "headNodeConnector":{
+     *                "node":{
+     *                   "id":"00:00:00:00:00:00:00:02",
+     *                   "type":"OF"
+     *                },
+     *                "id":"2",
+     *                "type":"OF"
+     *             }
+     *           },
+     *           "properties":{
+     *             "timeStamp": {
+     *                "value": 1379527162648,
+     *                "name": "creation",
+     *             }
+     *          }
+     *        }
+     *     ]
+     *  }
      * </pre>
      */
     @Path("/{containerName}")
@@ -217,23 +278,31 @@ public class TopologyNorthboundJAXRS {
      *
      * Example:
      *
-     * RequestURL:
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/topology/default/userLinks
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-     * &lt;topologyUserLinks&gt;
+     * &lt;list&gt;
      * &lt;userLinks&gt;
      * &lt;status&gt;Success&lt;/status&gt;
      * &lt;name&gt;link1&lt;/name&gt;
      * &lt;srcNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:02&lt;/srcNodeConnector&gt;
      * &lt;dstNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:51&lt;/dstNodeConnector&gt;
      * &lt;/userLinks&gt;
-     * &lt;/topologyUserLinks&gt;
+     * &lt;/list&gt;
      *
-     * Response in JSON:
-     * {"userLinks":{"status":"Success","name":"link1","srcNodeConnector":
-     * "OF|2@OF|00:00:00:00:00:00:00:02","dstNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:51"}}
+     * Response body in JSON:
+    * {
+     *   "userLinks": [
+     *    {
+     *      "status": "Success",
+     *      "name": "link1",
+     *      "srcNodeConnector": "OF|2@OF|00:00:00:00:00:00:00:02",
+     *      "dstNodeConnector": "OF|5@OF|00:00:00:00:00:00:00:05"
+     *    }
+     *  ]
+     * }
      *
      * </pre>
      */
@@ -278,20 +347,25 @@ public class TopologyNorthboundJAXRS {
      *
      * Example:
      *
-     * RequestURL:
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/topology/default/userLink/link1
      *
-     * Request in XML:
+     * Request body in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-     * &lt;topologyUserLinks&gt;
+     * &lt;topologyUserLinkConfig&gt;
      * &lt;status&gt;Success&lt;/status&gt;
      * &lt;name&gt;link1&lt;/name&gt;
      * &lt;srcNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:02&lt;/srcNodeConnector&gt;
      * &lt;dstNodeConnector&gt;OF|2@OF|00:00:00:00:00:00:00:51&lt;/dstNodeConnector&gt;
-     * &lt;/topologyUserLinks&gt;
+     * &lt;/topologyUserLinkConfig&gt;
      *
-     * Request in JSON:
-     * {"status":"Success","name":"link1","srcNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:02","dstNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:51"}
+     * Request body in JSON:
+     * {
+     *    "status":"Success",
+     *    "name":"link1",
+     *    "srcNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:02",
+     *    "dstNodeConnector":"OF|2@OF|00:00:00:00:00:00:00:51"
+     * }
      *
      * </pre>
      */
@@ -346,7 +420,7 @@ public class TopologyNorthboundJAXRS {
      *
      * Example:
      *
-     * RequestURL:
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/topology/default/userLink/config1
      *
      * </pre>

@@ -145,10 +145,10 @@ public class FlowProgrammerNorthbound {
      *
      * Example:
      *
-     * RequestURL:
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/flowprogrammer/default
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
      * &lt;list&gt;
      *     &#x20;&#x20;&#x20;&lt;flowConfig&gt;
@@ -166,10 +166,26 @@ public class FlowProgrammerNorthbound {
      *     &#x20;&#x20;&#x20;&lt;/flowConfig&gt;
      * &lt;/list&gt;
      *
-     * Response in JSON:
-     * {"flowConfig":{"installInHw":"true","name":"flow1","node":{"id":"00:00:00:00:00:00:00:01","type":"OF"},
-     * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}}
-     *
+     * Response body in JSON:
+     * {
+     *   "flowConfig": [
+     *      {
+     *         "installInHw": "true",
+     *         "name": "flow1",
+     *         "node": {
+     *            "type": "OF",
+     *            "id": "00:00:00:00:00:00:00:01"
+     *         },
+     *         "ingressPort": "1",
+     *         "priority": "500",
+     *         "etherType": "0x800",
+     *         "nwSrc":"9.9.1.1",
+     *         "actions": [
+     *           "OUTPUT=2"
+     *         ]
+     *      }
+     *    ]
+     * }
      * </pre>
      */
     @Path("/{containerName}")
@@ -205,10 +221,10 @@ public class FlowProgrammerNorthbound {
      *
      * Example:
      *
-     * RequestURL:
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/flowprogrammer/default/node/OF/00:00:00:00:00:00:00:01
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
      * &lt;list&gt;
      *     &#x20;&#x20;&#x20;&lt;flowConfig&gt;
@@ -226,10 +242,26 @@ public class FlowProgrammerNorthbound {
      *     &#x20;&#x20;&#x20;&lt;/flowConfig&gt;
      * &lt;/list&gt;
      *
-     * Response in JSON:
-     * {"flowConfig":{"installInHw":"true","name":"flow1","node":{"id":"00:00:00:00:00:00:00:01","type":"OF"},
-     * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}}
-     *
+    * Response body in JSON:
+     * {
+     *   "flowConfig": [
+     *      {
+     *         "installInHw": "true",
+     *         "name": "flow1",
+     *         "node": {
+     *            "type": "OF",
+     *            "id": "00:00:00:00:00:00:00:01"
+     *         },
+     *         "ingressPort": "1",
+     *         "priority": "500",
+     *         "etherType": "0x800",
+     *         "nwSrc":"9.9.1.1",
+     *         "actions": [
+     *           "OUTPUT=2"
+     *         ]
+     *       }
+     *    ]
+     * }
      * </pre>
      */
     @Path("/{containerName}/node/{nodeType}/{nodeId}")
@@ -272,10 +304,10 @@ public class FlowProgrammerNorthbound {
      *
      * Example:
      *
-     * RequestURL:
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/flowprogrammer/default/node/OF/00:00:00:00:00:00:00:01/staticFlow/flow1
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
      * &lt;flowConfig&gt;
      *     &#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
@@ -291,9 +323,22 @@ public class FlowProgrammerNorthbound {
      *     &#x20;&#x20;&#x20;&lt;actions&gt;OUTPUT=2&lt;/actions&gt;
      * &lt;/flowConfig&gt;
      *
-     * Response in JSON:
-     * {"installInHw":"true","name":"flow1","node":{"id":"00:00:00:00:00:00:00:01","type":"OF"},
-     * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}
+    * Response body in JSON:
+     * {
+     *    "installInHw":"true",
+     *    "name":"flow1",
+     *    "node":{
+     *       "id":"00:00:00:00:00:00:00:01",
+     *       "type":"OF"
+     *    },
+     *    "ingressPort":"1",
+     *    "priority":"500",
+     *    "etherType":"0x800",
+     *    "nwSrc":"9.9.1.1",
+     *    "actions":[
+     *       "OUTPUT=2"
+     *    ]
+     * }
      *
      * </pre>
      */
@@ -347,10 +392,10 @@ public class FlowProgrammerNorthbound {
      *
      * Example:
      *
-     * RequestURL:
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/flowprogrammer/default/node/OF/00:00:00:00:00:00:00:01/staticFlow/flow1
      *
-     * Request in XML:
+     * Request body in XML:
      * &lt;flowConfig&gt;
      *         &#x20;&#x20;&#x20;&lt;installInHw&gt;true&lt;/installInHw&gt;
      *         &#x20;&#x20;&#x20;&lt;name&gt;flow1&lt;/name&gt;
@@ -365,10 +410,22 @@ public class FlowProgrammerNorthbound {
      *         &#x20;&#x20;&#x20;&lt;actions&gt;OUTPUT=2&lt;/actions&gt;
      * &lt;/flowConfig&gt;
      *
-     * Request in JSON:
-     * {"installInHw":"true","name":"flow1","node":{"id":"00:00:00:00:00:00:00:01","type":"OF"},
-     * "ingressPort":"1","priority":"500","etherType":"0x800","nwSrc":"9.9.1.1","actions":"OUTPUT=2"}
-     *
+     * Request body in JSON:
+      * {
+     *    "installInHw":"true",
+     *    "name":"flow1",
+     *    "node":{
+     *       "id":"00:00:00:00:00:00:00:01",
+     *       "type":"OF"
+     *    },
+     *    "ingressPort":"1",
+     *    "priority":"500",
+     *    "etherType":"0x800",
+     *    "nwSrc":"9.9.1.1",
+     *    "actions":[
+     *       "OUTPUT=2"
+     *    ]
+     * }
      * </pre>
      */
 

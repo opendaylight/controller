@@ -26,7 +26,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -131,11 +130,10 @@ public class HostTrackerNorthbound {
      *
      * Example:
      *
-     * RequestURL:
-     *
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/hosttracker/default/hosts/active
      *
-     * Response in XML
+     * Response body in XML
      *
      * &lt;list&gt;
      * &#x20;&lt;hostConfig&gt;
@@ -160,7 +158,7 @@ public class HostTrackerNorthbound {
      * &#x20;&lt;/hostConfig&gt;
      * &lt;/list&gt;
      *
-     * Response in JSON:
+     * Response body in JSON:
      *
      * {
      * &#x20;"hostConfig":[
@@ -218,11 +216,10 @@ public class HostTrackerNorthbound {
      *
      * Example:
      *
-     * RequestURL:
-     *
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/hosttracker/default/hosts/inactive
      *
-     * Response in XML
+     * Response body in XML
      *
      * &lt;list&gt;
      * &#x20;&lt;hostConfig&gt;
@@ -247,7 +244,7 @@ public class HostTrackerNorthbound {
      * &#x20;&lt;/hostConfig&gt;
      * &lt;/list&gt;
      *
-     * Response in JSON:
+     * Response body in JSON:
      *
      * {
      * &#x20;"hostConfig":[
@@ -306,11 +303,10 @@ public class HostTrackerNorthbound {
      *
      * Example:
      *
-     * RequestURL:
-     *
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/hosttracker/default/address/1.1.1.1
      *
-     * Response in XML
+     * Response body in XML
      *
      * &lt;hostConfig&gt;
      * &#x20;&lt;dataLayerAddress&gt;00:00:00:00:01:01&lt;/dataLayerAddress&gt;
@@ -323,7 +319,7 @@ public class HostTrackerNorthbound {
      * &#x20;&lt;staticHost&gt;false&lt;/staticHost&gt;
      * &lt;/hostConfig&gt;
      *
-     * Response in JSON:
+     * Response body in JSON:
      *
      * {
      * &#x20;"dataLayerAddress":"00:00:00:00:01:01",
@@ -386,11 +382,10 @@ public class HostTrackerNorthbound {
      *
      * Example:
      *
-     * RequestURL:
-     *
+     * Request URL:
      * http://localhost:8080/controller/nb/v2/hosttracker/default/address/1.1.1.1
      *
-     * Request in XML
+     * Request body in XML
      *
      * &lt;hostConfig&gt;
      * &#x20;&lt;dataLayerAddress&gt;00:00:00:00:01:01&lt;/dataLayerAddress&gt;
@@ -403,7 +398,7 @@ public class HostTrackerNorthbound {
      * &#x20;&lt;staticHost&gt;false&lt;/staticHost&gt;
      * &lt;/hostConfig&gt;
      *
-     * Request in JSON:
+     * Request body in JSON:
      *
      * {
      * &#x20;"dataLayerAddress":"00:00:00:00:01:01",
@@ -472,6 +467,12 @@ public class HostTrackerNorthbound {
      * @param networkAddress
      *            IP Address
      * @return Response as dictated by the HTTP Response code.
+     *
+     * Example:
+     *
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/hosttracker/default/address/1.1.1.1
+     *
      */
 
     @Path("/{containerName}/address/{networkAddress}")

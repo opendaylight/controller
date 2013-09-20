@@ -112,12 +112,14 @@ public class SubnetsNorthbound {
      *
      * @return a List of SubnetConfig
      *
-     *         <pre>
+     * <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnets
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/subnetservice/default/subnets
      *
-     * Response in XML:
+     * Response body in XML:
+     * &lt;list&gt;
      * &lt;subnetConfig&gt;
      *    &lt;name&gt;marketingdepartment&lt;/name&gt;
      *    &lt;subnet&gt;30.31.54.254/24&lt;/subnet&gt;
@@ -125,20 +127,32 @@ public class SubnetsNorthbound {
      * &lt;subnetConfig&gt;
      *    &lt;name&gt;salesdepartment&lt;/name&gt;
      *    &lt;subnet&gt;20.18.1.254/16&lt;/subnet&gt;
-     *    &lt;nodeConnectors&gt;0F|11@OF|00:00:00:aa:bb:cc:dd:ee&gt;/nodeConnectors&gt;
-     *    &lt;nodeConnectors&gt;0F|13@OF|00:00:00:aa:bb:cc:dd:ee&gt;/nodeConnectors&gt;
+     *    &lt;nodeConnectors&gt;OF|11@OF|00:00:00:aa:bb:cc:dd:ee&lt;/nodeConnectors&gt;
+     *    &lt;nodeConnectors&gt;OF|13@OF|00:00:00:aa:bb:cc:dd:ee&lt;/nodeConnectors&gt;
      * &lt;/subnetConfig&gt;
+     * &lt;/list&gt;
+     * Response body in JSON:
+     * {
+     *   "subnetConfig": [
+     *     {
+     *       "name": "marketingdepartment",
+     *       "subnet": "30.31.54.254/24",
+     *       "nodeConnectors": [
+     *           "OF|04@OF|00:00:00:00:00:00:00:04",
+     *           "OF|07@OF|00:00:00:00:00:00:00:07"
+     *       ]
+     *     },
+     *     {
+     *       "name":"salesdepartment",
+     *       "subnet":"20.18.1.254/16",
+     *       "nodeConnectors": [
+     *            "OF|11@OF|00:00:00:aa:bb:cc:dd:ee",
+     *            "OF|13@OF|00:00:00:aa:bb:cc:dd:ee"
+     *        ]
+     *      }
+     *   ]
+     * }
      *
-     * Response in JSON:
-     * {
-     *  "name":"marketingdepartment",
-     *  "subnet":"30.31.54.254/24",
-     * }
-     * {
-     *  "name":"salesdepartment",
-     *  "subnet":"20.18.1.254/16",
-     *  "nodeConnectors":["0F|11@OF|00:00:00:aa:bb:cc:dd:ee", "0F|13@OF|00:00:00:aa:bb:cc:dd:ee"]
-     * }
      * </pre>
      */
     @Path("/{containerName}/subnets")
@@ -176,21 +190,25 @@ public class SubnetsNorthbound {
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/marketingdepartment
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/marketingdepartment
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;subnetConfig&gt;
      *    &lt;name&gt;marketingdepartment&lt;/name&gt;
      *    &lt;subnet&gt;30.0.0.1/24&lt;/subnet&gt;
-     *    &lt;nodeConnectors&gt;0F|1@OF|00:00:11:22:33:44:55:66&gt;/nodePorts&gt;
-     *    &lt;nodeConnectors&gt;0F|3@OF|00:00:11:22:33:44:55:66&gt;/nodePorts&gt;
+     *    &lt;nodeConnectors&gt;OF|1@OF|00:00:00:00:00:00:00:01&lt;/nodePorts&gt;
+     *    &lt;nodeConnectors&gt;OF|3@OF|00:00:00:00:00:00:00:03&lt;/nodePorts&gt;
      * &lt;/subnetConfig&gt;
      *
-     * Response in JSON:
+     * Response body in JSON:
      * {
      *  "name":"marketingdepartment",
      *  "subnet":"30.0.0.1/24",
-     *  "nodeConnectors":["0F|1@OF|00:00:11:22:33:44:55:66", "0F|3@OF|00:00:11:22:33:44:55:66"]
+     *  "nodeConnectors":[
+     *       "OF|1@OF|00:00:00:00:00:00:00:01",
+     *       "OF|3@OF|00:00:00:00:00:00:00:03"
+     *   ]
      * }
      * </pre>
      */
@@ -239,21 +257,25 @@ public class SubnetsNorthbound {
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/salesdepartment
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/salesdepartment
      *
-     * Request XML:
+     * Request body in XML:
      *  &lt;subnetConfig&gt;
      *      &lt;name&gt;salesdepartment&lt;/name&gt;
      *      &lt;subnet&gt;172.173.174.254/24&lt;/subnet&gt;
-     *      &lt;nodeConnectors&gt;0F|22@OF|00:00:11:22:33:44:55:66&gt;/nodeConnectors&gt;
-     *      &lt;nodeConnectors&gt;0F|39@OF|00:00:ab:cd:33:44:55:66&gt;/nodeConnectors&gt;
+     *      &lt;nodeConnectors&gt;OF|22@OF|00:00:11:22:33:44:55:66&lt;/nodeConnectors&gt;
+     *      &lt;nodeConnectors&gt;OF|39@OF|00:00:ab:cd:33:44:55:66&lt;/nodeConnectors&gt;
      *  &lt;/subnetConfig&gt;
      *
-     * Request in JSON:
+     * Request body in JSON:
      * {
      *  "name":"salesdepartment",
-     *  "subnet":"172.173.174.254/24"
-     *  "nodeConnectors":["0F|22@OF|00:00:11:22:33:44:55:66", "0F|39@OF|00:00:ab:cd:33:44:55:66"]
+     *  "subnet":"172.173.174.254/24",
+     *  "nodeConnectors":[
+     *       "OF|22@OF|00:00:11:22:33:44:55:66",
+     *       "OF|39@OF|00:00:ab:cd:33:44:55:66"
+     *       ]
      * }
      * </pre>
      */
@@ -308,9 +330,11 @@ public class SubnetsNorthbound {
      *            name of new subnet to be deleted
      * @return Response as dictated by the HTTP Response Status code
      *
-     *         <pre>
+     * <pre>
      * Example:
-     *            Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/engdepartment
+     *
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/engdepartment
      *
      * </pre>
      */
@@ -361,21 +385,25 @@ public class SubnetsNorthbound {
      *         <pre>
      * Example:
      *
-     * Request URL: http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/salesdepartment
+     * Request URL:
+     * http://localhost:8080/controller/nb/v2/subnetservice/default/subnet/salesdepartment
      *
-     *  Request in XML:
+     *  Request body in XML:
      *  &lt;subnetConfig&gt;
      *      &lt;name&gt;salesdepartment&lt;/name&gt;
      *      &lt;subnet&gt;172.173.174.254/24&lt;/subnet&gt;
-     *      &lt;nodeConnectors&gt;0F|22@OF|00:00:11:22:33:44:55:66&gt;/nodeConnectors&gt;
-     *      &lt;nodeConnectors&gt;0F|39@OF|00:00:ab:cd:33:44:55:66&gt;/nodeConnectors&gt;
+     *      &lt;nodeConnectors&gt;OF|22@OF|00:00:11:22:33:44:55:66&lt;/nodeConnectors&gt;
+     *      &lt;nodeConnectors&gt;OF|39@OF|00:00:ab:cd:33:44:55:66&lt;/nodeConnectors&gt;
      *  &lt;/subnetConfig&gt;
      *
-     * Request in JSON:
+     * Request body in JSON:
      * {
      *  "name":"salesdepartment",
-     *  "subnet":"172.173.174.254/24"
-     *  "nodeConnectors":["0F|22@OF|00:00:11:22:33:44:55:66", "0F|39@OF|00:00:ab:cd:33:44:55:66"]
+     *  "subnet":"172.173.174.254/24",
+     *  "nodeConnectors":[
+     *      "OF|22@OF|00:00:11:22:33:44:55:66",
+     *      "OF|39@OF|00:00:ab:cd:33:44:55:66"
+     *  ]
      * }
      * </pre>
      */

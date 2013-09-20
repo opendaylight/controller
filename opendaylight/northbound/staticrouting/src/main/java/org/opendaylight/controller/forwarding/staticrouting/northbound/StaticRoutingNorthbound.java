@@ -15,7 +15,6 @@ import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,7 +24,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBElement;
 
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -57,7 +55,12 @@ import org.opendaylight.controller.sal.utils.Status;
  * HTTP/1.1 200 OK
  * Content-Type: application/json
  *
- * {"staticRoute":{"name":"route-1","prefix":"10.10.1.0/24","nextHop":"1.1.1.1"}}
+ * { "staticRoute":[
+ *       "name":"route-1",
+ *       "prefix":"10.10.1.0/24",
+ *       "nextHop":"1.1.1.1"
+ *   ]
+ * }
  *
  * </pre>
  *
@@ -114,9 +117,9 @@ public class StaticRoutingNorthbound {
      * Example:
      *
      * Request URL:
-     * GET http://localhost:8080/controller/nb/v2/staticroute/default/routes
+     * http://localhost:8080/controller/nb/v2/staticroute/default/routes
      *
-     * Response in XML:
+     * Response body in XML:
      *  &lt;list&gt;
      *   &lt;staticRoute&gt;
      *     &lt;name&gt;route-1&lt;/name&gt;
@@ -125,9 +128,16 @@ public class StaticRoutingNorthbound {
      *   &lt;/staticRoute&gt;
      *  &lt;/list&gt;
      *
-     * Response in JSON:
-     * {"staticRoute":{"name":"route-1","prefix":"10.10.1.0/24","nextHop":"1.1.1.1"}}
-     *
+     * Response body in JSON:
+     * {
+     *    "staticRoute": [
+     *      {
+     *       "name": "route-1",
+     *       "prefix": "10.10.1.0/24",
+     *       "nextHop": "1.1.1.1"
+     *      }
+     *    ]
+     * }
      * </pre>
      */
     @Path("/{containerName}/routes")
@@ -160,9 +170,9 @@ public class StaticRoutingNorthbound {
      * Example:
      *
      * Request URL:
-     * GET http://localhost:8080/controller/nb/v2/staticroute/default/route/route-1
+     * http://localhost:8080/controller/nb/v2/staticroute/default/route/route-1
      *
-     * Response in XML:
+     * Response body in XML:
      *
      *   &lt;staticRoute&gt;
      *     &lt;name&gt;route-1&lt;/name&gt;
@@ -170,8 +180,12 @@ public class StaticRoutingNorthbound {
      *     &lt;nextHop&gt;1.1.1.1&lt;/nextHop&gt;
      *   &lt;/staticRoute&gt;
      *
-     * Response in JSON:
-     * {"name":"route-1","prefix":"10.10.1.0/24","nextHop":"1.1.1.1"}
+     * Response body in JSON:
+     * {
+     *    "name":"route-1",
+     *    "prefix":"10.10.1.0/24",
+     *    "nextHop":"1.1.1.1"
+     * }
      *
      * </pre>
      */
@@ -216,11 +230,20 @@ public class StaticRoutingNorthbound {
      * Example:
      *
      * Request URL:
-     * PUT http://localhost:8080/controller/nb/v2/staticroute/default/route/route-1
+     * http://localhost:8080/controller/nb/v2/staticroute/default/route/route-1
      *
-     * Request payload in JSON:
-     * {"name":"route-1","prefix":"10.10.1.0/24","nextHop":"1.1.1.1"}
-     *
+     * Request body in XML:
+     * &lt;staticRoute&gt;
+     *   &lt;name&gt;route-1&lt;/name&gt;
+     *   &lt;prefix>10.10.1.0/24&lt;/prefix&gt;
+     *   &lt;nextHop&gt;1.1.1.1&lt;/nextHop&gt;
+     *   &lt;/staticRoute&gt;
+     * Request body in JSON:
+     * {
+     *    "name":"route-1",
+     *    "prefix":"10.10.1.0/24",
+     *    "nextHop":"1.1.1.1"
+     * }
      * </pre>
      */
     @Path("/{containerName}/route/{route}")

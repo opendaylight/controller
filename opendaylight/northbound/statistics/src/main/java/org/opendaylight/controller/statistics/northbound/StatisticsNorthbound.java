@@ -114,7 +114,7 @@ public class StatisticsNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/statistics/default/flow
      *
-     * Response in JSON:
+     * Response body in JSON:
      * {
      *     "flowStatistics": [
      *         {
@@ -171,7 +171,7 @@ public class StatisticsNorthbound {
      *     ]
      * }
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      * &lt;list&gt;
      *     &lt;flowStatistics&gt;
@@ -287,7 +287,7 @@ public class StatisticsNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/statistics/default/flow/node/OF/00:00:00:00:00:00:00:01
      *
-     * Response in JSON:
+     * Response body in JSON:
      * {
      *     "node": {
      *         "id":"00:00:00:00:00:00:00:01",
@@ -340,7 +340,7 @@ public class StatisticsNorthbound {
      *     ]
      * }
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      *     &lt;nodeFlowStatistics&gt;
      *         &lt;node&gt;
@@ -474,7 +474,7 @@ public class StatisticsNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/statistics/default/port
      *
-     * Response in JSON:
+     * Response body in JSON:
      * {
      *     "portStatistics": [
      *         {
@@ -544,7 +544,7 @@ public class StatisticsNorthbound {
      *     ]
      * }
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      * &lt;list&gt;
      *     &lt;portStatistics&gt;
@@ -662,7 +662,7 @@ public class StatisticsNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/statistics/default/port/node/OF/00:00:00:00:00:00:00:01
      *
-     * Response in JSON:
+     * Response body in JSON:
      * {
      *     "node": {
      *         "id":"00:00:00:00:00:00:00:01",
@@ -716,7 +716,7 @@ public class StatisticsNorthbound {
      *     ]
      * }
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      * &lt;nodePortStatistics&gt;
      *     &lt;node&gt;
@@ -825,7 +825,7 @@ public class StatisticsNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/statistics/default/table
      *
-     * Response in JSON:
+     * Response body in JSON:
      * {
      *     "tableStatistics": [
      *         {
@@ -857,7 +857,7 @@ public class StatisticsNorthbound {
      *     ]
      * }
      *
-     *  Response in XML:
+     *  Response body in XML:
      *  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      *  &lt;list&gt;
      *  &lt;tableStatistics&gt;
@@ -970,7 +970,7 @@ public class StatisticsNorthbound {
      * Request URL:
      * http://localhost:8080/controller/nb/v2/statistics/default/table/node/OF/00:00:00:00:00:00:00:01
      *
-     * Response in JSON:
+     * Response body in JSON:
      * {
      *     "node": {
      *         "id":"00:00:00:00:00:00:00:01",
@@ -1004,7 +1004,7 @@ public class StatisticsNorthbound {
      *    ]
      * }
      *
-     * Response in XML:
+     * Response body in XML:
      * &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
      * &lt;nodeTableStatistics&gt;
      *     &lt;node&gt;
