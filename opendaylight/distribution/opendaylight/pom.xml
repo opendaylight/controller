@@ -104,6 +104,11 @@
     <module>../../web/troubleshoot</module>
     <module>../../web/topology</module>
 
+    <!--  Neutron -->
+    <module>../../networkconfiguration/neutron</module>
+    <module>../../networkconfiguration/neutron/implementation</module>
+    <module>../../northbound/networkconfiguration/neutron</module>
+
     <!-- Northbound bundles -->
     <module>../../northbound/commons</module>
     <module>../../northbound/bundlescanner/api</module>
