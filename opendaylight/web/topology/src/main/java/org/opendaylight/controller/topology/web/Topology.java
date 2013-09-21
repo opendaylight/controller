@@ -193,7 +193,11 @@ public class Topology implements IObjectReader, IConfigurationAware {
                 if (edgeIgnore(link)) {
                     continue;
                 }
-                for (Property p : properties.get(link)) {
+                Set<Property> props = properties.get(link);
+                if (props == null) {
+                    continue;
+                }
+                for (Property p : props) {
                     if (p instanceof Bandwidth) {
                         bandwidth = (Bandwidth) p;
                         break;
