@@ -32,7 +32,7 @@ public class MatchField implements Cloneable, Serializable {
     private Object value; // the value of the field we want to match
     private Object mask; // the value of the mask we want to match on the
     // specified field
-    private transient boolean isValid;
+    private boolean isValid;
 
     // To satisfy JAXB
     @SuppressWarnings("unused")
