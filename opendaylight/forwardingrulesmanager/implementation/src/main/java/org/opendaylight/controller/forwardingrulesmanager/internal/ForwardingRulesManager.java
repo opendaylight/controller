@@ -2462,6 +2462,14 @@ public class ForwardingRulesManager implements
                             } else {
                                 log.warn("Not expected null WorkStatus", work);
                             }
+                        }  else if (event instanceof ContainerFlowChangeEvent) {
+                            /*
+                             * Whether it is an addition or removal, we have to
+                             * recompute the merged flows entries taking into
+                             * account all the current container flows because
+                             * flow merging is not an injective function
+                             */
+                            updateFlowsContainerFlow();
                         } else {
                             log.warn("Dequeued unknown event {}", event.getClass()
                                     .getSimpleName());
@@ -2560,12 +2568,8 @@ public class ForwardingRulesManager implements
         }
         log.trace("Container {}: Updating installed flows because of container flow change: {} {}",
                 container.getName(), t, current);
-        /*
-         * Whether it is an addition or removal, we have to recompute the merged
-         * flows entries taking into account all the current container flows
-         * because flow merging is not an injective function
-         */
-        updateFlowsContainerFlow();
+        ContainerFlowChangeEvent ev = new ContainerFlowChangeEvent(previous, current, t);
+        pendingEvents.offer(ev);
     }
 
     @Override
@@ -2733,6 +2737,30 @@ public class ForwardingRulesManager implements
             return newEntry;
         }
     }
+    private class ContainerFlowChangeEvent extends FRMEvent {
+        private final ContainerFlow previous;
+        private final ContainerFlow current;
+        private final UpdateType type;
+
+        public ContainerFlowChangeEvent(ContainerFlow previous, ContainerFlow current, UpdateType type) {
+            this.previous = previous;
+            this.current = current;
+            this.type = type;
+        }
+
+        public ContainerFlow getPrevious() {
+            return this.previous;
+        }
+
+        public ContainerFlow getCurrent() {
+            return this.current;
+        }
+
+        public UpdateType getType() {
+            return this.type;
+        }
+    }
+
 
     private class WorkStatusCleanup extends FRMEvent {
         private FlowEntryDistributionOrder fe;
