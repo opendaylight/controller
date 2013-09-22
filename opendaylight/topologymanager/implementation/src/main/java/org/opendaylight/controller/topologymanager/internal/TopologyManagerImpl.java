@@ -918,10 +918,10 @@ public class TopologyManagerImpl implements
                     // Lets sleep for sometime to allow aggregation of event
                     Thread.sleep(100);
                 } catch (InterruptedException e1) {
-                    log.warn("TopologyNotify interrupted {}", e1.getMessage());
                     if (shuttingDown) {
                         return;
                     }
+                    log.warn("TopologyNotify interrupted {}", e1.getMessage());
                 } catch (Exception e2) {
                     log.error("", e2);
                 }

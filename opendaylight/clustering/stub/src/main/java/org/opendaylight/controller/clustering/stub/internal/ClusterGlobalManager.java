@@ -18,4 +18,6 @@ public class ClusterGlobalManager extends ClusterManagerCommon implements
     public ClusterGlobalManager() throws UnknownHostException {
         super();
     }
+    public void removeContainerCaches(String containerName) {
+    }
 }
