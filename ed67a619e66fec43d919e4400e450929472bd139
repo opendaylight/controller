@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_c92b4681",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-22T13:29:56Z",
+      "side": 1,
+      "message": "Ryan, we already have this dependency, just defined above. Please remove it.",
+      "revId": "ed67a619e66fec43d919e4400e450929472bd139",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a2f8d8d_a920fa9b",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-09-22T13:29:56Z",
+      "side": 1,
+      "message": "This is actually not needed because comes from the commons.opendaylight, here we express the dependencies across modules that are built in the same reactor (usually) or dependencies that are embedded in the artifact. Nothing wrong with it, but the issue pop-up if for example need to use a more recent version of commons-net.",
+      "revId": "ed67a619e66fec43d919e4400e450929472bd139",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
