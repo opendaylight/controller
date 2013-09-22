@@ -28,15 +28,6 @@ public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
             .getLogger(Activator.class);
 
-    @Override
-    protected void init() {
-
-    }
-
-    @Override
-    protected void destroy() {
-
-    }
 
     /**
      * Function that is used to communicate to dependency manager the list of

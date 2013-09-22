@@ -28,24 +28,6 @@ public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
             .getLogger(Activator.class);
 
-    /**
-     * Function called when the activator starts just after some
-     * initializations are done by the
-     * ComponentActivatorAbstractBase.
-     *
-     */
-    public void init() {
-
-    }
-
-    /**
-     * Function called when the activator stops just before the
-     * cleanup done by ComponentActivatorAbstractBase
-     *
-     */
-    public void destroy() {
-
-    }
 
     /**
      * Function that is used to communicate to dependency manager the

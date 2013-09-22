@@ -30,26 +30,6 @@ public class Activator extends ComponentActivatorAbstractBase {
             .getLogger(Activator.class);
 
     /**
-     * Function called when the activator starts just after some
-     * initializations are done by the
-     * ComponentActivatorAbstractBase.
-     *
-     */
-    @Override
-    public void init() {
-    }
-
-    /**
-     * Function called when the activator stops just before the
-     * cleanup done by ComponentActivatorAbstractBase
-     *
-     */
-    @Override
-    public void destroy() {
-
-    }
-
-    /**
      * Function that is used to communicate to dependency manager the
      * list of known implementations for services inside a container
      *
