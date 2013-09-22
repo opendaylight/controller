@@ -26,4 +26,5 @@ package org.opendaylight.controller.clustering.services;
  *
  */
 public interface IClusterGlobalServices extends IClusterServicesCommon {
+    public void removeContainerCaches(String containerName);
 }

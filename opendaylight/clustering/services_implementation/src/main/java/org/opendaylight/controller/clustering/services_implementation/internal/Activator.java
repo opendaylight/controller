@@ -10,7 +10,6 @@
 package org.opendaylight.controller.clustering.services_implementation.internal;
 
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
-import org.opendaylight.controller.sal.core.IContainerAware;
 
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
@@ -128,7 +127,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     public void configureGlobalInstance(Component c, Object imp) {
         if (imp.equals(ClusterManager.class)) {
             // export the service for Apps and Plugins
-            c.setInterface(new String[] { IClusterServices.class.getName(), IContainerAware.class.getName() }, null);
+            c.setInterface(new String[] { IClusterServices.class.getName() }, null);
         }
 
         if (imp.equals(ClusterGlobalManager.class)) {

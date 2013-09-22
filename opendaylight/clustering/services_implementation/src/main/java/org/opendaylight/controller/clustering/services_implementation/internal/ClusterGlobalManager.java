@@ -41,4 +41,13 @@ public class ClusterGlobalManager
         }
         super.unsetCacheUpdateAware(props, s);
     }
+
+    @Override
+    public void removeContainerCaches(String containerName) {
+        logger.debug("Removing caches for container {}", containerName);
+        for (String cacheName : clusterService.getCacheList(containerName)) {
+            clusterService.destroyCache(containerName, cacheName);
+        }
+    }
+
 }

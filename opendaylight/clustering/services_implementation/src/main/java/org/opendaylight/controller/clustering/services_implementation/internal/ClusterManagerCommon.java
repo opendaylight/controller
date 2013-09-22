@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class ClusterManagerCommon implements IClusterServicesCommon {
     protected String containerName = null;
-    private IClusterServices clusterService = null;
+    protected IClusterServices clusterService = null;
     protected static final Logger logger = LoggerFactory
             .getLogger(ClusterManagerCommon.class);
     private ConcurrentMap<String, GetUpdatesContainer> cacheUpdateAware =

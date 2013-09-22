@@ -1182,6 +1182,7 @@ public class ContainerManager extends Authorization<String> implements IContaine
             }
         }
 
+        if (delete) clusterServices.removeContainerCaches(containerName);
         return status;
     }
 

@@ -55,11 +55,10 @@ import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.clustering.services.IGetUpdates;
 import org.opendaylight.controller.clustering.services.IListenRoleChange;
 import org.opendaylight.controller.clustering.services.ListenRoleChangeAddException;
-import org.opendaylight.controller.sal.core.IContainerAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClusterManager implements IClusterServices, IContainerAware {
+public class ClusterManager implements IClusterServices {
     protected static final Logger logger = LoggerFactory
             .getLogger(ClusterManager.class);
     private DefaultCacheManager cm;
@@ -371,6 +370,7 @@ public class ClusterManager implements IClusterServices, IContainerAware {
             return null;
         }
         for (String cacheName : manager.getCacheNames()) {
+            if (!manager.isRunning(cacheName)) continue;
             if (cacheName.startsWith("{" + containerName + "}_")) {
                 String[] res = cacheName.split("[{}]");
                 if (res.length >= 4 && res[1].equals(containerName)
@@ -675,22 +675,5 @@ public class ClusterManager implements IClusterServices, IContainerAware {
                 i.newActiveAvailable();
             }
         }
-    }
-
-    private void removeContainerCaches(String containerName) {
-        logger.info("Destroying caches for container {}", containerName);
-        for (String cacheName : this.getCacheList(containerName)) {
-            this.destroyCache(containerName, cacheName);
-        }
-    }
-
-    @Override
-    public void containerCreate(String arg0) {
-        // no op
-    }
-
-    @Override
-    public void containerDestroy(String container) {
-        removeContainerCaches(container);
     }
 }
