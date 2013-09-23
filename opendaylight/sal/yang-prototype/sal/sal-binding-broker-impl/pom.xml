@@ -90,7 +90,7 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>5.0.0</version>
+            <version>${osgi.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
