@@ -214,7 +214,8 @@ public class ForwardingRulesManager implements
      * @return a Future object for monitoring the progress of the result, or
      *         null in case the processing should take place locally
      */
-    private Future<Status> distributeWorkOrder(FlowEntryInstall e, FlowEntryInstall u, UpdateType t) {
+    private FlowEntryDistributionOrderFutureTask distributeWorkOrder(FlowEntryInstall e, FlowEntryInstall u,
+            UpdateType t) {
         // A null entry it's an unexpected condition, anyway it's safe to keep
         // the handling local
         if (e == null) {
@@ -544,11 +545,17 @@ public class ForwardingRulesManager implements
      *         contain the unique id assigned to this request
      */
     private Status modifyEntryInternal(FlowEntryInstall currentEntries, FlowEntryInstall newEntries, boolean async) {
-        Future<Status> futureStatus = distributeWorkOrder(currentEntries, newEntries, UpdateType.CHANGED);
+        FlowEntryDistributionOrderFutureTask futureStatus =
+                distributeWorkOrder(currentEntries, newEntries, UpdateType.CHANGED);
         if (futureStatus != null) {
             Status retStatus = new Status(StatusCode.UNDEFINED);
             try {
                 retStatus = futureStatus.get();
+                if (retStatus.getCode()
+                        .equals(StatusCode.TIMEOUT)) {
+                    // A timeout happened, lets cleanup the workMonitor
+                    workMonitor.remove(futureStatus.getOrder());
+                }
             } catch (InterruptedException e) {
                 log.error("", e);
             } catch (ExecutionException e) {
@@ -656,11 +663,16 @@ public class ForwardingRulesManager implements
      *         contain the unique id assigned to this request
      */
     private Status removeEntryInternal(FlowEntryInstall entry, boolean async) {
-        Future<Status> futureStatus = distributeWorkOrder(entry, null, UpdateType.REMOVED);
+        FlowEntryDistributionOrderFutureTask futureStatus = distributeWorkOrder(entry, null, UpdateType.REMOVED);
         if (futureStatus != null) {
             Status retStatus = new Status(StatusCode.UNDEFINED);
             try {
                 retStatus = futureStatus.get();
+                if (retStatus.getCode()
+                        .equals(StatusCode.TIMEOUT)) {
+                    // A timeout happened, lets cleanup the workMonitor
+                    workMonitor.remove(futureStatus.getOrder());
+                }
             } catch (InterruptedException e) {
                 log.error("", e);
             } catch (ExecutionException e) {
@@ -704,11 +716,16 @@ public class ForwardingRulesManager implements
      *         contain the unique id assigned to this request
      */
     private Status addEntriesInternal(FlowEntryInstall entry, boolean async) {
-        Future<Status> futureStatus = distributeWorkOrder(entry, null, UpdateType.ADDED);
+        FlowEntryDistributionOrderFutureTask futureStatus = distributeWorkOrder(entry, null, UpdateType.ADDED);
         if (futureStatus != null) {
             Status retStatus = new Status(StatusCode.UNDEFINED);
             try {
                 retStatus = futureStatus.get();
+                if (retStatus.getCode()
+                        .equals(StatusCode.TIMEOUT)) {
+                    // A timeout happened, lets cleanup the workMonitor
+                    workMonitor.remove(futureStatus.getOrder());
+                }
             } catch (InterruptedException e) {
                 log.error("", e);
             } catch (ExecutionException e) {
@@ -3164,7 +3181,7 @@ public class ForwardingRulesManager implements
              */
             if (fe.getRequestorController()
                     .equals(clusterContainerService.getMyAddress())) {
-                FlowEntryDistributionOrderFutureTask fet = workMonitor.get(fe);
+                FlowEntryDistributionOrderFutureTask fet = workMonitor.remove(fe);
                 if (fet != null) {
                     logsync.trace("workStatus response is for us {}", fe);
                     // Signal we got the status
