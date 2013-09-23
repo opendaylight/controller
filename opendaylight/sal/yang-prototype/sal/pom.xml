@@ -29,6 +29,7 @@
 		<maven.bundle.version>2.4.0</maven.bundle.version>
         <releaseplugin.version>2.3.2</releaseplugin.version>
         <guava.version>14.0.1</guava.version>
+        <junit.version>4.8.1</junit.version>
 	</properties>
 
     <pluginRepositories>
@@ -146,7 +147,8 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.10</version>
+				<version>${junit.version}</version>
+                <scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.opendaylight.yangtools</groupId>
@@ -178,12 +180,6 @@
 	</dependencyManagement>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-			<optional>true</optional>
-		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>

@@ -56,6 +56,7 @@
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <commons.lang.version>3.1</commons.lang.version>
     <jacoco.version>0.5.3.201107060350</jacoco.version>
+    <junit.version>4.8.1</junit.version>
   </properties>
 
   <pluginRepositories>
@@ -576,6 +577,17 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>${junit.version}</version>
+          <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
