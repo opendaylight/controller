@@ -25,6 +25,8 @@
         <module>samples</module>
         <!-- Base Models -->
         <module>model</module>
+        <!-- Compability Packages -->
+        <module>sal-compability</module>
 	</modules>
 
 	<properties>
