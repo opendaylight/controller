@@ -36,6 +36,10 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
     private CountDownLatch waitingLatch;
     private Status retStatus;
     private static final Logger logger = LoggerFactory.getLogger(FlowEntryDistributionOrderFutureTask.class);
+    // Don't wait forever to program, rather timeout if there are issues, and
+    // log an error
+    private long timeout;
+    private static final Long DEFAULTTIMEOUT = 30000L;
 
     /**
      * @param order
@@ -49,6 +53,14 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
         this.waitingLatch = new CountDownLatch(1);
         // No return status yet!
         this.retStatus = new Status(StatusCode.UNDEFINED);
+        // Set the timeout
+        String strTimeout = System.getProperty("FlowEntryDistributionOrderFutureTask.timeout",
+                                               DEFAULTTIMEOUT.toString());
+        try {
+            timeout = Long.parseLong(strTimeout);
+        } catch (Exception e) {
+            timeout = DEFAULTTIMEOUT;
+        }
     }
 
     @Override
@@ -58,6 +70,7 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
 
     @Override
     public Status get() throws InterruptedException, ExecutionException {
+        boolean didFinish = false;
         logger.trace("Getting status for order {}", this.order);
         // If i'm done lets return the status as many times as caller wants
         if (this.waitingLatch.getCount() == 0L) {
@@ -67,16 +80,22 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
 
         logger.trace("Start waiting for status to come back");
         // Wait till someone signal that we are done
-        this.waitingLatch.await();
+        didFinish = this.waitingLatch.await(this.timeout, TimeUnit.MILLISECONDS);
 
-        logger.trace("Waiting for the status is over, returning it");
-        // Return the known status
-        return retStatus;
+        if (didFinish) {
+            logger.trace("Waiting for the status of order {} is over, returning it", this.order);
+            // Return the known status
+            return retStatus;
+        } else {
+            logger.error("Timing out, the workStatus for order {} has not come back in time!", this.order);
+            return new Status(StatusCode.TIMEOUT);
+        }
     }
 
     @Override
     public Status get(long timeout, TimeUnit unit) throws InterruptedException,
             ExecutionException, TimeoutException {
+        boolean didFinish = false;
         logger.trace("Getting status for order {}", this.order);
         // If i'm done lets return the status as many times as caller wants
         if (this.waitingLatch.getCount() == 0L) {
@@ -86,11 +105,18 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
 
         logger.trace("Start waiting for status to come back");
         // Wait till someone signal that we are done
-        this.waitingLatch.await(timeout, unit);
+        didFinish = this.waitingLatch.await(timeout, unit);
 
-        logger.trace("Waiting for the status is over, returning it");
-        // Return the known status, could also be null if didn't return
-        return retStatus;
+        if (didFinish) {
+            logger.trace("Waiting for the status is over, returning it");
+            // Return the known status, could also be null if didn't return
+            return retStatus;
+        } else {
+            // No need to bark here as long as this routine could indeed
+            // timeout
+            logger.trace("Timing out, the workStatus for order {} has not come back in time!", this.order);
+            return new Status(StatusCode.TIMEOUT);
+        }
     }
 
     @Override
@@ -122,5 +148,13 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
         // Now we are not waiting any longer
         this.waitingLatch.countDown();
         logger.trace("Unlocked the Future");
+    }
+
+    /**
+     * Getter for the workOrder for which the order is waiting for
+     * @return the order
+     */
+    public FlowEntryDistributionOrder getOrder() {
+        return order;
     }
 }
