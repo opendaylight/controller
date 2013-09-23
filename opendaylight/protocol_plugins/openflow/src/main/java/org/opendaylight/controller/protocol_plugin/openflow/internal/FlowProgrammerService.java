@@ -448,7 +448,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         for (Map.Entry<String, IFlowProgrammerNotifier> containerNotifier : flowProgrammerNotifiers
                 .entrySet()) {
             IFlowProgrammerNotifier notifier = containerNotifier.getValue();
-            notifier.flowErrorReported(node, rid, errorMsg);
+            notifier.flowErrorReported(node, rid, Utils.getOFErrorString(errorMsg));
         }
     }
 

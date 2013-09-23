@@ -3067,11 +3067,18 @@ public class ForwardingRulesManager implements
          * mapping will have to be added in future
          */
         FlowEntryInstall target = null;
-        for (FlowEntryInstall index : nodeFlows.get(node)) {
-            FlowEntryInstall entry = installedSwView.get(index);
-            if (entry.getRequestId() == rid) {
-                target = entry;
-                break;
+        List<FlowEntryInstall> flowEntryInstallList = nodeFlows.get(node);
+        // flowEntryInstallList could be null.
+        // so check for it.
+        if(flowEntryInstallList != null) {
+            for (FlowEntryInstall index : flowEntryInstallList) {
+                FlowEntryInstall entry = installedSwView.get(index);
+                if(entry != null) {
+                    if (entry.getRequestId() == rid) {
+                        target = entry;
+                        break;
+                    }
+                }
             }
         }
         if (target != null) {
