@@ -356,12 +356,12 @@ public class Controller implements IController, CommandProvider, IPluginInConnec
             String keyStoreFile = System.getProperty("controllerKeyStore");
             String trustStoreFile = System.getProperty("controllerTrustStore");
             if ((keyStoreFile == null) || keyStoreFile.trim().isEmpty()) {
-                ci.print("controllerKeyStore not specified in ./configuration/config.ini\n");
+                ci.print("controllerKeyStore not specified\n");
             } else {
                 ci.print("controllerKeyStore=" + keyStoreFile + "\n");
             }
             if ((trustStoreFile == null) || trustStoreFile.trim().isEmpty()) {
-                ci.print("controllerTrustStore not specified in ./configuration/config.ini\n");
+                ci.print("controllerTrustStore not specified\n");
             } else {
                 ci.print("controllerTrustStore=" + trustStoreFile + "\n");
             }
