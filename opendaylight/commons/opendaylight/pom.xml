@@ -28,6 +28,7 @@
     <siteplugin>3.2</siteplugin>
     <projectinfo>2.6</projectinfo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <compiler.version>2.3.2</compiler.version>
     <surefire.version>2.15</surefire.version>
     <failsafe.version>2.15</failsafe.version>
