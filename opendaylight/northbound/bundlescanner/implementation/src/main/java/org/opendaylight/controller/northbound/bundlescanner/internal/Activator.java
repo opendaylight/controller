@@ -18,14 +18,6 @@ import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 public class Activator extends ComponentActivatorAbstractBase {
 
     @Override
-    protected void init() {
-    }
-
-    @Override
-    protected void destroy() {
-    }
-
-    @Override
     protected Object[] getGlobalImplementations() {
         return new Object[] { BundleScanServiceImpl.class };
     }

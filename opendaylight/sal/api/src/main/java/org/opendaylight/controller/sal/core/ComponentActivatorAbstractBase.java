@@ -49,18 +49,20 @@ abstract public class ComponentActivatorAbstractBase implements
     private ConcurrentMap<Object, Component> dbGlobalInstances = (ConcurrentMap<Object, Component>) new ConcurrentHashMap<Object, Component>();
 
     /**
-     * Abstract method that MUST be implemented by the derived class
-     * that wants to activate the Component bundle in a container. Here
-     * customization for the component are expected
+     * Method that should be overriden by the derived class for customization
+     * during activation of the Component bundle in a container.
      */
-    abstract protected void init();
+    protected void init() {
+
+    }
 
     /**
-     * Abstract method that MUST be implemented by the derived class
-     * that wants to DE-activate the Component bundle in a container. Here
-     * customization for the component are expected
+     * Method that should be overriden by the derived class for customization
+     * during DE-activation of the Component bundle in a container.
      */
-    abstract protected void destroy();
+    public void destroy() {
+
+    }
 
     /**
      * Method which tells how many implementations are supported by
