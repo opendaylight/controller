@@ -120,7 +120,13 @@
 		<repository>
 			<id>jboss.releases</id>
 			<name>jboss.releases</name>
-			<url>${nexusproxy}/repositories/jboss.releases/</url>
+            <url>${nexusproxy}/repositories/jboss.releases/</url>
+            <snapshots>
+              <enabled>false</enabled>
+            </snapshots>
+            <releases>
+              <enabled>true</enabled>
+            </releases>
 		</repository>
 		<!-- OpenDayLight Released artifact -->
 		
