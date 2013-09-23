@@ -326,9 +326,9 @@ one.f.switchmanager.nodesLearnt = {
                         if (portsMatch != null) {
                             portsLength = portsMatch.length;
                         }
-                        item.ports = '<span class="nodePorts" style="cursor:pointer;color: #08c" ports='+encodeURIComponent(JSON.stringify(item.ports)) + ' nodeId=' + item.nodeId 
-                            + ' nodeName=' + nodeName  
-                            + '>' + portsLength +'</span>';
+                        item.ports = '<span class="nodePorts" style="cursor:pointer;color: #08c" ports='+encodeURIComponent(JSON.stringify(item.ports)) + ' nodeId="' + item.nodeId
+                            + '" nodeName="' + nodeName
+                            + '">' + portsLength +'</span>';
                     }); 
                     },
                     delay: 0
@@ -374,9 +374,9 @@ one.f.switchmanager.nodesLearnt = {
                             if (portsMatch != null) {
                                 portsLength = portsMatch.length;
                             }
-                            item.ports = '<span class="nodePorts" style="cursor: pointer;color: #08c" ports='+encodeURIComponent(JSON.stringify(item.ports)) + ' nodeId=' + item.nodeId 
-                                + ' nodeName=' + item.nodeName  
-                                + '>' + portsLength +'</span>';
+                            item.ports = '<span class="nodePorts" style="cursor: pointer;color: #08c" ports='+encodeURIComponent(JSON.stringify(item.ports)) + ' nodeId="' + item.nodeId
+                                + '" nodeName="' + item.nodeName
+                                + '">' + portsLength +'</span>';
                         }); 
                     },
                     delay: 0
@@ -808,17 +808,17 @@ one.f.switchmanager.subnetGatewayConfig = {
                     data: data.nodeData,
                     formatter: function(items) {
                         $.each(items, function(index, tableRow) {
-                            tableRow["selector"] = '<input type="checkbox" class="subnetGatewayConfig" id=' 
-                                + tableRow["name"] + '></input>';
+                            tableRow["selector"] = '<input type="checkbox" class="subnetGatewayConfig" id="'
+                                + tableRow["name"] + '"></input>';
                             var json = tableRow["nodePorts"];
                             var nodePorts = JSON.parse(json);
                             var nodePortHtml = "<div>";
                             $.each(nodePorts, function(index, nodePort) {
                                 nodePortHtml += nodePort["nodePortName"] + " @ " + nodePort["nodeName"];
                                 nodePortHtml += "&nbsp;";
-                                nodePortHtml += '<a href="#" id=' + encodeURIComponent(nodePort["nodePortId"]) + 
-                                    ' gatewayName=' + tableRow["name"] + 
-                                    ' onclick="javascript:one.f.switchmanager.subnetGatewayConfig.actions.deleteNodePort(this);">Remove</a>';
+                                nodePortHtml += '<a href="#" id="' + encodeURIComponent(nodePort["nodePortId"]) +
+                                    '" gatewayName="' + tableRow["name"] +
+                                    '" onclick="javascript:one.f.switchmanager.subnetGatewayConfig.actions.deleteNodePort(this);">Remove</a>';
                                 nodePortHtml += "<br/>";
                             });
                             nodePortHtml += "</div>";
@@ -1159,7 +1159,7 @@ one.f.switchmanager.staticRouteConfig = {
                     data: data.nodeData,
                     formatter: function(items) {
                         $.each(items, function(index, item) {
-                            item["selector"] = '<input type="checkbox" class="staticRoute" id=' + item["name"] + '></input>';
+                            item["selector"] = '<input type="checkbox" class="staticRoute" id="' + item["name"] + '"></input>';
                         });
 
                     },
@@ -1470,7 +1470,7 @@ one.f.switchmanager.spanPortConfig = {
                     data: data.nodeData,
                     formatter: function(items) {
                         $.each(items, function(index, item) {
-                            item["selector"] = '<input type="checkbox" class="spanPortConfig" spanPort=' + encodeURIComponent(item["json"]) + ' spanPortNode=' + item["nodeName"] + ' spanPortPort=' + item["spanPortName"] + '></input>';
+                            item["selector"] = '<input type="checkbox" class="spanPortConfig" spanPort=' + encodeURIComponent(item["json"]) + ' spanPortNode="' + item["nodeName"] + '" spanPortPort="' + item["spanPortName"] + '"></input>';
                         });
                     },
                     delay: 0
