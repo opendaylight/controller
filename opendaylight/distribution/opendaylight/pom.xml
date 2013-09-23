@@ -36,7 +36,7 @@
       </activation>
       <modules>
         <!-- MD-SAL bundles -->
-        <module>../../sal/yang-prototype</module>
+        <module>../../md-sal</module>
       </modules>
     </profile>
   </profiles>
