@@ -7,18 +7,15 @@
  */
 package org.opendaylight.controller.sample.toaster.provider.impl;
 
-import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareConsumer;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.common.GlobalDataStore;
 import org.opendaylight.controller.sample.toaster.provider.api.ToastConsumer;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
@@ -30,7 +27,6 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,15 +74,6 @@ public class ToastConsumerImpl extends AbstractBindingAwareConsumer implements B
         notificationService.addNotificationListener(ToastDone.class, this);
         
         
-    }
-
-    private void loadToasterData() {
-        // We request data store service implementation
-        DataBrokerService brokerService = session.getSALService(DataBrokerService.class);
-        
-        ToasterData data = brokerService.getData(GlobalDataStore.RuntimeInfo, ToasterData.class);
-        Toaster toaster = data.getToaster();
-        log.info("Available toaster is: ", toaster.getToasterManufacturer(),toaster.getToasterModelNumber());
     }
 
     @Override
