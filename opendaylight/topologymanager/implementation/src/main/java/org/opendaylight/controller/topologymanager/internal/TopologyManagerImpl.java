@@ -79,7 +79,6 @@ public class TopologyManagerImpl implements
     static final String TOPONODECONNECTORDB = "topologymanager.nodeConnectorDB";
     static final String TOPOUSERLINKSDB = "topologymanager.userLinksDB";
     private static final Logger log = LoggerFactory.getLogger(TopologyManagerImpl.class);
-    private static final String SAVE = "Save";
     private ITopologyService topoService;
     private IClusterContainerServices clusterContainerService;
     // DB of all the Edges with properties which constitute our topology
