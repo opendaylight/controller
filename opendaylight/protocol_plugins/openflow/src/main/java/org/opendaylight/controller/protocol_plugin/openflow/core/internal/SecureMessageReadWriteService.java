@@ -88,29 +88,25 @@ public class SecureMessageReadWriteService implements IMessageReadWrite {
             keyStoreFile = keyStoreFile.trim();
         }
         if ((keyStoreFile == null) || keyStoreFile.isEmpty()) {
-            throw new FileNotFoundException(
-                    "controllerKeyStore not specified in ./configuration/config.ini");
+            throw new FileNotFoundException("TLS KeyStore file not found.");
         }
         if (keyStorePassword != null) {
             keyStorePassword = keyStorePassword.trim();
         }
         if ((keyStorePassword == null) || keyStorePassword.isEmpty()) {
-            throw new FileNotFoundException(
-                    "controllerKeyStorePassword not specified in ./configuration/config.ini");
+            throw new FileNotFoundException("TLS KeyStore Password not provided.");
         }
         if (trustStoreFile != null) {
             trustStoreFile = trustStoreFile.trim();
         }
         if ((trustStoreFile == null) || trustStoreFile.isEmpty()) {
-            throw new FileNotFoundException(
-                    "controllerTrustStore not specified in ./configuration/config.ini");
+            throw new FileNotFoundException("TLS TrustStore file not found");
         }
         if (trustStorePassword != null) {
             trustStorePassword = trustStorePassword.trim();
         }
         if ((trustStorePassword == null) || trustStorePassword.isEmpty()) {
-            throw new FileNotFoundException(
-                    "controllerTrustStorePassword not specified in ./configuration/config.ini");
+            throw new FileNotFoundException("TLS TrustStore Password not provided.");
         }
 
         KeyStore ks = KeyStore.getInstance("JKS");
