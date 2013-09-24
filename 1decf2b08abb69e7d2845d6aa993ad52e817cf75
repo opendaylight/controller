@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_b0bbb7c3",
+        "filename": "opendaylight/clustering/services_implementation/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-09-24T09:49:21Z",
+      "side": 1,
+      "message": "Can you please add a comment here stating the need to enforce this version ?\nJust that folks in the future dont blindly change just the versions and not update the file that forced us to enforce this version :-)",
+      "revId": "1decf2b08abb69e7d2845d6aa993ad52e817cf75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
