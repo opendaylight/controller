@@ -12,43 +12,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.opendaylight.controller.sal.action.Controller;
-import org.opendaylight.controller.sal.action.Drop;
-import org.opendaylight.controller.sal.action.Flood;
-import org.opendaylight.controller.sal.action.FloodAll;
-import org.opendaylight.controller.sal.action.HwPath;
-import org.opendaylight.controller.sal.action.Loopback;
-import org.opendaylight.controller.sal.action.Output;
-import org.opendaylight.controller.sal.action.PopVlan;
-import org.opendaylight.controller.sal.action.PushVlan;
-import org.opendaylight.controller.sal.action.SetDlDst;
-import org.opendaylight.controller.sal.action.SetDlSrc;
-import org.opendaylight.controller.sal.action.SetDlType;
-import org.opendaylight.controller.sal.action.SetNextHop;
-import org.opendaylight.controller.sal.action.SetNwDst;
-import org.opendaylight.controller.sal.action.SetNwSrc;
-import org.opendaylight.controller.sal.action.SetNwTos;
-import org.opendaylight.controller.sal.action.SetTpDst;
-import org.opendaylight.controller.sal.action.SetTpSrc;
-import org.opendaylight.controller.sal.action.SetVlanCfi;
-import org.opendaylight.controller.sal.action.SetVlanId;
-import org.opendaylight.controller.sal.action.SetVlanPcp;
-import org.opendaylight.controller.sal.action.SwPath;
+import org.opendaylight.controller.sal.action.*;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.*;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.ControllerActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.OutputActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.VlanCfi;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.Address;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv4Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv6Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
@@ -59,14 +37,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.ethernet.match.fields.EthernetDestinationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.ethernet.match.fields.EthernetSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.ethernet.match.fields.EthernetTypeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.EthernetMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.EthernetMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.IpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.IpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.Layer3Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.Layer4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.VlanMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.VlanMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.ArpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv6MatchBuilder;
@@ -120,15 +91,15 @@ public class FromSalConversionsUtils {
         if (sourceAction instanceof Controller) {
             targetAction = new ControllerActionBuilder().build();
         } else if (sourceAction instanceof Drop) {
-            // TODO: define maping
+            targetAction = new DropActionBuilder().build();
         } else if (sourceAction instanceof Flood) {
-            // TODO: define maping
+            targetAction = new FloodActionBuilder().build();
         } else if (sourceAction instanceof FloodAll) {
-            // TODO: define maping
+            targetAction = new FloodAllActionBuilder().build();
         } else if (sourceAction instanceof HwPath) {
-            // TODO: define maping
+            targetAction = new HwPathActionBuilder().build();
         } else if (sourceAction instanceof Loopback) {
-            // TODO: define maping
+            targetAction = new LoopbackActionBuilder().build();
         } else if (sourceAction instanceof Output) {
             NodeConnector nodeConnector = ((Output) sourceAction).getPort();
 
@@ -137,40 +108,120 @@ public class FromSalConversionsUtils {
             targetAction = outputActionBuilder.build();
 
         } else if (sourceAction instanceof PopVlan) {
-            // TODO: define maping
+            targetAction = new PopVlanActionBuilder().build();
         } else if (sourceAction instanceof PushVlan) {
-            // TODO: define maping
+            PushVlan pushVlan = (PushVlan) sourceAction;
+            PushVlanActionBuilder pushVlanActionBuilder = new PushVlanActionBuilder();
+
+            pushVlanActionBuilder.setCfi(new VlanCfi(pushVlan.getCfi()));
+            pushVlanActionBuilder.setVlanId(new VlanId(pushVlan.getVlanId()));
+            pushVlanActionBuilder.setPcp(pushVlan.getPcp());
+            pushVlanActionBuilder.setTag(pushVlan.getTag());
+            targetAction = pushVlanActionBuilder.build();
         } else if (sourceAction instanceof SetDlDst) {
-            // TODO: define maping
+            SetDlDst setDlDst = (SetDlDst) sourceAction;
+            SetDlDstActionBuilder setDlDstActionBuilder = new SetDlDstActionBuilder();
+
+            setDlDstActionBuilder.setAddress(new MacAddress(Arrays.toString(setDlDst.getDlAddress())));
+            targetAction = setDlDstActionBuilder.build();
         } else if (sourceAction instanceof SetDlSrc) {
-            // TODO: define maping
+            SetDlSrc setDlSrc = (SetDlSrc) sourceAction;
+            SetDlSrcActionBuilder setDlSrcActionBuilder = new SetDlSrcActionBuilder();
+
+            setDlSrcActionBuilder.setAddress(new MacAddress(Arrays.toString(setDlSrc.getDlAddress())));
+            targetAction = setDlSrcActionBuilder.build();
         } else if (sourceAction instanceof SetDlType) {
-            // TODO: define maping
+            SetDlType setDlType = (SetDlType) sourceAction;
+            SetDlTypeActionBuilder setDlTypeActionBuilder = new SetDlTypeActionBuilder();
+
+            setDlTypeActionBuilder.setDlType(new EtherType(new Long(setDlType.getDlType())));
+            targetAction = setDlTypeActionBuilder.build();
         } else if (sourceAction instanceof SetNextHop) {
-            // TODO: define maping
+            SetNextHop setNextHop = (SetNextHop) sourceAction;
+            SetNextHopActionBuilder setNextHopActionBuilder = new SetNextHopActionBuilder();
+
+            InetAddress inetAddress = setNextHop.getAddress();
+            setNextHopActionBuilder.setAddress(addressFromAction(inetAddress));
+
+            targetAction = setNextHopActionBuilder.build();
         } else if (sourceAction instanceof SetNwDst) {
-            // TODO: define maping
+            SetNwDst setNwDst = (SetNwDst) sourceAction;
+            SetNwDstActionBuilder setNwDstActionBuilder = new SetNwDstActionBuilder();
+
+            InetAddress inetAddress = setNwDst.getAddress();
+            setNwDstActionBuilder.setAddress(addressFromAction(inetAddress));
+
+            targetAction = setNwDstActionBuilder.build();
         } else if (sourceAction instanceof SetNwSrc) {
-            // TODO: define maping
+            SetNwSrc setNwSrc = (SetNwSrc) sourceAction;
+            SetNwSrcActionBuilder setNwSrcActionBuilder = new SetNwSrcActionBuilder();
+
+            InetAddress inetAddress = setNwSrc.getAddress();
+            setNwSrcActionBuilder.setAddress(addressFromAction(inetAddress));
+
+            targetAction = setNwSrcActionBuilder.build();
         } else if (sourceAction instanceof SetNwTos) {
-            // TODO: define maping
+            SetNwTos setNwTos = (SetNwTos) sourceAction;
+            SetNwTosActionBuilder setNwTosActionBuilder = new SetNwTosActionBuilder();
+
+            setNwTosActionBuilder.setTos(setNwTos.getNwTos());
+            targetAction = setNwTosActionBuilder.build();
         } else if (sourceAction instanceof SetTpDst) {
-            // TODO: define maping
+            SetTpDst setTpDst = (SetTpDst) sourceAction;
+            SetTpDstActionBuilder setTpDstActionBuilder = new SetTpDstActionBuilder();
+
+            setTpDstActionBuilder.setPort(new PortNumber(setTpDst.getPort()));
+
+            targetAction = setTpDstActionBuilder.build();
         } else if (sourceAction instanceof SetTpSrc) {
-            // TODO: define maping
+            SetTpSrc setTpSrc = (SetTpSrc) sourceAction;
+            SetTpSrcActionBuilder setTpSrcActionBuilder = new SetTpSrcActionBuilder();
+
+            setTpSrcActionBuilder.setPort(new PortNumber(setTpSrc.getPort()));
+
+            targetAction = setTpSrcActionBuilder.build();
         } else if (sourceAction instanceof SetVlanCfi) {
-            // TODO: define maping
+            SetVlanCfi setVlanCfi = (SetVlanCfi) sourceAction;
+            SetVlanCfiActionBuilder setVlanCfiActionBuilder = new SetVlanCfiActionBuilder();
+
+            setVlanCfiActionBuilder.setVlanCfi(new VlanCfi(setVlanCfi.getCfi()));
+
+            targetAction = setVlanCfiActionBuilder.build();
         } else if (sourceAction instanceof SetVlanId) {
-            // TODO: define maping
+            SetVlanId setVlanId = (SetVlanId) sourceAction;
+            SetVlanIdActionBuilder setVlanIdActionBuilder = new SetVlanIdActionBuilder();
+
+            setVlanIdActionBuilder.setVlanId(new VlanId(setVlanId.getVlanId()));
+
+            targetAction = setVlanIdActionBuilder.build();
         } else if (sourceAction instanceof SetVlanPcp) {
-            // TODO: define maping
+            SetVlanPcp setVlanPcp = (SetVlanPcp) sourceAction;
+            SetVlanPcpActionBuilder setVlanPcpActionBuilder = new SetVlanPcpActionBuilder();
+
+            setVlanPcpActionBuilder.setVlanPcp(new VlanPcp((short) setVlanPcp.getPcp()));
+
+            targetAction = setVlanPcpActionBuilder.build();
         } else if (sourceAction instanceof SwPath) {
-            // TODO: define maping
+            targetAction = new SwPathActionBuilder().build();
         }
 
         targetActionBuilder.setAction(targetAction);
 
         return targetActionBuilder.build();
+    }
+
+    private static Address addressFromAction(InetAddress inetAddress) {
+        byte[] byteInetAddresss = inetAddress.getAddress();
+        if (inetAddress instanceof Inet4Address) {
+            Ipv4Builder ipv4Builder = new Ipv4Builder();
+            ipv4Builder.setIpv4Address(new Ipv4Prefix(Arrays.toString(byteInetAddresss)));
+            return ipv4Builder.build();
+        } else if (inetAddress instanceof Inet6Address) {
+            Ipv6Builder ipv6Builder = new Ipv6Builder();
+            ipv6Builder.setIpv6Address(new Ipv6Prefix(Arrays.toString(byteInetAddresss)));
+            return ipv6Builder.build();
+        }
+        return null;
     }
 
     private static List<Uri> nodeConnectorToUri(NodeConnector nodeConnector) {
@@ -312,13 +363,9 @@ public class FromSalConversionsUtils {
                 .setAddress(ethernetSourceAddressFrom(sourceMatch));
         targetEthMatchBuild.setEthernetSource(ethSourBuild.build());
 
-        final MatchField dataLinkDest = sourceMatch.getField(DL_DST);
-        if (dataLinkDest != null && dataLinkDest.getValue() != null) {
-            final MacAddress macDestAddress;
-            macDestAddress = new MacAddress((String) (dataLinkDest.getValue()));
-            EthernetDestinationBuilder ethDestBuild = new EthernetDestinationBuilder().setAddress(macDestAddress);
-            targetEthMatchBuild.setEthernetDestination(ethDestBuild.build());
-        }
+        EthernetDestinationBuilder ethDestBuild = new EthernetDestinationBuilder()
+                .setAddress(ethernetDestAddressFrom(sourceMatch));
+        targetEthMatchBuild.setEthernetDestination(ethDestBuild.build());
 
         final MatchField dataLinkType = sourceMatch.getField(MatchType.DL_TYPE);
         if (dataLinkType != null && dataLinkType.getValue() != null) {

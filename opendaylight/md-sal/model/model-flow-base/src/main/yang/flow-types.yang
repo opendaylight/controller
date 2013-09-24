@@ -5,11 +5,31 @@ module opendaylight-flow-types {
     import ietf-inet-types {prefix inet;}
     import opendaylight-match-types {prefix match;}
     import ietf-yang-types {prefix yang;}
-
+    import opendaylight-l2-types {prefix l2t;}
 
     revision "2013-08-19" {
         description "Initial revision of flow service";
     }
+    
+    
+    typedef vlan-cfi {
+           type int32;    
+    }
+    
+    grouping address {
+        choice address {
+            case ipv4 {
+                leaf ipv4-address {
+                    type inet:ipv4-prefix;
+                }
+            }
+            case ipv6 {
+                leaf ipv6-address {
+                    type inet:ipv6-prefix;
+                }
+            }
+        }
+    }    
 
     grouping action {
         choice action {
@@ -59,9 +79,102 @@ module opendaylight-flow-types {
 
             }
 
-            case push-vlan-action {
-
+            case drop-action {
             }
+            
+            case flood-action {
+            }
+            
+            case flood-all-action {
+            }
+            
+            case hw-path-action {
+            }
+            
+            case loopback-action {
+            }
+            
+            case pop-vlan-action {
+            }
+            
+            case push-vlan-action {
+                leaf tag {               // TPID - 16 bits
+                    type int32;
+                } 
+                leaf pcp {               // PCP - 3 bits
+                    type int32;
+                }
+                leaf cfi {               // CFI - 1 bit (drop eligible)
+                    type vlan-cfi;
+                }
+                leaf vlan-id {           // VID - 12 bits
+                    type l2t:vlan-id;
+                }
+//                leaf tci {               //TCI = [PCP + CFI + VID]
+//                }
+//                leaf header {            //header = [TPID + TCI] 
+//                }
+            }
+            case set-dl-dst-action {
+                leaf address {
+                    type yang:mac-address;
+                }
+            }
+            
+            case set-dl-src-action {
+                leaf address {
+                    type yang:mac-address;
+                }
+            }
+            case set-dl-type-action {
+                leaf dl-type {
+                    type l2t:ether-type;
+                }
+            }
+            case set-next-hop-action {
+                uses address;
+            }
+            case set-nw-dst-action {
+                uses address;            
+            }
+            case set-nw-src-action{
+                uses address;            
+            }
+            case set-nw-tos-action {
+                leaf tos {
+                    type int32;
+                }
+            }
+            
+            case set-tp-dst-action {
+                leaf port {
+                    type inet:port-number;
+                }                
+            }
+            case set-tp-src-action {
+                leaf port {
+                    type inet:port-number;
+                }                
+            }
+            case set-vlan-cfi-action {
+                leaf vlan-cfi {
+                    type vlan-cfi;
+                }
+            }
+            case set-vlan-id-action {
+                leaf vlan-id {
+                    type l2t:vlan-id;
+                } 
+            }
+            case set-vlan-pcp-action {
+                leaf vlan-pcp {
+                    type l2t:vlan-pcp;
+                }            
+            }
+            case sw-path-action {            
+            }
+            
+            
         }
     }
 
