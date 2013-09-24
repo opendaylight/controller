@@ -100,7 +100,7 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
      * @return true if node is local to this controller. false otherwise.
      */
     public boolean isLocal(Node node) {
-        if (this.connectionListener == null) return true;
+        if (this.connectionListener == null) return false;
         return connectionListener.isLocal(node);
     }
 
