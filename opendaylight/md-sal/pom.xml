@@ -1,61 +1,64 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.opendaylight.controller</groupId>
-	<artifactId>sal-parent</artifactId>
-	<version>1.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>sal-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <scm>
-      <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-      <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
+        <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+        <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+        <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
     </scm>
 
-	<modules>
-		<module>sal-common</module>
-		<module>sal-common-util</module>
+    <modules>
+        <module>sal-common</module>
+        <module>sal-common-util</module>
         <!-- Binding Independent -->
         <module>sal-dom-api</module>
         <module>sal-dom-broker</module>
         <module>sal-dom-spi</module>
         <!-- Binding Aware -->
-		<module>sal-binding-api</module>
-		<module>sal-binding-broker</module>
+        <module>sal-binding-api</module>
+        <module>sal-binding-broker</module>
         <!-- Samples -->
         <module>samples</module>
         <!-- Base Models -->
         <module>model</module>
         <!-- Compability Packages -->
         <module>sal-compability</module>
-	</modules>
+        <!-- Connectors -->
+        <module>sal-connector-api</module>
+        <module>sal-rest-connector</module>
+    </modules>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<slf4j.version>1.7.2</slf4j.version>
-		<nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-		<yang.version>0.5.8-SNAPSHOT</yang.version>
-		<bundle.plugin.version>2.3.7</bundle.plugin.version>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+        <!-- Plugin Versions -->
+        <bundle.plugin.version>2.4.0</bundle.plugin.version>
         <releaseplugin.version>2.3.2</releaseplugin.version>
+
+        <!-- Dependency Versions -->
+        <slf4j.version>1.7.2</slf4j.version>
+        <yang.version>0.5.8</yang.version>
+        <yang.codegen.version>0.5.8</yang.codegen.version>
         <guava.version>14.0.1</guava.version>
         <osgi.core.version>5.0.0</osgi.core.version>
-	</properties>
+        <xtend.version>2.4.3</xtend.version>
+    </properties>
 
     <pluginRepositories>
         <pluginRepository>
-          <id>central</id>
-          <name>maven repo1</name>
-          <url>http://repo1.maven.org/maven2</url>
-          <snapshots>
-              <enabled>false</enabled>
-          </snapshots>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-        </pluginRepository>
-        <pluginRepository>
-            <id>opendaylight.snapshot</id>
-            <name>opendaylight.snapshot</name>
-            <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+            <id>central</id>
+            <name>maven repo1</name>
+            <url>http://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
         </pluginRepository>
         <pluginRepository>
             <id>opendaylight.release</id>
@@ -65,8 +68,7 @@
     </pluginRepositories>
 
 
-	<repositories>
-      
+    <repositories>
         <repository>
             <id>opendaylight-release</id>
             <name>opendaylight-release</name>
@@ -78,209 +80,214 @@
             <name>opendaylight-snapshot</name>
             <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
         </repository>
+        <repository>		
+            <id>thirdparty</id>		
+            <name>thirdparty</name>		
+            <url>${nexusproxy}/repositories/thirdparty/</url>		
+        </repository>
         <repository>
-        <id>central</id>
-        <name>central</name>
-        <url>http://repo1.maven.org/maven2</url>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-      </repository>
-		<!-- EBR release -->
-		<!-- http://repository.springsource.com/maven/bundles/release -->
-		<repository>
-			<id>ebr-bundles-release</id>
-			<name>ebr-bundles-release</name>
-			<url>${nexusproxy}/repositories/ebr-bundles-release/</url>
-		</repository>
-		<!-- EBR external -->
-		<!-- http://repository.springsource.com/maven/bundles/external -->
-		<repository>
-			<id>ebr-bundles-external</id>
-			<name>ebr-bundles-external</name>
-			<url>${nexusproxy}/repositories/ebr-bundles-external/</url>
-		</repository>
-		<!-- Pax mirror -->
-		<!-- https://oss.sonatype.org/content/repositories/ops4j-releases -->
-		<repository>
-			<id>ops4j-releases</id>
-			<name>ops4j-releases</name>
-			<url>${nexusproxy}/repositories/ops4j-releases/</url>
-		</repository>
-		<!-- Third Packages hosted in local maven because not available in other 
-			places -->
-		<repository>
-			<id>thirdparty</id>
-			<name>thirdparty</name>
-			<url>${nexusproxy}/repositories/thirdparty/</url>
-		</repository>
-		<!-- Jboss mirror -->
-		<!-- https://repository.jboss.org/nexus/content/repositories/releases -->
-		<repository>
-			<id>jboss.releases</id>
-			<name>jboss.releases</name>
-            <url>${nexusproxy}/repositories/jboss.releases/</url>
+            <id>central</id>
+            <name>central</name>
+            <url>http://repo1.maven.org/maven2</url>
             <snapshots>
-              <enabled>false</enabled>
+                <enabled>false</enabled>
             </snapshots>
             <releases>
-              <enabled>true</enabled>
+                <enabled>true</enabled>
             </releases>
-		</repository>
-		<!-- OpenDayLight Released artifact -->
-		
-	</repositories>
+        </repository>
+    </repositories>
 
-  <distributionManagement>
-    <!-- OpenDayLight Released artifact -->
-    <repository>
-      <id>opendaylight-release</id>
-      <url>${nexusproxy}/repositories/opendaylight.release/</url>
-    </repository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <snapshotRepository>
-      <id>opendaylight-snapshot</id>
-      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
-    </snapshotRepository>
-    <!-- Site deployment -->
-    <site>
-      <id>website</id>
-      <url>${sitedeploy}</url>
-    </site>
-  </distributionManagement>
+    <distributionManagement>
+        <!-- OpenDayLight Released artifact -->
+        <repository>
+            <id>opendaylight-release</id>
+            <url>${nexusproxy}/repositories/opendaylight.release/</url>
+        </repository>
+        <!-- OpenDayLight Snapshot artifact -->
+        <snapshotRepository>
+            <id>opendaylight-snapshot</id>
+            <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+        </snapshotRepository>
+        <!-- Site deployment -->
+        <site>
+            <id>website</id>
+            <url>${sitedeploy}</url>
+        </site>
+    </distributionManagement>
 
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
+    <dependencyManagement>
+        <dependencies>
+
+
+
+
+            <!-- YANG Tools Dependencies -->
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-binding</artifactId>
+                <version>${yang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-common</artifactId>
+                <version>${yang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-data-api</artifactId>
+                <version>${yang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-model-api</artifactId>
+                <version>${yang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-data-util</artifactId>
+                <version>${yang.version}</version>
+            </dependency>
+            <!-- SAL Dependencies -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sal-connector-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- Supporting Libraries -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>1.7.2</version>
-			</dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.10</version>
-			</dependency>
-			<dependency>
-				<groupId>org.opendaylight.yangtools</groupId>
-				<artifactId>yang-binding</artifactId>
-				<version>${yang.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.opendaylight.yangtools</groupId>
-				<artifactId>yang-common</artifactId>
-				<version>${yang.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.opendaylight.yangtools</groupId>
-				<artifactId>yang-data-api</artifactId>
-				<version>${yang.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.opendaylight.yangtools</groupId>
-				<artifactId>yang-model-api</artifactId>
-				<version>${yang.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.opendaylight.yangtools</groupId>
-				<artifactId>yang-data-util</artifactId>
-				<version>${yang.version}</version>
-			</dependency>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.xtend</groupId>
+                <artifactId>org.eclipse.xtend.lib</artifactId>
+                <version>${xtend.version}</version>
+            </dependency>
+
+            <!-- Testing Dependencies -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.10</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>1.9.5</version>
                 <scope>test</scope>
-		    </dependency>
-		</dependencies>
-
-	</dependencyManagement>
-
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-			<optional>true</optional>
-		</dependency>
-	</dependencies>
-	<build>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <build>
         <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-release-plugin</artifactId>
-              <version>${releaseplugin.version}</version>
-            </plugin>
-          </plugins>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${releaseplugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>${bundle.plugin.version}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <instructions>
+                            <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+                        </instructions>
+                        <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.eclipse.xtend</groupId>
+                    <artifactId>xtend-maven-plugin</artifactId>
+                    <version>${xtend.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${basedir}/src/main/xtend-gen</outputDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <configuration>
+                        <filesets>
+                            <fileset>
+                                <directory>${basedir}/src/main/xtend-gen</directory>
+                                <includes>
+                                    <include>**</include>
+                                </includes>
+                            </fileset>
+                        </filesets>
+                    </configuration>
+                </plugin>
+            </plugins>
         </pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<version>${bundle.plugin.version}</version>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-					</instructions>
-					<manifestLocation>${project.basedir}/META-INF</manifestLocation>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0</version>
-				<inherited>true</inherited>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.8.1</version>
-				<configuration>
-					<stylesheet>maven</stylesheet>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>aggregate</goal>
-						</goals>
-						<phase>site</phase>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>2.4.0</version>
-				<configuration>
-					<effort>Max</effort>
-					<threshold>Low</threshold>
-					<goal>site</goal>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jdepend-maven-plugin</artifactId>
-				<version>2.0-beta-2</version>
-			</plugin>
-		</plugins>
-	</reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                    <stylesheet>maven</stylesheet>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                        <phase>site</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>2.4.0</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <goal>site</goal>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jdepend-maven-plugin</artifactId>
+                <version>2.0-beta-2</version>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>
