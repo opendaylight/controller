@@ -37,6 +37,10 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.xtend</groupId>
+            <artifactId>org.eclipse.xtend.lib</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -51,6 +55,10 @@
                         <Bundle-Activator>org.opendaylight.controller.sal.dom.broker.BrokerActivator</Bundle-Activator>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.xtend</groupId>
+                <artifactId>xtend-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
