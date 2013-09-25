@@ -7,45 +7,46 @@ import java.util.concurrent.TimeoutException;
 
 public class Futures {
 
-	private Futures(){}
-	
-	public static <T> Future<T> immediateFuture(T result) {
-		return new ImmediateFuture<T>(result);
-	}
-	
-	private static class ImmediateFuture<T> implements Future<T> {
+    private Futures() {
+    }
 
-		private final T result;
-		
-		public ImmediateFuture(T result) {
-			this.result = result;
-		}
-		
-		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
-			return false;
-		}
+    public static <T> Future<T> immediateFuture(T result) {
+        return new ImmediateFuture<T>(result);
+    }
 
-		@Override
-		public boolean isCancelled() {
-			return false;
-		}
+    private static class ImmediateFuture<T> implements Future<T> {
 
-		@Override
-		public boolean isDone() {
-			return true;
-		}
+        private final T result;
 
-		@Override
-		public T get() throws InterruptedException, ExecutionException {
-			return result;
-		}
+        public ImmediateFuture(T result) {
+            this.result = result;
+        }
 
-		@Override
-		public T get(long timeout, TimeUnit unit) throws InterruptedException,
-				ExecutionException, TimeoutException {
-			return result;
-		}
-		
-	}
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isDone() {
+            return true;
+        }
+
+        @Override
+        public T get() throws InterruptedException, ExecutionException {
+            return result;
+        }
+
+        @Override
+        public T get(long timeout, TimeUnit unit) throws InterruptedException,
+                ExecutionException, TimeoutException {
+            return result;
+        }
+
+    }
 }
