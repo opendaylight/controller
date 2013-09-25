@@ -89,8 +89,22 @@ public class ClusterManagerTest {
             Assert.assertTrue(true);
         }
 
-        // Create second cache properly this time, as non_transactional
+        // Create second cache NON_TRANSACTIONAL but with both ASYNC and SYNC,
+        // expect to complain
         cacheModeSet.remove(cacheMode.TRANSACTIONAL);
+        cacheModeSet.add(cacheMode.SYNC);
+        cacheModeSet.add(cacheMode.ASYNC);
+        try {
+            c2 = (CacheImpl<String, Integer>) cm.createCache("Container1", "Cache2", cacheModeSet);
+        } catch (CacheExistException cee) {
+            Assert.assertTrue(false);
+        } catch (CacheConfigException cce) {
+            Assert.assertTrue(true);
+        }
+
+        // Create second cache properly this time, as non_transactional and
+        // ASYNC
+        cacheModeSet.remove(cacheMode.SYNC);
         try {
             c2 = (CacheImpl<String, Integer>) cm.createCache("Container1",
                     "Cache2", cacheModeSet);
