@@ -130,7 +130,7 @@ public class Devices implements IDaylightWeb {
                 nodeDatum.put("mode", modeStr);
 
                 nodeDatum.put("json", gson.toJson(nodeDatum));
-                nodeDatum.put("mac", HexEncode.bytesToHexString(device.getDataLayerAddress()));
+                nodeDatum.put("mac", HexEncode.bytesToHexStringFormat(device.getDataLayerAddress()));
                 StringBuffer sb1 = new StringBuffer();
                 Set<NodeConnector> nodeConnectorSet = device.getNodeConnectors();
                 if (nodeConnectorSet != null && nodeConnectorSet.size() > 0) {
