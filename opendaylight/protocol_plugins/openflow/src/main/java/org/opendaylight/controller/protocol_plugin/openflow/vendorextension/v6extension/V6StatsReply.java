@@ -304,12 +304,6 @@ public class V6StatsReply extends OFVendorStatistics {
     }
 
     @Override
-    public void writeTo(ByteBuffer data) {
-        super.writeTo(data);//TBD. This Fn needs work. Should never get called though.
-
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
