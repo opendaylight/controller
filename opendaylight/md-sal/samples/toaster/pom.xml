@@ -19,7 +19,7 @@
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>0.5.7-SNAPSHOT</version>
+                <version>${yang.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -37,16 +37,15 @@
                                     </outputBaseDir>
                                 </generator>
                             </codeGenerators>
-                            <inspectDependencies>false</inspectDependencies>
+                            <inspectDependencies>true</inspectDependencies>
                         </configuration>
                     </execution>
                 </executions>
-
                 <dependencies>
                     <dependency>
                         <groupId>org.opendaylight.yangtools</groupId>
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
-                        <version>0.5.7-SNAPSHOT</version>
+                        <version>${yang.codegen.version}</version>
                         <type>jar</type>
                     </dependency>
                 </dependencies>
