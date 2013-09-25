@@ -134,9 +134,9 @@ public abstract class BaseDistributionInterceptor extends ClusteringInterceptor 
                 rpcManager.invokeRemotely(recipientGenerator.generateRecipients(), command,
                         rpcManager.getDefaultRpcOptions(isSync));
             } else {
-                log.errorf("Didn't invoke RPC because primaryOwner (%s) didn't match this node (%s)", primaryOwner,
+                log.tracef("Didn't invoke RPC because primaryOwner (%s) didn't match this node (%s)", primaryOwner,
                            rpcManager.getAddress());
-                log.errorf("Hashcode is (%s) for Key (%s) .. it could be inconsistent in the cluster!",
+                log.tracef("Hashcode is (%s) for Key (%s)",
                            command.getKey().hashCode(), command.getKey());
             }
          return returnValue;
