@@ -12,6 +12,11 @@
     <yang.version>0.5.8-SNAPSHOT</yang.version>
     <maven.bundle.version>2.4.0</maven.bundle.version>
   </properties>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 
   <build>
     <plugins>
