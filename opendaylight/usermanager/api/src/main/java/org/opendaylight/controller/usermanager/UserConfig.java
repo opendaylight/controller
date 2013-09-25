@@ -38,7 +38,7 @@ public class UserConfig implements Serializable {
     private static final boolean strongPasswordCheck = Boolean.getBoolean("enableStrongPasswordCheck");
     private static final String BAD_PASSWORD = "Bad Password";
     private static final int USERNAME_MAXLENGTH = 32;
-    protected static final String PASSWORD_REGEX = "(?=.*[^\\w])(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,256}$";
+    protected static final String PASSWORD_REGEX = "(?=.*[^a-zA-Z0-9])(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,256}$";
     private static final Pattern INVALID_USERNAME_CHARACTERS = Pattern.compile("([/\\s\\.\\?#%;\\\\]+)");
     private static MessageDigest oneWayFunction = null;
     static {

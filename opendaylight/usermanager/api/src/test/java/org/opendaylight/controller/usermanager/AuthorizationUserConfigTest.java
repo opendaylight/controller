@@ -153,5 +153,9 @@ public class AuthorizationUserConfigTest {
         // No special characters
         password = "aBc4ef7H8";
         assertFalse(password.matches(regex));
+
+        // Underscore is a special character
+        password = "Azmb_123 ";
+        assertTrue(password.matches(regex));
     }
 }
