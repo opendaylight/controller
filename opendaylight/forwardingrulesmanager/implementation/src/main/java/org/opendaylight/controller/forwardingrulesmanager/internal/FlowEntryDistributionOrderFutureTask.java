@@ -87,7 +87,8 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
             // Return the known status
             return retStatus;
         } else {
-            logger.error("Timing out, the workStatus for order {} has not come back in time!", this.order);
+            logger.error("Timing out, the workStatus for order {} has not come back in time!, it's hashcode is {}",
+                    this.order, this.order.hashCode());
             return new Status(StatusCode.TIMEOUT);
         }
     }
