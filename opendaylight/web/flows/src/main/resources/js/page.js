@@ -659,7 +659,8 @@ one.f.flows = {
             var $form = $(document.createElement('form'));
             var $fieldset = $(document.createElement('fieldset'));
             // flow description
-            var $legend = one.lib.form.legend("Flow Description");
+            var $legend = one.lib.form.legend("");
+            $legend.css('visibility', 'hidden');
             $fieldset.append($legend);
             // name
             var $label = one.lib.form.label("Name");
@@ -739,31 +740,27 @@ one.f.flows = {
             $fieldset.append($label).append($input).append($help);
             // srcMac
             var $label = one.lib.form.label("Source MAC Address");
-            var $input = one.lib.form.input("Source MAC Address");
+            var $input = one.lib.form.input("3c:97:0e:75:c3:f7");
             $input.attr('id', one.f.flows.id.modal.form.srcMac);
-            var $help = one.lib.form.help("Example: 00:11:22:aa:bb:cc");
-            $fieldset.append($label).append($input).append($help);
+            $fieldset.append($label).append($input);
             // dstMac
             var $label = one.lib.form.label("Destination MAC Address");
-            var $input = one.lib.form.input("Destination MAC Address");
+            var $input = one.lib.form.input("7c:d1:c3:e8:e6:99");
             $input.attr('id', one.f.flows.id.modal.form.dstMac);
-            var $help = one.lib.form.help("Example: 00:11:22:aa:bb:cc");
-            $fieldset.append($label).append($input).append($help);
+            $fieldset.append($label).append($input);
             // layer 3
             var $legend = one.lib.form.legend("Layer 3");
             $fieldset.append($legend);
             // srcIp
             var $label = one.lib.form.label("Source IP Address");
-            var $input = one.lib.form.input("Source IP Address");
+            var $input = one.lib.form.input("192.168.3.128");
             $input.attr('id', one.f.flows.id.modal.form.srcIp);
-            var $help = one.lib.form.help("Example: 127.0.0.1");
-            $fieldset.append($label).append($input).append($help);
+            $fieldset.append($label).append($input);
             // dstIp
             var $label = one.lib.form.label("Destination IP Address");
-            var $input = one.lib.form.input("Destination IP Address");
+            var $input = one.lib.form.input("2001:2334::0/32");
             $input.attr('id', one.f.flows.id.modal.form.dstIp);
-            var $help = one.lib.form.help("Example: 127.0.0.1");
-            $fieldset.append($label).append($input).append($help);
+            $fieldset.append($label).append($input);
             // tosBits
             var $label = one.lib.form.label("TOS Bits");
             var $input = one.lib.form.input("TOS Bits");
