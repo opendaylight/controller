@@ -103,11 +103,11 @@ public class NeutronNetworksNorthbound {
             Boolean bShared = null;
             Boolean bRouterExternal = null;
             if (queryAdminStateUp != null)
-                bAdminStateUp = new Boolean(queryAdminStateUp);
+                bAdminStateUp = Boolean.valueOf(queryAdminStateUp);
             if (queryShared != null)
-                bShared = new Boolean(queryShared);
+                bShared = Boolean.valueOf(queryShared);
             if (queryRouterExternal != null)
-                bRouterExternal = new Boolean(queryRouterExternal);
+                bRouterExternal = Boolean.valueOf(queryRouterExternal);
             if ((queryID == null || queryID.equals(oSN.getID())) &&
                     (queryName == null || queryName.equals(oSN.getNetworkName())) &&
                     (bAdminStateUp == null || bAdminStateUp.booleanValue() == oSN.isAdminStateUp()) &&
