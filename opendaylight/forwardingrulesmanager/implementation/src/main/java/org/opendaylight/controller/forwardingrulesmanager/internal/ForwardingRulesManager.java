@@ -1876,7 +1876,9 @@ public class ForwardingRulesManager implements
      * If requested, a copy of each original flow entry will be stored in the
      * inactive list so that it can be re-applied when needed (This is typically
      * the case when running in the default container and controller moved to
-     * container mode)
+     * container mode) NOTE WELL: The routine as long as does a bulk change will
+     * operate only on the entries for nodes locally attached so to avoid
+     * redundant operations initiated by multiple nodes
      *
      * @param preserveFlowEntries
      *            if true, a copy of each original entry is stored in the
@@ -1902,9 +1904,15 @@ public class ForwardingRulesManager implements
 
         // Now remove the entries
         for (FlowEntryInstall flowEntryHw : toRemove) {
-            Status status = this.removeEntryInternal(flowEntryHw, false);
-            if (!status.isSuccess()) {
-                log.warn("Failed to remove entry: {}. The failure is: {}", flowEntryHw, status.getDescription());
+            Node n = flowEntryHw.getNode();
+            if (n != null && connectionManager.getLocalityStatus(n) == ConnectionLocality.LOCAL) {
+                Status status = this.removeEntryInternal(flowEntryHw, false);
+                if (!status.isSuccess()) {
+                    log.warn("Failed to remove entry: {}. The failure is: {}", flowEntryHw, status.getDescription());
+                }
+            } else {
+                log.debug("Not removing entry {} because not connected locally, the remote guy will do it's job",
+                        flowEntryHw);
             }
         }
     }
@@ -2641,6 +2649,12 @@ public class ForwardingRulesManager implements
         uninstallAllFlowEntries(false);
         // Shutdown executor
         this.executor.shutdownNow();
+        // Now walk all the workMonitor and wake up the one sleeping because
+        // destruction is happening
+        for (FlowEntryDistributionOrder fe : workMonitor.keySet()) {
+            FlowEntryDistributionOrderFutureTask task = workMonitor.get(fe);
+            task.cancel(true);
+        }
     }
 
     public void setFlowProgrammerService(IFlowProgrammerService service) {

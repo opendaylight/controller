@@ -65,6 +65,12 @@ final class FlowEntryDistributionOrderFutureTask implements Future<Status> {
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
+        if (this.waitingLatch.getCount() != 0L) {
+            this.retStatus = new Status(StatusCode.GONE);
+            this.waitingLatch.countDown();
+            logger.trace("Cancelled the workOrder");
+            return true;
+        }
         return false;
     }
 
