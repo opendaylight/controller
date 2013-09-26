@@ -13,6 +13,7 @@ import static org.opendaylight.controller.sal.match.MatchType.TP_DST;
 import static org.opendaylight.controller.sal.match.MatchType.TP_SRC;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,159 +74,155 @@ public class ToSalConversionsUtils {
 
         List<Action> actions = source.getAction();
         if (actions != null) {
-            for (Action sourceAction : actions) {
-                Set<org.opendaylight.controller.sal.action.Action> targetActions = actionFrom(sourceAction);
-                for (org.opendaylight.controller.sal.action.Action targetAction : targetActions) {
-                    target.addAction(targetAction);
-                }
-            }
+            target.setActions(actionFrom(actions));
         }
 
         target.setId(source.getCookie().longValue());
         return target;
     }
 
-    public static Set<org.opendaylight.controller.sal.action.Action> actionFrom(Action source) {
-        org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.Action sourceAction = source
-                .getAction();
-        Set<org.opendaylight.controller.sal.action.Action> targetAction = new HashSet<>();
-        if (sourceAction instanceof ControllerAction) {
-            targetAction.add(new Controller());
-        } else if (sourceAction instanceof OutputAction) {
+    public static List<org.opendaylight.controller.sal.action.Action> actionFrom(List<Action> actions) {
+        List<org.opendaylight.controller.sal.action.Action> targetAction = new ArrayList<>();
+        for (Action action : actions) {
+            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.Action sourceAction = action
+                    .getAction();
 
-            List<Uri> nodeConnectors = ((OutputAction) sourceAction).getOutputNodeConnector();
-            for (Uri uri : nodeConnectors) {
-                targetAction.add(new Output(fromNodeConnectorRef(uri)));
-            }
-        } else if (sourceAction instanceof PopMplsAction) {
-            // TODO: define maping
-        } else if (sourceAction instanceof PushMplsAction) {
-            // TODO: define maping
-        } else if (sourceAction instanceof PushPbbAction) {
-            // TODO: define maping
-        } else if (sourceAction instanceof PushVlanAction) {
-            // TODO: define maping
-            // PushVlanAction vlanAction = (PushVlanAction) sourceAction;
-            // targetAction.add(new PushVlan(vlanAction., pcp, cfi, vlanId);
-        } else if (sourceAction instanceof SetMplsTtlAction) {
-            // TODO: define maping
-            // targetAction = //no action to map
-        } else if (sourceAction instanceof SetNwTtlAction) {
-            // TODO: define maping
-        } else if (sourceAction instanceof SetQueueAction) {
-            // TODO: define maping
-            // targetAction = //no action to map
-        } else if (sourceAction instanceof DropAction) {
-            targetAction.add(new Drop());
-        } else if (sourceAction instanceof FloodAction) {
-            targetAction.add(new Flood());
-        } else if (sourceAction instanceof FloodAllAction) {
-            targetAction.add(new FloodAll());
-        } else if (sourceAction instanceof HwPathAction) {
-            targetAction.add(new HwPath());
-        } else if (sourceAction instanceof LoopbackAction) {
-            targetAction.add(new Loopback());
-        } else if (sourceAction instanceof PopVlanAction) {
-            targetAction.add(new PopVlan());
-        } else if (sourceAction instanceof PushVlanAction) {
-            PushVlanAction pushVlanAction = (PushVlanAction) sourceAction;
-            PushVlan pushVlan = pushVlanFrom(pushVlanAction);
-            if (pushVlan != null) {
-                targetAction.add(pushVlan);
-            }
-        } else if (sourceAction instanceof SetDlDstAction) {
-            MacAddress addressL2Dest = ((SetDlDstAction) sourceAction).getAddress();
-            if (addressL2Dest != null) {
-                String addressValue = addressL2Dest.getValue();
-                if (addressValue != null) {
-                    targetAction.add(new SetDlDst(addressValue.getBytes()));
-                }
-            }
-        } else if (sourceAction instanceof SetDlSrcAction) {
-            MacAddress addressL2Src = ((SetDlSrcAction) sourceAction).getAddress();
-            if (addressL2Src != null) {
-                String addressValue = addressL2Src.getValue();
-                if (addressValue != null) {
-                    targetAction.add(new SetDlSrc(addressValue.getBytes()));
-                }
-            }
-        } else if (sourceAction instanceof SetDlTypeAction) {
-            EtherType dlType = ((SetDlTypeAction) sourceAction).getDlType();
-            if (dlType != null) {
-                Long dlTypeValue = dlType.getValue();
-                if (dlTypeValue != null) {
-                    targetAction.add(new SetDlType(dlTypeValue.intValue()));
-                }
-            }
-        } else if (sourceAction instanceof SetNextHopAction) {
-            Address addressL3 = ((SetNextHopAction) sourceAction).getAddress();
+            if (sourceAction instanceof ControllerAction) {
+                targetAction.add(new Controller());
+            } else if (sourceAction instanceof OutputAction) {
 
-            InetAddress inetAddress = inetAddressFrom(addressL3);
-            if (inetAddress != null) {
-                targetAction.add(new SetNextHop(inetAddress));
-            }
-        } else if (sourceAction instanceof SetNwDstAction) {
-            Address addressL3 = ((SetNwDstAction) sourceAction).getAddress();
+                List<Uri> nodeConnectors = ((OutputAction) sourceAction).getOutputNodeConnector();
+                if (nodeConnectors != null) {
+                    for (Uri uri : nodeConnectors) {
+                        targetAction.add(new Output(fromNodeConnectorRef(uri)));
+                    }
+                }
+            } else if (sourceAction instanceof PopMplsAction) {
+                // TODO: define maping
+            } else if (sourceAction instanceof PushMplsAction) {
+                // TODO: define maping
+            } else if (sourceAction instanceof PushPbbAction) {
+                // TODO: define maping
+            } else if (sourceAction instanceof SetMplsTtlAction) {
+                // TODO: define maping
+                // targetAction = //no action to map
+            } else if (sourceAction instanceof SetNwTtlAction) {
+                // TODO: define maping
+            } else if (sourceAction instanceof SetQueueAction) {
+                // TODO: define maping
+                // targetAction = //no action to map
+            } else if (sourceAction instanceof DropAction) {
+                targetAction.add(new Drop());
+            } else if (sourceAction instanceof FloodAction) {
+                targetAction.add(new Flood());
+            } else if (sourceAction instanceof FloodAllAction) {
+                targetAction.add(new FloodAll());
+            } else if (sourceAction instanceof HwPathAction) {
+                targetAction.add(new HwPath());
+            } else if (sourceAction instanceof LoopbackAction) {
+                targetAction.add(new Loopback());
+            } else if (sourceAction instanceof PopVlanAction) {
+                targetAction.add(new PopVlan());
+            } else if (sourceAction instanceof PushVlanAction) {
+                PushVlanAction pushVlanAction = (PushVlanAction) sourceAction;
+                PushVlan pushVlan = pushVlanFrom(pushVlanAction);
+                if (pushVlan != null) {
+                    targetAction.add(pushVlan);
+                }
+            } else if (sourceAction instanceof SetDlDstAction) {
+                MacAddress addressL2Dest = ((SetDlDstAction) sourceAction).getAddress();
+                if (addressL2Dest != null) {
+                    String addressValue = addressL2Dest.getValue();
+                    if (addressValue != null) {
+                        targetAction.add(new SetDlDst(addressValue.getBytes()));
+                    }
+                }
+            } else if (sourceAction instanceof SetDlSrcAction) {
+                MacAddress addressL2Src = ((SetDlSrcAction) sourceAction).getAddress();
+                if (addressL2Src != null) {
+                    String addressValue = addressL2Src.getValue();
+                    if (addressValue != null) {
+                        targetAction.add(new SetDlSrc(addressValue.getBytes()));
+                    }
+                }
+            } else if (sourceAction instanceof SetDlTypeAction) {
+                EtherType dlType = ((SetDlTypeAction) sourceAction).getDlType();
+                if (dlType != null) {
+                    Long dlTypeValue = dlType.getValue();
+                    if (dlTypeValue != null) {
+                        targetAction.add(new SetDlType(dlTypeValue.intValue()));
+                    }
+                }
+            } else if (sourceAction instanceof SetNextHopAction) {
+                Address addressL3 = ((SetNextHopAction) sourceAction).getAddress();
 
-            InetAddress inetAddress = inetAddressFrom(addressL3);
-            if (inetAddress != null) {
-                targetAction.add(new SetNwDst(inetAddress));
-            }
-        } else if (sourceAction instanceof SetNwSrcAction) {
-            Address addressL3 = ((SetNwDstAction) sourceAction).getAddress();
+                InetAddress inetAddress = inetAddressFrom(addressL3);
+                if (inetAddress != null) {
+                    targetAction.add(new SetNextHop(inetAddress));
+                }
+            } else if (sourceAction instanceof SetNwDstAction) {
+                Address addressL3 = ((SetNwDstAction) sourceAction).getAddress();
 
-            InetAddress inetAddress = inetAddressFrom(addressL3);
-            if (inetAddress != null) {
-                targetAction.add(new SetNwSrc(inetAddress));
-            }
-        } else if (sourceAction instanceof SetNwTosAction) {
-            Integer tos = ((SetNwTosAction) sourceAction).getTos();
-            if (tos != null) {
-                targetAction.add(new SetNwTos(tos));
-            }
-        } else if (sourceAction instanceof SetTpDstAction) {
-            PortNumber port = ((SetTpDstAction) sourceAction).getPort();
-            if (port != null) {
-                Integer portValue = port.getValue();
-                if (port.getValue() != null) {
-                    targetAction.add(new SetTpDst(portValue));
+                InetAddress inetAddress = inetAddressFrom(addressL3);
+                if (inetAddress != null) {
+                    targetAction.add(new SetNwDst(inetAddress));
                 }
-            }
-        } else if (sourceAction instanceof SetTpSrcAction) {
-            PortNumber port = ((SetTpSrcAction) sourceAction).getPort();
-            if (port != null) {
-                Integer portValue = port.getValue();
-                if (port.getValue() != null) {
-                    targetAction.add(new SetTpSrc(portValue));
+            } else if (sourceAction instanceof SetNwSrcAction) {
+                Address addressL3 = ((SetNwSrcAction) sourceAction).getAddress();
+
+                InetAddress inetAddress = inetAddressFrom(addressL3);
+                if (inetAddress != null) {
+                    targetAction.add(new SetNwSrc(inetAddress));
                 }
-            }
-        } else if (sourceAction instanceof SetVlanCfiAction) {
-            VlanCfi vlanCfi = ((SetVlanCfiAction) sourceAction).getVlanCfi();
-            if (vlanCfi != null) {
-                Integer vlanCfiValue = vlanCfi.getValue();
-                if (vlanCfiValue != null) {
-                    targetAction.add(new SetVlanCfi(vlanCfiValue));
+            } else if (sourceAction instanceof SetNwTosAction) {
+                Integer tos = ((SetNwTosAction) sourceAction).getTos();
+                if (tos != null) {
+                    targetAction.add(new SetNwTos(tos));
                 }
-            }
-        } else if (sourceAction instanceof SetVlanIdAction) {
-            org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId vlanID = ((SetVlanIdAction) sourceAction)
-                    .getVlanId();
-            if (vlanID != null) {
-                Integer vlanIdValue = vlanID.getValue();
-                if (vlanIdValue != null) {
-                    targetAction.add(new SetVlanId(vlanIdValue));
+            } else if (sourceAction instanceof SetTpDstAction) {
+                PortNumber port = ((SetTpDstAction) sourceAction).getPort();
+                if (port != null) {
+                    Integer portValue = port.getValue();
+                    if (port.getValue() != null) {
+                        targetAction.add(new SetTpDst(portValue));
+                    }
                 }
-            }
-        } else if (sourceAction instanceof SetVlanPcpAction) {
-            VlanPcp vlanPcp = ((SetVlanPcpAction) sourceAction).getVlanPcp();
-            if (vlanPcp != null) {
-                Short vlanPcpValue = vlanPcp.getValue();
-                if (vlanPcpValue != null) {
-                    targetAction.add(new SetVlanPcp(vlanPcpValue));
+            } else if (sourceAction instanceof SetTpSrcAction) {
+                PortNumber port = ((SetTpSrcAction) sourceAction).getPort();
+                if (port != null) {
+                    Integer portValue = port.getValue();
+                    if (port.getValue() != null) {
+                        targetAction.add(new SetTpSrc(portValue));
+                    }
                 }
+            } else if (sourceAction instanceof SetVlanCfiAction) {
+                VlanCfi vlanCfi = ((SetVlanCfiAction) sourceAction).getVlanCfi();
+                if (vlanCfi != null) {
+                    Integer vlanCfiValue = vlanCfi.getValue();
+                    if (vlanCfiValue != null) {
+                        targetAction.add(new SetVlanCfi(vlanCfiValue));
+                    }
+                }
+            } else if (sourceAction instanceof SetVlanIdAction) {
+                org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId vlanID = ((SetVlanIdAction) sourceAction)
+                        .getVlanId();
+                if (vlanID != null) {
+                    Integer vlanIdValue = vlanID.getValue();
+                    if (vlanIdValue != null) {
+                        targetAction.add(new SetVlanId(vlanIdValue));
+                    }
+                }
+            } else if (sourceAction instanceof SetVlanPcpAction) {
+                VlanPcp vlanPcp = ((SetVlanPcpAction) sourceAction).getVlanPcp();
+                if (vlanPcp != null) {
+                    Short vlanPcpValue = vlanPcp.getValue();
+                    if (vlanPcpValue != null) {
+                        targetAction.add(new SetVlanPcp(vlanPcpValue));
+                    }
+                }
+            } else if (sourceAction instanceof SwPathAction) {
+                targetAction.add(new SwPath());
             }
-        } else if (sourceAction instanceof SwPathAction) {
-            targetAction.add(new SwPath());
         }
 
         return targetAction;
