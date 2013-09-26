@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.connection.IConnectionListener;
 import org.opendaylight.controller.sal.connection.IConnectionService;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
@@ -102,6 +103,12 @@ public class ConnectionService implements IPluginOutConnectionService, IConnecti
     public boolean isLocal(Node node) {
         if (this.connectionListener == null) return false;
         return connectionListener.isLocal(node);
+    }
+
+    @Override
+    public ConnectionLocality getLocalityStatus(Node node) {
+        if (this.connectionListener == null) return ConnectionLocality.NOT_CONNECTED;
+        return connectionListener.getLocalityStatus(node);
     }
 
     @Override

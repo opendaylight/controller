@@ -26,6 +26,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitch;
 import org.opendaylight.controller.protocol_plugin.openflow.core.ISwitchStateListener;
+import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Buffers;
@@ -259,7 +260,11 @@ public class InventoryServiceShim implements IContainerListener,
         }
 
         // Add this node
-        addNode(sw);
+        if (connectionOutService.getLocalityStatus(node) != ConnectionLocality.NOT_CONNECTED) {
+            addNode(sw);
+        } else {
+            logger.debug("Skipping node addition due to Connectivity Status : {}", connectionOutService.getLocalityStatus(node).name());
+        }
     }
 
     @Override

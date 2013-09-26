@@ -1,4 +1,4 @@
-package org.opendaylight.controller.connectionmanager;
+package org.opendaylight.controller.sal.connection;
 
 public enum ConnectionLocality {
     /**

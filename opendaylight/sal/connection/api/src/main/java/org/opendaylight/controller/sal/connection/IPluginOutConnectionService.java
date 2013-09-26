@@ -22,4 +22,6 @@ public interface IPluginOutConnectionService {
      * @return true if node is local to this controller. false otherwise.
      */
     public boolean isLocal(Node node);
+
+    public ConnectionLocality getLocalityStatus(Node node);
 }
