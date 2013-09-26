@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
@@ -781,6 +780,16 @@ public class ForwardingRulesManager implements
             }
         }
         return true;
+    }
+
+    private ConcurrentMap.Entry<Integer, FlowConfig> getStaticFlowEntry(String name, Node node) {
+        for (ConcurrentMap.Entry<Integer, FlowConfig> flowEntry : staticFlows.entrySet()) {
+            FlowConfig flowConfig = flowEntry.getValue();
+            if (flowConfig.isByNameAndNodeIdEqual(name, node)) {
+                return flowEntry;
+            }
+        }
+        return null;
     }
 
     private void updateLocalDatabase(FlowEntryInstall entry, boolean add) {
@@ -1947,10 +1956,9 @@ public class ForwardingRulesManager implements
 
     @Override
     public FlowConfig getStaticFlow(String name, Node node) {
-        for (ConcurrentMap.Entry<Integer, FlowConfig> entry : staticFlows.entrySet()) {
-            if (entry.getValue().isByNameAndNodeIdEqual(name, node)) {
-                return entry.getValue();
-            }
+        ConcurrentMap.Entry<Integer, FlowConfig> entry = getStaticFlowEntry(name, node);
+        if(entry != null) {
+            return entry.getValue();
         }
         return null;
     }
@@ -3032,6 +3040,36 @@ public class ForwardingRulesManager implements
         }
     }
 
+    public void _frmProcessErrorEvent(CommandInterpreter ci) throws UnknownHostException {
+        Node node = null;
+        long reqId = 0L;
+        String nodeId = ci.nextArgument();
+        if (nodeId == null) {
+            ci.print("Node id not specified");
+            return;
+        }
+        String requestId = ci.nextArgument();
+        if (requestId == null) {
+            ci.print("Request id not specified");
+            return;
+        }
+        try {
+            node = NodeCreator.createOFNode(Long.valueOf(nodeId));
+        } catch (NumberFormatException e) {
+            ci.print("Node id not a number");
+            return;
+        }
+        try {
+            reqId = Long.parseLong(requestId);
+        } catch (NumberFormatException e) {
+            ci.print("Request id not a number");
+            return;
+        }
+        // null for error object is good enough for now
+        ErrorReportedEvent event = new ErrorReportedEvent(reqId, node, null);
+        this.processErrorEvent(event);
+    }
+
     @Override
     public void flowRemoved(Node node, Flow flow) {
         log.trace("Received flow removed notification on {} for {}", node, flow);
@@ -3101,6 +3139,15 @@ public class ForwardingRulesManager implements
         if (target != null) {
             // This was a flow install, update database
             this.updateLocalDatabase(target, false);
+            // also update the config
+            if(FlowConfig.STATICFLOWGROUP.equals(target.getGroupName())) {
+                ConcurrentMap.Entry<Integer, FlowConfig> staticFlowEntry = getStaticFlowEntry(target.getFlowName(),target.getNode());
+                // staticFlowEntry should never be null.
+                // the null check is just an extra defensive check.
+                if(staticFlowEntry != null) {
+                    staticFlows.remove(staticFlowEntry.getKey());
+                }
+            }
         }
 
         // Notify listeners
