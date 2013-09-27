@@ -1,0 +1,105 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.opendaylight</groupId>
+		<artifactId>config-subsystem</artifactId>
+		<version>0.2.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>yang-test</artifactId>
+
+	<description> Artifact that contains only generated code from yang files. Suitable for testing.
+	</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>config-api</artifactId>
+			<version>0.2.1-SNAPSHOT</version>
+		</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+		<!-- Needed for generated ietf types -->
+		<dependency>
+			<groupId>org.opendaylight.yangtools</groupId>
+			<artifactId>binding-generator-util</artifactId>
+			<version>${opendaylight.binding.version}</version>
+		</dependency>
+                <dependency>
+			<groupId>org.opendaylight.yangtools</groupId>
+			<artifactId>yang-maven-plugin-spi</artifactId>
+			<version>${opendaylight.yang.version}</version>
+		</dependency>
+	</dependencies>
+
+	<name>${project.artifactId}</name>
+	<prerequisites>
+		<maven>3.0.4</maven>
+	</prerequisites>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.opendaylight.yangtools</groupId>
+				<artifactId>yang-maven-plugin</artifactId>
+
+				<executions>
+					<execution>
+						<id>ietf</id>
+						<goals>
+							<goal>generate-sources</goal>
+						</goals>
+						<configuration>
+							<yangFilesRootDir>src/main/yang/ietf</yangFilesRootDir>
+
+							<codeGenerators>
+								<generator>
+									<codeGeneratorClass>
+										org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+									</codeGeneratorClass>
+									<outputBaseDir><!-- -1309 -->
+										${project.build.directory}/generated-sources/maven-sal-api-gen
+									</outputBaseDir>
+								</generator>
+							</codeGenerators>
+							<inspectDependencies>false</inspectDependencies>
+						</configuration>
+					</execution>
+
+				</executions>
+				<dependencies>
+
+					<dependency>
+						<groupId>org.opendaylight.yangtools</groupId>
+						<artifactId>maven-sal-api-gen-plugin</artifactId>
+						<version>${opendaylight.yang.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source-ietf</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/maven-sal-api-gen</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
