@@ -1,5 +1,9 @@
 package org.opendaylight.controller.sal.compability;
 
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.ETHERNET_ARP;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.SCTP;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.TCP;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.UDP;
 import static org.opendaylight.controller.sal.match.MatchType.DL_DST;
 import static org.opendaylight.controller.sal.match.MatchType.DL_SRC;
 import static org.opendaylight.controller.sal.match.MatchType.DL_TYPE;
@@ -14,9 +18,7 @@ import static org.opendaylight.controller.sal.match.MatchType.TP_SRC;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.opendaylight.controller.sal.action.*;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -34,6 +36,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.A
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.MacAddressFilter;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.arp.match.fields.ArpSourceHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.arp.match.fields.ArpTargetHardwareAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.ethernet.match.fields.EthernetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.ArpMatch;
@@ -311,7 +315,8 @@ public class ToSalConversionsUtils {
     private static void fillFrom(Match target, IpMatch ipMatch) {
         if (ipMatch != null) {
             Short ipProtocol = ipMatch.getIpProtocol();
-            if (ipProtocol != null) {
+
+            if (ipProtocol != null && target.getField(NW_PROTO) == null) {
                 target.setField(NW_PROTO, ipProtocol.byteValue());
             }
             Dscp dscp = ipMatch.getIpDscp();
@@ -353,6 +358,8 @@ public class ToSalConversionsUtils {
                 target.setField(TP_DST, udpDestPortValue.shortValue());
             }
         }
+
+        target.setField(NW_PROTO, UDP);
     }
 
     private static void fillTransportLayer(Match target, TcpMatch source) {
@@ -371,6 +378,8 @@ public class ToSalConversionsUtils {
                 target.setField(TP_DST, tcpDestPortValue.shortValue());
             }
         }
+
+        target.setField(NW_PROTO, TCP);
     }
 
     private static void fillTransportLayer(Match target, SctpMatch source) {
@@ -388,6 +397,9 @@ public class ToSalConversionsUtils {
                 target.setField(TP_DST, sctpDestPortValue.shortValue());
             }
         }
+
+        target.setField(NW_PROTO, SCTP);
+
     }
 
     private static void fillFrom(Match target, Layer3Match source) {
@@ -407,10 +419,21 @@ public class ToSalConversionsUtils {
         if (sourceAddress != null) {
             target.setField(NW_SRC, (InetAddress) inetAddressFrom(sourceAddress), null);
         }
-        Ipv4Prefix destAddress = source.getArpSourceTransportAddress();
+        Ipv4Prefix destAddress = source.getArpTargetTransportAddress();
         if (destAddress != null) {
             target.setField(NW_DST, (InetAddress) inetAddressFrom(destAddress), null);
         }
+        ArpSourceHardwareAddress sourceHwAddress = source.getArpSourceHardwareAddress();
+        if (sourceHwAddress != null) {
+            target.setField(DL_SRC, sourceHwAddress.getAddress().getValue().getBytes());
+        }
+        ArpTargetHardwareAddress targetHwAddress = source.getArpTargetHardwareAddress();
+        if (targetHwAddress != null) {
+            target.setField(DL_DST, targetHwAddress.getAddress().getValue().getBytes());
+        }
+
+        target.setField(DL_TYPE, new Short(ETHERNET_ARP));
+
     }
 
     private static void fillFromIpv6(Match target, Ipv6Match source) {
@@ -418,7 +441,7 @@ public class ToSalConversionsUtils {
         if (sourceAddress != null) {
             target.setField(NW_SRC, (InetAddress) inetAddressFrom(sourceAddress), null);
         }
-        Ipv6Prefix destAddress = source.getIpv6Source();
+        Ipv6Prefix destAddress = source.getIpv6Destination();
         if (destAddress != null) {
             target.setField(NW_DST, (InetAddress) inetAddressFrom(destAddress), null);
         }
@@ -429,7 +452,7 @@ public class ToSalConversionsUtils {
         if (sourceAddress != null) {
             target.setField(NW_SRC, (InetAddress) inetAddressFrom(sourceAddress), null);
         }
-        Ipv4Prefix destAddress = source.getIpv4Source();
+        Ipv4Prefix destAddress = source.getIpv4Destination();
         if (destAddress != null) {
             target.setField(NW_DST, (InetAddress) inetAddressFrom(destAddress), null);
         }
@@ -457,7 +480,7 @@ public class ToSalConversionsUtils {
         EthernetType ethType = source.getEthernetType();
         if (ethType != null) {
             EtherType ethInnerType = ethType.getType();
-            if (ethInnerType != null) {
+            if (ethInnerType != null && target.getField(DL_TYPE) == null) {
                 Long value = ethInnerType.getValue();
                 target.setField(DL_TYPE, value.shortValue());
             }
