@@ -59,7 +59,7 @@ import org.opendaylight.controller.sal.action.PopVlan;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainer;
-import org.opendaylight.controller.sal.core.IContainerListener;
+import org.opendaylight.controller.sal.core.IContainerLocalListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
@@ -97,7 +97,7 @@ import org.slf4j.LoggerFactory;
 public class ForwardingRulesManager implements
         IForwardingRulesManager,
         PortGroupChangeListener,
-        IContainerListener,
+        IContainerLocalListener,
         ISwitchManagerAware,
         IConfigurationContainerAware,
         IInventoryListener,
@@ -1366,9 +1366,6 @@ public class ForwardingRulesManager implements
             clusterContainerService.createCache("frm.staticFlows",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
-            clusterContainerService.createCache("frm.flowsSaveEvent",
-                    EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-
             clusterContainerService.createCache("frm.staticFlowsOrdinal",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
@@ -2516,6 +2513,7 @@ public class ForwardingRulesManager implements
                             log.warn("Dequeued null event");
                             continue;
                         }
+                        log.trace("Dequeued {} event", event.getClass().getSimpleName());
                         if (event instanceof NodeUpdateEvent) {
                             NodeUpdateEvent update = (NodeUpdateEvent) event;
                             Node node = update.getNode();

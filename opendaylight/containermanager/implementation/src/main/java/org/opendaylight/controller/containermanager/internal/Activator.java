@@ -24,8 +24,10 @@ import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
+import org.opendaylight.controller.sal.core.IContainerLocalListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory.getLogger(Activator.class);
@@ -139,6 +141,12 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                     .setService(IContainerListener.class)
                     .setCallbacks("setIContainerListener", "unsetIContainerListener")
+                    .setRequired(false));
+
+            // Interface expected to be exported by the Functional Modules
+            c.add(createServiceDependency()
+                    .setService(IContainerLocalListener.class)
+                    .setCallbacks("setIContainerLocalListener", "unsetIContainerLocalListener")
                     .setRequired(false));
         }
     }
