@@ -2,14 +2,13 @@ module opendaylight-statistics-types {
     namespace "urn:opendaylight:model:statistics:types";
     prefix stat-types;
 
+    import ietf-yang-types {prefix yang;}
     import opendaylight-inventory {prefix inv;}
-
+    import opendaylight-port-inventory {prefix port-inv;}
     
-    revision "2013-08-19" {
+    revision "2013-09-25" {
         description "Initial revision of flow service";
-    }
-
-    
+    }    
 
     grouping node-connector-statistics {
     	container packets {
@@ -52,5 +51,18 @@ module opendaylight-statistics-types {
         leaf collision-count {
             type uint64;
         }
+        
+        container duration {
+            leaf second {
+                type yang:counter32;
+            }
+            leaf nanosecond {
+                type yang:counter32;
+            }
+        }
+    }
+    
+    grouping ofp-port-description {
+        uses port-inv:ofp-port;
     }
 }
