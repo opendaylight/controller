@@ -37,6 +37,7 @@
       <modules>
         <!-- MD-SAL bundles -->
         <module>../../md-sal</module>
+        <module>../../config</module>
       </modules>
     </profile>
   </profiles>
