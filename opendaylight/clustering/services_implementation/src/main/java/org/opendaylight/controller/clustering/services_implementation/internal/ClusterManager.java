@@ -33,6 +33,7 @@ import javax.transaction.TransactionManager;
 
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
+import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
 import org.infinispan.configuration.parsing.ParserRegistry;
@@ -304,24 +305,54 @@ public class ClusterManager implements IClusterServices {
             throw new CacheExistException();
         }
 
-        // Sanity check to avoid contrasting parameters
-        if (cMode.containsAll(EnumSet.of(
-                IClusterServices.cacheMode.NON_TRANSACTIONAL,
+        // Sanity check to avoid contrasting parameters between transactional
+        // and not
+        if (cMode.containsAll(EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL,
                 IClusterServices.cacheMode.TRANSACTIONAL))) {
             throw new CacheConfigException();
         }
 
-        if (cMode.contains(IClusterServices.cacheMode.NON_TRANSACTIONAL)) {
-            c = manager.getCache(realCacheName);
-            return c;
-        } else if (cMode.contains(IClusterServices.cacheMode.TRANSACTIONAL)) {
-            Configuration rc = manager
-                    .getCacheConfiguration("transactional-type");
-            manager.defineConfiguration(realCacheName, rc);
-            c = manager.getCache(realCacheName);
-            return c;
+        // Sanity check to avoid contrasting parameters between sync and async
+        if (cMode.containsAll(EnumSet.of(IClusterServices.cacheMode.SYNC, IClusterServices.cacheMode.ASYNC))) {
+            throw new CacheConfigException();
         }
-        return null;
+
+        Configuration fromTemplateConfig = null;
+        /*
+         * Fetch transactional/non-transactional templates
+         */
+        // Check if transactional
+        if (cMode.contains(IClusterServices.cacheMode.TRANSACTIONAL)) {
+            fromTemplateConfig = manager.getCacheConfiguration("transactional-type");
+        } else if (cMode.contains(IClusterServices.cacheMode.NON_TRANSACTIONAL)) {
+            fromTemplateConfig = manager.getDefaultCacheConfiguration();
+        }
+
+        // If none set the transactional property then just return null
+        if (fromTemplateConfig == null) {
+            return null;
+        }
+
+        ConfigurationBuilder builder = new ConfigurationBuilder();
+        builder.read(fromTemplateConfig);
+        /*
+         * Now evaluate async/sync
+         */
+        if (cMode.contains(IClusterServices.cacheMode.ASYNC)) {
+            builder.clustering()
+                    .cacheMode(fromTemplateConfig.clustering()
+                            .cacheMode()
+                            .toAsync());
+        } else if (cMode.contains(IClusterServices.cacheMode.SYNC)) {
+            builder.clustering()
+                    .cacheMode(fromTemplateConfig.clustering()
+                            .cacheMode()
+                            .toSync());
+        }
+
+        manager.defineConfiguration(realCacheName, builder.build());
+        c = manager.getCache(realCacheName);
+        return c;
     }
 
     @Override

@@ -62,7 +62,19 @@ public interface IClusterServices {
          * immediately committed in the cache.
          *
          */
-        NON_TRANSACTIONAL;
+        NON_TRANSACTIONAL,
+        /**
+         * Set on a cache that can transfer the updates asynchronously from the
+         * calling thread. The caller when doing put/clear/remove cannot expect
+         * that the operation has happened clusterwide
+         */
+        ASYNC,
+        /**
+         * Set on a cache that transfer the updates synchronously to the calling
+         * thread so when getting back the operation is supposed to have
+         * completed on all the cluster nodes. Slow but safe.
+         */
+        SYNC;
     }
 
     /**
@@ -237,6 +249,7 @@ public interface IClusterServices {
      *
      * @return true if the role is the one of standby, else false
      */
+    @Deprecated
     boolean amIStandby();
 
     /**
@@ -247,6 +260,7 @@ public interface IClusterServices {
      *
      * @return Address of the active controller
      */
+    @Deprecated
     InetAddress getActiveAddress();
 
     /**
@@ -271,6 +285,7 @@ public interface IClusterServices {
      *
      * @param i Interface that will be called when the Role Change happens
      */
+    @Deprecated
     void listenRoleChange(IListenRoleChange i)
             throws ListenRoleChangeAddException;
 
@@ -281,5 +296,6 @@ public interface IClusterServices {
      *
      * @param i Interface that will be called when the Role Change happens
      */
+    @Deprecated
     void unlistenRoleChange(IListenRoleChange i);
 }
