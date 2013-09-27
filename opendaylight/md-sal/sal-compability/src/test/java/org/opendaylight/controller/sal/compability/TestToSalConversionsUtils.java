@@ -13,10 +13,8 @@ import java.util.List;
 import org.junit.Test;
 import org.opendaylight.controller.sal.action.*;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.*;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
@@ -32,18 +30,116 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.M
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.EthernetMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.arp.match.fields.ArpSourceHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.arp.match.fields.ArpTargetHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.ethernet.match.fields.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.ArpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv4MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv6MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.SctpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.TcpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.UdpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.vlan.match.fields.VlanIdBuilder;
 
 import com.google.common.net.InetAddresses;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.ETHERNET_ARP;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.SCTP;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.TCP;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.UDP;
 
 public class TestToSalConversionsUtils {
     // prefix:
     // od|Od = Open Daylight
+    private enum MtchType {
+        other, ipv4, ipv6, arp, sctp, tcp, udp
+    }
 
     @Test
     public void testToSalConversion() {
-        Flow salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow());
+        FlowAddedBuilder odNodeFlowBuilder = new FlowAddedBuilder();
+        odNodeFlowBuilder = prepareOdFlowCommon();
+
+        Flow salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.other));
+        checkSalMatch(salFlow.getMatch(), MtchType.other);
+
+        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.ipv4));
+        checkSalMatch(salFlow.getMatch(), MtchType.ipv4);
+
+        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.ipv6));
+        checkSalMatch(salFlow.getMatch(), MtchType.ipv6);
+
+        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.arp));
+        checkSalMatch(salFlow.getMatch(), MtchType.arp);
+
+        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.sctp));
+        checkSalMatch(salFlow.getMatch(), MtchType.sctp);
+
+        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.tcp));
+        checkSalMatch(salFlow.getMatch(), MtchType.tcp);
+
+        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.udp));
+        checkSalMatch(salFlow.getMatch(), MtchType.udp);
+
         checkSalFlow(salFlow);
+    }
+
+    private void checkSalMatch(org.opendaylight.controller.sal.match.Match match, MtchType mt) {
+        switch (mt) {
+        case other:
+            assertEquals("DL_DST isn't equal.", "3C:A9:F4:00:E0:C8",
+                    new String((byte[]) match.getField(MatchType.DL_DST).getValue()));
+            assertEquals("DL_SRC isn't equal.", "24:77:03:7C:C5:F1",
+                    new String((byte[]) match.getField(MatchType.DL_SRC).getValue()));
+            assertEquals("DL_TYPE isn't equal.", (short) 0xffff, (short) match.getField(MatchType.DL_TYPE).getValue());
+            assertEquals("NW_TOS isn't equal.", (byte) 0x33, (byte) match.getField(MatchType.NW_TOS).getValue());
+            assertEquals("NW_PROTO isn't equal.", (byte) 0x3f, (byte) match.getField(MatchType.NW_PROTO).getValue());
+            assertEquals("DL_VLAN isn't equal.", (short) 0xfff, (short) match.getField(MatchType.DL_VLAN).getValue());
+            assertEquals("DL_VLAN_PR isn't equal.", (byte) 0x7, (byte) match.getField(MatchType.DL_VLAN_PR).getValue());
+            break;
+        case arp:
+            assertEquals("DL_SRC isn't equal.", "22:44:66:88:AA:CC",
+                    new String((byte[]) match.getField(MatchType.DL_SRC).getValue()));
+            assertEquals("DL_DST isn't equal.", "11:33:55:77:BB:DD",
+                    new String((byte[]) match.getField(MatchType.DL_DST).getValue()));
+            assertEquals("NW_SRC isn't equal.", "192.168.1.101",
+                    InetAddresses.toAddrString((InetAddress) match.getField(MatchType.NW_SRC).getValue()));
+            assertEquals("NW_DST isn't equal.", "192.168.1.102",
+                    InetAddresses.toAddrString((InetAddress) match.getField(MatchType.NW_DST).getValue()));
+            assertEquals("DL_TYPE isn't equal.", ETHERNET_ARP, match.getField(MatchType.DL_TYPE).getValue());
+            break;
+        case ipv4:
+            assertEquals("NW_SRC isn't equal.", "192.168.1.104",
+                    InetAddresses.toAddrString((InetAddress) match.getField(MatchType.NW_SRC).getValue()));
+            assertEquals("NW_DST isn't equal.", "192.168.1.105",
+                    InetAddresses.toAddrString((InetAddress) match.getField(MatchType.NW_DST).getValue()));
+            break;
+        case ipv6:
+            assertEquals("NW_SRC isn't equal.", "3001:db8:85a3::8a2e:370:7334",
+                    InetAddresses.toAddrString((InetAddress) match.getField(MatchType.NW_SRC).getValue()));
+            assertEquals("NW_DST isn't equal.", "3001:db8:85a3::8a2e:370:7335",
+                    InetAddresses.toAddrString((InetAddress) match.getField(MatchType.NW_DST).getValue()));
+            break;
+        case sctp:
+            assertEquals("TP_SRC isn't equal.", 31, (short) match.getField(MatchType.TP_SRC).getValue());
+            assertEquals("TP_DST isn't equal.", 32, (short) match.getField(MatchType.TP_DST).getValue());
+            assertEquals("NW_PROTO isn't equal.", SCTP, (byte) match.getField(MatchType.NW_PROTO).getValue());
+            break;
+        case tcp:
+            assertEquals("TP_SRC isn't equal.", 21, (short) match.getField(MatchType.TP_SRC).getValue());
+            assertEquals("TP_DST isn't equal.", 22, (short) match.getField(MatchType.TP_DST).getValue());
+            assertEquals("NW_PROTO isn't equal.", TCP, (byte) match.getField(MatchType.NW_PROTO).getValue());
+            break;
+        case udp:
+            assertEquals("TP_SRC isn't equal.", 11, (short) match.getField(MatchType.TP_SRC).getValue());
+            assertEquals("TP_DST isn't equal.", 12, (short) match.getField(MatchType.TP_DST).getValue());
+            assertEquals("NW_PROTO isn't equal.", UDP, (byte) match.getField(MatchType.NW_PROTO).getValue());
+            break;
+        default:
+            break;
+
+        }
+
     }
 
     private void checkSalFlow(Flow salFlow) {
@@ -148,15 +244,19 @@ public class TestToSalConversionsUtils {
         }
     }
 
-    private NodeFlow prepareOdFlow() {
+    private FlowAddedBuilder prepareOdFlowCommon() {
         FlowAddedBuilder odNodeFlowBuilder = new FlowAddedBuilder();
+
         odNodeFlowBuilder.setCookie(new BigInteger("9223372036854775807"));
         odNodeFlowBuilder.setHardTimeout(32767);
         odNodeFlowBuilder.setIdleTimeout(32767);
         odNodeFlowBuilder.setPriority(32767);
         odNodeFlowBuilder.setAction(prepareOdActions());
-        odNodeFlowBuilder.setMatch(prepareOdMatch());
+        return odNodeFlowBuilder;
+    }
 
+    private NodeFlow prepareOdFlow(FlowAddedBuilder odNodeFlowBuilder, MtchType mt) {
+        odNodeFlowBuilder.setMatch(prepOdMatch(mt));
         return odNodeFlowBuilder.build();
     }
 
@@ -331,11 +431,133 @@ public class TestToSalConversionsUtils {
         outputActionBuilder.setOutputNodeConnector(uris);
     }
 
-    private Match prepareOdMatch() {
+    private Match prepOdMatch(MtchType mt) {
         MatchBuilder odMatchBuilder = new MatchBuilder();
-        EthernetMatchBuilder odEthernetMatchBuilder = new EthernetMatchBuilder();
-        odMatchBuilder.setEthernetMatch(odEthernetMatchBuilder.build());
-
+        switch (mt) {
+        case other:
+            odMatchBuilder.setEthernetMatch(prepEthernetMatch());
+            odMatchBuilder.setIpMatch(prepIpMatch());
+            odMatchBuilder.setVlanMatch(prepVlanMatch());
+            break;
+        case ipv4:
+            odMatchBuilder.setLayer3Match(prepLayer3MatchIpv4());
+            break;
+        case ipv6:
+            odMatchBuilder.setLayer3Match(prepLayer3MatchIpv6());
+            break;
+        case arp:
+            odMatchBuilder.setLayer3Match(prepLayer3MatchArp());
+            break;
+        case sctp:
+            odMatchBuilder.setLayer4Match(prepLayer4MatchSctp());
+            break;
+        case tcp:
+            odMatchBuilder.setLayer4Match(prepLayer4MatchTcp());
+            break;
+        case udp:
+            odMatchBuilder.setLayer4Match(prepLayer4MatchUdp());
+            break;
+        }
         return odMatchBuilder.build();
+    }
+
+    private Layer4Match prepLayer4MatchUdp() {
+        UdpMatchBuilder udpMatchBuilder = new UdpMatchBuilder();
+
+        udpMatchBuilder.setUdpSourcePort(new PortNumber(11));
+        udpMatchBuilder.setUdpDestinationPort(new PortNumber(12));
+
+        return udpMatchBuilder.build();
+    }
+
+    private Layer4Match prepLayer4MatchTcp() {
+        TcpMatchBuilder tcpMatchBuilder = new TcpMatchBuilder();
+
+        tcpMatchBuilder.setTcpSourcePort(new PortNumber(21));
+        tcpMatchBuilder.setTcpDestinationPort(new PortNumber(22));
+
+        return tcpMatchBuilder.build();
+    }
+
+    private Layer4Match prepLayer4MatchSctp() {
+        SctpMatchBuilder sctpMatchBuilder = new SctpMatchBuilder();
+
+        sctpMatchBuilder.setSctpSourcePort(new PortNumber(31));
+        sctpMatchBuilder.setSctpDestinationPort(new PortNumber(32));
+
+        return sctpMatchBuilder.build();
+    }
+
+    private Layer3Match prepLayer3MatchIpv4() {
+        Ipv4MatchBuilder ipv4MatchBuilder = new Ipv4MatchBuilder();
+        ipv4MatchBuilder.setIpv4Source(new Ipv4Prefix("192.168.1.104"));
+        ipv4MatchBuilder.setIpv4Destination(new Ipv4Prefix("192.168.1.105"));
+        return ipv4MatchBuilder.build();
+    }
+
+    private Layer3Match prepLayer3MatchIpv6() {
+        Ipv6MatchBuilder ipv6MatchBuilder = new Ipv6MatchBuilder();
+        ipv6MatchBuilder.setIpv6Source(new Ipv6Prefix("3001:0db8:85a3:0000:0000:8a2e:0370:7334"));
+        ipv6MatchBuilder.setIpv6Destination(new Ipv6Prefix("3001:0db8:85a3:0000:0000:8a2e:0370:7335"));
+        return ipv6MatchBuilder.build();
+    }
+
+    private Layer3Match prepLayer3MatchArp() {
+        ArpMatchBuilder arpMatchBuilder = new ArpMatchBuilder();
+        arpMatchBuilder.setArpSourceTransportAddress(new Ipv4Prefix("192.168.1.101"));
+        arpMatchBuilder.setArpTargetTransportAddress(new Ipv4Prefix("192.168.1.102"));
+
+        ArpSourceHardwareAddressBuilder arpSourAddressBuild = new ArpSourceHardwareAddressBuilder();
+        arpSourAddressBuild.setAddress(new MacAddress("22:44:66:88:AA:CC"));
+        arpMatchBuilder.setArpSourceHardwareAddress(arpSourAddressBuild.build());
+
+        ArpTargetHardwareAddressBuilder arpTarAddressBuild = new ArpTargetHardwareAddressBuilder();
+        arpTarAddressBuild.setAddress(new MacAddress("11:33:55:77:BB:DD"));
+        arpMatchBuilder.setArpTargetHardwareAddress(arpTarAddressBuild.build());
+        return arpMatchBuilder.build();
+    }
+
+    private VlanMatch prepVlanMatch() {
+        VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder();
+
+        VlanIdBuilder vlanIdBuilder = new VlanIdBuilder().setVlanId(new VlanId(0xfff));
+        vlanMatchBuilder.setVlanId(vlanIdBuilder.build());
+        vlanMatchBuilder.setVlanPcp(new VlanPcp((short) 0x7));
+
+        return vlanMatchBuilder.build();
+
+    }
+
+    private IpMatch prepIpMatch() {
+        IpMatchBuilder ipMatchBuilder = new IpMatchBuilder();
+        ipMatchBuilder.setIpDscp(new Dscp((short) 0x33));
+        ipMatchBuilder.setIpProtocol((short) 0x3f);
+        return ipMatchBuilder.build();
+    }
+
+    private EthernetMatch prepEthernetMatch() {
+        EthernetMatchBuilder odEthernetMatchBuilder = new EthernetMatchBuilder();
+        odEthernetMatchBuilder.setEthernetDestination(prepEthDest());
+        odEthernetMatchBuilder.setEthernetSource(prepEthSour());
+        odEthernetMatchBuilder.setEthernetType(prepEthType());
+        return odEthernetMatchBuilder.build();
+    }
+
+    private EthernetType prepEthType() {
+        EthernetTypeBuilder ethTypeBuild = new EthernetTypeBuilder();
+        ethTypeBuild.setType(new EtherType(0xffffl));
+        return ethTypeBuild.build();
+    }
+
+    private EthernetSource prepEthSour() {
+        EthernetSourceBuilder ethSourBuild = new EthernetSourceBuilder();
+        ethSourBuild.setAddress(new MacAddress("24:77:03:7C:C5:F1"));
+        return ethSourBuild.build();
+    }
+
+    private EthernetDestination prepEthDest() {
+        EthernetDestinationBuilder ethDestBuild = new EthernetDestinationBuilder();
+        ethDestBuild.setAddress(new MacAddress("3C:A9:F4:00:E0:C8"));
+        return ethDestBuild.build();
     }
 }

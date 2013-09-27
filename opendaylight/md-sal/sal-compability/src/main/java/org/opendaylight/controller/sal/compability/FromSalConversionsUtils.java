@@ -18,6 +18,7 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.*;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
@@ -46,15 +47,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.vlan.match.fields.VlanIdBuilder;
 
+import com.google.common.net.InetAddresses;
+
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.ETHERNET_ARP;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.SCTP;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.TCP;
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.UDP;
+
 public class FromSalConversionsUtils {
-
-    // source: http://en.wikipedia.org/wiki/Ethertype
-    private static final Short ETHERNET_ARP = new Short((short) 0x0806);
-
-    // source: http://en.wikipedia.org/wiki/List_of_IP_protocol_numbers
-    private static final short TCP = (short) 0x06;
-    private static final short UDP = (short) 0x11;
-    private static final short SCTP = (short) 0x84;
 
     private FromSalConversionsUtils() {
 
@@ -122,13 +122,13 @@ public class FromSalConversionsUtils {
             SetDlDst setDlDst = (SetDlDst) sourceAction;
             SetDlDstActionBuilder setDlDstActionBuilder = new SetDlDstActionBuilder();
 
-            setDlDstActionBuilder.setAddress(new MacAddress(Arrays.toString(setDlDst.getDlAddress())));
+            setDlDstActionBuilder.setAddress(new MacAddress(new String(setDlDst.getDlAddress())));
             targetAction = setDlDstActionBuilder.build();
         } else if (sourceAction instanceof SetDlSrc) {
             SetDlSrc setDlSrc = (SetDlSrc) sourceAction;
             SetDlSrcActionBuilder setDlSrcActionBuilder = new SetDlSrcActionBuilder();
 
-            setDlSrcActionBuilder.setAddress(new MacAddress(Arrays.toString(setDlSrc.getDlAddress())));
+            setDlSrcActionBuilder.setAddress(new MacAddress(new String(setDlSrc.getDlAddress())));
             targetAction = setDlSrcActionBuilder.build();
         } else if (sourceAction instanceof SetDlType) {
             SetDlType setDlType = (SetDlType) sourceAction;
@@ -211,14 +211,14 @@ public class FromSalConversionsUtils {
     }
 
     private static Address addressFromAction(InetAddress inetAddress) {
-        byte[] byteInetAddresss = inetAddress.getAddress();
+        String strInetAddresss = InetAddresses.toAddrString(inetAddress);
         if (inetAddress instanceof Inet4Address) {
             Ipv4Builder ipv4Builder = new Ipv4Builder();
-            ipv4Builder.setIpv4Address(new Ipv4Prefix(Arrays.toString(byteInetAddresss)));
+            ipv4Builder.setIpv4Address(new Ipv4Prefix(strInetAddresss));
             return ipv4Builder.build();
         } else if (inetAddress instanceof Inet6Address) {
             Ipv6Builder ipv6Builder = new Ipv6Builder();
-            ipv6Builder.setIpv6Address(new Ipv6Prefix(Arrays.toString(byteInetAddresss)));
+            ipv6Builder.setIpv6Address(new Ipv6Prefix(strInetAddresss));
             return ipv6Builder.build();
         }
         return null;
@@ -250,16 +250,15 @@ public class FromSalConversionsUtils {
         MatchField nwProto = sourceMatch.getField(MatchType.NW_PROTO);
         Short nwProtocolSource = null;
         if (nwProto != null && nwProto.getValue() != null) {
-            nwProtocolSource = (Short) (nwProto.getValue());
-        }
-
-        switch (nwProtocolSource) {
-        case TCP:
-            return Layer4MatchAsTcp(sourceMatch);
-        case UDP:
-            return Layer4MatchAsUdp(sourceMatch);
-        case SCTP:
-            return Layer4MatchAsSctp(sourceMatch);
+            nwProtocolSource = (short) ((byte) nwProto.getValue());
+            switch (nwProtocolSource) {
+            case TCP:
+                return Layer4MatchAsTcp(sourceMatch);
+            case UDP:
+                return Layer4MatchAsUdp(sourceMatch);
+            case SCTP:
+                return Layer4MatchAsSctp(sourceMatch);
+            }
         }
         return null;
     }
@@ -315,8 +314,9 @@ public class FromSalConversionsUtils {
 
     private static Integer transportPortFrom(final Match sourceMatch, final MatchType matchType) {
         MatchField transportPort = sourceMatch.getField(matchType);
-        if (transportPort != null && transportPort.getValue() != null) {
-            return (Integer) (transportPort.getValue());
+        if (transportPort != null && transportPort.getValue() != null
+                && transportPort.getValue().getClass().equals(Short.class)) {
+            return new Integer(NetUtils.getUnsignedShort((short) transportPort.getValue()));
         }
         return null;
     }
@@ -327,13 +327,13 @@ public class FromSalConversionsUtils {
         MatchField vlan = sourceMatch.getField(MatchType.DL_VLAN);
         if (vlan != null && vlan.getValue() != null) {
             VlanIdBuilder vlanIDBuilder = new VlanIdBuilder();
-            vlanIDBuilder.setVlanId(new VlanId((Integer) (vlan.getValue())));
+            vlanIDBuilder.setVlanId(new VlanId((int) (NetUtils.getUnsignedShort((short) vlan.getValue()))));
             vlanMatchBuild.setVlanId(vlanIDBuilder.build());
         }
 
         MatchField vlanPriority = sourceMatch.getField(MatchType.DL_VLAN_PR);
         if (vlanPriority != null && vlanPriority.getValue() != null) {
-            vlanMatchBuild.setVlanPcp(new VlanPcp((Short) (vlanPriority.getValue())));
+            vlanMatchBuild.setVlanPcp(new VlanPcp((short) ((byte) vlanPriority.getValue())));
         }
 
         return vlanMatchBuild.build();
@@ -343,13 +343,13 @@ public class FromSalConversionsUtils {
         IpMatchBuilder targetIpMatchBuild = new IpMatchBuilder();
         MatchField networkTos = sourceMatch.getField(MatchType.NW_TOS);
         if (networkTos != null && networkTos.getValue() != null) {
-            Dscp dscp = new Dscp((Short) (networkTos.getValue()));
+            Dscp dscp = new Dscp((short) (NetUtils.getUnsignedByte((Byte) networkTos.getValue())));
             targetIpMatchBuild.setIpDscp(dscp);
         }
 
         MatchField protocol = sourceMatch.getField(MatchType.NW_PROTO);
         if (protocol != null && protocol.getValue() != null) {
-            targetIpMatchBuild.setIpProtocol((Short) (protocol.getValue()));
+            targetIpMatchBuild.setIpProtocol((short) ((byte) protocol.getValue()));
         }
 
         return targetIpMatchBuild.build();
@@ -369,7 +369,7 @@ public class FromSalConversionsUtils {
 
         final MatchField dataLinkType = sourceMatch.getField(MatchType.DL_TYPE);
         if (dataLinkType != null && dataLinkType.getValue() != null) {
-            EtherType etherType = new EtherType((Long) (dataLinkType.getValue()));
+            EtherType etherType = new EtherType(new Long(NetUtils.getUnsignedShort((Short) dataLinkType.getValue())));
             EthernetTypeBuilder ethType = new EthernetTypeBuilder().setType(etherType);
             targetEthMatchBuild.setEthernetType(ethType.build());
         }
@@ -379,7 +379,7 @@ public class FromSalConversionsUtils {
     private static MacAddress ethernetSourceAddressFrom(final Match sourceMatch) {
         final MatchField dataLinkSource = sourceMatch.getField(DL_SRC);
         if (dataLinkSource != null && dataLinkSource.getValue() != null) {
-            return new MacAddress(new MacAddress((String) (dataLinkSource.getValue())));
+            return new MacAddress(new MacAddress(new String((byte[]) dataLinkSource.getValue())));
         }
         return null;
 
@@ -404,7 +404,7 @@ public class FromSalConversionsUtils {
             if (dataLinkType != null && dataLinkType.getValue() != null) {
                 dLType = (Short) (dataLinkType.getValue());
             }
-            if (dLType.equals(ETHERNET_ARP)) {
+            if (dLType != null && dLType.equals(ETHERNET_ARP)) {
                 return setLayer3MatchAsArp(sourceMatch, (Inet4Address) inetSourceAddress,
                         (Inet4Address) inetDestAddress);
             } else {
@@ -420,16 +420,16 @@ public class FromSalConversionsUtils {
 
     private static Layer3Match setLayer3MatchAsArp(final Match sourceMatch, final Inet4Address inetSourceAddress,
             final Inet4Address inetDestAddress) {
-        byte[] inetSourceAddressValue = inetSourceAddress.getAddress();
-        Ipv4Prefix ipv4SourcePrefix = new Ipv4Prefix(Arrays.toString(inetSourceAddressValue));
+        String inetSourceAddressStr = InetAddresses.toAddrString(inetSourceAddress);
+        Ipv4Prefix ipv4SourcePrefix = new Ipv4Prefix(inetSourceAddressStr);
 
-        byte[] inetDestAddressValue = inetDestAddress.getAddress();
-        Ipv4Prefix ipv4DestPrefix = new Ipv4Prefix(Arrays.toString(inetDestAddressValue));
+        String inetDestAddressValue = InetAddresses.toAddrString(inetDestAddress);
+        Ipv4Prefix ipv4DestPrefix = new Ipv4Prefix(inetDestAddressValue);
 
         ArpMatchBuilder arpMatchBuilder = new ArpMatchBuilder();
 
         arpMatchBuilder.setArpSourceTransportAddress(ipv4SourcePrefix);
-        arpMatchBuilder.setArpSourceTransportAddress(ipv4DestPrefix);
+        arpMatchBuilder.setArpTargetTransportAddress(ipv4DestPrefix);
 
         ArpSourceHardwareAddressBuilder arpSourceHardwareAddressBuilder = new ArpSourceHardwareAddressBuilder();
         arpSourceHardwareAddressBuilder.setAddress(ethernetSourceAddressFrom(sourceMatch));
@@ -446,27 +446,31 @@ public class FromSalConversionsUtils {
     private static MacAddress ethernetDestAddressFrom(final Match sourceMatch) {
         final MatchField dataLinkDest = sourceMatch.getField(DL_DST);
         if (dataLinkDest != null && dataLinkDest.getValue() != null) {
-            return new MacAddress((String) (dataLinkDest.getValue()));
+            return new MacAddress(new String((byte[]) (dataLinkDest.getValue())));
         }
         return null;
     }
 
     private static Layer3Match setLayer3MatchAsIpv4(final Inet4Address inetSourceAddress,
             final Inet4Address inetDestAddress) {
-        byte[] inetAddressValue = inetSourceAddress.getAddress();
+        String inetSrcAddressString = InetAddresses.toAddrString(inetSourceAddress);
+        String inetDstAddressString = InetAddresses.toAddrString(inetDestAddress);
 
         Ipv4MatchBuilder layer4MatchBuild = new Ipv4MatchBuilder();
-        layer4MatchBuild.setIpv4Source(new Ipv4Prefix(Arrays.toString(inetAddressValue)));
+        layer4MatchBuild.setIpv4Source(new Ipv4Prefix(inetSrcAddressString));
+        layer4MatchBuild.setIpv4Destination(new Ipv4Prefix(inetDstAddressString));
         return layer4MatchBuild.build();
 
     }
 
     private static Layer3Match setLayer3MatchAsIpv6(final Inet6Address inetSourceAddress,
             final Inet6Address inetDestAddress) {
-        byte[] inetAddressValue = inetSourceAddress.getAddress();
+        String inetSrcAddressString = InetAddresses.toAddrString(inetSourceAddress);
+        String inetDstAddressString = InetAddresses.toAddrString(inetDestAddress);
         Ipv6MatchBuilder layer6MatchBuild = new Ipv6MatchBuilder();
 
-        layer6MatchBuild.setIpv6Source(new Ipv6Prefix(Arrays.toString(inetAddressValue)));
+        layer6MatchBuild.setIpv6Source(new Ipv6Prefix(inetSrcAddressString));
+        layer6MatchBuild.setIpv6Destination(new Ipv6Prefix(inetDstAddressString));
         return layer6MatchBuild.build();
     }
 
