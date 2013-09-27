@@ -278,7 +278,7 @@ one.f.switchmanager.nodesLearnt = {
         footer: {
             updateNode: function() {
                 var footer = [];
-                var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.nodesLearnt.id.modal.save, "btn-success", "");
+                var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.nodesLearnt.id.modal.save, "btn-primary", "");
                 var $saveButton = one.lib.dashlet.button.button(saveButton);
                 footer.push($saveButton);
 
@@ -356,7 +356,7 @@ one.f.switchmanager.nodesLearnt = {
                         },
                         {
                             property: 'mac',
-                            label: 'MAC',
+                            label: 'MAC Address',
                             sortable: true
                         },
                         {
@@ -516,6 +516,10 @@ one.f.switchmanager.subnetGatewayConfig = {
                     one.f.switchmanager.subnetGatewayConfig.id.dashlet.addPorts, "btn-primary", "btn-mini");
                 var $button = one.lib.dashlet.button.button(button);
                 $button.click(function() {
+                    if (one.f.switchmanager.subnetGatewayConfig.registry.gateways.length === 0) {
+                      alert('No Gateways Exist');
+                      return false;
+                    }
                     var $modal = one.f.switchmanager.subnetGatewayConfig.modal.initialize.ports();
                     $modal.modal();
                 });
@@ -649,8 +653,9 @@ one.f.switchmanager.subnetGatewayConfig = {
                 // gateway IP Mask 
                 var $label = one.lib.form.label("Gateway IP Address/Mask");
                 var $input = one.lib.form.input("Gateway IP Address/Mask");
+                var $help = one.lib.form.help('Example: 192.168.10.254/16');
                 $input.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.gatewayIPAddress);
-                $fieldset.append($label).append($input);
+                $fieldset.append($label).append($input).append($help);
                 
                 $form.append($fieldset);
                 return $form;
@@ -662,6 +667,7 @@ one.f.switchmanager.subnetGatewayConfig = {
                 var $label = one.lib.form.label("Gateway Name");
                 var $select = one.lib.form.select.create(one.f.switchmanager.subnetGatewayConfig.registry.gateways);
                 $select.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.name);
+                one.lib.form.select.prepend($select, { '' : 'Please Select a Gateway' });
                 $select.val($select.find("option:first").val());
                 $fieldset.append($label).append($select);
 
@@ -692,6 +698,7 @@ one.f.switchmanager.subnetGatewayConfig = {
                 // ports
                 var $label = one.lib.form.label("Select Port");
                 var $select = one.lib.form.select.create();
+                one.lib.form.select.prepend($select, { '' : 'Please Select a Port' });
                 $select.attr('id', one.f.switchmanager.subnetGatewayConfig.id.modal.form.ports);
                 $fieldset.append($label).append($select);
                 
@@ -713,7 +720,7 @@ one.f.switchmanager.subnetGatewayConfig = {
         },
         footer : function() {
             var footer = [];
-            var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.subnetGatewayConfig.id.modal.save, "btn-success", "");
+            var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.subnetGatewayConfig.id.modal.save, "btn-primary", "");
             var $saveButton = one.lib.dashlet.button.button(saveButton);
             footer.push($saveButton);
             return footer;
@@ -1042,13 +1049,15 @@ one.f.switchmanager.staticRouteConfig = {
             // static route IP Mask 
             var $label = one.lib.form.label("Static Route");
             var $input = one.lib.form.input("Static Route");
+            var $help = one.lib.form.help('Example: 53.55.0.0/16');
             $input.attr('id', one.f.switchmanager.staticRouteConfig.id.modal.form.staticRoute);
-            $fieldset.append($label).append($input);
+            $fieldset.append($label).append($input).append($help);
             // static route IP Mask 
             var $label = one.lib.form.label("Next Hop");
             var $input = one.lib.form.input("Next Hop");
+            var $help = one.lib.form.help('Example: 192.168.10.254');
             $input.attr('id', one.f.switchmanager.staticRouteConfig.id.modal.form.nextHop);
-            $fieldset.append($label).append($input);
+            $fieldset.append($label).append($input).append($help);
             // return
             $form.append($fieldset);
             return $form;
@@ -1065,7 +1074,7 @@ one.f.switchmanager.staticRouteConfig = {
         },
         footer : function() {
             var footer = [];
-            var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.staticRouteConfig.id.modal.save, "btn-success", "");
+            var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.staticRouteConfig.id.modal.save, "btn-primary", "");
             var $saveButton = one.lib.dashlet.button.button(saveButton);
             footer.push($saveButton);
             return footer;
@@ -1334,20 +1343,24 @@ one.f.switchmanager.spanPortConfig = {
                 // retrieve port value
                 var nodeId = $(this).find('option:selected').attr('value');
                 one.f.switchmanager.spanPortConfig.registry['currentNode'] = nodeId;
-                var $ports = $('#' + one.f.switchmanager.spanPortConfig.id.modal.form.port);
+                var $ports = $('#'+one.f.switchmanager.spanPortConfig.id.modal.form.port);
                 var ports = one.f.switchmanager.spanPortConfig.registry['nodePorts'][nodeId]
                 var options = {};
                 $(ports).each(function(idx, val) {
                     options[val.internalPortName] = val.portName+' ('+val.portId+')'; 
                 });
                 one.lib.form.select.inject($ports, options); 
+                one.lib.form.select.prepend($ports, {'':'Please Select a Port'});
+                $ports.val($ports.find('option:first').val());
             });
 
             $fieldset.append($label).append($select);
             // input port
             var $label = one.lib.form.label("Input Port");
             var $select = one.lib.form.select.create();
+            one.lib.form.select.prepend($select, {'':'None'});
             $select.attr('id', one.f.switchmanager.spanPortConfig.id.modal.form.port);
+            $select.val($select.find('option:first').val());
             $fieldset.append($label).append($select);
             
             // return
@@ -1377,14 +1390,14 @@ one.f.switchmanager.spanPortConfig = {
         },
         footer : function() {
             var footer = [];
-            var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.spanPortConfig.id.modal.save, "btn-success", "");
+            var saveButton = one.lib.dashlet.button.single("Save", one.f.switchmanager.spanPortConfig.id.modal.save, "btn-primary", "");
             var $saveButton = one.lib.dashlet.button.button(saveButton);
             footer.push($saveButton);
             return footer;
         },
         removeMultiple: {
             dialog: function(spanPortsToDelete) {
-                var h3 = 'Remove Span Port';
+                var h3 = 'Remove SPAN Port';
                 
                 var footer = one.f.switchmanager.spanPortConfig.modal.removeMultiple.footer();
                 var $body = one.f.switchmanager.spanPortConfig.modal.removeMultiple.body(spanPortsToDelete);
