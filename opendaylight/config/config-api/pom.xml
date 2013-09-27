@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<project
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>config-subsystem</artifactId>
+        <groupId>org.opendaylight</groupId>
+        <version>0.2.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>config-api</artifactId>
+    <name>${project.artifactId}</name>
+    <packaging>bundle</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.bgpcep</groupId>
+            <artifactId>concepts</artifactId>
+            <version>0.2.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            javax.management,
+                            org.opendaylight.protocol.concepts
+                        </Import-Package>
+                        <Export-Package>
+                            org.opendaylight.controller.config.api,
+                            org.opendaylight.controller.config.api.annotations,
+                            org.opendaylight.controller.config.spi,
+                            org.opendaylight.controller.config.api.jmx,
+                            org.opendaylight.controller.config.api.jmx.constants,
+                            org.opendaylight.controller.config.api.runtime,
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
