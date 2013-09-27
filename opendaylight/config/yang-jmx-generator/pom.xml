@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<project
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>config-subsystem</artifactId>
+        <groupId>org.opendaylight</groupId>
+        <version>0.2.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>yang-jmx-generator</artifactId>
+    <name>${project.artifactId}</name>
+    <packaging>bundle</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>binding-generator-util</artifactId>
+            <version>${opendaylight.binding.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>binding-generator-spi</artifactId>
+            <version>${opendaylight.binding.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opendaylight.bgpcep</groupId>
+            <artifactId>mockito-configuration</artifactId>
+            <version>0.2.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-parser-impl</artifactId>
+            <version>${opendaylight.yang.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>config-api</artifactId>
+            <version>0.2.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>binding-generator-impl</artifactId>
+            <version>${opendaylight.binding.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Private-Package>
+                            org.opendaylight.controller.config.yangjmxgenerator.plugin.util,
+                        </Private-Package>
+                        <Import-Package>
+                            org.slf4j,
+                            com.google.common.base,
+                            com.google.common.collect,
+                            javax.management.*,
+                        </Import-Package>
+                        <Export-Package>
+                            org.opendaylight.controller.config.yangjmxgenerator,
+                            org.opendaylight.controller.config.yangjmxgenerator.attribute,
+                            <!-- OPENDAYLIGHT NEEDED BY YANG-STORE -->
+                            org.opendaylight.yangtools.binding.generator.util,
+                            org.opendaylight.yangtools.sal.binding.generator.spi,
+                            org.opendaylight.yangtools.sal.binding.model.api,
+                            org.opendaylight.yangtools.yang.binding,
+                            org.opendaylight.yangtools.yang.common,
+                            org.opendaylight.yangtools.yang.model.api,
+                            org.opendaylight.yangtools.yang.model.api.type,
+
+                            org.opendaylight.yangtools.binding.generator.util.generated.type.builder,
+                            org.opendaylight.yangtools.sal.binding.model.api.type.builder,
+                            org.opendaylight.yangtools.yang.binding,
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <!-- test jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
