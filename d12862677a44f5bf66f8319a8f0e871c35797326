@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2f8d8d_3b49ded0",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-09-27T16:42:00Z",
+      "side": 1,
+      "message": "Controller is capable of learning the location of non SDN enabled (PRODUCTION) switches which are directly connected to a SDN enabled switch under its control as long as those switches run LLDP on those links.\n\nI am afraid this change would remove the capability of showing these nodes on the topology.\nBecause the notion of PRODUCTION switch is maintained only in the Topology service context. Switch Manager holds only the SDN switches info, it does not have any info about the node connectors of a directly connected production switch.\n\nWill let Jason comment on this if it could really be an issue.",
+      "revId": "d12862677a44f5bf66f8319a8f0e871c35797326",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
