@@ -236,6 +236,17 @@ public class ClusterManager implements IClusterServices {
         return res;
     }
 
+    private void exitOnSecurityException(Exception ioe) {
+        Throwable cause = ioe.getCause();
+        while (cause != null) {
+            if (cause instanceof java.lang.SecurityException) {
+                logger.error("Failed Cluster authentication. Stopping Controller...");
+                System.exit(0);
+            }
+            cause = cause.getCause();
+        }
+    }
+
     public void start() {
         this.gossiper = startGossiper();
         if (this.gossiper != null) {
@@ -272,6 +283,7 @@ public class ClusterManager implements IClusterServices {
             logger.error("Stack Trace that raised th exception");
             logger.error("",ioe);
             this.cm = null;
+            exitOnSecurityException(ioe);
             this.stop();
         }
         logger.debug("Cache Manager has value {}", this.cm);
