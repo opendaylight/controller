@@ -38,7 +38,6 @@ import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
-import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
@@ -56,6 +55,7 @@ import org.opendaylight.controller.sal.action.Controller;
 import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.action.PopVlan;
+import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainer;
@@ -118,7 +118,7 @@ public class ForwardingRulesManager implements
     private ConcurrentMap<PortGroupConfig, Map<Node, PortGroup>> portGroupData;
     private ConcurrentMap<String, Object> TSPolicies;
     private boolean inContainerMode; // being used by global instance only
-    private boolean stopping;
+    protected boolean stopping;
 
     /*
      * Flow database. It's the software view of what was requested to install
@@ -180,7 +180,7 @@ public class ForwardingRulesManager implements
      * not picked by anyone, which is always a case can happen especially on
      * Node disconnect cases.
      */
-    private ConcurrentMap<FlowEntryDistributionOrder, FlowEntryInstall> workOrder;
+    protected ConcurrentMap<FlowEntryDistributionOrder, FlowEntryInstall> workOrder;
 
     /*
      * Data structure responsible for retrieving the results of the workOrder
@@ -193,7 +193,7 @@ public class ForwardingRulesManager implements
      * TODO: The workStatus entries need to have a lifetime associated in case
      * of requestor controller leaving the cluster.
      */
-    private ConcurrentMap<FlowEntryDistributionOrder, Status> workStatus;
+    protected ConcurrentMap<FlowEntryDistributionOrder, Status> workStatus;
 
     /*
      * Local Map used to hold the Future which a caller can use to monitor for
@@ -1126,7 +1126,7 @@ public class ForwardingRulesManager implements
      * merged flow may conflict with an existing old container flows merged flow
      * on the network node
      */
-    private void updateFlowsContainerFlow() {
+    protected void updateFlowsContainerFlow() {
         Set<FlowEntry> toReInstall = new HashSet<FlowEntry>();
         // First remove all installed entries
         for (ConcurrentMap.Entry<FlowEntryInstall, FlowEntryInstall> entry : installedSwView.entrySet()) {
@@ -2548,7 +2548,7 @@ public class ForwardingRulesManager implements
                                 logsync.trace("Executing the workOrder {}", fe);
                                 Status gotStatus = null;
                                 FlowEntryInstall feiCurrent = fe.getEntry();
-                                FlowEntryInstall feiNew = workOrder.get(fe.getEntry());
+                                FlowEntryInstall feiNew = workOrder.get(fe);
                                 switch (fe.getUpType()) {
                                 case ADDED:
                                     /*
