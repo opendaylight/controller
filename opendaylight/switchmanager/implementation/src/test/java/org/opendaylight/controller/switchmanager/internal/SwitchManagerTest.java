@@ -134,10 +134,15 @@ public class SwitchManagerTest {
             switchmgr.updateNode(tailnc[i - 1].getNode(), UpdateType.ADDED,
                     props);
 
+            Assert.assertFalse(switchmgr.doesNodeConnectorExist(headnc[i - 1]));
             switchmgr.updateNodeConnector(headnc[i - 1], UpdateType.ADDED,
                     props);
+            Assert.assertTrue(switchmgr.doesNodeConnectorExist(headnc[i - 1]));
+
+            Assert.assertFalse(switchmgr.doesNodeConnectorExist(tailnc[i - 1]));
             switchmgr.updateNodeConnector(tailnc[i - 1], UpdateType.ADDED,
                     props);
+            Assert.assertTrue(switchmgr.doesNodeConnectorExist(tailnc[i - 1]));
         }
 
         for (int i = 0; i < 5; i++) {

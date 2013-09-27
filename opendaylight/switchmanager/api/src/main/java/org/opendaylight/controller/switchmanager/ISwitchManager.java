@@ -336,6 +336,14 @@ public interface ISwitchManager {
     public Boolean isNodeConnectorEnabled(NodeConnector nodeConnector);
 
     /**
+     * Test whether the given node connector exists.
+     *
+     * @param nc  {@link org.opendaylight.controller.sal.core.NodeConnector}
+     * @return    True if exists, false otherwise.
+     */
+    public boolean doesNodeConnectorExist(NodeConnector nc);
+
+    /**
      * Return controller MAC address
          *
      * @return MAC address in byte array

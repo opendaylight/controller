@@ -53,6 +53,7 @@ import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
 import org.opendaylight.controller.topologymanager.ITopologyManagerClusterWideAware;
@@ -81,6 +82,7 @@ public class TopologyManagerImpl implements
     private static final Logger log = LoggerFactory.getLogger(TopologyManagerImpl.class);
     private ITopologyService topoService;
     private IClusterContainerServices clusterContainerService;
+    private ISwitchManager switchManager;
     // DB of all the Edges with properties which constitute our topology
     private ConcurrentMap<Edge, Set<Property>> edgesDB;
     // DB of all NodeConnector which are part of ISL Edges, meaning they
@@ -158,6 +160,18 @@ public class TopologyManagerImpl implements
         if (this.clusterContainerService == s) {
             log.debug("Cluster Service removed!");
             this.clusterContainerService = null;
+        }
+    }
+
+    void setSwitchManager(ISwitchManager s) {
+        log.debug("Adding ISwitchManager: {}", s);
+        this.switchManager = s;
+    }
+
+    void unsetSwitchManager(ISwitchManager s) {
+        if (this.switchManager == s) {
+            log.debug("Removing ISwitchManager: {}", s);
+            this.switchManager = null;
         }
     }
 
@@ -507,9 +521,22 @@ public class TopologyManagerImpl implements
         }
     }
 
+    private boolean nodeConnectorsExist(Edge e) {
+        NodeConnector head = e.getHeadNodeConnector();
+        NodeConnector tail = e.getTailNodeConnector();
+        return (switchManager.doesNodeConnectorExist(head) &&
+                switchManager.doesNodeConnectorExist(tail));
+    }
+
     private TopoEdgeUpdate edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
         switch (type) {
         case ADDED:
+            // Ensure that both tail and head node connectors exist.
+            if (!nodeConnectorsExist(e)) {
+                log.warn("Ignore edge that contains invalid node connector: {}", e);
+                return null;
+            }
+
             // Make sure the props are non-null
             if (props == null) {
                 props = new HashSet<Property>();
@@ -631,18 +658,21 @@ public class TopologyManagerImpl implements
             Set<Property> p = topoedgeupdateList.get(i).getProperty();
             UpdateType type = topoedgeupdateList.get(i).getUpdateType();
             TopoEdgeUpdate teu = edgeUpdate(e, type, p);
-            teuList.add(teu);
-        }
-
-        // Now update the listeners
-        for (ITopologyManagerAware s : this.topologyManagerAware) {
-            try {
-                s.edgeUpdate(teuList);
-            } catch (Exception exc) {
-                log.error("Exception on edge update:", exc);
+            if (teu != null) {
+                teuList.add(teu);
             }
         }
 
+        if (!teuList.isEmpty()) {
+            // Now update the listeners
+            for (ITopologyManagerAware s : this.topologyManagerAware) {
+                try {
+                    s.edgeUpdate(teuList);
+                } catch (Exception exc) {
+                    log.error("Exception on edge update:", exc);
+                }
+            }
+        }
     }
 
     private Edge getReverseLinkTuple(TopologyUserLinkConfig link) {
@@ -692,7 +722,14 @@ public class TopologyManagerImpl implements
         Edge linkTuple = getLinkTuple(userLink);
         if (linkTuple != null) {
             if (!isProductionLink(linkTuple)) {
-                edgeUpdate(linkTuple, UpdateType.ADDED, new HashSet<Property>());
+                TopoEdgeUpdate teu = edgeUpdate(linkTuple, UpdateType.ADDED,
+                                                new HashSet<Property>());
+                if (teu == null) {
+                    userLinksDB.remove(userLink.getName());
+                    return new Status(StatusCode.NOTFOUND,
+                           "Link configuration contains invalid node connector: "
+                           + userLink);
+                }
             }
 
             linkTuple = getReverseLinkTuple(userLink);
