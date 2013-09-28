@@ -72,9 +72,9 @@ public class ContainerManagerNorthbound {
 
     @Context
     public void setSecurityContext(SecurityContext context) {
-        Principal principal;
-        principal = context.getUserPrincipal();
-        username = principal.getName();
+        if (context != null && context.getUserPrincipal() != null) {
+            username = context.getUserPrincipal().getName();
+        }
     }
 
     protected String getUserName() {
