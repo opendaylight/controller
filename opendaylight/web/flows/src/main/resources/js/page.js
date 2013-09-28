@@ -221,7 +221,7 @@ one.f.detail = {
             return $table;
         },
         description : function(body) {
-            var header = ['Input Port', 'Ethernet Type', 'VLAN ID', 'VLAN Priority', 'Source MAC', 'Dest MAC', 'Source IP', 'Dest IP', 'TOS', 'Source Port', 'Dest Port', 'Protocol', 'Cookie'];
+            var header = ['Input Port', 'Ethernet Type', 'VLAN ID', 'VLAN Priority', 'Source MAC', 'Dest MAC', 'Source IP', 'Dest IP', 'ToS', 'Source Port', 'Dest Port', 'Protocol', 'Cookie'];
             var $thead = one.lib.dashlet.table.header(header);
             var attributes = ['table-striped', 'table-bordered', 'table-condensed'];
             var $table = one.lib.dashlet.table.table(attributes);
@@ -762,8 +762,8 @@ one.f.flows = {
             $input.attr('id', one.f.flows.id.modal.form.dstIp);
             $fieldset.append($label).append($input);
             // tosBits
-            var $label = one.lib.form.label("TOS Bits");
-            var $input = one.lib.form.input("TOS Bits");
+            var $label = one.lib.form.label("ToS Bits");
+            var $input = one.lib.form.input("ToS Bits");
             $input.attr('id', one.f.flows.id.modal.form.tosBits);
             var $help = one.lib.form.help("Range: 0 - 63");
             $fieldset.append($label).append($input).append($help);
@@ -815,7 +815,7 @@ one.f.flows = {
                 "modifyDatalayerDestinationAddress" : "Modify Datalayer Destination Address",
                 "modifyNetworkSourceAddress" : "Modify Network Source Address",
                 "modifyNetworkDestinationAddress" :"Modify Network Destination Address",
-                "modifyTosBits" : "Modify TOS Bits",
+                "modifyTosBits" : "Modify ToS Bits",
                 "modifyTransportSourcePort" : "Modify Transport Source Port",
                 "modifyTransportDestinationPort" : "Modify Transport Destination Port"
             };
@@ -948,7 +948,7 @@ one.f.flows = {
                         var id = one.f.flows.id.modal.action.modifyTosBits;
                         var help = "Range: 0 - 63";
                         var action = 'SET_NW_TOS';
-                        var name = "TOS Bits";
+                        var name = "ToS Bits";
                         var body = function() {
                             return one.f.flows.modal.action.body.set(h3, placeholder, id, help);
                         };
