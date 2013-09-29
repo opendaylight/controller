@@ -202,6 +202,11 @@ public class ForwardingRulesManager implements
     private ConcurrentMap<FlowEntryDistributionOrder, FlowEntryDistributionOrderFutureTask> workMonitor =
             new ConcurrentHashMap<FlowEntryDistributionOrder, FlowEntryDistributionOrderFutureTask>();
 
+    /*
+     * Max pool size for the executor
+     */
+    private static final int maxPoolSize = 10;
+
     /**
      * @param e
      *            Entry being installed/updated/removed
@@ -2516,7 +2521,7 @@ public class ForwardingRulesManager implements
             public void run() {
                 while (!stopping) {
                     try {
-                        FRMEvent event = pendingEvents.take();
+                        final FRMEvent event = pendingEvents.take();
                         if (event == null) {
                             log.warn("Dequeued null event");
                             continue;
@@ -2542,36 +2547,40 @@ public class ForwardingRulesManager implements
                             /*
                              * Take care of handling the remote Work request
                              */
-                            WorkOrderEvent work = (WorkOrderEvent) event;
-                            FlowEntryDistributionOrder fe = work.getFe();
-                            if (fe != null) {
-                                logsync.trace("Executing the workOrder {}", fe);
-                                Status gotStatus = null;
-                                FlowEntryInstall feiCurrent = fe.getEntry();
-                                FlowEntryInstall feiNew = workOrder.get(fe);
-                                switch (fe.getUpType()) {
-                                case ADDED:
-                                    /*
-                                     * TODO: Not still sure how to handle the
-                                     * sync entries
-                                     */
-                                    gotStatus = addEntriesInternal(feiCurrent, true);
-                                    break;
-                                case CHANGED:
-                                    gotStatus = modifyEntryInternal(feiCurrent, feiNew, true);
-                                    break;
-                                case REMOVED:
-                                    gotStatus = removeEntryInternal(feiCurrent, true);
-                                    break;
+                            Runnable r = new Runnable() {
+                                @Override
+                                public void run() {
+                                    WorkOrderEvent work = (WorkOrderEvent) event;
+                                    FlowEntryDistributionOrder fe = work.getFe();
+                                    if (fe != null) {
+                                        logsync.trace("Executing the workOrder {}", fe);
+                                        Status gotStatus = null;
+                                        FlowEntryInstall feiCurrent = fe.getEntry();
+                                        FlowEntryInstall feiNew = workOrder.get(fe);
+                                        switch (fe.getUpType()) {
+                                        case ADDED:
+                                            gotStatus = addEntriesInternal(feiCurrent, false);
+                                            break;
+                                        case CHANGED:
+                                            gotStatus = modifyEntryInternal(feiCurrent, feiNew, false);
+                                            break;
+                                        case REMOVED:
+                                            gotStatus = removeEntryInternal(feiCurrent, false);
+                                            break;
+                                        }
+                                        // Remove the Order
+                                        workOrder.remove(fe);
+                                        logsync.trace(
+                                                "The workOrder has been executed and now the status is being returned {}", fe);
+                                        // Place the status
+                                        workStatus.put(fe, gotStatus);
+                                    } else {
+                                        log.warn("Not expected null WorkOrder", work);
+                                    }
                                 }
-                                // Remove the Order
-                                workOrder.remove(fe);
-                                logsync.trace(
-                                        "The workOrder has been executed and now the status is being returned {}", fe);
-                                // Place the status
-                                workStatus.put(fe, gotStatus);
-                            } else {
-                                log.warn("Not expected null WorkOrder", work);
+                            };
+                            if(executor != null) {
+                                executor.execute(r);
                             }
                         } else if (event instanceof WorkStatusCleanup) {
                             /*
@@ -2631,7 +2640,7 @@ public class ForwardingRulesManager implements
         stopping = false;
 
         // Allocate the executor service
-        this.executor = Executors.newSingleThreadExecutor();
+        this.executor = Executors.newFixedThreadPool(maxPoolSize);
 
         // Start event handler thread
         frmEventHandler.start();
