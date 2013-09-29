@@ -6,19 +6,19 @@
   </prerequisites>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>commons.opendaylight</artifactId>
-  <version>1.4.0</version>
+  <version>1.4.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>releasepom-0.1.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
@@ -388,7 +388,7 @@
             <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>0.0.1</version>
+              <version>0.0.2-SNAPSHOT</version>
             </dependency>
           </dependencies>
         <executions>
