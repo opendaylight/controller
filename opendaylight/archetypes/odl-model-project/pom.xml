@@ -4,7 +4,7 @@
 
   <groupId>org.opendaylight.controller.archetypes</groupId>
   <artifactId>odl-model-project</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>maven-archetype</packaging>
 
   <name>odl-model-project</name>
@@ -12,6 +12,7 @@
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+    <tag>releasepom-0.1.0</tag>
   </scm>
 
   <build>
