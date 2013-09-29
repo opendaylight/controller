@@ -361,50 +361,39 @@ public class Troubleshoot implements IDaylightWeb {
                 if (outPorts.length() > 0) {
                     outPorts.append(" ");
                 }
-                actions.append(action.getType().toString() + " = "
-                        + ao.getPort().getNodeConnectorIdAsString() + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(ao.getPort().getNodeConnectorIdAsString()).append("<br>");
             } else if (action instanceof SetVlanId) {
                 SetVlanId av = (SetVlanId) action;
                 String outVlanId = String.valueOf(av.getVlanId());
-                actions.append(action.getType().toString() + " = " + outVlanId
-                        + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(outVlanId).append("<br>");
             } else if (action instanceof SetDlSrc) {
                 SetDlSrc ads = (SetDlSrc) action;
-                actions.append(action.getType().toString() + " = "
-                        + HexEncode.bytesToHexStringFormat(ads.getDlAddress()) + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(HexEncode.bytesToHexStringFormat(ads.getDlAddress())).append("<br>");
             } else if (action instanceof SetDlDst) {
                 SetDlDst add = (SetDlDst) action;
-                actions.append(action.getType().toString() + " = "
-                        + HexEncode.bytesToHexStringFormat(add.getDlAddress())
-                        + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(HexEncode.bytesToHexStringFormat(add.getDlAddress())).append("<br>");
             } else if (action instanceof SetNwSrc) {
                 SetNwSrc ans = (SetNwSrc) action;
-                actions.append(action.getType().toString() + " = "
-                        + ans.getAddressAsString() + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(ans.getAddressAsString()).append("<br>");
             } else if (action instanceof SetNwDst) {
                 SetNwDst and = (SetNwDst) action;
-                actions.append(action.getType().toString() + " = "
-                        + and.getAddressAsString() + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(and.getAddressAsString()).append("<br>");
             } else if (action instanceof SetNwTos) {
                 SetNwTos ant = (SetNwTos) action;
-                actions.append(action.getType().toString() + " = "
-                        + ant.getNwTos() + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(ant.getNwTos()).append("<br>");
             } else if (action instanceof SetTpSrc) {
                 SetTpSrc ads = (SetTpSrc) action;
-                actions.append(action.getType().toString() + " = "
-                        + ads.getPort() + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(ads.getPort()).append("<br>");
             } else if (action instanceof SetTpDst) {
                 SetTpDst atd = (SetTpDst) action;
-                actions.append(action.getType().toString() + " = "
-                        + atd.getPort() + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(atd.getPort()).append("<br>");
             } else if (action instanceof SetVlanPcp) {
                 SetVlanPcp avp = (SetVlanPcp) action;
-                actions.append(action.getType().toString() + " = "
-                        + avp.getPcp() + "<br>");
+                actions.append(action.getType().toString()).append(" = ").append(avp.getPcp()).append("<br>");
                 // } else if (action instanceof SetDlSrc) {
                 // SetDlSrc ads = (SetDlSrc) action;
             } else {
-                actions.append(action.getType().toString() + "<br>");
+                actions.append(action.getType().toString()).append("<br>");
             }
         }
         row.put("actions", actions.toString());

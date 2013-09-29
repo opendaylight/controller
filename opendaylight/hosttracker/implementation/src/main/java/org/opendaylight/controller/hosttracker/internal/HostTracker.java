@@ -696,9 +696,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         int num = 1;
         for (ArrayList<String> hierarchy : hierarchies) {
             StringBuffer buf = new StringBuffer();
-            buf.append("Hierarchy#" + num + " : ");
+            buf.append("Hierarchy#").append(num).append(" : ");
             for (String switchName : hierarchy) {
-                buf.append(switchName + "/");
+                buf.append(switchName).append("/");
             }
             logger.debug("{} -> {}", getContainerName(), buf);
             num++;

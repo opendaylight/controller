@@ -103,13 +103,13 @@ public class Latency extends Property {
         if (this.latencyValue == 0) {
             sb.append("UnKnown");
         } else if (this.latencyValue < LATENCY1ns) {
-            sb.append(this.latencyValue + "psec");
+            sb.append(this.latencyValue).append("psec");
         } else if (this.latencyValue < LATENCY1us) {
-            sb.append(Long.toString(this.latencyValue / LATENCY1ns) + "nsec");
+            sb.append(Long.toString(this.latencyValue / LATENCY1ns)).append("nsec");
         } else if (this.latencyValue < LATENCY1ms) {
-            sb.append(Long.toString(this.latencyValue / LATENCY1us) + "usec");
+            sb.append(Long.toString(this.latencyValue / LATENCY1us)).append("usec");
         } else if (this.latencyValue < LATENCY1s) {
-            sb.append(Long.toString(this.latencyValue / LATENCY1ms) + "msec");
+            sb.append(Long.toString(this.latencyValue / LATENCY1ms)).append("msec");
         }
 
         sb.append("]");
