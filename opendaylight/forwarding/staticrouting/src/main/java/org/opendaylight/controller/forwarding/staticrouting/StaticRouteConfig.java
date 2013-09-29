@@ -103,8 +103,9 @@ public class StaticRouteConfig implements Serializable {
      * @return The string representation of the next hop address type
      */
     public String getNextHopType() {
-        if (nextHopType == null)
+        if (nextHopType == null) {
             return StaticRoute.NextHopType.IPADDRESS.toString();
+        }
         return nextHopType;
     }
 
@@ -218,8 +219,9 @@ public class StaticRouteConfig implements Serializable {
      * @return The IP address
      */
     public InetAddress getStaticRouteIP() {
-        if (!isValidStaticRouteEntry())
+        if (!isValidStaticRouteEntry()) {
             return null;
+        }
         InetAddress ip = null;
         try {
             ip = InetAddress.getByName(staticRoute.split("/")[0]);
@@ -337,12 +339,15 @@ public class StaticRouteConfig implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         StaticRouteConfig other = (StaticRouteConfig) obj;
         if (name == null) {
             if (other.name != null)
