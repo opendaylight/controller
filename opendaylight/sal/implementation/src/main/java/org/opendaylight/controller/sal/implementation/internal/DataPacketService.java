@@ -324,7 +324,6 @@ public class DataPacketService implements IPluginOutDataPacketService,
                 // find it lets just add our dependency at the end of
                 // the list.
                 for (List<DataPacketListener> serialListeners : this.listenDataPacket) {
-                    int i = 0;
                     boolean done = false;
                     if (serialListeners.contains(lDependency)) {
                         serialListeners.add(l);
