@@ -287,7 +287,7 @@ abstract public class ComponentActivatorAbstractBase implements
         StringBuffer buffer = new StringBuffer();
 
         for (int i = 0; i < stack.length; i++) {
-            buffer.append("\n\t" + stack[i].toString());
+            buffer.append("\n\t").append(stack[i].toString());
         }
         return buffer.toString();
     }
