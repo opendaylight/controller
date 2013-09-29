@@ -351,29 +351,19 @@ public interface ISwitchManager {
     public byte[] getNodeMAC(Node node);
 
     /**
-     * Return true if the host Refresh procedure (by sending ARP request probes
-     * to known hosts) is enabled. By default, the procedure is enabled. This can
-     * be overwritten by OSFI CLI "hostRefresh off".
+     * Create a Name/Tier/Bandwidth Property object based on given property name
+     * and value. Other property types are not supported yet.
      *
-     * @return true if it is enabled; false if it's disabled.
+     * @param propName
+     *            Name of the Property specified by
+     *            {@link org.opendaylight.controller.sal.core.Property} and its
+     *            extended classes
+     * @param propValue
+     *            Value of the Property specified by
+     *            {@link org.opendaylight.controller.sal.core.Property} and its
+     *            extended classes
+     * @return {@link org.opendaylight.controller.sal.core.Property}
      */
-    public boolean isHostRefreshEnabled();
-
-    /**
-     * Return host refresh retry count
-     *
-     * @return host refresh retry count
-     */
-    public int getHostRetryCount();
-
-        /**
-         * Create a Name/Tier/Bandwidth Property object based on given property
-         * name and value. Other property types are not supported yet.
-         *
-     * @param propName Name of the Property specified by {@link org.opendaylight.controller.sal.core.Property} and its extended classes
-     * @param propValue Value of the Property specified by {@link org.opendaylight.controller.sal.core.Property} and its extended classes
-         * @return {@link org.opendaylight.controller.sal.core.Property}
-         */
     public Property createProperty(String propName, String propValue);
 
     /**

@@ -106,6 +106,8 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private String containerName = null;
     private ExecutorService executor;
     protected boolean stopping;
+    private static boolean hostRefresh = true;
+    private static int hostRetryCount = 5;
     private static class ARPPending {
         protected InetAddress hostIP;
         protected short sent_count;
@@ -933,7 +935,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                     ARPPendingList.remove(entry.getKey());
                     continue;
                 }
-                if (arphost.getSent_count() < switchManager.getHostRetryCount()) {
+                if (arphost.getSent_count() < hostRetryCount) {
                     /*
                      * No reply has been received of first ARP Req, send the
                      * next one. Before sending the ARP, check if ARPHandler is
@@ -946,7 +948,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                     hostFinder.find(arphost.getHostIP());
                     arphost.sent_count++;
                     logger.debug("ARP Sent from ARPPending List, IP: {}", arphost.getHostIP().getHostAddress());
-                } else if (arphost.getSent_count() >= switchManager.getHostRetryCount()) {
+                } else if (arphost.getSent_count() >= hostRetryCount) {
                     /*
                      * ARP requests have been sent without receiving a reply,
                      * remove this from the pending list
@@ -977,9 +979,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             if ((clusterContainerService != null) && !clusterContainerService.amICoordinator()) {
                 return;
             }
-            if ((switchManager != null) && !switchManager.isHostRefreshEnabled()) {
+            if (!hostRefresh) {
                 /*
-                 * The host probe procedure was disabled by CLI
+                 * The host probe procedure is turned off
                  */
                 return;
             }
@@ -997,7 +999,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
 
                 short arp_cntdown = host.getArpSendCountDown();
                 arp_cntdown--;
-                if (arp_cntdown > switchManager.getHostRetryCount()) {
+                if (arp_cntdown > hostRetryCount) {
                     host.setArpSendCountDown(arp_cntdown);
                 } else if (arp_cntdown <= 0) {
                     /*
@@ -1006,7 +1008,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                      */
                     removeKnownHost(entry.getKey());
                     notifyHostLearnedOrRemoved(host, false);
-                } else if (arp_cntdown <= switchManager.getHostRetryCount()) {
+                } else if (arp_cntdown <= hostRetryCount) {
                     /*
                      * Use the services of arphandler to check if host is still
                      * there
