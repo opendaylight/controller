@@ -2279,10 +2279,12 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
             Device d = di.next();
             if (d.isStaticHost()) {
                 deleteDevice(d);
-                for (IfNewHostNotify notify : newHostNotify)
+                for (IfNewHostNotify notify : newHostNotify) {
                     notify.notifyHTClientHostRemoved(d.toHostNodeConnector());
-                for (IDeviceListener listener : listeners)
+                }
+                for (IDeviceListener listener : listeners) {
                     listener.deviceRemoved(d);
+                }
             }
         }
         //go through inactive entites.
@@ -2313,10 +2315,12 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                 if (host.getnodeconnectorNode().equals(node)) {
                     logger.debug("Node: {} is down, remove from Hosts_DB", node);
                     deleteDevice(device);
-                    for (IfNewHostNotify notify : newHostNotify)
+                    for (IfNewHostNotify notify : newHostNotify) {
                         notify.notifyHTClientHostRemoved(host);
-                    for (IDeviceListener listener : listeners)
+                    }
+                    for (IDeviceListener listener : listeners) {
                         listener.deviceRemoved(device);
+                    }
                 }
             }
             break;
@@ -2357,10 +2361,12 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                 HostNodeConnector host = device.toHostNodeConnector();
                 if (host != null) {
                     inactiveStaticDevices.remove(nodeConnector);
-                    for (IfNewHostNotify notify : newHostNotify)
+                    for (IfNewHostNotify notify : newHostNotify) {
                         notify.notifyHTClient(host);
-                    for (IDeviceListener listener : listeners)
+                    }
+                    for (IDeviceListener listener : listeners) {
                         listener.deviceAdded(device);
+                    }
                 } else {
                     logger.debug("handleNodeConnectorStatusDown {}", nodeConnector);
                 }
@@ -2372,10 +2378,12 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
                     HostNodeConnector host = device.toHostNodeConnector();
                     if (host.getnodeConnector().equals(nodeConnector)) {
                         deleteDevice(device);
-                        for (IfNewHostNotify notify : newHostNotify)
+                        for (IfNewHostNotify notify : newHostNotify) {
                             notify.notifyHTClientHostRemoved(host);
-                        for (IDeviceListener listener : listeners)
+                        }
+                        for (IDeviceListener listener : listeners) {
                             listener.deviceRemoved(device);
+                        }
                     }
                 }
 
