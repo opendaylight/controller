@@ -88,7 +88,7 @@ public class RoundRobinLBPolicy implements ILoadBalancingPolicy{
                 }
                 rrLogger.debug("Next pool member for new client of VIP is set to {}",pool.getAllMembers().get(memberNum));
 
-                this.nextItemFromPool.put(dest, new Integer(memberNum));
+                this.nextItemFromPool.put(dest, memberNum);
             }else{
                 rrLogger.debug("Network traffic for VIP : {} has appeared first time from client {}",dest,source);
                 pool = this.cmgr.getPool(dest.getPoolName());
@@ -96,7 +96,7 @@ public class RoundRobinLBPolicy implements ILoadBalancingPolicy{
                 this.clientMemberMap.put(source, pm);
 
                 rrLogger.info("Network traffic from client {} will be directed to pool member {}",pm);
-                this.nextItemFromPool.put(dest, new Integer(1));
+                this.nextItemFromPool.put(dest, 1);
                 rrLogger.debug("Next pool member for new client of VIP is set to {}",pool.getAllMembers().get(1));
             }
         }
@@ -145,7 +145,7 @@ public class RoundRobinLBPolicy implements ILoadBalancingPolicy{
 
         for(VIP vip:resetVIPPoolMemberCount){
             rrLogger.debug("VIP next pool member counter reset to 0");
-            this.nextItemFromPool.put(vip, new Integer(0));
+            this.nextItemFromPool.put(vip, 0);
         }
 
         rrLogger.debug("[VIP- NextMember] table after cleanup : {}",this.nextItemFromPool.toString());

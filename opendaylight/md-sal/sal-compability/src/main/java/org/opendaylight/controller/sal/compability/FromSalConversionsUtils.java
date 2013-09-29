@@ -64,9 +64,9 @@ public class FromSalConversionsUtils {
         if (sourceFlow != null) {
             final FlowAddedBuilder targetFlow = new FlowAddedBuilder();
 
-            targetFlow.setHardTimeout(new Integer(sourceFlow.getHardTimeout()));
-            targetFlow.setIdleTimeout(new Integer(sourceFlow.getIdleTimeout()));
-            targetFlow.setPriority(new Integer(sourceFlow.getPriority()));
+            targetFlow.setHardTimeout((int) sourceFlow.getHardTimeout());
+            targetFlow.setIdleTimeout((int) sourceFlow.getIdleTimeout());
+            targetFlow.setPriority((int) sourceFlow.getPriority());
             targetFlow.setCookie(new BigInteger(String.valueOf(sourceFlow.getId())));
 
             List<org.opendaylight.controller.sal.action.Action> sourceActions = sourceFlow.getActions();
