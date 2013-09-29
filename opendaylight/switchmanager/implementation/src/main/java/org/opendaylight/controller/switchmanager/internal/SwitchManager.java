@@ -106,8 +106,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     private final Set<IInventoryListener> inventoryListeners = Collections
             .synchronizedSet(new HashSet<IInventoryListener>());
     private final Set<ISpanAware> spanAware = Collections.synchronizedSet(new HashSet<ISpanAware>());
-    private static boolean hostRefresh = true;
-    private int hostRetryCount = 5;
     private IClusterContainerServices clusterContainerService = null;
     private String containerName = null;
     private boolean isDefaultContainer = true;
@@ -1386,16 +1384,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     @Override
-    public boolean isHostRefreshEnabled() {
-        return hostRefresh;
-    }
-
-    @Override
-    public int getHostRetryCount() {
-        return hostRetryCount;
-    }
-
-    @Override
     public NodeConnector getNodeConnector(Node node, String nodeConnectorName) {
         if (nodeConnectorNames == null) {
             return null;
@@ -1850,8 +1838,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         help.append("\t pencs <node id>        - Print enabled node connectors for a given node\n");
         help.append("\t pdm <node id>          - Print switch ports in device map\n");
         help.append("\t snt <node id> <tier>   - Set node tier number\n");
-        help.append("\t hostRefresh <on/off/?> - Enable/Disable/Query host refresh\n");
-        help.append("\t hostRetry <count>      - Set host retry count\n");
         return help.toString();
     }
 
@@ -1955,43 +1941,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         Integer tid = Integer.decode(st);
         Tier tier = new Tier(tid);
         setNodeProp(node, tier);
-    }
-
-    public void _hostRefresh(CommandInterpreter ci) {
-        String mode = ci.nextArgument();
-        if (mode == null) {
-            ci.println("expecting on/off/?");
-            return;
-        }
-        if (mode.toLowerCase().equals("on")) {
-            hostRefresh = true;
-        } else if (mode.toLowerCase().equals("off")) {
-            hostRefresh = false;
-        } else if (mode.equals("?")) {
-            if (hostRefresh) {
-                ci.println("host refresh is ON");
-            } else {
-                ci.println("host refresh is OFF");
-            }
-        } else {
-            ci.println("expecting on/off/?");
-        }
-        return;
-    }
-
-    public void _hostRetry(CommandInterpreter ci) {
-        String retry = ci.nextArgument();
-        if (retry == null) {
-            ci.println("Please enter a valid number. Current retry count is "
-                    + hostRetryCount);
-            return;
-        }
-        try {
-            hostRetryCount = Integer.parseInt(retry);
-        } catch (Exception e) {
-            ci.println("Please enter a valid number");
-        }
-        return;
     }
 
     @Override
