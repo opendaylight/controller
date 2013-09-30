@@ -1,0 +1,70 @@
+module flow-node-inventory {
+    namespace "urn:opendaylight:flow:inventory";
+    prefix flownode;
+
+    import yang-ext {prefix ext;}
+    import ietf-inet-types {prefix inet;}
+    import ietf-yang-types {prefix yang;}
+    import opendaylight-inventory {prefix inv;}
+    
+    revision "2013-08-19" {
+        description "Flow Capable Node extensions to the nventory model";
+    }
+    
+    grouping flow-capable-node-capabilities {
+        container tables {
+            leaf support-state {
+                type inv:support-type;
+            }
+            
+        }
+        
+        container group-tables {
+        
+        }
+        
+        container supported-match-types {
+            list match-type {
+                leaf match {
+                    type string; // FIXME: Add identity
+                }
+                leaf support-state {
+                    type inv:support-type;
+                }
+            }
+        }
+        
+        container supported-instructions {
+            list instruction-type {
+                leaf instruction {
+                    type string; // FIXME: Add identity
+                }
+                
+                leaf support-state {
+                    type inv:support-type;
+                }
+            }
+        }
+
+        container supported-actions {
+            list action-type {
+                leaf action {
+                    type string; // FIXME: Add identity
+                }
+                
+                leaf support-state {
+                    type inv:support-type;
+                }
+            }
+        }
+    }
+    
+    augment "/inv:nodes/inv:node" {
+        augment-identifier "flow-capable-node";
+        uses flow-capable-node-capabilities;
+    }
+    
+    notification node-capabilities-updated {
+        uses flow-capable-node-capabilities;
+    }
+}
