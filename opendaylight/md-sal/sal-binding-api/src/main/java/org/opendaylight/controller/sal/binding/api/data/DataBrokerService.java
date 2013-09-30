@@ -11,7 +11,9 @@ import java.util.concurrent.Future;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareService;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.DataRoot;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 /**
@@ -56,6 +58,7 @@ public interface DataBrokerService extends BindingAwareService {
      *            Data tree filter similar to the NETCONF filter
      * @return
      */
+    @Deprecated
     <T extends DataRoot> T getData(DataStoreIdentifier store, T filter);
 
     /**
@@ -68,6 +71,7 @@ public interface DataBrokerService extends BindingAwareService {
      *            Identifier of the store, from which will be data retrieved
      * @return
      */
+    @Deprecated
     <T extends DataRoot> T getCandidateData(DataStoreIdentifier store, Class<T> rootType);
 
     /**
@@ -90,6 +94,7 @@ public interface DataBrokerService extends BindingAwareService {
      *            A filter data root
      * @return
      */
+    @Deprecated
     <T extends DataRoot> T getCandidateData(DataStoreIdentifier store, T filter);
 
     /**
@@ -104,6 +109,7 @@ public interface DataBrokerService extends BindingAwareService {
      * @return Result object containing the modified data tree if the operation
      *         was successful, otherwise list of the encountered errors.
      */
+    @Deprecated
     RpcResult<DataRoot> editCandidateData(DataStoreIdentifier store, DataRoot changeSet);
 
     /**
@@ -130,5 +136,17 @@ public interface DataBrokerService extends BindingAwareService {
      * @return Result of the commit, containing success information or list of
      *         encountered errors, if commit was not successful.
      */
+    @Deprecated
     Future<RpcResult<Void>> commit(DataStoreIdentifier store);
+    
+    
+    DataObject getData(InstanceIdentifier data);
+    DataObject getConfigurationData(InstanceIdentifier data);
+    
+    /**
+     * Creates a data modification transaction.
+     * 
+     * @return new blank data modification transaction.
+     */
+    DataModification beginTransaction();
 }

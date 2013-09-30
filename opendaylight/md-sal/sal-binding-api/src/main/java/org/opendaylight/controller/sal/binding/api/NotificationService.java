@@ -12,6 +12,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
 public interface NotificationService extends BindingAwareService {
 
     <T extends Notification> void addNotificationListener(Class<T> notificationType, NotificationListener<T> listener);
-
+    void addNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener);
+    void removeNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener);
     <T extends Notification> void removeNotificationListener(Class<T> notificationType, NotificationListener<T> listener);
 }

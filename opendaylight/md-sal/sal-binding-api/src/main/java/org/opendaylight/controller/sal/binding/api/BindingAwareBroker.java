@@ -7,8 +7,11 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 
@@ -161,14 +164,52 @@ public interface BindingAwareBroker {
      * 
      */
     public interface ProviderContext extends ConsumerContext {
+        /**
+         * Registers an global RpcService implementation.
+         * 
+         * @param type
+         * @param implementation
+         * @return
+         */
+        <T extends RpcService> RpcRegistration<T> addRpcImplementation(Class<T> type, T implementation)
+                throws IllegalStateException;
 
-        <T extends RpcService> RpcServiceRegistration<T> addRpcImplementation(Class<T> type, T implementation);
+        <T extends RpcService> RpcRegistration<T> addMountRpcImplementation(Class<T> type,
+                InstanceIdentifier mount, T implementation) throws IllegalStateException;
+
+        <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(Class<T> type, T implementation)
+                throws IllegalStateException;
+        
+        void registerFunctionality(ProviderFunctionality functionality);
+        void unregisterFunctionality(ProviderFunctionality functionality);
     }
 
-    public interface RpcServiceRegistration<T extends RpcService> {
+    public interface RpcRegistration<T extends RpcService> {
 
+        /**
+         * 
+         * @return instance for which registration does exists.
+         */
         T getService();
 
+        /**
+         * Unregister an RpcService from broker.
+         * 
+         */
         void unregister();
+    }
+
+    public interface RoutedRpcRegistration<T extends RpcService> extends RpcRegistration<T> {
+
+        /**
+         * Register particular instance identifier to be processed by this
+         * RpcService
+         * 
+         * @param context
+         * @param instance
+         */
+        void registerInstance(Class<? extends BaseIdentity> context, InstanceIdentifier instance);
+
+        void unregisterInstance(Class<? extends BaseIdentity> context, InstanceIdentifier instance);
     }
 }

@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.sal.binding.impl
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcServiceRegistration
 import org.osgi.framework.ServiceRegistration
 import org.opendaylight.yangtools.yang.binding.RpcService
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration
 
-class RpcServiceRegistrationImpl<T extends RpcService> implements RpcServiceRegistration<T> {
+class RpcServiceRegistrationImpl<T extends RpcService> implements RpcRegistration<T> {
 
     val ServiceRegistration<T> osgiRegistration;
     private val T service;

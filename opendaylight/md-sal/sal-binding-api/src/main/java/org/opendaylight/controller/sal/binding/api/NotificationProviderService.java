@@ -7,9 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
+import java.util.concurrent.ExecutorService;
+
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 public interface NotificationProviderService extends NotificationService {
 
     void notify(Notification notification);
+    
+    void notify(Notification notification, ExecutorService service);
 }
