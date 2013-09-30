@@ -11,7 +11,6 @@ package org.opendaylight.controller.topologymanager.internal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,280 +28,17 @@ import org.opendaylight.controller.sal.core.Latency;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.State;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
-import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
-import org.opendaylight.controller.switchmanager.SpanConfig;
-import org.opendaylight.controller.switchmanager.Subnet;
-import org.opendaylight.controller.switchmanager.SubnetConfig;
-import org.opendaylight.controller.switchmanager.Switch;
-import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
 
 public class TopologyManagerImplTest {
-    /**
-     * Mockup of switch manager that only maintains existence of node
-     * connector.
-     */
-    private final class TestSwitchManager implements ISwitchManager {
-        private final Set<Node>  nodeSet = new HashSet<Node>();
-        private final Set<NodeConnector> nodeConnectorSet =
-            new HashSet<NodeConnector>();
-
-        private void addNodeConnectors(NodeConnector ... connectors) {
-            for (NodeConnector nc: connectors) {
-                if (nc != null) {
-                    nodeSet.add(nc.getNode());
-                    nodeConnectorSet.add(nc);
-                }
-            }
-        }
-
-        private void addNodeConnectors(TopologyUserLinkConfig ... links) {
-            for (TopologyUserLinkConfig link: links) {
-                NodeConnector src =
-                    NodeConnector.fromString(link.getSrcNodeConnector());
-                NodeConnector dst =
-                    NodeConnector.fromString(link.getDstNodeConnector());
-                addNodeConnectors(src, dst);
-            }
-        }
-
-        @Override
-        public Status addSubnet(SubnetConfig configObject) {
-            return null;
-        }
-
-        @Override
-        public Status removeSubnet(SubnetConfig configObject) {
-            return null;
-        }
-
-        @Override
-        public Status modifySubnet(SubnetConfig configObject) {
-            return null;
-        }
-
-        @Override
-        public Status removeSubnet(String name) {
-            return null;
-        }
-
-        @Override
-        public List<Switch> getNetworkDevices() {
-            return null;
-        }
-
-        @Override
-        public List<SubnetConfig> getSubnetsConfigList() {
-            return null;
-        }
-
-        @Override
-        public SubnetConfig getSubnetConfig(String subnet) {
-            return null;
-        }
-
-        @Override
-        public Subnet getSubnetByNetworkAddress(InetAddress networkAddress) {
-            return null;
-        }
-
-        @Override
-        public Status saveSwitchConfig() {
-            return null;
-        }
-
-        @Override
-        public Status addSpanConfig(SpanConfig configObject) {
-            return null;
-        }
-
-        @Override
-        public Status removeSpanConfig(SpanConfig cfgObject) {
-            return null;
-        }
-
-        @Override
-        public List<SpanConfig> getSpanConfigList() {
-            return null;
-        }
-
-        @Override
-        public List<NodeConnector> getSpanPorts(Node node) {
-            return null;
-        }
-
-        @Override
-        public void updateSwitchConfig(SwitchConfig cfgObject) {
-        }
-
-        @Override
-        public Status updateNodeConfig(SwitchConfig switchConfig) {
-            return null;
-        }
-
-        @Override
-        public Status removeNodeConfig(String nodeId) {
-            return null;
-        }
-
-        @Override
-        public SwitchConfig getSwitchConfig(String nodeId) {
-            return null;
-        }
-
-        @Override
-        public Status addPortsToSubnet(String name, List<String> nodeConnectors) {
-            return null;
-        }
-
-        @Override
-        public Status removePortsFromSubnet(String name, List<String> nodeConnectors) {
-            return null;
-        }
-
-        @Override
-        public Set<Node> getNodes() {
-            return new HashSet<Node>(nodeSet);
-        }
-
-        @Override
-        public Map<String, Property> getNodeProps(Node node) {
-            return new HashMap<String, Property>();
-        }
-
-        @Override
-        public Property getNodeProp(Node node, String propName) {
-            return null;
-        }
-
-        @Override
-        public void setNodeProp(Node node, Property prop) {
-        }
-
-        @Override
-        public Status removeNodeProp(Node node, String propName) {
-            return null;
-        }
-
-        @Override
-        public Status removeNodeAllProps(Node node) {
-            return null;
-        }
-
-        @Override
-        public Set<NodeConnector> getUpNodeConnectors(Node node) {
-            return getNodeConnectors(node);
-        }
-
-        @Override
-        public Set<NodeConnector> getNodeConnectors(Node node) {
-            Set<NodeConnector> set = new HashSet<NodeConnector>();
-            for (NodeConnector nc: nodeConnectorSet) {
-                if (nc.getNode().equals(node)) {
-                    set.add(nc);
-                }
-            }
-
-            return set;
-        }
-
-        @Override
-        public Set<NodeConnector> getPhysicalNodeConnectors(Node node) {
-            return getNodeConnectors(node);
-        }
-
-        @Override
-        public Map<String, Property> getNodeConnectorProps(NodeConnector nodeConnector) {
-            return new HashMap<String, Property>();
-        }
-
-        @Override
-        public Property getNodeConnectorProp(NodeConnector nodeConnector, String propName) {
-            return null;
-        }
-
-        @Override
-        public Status addNodeConnectorProp(NodeConnector nodeConnector, Property prop) {
-            return null;
-        }
-
-        @Override
-        public Status removeNodeConnectorProp(NodeConnector nc, String propName) {
-            return null;
-        }
-
-        @Override
-        public Status removeNodeConnectorAllProps(NodeConnector nodeConnector) {
-            return null;
-        }
-
-        @Override
-        public NodeConnector getNodeConnector(Node node, String nodeConnectorName) {
-            return null;
-        }
-
-        @Override
-        public boolean isSpecial(NodeConnector p) {
-            String type = p.getType();
-            return (type.equals(NodeConnectorIDType.CONTROLLER)
-                    || type.equals(NodeConnectorIDType.ALL)
-                    || type.equals(NodeConnectorIDType.SWSTACK)
-                    || type.equals(NodeConnectorIDType.HWPATH));
-        }
-
-        @Override
-        public Boolean isNodeConnectorEnabled(NodeConnector nodeConnector) {
-            if (doesNodeConnectorExist(nodeConnector)) {
-                return Boolean.TRUE;
-            }
-            return Boolean.FALSE;
-        }
-
-        @Override
-        public boolean doesNodeConnectorExist(NodeConnector nc) {
-            return (nc != null && nodeConnectorSet.contains(nc));
-        }
-
-        @Override
-        public byte[] getControllerMAC() {
-            return new byte[6];
-        }
-
-        @Override
-        public byte[] getNodeMAC(Node node) {
-            return new byte[6];
-        }
-
-        @Override
-        public boolean isHostRefreshEnabled() {
-            return true;
-        }
-
-        @Override
-        public int getHostRetryCount() {
-            return 1;
-        }
-
-        @Override
-        public Property createProperty(String propName, String propValue) {
-            return null;
-        }
-
-        @Override
-        public String getNodeDescription(Node node) {
-            return null;
-        }
-    }
 
     /*
      * Sets the node, edges and properties for edges here: Edge <SwitchId :
@@ -314,7 +50,7 @@ public class TopologyManagerImplTest {
      *
      * @throws ConstructionException
      */
-    public void setNodeEdges(TopologyManagerImpl topoManagerImpl, TestSwitchManager swMgr)
+    public void setNodeEdges(TopologyManagerImpl topoManagerImpl)
             throws ConstructionException {
         topoManagerImpl.nonClusterObjectCreate();
 
@@ -337,7 +73,6 @@ public class TopologyManagerImplTest {
             NodeConnector tailnc1 = NodeConnectorCreator
                     .createOFNodeConnector((short) (i + 10),
                             NodeCreator.createOFNode((long) (i + 10)));
-            swMgr.addNodeConnectors(tailnc1, headnc1);
             Edge e1 = new Edge(tailnc1, headnc1);
             TopoEdgeUpdate teu1 = new TopoEdgeUpdate(e1, props,
                     UpdateType.ADDED);
@@ -347,21 +82,20 @@ public class TopologyManagerImplTest {
                     (short) (i + 1), headnc1.getNode());
             NodeConnector headnc2 = NodeConnectorCreator.createOFNodeConnector(
                     (short) (i + 11), tailnc1.getNode());
-            swMgr.addNodeConnectors(tailnc1, headnc2);
             Edge e2 = new Edge(tailnc2, headnc2);
             TopoEdgeUpdate teu2 = new TopoEdgeUpdate(e2, props,
                     UpdateType.ADDED);
             topoedgeupdateList.add(teu2);
             topoManagerImpl.edgeUpdate(topoedgeupdateList);
+
         }
+
     }
 
     @Test
     public void testGetNodeEdges() throws ConstructionException {
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
-        TestSwitchManager swMgr = new TestSwitchManager();
-        topoManagerImpl.setSwitchManager(swMgr);
-        setNodeEdges(topoManagerImpl, swMgr);
+        setNodeEdges(topoManagerImpl);
 
         Map<Node, Set<Edge>> nodeEdgeMap = topoManagerImpl.getNodeEdges();
         for (Iterator<Map.Entry<Node, Set<Edge>>> i = nodeEdgeMap.entrySet()
@@ -392,9 +126,7 @@ public class TopologyManagerImplTest {
     @Test
     public void testGetEdges() throws ConstructionException {
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
-        TestSwitchManager swMgr = new TestSwitchManager();
-        topoManagerImpl.setSwitchManager(swMgr);
-        setNodeEdges(topoManagerImpl, swMgr);
+        setNodeEdges(topoManagerImpl);
 
         Map<Edge, Set<Property>> edgeProperty = topoManagerImpl.getEdges();
 
@@ -476,11 +208,7 @@ public class TopologyManagerImplTest {
                 "OF|10@OF|20", "OF|10@OF|20");
 
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
-        TestSwitchManager swMgr = new TestSwitchManager();
-        topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
-
-        swMgr.addNodeConnectors(link1, link2, link3, link4);
 
         Assert.assertTrue(topoManagerImpl.addUserLink(link1).isSuccess());
         Assert.assertTrue(topoManagerImpl.addUserLink(link2).getCode() == StatusCode.CONFLICT);
@@ -494,14 +222,6 @@ public class TopologyManagerImplTest {
                 .isSuccess());
         Assert.assertTrue(topoManagerImpl.getUserLinks().isEmpty());
 
-        TopologyUserLinkConfig badlink1 =
-            new TopologyUserLinkConfig("bad1", "OF|1@OF|2", "OF|1@OF|3");
-        TopologyUserLinkConfig badlink2 =
-            new TopologyUserLinkConfig("bad2", "OF|10@OF|21", "OF|10@OF|20");
-        Assert.assertEquals(StatusCode.NOTFOUND,
-                            topoManagerImpl.addUserLink(badlink1).getCode());
-        Assert.assertEquals(StatusCode.NOTFOUND,
-                            topoManagerImpl.addUserLink(badlink2).getCode());
     }
 
     @Test
@@ -509,8 +229,6 @@ public class TopologyManagerImplTest {
         TopologyUserLinkConfig[] link = new TopologyUserLinkConfig[5];
         TopologyUserLinkConfig[] reverseLink = new TopologyUserLinkConfig[5];
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
-        TestSwitchManager swMgr = new TestSwitchManager();
-        topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
 
         String name = "Test";
@@ -567,11 +285,7 @@ public class TopologyManagerImplTest {
             Assert.assertTrue(link[i].isValid() == true);
 
             reverseLink[i] = new TopologyUserLinkConfig(name, dstNodeConnector, srcNodeConnector);
-
-            Assert.assertEquals(StatusCode.NOTFOUND,
-                                topoManagerImpl.addUserLink(link[i]).getCode());
-            swMgr.addNodeConnectors(link[i]);
-            Assert.assertTrue(topoManagerImpl.addUserLink(link[i]).isSuccess());
+            topoManagerImpl.addUserLink(link[i]);
         }
 
         ConcurrentMap<String, TopologyUserLinkConfig> userLinks = topoManagerImpl
@@ -594,8 +308,6 @@ public class TopologyManagerImplTest {
     public void testHostLinkMethods() throws ConstructionException,
     UnknownHostException {
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
-        TestSwitchManager swMgr = new TestSwitchManager();
-        topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
         int hostCounter = 0;
 
@@ -657,8 +369,6 @@ public class TopologyManagerImplTest {
     public void testGetNodesWithNodeConnectorHost()
             throws ConstructionException, UnknownHostException {
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
-        TestSwitchManager swMgr = new TestSwitchManager();
-        topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
         int hostCounter = 0;
 
