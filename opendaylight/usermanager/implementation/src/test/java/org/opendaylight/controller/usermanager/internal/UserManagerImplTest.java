@@ -104,15 +104,9 @@ public class UserManagerImplTest {
         }
     }
 
-    /**
-     * Test method for
-     * {@link org.opendaylight.controller.usermanager.internal.UserManager#addAAAProvider(org.opendaylight.controller.usermanager.IAAAProvider)}
-     * .
-     */
-    @Test
-    public void testAddAAAProvider() {
+    private IAAAProvider getAnonymousAAAProvider(final String providerName) {
         // instantiate an anonymous AAAProvider
-        IAAAProvider a3p = new IAAAProvider() {
+        return new IAAAProvider() {
 
             @Override
             public AuthResponse authService(String userName, String password,
@@ -122,25 +116,26 @@ public class UserManagerImplTest {
 
             @Override
             public String getName() {
-                return "dummyAAAProvider";
+                return providerName;
             }
         };
-
-        um.addAAAProvider(a3p);
-        assertEquals(a3p, um.getAAAProvider("dummyAAAProvider"));
-
     }
 
     /**
      * Test method for
+     * {@link org.opendaylight.controller.usermanager.internal.UserManager#addAAAProvider(org.opendaylight.controller.usermanager.IAAAProvider)}
+     * and for
      * {@link org.opendaylight.controller.usermanager.internal.UserManager#removeAAAProvider(org.opendaylight.controller.usermanager.IAAAProvider)}
-     * and for for
+     * and
      * {@link org.opendaylight.controller.usermanager.internal.UserManager#getAAAProvider(java.lang.String)}
-     * .
      */
     @Test
-    public void testRemoveAAAProvider() {
-        um.removeAAAProvider(um.getAAAProvider("dummyAAAProvider"));
+    public void testAddGetRemoveAAAProvider() {
+        final String providerName = "dummyAAAProvider";
+        IAAAProvider a3p = getAnonymousAAAProvider(providerName);
+        um.addAAAProvider(a3p);
+        assertEquals(a3p, um.getAAAProvider(providerName));
+        um.removeAAAProvider(um.getAAAProvider(providerName));
         assertTrue(um.getAAAProviderNames().isEmpty());
     }
 
