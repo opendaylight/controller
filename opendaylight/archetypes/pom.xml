@@ -4,6 +4,12 @@
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>commons.parent</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+    <relativePath>../commons/parent</relativePath>
+  </parent>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>

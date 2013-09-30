@@ -1054,5 +1054,26 @@
         <artifactId>org.eclipse.persistence.antlr</artifactId>
         <version>2.5.0</version>
     </dependency>
+    <!-- Third parties from opendaylight released -->
+    <dependency>
+      <groupId>org.opendaylight.controller.thirdparty</groupId>
+      <artifactId>net.sf.jung2</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.thirdparty</groupId>
+      <artifactId>org.openflow.openflowj</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.thirdparty</groupId>
+      <artifactId>com.sun.jersey.jersey-servlet</artifactId>
+      <version>1.17</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.thirdparty</groupId>
+      <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
+      <version>7.0.42</version>
+    </dependency>
   </dependencies>
 </project>
