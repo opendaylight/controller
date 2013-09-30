@@ -16,7 +16,9 @@ public abstract class AbstractBindingAwareConsumer implements BindingAwareConsum
     }
 
     @Deprecated
-    abstract protected void startImpl(BundleContext context);
+    protected void startImpl(BundleContext context) {
+        
+    }
     
     @Override
     public final  void stop(BundleContext context) throws Exception {

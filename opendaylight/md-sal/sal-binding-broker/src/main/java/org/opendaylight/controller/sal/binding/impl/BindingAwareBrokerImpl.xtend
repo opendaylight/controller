@@ -28,16 +28,19 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
 
 import org.slf4j.LoggerFactory
 import org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration
 
 class BindingAwareBrokerImpl implements BindingAwareBroker {
     private static val log = LoggerFactory.getLogger(BindingAwareBrokerImpl)
-    
+
     private val clsPool = ClassPool.getDefault()
     private var RuntimeCodeGenerator generator;
     private Map<Class<? extends RpcService>, RpcProxyContext> managedProxies = new HashMap();
     private var NotificationBrokerImpl notifyBroker
     private var ServiceRegistration<NotificationProviderService> notifyBrokerRegistration
-    
+
     @Property
     var BundleContext brokerBundleContext
 
@@ -92,9 +95,9 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
      * If proxy class does not exist for supplied service class it will be generated automatically.
      */
     def <T extends RpcService> getManagedDirectProxy(Class<T> service) {
-        
+
         var RpcProxyContext existing = null
-        if ((existing = managedProxies.get(service)) != null) {
+        if((existing = managedProxies.get(service)) != null) {
             return existing.proxy
         }
         val proxyClass = generator.generateDirectProxy(service)
@@ -107,6 +110,7 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         managedProxies.put(service, rpcProxyCtx)
         return rpcProxyCtx.proxy
     }
+
     /**
      * Registers RPC Implementation
      * 
@@ -121,4 +125,15 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         proxy.delegate = service;
         return new RpcServiceRegistrationImpl<T>(type, service, osgiReg);
     }
+
+    def <T extends RpcService> RpcRegistration<T> registerMountedRpcImplementation(Class<T> tyoe, T service, InstanceIdentifier identifier,
+        OsgiProviderContext context, Hashtable<String, String> properties) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+
+    def <T extends RpcService> RoutedRpcRegistration<T> registerRoutedRpcImplementation(Class<T> type, T service, OsgiProviderContext context,
+        Hashtable<String, String> properties) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+
 }
