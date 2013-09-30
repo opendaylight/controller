@@ -232,7 +232,7 @@ public class ContainerManager extends Authorization<String> implements IContaine
 
         roles = (ConcurrentMap<String, AppRoleLevel>) clusterServices.getCache("containermgr.roles");
 
-        if (containerConfigs.size() > 0) {
+        if (inContainerMode()) {
             for (Map.Entry<String, ContainerConfig> entry : containerConfigs.entrySet()) {
                 // Notify global and local listeners about the mode change
                 notifyContainerChangeInternal(entry.getValue(), UpdateType.ADDED, true);
@@ -1402,10 +1402,6 @@ public class ContainerManager extends Authorization<String> implements IContaine
             return;
         }
         String staticVlan = ci.nextArgument();
-        if (staticVlan == null) {
-            ci.print("Static Vlan not specified");
-            return;
-        }
         ContainerConfig containerConfig = new ContainerConfig(containerName, staticVlan, null, null);
         ci.println(this.addRemoveContainer(containerConfig, false));
     }
@@ -1666,5 +1662,10 @@ public class ContainerManager extends Authorization<String> implements IContaine
     @Override
     public boolean hasNonDefaultContainer() {
         return !containerConfigs.keySet().isEmpty();
+    }
+
+    @Override
+    public boolean inContainerMode() {
+        return this.containerConfigs.size() > 0;
     }
 }

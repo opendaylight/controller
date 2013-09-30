@@ -18,6 +18,7 @@ import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
+import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManagerAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
@@ -25,6 +26,7 @@ import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.IContainerLocalListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
@@ -94,8 +96,11 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName).setService(IContainer.class)
                     .setCallbacks("setIContainer", "unsetIContainer").setRequired(true));
             c.add(createServiceDependency().setService(IConnectionManager.class)
-                    .setCallbacks("setIConnectionManager", "unsetIConnectionManager")
-                    .setRequired(true));
+                    .setCallbacks("setIConnectionManager", "unsetIConnectionManager").setRequired(true));
+            if (GlobalConstants.DEFAULT.toString().equals(containerName)) {
+                c.add(createServiceDependency().setService(IContainerManager.class)
+                        .setCallbacks("setIContainerManager", "unsetIContainerManager").setRequired(true));
+            }
         }
     }
 }

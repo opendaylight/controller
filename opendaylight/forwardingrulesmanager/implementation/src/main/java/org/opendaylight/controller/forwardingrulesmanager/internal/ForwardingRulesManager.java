@@ -39,6 +39,7 @@ import org.opendaylight.controller.clustering.services.IClusterContainerServices
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.connectionmanager.IConnectionManager;
+import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntryInstall;
@@ -117,6 +118,7 @@ public class ForwardingRulesManager implements
     private ConcurrentMap<String, PortGroupConfig> portGroupConfigs;
     private ConcurrentMap<PortGroupConfig, Map<Node, PortGroup>> portGroupData;
     private ConcurrentMap<String, Object> TSPolicies;
+    private IContainerManager containerManager;
     private boolean inContainerMode; // being used by global instance only
     protected boolean stopping;
 
@@ -2627,6 +2629,14 @@ public class ForwardingRulesManager implements
      *
      */
     void start() {
+        /*
+         * If running in default container, need to know if controller is in
+         * container mode
+         */
+        if (GlobalConstants.DEFAULT.toString().equals(this.getContainerName())) {
+            inContainerMode = containerManager.inContainerMode();
+        }
+
         // Initialize graceful stop flag
         stopping = false;
 
@@ -3199,6 +3209,16 @@ public class ForwardingRulesManager implements
 
     public void setIConnectionManager(IConnectionManager s) {
         this.connectionManager = s;
+    }
+
+    public void unsetIContainerManager(IContainerManager s) {
+        if (s == this.containerManager) {
+            this.containerManager = null;
+        }
+    }
+
+    public void setIContainerManager(IContainerManager s) {
+        this.containerManager = s;
     }
 
     @Override

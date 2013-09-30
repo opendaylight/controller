@@ -52,6 +52,7 @@
             <Import-Package>
               org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.configuration,
+              org.opendaylight.controller.containermanager,
               org.opendaylight.controller.hosttracker,
               org.opendaylight.controller.hosttracker.hostAware,
               org.opendaylight.controller.switchmanager,
@@ -67,7 +68,6 @@
               javax.xml.bind.annotation,
               javax.xml.bind,
               org.apache.felix.dm,
-              org.apache.commons.lang3.builder,
               org.osgi.service.component,
               org.slf4j,
               org.eclipse.osgi.framework.console,
@@ -155,6 +155,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>connectionmanager</artifactId>
       <version>0.1.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>containermanager</artifactId>
+      <version>0.5.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
