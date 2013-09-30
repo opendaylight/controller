@@ -141,13 +141,6 @@ public abstract class AbstractScheme {
         return nodeConnections;
     }
 
-    public boolean isLocal(Node node) {
-        if (nodeConnections == null) return false;
-        InetAddress myController = clusterServices.getMyAddress();
-        Set<InetAddress> controllers = nodeConnections.get(node);
-        return (controllers != null && controllers.contains(myController));
-    }
-
     public ConnectionLocality getLocalityStatus(Node node) {
         if (nodeConnections == null) return ConnectionLocality.NOT_CONNECTED;
         Set<InetAddress> controllers = nodeConnections.get(node);
@@ -278,7 +271,7 @@ public abstract class AbstractScheme {
         if (node == null || controller == null) {
             return new Status(StatusCode.BADREQUEST);
         }
-        if (isLocal(node))  {
+        if (this.getLocalityStatus(node) == ConnectionLocality.LOCAL)  {
             return new Status(StatusCode.SUCCESS);
         }
         if (isConnectionAllowed(node)) {

@@ -183,9 +183,7 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
 
     @Override
     public boolean isLocal(Node node) {
-        AbstractScheme scheme = schemes.get(activeScheme);
-        if (scheme == null) return false;
-        return scheme.isLocal(node);
+        return this.getLocalityStatus(node) == ConnectionLocality.LOCAL;
     }
 
     @Override
