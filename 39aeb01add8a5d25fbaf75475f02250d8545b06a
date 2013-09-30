@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa5d592f_ea7607d8",
+        "filename": "opendaylight/protocol_plugins/stub/src/main/java/org/opendaylight/controller/protocol_plugins/stub/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2013-09-30T22:29:06Z",
+      "side": 1,
+      "message": "The Cisco copyright notice?",
+      "parentUuid": "fa5d592f_8a8f8bcc",
+      "revId": "39aeb01add8a5d25fbaf75475f02250d8545b06a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa5d592f_6a9577e3",
         "filename": "opendaylight/protocol_plugins/stub/src/main/java/org/opendaylight/controller/protocol_plugins/stub/internal/Activator.java",
         "patchSetId": 1
@@ -47,6 +65,24 @@
       "writtenOn": "2013-09-30T21:57:31Z",
       "side": 1,
       "message": "Please remove System.out prints",
+      "revId": "39aeb01add8a5d25fbaf75475f02250d8545b06a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_0a727be5",
+        "filename": "opendaylight/protocol_plugins/stub/src/main/java/org/opendaylight/controller/protocol_plugins/stub/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2013-09-30T22:29:06Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "fa5d592f_8af8ab4a",
       "revId": "39aeb01add8a5d25fbaf75475f02250d8545b06a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
