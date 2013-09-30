@@ -21,6 +21,7 @@ import org.opendaylight.controller.configuration.IConfigurationContainerAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.topology.IListenTopoUpdates;
 import org.opendaylight.controller.sal.topology.ITopologyService;
+import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.opendaylight.controller.topologymanager.ITopologyManagerAware;
 import org.opendaylight.controller.topologymanager.ITopologyManagerClusterWideAware;
@@ -77,6 +78,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createContainerServiceDependency(containerName).setService(
                     ITopologyService.class).setCallbacks("setTopoService",
                     "unsetTopoService").setRequired(true));
+
+            c.add(createContainerServiceDependency(containerName).setService(
+                    ISwitchManager.class).setCallbacks("setSwitchManager",
+                    "unsetSwitchManager").setRequired(true));
 
             // These are all the listeners for a topology manager
             // updates, there could be many or none
