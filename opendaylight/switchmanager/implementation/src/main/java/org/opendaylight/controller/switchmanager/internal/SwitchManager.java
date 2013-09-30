@@ -1832,12 +1832,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     @Override
-    public boolean doesNodeConnectorExist(NodeConnector nc) {
-        return (nc != null && nodeConnectorProps != null
-                && nodeConnectorProps.containsKey(nc));
-    }
-
-    @Override
     public String getHelp() {
         StringBuffer help = new StringBuffer();
         help.append("---Switch Manager---\n");
