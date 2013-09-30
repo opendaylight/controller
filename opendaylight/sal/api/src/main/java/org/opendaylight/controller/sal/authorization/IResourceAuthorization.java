@@ -68,10 +68,15 @@ public interface IResourceAuthorization {
     public boolean isApplicationRole(String roleName);
 
     /**
-     * Create a resource group for application
+     * Create a resource group for application.
      *
-     * @param groupName the name for the resource group
-     * @param resources the list of resources for the group
+     * NOTE: Resource addition is "best effort", if an object is not of correct type,
+     * it is discarded.
+     *
+     * @param groupName
+     *            the name for the resource group
+     * @param resources
+     *            the list of resources for the group
      * @return the status of the request
      */
     public Status createResourceGroup(String groupName, List<Object> resources);
