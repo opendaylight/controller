@@ -1,30 +1,34 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+
+
+
 package org.opendaylight.controller.protocol_plugins.stub.internal;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import org.apache.felix.dm.Component;
-
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
-import org.opendaylight.controller.sal.core.IContainerListener;
-import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
-import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.discovery.IDiscoveryService;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
-import org.opendaylight.controller.sal.packet.IPluginInDataPacketService;
-import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService;
 import org.opendaylight.controller.sal.reader.IPluginInReadService;
-import org.opendaylight.controller.sal.reader.IReadService;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
-
+import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
+import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 /**
  * stub protocol plugin Activator
@@ -68,7 +72,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public Object[] getImplementations() {
-        Object[] res = { ReadService.class, InventoryService.class };
+        Object[] res = { ReadService.class, InventoryService.class, TopologyServices.class };
         return res;
     }
 
@@ -106,6 +110,17 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "STUB");
             c.setInterface(IPluginInInventoryService.class.getName(), props);
         }
+
+        if(imp.equals(TopologyServices.class)){
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "STUB");
+            c.setInterface(IPluginInTopologyService.class.getName(), props);
+            c.add(createServiceDependency().setService(IPluginOutTopologyService.class, "")
+                    .setCallbacks("setPluginOutTopologyService", "unsetPluginOutTopologyService")
+                    .setRequired(true));
+
+        }
+
     }
 
     @Override
@@ -115,7 +130,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                         FlowProgrammerService.class,
                         StubNodeFactory.class,
                         StubNodeConnectorFactory.class,
-                        InventoryService.class };
+                        InventoryService.class
+                };
         return res;
     }
 
@@ -159,5 +175,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setPluginOutInventoryServices", "unsetPluginOutInventoryServices")
                     .setRequired(true));
         }
+
     }
 }
