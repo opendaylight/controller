@@ -12,24 +12,26 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcServiceRegistration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 
 import static org.opendaylight.controller.sal.binding.impl.osgi.Constants.*;
 import static extension org.opendaylight.controller.sal.binding.impl.osgi.PropertiesUtils.*;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality
 
 class OsgiProviderContext extends OsgiConsumerContext implements ProviderContext {
 
     @Property
-    val Map<Class<? extends RpcService>, RpcServiceRegistrationImpl<? extends RpcService>> registeredServices
+    val Map<Class<? extends RpcService>, RpcRegistration<? extends RpcService>> registeredServices
 
     new(BundleContext ctx, BindingAwareBrokerImpl broker) {
         super(ctx, broker);
         _registeredServices = new HashMap();
     }
 
-    override def <T extends RpcService> RpcServiceRegistration<T> addRpcImplementation(Class<T> type, T implementation) {
+    override <T extends RpcService> addRpcImplementation(Class<T> type, T implementation) {
 
         // TODO Auto-generated method stub
         val properties = new Hashtable<String, String>();
@@ -39,5 +41,33 @@ class OsgiProviderContext extends OsgiConsumerContext implements ProviderContext
         val salReg = broker.registerRpcImplementation(type, implementation, this, properties)
         registeredServices.put(type, salReg)
         return salReg;
+    }
+
+    override <T extends RpcService> addMountRpcImplementation(Class<T> type, InstanceIdentifier mount, T implementation) throws IllegalStateException {
+
+        val properties = new Hashtable<String, String>();
+        properties.salServiceType = SAL_SERVICE_TYPE_PROVIDER
+
+        // Fill requirements
+        val salReg = broker.registerMountedRpcImplementation(type, implementation, mount, this, properties)
+        registeredServices.put(type, salReg)
+        return salReg;
+    }
+
+    override <T extends RpcService> addRoutedRpcImplementation(Class<T> type, T implementation) throws IllegalStateException {
+        val properties = new Hashtable<String, String>();
+        properties.salServiceType = SAL_SERVICE_TYPE_PROVIDER
+
+        // Fill requirements
+        val salReg = broker.registerRoutedRpcImplementation(type, implementation, this, properties)
+        registeredServices.put(type, salReg)
+        return salReg;
+    }
+
+    override registerFunctionality(ProviderFunctionality functionality) {
+    
+    }
+
+    override unregisterFunctionality(ProviderFunctionality functionality) {
     }
 }

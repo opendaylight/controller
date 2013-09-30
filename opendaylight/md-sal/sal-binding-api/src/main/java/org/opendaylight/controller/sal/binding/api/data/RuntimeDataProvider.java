@@ -2,11 +2,13 @@ package org.opendaylight.controller.sal.binding.api.data;
 
 import java.util.Set;
 
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.DataRoot;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface RuntimeDataProvider {
+public interface RuntimeDataProvider extends ProviderFunctionality {
 
     Set<DataStoreIdentifier> getSupportedStores();
     
@@ -48,4 +50,7 @@ public interface RuntimeDataProvider {
      * @return
      */
     <T extends DataRoot> T getData(DataStoreIdentifier store, T filter);
+    
+    
+     <T extends DataObject> T getData(Class<T> dataType, InstanceIdentifier identifier);
 }

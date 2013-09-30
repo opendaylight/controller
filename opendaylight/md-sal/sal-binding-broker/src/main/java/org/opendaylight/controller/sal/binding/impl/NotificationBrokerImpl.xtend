@@ -49,4 +49,17 @@ class NotificationBrokerImpl implements NotificationProviderService {
     def notifyAll(Collection<NotificationListener<?>> listeners, Notification notification) {
         listeners.forEach[(it as NotificationListener).onNotification(notification)]
     }
+    
+    override addNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        
+    }
+    
+    override removeNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+    
+    override notify(Notification notification, ExecutorService service) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
 }

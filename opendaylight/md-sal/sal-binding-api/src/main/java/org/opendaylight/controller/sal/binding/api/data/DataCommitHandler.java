@@ -77,107 +77,6 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * <li>For each <code>CommitTransaction</code> from Commit Request phase
  * <ol>
  * <li><code>Broker</code>
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
  * broker invokes a {@link CommitTransaction#finish()}
  * <li>The provider rollbacks a commit and returns an {@link RpcResult} of
  * rollback. </ol>
@@ -234,6 +133,13 @@ public interface DataCommitHandler extends ProviderFunctionality {
          */
         DataStoreIdentifier getDataStore();
 
+        /**
+         * Returns a modification transaction which is the source of this
+         * commit transaction.
+         * 
+         */
+        DataModification getModification();
+        
         /**
          * Returns the handler associated with this transaction.
          * 
