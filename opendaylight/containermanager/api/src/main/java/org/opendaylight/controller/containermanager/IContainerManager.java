@@ -187,4 +187,11 @@ public interface IContainerManager {
      * @return  List of Container name strings.
      */
     public List<String> getContainerNames();
+
+    /**
+     * Returns whether the controller is running in container mode
+     *
+     * @return true if controller is in container mode, false otherwise
+     */
+    public boolean inContainerMode();
 }

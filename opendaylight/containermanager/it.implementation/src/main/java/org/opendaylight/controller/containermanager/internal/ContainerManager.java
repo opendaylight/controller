@@ -43,7 +43,7 @@ public class ContainerManager implements IContainerManager {
      * This is configuration world: container names (also the map key)
      * are maintained as they were configured by user, same case
      */
-    private Set<IContainerAware> iContainerAware = (Set<IContainerAware>) Collections
+    private Set<IContainerAware> iContainerAware = Collections
             .synchronizedSet(new HashSet<IContainerAware>());
     private Set<IContainerListener> iContainerListener = Collections
             .synchronizedSet(new HashSet<IContainerListener>());
@@ -211,6 +211,12 @@ public class ContainerManager implements IContainerManager {
     public List<String> getContainerFlowNameList(String containerName) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public boolean inContainerMode() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }
