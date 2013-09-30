@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa5d592f_8a8f8bcc",
+        "filename": "opendaylight/protocol_plugins/stub/src/main/java/org/opendaylight/controller/protocol_plugins/stub/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-09-30T21:58:02Z",
+      "side": 1,
+      "message": "Please add the copyright notice",
+      "revId": "39aeb01add8a5d25fbaf75475f02250d8545b06a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa5d592f_6a9577e3",
         "filename": "opendaylight/protocol_plugins/stub/src/main/java/org/opendaylight/controller/protocol_plugins/stub/internal/Activator.java",
         "patchSetId": 1
