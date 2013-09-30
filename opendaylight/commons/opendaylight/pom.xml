@@ -582,6 +582,7 @@
             <author>true</author>
             <keywords>true</keywords>
             <excludePackageNames>net.sf.jnetlib.*:cern.*:corejava:*.internal:edu.uci.*</excludePackageNames>
+            <failOnError>false</failOnError>
           </configuration>
         </plugin>
         <plugin>

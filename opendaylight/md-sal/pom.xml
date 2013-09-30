@@ -260,6 +260,7 @@
                 <version>2.8.1</version>
                 <configuration>
                     <stylesheet>maven</stylesheet>
+                    <failOnError>false</failOnError>
                 </configuration>
                 <executions>
                     <execution>
