@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
@@ -188,13 +189,13 @@ public class FlowConfig implements Serializable {
     public boolean installInHw() {
         if (installInHw == null) {
             // backward compatibility
-            installInHw = "true";
+            installInHw = Boolean.toString(true);
         }
-        return installInHw.equals("true");
+        return Boolean.valueOf(installInHw);
     }
 
     public void setInstallInHw(boolean inHw) {
-        installInHw = inHw ? "true" : "false";
+        installInHw = String.valueOf(inHw);
     }
 
     public String getInstallInHw() {
@@ -1072,7 +1073,7 @@ public class FlowConfig implements Serializable {
     }
 
     public void toggleInstallation() {
-        installInHw = (installInHw == null) ? "true" : (installInHw.equals("true")) ? "false" : "true";
+        installInHw = (installInHw == null) ? Boolean.toString(false) : Boolean.toString(!Boolean.valueOf(installInHw));
     }
 
     /*

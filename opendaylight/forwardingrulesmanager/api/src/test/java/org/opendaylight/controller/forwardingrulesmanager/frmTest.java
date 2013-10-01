@@ -469,13 +469,14 @@ public class frmTest {
 
     @Test
     public void testStatusToggle() throws UnknownHostException {
+        // default is install in Hw
         FlowConfig fc = new FlowConfig();
-        fc.toggleInstallation();
-        Assert.assertTrue(fc.installInHw());
         fc.toggleInstallation();
         Assert.assertFalse(fc.installInHw());
         fc.toggleInstallation();
         Assert.assertTrue(fc.installInHw());
+        fc.toggleInstallation();
+        Assert.assertFalse(fc.installInHw());
 
     }
 
