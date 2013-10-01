@@ -773,7 +773,6 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      */
     @SuppressWarnings("unchecked")
     private void updateCurrentHierarchy(Node node, ArrayList<String> currHierarchy, List<List<String>> fullHierarchy) {
-        // currHierarchy.add(String.format("%x", currSw.getId()));
         currHierarchy.add(dpidToHostNameHack((Long) node.getID()));
         // Shallow copy as required
         ArrayList<String> currHierarchyClone = (ArrayList<String>) currHierarchy.clone();

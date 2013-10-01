@@ -109,9 +109,6 @@ public class UDP extends Packet {
      * Store the value read from data stream in hdrFieldMap
      */
     public void setHeaderField(String headerField, byte[] readValue) {
-        /*if (headerField.equals("Protocol")) {
-                payloadClass = decodeMap.get(readValue);
-        }*/
         hdrFieldsMap.put(headerField, readValue);
     }
 

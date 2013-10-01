@@ -43,11 +43,6 @@ public abstract class Action implements Serializable {
     public Action() {
     }
 
-    /*
-     * public Action (ActionType type, Object value) { this.type = type;
-     * this.value = value; this.isValid = true; }
-     */
-
     /**
      * Checks if the passed value is in the valid range for this action
      *

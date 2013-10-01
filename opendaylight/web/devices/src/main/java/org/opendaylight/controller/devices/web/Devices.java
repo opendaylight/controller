@@ -752,7 +752,6 @@ public class Devices implements IDaylightWeb {
 
     @RequestMapping(value = "login")
     public String login(final HttpServletRequest request, final HttpServletResponse response) {
-        // response.setHeader("X-Page-Location", "/login");
         /*
          * IUserManager userManager = (IUserManager) ServiceHelper
          * .getGlobalInstance(IUserManager.class, this); if (userManager ==

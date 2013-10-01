@@ -58,31 +58,6 @@ public interface IDeviceService {
     }
 
     /**
-     * The source device for the current packet-in, if applicable.
-     */
-    // public static final String CONTEXT_SRC_DEVICE =
-    // "net.floodlightcontroller.devicemanager.srcDevice";
-
-    /**
-     * The destination device for the current packet-in, if applicable.
-     */
-    // public static final String CONTEXT_DST_DEVICE =
-    // / "net.floodlightcontroller.devicemanager.dstDevice";
-
-    /**
-     * The original destination device for the current packet-in
-     */
-    // public static final String CONTEXT_ORIG_DST_DEVICE =
-    // "net.floodlightcontroller.devicemanager.origDstDevice";
-
-    /**
-     * A FloodlightContextStore object that can be used to interact with the
-     * FloodlightContext information created by BVS manager.
-     */
-    // public static final FloodlightContextStore<IDevice> fcStore =
-    // new FloodlightContextStore<IDevice>();
-
-    /**
      * Get the device with the given device key.
      *
      * @param deviceKey

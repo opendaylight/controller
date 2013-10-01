@@ -341,7 +341,6 @@ public class Device implements IDevice {
      */
     List<AttachmentPoint> getDuplicateAttachmentPoints(
             List<AttachmentPoint> oldAPList, Map<Long, AttachmentPoint> apMap) {
-        // ITopologyService topology = deviceManager.topology;
         List<AttachmentPoint> dupAPs = new ArrayList<AttachmentPoint>();
         long timeThreshold = System.currentTimeMillis()
                 - AttachmentPoint.INACTIVITY_INTERVAL;
@@ -350,17 +349,11 @@ public class Device implements IDevice {
             return dupAPs;
 
         for (AttachmentPoint ap : oldAPList) {
-            // XXX - Missing functionality
-            // long id = topology.getL2DomainId(ap.getSw());
             long id = 0;
             AttachmentPoint trueAP = apMap.get(id);
 
             if (trueAP == null)
                 continue;
-            // XXX - Missing functionality
-            // boolean c = (topology.isConsistent(trueAP.getSw(),
-            // trueAP.getPort(),
-            // ap.getSw(), ap.getPort()));
             boolean c = true;
             boolean active = (ap.getActiveSince() > trueAP.getActiveSince());
             boolean last = ap.getLastSeen() > timeThreshold;
@@ -462,7 +455,6 @@ public class Device implements IDevice {
         }
 
         // XXX - Missing functionality
-        // long id = topology.getL2DomainId(sw);
         long id = 0;
         AttachmentPoint oldAP = apMap.get(id);
 
@@ -499,11 +491,6 @@ public class Device implements IDevice {
                 oldAPList.addAll(oldAPs);
             oldAPList.add(oldAP);
             this.oldAPs = oldAPList;
-            // XXX - Missing functionality
-            // if (!topology.isInSameBroadcastDomain(oldAP.getSw(),
-            // oldAP.getPort(),
-            // newAP.getSw(), newAP.getPort()))
-            // return true; // attachment point changed.
             return true;
         } else if (oldAPFlag) {
             // retain oldAP as is. Put the newAP in oldAPs for flagging
@@ -514,11 +501,6 @@ public class Device implements IDevice {
             // Add to oldAPList only if it was picked up from the oldAPList
             oldAPList.add(newAP);
             this.oldAPs = oldAPList;
-            // XXX - Missing functionality
-            // if (!topology.isInSameBroadcastDomain(oldAP.getSw(),
-            // oldAP.getPort(),
-            // newAP.getSw(), newAP.getPort()))
-            // return true; // attachment point changed.
             return true;
         }
         return false;
@@ -836,7 +818,6 @@ public class Device implements IDevice {
             if (!isFirst)
                 builder.append(", ");
             isFirst = false;
-            // builder.append(IPv4.fromIPv4Address(ip));
             builder.append(ip);
         }
         builder.append("], APs=");
