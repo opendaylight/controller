@@ -74,6 +74,7 @@
      <ul class="dropdown-menu">
       <li><a href="#admin" id="admin" data-role="${role}"><div class="icon-users"></div> Users</a></li>
       <li><a href="#cluster" id="cluster"><div class="icon-cluster"></div>Cluster</a></li>
+      <li><a href="#osgi" id="osgi"><div class="icon-default"></div>OSGi</a></li>
       <li><a href="#save" id="save"><div class="icon-save"></div>Save</a></li>
       <li><a href="#logout" id="logout"><div class="icon-logout"></div> Logout</a></li>
      </ul>
