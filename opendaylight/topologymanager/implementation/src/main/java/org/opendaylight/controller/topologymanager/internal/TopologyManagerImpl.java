@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,6 +116,14 @@ public class TopologyManagerImpl implements
         if (this.topologyManagerAware != null) {
             log.debug("Adding ITopologyManagerAware: {}", s);
             this.topologyManagerAware.add(s);
+            // Reply all the known edges
+            if (this.edgesDB != null) {
+                List<TopoEdgeUpdate> existingEdges = new ArrayList<TopoEdgeUpdate>();
+                for (Entry<Edge, Set<Property>> entry : this.edgesDB.entrySet()) {
+                    existingEdges.add(new TopoEdgeUpdate(entry.getKey(), entry.getValue(), UpdateType.ADDED));
+                }
+                s.edgeUpdate(existingEdges);
+            }
         }
     }
 
@@ -129,6 +138,14 @@ public class TopologyManagerImpl implements
         if (this.topologyManagerClusterWideAware != null) {
             log.debug("Adding ITopologyManagerClusterWideAware: {}", s);
             this.topologyManagerClusterWideAware.add(s);
+            // Reply all the known edges
+            if (this.edgesDB != null) {
+                List<TopoEdgeUpdate> existingEdges = new ArrayList<TopoEdgeUpdate>();
+                for (Entry<Edge, Set<Property>> entry : this.edgesDB.entrySet()) {
+                    existingEdges.add(new TopoEdgeUpdate(entry.getKey(), entry.getValue(), UpdateType.ADDED));
+                }
+                s.edgeUpdate(existingEdges);
+            }
         }
     }
 
