@@ -318,8 +318,9 @@ public class NeutronSubnet {
         Iterator<NeutronSubnet_IPAllocationPool> i = allocationPools.iterator();
         while (i.hasNext()) {
             NeutronSubnet_IPAllocationPool pool = i.next();
-            if (ans == null)
+            if (ans == null) {
                 ans = pool.getPoolStart();
+            }
             else
                 if (NeutronSubnet_IPAllocationPool.convert(pool.getPoolStart()) <
                         NeutronSubnet_IPAllocationPool.convert(ans))

@@ -119,8 +119,9 @@ public class V6StatsRequest extends OFVendorStatistics {
         this.outPort = data.getShort();
         this.match_len = data.getShort();
         this.tableId = data.get();
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++) {
             data.get();//pad byte
+        }
 
     }
 
@@ -132,8 +133,9 @@ public class V6StatsRequest extends OFVendorStatistics {
         data.putShort(this.outPort);
         data.putShort(this.match_len);
         data.put(this.tableId);
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)  {
             data.put((byte) 0x0);//pad byte
+        }
     }
 
     @Override

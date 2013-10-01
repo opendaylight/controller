@@ -296,8 +296,9 @@ public class V6StatsReply extends OFVendorStatistics {
          * action list may be preceded by a padding of 0 to 7 bytes based upon this:
          */
         short pad_size = (short) (((match_len + 7) / 8) * 8 - match_len);
-        for (i = 0; i < pad_size; i++)
+        for (i = 0; i < pad_size; i++) {
             data.get();
+        }
         int action_len = this.length - MINIMUM_LENGTH - (match_len + pad_size);
         if (action_len > 0)
             this.actions = this.actionFactory.parseActions(data, action_len);

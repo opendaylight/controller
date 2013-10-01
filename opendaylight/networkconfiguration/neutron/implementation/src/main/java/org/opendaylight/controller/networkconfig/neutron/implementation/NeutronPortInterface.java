@@ -222,10 +222,12 @@ public class NeutronPortInterface implements INeutronPortCRUD {
             NeutronSubnet subnet = systemCRUD.getSubnet(ip.getSubnetUUID());
             if (ip.getIpAddress() == null)
                 ip.setIpAddress(subnet.getLowAddr());
-            if (!ip.getIpAddress().equals(subnet.getGatewayIP()))
+            if (!ip.getIpAddress().equals(subnet.getGatewayIP())) {
                 subnet.allocateIP(ip.getIpAddress());
-            else
+            }
+            else {
                 subnet.setGatewayIPAllocated();
+            }
             subnet.addPort(input);
         }
         INeutronNetworkCRUD networkIf = NeutronCRUDInterfaces.getINeutronNetworkCRUD(this);
@@ -249,10 +251,12 @@ public class NeutronPortInterface implements INeutronPortCRUD {
         while (fixedIPIterator.hasNext()) {
             Neutron_IPs ip = fixedIPIterator.next();
             NeutronSubnet subnet = systemCRUD.getSubnet(ip.getSubnetUUID());
-            if (!ip.getIpAddress().equals(subnet.getGatewayIP()))
+            if (!ip.getIpAddress().equals(subnet.getGatewayIP())) {
                 subnet.releaseIP(ip.getIpAddress());
-            else
+            }
+            else {
                 subnet.resetGatewayIPAllocated();
+            }
             subnet.removePort(port);
         }
         return true;
