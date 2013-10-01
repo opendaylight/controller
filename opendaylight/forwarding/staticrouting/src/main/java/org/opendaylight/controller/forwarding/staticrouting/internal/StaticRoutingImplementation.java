@@ -438,7 +438,6 @@ public class StaticRoutingImplementation implements IfNewHostNotify,
 
         log.debug("forwarding.staticrouting starting on container {}",
                   containerName);
-        //staticRoutes = new ConcurrentHashMap<String, StaticRoute>();
         allocateCaches();
         retrieveCaches();
         this.executor = Executors.newFixedThreadPool(1);

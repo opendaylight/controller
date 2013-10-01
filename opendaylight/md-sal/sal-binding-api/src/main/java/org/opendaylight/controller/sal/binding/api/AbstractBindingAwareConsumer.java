@@ -12,7 +12,6 @@ public abstract class AbstractBindingAwareConsumer implements BindingAwareConsum
         BindingAwareBroker broker = context.getService(brokerRef);
         broker.registerConsumer(this, context);
         startImpl(context);
-        //context.ungetService(brokerRef);
     }
 
     @Deprecated

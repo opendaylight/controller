@@ -88,10 +88,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setNewHostNotify",
                             "unsetNewHostNotify").setRequired(false));
 
-            // c.add(createContainerServiceDependency(containerName).setService(
-            // IClusterContainerServices.class).setCallbacks(
-            // "setClusterContainerService",
-            // "unsetClusterContainerService").setRequired(true));
             c.add(createContainerServiceDependency(containerName)
                     .setService(ITopologyManager.class)
                     .setCallbacks("setTopologyManager", "unsetTopologyManager")

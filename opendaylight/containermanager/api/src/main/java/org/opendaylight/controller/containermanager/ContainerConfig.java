@@ -311,17 +311,6 @@ public class ContainerConfig implements Serializable {
             return status;
         }
 
-        /* Allow adding ports which are already present
-        if (!ports.isEmpty()) {
-            List<String> intersection = new ArrayList<String>(ports);
-            intersection.retainAll(ncList);
-            if (!intersection.isEmpty()) {
-                return new Status(StatusCode.CONFLICT, "The following node connectors are already part of this container: "
-                        + intersection);
-            }
-        }
-        */
-
         // Add ports
         ports.addAll(ncList);
         return new Status(StatusCode.SUCCESS);
@@ -415,36 +404,6 @@ public class ContainerConfig implements Serializable {
             }
         }
 
-        /*
-         * Revisit the following flow-spec confict validation later based on more testing.
-         * (*)
-        if (!delete) {
-            // Check for overlapping container flows in the request
-            int size = cFlowConfigs.size();
-            for (int i = 0; i < size; i++) {
-                ContainerFlowConfig first = cFlowConfigs.get(i);
-                for (int j = i + 1; j < size; j++) {
-                    ContainerFlowConfig second = cFlowConfigs.get(j);
-                    if (first.overlap(second)) {
-                        return new Status(StatusCode.BADREQUEST, String.format(
-                                "Invalid Request: the proposed flow specs overlap: %s <-> %s", first.getName(),
-                                second.getName()));
-                    }
-                }
-            }
-            // Check if any of the proposed container flows overlap with the
-            // existing ones
-            for (ContainerFlowConfig current : cFlowConfigs) {
-                for (ContainerFlowConfig existing : this.containerFlows) {
-                    if (current.overlap(existing)) {
-                        return new Status(StatusCode.BADREQUEST, String.format(
-                                "Invalid Request: the proposed flow specs overlap: %s <-> %s", current.getName(),
-                                existing.getName()));
-                    }
-                }
-            }
-        }
-        */
 
         return new Status(StatusCode.SUCCESS);
     }
