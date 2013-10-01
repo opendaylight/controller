@@ -728,6 +728,11 @@ $("#logout").click(function() {
   location.href = "/logout";
 });
 
+// felix osgi runtime
+$("#osgi").click(function() {
+  window.open("/controller/osgi/system/console", '_newtab');
+});
+
 $.ajaxSetup({
   complete : function(xhr, textStatus) {
     var mime = xhr.getResponseHeader('Content-Type');

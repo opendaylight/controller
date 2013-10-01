@@ -366,6 +366,11 @@
       <artifactId>topology.web</artifactId>
       <version>${controller.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>osgi-brandfragment.web</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
 
     <!--  Neutron -->
 
@@ -446,6 +451,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>networkconfig.bridgedomain.northbound</artifactId>
       <version>${networkconfig.bridgedomain.northbound.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>httpservice-bridge</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
     <!-- Debug and logging -->
@@ -869,6 +879,23 @@
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>org.eclipse.persistence.antlr</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.equinox.http</groupId>
+      <artifactId>servlet</artifactId>
+      <!--
+      <version>1.0.0-v20070606</version>
+      -->
+    </dependency>
+    <!-- felix webconsole -->
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.webconsole</artifactId>
+      <version>4.2.0</version>
+      <classifier>all</classifier>
+      <!-- the all bundle includes all the necessary plugins -->
+    </dependency>
+
     <!-- Third parties from opendaylight released -->
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
