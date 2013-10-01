@@ -165,10 +165,12 @@ public class SingletonTask {
         }
 
         if (needQueue) {
-            if (delay <= 0)
+            if (delay <= 0) {
                 ses.execute(stw);
-            else
+            }
+            else {
                 ses.schedule(stw, delay, unit);
+            }
         }
     }
 }

@@ -218,8 +218,9 @@ public class V6FlowMod extends OFVendor implements Cloneable {
             V6FlowMod v6flowMod = (V6FlowMod) super.clone();
             v6flowMod.setMatch(neoMatch);
             List<OFAction> neoActions = new LinkedList<OFAction>();
-            for (OFAction action : this.actions)
+            for (OFAction action : this.actions) {
                 neoActions.add((OFAction) action.clone());
+            }
             v6flowMod.setActions(neoActions);
             return v6flowMod;
         } catch (CloneNotSupportedException e) {

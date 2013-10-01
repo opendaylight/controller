@@ -112,8 +112,9 @@ public class NeutronSubnet_IPAllocationPool {
         if (r.length == 0) return "";
         StringBuilder sb = new StringBuilder();
         int i;
-        for(i=0;i<r.length-1;i++)
+        for(i=0;i<r.length-1;i++) {
             sb.append(r[i]+d);
+        }
         return sb.toString()+r[i];
     }
 
