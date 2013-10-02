@@ -133,6 +133,7 @@
 
     <!-- Parents -->
     <module>../../commons/concepts</module>
+    <module>../../commons/httpclient</module>
     <module>../../commons/integrationtest</module>
     <module>../../commons/checkstyle</module>
     <module>../../commons/opendaylight</module>
