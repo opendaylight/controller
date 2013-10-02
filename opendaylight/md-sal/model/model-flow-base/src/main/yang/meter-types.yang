@@ -16,8 +16,8 @@ module opendaylight-meter-types {
     
     grouping meter-flags {
         leaf flags {
-            type enumeration {
-                enum meter-kbps;
+            type bits {
+                enum meter_kbps;
                 enum meter_pktps;
                 enum meter_burst;
                 enum meter_stats;
@@ -30,7 +30,7 @@ module opendaylight-meter-types {
             type enumeration {
                 enum ofpmbt-drop;
                 enum ofpmbt-dscp-remark;
-                enum ofpmbt-experimenter;               
+                enum ofpmbt-experimenter;
             }
         }
     }
@@ -79,7 +79,7 @@ module opendaylight-meter-types {
     
     grouping meter {
         
-        uses meter-flags;        
+        uses meter-flags;
         
         leaf meter-id {
             type meter-ref;
@@ -155,7 +155,7 @@ module opendaylight-meter-types {
                 leaf byte-band-count {
                     type yang:counter64;
                 }
-            }       
+            }
         }
     }
 
