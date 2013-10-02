@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>config-subsystem</artifactId>
-        <groupId>org.opendaylight</groupId>
+        <groupId>org.opendaylight.controller</groupId>
         <version>0.2.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
