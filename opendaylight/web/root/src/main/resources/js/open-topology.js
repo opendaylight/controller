@@ -45,7 +45,7 @@ one.topology.option = {
     },
     label : function(style, node) {
         var marginTop, minWidth;
-        if (node.data["$type"] == "swtch") {
+        if (node.data["$type"] == "switch") {
             marginTop = "42px";
             minWidth = "65px";
         } else if (node.data["$type"] == "host") {
@@ -113,8 +113,8 @@ one.topology.init = function(json) {
                         if (node.id != undefined) {
                             one.topology.graph.canvas.getElement().style.cursor = 'move';
                         } else if (eventInfo.edge != undefined
-                                && eventInfo.edge.nodeTo.data["$type"] == "swtch"
-                                && eventInfo.edge.nodeFrom.data["$type"] == "swtch") {
+                                && eventInfo.edge.nodeTo.data["$type"] == "switch"
+                                && eventInfo.edge.nodeFrom.data["$type"] == "switch") {
                             one.topology.graph.canvas.getElement().style.cursor = 'pointer';
                         }
                     },

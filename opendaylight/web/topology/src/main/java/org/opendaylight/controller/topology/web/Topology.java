@@ -614,7 +614,7 @@ public class Topology implements IObjectReader, IConfigurationAware {
     }
 
     protected class NodeType {
-        public static final String NODE = "swtch";
+        public static final String NODE = "switch";
         public static final String HOST = "host";
     }
 
