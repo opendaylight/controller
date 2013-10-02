@@ -98,11 +98,16 @@ one.topology.init = function(json) {
                 Edge : one.topology.option.edge(true, '23A4FF', 1.5),
                 Tips : {
                     enable : true,
-                    type : 'Native',
+                    type : 'auto',
+                    offsetX: 15,
+                    offsetY: 15,
                     onShow : function(tip, node) {
                         if (node.name != undefined)
-                            tip.innerHTML = "";
-                        // tipsOnShow(tip, node);
+                            tip.innerHTML = "Name : " + node.name + "<br>";
+                        if(node.data["$type"]!=undefined)
+                            tip.innerHTML = tip.innerHTML + "Type : " + node.data["$type"] + "<br>";
+                        if(node.data["$desc"]!=undefined)
+                            tip.innerHTML = tip.innerHTML + "Description : " + node.data["$desc"];
                     }
                 },
                 Events : {
