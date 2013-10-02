@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa5d592f_1f3ab736",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/meter-types.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-10-02T19:34:48Z",
+      "side": 1,
+      "message": "Shouldn\u0027t these be \u0027bit\u0027 statements here?",
+      "revId": "e0a0e33e188d38e8afb70f2e251500b99f6d49d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
