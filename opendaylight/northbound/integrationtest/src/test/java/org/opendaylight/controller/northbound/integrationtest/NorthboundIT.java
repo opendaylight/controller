@@ -8,17 +8,12 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -32,6 +27,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opendaylight.controller.commons.httpclient.HTTPClient;
+import org.opendaylight.controller.commons.httpclient.HTTPRequest;
+import org.opendaylight.controller.commons.httpclient.HTTPResponse;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.ConstructionException;
@@ -149,53 +147,47 @@ public class NorthboundIT {
         }
 
         try {
-            URL url = new URL(restUrl);
             this.userManager.getAuthorizationList();
             this.userManager.authenticate("admin", "admin");
+            HTTPRequest request = new HTTPRequest();
+
+            request.setUri(restUrl);
+            request.setMethod(method);
+
+            Map<String, List<String>> headers = new HashMap<String, List<String>>();
             String authString = "admin:admin";
             byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
             String authStringEnc = new String(authEncBytes);
-
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod(method);
-            connection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Accept", "application/json");
-
+            List<String> header = new ArrayList<String>();
+            header.add("Basic "+authStringEnc);
+            headers.put("Authorization", header);
+            header = new ArrayList<String>();
+            header.add("application/json");
+            headers.put("Content-Type", header);
+            headers.put("Accept", header);
+            request.setHeaders(headers);
             if (body != null) {
-                connection.setDoOutput(true);
-                OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-                wr.write(body);
-                wr.flush();
+                request.setEntity(body);
             }
-            connection.connect();
-            connection.getContentType();
+
+            HTTPResponse response = HTTPClient.sendRequest(request);
 
             // Response code for success should be 2xx
-            httpResponseCode = connection.getResponseCode();
+            httpResponseCode = response.getStatus();
             if (httpResponseCode > 299) {
                 return httpResponseCode.toString();
             }
 
             if (debugMsg) {
-                System.out.println("HTTP response code: " + connection.getResponseCode());
-                System.out.println("HTTP response message: " + connection.getResponseMessage());
+                System.out.println("HTTP response code: " + response.getStatus());
+                System.out.println("HTTP response message: " + response.getEntity());
             }
 
-            InputStream is = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-            StringBuilder sb = new StringBuilder();
-            int cp;
-            while ((cp = rd.read()) != -1) {
-                sb.append((char) cp);
-            }
-            is.close();
-            connection.disconnect();
-            if (debugMsg) {
-                System.out.println("Response : "+sb.toString());
-            }
-            return sb.toString();
+            return response.getEntity();
         } catch (Exception e) {
+            if (debugMsg) {
+                e.printStackTrace();
+            }
             return null;
         }
     }
@@ -1381,6 +1373,7 @@ public class NorthboundIT {
                 mavenBundle("org.opendaylight.controller", "forwarding.staticrouting").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "bundlescanner").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "bundlescanner.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "commons.httpclient").versionAsInProject(),
 
                 // Northbound bundles
                 mavenBundle("org.opendaylight.controller", "commons.northbound").versionAsInProject(),
