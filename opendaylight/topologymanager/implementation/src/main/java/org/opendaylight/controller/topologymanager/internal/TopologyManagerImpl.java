@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
  * topology database and notifies all the listeners of topology changes.
  */
 public class TopologyManagerImpl implements
-        ICacheUpdateAware,
+        ICacheUpdateAware<Object, Object>,
         ITopologyManager,
         IConfigurationContainerAware,
         IListenTopoUpdates,
@@ -200,7 +200,7 @@ public class TopologyManagerImpl implements
         notifyThread = new Thread(new TopologyNotify(notifyQ));
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void allocateCaches() {
         try {
             this.edgesDB =
@@ -243,7 +243,7 @@ public class TopologyManagerImpl implements
         }
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         if (this.clusterContainerService == null) {
             log.error("Cluster Services is null, can't retrieve caches.");
@@ -531,6 +531,11 @@ public class TopologyManagerImpl implements
     private TopoEdgeUpdate edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
         switch (type) {
         case ADDED:
+            // Avoid redundant update as notifications trigger expensive tasks
+            if (edgesDB.containsKey(e)) {
+                log.trace("Skipping redundant edge addition: {}", e);
+                return null;
+            }
             // Ensure that both tail and head node connectors exist.
             if (!nodeConnectorsExist(e)) {
                 log.warn("Ignore edge that contains invalid node connector: {}", e);
@@ -896,7 +901,7 @@ public class TopologyManagerImpl implements
     public void entryUpdated(final Object key, final Object new_value, final String cacheName, final boolean originLocal) {
         if (cacheName.equals(TOPOEDGESDB)) {
             final Edge e = (Edge) key;
-            log.trace("Edge {} CHANGED isLocal:{}", e, originLocal);
+            log.trace("Edge {} UPDATED isLocal:{}", e, originLocal);
             final Set<Property> props = (Set<Property>) new_value;
             edgeUpdateClusterWide(e, UpdateType.CHANGED, props, originLocal);
         }
