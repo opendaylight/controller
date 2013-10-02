@@ -10,7 +10,7 @@
     </parent>
 
 
-    <groupId>org.opendaylight</groupId>
+    <groupId>org.opendaylight.controller</groupId>
     <version>0.2.1-SNAPSHOT</version>
     <artifactId>config-subsystem</artifactId>
     <packaging>pom</packaging>
@@ -195,7 +195,7 @@
                     </executions>
                     <dependencies>
                         <dependency>
-                            <groupId>org.opendaylight</groupId>
+                            <groupId>org.opendaylight.controller</groupId>
                             <artifactId>yang-jmx-generator-plugin</artifactId>
                             <version>0.2.1-SNAPSHOT</version>
                         </dependency>
