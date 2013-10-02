@@ -17,4 +17,4 @@ opendaylight/northbound/integrationtest/logs/*
 *.iml
 *.iws
 .idea
-
+**/xtend-gen
