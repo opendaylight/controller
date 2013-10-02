@@ -78,3 +78,16 @@
   width: 16px;
 }
 
+.tip {
+   background-color: white;
+   border: 1px solid #CCCCCC;
+   box-shadow: 2px 2px 8px #555555;
+   color: #111111;
+   font-family: Verdana,Geneva,Arial,Helvetica,sans-serif;
+   font-size: 14px;
+   opacity: 0.9;
+   padding: 7px;
+   width: 260px;
+   border-radius: 8px;
+}
+
