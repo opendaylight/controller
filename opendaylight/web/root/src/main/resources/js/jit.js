@@ -4109,7 +4109,7 @@ $jit.MultiGraph = new Class({
 
 	  // add this adjacency into the current edges object
 	  adjsObj[obj2.id].push(adj);
-	  if (adj.nodeFrom.data["$type"] != "swtch") {
+	  if (adj.nodeFrom.data["$type"] != "switch") {
 	  	// if this is not a switch (e.g. host), then add it to the switch because it will never be added by itself
 	  	adjsObj2[obj.id].push(adj);
 	  }
@@ -6126,7 +6126,7 @@ var MultiNodeHelper = {
 				&& Math.abs(pos.y - npos.y) <= height / 2;
 		}
 	},
-	'swtch': {
+	'switch': {
 		'render': function(pos, canvas, animating) {
 			var ctx = canvas.getCtx();
 			var img = new Image();
@@ -9782,14 +9782,14 @@ $jit.MultiTopology.$extend = true;
 			return this.nodeHelper.host.contains(npos, pos);
 		}
 	},
-	'swtch': {
+	'switch': {
 		'render': function(node, canvas, animating) {
 			var pos = node.pos.getc(true);
-			this.nodeHelper.swtch.render(pos, canvas, animating);
+			this.nodeHelper.switch.render(pos, canvas, animating);
 		},
 		'contains': function(node, pos) {
 			var npos = node.pos.getc(true);
-			return this.nodeHelper.swtch.contains(npos, pos);
+			return this.nodeHelper.switch.contains(npos, pos);
 		}
 	}
   });
