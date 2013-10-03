@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa5d592f_0510214d",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 29
+      },
+      "writtenOn": "2013-10-03T19:39:54Z",
+      "side": 1,
+      "message": "typo. capable",
+      "revId": "d360cb161268c6d7181775f25c0717d4f80c2043",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
