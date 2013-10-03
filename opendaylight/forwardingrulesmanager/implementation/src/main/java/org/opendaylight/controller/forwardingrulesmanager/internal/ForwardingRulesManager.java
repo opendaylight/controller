@@ -331,7 +331,7 @@ public class ForwardingRulesManager implements
                 succeded = ret;
             } else {
                 error = ret;
-                log.warn("Failed to install the entry: {}. The failure is: {}", installEntry, ret.getDescription());
+                log.trace("Failed to install the entry: {}. The failure is: {}", installEntry, ret.getDescription());
             }
         }
 
@@ -577,7 +577,7 @@ public class ForwardingRulesManager implements
                     .getFlow());
 
             if (!status.isSuccess()) {
-                log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", newEntries.getInstall(),
+                log.trace("SDN Plugin failed to program the flow: {}. The failure is: {}", newEntries.getInstall(),
                         status.getDescription());
                 return status;
             }
@@ -637,7 +637,7 @@ public class ForwardingRulesManager implements
 
             if (!ret.isSuccess()) {
                 error = ret;
-                log.warn("Failed to remove the entry: {}. The failure is: {}", entry.getInstall(), ret.getDescription());
+                log.trace("Failed to remove the entry: {}. The failure is: {}", entry.getInstall(), ret.getDescription());
                 if (installedList.size() == 1) {
                     // If we had only one entry to remove, this is fatal failure
                     return error;
@@ -695,7 +695,7 @@ public class ForwardingRulesManager implements
                     .getFlow());
 
             if (!status.isSuccess()) {
-                log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
+                log.trace("SDN Plugin failed to remove the flow: {}. The failure is: {}", entry.getInstall(),
                         status.getDescription());
                 return status;
             }
@@ -745,7 +745,7 @@ public class ForwardingRulesManager implements
                     .getFlow());
 
             if (!status.isSuccess()) {
-                log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
+                log.trace("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
                         status.getDescription());
                 return status;
             }
@@ -915,7 +915,7 @@ public class ForwardingRulesManager implements
             updateLocalDatabase(target, false);
         } else {
             // log the error
-            log.warn("SDN Plugin failed to remove the flow: {}. The failure is: {}", target.getInstall(),
+            log.trace("SDN Plugin failed to remove the flow: {}. The failure is: {}", target.getInstall(),
                     status.getDescription());
         }
 
@@ -1921,7 +1921,7 @@ public class ForwardingRulesManager implements
             if (n != null && connectionManager.getLocalityStatus(n) == ConnectionLocality.LOCAL) {
                 Status status = this.removeEntryInternal(flowEntryHw, false);
                 if (!status.isSuccess()) {
-                    log.warn("Failed to remove entry: {}. The failure is: {}", flowEntryHw, status.getDescription());
+                    log.trace("Failed to remove entry: {}. The failure is: {}", flowEntryHw, status.getDescription());
                 }
             } else {
                 log.debug("Not removing entry {} because not connected locally, the remote guy will do it's job",
