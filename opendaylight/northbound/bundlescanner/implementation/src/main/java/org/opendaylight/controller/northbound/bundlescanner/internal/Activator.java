@@ -11,11 +11,25 @@ package org.opendaylight.controller.northbound.bundlescanner.internal;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.northbound.bundlescanner.IBundleScanService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * The activator registers the BundleScanner.
  */
 public class Activator extends ComponentActivatorAbstractBase {
+
+    @Override
+    protected void init() {
+        BundleContext context = FrameworkUtil.getBundle(BundleScanner.class).getBundleContext();
+        context.addBundleListener(BundleScanner.getInstance());
+    }
+
+    @Override
+    public void destroy() {
+        BundleContext context = FrameworkUtil.getBundle(BundleScanner.class).getBundleContext();
+        context.removeBundleListener(BundleScanner.getInstance());
+    }
 
     @Override
     protected Object[] getGlobalImplementations() {
