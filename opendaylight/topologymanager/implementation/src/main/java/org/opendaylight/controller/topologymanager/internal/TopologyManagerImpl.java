@@ -521,11 +521,16 @@ public class TopologyManagerImpl implements
         }
     }
 
-    private boolean nodeConnectorsExist(Edge e) {
+    private boolean headNodeConnectorExist(Edge e) {
+        /*
+         * Only check the head end point which is supposed to be part of a
+         * network node we control (present in our inventory). If we checked the
+         * tail end point as well, we would not store the edges that connect to
+         * a non sdn enable port on a non sdn capanle production switch. We want
+         * to be able to see these switches on the topology.
+         */
         NodeConnector head = e.getHeadNodeConnector();
-        NodeConnector tail = e.getTailNodeConnector();
-        return (switchManager.doesNodeConnectorExist(head) &&
-                switchManager.doesNodeConnectorExist(tail));
+        return (switchManager.doesNodeConnectorExist(head));
     }
 
     private TopoEdgeUpdate edgeUpdate(Edge e, UpdateType type, Set<Property> props) {
@@ -536,8 +541,9 @@ public class TopologyManagerImpl implements
                 log.trace("Skipping redundant edge addition: {}", e);
                 return null;
             }
-            // Ensure that both tail and head node connectors exist.
-            if (!nodeConnectorsExist(e)) {
+
+            // Ensure that head node connector exists
+            if (!headNodeConnectorExist(e)) {
                 log.warn("Ignore edge that contains invalid node connector: {}", e);
                 return null;
             }
