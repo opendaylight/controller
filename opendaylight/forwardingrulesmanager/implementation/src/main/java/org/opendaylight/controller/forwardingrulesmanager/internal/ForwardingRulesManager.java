@@ -695,7 +695,7 @@ public class ForwardingRulesManager implements
                     .getFlow());
 
             if (!status.isSuccess()) {
-                log.warn("SDN Plugin failed to program the flow: {}. The failure is: {}", entry.getInstall(),
+                log.warn("SDN Plugin failed to remove the flow: {}. The failure is: {}", entry.getInstall(),
                         status.getDescription());
                 return status;
             }
