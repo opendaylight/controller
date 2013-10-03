@@ -62,39 +62,6 @@
                         </Bundle-Activator>
                         <Private-Package>
                             org.opendaylight.controller.config.yang.store.impl,
-                            <!-- OPENDAYLIGHT -->
-                            org.opendaylight.yangtools.sal.binding.yang.types,
-                            org.opendaylight.yangtools.yang.parser.impl,
-                            org.opendaylight.yangtools.antlrv4.code.gen,
-                            org.opendaylight.yangtools.yang.model.parser.api,
-
-                            org.opendaylight.yangtools.yang.model.util,
-
-                            org.opendaylight.yangtools.yang.parser.builder.api,
-                            org.opendaylight.yangtools.yang.parser.builder.impl,
-
-                            org.opendaylight.yangtools.yang.parser.impl,
-                            org.opendaylight.yangtools.yang.parser.util,
-
-                            org.opendaylight.yangtools.yang.validator,
-                            <!-- ANTLR -->
-
-                            org.antlr.v4.runtime,
-                            org.antlr.v4.runtime.tree,
-                            org.antlr.v4.runtime.atn,
-                            org.antlr.v4.runtime.dfa,
-                            org.antlr.v4.runtime.misc,
-                            org.antlr.v4.runtime.tree.gui,
-                            org.abego.treelayout,
-                            org.abego.treelayout.util,
-                            org.abego.treelayout.internal.util,
-                            org.abego.treelayout.internal.util.java.lang,
-                            org.abego.treelayout.internal.util.java.lang.string,
-                            org.abego.treelayout.internal.util.java.util,
-
-                            <!-- xtext -->
-                            org.eclipse.xtext.xbase.lib.*,
-                            org.apache.commons.lang.*,
                         </Private-Package>
 
                         <Import-Package>
@@ -108,19 +75,12 @@
                             org.osgi.util.tracker,
                             org.slf4j,
                             javax.*,
-                            <!-- OPENDAYLIGHT PROVIDED BY YANG-JMX-GENERATOR -->
+                            <!-- YANGTOOLS -->
+                            org.opendaylight.yangtools.sal.binding.yang.types,
                             org.opendaylight.yangtools.yang.common,
                             org.opendaylight.yangtools.yang.model.api,
-                            org.opendaylight.yangtools.yang.model.api.type,
-
-                            org.opendaylight.yangtools.yang.binding,
-
-                            org.opendaylight.yangtools.binding.generator.util,
                             org.opendaylight.yangtools.sal.binding.generator.spi,
-                            org.opendaylight.yangtools.sal.binding.model.api,
-
-                            org.opendaylight.yangtools.binding.generator.util.generated.type.builder,
-                            org.opendaylight.yangtools.sal.binding.model.api.type.builder,
+                            org.opendaylight.yangtools.yang.parser.impl
                         </Import-Package>
                         <Export-Package>
                         </Export-Package>
