@@ -457,13 +457,13 @@ public class TopologyManagerImplTest {
     @Test
     public void testAddDeleteUserLink() {
         TopologyUserLinkConfig link1 = new TopologyUserLinkConfig("default1",
-                "OF|1@OF|2", "OF|1@OF|2");
+                "OF|1@OF|2", "OF|1@OF|3");
         TopologyUserLinkConfig link2 = new TopologyUserLinkConfig("default1",
-                "OF|10@OF|20", "OF|10@OF|20");
+                "OF|10@OF|20", "OF|10@OF|30");
         TopologyUserLinkConfig link3 = new TopologyUserLinkConfig("default2",
-                "OF|1@OF|2", "OF|1@OF|2");
+                "OF|1@OF|2", "OF|1@OF|3");
         TopologyUserLinkConfig link4 = new TopologyUserLinkConfig("default20",
-                "OF|10@OF|20", "OF|10@OF|20");
+                "OF|10@OF|20", "OF|10@OF|30");
 
         TopologyManagerImpl topoManagerImpl = new TopologyManagerImpl();
         TestSwitchManager swMgr = new TestSwitchManager();
@@ -485,9 +485,9 @@ public class TopologyManagerImplTest {
         Assert.assertTrue(topoManagerImpl.getUserLinks().isEmpty());
 
         TopologyUserLinkConfig badlink1 =
-            new TopologyUserLinkConfig("bad1", "OF|1@OF|2", "OF|1@OF|3");
+            new TopologyUserLinkConfig("bad1", "OF|1@OF|4", "OF|1@OF|5");
         TopologyUserLinkConfig badlink2 =
-            new TopologyUserLinkConfig("bad2", "OF|10@OF|21", "OF|10@OF|20");
+            new TopologyUserLinkConfig("bad2", "OF|10@OF|7", "OF|7@OF|13");
         Assert.assertEquals(StatusCode.NOTFOUND,
                             topoManagerImpl.addUserLink(badlink1).getCode());
         Assert.assertEquals(StatusCode.NOTFOUND,
@@ -630,10 +630,11 @@ public class TopologyManagerImplTest {
 
         for (int i = 0; i < 5; i++) {
             Host host = topoManagerImpl.getHostAttachedToNodeConnector(nc[i]);
-            if (i == 4)
+            if (i == 4) {
                 Assert.assertTrue(host == null);
-            else
+            } else {
                 Assert.assertTrue(host.equals(h[i]));
+            }
         }
 
         Set<NodeConnector> ncSet = topoManagerImpl.getNodeConnectorWithHost();
