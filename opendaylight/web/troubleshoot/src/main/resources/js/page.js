@@ -192,7 +192,7 @@ one.f.troubleshooting.existingNodes = {
                         },
                         {
                             property: 'nodeId',
-                            label: 'Static Route',
+                            label: 'Node ID',
                             sortable: true
                         },
                         {
