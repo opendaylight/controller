@@ -28,6 +28,7 @@
         <module>yang-store-api</module>
         <module>yang-store-impl</module>
         <module>yang-test</module>
+        <module>logback-config</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
