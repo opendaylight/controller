@@ -19,6 +19,7 @@
         <exclude>org.opendaylight.controller:hosttracker_new</exclude>
         <exclude>org.opendaylight.controller:hosttracker_new.implementation</exclude>
         <exclude>org.opendaylight.controller:checkstyle</exclude>
+        <exclude>org.opendaylight.controller:sanitytest</exclude>
       </excludes>
       <binaries>
         <outputDirectory>opendaylight/plugins</outputDirectory>
