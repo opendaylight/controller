@@ -220,9 +220,9 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                     "switchmanager.controllerProps",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheConfigException cce) {
-            log.error("\nCache configuration invalid - check cache mode");
+            log.error("Cache configuration invalid - check cache mode");
         } catch (CacheExistException ce) {
-            log.error("\nCache already exits - destroy and recreate if needed");
+            log.error("Cache already exists - destroy and recreate if needed");
         }
     }
 
@@ -407,7 +407,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     private Status semanticCheck(SubnetConfig conf) {
         Subnet newSubnet = new Subnet(conf);
         Set<InetAddress> IPs = subnets.keySet();
-        if (IPs == null) {
+        if (IPs.size() == 0) {
             return new Status(StatusCode.SUCCESS);
         }
         for (InetAddress i : IPs) {
@@ -910,8 +910,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         Status retS = null, retP = null;
         ObjectWriter objWriter = new ObjectWriter();
 
-        retS = objWriter.write(new ConcurrentHashMap<String, SubnetConfig>(
-                subnetsConfigList), subnetFileName);
         retP = objWriter.write(new ConcurrentHashMap<SpanConfig, SpanConfig>(
                 spanConfigList), spanFileName);
         retS = objWriter.write(new ConcurrentHashMap<String, SwitchConfig>(
@@ -1402,8 +1400,8 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
      *
      * @param nodeConnector
      *            {@link org.opendaylight.controller.sal.core.NodeConnector}
-     * @param propName
-     *            name of {@link org.opendaylight.controller.sal.core.Property}
+     * @param prop
+     *            {@link org.opendaylight.controller.sal.core.Property}
      * @return success or failed reason
      */
     @Override
@@ -1451,7 +1449,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
                         try {
                             map.put(s, new NodeConnector(entry.getValue()));
                         } catch (ConstructionException e) {
-                            log.error("An error occured",e);
+                            log.error("An error occurred",e);
                         }
                     }
                 }

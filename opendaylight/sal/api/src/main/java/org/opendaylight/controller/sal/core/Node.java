@@ -336,7 +336,7 @@ public class Node implements Serializable {
      * @param str string formatted in toString mode that can be
      * converted back to a Node format.
      *
-     * @return a Node if succed or null if no
+     * @return a Node if succeed or null if no
      */
     public static Node fromString(String str) {
         if (str == null) {
