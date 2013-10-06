@@ -106,11 +106,12 @@ public class ForwardingRulesManager implements
         ICacheUpdateAware<Object,Object>,
         CommandProvider,
         IFlowProgrammerListener {
-    private static final String NODEDOWN = "Node is Down";
-    private static final String SUCCESS = StatusCode.SUCCESS.toString();
+
     private static final Logger log = LoggerFactory.getLogger(ForwardingRulesManager.class);
-    private static final String PORTREMOVED = "Port removed";
     private static final Logger logsync = LoggerFactory.getLogger("FRMsync");
+    private static final String PORTREMOVED = "Port removed";
+    private static final String NODEDOWN = "Node is Down";
+    private static final String INVALID_FLOW_ENTRY = "Invalid FlowEntry";
     private String frmFileName;
     private String portGroupFileName;
     private ConcurrentMap<Integer, FlowConfig> staticFlows;
@@ -164,8 +165,8 @@ public class ForwardingRulesManager implements
      * necessity non-transactional as long as need to be able to synchronize
      * states also while a transaction is in progress
      */
-    static final String WORKORDERCACHE = "frm.workOrder";
-    static final String WORKSTATUSCACHE = "frm.workStatus";
+    static final String WORK_ORDER_CACHE = "frm.workOrder";
+    static final String WORK_STATUS_CACHE = "frm.workStatus";
 
     /*
      * Data structure responsible for distributing the FlowEntryInstall requests
@@ -269,10 +270,9 @@ public class ForwardingRulesManager implements
 
         // Sanity Check
         if (flowEntry == null || flowEntry.getNode() == null) {
-            String msg = "Invalid FlowEntry";
-            String logMsg = msg + ": {}";
+            String logMsg = INVALID_FLOW_ENTRY + ": {}";
             log.warn(logMsg, flowEntry);
-            return new Status(StatusCode.NOTACCEPTABLE, msg);
+            return new Status(StatusCode.NOTACCEPTABLE, INVALID_FLOW_ENTRY);
         }
 
         /*
@@ -388,7 +388,7 @@ public class ForwardingRulesManager implements
         // Sanity checks
         if (currentFlowEntry == null || currentFlowEntry.getNode() == null || newFlowEntry == null
                 || newFlowEntry.getNode() == null) {
-            String msg = "Modify: Invalid FlowEntry";
+            String msg = "Modify: " + INVALID_FLOW_ENTRY;
             String logMsg = msg + ": {} or {}";
             log.warn(logMsg, currentFlowEntry, newFlowEntry);
             return new Status(StatusCode.NOTACCEPTABLE, msg);
@@ -609,10 +609,9 @@ public class ForwardingRulesManager implements
 
         // Sanity Check
         if (flowEntry == null || flowEntry.getNode() == null) {
-            String msg = "Invalid FlowEntry";
-            String logMsg = msg + ": {}";
+            String logMsg = INVALID_FLOW_ENTRY + ": {}";
             log.warn(logMsg, flowEntry);
-            return new Status(StatusCode.NOTACCEPTABLE, msg);
+            return new Status(StatusCode.NOTACCEPTABLE, INVALID_FLOW_ENTRY);
         }
 
         // Derive the container flows merged installed entries
@@ -1385,10 +1384,10 @@ public class ForwardingRulesManager implements
             clusterContainerService.createCache("frm.TSPolicies",
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
-            clusterContainerService.createCache(WORKSTATUSCACHE,
+            clusterContainerService.createCache(WORK_STATUS_CACHE,
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL, IClusterServices.cacheMode.ASYNC));
 
-            clusterContainerService.createCache(WORKORDERCACHE,
+            clusterContainerService.createCache(WORK_ORDER_CACHE,
                     EnumSet.of(IClusterServices.cacheMode.NON_TRANSACTIONAL, IClusterServices.cacheMode.ASYNC));
 
         } catch (CacheConfigException cce) {
@@ -1480,18 +1479,18 @@ public class ForwardingRulesManager implements
             log.error("Retrieval of frm.TSPolicies cache failed for Container {}", container.getName());
         }
 
-        map = clusterContainerService.getCache(WORKORDERCACHE);
+        map = clusterContainerService.getCache(WORK_ORDER_CACHE);
         if (map != null) {
             workOrder = (ConcurrentMap<FlowEntryDistributionOrder, FlowEntryInstall>) map;
         } else {
-            log.error("Retrieval of " + WORKORDERCACHE + " cache failed for Container {}", container.getName());
+            log.error("Retrieval of " + WORK_ORDER_CACHE + " cache failed for Container {}", container.getName());
         }
 
-        map = clusterContainerService.getCache(WORKSTATUSCACHE);
+        map = clusterContainerService.getCache(WORK_STATUS_CACHE);
         if (map != null) {
             workStatus = (ConcurrentMap<FlowEntryDistributionOrder, Status>) map;
         } else {
-            log.error("Retrieval of " + WORKSTATUSCACHE + " cache failed for Container {}", container.getName());
+            log.error("Retrieval of " + WORK_STATUS_CACHE + " cache failed for Container {}", container.getName());
         }
     }
 
@@ -1537,7 +1536,7 @@ public class ForwardingRulesManager implements
         boolean multipleFlowPush = false;
         String error;
         Status status;
-        config.setStatus(SUCCESS);
+        config.setStatus(StatusCode.SUCCESS.toString());
 
         // Presence check
         if (flowConfigExists(config)) {
@@ -1615,7 +1614,7 @@ public class ForwardingRulesManager implements
                 continue;
             }
             if (config.getNode().equals(node)) {
-                if (config.installInHw() && !config.getStatus().equals(SUCCESS)) {
+                if (config.installInHw() && !config.getStatus().equals(StatusCode.SUCCESS.toString())) {
                     Status status = this.installFlowEntryAsync(config.getFlowEntry());
                     config.setStatus(status.getDescription());
                 }
@@ -1669,7 +1668,7 @@ public class ForwardingRulesManager implements
                     config.setStatus("Removed from node because in container mode");
                     break;
                 case REMOVED:
-                    config.setStatus(SUCCESS);
+                    config.setStatus(StatusCode.SUCCESS.toString());
                     break;
                 default:
                 }
@@ -1856,7 +1855,7 @@ public class ForwardingRulesManager implements
                                     .installFlowEntry(target.getFlowEntry());
             if (status.isSuccess()) {
                 // Update Configuration database
-                target.setStatus(SUCCESS);
+                target.setStatus(StatusCode.SUCCESS.toString());
                 target.toggleInstallation();
                 staticFlows.put(key, target);
             }
@@ -2259,12 +2258,12 @@ public class ForwardingRulesManager implements
         List<FlowConfig> flowConfigForNode = getStaticFlows(nodeConnector.getNode());
         for (FlowConfig flowConfig : flowConfigForNode) {
             if (doesFlowContainNodeConnector(flowConfig.getFlow(), nodeConnector)) {
-                if (flowConfig.installInHw() && !flowConfig.getStatus().equals(SUCCESS)) {
+                if (flowConfig.installInHw() && !flowConfig.getStatus().equals(StatusCode.SUCCESS.toString())) {
                     Status status = this.installFlowEntry(flowConfig.getFlowEntry());
                     if (!status.isSuccess()) {
                         flowConfig.setStatus(status.getDescription());
                     } else {
-                        flowConfig.setStatus(SUCCESS);
+                        flowConfig.setStatus(StatusCode.SUCCESS.toString());
                     }
                     updated = true;
                 }
@@ -3127,7 +3126,7 @@ public class ForwardingRulesManager implements
         if (target != null) {
             // Update Configuration database
             target.toggleInstallation();
-            target.setStatus(SUCCESS);
+            target.setStatus(StatusCode.SUCCESS.toString());
             staticFlows.put(key, target);
         }
 
@@ -3245,7 +3244,7 @@ public class ForwardingRulesManager implements
              */
             return;
         }
-        if (cacheName.equals(WORKORDERCACHE)) {
+        if (cacheName.equals(WORK_ORDER_CACHE)) {
             logsync.trace("Got a WorkOrderCacheUpdate for {}", key);
             /*
              * This is the case of one workOrder becoming available, so we need
@@ -3263,7 +3262,7 @@ public class ForwardingRulesManager implements
                 // processing
                 pendingEvents.offer(new WorkOrderEvent(fe, (FlowEntryInstall) new_value));
             }
-        } else if (cacheName.equals(WORKSTATUSCACHE)) {
+        } else if (cacheName.equals(WORK_STATUS_CACHE)) {
             logsync.trace("Got a WorkStatusCacheUpdate for {}", key);
             /*
              * This is the case of one workOrder being completed and a status
