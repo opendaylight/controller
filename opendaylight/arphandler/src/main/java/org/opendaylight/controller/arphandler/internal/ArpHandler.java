@@ -52,7 +52,6 @@ import org.opendaylight.controller.sal.packet.IPv4;
 import org.opendaylight.controller.sal.packet.Packet;
 import org.opendaylight.controller.sal.packet.PacketResult;
 import org.opendaylight.controller.sal.packet.RawPacket;
-import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.NetUtils;
@@ -156,22 +155,9 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             byte[] tMAC, InetAddress tIP) {
         byte[] senderIP = sIP.getAddress();
         byte[] targetIP = tIP.getAddress();
-        ARP arp = new ARP();
-        arp.setHardwareType(ARP.HW_TYPE_ETHERNET)
-            .setProtocolType(EtherTypes.IPv4.shortValue())
-            .setHardwareAddressLength((byte) 6)
-            .setProtocolAddressLength((byte) 4)
-            .setOpCode(ARP.REPLY)
-            .setSenderHardwareAddress(sMAC)
-            .setSenderProtocolAddress(senderIP)
-            .setTargetHardwareAddress(tMAC)
-            .setTargetProtocolAddress(targetIP);
+        ARP arp = createARP(ARP.REPLY,sMAC,senderIP,tMAC,targetIP);
 
-        Ethernet ethernet = new Ethernet();
-        ethernet.setSourceMACAddress(sMAC)
-            .setDestinationMACAddress(tMAC)
-            .setEtherType(EtherTypes.ARP.shortValue())
-            .setPayload(arp);
+        Ethernet ethernet = createEthernet(sMAC, tMAC, arp);
 
         RawPacket destPkt = this.dataPacketService.encodeDataPacket(ethernet);
         destPkt.setOutgoingNodeConnector(p);
@@ -348,36 +334,19 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         } else {
             nodeConnectors = subnet.getNodeConnectors();
         }
-
+        byte[] targetBroadcastHardwareAddress = new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
         for (NodeConnector p : nodeConnectors) {
             //fiter out any non-local or internal ports
             if (! connectionManager.isLocal(p.getNode()) || topologyManager.isInternal(p)) {
                 continue;
             }
             log.trace("Sending toward nodeConnector:{}", p);
-            ARP arp = new ARP();
             byte[] senderIP = subnet.getNetworkAddress().getAddress();
             byte[] targetIPByte = targetIP.getAddress();
-            arp.setHardwareType(ARP.HW_TYPE_ETHERNET)
-               .setProtocolType(EtherTypes.IPv4.shortValue())
-               .setHardwareAddressLength((byte) 6)
-               .setProtocolAddressLength((byte) 4)
-               .setOpCode(ARP.REQUEST)
-               .setSenderHardwareAddress(getControllerMAC())
-               .setSenderProtocolAddress(senderIP)
-               .setTargetHardwareAddress(
-                       new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 })
-               .setTargetProtocolAddress(targetIPByte);
+            ARP arp = createARP(ARP.REQUEST, getControllerMAC(), senderIP, targetBroadcastHardwareAddress, targetIPByte);
 
-            Ethernet ethernet = new Ethernet();
-            ethernet.setSourceMACAddress(getControllerMAC())
-                    .setDestinationMACAddress(new byte[] {(byte) -1,
-                                                          (byte) -1,
-                                                          (byte) -1,
-                                                          (byte) -1,
-                                                          (byte) -1,
-                                                          (byte) -1 })
-                    .setEtherType(EtherTypes.ARP.shortValue()).setPayload(arp);
+            byte[] destMACAddress = new byte[] {(byte) -1, (byte) -1, (byte) -1, (byte) -1,(byte) -1,(byte) -1 };
+            Ethernet ethernet = createEthernet(getControllerMAC(), destMACAddress, arp);
 
             // TODO For now send port-by-port, see how to optimize to
             // send to multiple ports at once
@@ -405,22 +374,9 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
         byte[] senderIP = subnet.getNetworkAddress().getAddress();
         byte[] targetIP = host.getNetworkAddress().getAddress();
         byte[] targetMAC = host.getDataLayerAddressBytes();
-        ARP arp = new ARP();
-        arp.setHardwareType(ARP.HW_TYPE_ETHERNET)
-            .setProtocolType(EtherTypes.IPv4.shortValue())
-            .setHardwareAddressLength((byte) 6)
-            .setProtocolAddressLength((byte) 4)
-            .setOpCode(ARP.REQUEST)
-            .setSenderHardwareAddress(getControllerMAC())
-            .setSenderProtocolAddress(senderIP)
-            .setTargetHardwareAddress(targetMAC)
-            .setTargetProtocolAddress(targetIP);
+        ARP arp = createARP(ARP.REQUEST, getControllerMAC(), senderIP, targetMAC, targetIP);
 
-        Ethernet ethernet = new Ethernet();
-        ethernet.setSourceMACAddress(getControllerMAC())
-                .setDestinationMACAddress(targetMAC)
-                .setEtherType(EtherTypes.ARP.shortValue())
-                .setPayload(arp);
+        Ethernet ethernet = createEthernet(getControllerMAC(), targetMAC, arp);
 
         RawPacket destPkt = this.dataPacketService.encodeDataPacket(ethernet);
         destPkt.setOutgoingNodeConnector(outPort);
@@ -626,6 +582,29 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             }
         }
         return PacketResult.IGNORED;
+    }
+
+    private ARP createARP(short opCode, byte[] senderMacAddress, byte[] senderIP, byte[] targetMacAddress, byte[] targetIP) {
+            ARP arp = new ARP();
+            arp.setHardwareType(ARP.HW_TYPE_ETHERNET);
+            arp.setProtocolType(EtherTypes.IPv4.shortValue());
+            arp.setHardwareAddressLength((byte) 6);
+            arp.setProtocolAddressLength((byte) 4);
+            arp.setOpCode(opCode);
+            arp.setSenderHardwareAddress(senderMacAddress) ;
+            arp.setSenderProtocolAddress(senderIP);
+            arp.setTargetHardwareAddress(targetMacAddress);
+            arp.setTargetProtocolAddress(targetIP);
+            return arp;
+    }
+
+    private Ethernet createEthernet(byte[] sourceMAC, byte[] targetMAC, ARP arp) {
+        Ethernet ethernet = new Ethernet();
+        ethernet.setSourceMACAddress(sourceMAC);
+        ethernet.setDestinationMACAddress(targetMAC);
+        ethernet.setEtherType(EtherTypes.ARP.shortValue());
+        ethernet.setPayload(arp);
+        return ethernet;
     }
 
     private void startPeriodicTimer() {
