@@ -73,8 +73,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             String interfaces[] = null;
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             Set<String> propSet = new HashSet<String>();
-            propSet.add(ForwardingRulesManager.WORKSTATUSCACHE);
-            propSet.add(ForwardingRulesManager.WORKORDERCACHE);
+            propSet.add(ForwardingRulesManager.WORK_STATUS_CACHE);
+            propSet.add(ForwardingRulesManager.WORK_ORDER_CACHE);
             props.put("cachenames", propSet);
 
             // export the service
