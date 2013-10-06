@@ -660,7 +660,11 @@
        <artifactId>yang-model-api</artifactId>
        <version>${yangtools.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>switchmanager</artifactId>
+        <version>0.5.1-SNAPSHOT</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
