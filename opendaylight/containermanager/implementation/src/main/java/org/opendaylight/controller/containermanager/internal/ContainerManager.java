@@ -30,6 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.controller.appauth.authorization.Authorization;
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
@@ -37,8 +38,14 @@ import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.configuration.IConfigurationAware;
 import org.opendaylight.controller.configuration.IConfigurationService;
+import org.opendaylight.controller.containermanager.ContainerChangeEvent;
+import org.opendaylight.controller.containermanager.ContainerConfig;
+import org.opendaylight.controller.containermanager.ContainerData;
+import org.opendaylight.controller.containermanager.ContainerFlowChangeEvent;
+import org.opendaylight.controller.containermanager.ContainerFlowConfig;
 import org.opendaylight.controller.containermanager.IContainerAuthorization;
 import org.opendaylight.controller.containermanager.IContainerManager;
+import org.opendaylight.controller.containermanager.NodeConnectorsChangeEvent;
 import org.opendaylight.controller.sal.authorization.AppRoleLevel;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.authorization.Resource;
@@ -64,14 +71,6 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.topologymanager.ITopologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.opendaylight.controller.appauth.authorization.Authorization;
-import org.opendaylight.controller.containermanager.ContainerFlowChangeEvent;
-import org.opendaylight.controller.containermanager.ContainerFlowConfig;
-import org.opendaylight.controller.containermanager.NodeConnectorsChangeEvent;
-import org.opendaylight.controller.containermanager.ContainerChangeEvent;
-import org.opendaylight.controller.containermanager.ContainerConfig;
-import org.opendaylight.controller.containermanager.ContainerData;
 
 public class ContainerManager extends Authorization<String> implements IContainerManager, IObjectReader,
         CommandProvider, ICacheUpdateAware<String, Object>, IContainerInternal, IContainerAuthorization,
@@ -144,10 +143,9 @@ public class ContainerManager extends Authorization<String> implements IContaine
     }
 
     public void setIContainerAware(IContainerAware iContainerAware) {
-        if (!this.iContainerAware.contains(iContainerAware)) {
-            this.iContainerAware.add(iContainerAware);
+        if (this.iContainerAware.add(iContainerAware)) {
             // Now call the container creation for all the known containers so far
-            for (String container : getContainerNameList()) {
+            for (String container : containerConfigs.keySet()) {
                 iContainerAware.containerCreate(container.toLowerCase(Locale.ENGLISH));
             }
         }
