@@ -14,13 +14,12 @@ import org.opendaylight.controller.sal.utils.Status;
 
 /**
  * Listener Interface for receiving Configuration events.
- *
- *
  */
 public interface IConfigurationAwareCommon {
-
     /**
-     * Trigger from configuration component to persist the configuration state.
+     * Trigger from Configuration Service or Container Configuration Service to
+     * persist the configuration state for this component on the local cluster
+     * node
      */
     Status saveConfiguration();
 }

@@ -12,8 +12,6 @@ package org.opendaylight.controller.configuration;
 
 /**
  * Listener Interface for receiving Configuration events.
- *
- *
  */
 public interface IConfigurationAware extends IConfigurationAwareCommon {
 }

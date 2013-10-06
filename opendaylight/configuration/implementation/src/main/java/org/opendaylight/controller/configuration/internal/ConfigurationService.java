@@ -31,22 +31,17 @@ import org.slf4j.LoggerFactory;
 /**
  * @file   ConfigurationImpl.java
  *
- * @brief  Backend functionality for all Configuration related tasks.
- *
+ * @brief  Backend functionality for all ConfigurationService related tasks.
  *
  */
 
-public class ConfigurationImpl implements IConfigurationService, ICacheUpdateAware<ConfigurationEvent, String> {
+public class ConfigurationService implements IConfigurationService, ICacheUpdateAware<ConfigurationEvent, String> {
     private static final Logger logger = LoggerFactory
-            .getLogger(ConfigurationImpl.class);
+            .getLogger(ConfigurationService.class);
+    public static final String SAVE_EVENT_CACHE = "config.event.save";
     private IClusterGlobalServices clusterServices;
     private ConcurrentMap <ConfigurationEvent, String> configEvent;
-    /*
-     * Collection containing the configuration objects.
-     * This is configuration world: container names (also the map key)
-     * are maintained as they were configured by user, same case
-     */
-    private Set<IConfigurationAware> configurationAwareList = (Set<IConfigurationAware>) Collections
+    private Set<IConfigurationAware> configurationAwareList = Collections
             .synchronizedSet(new HashSet<IConfigurationAware>());
 
 
@@ -77,7 +72,7 @@ public class ConfigurationImpl implements IConfigurationService, ICacheUpdateAwa
     }
 
     public void init() {
-        logger.info("ContainerManager startup....");
+        logger.info("ConfigurationService Manager init");
     }
 
     public void start() {
@@ -119,13 +114,17 @@ public class ConfigurationImpl implements IConfigurationService, ICacheUpdateAwa
     @Override
     public void entryCreated(ConfigurationEvent key, String cacheName,
             boolean originLocal) {
-        if (originLocal) return;
+        if (originLocal) {
+            return;
+        }
     }
 
     @Override
     public void entryUpdated(ConfigurationEvent key, String new_value,
             String cacheName, boolean originLocal) {
-        if (originLocal) return;
+        if (originLocal) {
+            return;
+        }
         if (key == ConfigurationEvent.SAVE) {
             saveConfigurationsInternal();
         }
@@ -134,32 +133,33 @@ public class ConfigurationImpl implements IConfigurationService, ICacheUpdateAwa
     @Override
     public void entryDeleted(ConfigurationEvent key, String cacheName,
             boolean originLocal) {
-        if (originLocal) return;
+        if (originLocal) {
+            return;
+        }
     }
 
-    @SuppressWarnings("deprecation")
     private void allocateCache() {
         if (this.clusterServices == null) {
             logger.error("uninitialized clusterServices, can't create cache");
             return;
         }
         try {
-            this.clusterServices.createCache("config.event.save",
+            this.clusterServices.createCache(SAVE_EVENT_CACHE,
                     EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
         } catch (CacheConfigException cce) {
-            logger.error("Error creating Configuration cache ", cce);
+            logger.debug("Error creating ConfigurationService cache ", cce);
         } catch (CacheExistException cce) {
-            logger.error("Configuration Cache already exists, destroy and recreate ", cce);
+            logger.debug("ConfigurationService Cache already exists, destroy and recreate ", cce);
         }
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCache() {
         if (this.clusterServices == null) {
             logger.error("uninitialized clusterServices, can't retrieve cache");
             return;
         }
-        configEvent = (ConcurrentMap<ConfigurationEvent, String>) this.clusterServices.getCache("config.event.save");
+        configEvent = (ConcurrentMap<ConfigurationEvent, String>) this.clusterServices.getCache(SAVE_EVENT_CACHE);
         if (configEvent == null) {
             logger.error("Failed to retrieve configuration Cache");
         }

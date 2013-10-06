@@ -15,7 +15,7 @@ import org.opendaylight.controller.sal.utils.Status;
 /**
  * @file   TestConfigurationAware.java
  *
- * @brief  Test Class to create for jUnit test cases for Configuration Implementation
+ * @brief  Test Class to create for jUnit test cases for ConfigurationService Implementation
  *
  *
  */

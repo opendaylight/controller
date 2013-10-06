@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
+import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.configuration.IConfigurationAware;
 import org.opendaylight.controller.configuration.IConfigurationContainerAware;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @file Activator.java
  *
- * @brief Component Activator for Configuration Management.
+ * @brief Component Activator for ConfigurationService Management.
  *
  *
  *
@@ -47,8 +48,9 @@ public class Activator extends ComponentActivatorAbstractBase {
      * instantiated in order to get an fully working implementation
      * Object
      */
+    @Override
     public Object[] getImplementations() {
-        Object[] res = { ConfigurationContainerImpl.class };
+        Object[] res = { ContainerConfigurationService.class };
         return res;
     }
 
@@ -65,17 +67,26 @@ public class Activator extends ComponentActivatorAbstractBase {
      * also optional per-container different behavior if needed, usually
      * should not be the case though.
      */
+    @Override
     public void configureInstance(Component c, Object imp, String containerName) {
-        if (imp.equals(ConfigurationContainerImpl.class)) {
+        if (imp.equals(ContainerConfigurationService.class)) {
+            Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
+            Set<String> propSet = new HashSet<String>();
+            propSet.add(ContainerConfigurationService.CONTAINER_SAVE_EVENT_CACHE);
+            props.put("cachenames", propSet);
+
             // export the service
-            c.setInterface(new String[] {
-                    IConfigurationContainerService.class.getName(),
-                    IConfigurationAware.class.getName() }, null);
+            c.setInterface(
+                    new String[] { IConfigurationContainerService.class.getName(), IConfigurationAware.class.getName(),
+                            ICacheUpdateAware.class.getName() }, props);
 
             c.add(createContainerServiceDependency(containerName).setService(
                     IConfigurationContainerAware.class).setCallbacks(
                             "addConfigurationContainerAware",
                             "removeConfigurationContainerAware").setRequired(false));
+
+            c.add(createContainerServiceDependency(containerName).setService(IClusterContainerServices.class)
+                    .setCallbacks("setClusterServices", "unsetClusterServices").setRequired(true));
         }
     }
 
@@ -92,8 +103,9 @@ public class Activator extends ComponentActivatorAbstractBase {
      * @return The list of implementations the bundle will support,
      * in Global version
      */
+    @Override
     protected Object[] getGlobalImplementations() {
-        Object[] res = { ConfigurationImpl.class };
+        Object[] res = { ConfigurationService.class };
         return res;
     }
 
@@ -105,11 +117,12 @@ public class Activator extends ComponentActivatorAbstractBase {
      * @param imp implementation to be configured
      * @param containerName container on which the configuration happens
      */
+    @Override
     protected void configureGlobalInstance(Component c, Object imp) {
-        if (imp.equals(ConfigurationImpl.class)) {
+        if (imp.equals(ConfigurationService.class)) {
             Dictionary<String, Set<String>> props = new Hashtable<String, Set<String>>();
             Set<String> propSet = new HashSet<String>();
-            propSet.add("config.event.save");
+            propSet.add(ConfigurationService.SAVE_EVENT_CACHE);
             props.put("cachenames", propSet);
 
             // export the service

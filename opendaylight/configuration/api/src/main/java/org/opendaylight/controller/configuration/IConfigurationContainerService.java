@@ -10,10 +10,7 @@
 package org.opendaylight.controller.configuration;
 
 /**
- * Container Manager interface
- *
- *
+ * Container configuration service
  */
-public interface IConfigurationContainerService extends
-        IConfigurationServiceCommon {
+public interface IConfigurationContainerService extends IConfigurationServiceCommon {
 }

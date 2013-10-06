@@ -18,7 +18,7 @@ public class ConfigurationImplTest {
         @Test
         public void testAddRemoveSaveConfiguration() {
 
-                ConfigurationImpl configurationImpl = new ConfigurationImpl();
+                ConfigurationService configurationImpl = new ConfigurationService();
                 IConfigurationAware testConfigurationAware = new ConfigurationAwareTest();
 
                 configurationImpl.addConfigurationAware(testConfigurationAware);
