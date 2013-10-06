@@ -67,8 +67,6 @@ public class V6Match extends OFMatch implements Cloneable {
     protected short match_len = 0;
     protected short pad_size = 0;
 
-    private static int IPV6_EXT_MIN_HDR_LEN = 36;
-
     private enum MatchFieldState {
         MATCH_ABSENT, MATCH_FIELD_ONLY, MATCH_FIELD_WITH_MASK
     }
@@ -282,7 +280,7 @@ public class V6Match extends OFMatch implements Cloneable {
     }
 
     public int getIPv6ExtMinHdrLen() {
-        return IPV6_EXT_MIN_HDR_LEN;
+        return 36;
     }
 
     public short getPadSize() {

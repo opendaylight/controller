@@ -96,10 +96,12 @@ public class HTTPClient {
                 return ans;
             }
             ans.setStatus(response.getStatusLine().getStatusCode());
-            if (receivedEntity != null)
+            if (receivedEntity != null) {
                 ans.setEntity(EntityUtils.toString(receivedEntity));
-            else
+            }
+            else {
                 ans.setEntity(null);
+            }
             return ans;
         } finally {
             response.close();

@@ -111,10 +111,12 @@ public class NeutronPortsNorthbound {
                     (queryDeviceID == null || queryDeviceID.equals(oSS.getDeviceID())) &&
                     (queryDeviceOwner == null || queryDeviceOwner.equals(oSS.getDeviceOwner())) &&
                     (queryTenantID == null || queryTenantID.equals(oSS.getTenantID()))) {
-                if (fields.size() > 0)
+                if (fields.size() > 0) {
                     ans.add(extractFields(oSS,fields));
-                else
+                }
+                else {
                     ans.add(oSS);
+                }
             }
         }
         //TODO: apply pagination to results

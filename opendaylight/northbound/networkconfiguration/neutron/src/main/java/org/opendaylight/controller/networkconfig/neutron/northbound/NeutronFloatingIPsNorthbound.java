@@ -107,10 +107,12 @@ public class NeutronFloatingIPsNorthbound {
                     (queryFixedIPAddress == null || queryFixedIPAddress.equals(oSS.getFixedIPAddress())) &&
                     (queryFloatingIPAddress == null || queryFloatingIPAddress.equals(oSS.getFloatingIPAddress())) &&
                     (queryTenantID == null || queryTenantID.equals(oSS.getTenantUUID()))) {
-                if (fields.size() > 0)
+                if (fields.size() > 0) {
                     ans.add(extractFields(oSS,fields));
-                else
+                }
+                else {
                     ans.add(oSS);
+                }
             }
         }
         //TODO: apply pagination to results

@@ -115,10 +115,12 @@ public class NeutronNetworksNorthbound {
                     (bShared == null || bShared.booleanValue() == oSN.isShared()) &&
                     (bRouterExternal == null || bRouterExternal.booleanValue() == oSN.isRouterExternal()) &&
                     (queryTenantID == null || queryTenantID.equals(oSN.getTenantID()))) {
-                if (fields.size() > 0)
+                if (fields.size() > 0)  {
                     ans.add(extractFields(oSN,fields));
-                else
+                }
+                else {
                     ans.add(oSN);
+                }
             }
         }
         //TODO: apply pagination to results
@@ -153,9 +155,10 @@ public class NeutronNetworksNorthbound {
             NeutronNetwork ans = networkInterface.getNetwork(netUUID);
             return Response.status(200).entity(
                     new NeutronNetworkRequest(extractFields(ans, fields))).build();
-        } else
+        } else {
             return Response.status(200).entity(
                     new NeutronNetworkRequest(networkInterface.getNetwork(netUUID))).build();
+        }
     }
 
     /**

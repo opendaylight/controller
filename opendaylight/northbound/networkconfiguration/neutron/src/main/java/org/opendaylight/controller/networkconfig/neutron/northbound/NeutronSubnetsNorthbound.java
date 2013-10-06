@@ -108,10 +108,12 @@ public class NeutronSubnetsNorthbound {
                     (queryGatewayIP == null || queryGatewayIP.equals(oSS.getGatewayIP())) &&
                     (queryEnableDHCP == null || queryEnableDHCP.equals(oSS.getEnableDHCP())) &&
                     (queryTenantID == null || queryTenantID.equals(oSS.getTenantID()))) {
-                if (fields.size() > 0)
+                if (fields.size() > 0) {
                     ans.add(extractFields(oSS,fields));
-                else
+                }
+                else {
                     ans.add(oSS);
+                }
             }
         }
         //TODO: apply pagination to results

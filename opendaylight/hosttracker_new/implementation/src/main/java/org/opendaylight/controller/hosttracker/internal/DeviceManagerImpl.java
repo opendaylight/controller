@@ -125,57 +125,6 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
     private ISwitchManager switchManager = null;
     private IDataPacketService dataPacketService = null;
 
-    public static final String CNT_INCOMING = MODULE_NAME + "-incoming";
-    public static final String CNT_RECONCILE_REQUEST = MODULE_NAME
-            + "-reconcileRequest";
-    public static final String CNT_RECONCILE_NO_SOURCE = MODULE_NAME
-            + "-reconcileNoSourceDevice";
-    public static final String CNT_RECONCILE_NO_DEST = MODULE_NAME
-            + "-reconcileNoDestDevice";
-    public static final String CNT_BROADCAST_SOURCE = MODULE_NAME
-            + "-broadcastSource";
-    public static final String CNT_NO_SOURCE = MODULE_NAME + "-noSourceDevice";
-    public static final String CNT_NO_DEST = MODULE_NAME + "-noDestDevice";
-    public static final String CNT_DHCP_CLIENT_NAME_SNOOPED = MODULE_NAME
-            + "-dhcpClientNameSnooped";
-    public static final String CNT_DEVICE_ON_INTERAL_PORT_NOT_LEARNED = MODULE_NAME
-            + "-deviceOnInternalPortNotLearned";
-    public static final String CNT_PACKET_NOT_ALLOWED = MODULE_NAME
-            + "-packetNotAllowed";
-    public static final String CNT_NEW_DEVICE = MODULE_NAME + "-newDevice";
-    public static final String CNT_PACKET_ON_INTERNAL_PORT_FOR_KNOWN_DEVICE = MODULE_NAME
-            + "-packetOnInternalPortForKnownDevice";
-    public static final String CNT_NEW_ENTITY = MODULE_NAME + "-newEntity";
-    public static final String CNT_DEVICE_CHANGED = MODULE_NAME
-            + "-deviceChanged";
-    public static final String CNT_DEVICE_MOVED = MODULE_NAME + "-deviceMoved";
-    public static final String CNT_CLEANUP_ENTITIES_RUNS = MODULE_NAME
-            + "-cleanupEntitiesRuns";
-    public static final String CNT_ENTITY_REMOVED_TIMEOUT = MODULE_NAME
-            + "-entityRemovedTimeout";
-    public static final String CNT_DEVICE_DELETED = MODULE_NAME
-            + "-deviceDeleted";
-    public static final String CNT_DEVICE_RECLASSIFY_DELETE = MODULE_NAME
-            + "-deviceReclassifyDelete";
-    public static final String CNT_DEVICE_STORED = MODULE_NAME
-            + "-deviceStored";
-    public static final String CNT_DEVICE_STORE_THROTTLED = MODULE_NAME
-            + "-deviceStoreThrottled";
-    public static final String CNT_DEVICE_REMOVED_FROM_STORE = MODULE_NAME
-            + "-deviceRemovedFromStore";
-    public static final String CNT_SYNC_EXCEPTION = MODULE_NAME
-            + "-syncException";
-    public static final String CNT_DEVICES_FROM_STORE = MODULE_NAME
-            + "-devicesFromStore";
-    public static final String CNT_CONSOLIDATE_STORE_RUNS = MODULE_NAME
-            + "-consolidateStoreRuns";
-    public static final String CNT_CONSOLIDATE_STORE_DEVICES_REMOVED = MODULE_NAME
-            + "-consolidateStoreDevicesRemoved";
-
-    static final String DEVICE_SYNC_STORE_NAME = DeviceManagerImpl.class
-            .getCanonicalName() + ".stateStore";
-
-
     /**
      * Time in milliseconds before entities will expire
      */
@@ -740,9 +689,7 @@ public class DeviceManagerImpl implements IDeviceService, IEntityClassListener,
      * Check whether the given attachment point is valid given the current
      * topology
      *
-     * @param switchDPID
-     *            the DPID
-     * @param switchPort
+     * @param port
      *            the port
      * @return true if it's a valid attachment point
      */

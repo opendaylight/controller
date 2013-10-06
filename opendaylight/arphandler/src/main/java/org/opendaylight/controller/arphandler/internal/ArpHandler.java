@@ -320,14 +320,14 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
                             sourceIP,
                             pkt.getSenderHardwareAddress()), false);
                 }
-            } else {
+            }
                 /*
                  * Target MAC has been changed. For now, discard it.
                  * TODO: We may need to send unicast ARP REQUEST on behalf of
                  * the target back to the sender to trigger the sender to update
                  * its table
                  */
-            }
+
         }
     }
 

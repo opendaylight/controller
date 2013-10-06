@@ -553,8 +553,9 @@ public abstract class BitBufferHelper {
                         shiftedBytes[i] = (byte) ((inputBytes[i] << numBitstoShiftBy) | ((inputBytes[i + 1] & getMSBMask(numBitstoShiftBy)) >> (numEndRestBits - numBitstoShiftBy)));
                         shiftedBytes[i + 1] = (byte) ((inputBytes[i + 1] & getLSBMask(numEndRestBits
                                 - numBitstoShiftBy)) << numBitstoShiftBy);
-                    } else
+                    } else {
                         shiftedBytes[i] = (byte) ((inputBytes[i] << numBitstoShiftBy) | ((inputBytes[i + 1] & getMSBMask(numEndRestBits)) >> (NetUtils.NumBitsInAByte - numEndRestBits)));
+                    }
                 }
                 shiftedBytes[i] = (byte) ((inputBytes[i] << numBitstoShiftBy) | (inputBytes[i + 1] & getMSBMask(numBitstoShiftBy)) >> (NetUtils.NumBitsInAByte - numBitstoShiftBy));
             }

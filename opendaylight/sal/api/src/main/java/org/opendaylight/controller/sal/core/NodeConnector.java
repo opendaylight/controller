@@ -329,8 +329,6 @@ public class NodeConnector implements Serializable {
             } catch (Exception ex) {
                 return;
             }
-        } else {
-            // Lookup via OSGi service registry
         }
     }
 
@@ -371,7 +369,7 @@ public class NodeConnector implements Serializable {
     /**
      * private setter to be used by JAXB
      *
-     * @param nodeConnectorIDString String representation for NodeConnectorID
+     * @param IDStr String representation for NodeConnectorID
      */
     private void setNodeConnectorIDString(String IDStr) {
         this.nodeConnectorIDString = IDStr;

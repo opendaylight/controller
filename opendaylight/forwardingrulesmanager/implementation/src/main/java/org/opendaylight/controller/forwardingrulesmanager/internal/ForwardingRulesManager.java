@@ -279,7 +279,7 @@ public class ForwardingRulesManager implements
          * Derive the container flow merged entries to install In presence of N
          * container flows, we may end up with N different entries to install...
          */
-        List<FlowEntryInstall> toInstallList = deriveInstallEntries(flowEntry.clone(), container.getContainerFlows());
+        List<FlowEntryInstall> toInstallList = deriveInstallEntries(flowEntry.clone());
 
         // Container Flow conflict Check
         if (toInstallList.isEmpty()) {
@@ -352,7 +352,7 @@ public class ForwardingRulesManager implements
      * @return the list of container flow merged entries good to be installed on
      *         this container
      */
-    private List<FlowEntryInstall> deriveInstallEntries(FlowEntry request, List<ContainerFlow> cFlowList) {
+    private List<FlowEntryInstall> deriveInstallEntries(FlowEntry request) {
         List<FlowEntryInstall> toInstallList = new ArrayList<FlowEntryInstall>(1);
 
         if (container.getContainerFlows() == null || container.getContainerFlows().isEmpty()) {
@@ -424,9 +424,8 @@ public class ForwardingRulesManager implements
         }
 
         // Derive the installed and toInstall entries
-        List<FlowEntryInstall> installedList = deriveInstallEntries(currentFlowEntry.clone(),
-                container.getContainerFlows());
-        List<FlowEntryInstall> toInstallList = deriveInstallEntries(newFlowEntry.clone(), container.getContainerFlows());
+        List<FlowEntryInstall> installedList = deriveInstallEntries(currentFlowEntry.clone());
+        List<FlowEntryInstall> toInstallList = deriveInstallEntries(newFlowEntry.clone());
 
         if (toInstallList.isEmpty()) {
             String msg = "Modify Operation Rejected: The new entry conflicts with all the container flows";
@@ -616,7 +615,7 @@ public class ForwardingRulesManager implements
         }
 
         // Derive the container flows merged installed entries
-        List<FlowEntryInstall> installedList = deriveInstallEntries(flowEntry.clone(), container.getContainerFlows());
+        List<FlowEntryInstall> installedList = deriveInstallEntries(flowEntry.clone());
 
         Status succeeded = null;
         boolean atLeastOneRemoved = false;
