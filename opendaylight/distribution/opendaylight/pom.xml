@@ -457,7 +457,6 @@
     </dependency>
 
     <!-- Southbound bundles -->
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>protocol_plugins.openflow</artifactId>
@@ -480,15 +479,6 @@
       <artifactId>samples.simpleforwarding</artifactId>
       <version>${controller.version}</version>
     </dependency>
-
-    <!-- Sanitytest
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sanitytest</artifactId>
-      <version>${controller.version}</version>
-    </dependency>
-
-    -->
 
     <!-- Third party depedencies -->
 
@@ -982,8 +972,14 @@
      <artifactId>yang-model-api</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sanitytest</artifactId>
+      <version>${controller.version}</version>
+    </dependency>
 
   </dependencies>
+
 
   <build>
     <plugins>
@@ -1024,7 +1020,32 @@
           </execution>
         </executions>
       </plugin>
-      <!--
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+          <executions>
+            <execution>
+              <id>copy</id>
+              <phase>package</phase>
+              <goals>
+                <goal>copy</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <artifactItems>
+              <artifactItem>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sanitytest</artifactId>
+                <version>${controller.version}</version>
+                <type>jar</type>
+              </artifactItem>
+            </artifactItems>
+          </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -1038,11 +1059,16 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <executable>./run.sh</executable>
-        </configuration>
+          <configuration>
+            <executable>java</executable>
+            <arguments>
+                <argument>-cp</argument>
+                <argument>../sanitytest/target/classes</argument>
+                <argument>org.opendaylight.controller.distribution.Sanity</argument>
+            </arguments>
+            <workingDirectory>${exec.workingdir}/../../sanitytest</workingDirectory>
+          </configuration>
       </plugin>
-      -->
     </plugins>
   </build>
 </project>
