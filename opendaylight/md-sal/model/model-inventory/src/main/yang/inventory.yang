@@ -44,17 +44,17 @@ module opendaylight-inventory {
 
     }
 
-	grouping node {
-		leaf id {
+    grouping node {
+    leaf id {
             type node-id;
         }
-	}
+    }
 
-	grouping node-connector {
-		leaf id {
+    grouping node-connector {
+        leaf id {
             type node-connector-id;
-		}
-	}
+        }
+    }
 
 
 

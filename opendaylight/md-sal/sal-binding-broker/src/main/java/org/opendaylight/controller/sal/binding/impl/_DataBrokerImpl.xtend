@@ -18,6 +18,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult
 import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider
 import java.util.Map
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
+import org.opendaylight.controller.sal.binding.api.data.DataChangeListener
 
 class _DataBrokerImpl implements DataProviderService {
 
@@ -85,6 +86,22 @@ class _DataBrokerImpl implements DataProviderService {
     }
     
     override getData(InstanceIdentifier data) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+    
+    override registerCommitHandler(InstanceIdentifier path, DataCommitHandler commitHandler) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+    
+    override registerValidator(InstanceIdentifier path, DataValidator validator) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+    
+    override registerChangeListener(InstanceIdentifier path, DataChangeListener changeListener) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+    
+    override unregisterChangeListener(InstanceIdentifier path, DataChangeListener changeListener) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 
