@@ -7,43 +7,6 @@
     <format>zip</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
-  <moduleSets>
-    <moduleSet>
-      <excludes>
-        <exclude>org.opendaylight.controller.thirdparty:org.openflow.openflowj</exclude>
-        <exclude>org.opendaylight.controller:clustering.stub</exclude>
-        <exclude>org.opendaylight.controller:logging.bridge</exclude>
-        <exclude>org.opendaylight.controller:protocol_plugins.stub</exclude>
-        <exclude>org.opendaylight.controller:*.integrationtest</exclude>
-        <exclude>org.opendaylight.controller:containermanager.it.implementation</exclude>
-        <exclude>org.opendaylight.controller:hosttracker_new</exclude>
-        <exclude>org.opendaylight.controller:hosttracker_new.implementation</exclude>
-        <exclude>org.opendaylight.controller:checkstyle</exclude>
-        <exclude>org.opendaylight.controller:sanitytest</exclude>
-      </excludes>
-      <binaries>
-        <outputDirectory>opendaylight/plugins</outputDirectory>
-        <outputFileNameMapping>
-          ${module.groupId}.${module.artifactId}-${module.version}${dashClassifier?}.${module.extension}
-        </outputFileNameMapping>
-        <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
-      </binaries>
-    </moduleSet>
-    <moduleSet>
-      <includes>
-        <include>org.opendaylight.controller:logging.bridge</include>
-      </includes>
-      <binaries>
-        <outputDirectory>opendaylight/lib</outputDirectory>
-        <outputFileNameMapping>
-          ${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}
-        </outputFileNameMapping>
-        <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
-      </binaries>
-    </moduleSet>
-  </moduleSets>
   <dependencySets>
     <dependencySet>
       <outputDirectory>opendaylight/plugins</outputDirectory>
@@ -63,6 +26,8 @@
         <exclude>com.sun.jersey:jersey-core</exclude>
         <exclude>com.sun.jersey:jersey-json</exclude>
         <exclude>com.sun.jersey:jersey-server</exclude>
+        <exclude>org.opendaylight.controller:logging.bridge</exclude>
+        <exclude>org.opendaylight.controller:sanitytest</exclude>
       </excludes>
       <outputFileNameMapping>
         ${artifact.groupId}.${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}
@@ -89,6 +54,7 @@
         <include>com.sun.jersey:jersey-core</include>
         <include>com.sun.jersey:jersey-json</include>
         <include>com.sun.jersey:jersey-server</include>
+        <include>org.opendaylight.controller:logging.bridge</include>
       </includes>
       <useTransitiveDependencies>false</useTransitiveDependencies>
       <outputFileNameMapping>

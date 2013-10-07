@@ -98,5 +98,9 @@
       <artifactId>sal</artifactId>
       <version>0.5.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
   </dependencies>
 </project>
