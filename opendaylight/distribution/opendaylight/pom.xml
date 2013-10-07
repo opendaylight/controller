@@ -138,6 +138,9 @@
     <module>../../commons/checkstyle</module>
     <module>../../commons/opendaylight</module>
     <module>../../commons/parent</module>
+
+
+    <module>../sanitytest</module>
   </modules>
 
   <build>
@@ -178,6 +181,29 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>sanity-test</id>
+            <phase>package</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+          <configuration>
+            <executable>java</executable>
+            <arguments>
+                <argument>-cp</argument>
+                <argument>../sanitytest/target/classes</argument>
+                <argument>org.opendaylight.controller.distribution.Sanity</argument>
+            </arguments>
+            <workingDirectory>${exec.workingdir}/../../sanitytest</workingDirectory>
+          </configuration>
       </plugin>
     </plugins>
   </build>
