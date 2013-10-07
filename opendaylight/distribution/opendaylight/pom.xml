@@ -138,7 +138,18 @@
     <module>../../commons/checkstyle</module>
     <module>../../commons/opendaylight</module>
     <module>../../commons/parent</module>
+
+
+    <module>../sanitytest</module>
   </modules>
+
+    <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sanitytest</artifactId>
+        <version>0.4.1-SNAPSHOT</version>
+      </dependency>
+    </dependencies>
 
   <build>
     <plugins>
@@ -179,6 +190,56 @@
           </execution>
         </executions>
       </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.8</version>
+            <executions>
+              <execution>
+                <id>copy</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.opendaylight.controller</groupId>
+                  <artifactId>sanitytest</artifactId>
+                  <version>0.4.1-SNAPSHOT</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+              <!-- other configurations here -->
+            </configuration>
+        </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>sanity-test</id>
+            <phase>package</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+          <configuration>
+            <executable>java</executable>
+            <arguments>
+                <argument>-cp</argument>
+                <argument>../sanitytest/target/classes</argument>
+                <argument>org.opendaylight.controller.distribution.Sanity</argument>
+            </arguments>
+            <workingDirectory>${exec.workingdir}/../../sanitytest</workingDirectory>
+          </configuration>
+      </plugin>
+
+
     </plugins>
   </build>
 </project>
