@@ -120,5 +120,9 @@
       <artifactId>forwarding.staticrouting</artifactId>
       <version>0.4.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+    </dependency>
   </dependencies>
 </project>
