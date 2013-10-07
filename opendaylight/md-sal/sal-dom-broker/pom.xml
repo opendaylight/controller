@@ -7,6 +7,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>sal-broker-impl</artifactId>
+    <packaging>bundle</packaging>
     <scm>
         <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
         <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
@@ -53,14 +54,13 @@
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
                         <Bundle-Activator>org.opendaylight.controller.sal.dom.broker.BrokerActivator</Bundle-Activator>
-                    </instructions>
-                    <Private-Package>
-                            org.opendaylight.controller.dom.broker,
-                            org.opendaylight.controller.sal.broker.osgi.*,
+                        <Private-Package>
+                            org.opendaylight.controller.sal.dom.broker,
                             org.eclipse.xtend2.lib,
                             org.eclipse.xtend.lib,
                             org.eclipse.xtext.xbase.*
-                    </Private-Package>
+                        </Private-Package>
+                    </instructions>
                 </configuration>
             </plugin>
             <plugin>
