@@ -16,6 +16,24 @@
       "revId": "0ecb36e024c0e15afb292be1a2d3086a5ce1dc1c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_5b3b9ceb",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-07T07:30:19Z",
+      "side": 0,
+      "message": "ok, how do you propose to solve it? it\u0027s a code analysis warning for dead store",
+      "parentUuid": "fa5d592f_9b60f436",
+      "revId": "0ecb36e024c0e15afb292be1a2d3086a5ce1dc1c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
