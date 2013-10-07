@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa5d592f_9b60f436",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-07T02:50:06Z",
+      "side": 0,
+      "message": "Why are you removing the save config for the subnet gateways  ?\n\nUndertsand restS is a dead store here, but please do not remove that line.",
+      "revId": "0ecb36e024c0e15afb292be1a2d3086a5ce1dc1c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
