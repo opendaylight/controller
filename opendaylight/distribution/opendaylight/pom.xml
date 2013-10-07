@@ -466,14 +466,12 @@
       <version>${controller.version}</version>
     </dependency>
 
-    <!-- Sanitytest
+    <!-- Sanitytest -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sanitytest</artifactId>
       <version>${controller.version}</version>
     </dependency>
-
-    -->
 
     <!-- Third party depedencies -->
 
@@ -965,8 +963,6 @@
      <groupId>org.opendaylight.yangtools</groupId>
      <artifactId>yang-model-api</artifactId>
     </dependency>
-
-
   </dependencies>
 
   <build>
@@ -1008,7 +1004,32 @@
           </execution>
         </executions>
       </plugin>
-      <!--
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+          <executions>
+            <execution>
+              <id>copy</id>
+              <phase>package</phase>
+              <goals>
+                <goal>copy</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <artifactItems>
+              <artifactItem>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sanitytest</artifactId>
+                <version>${controller.version}</version>
+                <type>jar</type>
+              </artifactItem>
+            </artifactItems>
+            <!-- other configurations here -->
+          </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -1023,10 +1044,15 @@
           </execution>
         </executions>
         <configuration>
-          <executable>./run.sh</executable>
+          <executable>java</executable>
+          <arguments>
+              <argument>-cp</argument>
+              <argument>../sanitytest/target/classes</argument>
+              <argument>org.opendaylight.controller.distribution.Sanity</argument>
+          </arguments>
+          <workingDirectory>${exec.workingdir}/../../sanitytest</workingDirectory>
         </configuration>
       </plugin>
-      -->
     </plugins>
   </build>
 </project>
