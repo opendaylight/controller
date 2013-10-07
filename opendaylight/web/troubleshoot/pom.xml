@@ -121,5 +121,10 @@
       <artifactId>web</artifactId>
       <version>0.4.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
   </dependencies>
 </project>
