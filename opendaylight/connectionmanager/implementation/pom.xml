@@ -71,5 +71,9 @@
       <artifactId>sal.connection</artifactId>
       <version>0.1.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+    </dependency>
   </dependencies>
 </project>
