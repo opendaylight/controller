@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.opendaylight</artifactId>
-        <version>1.4.0-SNAPSHOT</version>
+        <version>1.4.1-SNAPSHOT</version>
         <relativePath>../commons/opendaylight</relativePath>
     </parent>
 
@@ -39,8 +39,9 @@
         <jacoco.version>0.6.2.201302030002</jacoco.version>
         <slf4j.version>1.7.2</slf4j.version>
         <jolokia.version>1.1.1</jolokia.version>
-        <opendaylight.yang.version>0.5.7-SNAPSHOT</opendaylight.yang.version>
-        <opendaylight.binding.version>0.5.7-SNAPSHOT</opendaylight.binding.version>
+        <osgi.core.version>5.0.0</osgi.core.version>
+        <opendaylight.yang.version>0.5.9-SNAPSHOT</opendaylight.yang.version>
+        <opendaylight.binding.version>0.6.0-SNAPSHOT</opendaylight.binding.version>
         <jmxGeneratorPath>${project.build.directory}/generated-sources/config</jmxGeneratorPath>
     </properties>
 

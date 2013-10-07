@@ -121,5 +121,13 @@
       <artifactId>statisticsmanager</artifactId>
       <version>0.4.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>equinoxSDK381</groupId>
+        <artifactId>org.apache.felix.gogo.runtime</artifactId>
+    </dependency>
   </dependencies>
 </project>
