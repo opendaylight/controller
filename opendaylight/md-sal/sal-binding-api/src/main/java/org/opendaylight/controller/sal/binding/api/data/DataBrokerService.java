@@ -138,10 +138,12 @@ public interface DataBrokerService extends BindingAwareService {
      */
     @Deprecated
     Future<RpcResult<Void>> commit(DataStoreIdentifier store);
-    
+
     
     DataObject getData(InstanceIdentifier data);
+
     DataObject getConfigurationData(InstanceIdentifier data);
+
     
     /**
      * Creates a data modification transaction.
@@ -149,4 +151,9 @@ public interface DataBrokerService extends BindingAwareService {
      * @return new blank data modification transaction.
      */
     DataModification beginTransaction();
+
+    public void registerChangeListener(InstanceIdentifier path, DataChangeListener changeListener);
+    
+    public void unregisterChangeListener(InstanceIdentifier path, DataChangeListener changeListener);
+
 }

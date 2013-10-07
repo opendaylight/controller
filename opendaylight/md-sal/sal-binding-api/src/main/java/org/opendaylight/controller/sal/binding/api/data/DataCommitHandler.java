@@ -107,6 +107,7 @@ public interface DataCommitHandler extends ProviderFunctionality {
      * 
      * @return Set of Data Store identifiers
      */
+    @Deprecated
     Set<DataStoreIdentifier> getSupportedDataStores();
 
     /**
@@ -124,13 +125,18 @@ public interface DataCommitHandler extends ProviderFunctionality {
      * @param store
      * @return Transaction object representing this commit, errors otherwise.
      */
+    @Deprecated
     RpcResult<CommitTransaction> requestCommit(DataStoreIdentifier store);
 
+    
+    RpcResult<CommitTransaction> requestCommit(DataModification modification);
+    
     public interface CommitTransaction {
         /**
          * 
          * @return Data store affected by the transaction
          */
+        @Deprecated
         DataStoreIdentifier getDataStore();
 
         /**

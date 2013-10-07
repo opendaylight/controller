@@ -24,6 +24,7 @@ public interface DataProviderService extends DataBrokerService {
      * @param validator
      *            Validator
      */
+    @Deprecated
     public void addValidator(DataStoreIdentifier store, DataValidator validator);
 
     /**
@@ -33,6 +34,8 @@ public interface DataProviderService extends DataBrokerService {
      * @param validator
      *            Validator
      */
+    
+    @Deprecated
     public void removeValidator(DataStoreIdentifier store, DataValidator validator);
 
     /**
@@ -41,6 +44,7 @@ public interface DataProviderService extends DataBrokerService {
      * @param store
      * @param provider
      */
+    @Deprecated
     void addCommitHandler(DataStoreIdentifier store, DataCommitHandler provider);
 
     /**
@@ -49,6 +53,7 @@ public interface DataProviderService extends DataBrokerService {
      * @param store
      * @param provider
      */
+    @Deprecated
     void removeCommitHandler(DataStoreIdentifier store, DataCommitHandler provider);
 
     /**
@@ -66,4 +71,9 @@ public interface DataProviderService extends DataBrokerService {
      * @param refresher
      */
     void removeRefresher(DataStoreIdentifier store, DataRefresher refresher);
+
+    public void registerCommitHandler(InstanceIdentifier path, DataCommitHandler commitHandler);
+    
+    public void registerValidator(InstanceIdentifier path, DataValidator validator);
+
 }
