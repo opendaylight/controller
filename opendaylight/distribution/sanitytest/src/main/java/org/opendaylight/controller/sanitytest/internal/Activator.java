@@ -27,13 +27,14 @@ public class Activator implements BundleActivator {
 
     public void start(final BundleContext bundleContext) throws Exception {
         Timer monitorTimer = new Timer("monitor timer", true);
+
         monitorTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 boolean failed = false;
                 for(Bundle bundle : bundleContext.getBundles()){
                     if(bundle.getState() != Bundle.ACTIVE && bundle.getState() != Bundle.RESOLVED) {
-                        System.out.println("------ Failed to activate/resolve bundle = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
+                        System.out.println("Failed to activate/resolve bundle = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
                         failed = true;
                     }
                 }

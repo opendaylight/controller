@@ -138,9 +138,6 @@
     <module>../../commons/checkstyle</module>
     <module>../../commons/opendaylight</module>
     <module>../../commons/parent</module>
-
-
-    <module>../sanitytest</module>
   </modules>
 
   <build>
@@ -181,23 +178,6 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>sanity-test</id>
-            <phase>package</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <executable>./run.sh</executable>
-        </configuration>
       </plugin>
     </plugins>
   </build>
