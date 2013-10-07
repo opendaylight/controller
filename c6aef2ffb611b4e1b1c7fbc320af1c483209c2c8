@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa5d592f_36bb5d74",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2013-10-07T19:35:40Z",
+      "side": 1,
+      "message": "If it\u0027s not a common practice in Java, it /is/ a common practice in the current OpenDaylight controller project, e.g., IConnectionManager, ICacheUpdateAware, etc. If you still want me to change it, I can make it BroadcastHandler or BroadcastHandlerInterface.",
+      "parentUuid": "fa5d592f_36d6bdc6",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa5d592f_76cc3536",
         "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
         "patchSetId": 1
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "fa5d592f_16b0598a",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2013-10-07T19:35:40Z",
+      "side": 1,
+      "message": "unfortunately setInterface takes a Dictionary.",
+      "parentUuid": "fa5d592f_769af515",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa5d592f_d6fbe145",
         "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
         "patchSetId": 1
@@ -81,6 +117,24 @@
       "writtenOn": "2013-10-07T18:38:21Z",
       "side": 1,
       "message": "Is this scope of syncing OK? Won\u0027t the entire system be stuck on this for each packet?",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_f6aca537",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2013-10-07T19:35:40Z",
+      "side": 1,
+      "message": "It should probably be a reader/writer lock where the set*/unset* get the writer lock and the rest of the functions get the reader lock. This was designed to start off as a simple, example application, but we can certainly put some more effort into this in the future.",
+      "parentUuid": "fa5d592f_d6fbe145",
       "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -115,6 +169,24 @@
       "writtenOn": "2013-10-07T18:38:21Z",
       "side": 1,
       "message": "The log message isn\u0027t very informative - consider it appearing 20 times in the log - it doesn\u0027t guide as to what can be done and what specific entity/conf it is related to.\nPlease consider adding additional information to the message - node/packet details or anything else you think is relevant.",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_d6a9a125",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2013-10-07T19:35:40Z",
+      "side": 1,
+      "message": "This log message has nothing to do with the actual packet, it\u0027s purely triggered by having an incorrect mode.",
+      "parentUuid": "fa5d592f_569ff103",
       "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
