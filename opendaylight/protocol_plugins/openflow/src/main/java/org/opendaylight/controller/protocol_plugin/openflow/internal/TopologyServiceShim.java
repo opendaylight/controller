@@ -131,8 +131,11 @@ public class TopologyServiceShim implements IDiscoveryListener,
                     if (notifyListeners) {
                         for (String container : teuMap.keySet()) {
                             // notify the listener
-                            topologyServiceShimListeners.get(container)
-                                    .edgeUpdate(teuMap.get(container));
+                            ITopologyServiceShimListener l = topologyServiceShimListeners.get(container);
+                            // container topology service may not have come up yet
+                            if (l != null) {
+                                l.edgeUpdate(teuMap.get(container));
+                            }
                         }
                     }
 
