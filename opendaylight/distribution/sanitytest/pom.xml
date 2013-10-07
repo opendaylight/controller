@@ -17,7 +17,13 @@
   <artifactId>sanitytest</artifactId>
   <version>0.4.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
-
+  <dependencies>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <plugin>
