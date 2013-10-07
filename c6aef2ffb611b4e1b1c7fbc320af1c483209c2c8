@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa5d592f_36d6bdc6",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-07T18:38:21Z",
+      "side": 1,
+      "message": "It\u0027s not a common practice in Java to start interfaces with capital \"I\".\nI recommend to rename it to better reflect the language standard.",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_76cc3536",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-07T18:38:21Z",
+      "side": 1,
+      "message": "There is no need to define methods of interface as public - they are implicitly public. it\u0027s allowed , but discouraged by the JLS.\n\nIt\u0027s also confusing to have one method defined as public, and another without modifier in the same interface.",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_96ee898a",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastPortSelector.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-07T18:38:21Z",
+      "side": 1,
+      "message": "same comment here regarding starting interface with capital \"I\" - not common in Java.",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_769af515",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-07T18:38:21Z",
+      "side": 1,
+      "message": "class Dictionary is obsolete. It shouldn\u0027t be used anymore in new code.\n\nPlease see here:\nhttp://docs.oracle.com/javase/7/docs/api/java/util/Dictionary.html\n\nAlso, Hashtable is also less recommended for usage due to its performance penalty caused by its synchronization. If you don\u0027t need this synced, please use HashMap.\nIf you do need it synced, ConcurrentHashMap is the better way to go.",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_d6fbe145",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-07T18:38:21Z",
+      "side": 1,
+      "message": "Is this scope of syncing OK? Won\u0027t the entire system be stuck on this for each packet?",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_b6f86d4a",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-07T18:38:21Z",
+      "side": 1,
+      "message": "How about making a single if with 3 conditions? if topoManager \u003d\u003d null OR dataPacketService \u003d\u003d null OR invSvc \u003d\u003d null --\u003e return false.",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_569ff103",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-07T18:38:21Z",
+      "side": 1,
+      "message": "The log message isn\u0027t very informative - consider it appearing 20 times in the log - it doesn\u0027t guide as to what can be done and what specific entity/conf it is related to.\nPlease consider adding additional information to the message - node/packet details or anything else you think is relevant.",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_f6fee537",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-07T18:38:21Z",
+      "side": 1,
+      "message": "Please replace it with printing to log.",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
