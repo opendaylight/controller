@@ -26,7 +26,6 @@ import javax.ws.rs.core.Response;
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterCRUD;
@@ -36,7 +35,6 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter_Interface;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
-import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
@@ -416,12 +414,19 @@ public class NeutronRoutersNorthbound {
                 targetPort.getDeviceOwner() != null)
             return Response.status(409).build();
 
+        Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+        if (instances != null) {
+            for (Object instance : instances) {
+                INeutronRouterAware service = (INeutronRouterAware) instance;
+                service.canAttachInterface(target, input);
+            }
+        }
+
         //mark the port device id and device owner fields
         targetPort.setDeviceOwner("network:router_interface");
         targetPort.setDeviceID(routerUUID);
 
         target.addInterface(input.getPortUUID(), input);
-        Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
         if (instances != null) {
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -485,12 +490,19 @@ public class NeutronRoutersNorthbound {
             input.setID(target.getID());
             input.setTenantID(target.getTenantID());
 
+            Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+            if (instances != null) {
+                for (Object instance : instances) {
+                    INeutronRouterAware service = (INeutronRouterAware) instance;
+                    service.canDetachInterface(target, input);
+                }
+            }
+
             // reset the port ownership
             port.setDeviceID(null);
             port.setDeviceOwner(null);
 
             target.removeInterface(input.getPortUUID());
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
             if (instances != null) {
                 for (Object instance : instances) {
                     INeutronRouterAware service = (INeutronRouterAware) instance;
@@ -535,10 +547,16 @@ public class NeutronRoutersNorthbound {
                 return Response.status(409).build();
             input.setID(target.getID());
             input.setTenantID(target.getTenantID());
+            Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
+            if (instances != null) {
+                for (Object instance : instances) {
+                    INeutronRouterAware service = (INeutronRouterAware) instance;
+                    service.canDetachInterface(target, input);
+                }
+            }
             port.setDeviceID(null);
             port.setDeviceOwner(null);
             target.removeInterface(input.getPortUUID());
-            Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
             for (Object instance : instances) {
                 INeutronRouterAware service = (INeutronRouterAware) instance;
                 service.neutronRouterInterfaceDetached(target, input);

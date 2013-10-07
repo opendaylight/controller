@@ -82,6 +82,20 @@ public interface INeutronRouterAware {
     public void neutronRouterDeleted(NeutronRouter router);
 
     /**
+     * Services provide this interface method to indicate if the specified interface can be attached to the specified route
+     *
+     * @param router
+     *            instance of the base Neutron Router object
+     * @param routerInterface
+     *            instance of the NeutronRouter_Interface to be attached to the router
+     * @return integer
+     *            the return value is understood to be a HTTP status code.  A return value outside of 200 through 299
+     *            results in the attach operation being interrupted and the returned status value reflected in the
+     *            HTTP response.
+     */
+    public int canAttachInterface(NeutronRouter router, NeutronRouter_Interface routerInterface);
+
+    /**
      * Services provide this interface method for taking action after an interface has been added to a router
      *
      * @param router
@@ -91,6 +105,20 @@ public interface INeutronRouterAware {
      * @return void
      */
     public void neutronRouterInterfaceAttached(NeutronRouter router, NeutronRouter_Interface routerInterface);
+
+    /**
+     * Services provide this interface method to indicate if the specified interface can be detached from the specified router
+     *
+     * @param router
+     *            instance of the base Neutron Router object
+     * @param routerInterface
+     *            instance of the NeutronRouter_Interface to be detached to the router
+     * @return integer
+     *            the return value is understood to be a HTTP status code.  A return value outside of 200 through 299
+     *            results in the detach operation being interrupted and the returned status value reflected in the
+     *            HTTP response.
+     */
+    public int canDetachInterface(NeutronRouter router, NeutronRouter_Interface routerInterface);
 
     /**
      * Services provide this interface method for taking action after an interface has been removed from a router
