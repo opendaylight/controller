@@ -123,5 +123,14 @@
       <artifactId>web</artifactId>
       <version>0.4.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.thirdparty</groupId>
+      <artifactId>net.sf.jung2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
