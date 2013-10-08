@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>binding-generator-impl</artifactId>
+            <artifactId>binding-type-provider</artifactId>
             <version>${opendaylight.binding.version}</version>
         </dependency>
         <dependency>

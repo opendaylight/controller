@@ -1,0 +1,18 @@
+curl http://localhost:17777/jolokia/read/org.opendaylight.controller:instanceName=fixed1,type=ConfigBean,interfaceName=testing-threadpool | jsonpp
+{
+    "request": {
+        "mbean": "org.opendaylight.controller:instanceName=fixed1,interfaceName=testing-threadpool,type=ConfigBean",
+        "type": "read"
+    },
+    "status": 200,
+    "timestamp": 1362416252,
+    "value": {
+        "ExportedInterfaces": [
+            "testing-threadpool",
+            "modifiable-threadpool"
+        ],
+        "ImplementationName": "fixed",
+        "ThreadCount": 10,
+        "TriggerNewInstanceCreation": false
+    }
+}
