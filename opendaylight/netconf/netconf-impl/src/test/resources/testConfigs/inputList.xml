@@ -1,0 +1,9 @@
+<jmxbean>
+    <mBean>org.opendaylight.controller:type=AppDeployer</mBean>
+    <type>EXEC</type>
+    <operation>lookupConfigBeans</operation>
+    <arguments>
+        <elements>22</elements>
+        <elements>69</elements>
+    </arguments>
+</jmxbean>

@@ -23,6 +23,10 @@
             <artifactId>concepts</artifactId>
             <version>0.2.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -34,7 +38,8 @@
                     <instructions>
                         <Import-Package>
                             javax.management,
-                            org.opendaylight.protocol.concepts
+                            org.opendaylight.protocol.concepts,
+                            org.osgi.framework,
                         </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.api,
@@ -43,6 +48,7 @@
                             org.opendaylight.controller.config.api.jmx,
                             org.opendaylight.controller.config.api.jmx.constants,
                             org.opendaylight.controller.config.api.runtime,
+                            org.opendaylight.controller.config.stat,
                         </Export-Package>
                     </instructions>
                 </configuration>
