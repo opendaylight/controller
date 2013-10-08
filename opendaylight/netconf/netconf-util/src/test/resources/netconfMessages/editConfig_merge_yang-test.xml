@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rpc message-id="6"
+     xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <target>
+            <candidate/>
+        </target>
+        <default-operation>merge</default-operation>
+        <test-option>set</test-option>
+        <config>
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module
+                        xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                        nc:operation="merge">
+                    <name>impl-dep-instance</name>
+                    <type
+                            xmlns:th-java="urn:opendaylight:params:xml:ns:yang:controller:test:impl">th-java:impl-dep
+                    </type>
+                </module>
+            </modules>
+        </config>
+    </edit-config>
+</rpc>

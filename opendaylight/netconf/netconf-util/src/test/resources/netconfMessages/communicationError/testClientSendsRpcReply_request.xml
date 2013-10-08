@@ -1,0 +1,4 @@
+<rpc-reply message-id="*** replaced by message id ***"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <ok/>
+</rpc-reply>

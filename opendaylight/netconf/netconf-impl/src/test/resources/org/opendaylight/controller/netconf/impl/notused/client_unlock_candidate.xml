@@ -1,0 +1,8 @@
+<rpc message-id="105"
+     xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <unlock>
+        <target>
+            <candidate/>
+        </target>
+    </unlock>
+</rpc>
