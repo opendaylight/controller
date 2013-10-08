@@ -1,0 +1,21 @@
+<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <default-operation>replace</default-operation>
+        <config xmlns="top:level:namespace">
+            <modules>
+                <module xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl" operation="remove">
+                    <type xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">impl-dep</type>
+                    <name>dep</name>
+                </module>
+                <module xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl" operation="remove">
+                    <type xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">impl-dep</type>
+                    <name>dep2</name>
+                </module>
+            </modules>
+            <services/>
+        </config>
+    </edit-config>
+</rpc>

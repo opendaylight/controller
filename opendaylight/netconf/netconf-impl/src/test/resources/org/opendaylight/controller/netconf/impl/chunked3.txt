@@ -1,0 +1,43 @@
+
+#43
+<rpc message-id="101" xmlns="urn:ietf:param
+#14
+s:xml:ns:netco
+#14
+nf:base:1.0">
+
+#26
+<get-config>
+    <source>
+
+#35
+     <running/>
+         </source>
+
+#39
+    <filter type="subtree">
+          <
+#40
+top xmlns="http://example.com/schema/1.2
+#26
+/config">
+        <users>
+
+#36
+     <user>
+                 <name>f
+#56
+red</name>
+          </user>
+                  </users>
+
+#28
+      </top>
+          </fil
+#1
+t
+#28
+er>
+  </get-config>
+  </rpc>
+##

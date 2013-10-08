@@ -1,0 +1,19 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" a="64" id="a" message-id="101" xmlnx="a:b:c:d">
+    <data>
+        <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+            <!--<module>
+            <type>impl</type>
+            </module>
+            -->
+            <!--<module>
+            <type>impl-dep</type>
+            </module>
+            -->
+            <!--<module>
+            <type>impl-netconf</type>
+            </module>
+            -->
+        </modules>
+        <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config"/>
+    </data>
+</rpc-reply>
