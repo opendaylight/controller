@@ -1,0 +1,8 @@
+<rpc message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <get-config>
+        <source>
+            <running/>
+        </source>
+        <filter type="xpath" select="/top/jmxbean[objectName='org.opendaylight.controller:type=ConfigRegistry']"/>
+    </get-config>
+</rpc>

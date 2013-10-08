@@ -1,0 +1,43 @@
+<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <default-operation>none</default-operation>
+        <config>
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                        nc:operation="remove">
+                    <name>dep</name>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-dep
+                    </type>
+                </module>
+
+                <module xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                        nc:operation="remove">
+                    <name>dep2</name>
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-dep
+                    </type>
+                </module>
+
+                <module xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                        nc:operation="remove">
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-netconf
+                    </type>
+                    <name>test1</name>
+                </module>
+
+                <module xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                        nc:operation="remove">
+                    <type xmlns:test-impl="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+                        test-impl:impl-netconf
+                    </type>
+                    <name>test2</name>
+                </module>
+            </modules>
+        </config>
+    </edit-config>
+</rpc>

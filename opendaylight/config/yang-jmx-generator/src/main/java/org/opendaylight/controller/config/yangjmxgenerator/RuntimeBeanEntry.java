@@ -7,20 +7,9 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
@@ -28,22 +17,12 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
-import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
-import org.opendaylight.yangtools.yang.model.api.SchemaNode;
-import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.UsesNode;
+import org.opendaylight.yangtools.yang.model.api.*;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Holds information about runtime bean to be generated. There are two kinds of
@@ -295,8 +274,8 @@ public class RuntimeBeanEntry {
                                         + "Error occured in " + rpcDefinition);
                     }
                     List<JavaAttribute> parameters = new ArrayList<>();
-                    for (DataSchemaNode childNode : rpcDefinition.getInput()
-                            .getChildNodes()) {
+                    for (DataSchemaNode childNode : sortAttributes(rpcDefinition.getInput()
+                            .getChildNodes())) {
                         if (childNode.isAddedByUses() == false) { // skip
                                                                   // refined
                                                                   // context-instance
@@ -316,6 +295,17 @@ public class RuntimeBeanEntry {
         }
         return new AttributesRpcsAndRuntimeBeans(runtimeBeanEntries,
                 attributes, rpcs);
+    }
+
+    private static Collection<DataSchemaNode> sortAttributes(Set<DataSchemaNode> childNodes) {
+        final TreeSet<DataSchemaNode> dataSchemaNodes = new TreeSet<>(new Comparator<DataSchemaNode>() {
+            @Override
+            public int compare(DataSchemaNode o1, DataSchemaNode o2) {
+                return o1.getQName().getLocalName().compareTo(o2.getQName().getLocalName());
+            }
+        });
+        dataSchemaNodes.addAll(childNodes);
+        return dataSchemaNodes;
     }
 
     private static boolean isInnerStateBean(DataSchemaNode child) {
