@@ -19,6 +19,74 @@
     },
     {
       "key": {
+        "uuid": "fa5d592f_d84aefab",
+        "filename": "opendaylight/networkconfiguration/neutron/implementation/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2013-10-08T21:26:52Z",
+      "side": 1,
+      "message": "Hard coded dependency version",
+      "revId": "3d20ec8ad39915ab00bd527271d98ddf87df2b36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_1851a762",
+        "filename": "opendaylight/northbound/bundlescanner/implementation/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2013-10-08T21:26:52Z",
+      "side": 1,
+      "message": "Hard coded version",
+      "revId": "3d20ec8ad39915ab00bd527271d98ddf87df2b36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_d8730f14",
+        "filename": "opendaylight/usermanager/api/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2013-10-08T21:26:52Z",
+      "side": 1,
+      "message": "Hard coded equinox version. Intentional?",
+      "revId": "3d20ec8ad39915ab00bd527271d98ddf87df2b36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_b8605b36",
+        "filename": "opendaylight/usermanager/api/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2013-10-08T21:26:52Z",
+      "side": 1,
+      "message": "Would be consistent if we left the version out of the dependency since the versions are being defined by dependencyManagement",
+      "revId": "3d20ec8ad39915ab00bd527271d98ddf87df2b36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa5d592f_186ac71a",
         "filename": "opendaylight/web/troubleshoot/pom.xml",
         "patchSetId": 9
