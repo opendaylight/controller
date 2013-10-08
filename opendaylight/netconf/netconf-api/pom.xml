@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <artifactId>netconf-subsystem</artifactId>
+        <groupId>org.opendaylight.controller</groupId>
+        <version>0.2.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>netconf-api</artifactId>
+    <name>${project.artifactId}</name>
+    <packaging>bundle</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-api</artifactId>
+            <version>0.2.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.bgpcep</groupId>
+            <artifactId>framework</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Private-Package>
+                        </Private-Package>
+                        <Import-Package>
+                            javax.management,
+                            org.opendaylight.controller.config.api.jmx,
+                            org.opendaylight.protocol.framework,
+                            org.w3c.dom
+                        </Import-Package>
+                        <Export-Package>
+                            org.opendaylight.controller.netconf.api,
+                            org.opendaylight.controller.netconf.api.jmx,
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>

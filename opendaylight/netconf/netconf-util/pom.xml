@@ -1,0 +1,117 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>netconf-subsystem</artifactId>
+        <groupId>org.opendaylight.controller</groupId>
+        <version>0.2.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>netconf-util</artifactId>
+    <name>${project.artifactId}</name>
+    <packaging>bundle</packaging>
+
+
+    <dependencies>
+        <!-- compile dependencies -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>netconf-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>netconf-mapping-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-api</artifactId>
+            <version>0.2.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.bgpcep</groupId>
+            <artifactId>framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.bgpcep</groupId>
+            <artifactId>util</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.opendaylight.controller.netconf.util,
+                            org.opendaylight.controller.netconf.util.xml,
+                            org.opendaylight.controller.netconf.util.osgi,
+                            org.opendaylight.controller.netconf.util.mapping,
+                            org.opendaylight.controller.netconf.util.messages,
+                        </Export-Package>
+                        <Import-Package>
+                            org.opendaylight.controller.config.stat,
+                            com.google.common.base,
+                            com.google.common.collect,
+                            io.netty.buffer,
+                            io.netty.channel,
+                            io.netty.channel.socket,
+                            io.netty.handler.codec,
+                            io.netty.handler.ssl,
+                            io.netty.util,
+                            io.netty.util.concurrent,
+                            javax.annotation,
+                            javax.net.ssl,
+                            javax.xml.namespace,
+                            javax.xml.parsers,
+                            javax.xml.transform,
+                            javax.xml.transform.dom,
+                            javax.xml.transform.stream,
+                            javax.xml.validation,
+                            javax.xml.xpath,
+                            org.opendaylight.controller.netconf.api,
+                            org.opendaylight.controller.netconf.mapping.api,
+                            org.opendaylight.protocol.framework,
+                            org.opendaylight.protocol.util,
+                            org.osgi.framework,
+                            org.slf4j,
+                            org.w3c.dom,
+                            org.xml.sax,
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
