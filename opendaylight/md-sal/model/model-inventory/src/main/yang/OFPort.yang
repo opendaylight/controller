@@ -11,7 +11,7 @@ module opendaylight-port-inventory {
         description "Initial revision of Port Inventory model";
     }
 
-    typedef node-connector-Id {
+    typedef port-connector-Id {
         type instance-identifier;
     }
     
@@ -61,7 +61,7 @@ module opendaylight-port-inventory {
     
     grouping common-port {
         leaf port_no {
-            type node-connector-Id;
+            type port-connector-Id;
         }
         
         leaf-list hw_addr {

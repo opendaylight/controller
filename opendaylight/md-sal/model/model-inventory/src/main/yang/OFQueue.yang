@@ -1,0 +1,84 @@
+module opendaylight-queue-inventory {
+    namespace "urn:opendaylight:queue:inventory";
+    prefix queueInv;
+
+    import yang-ext {prefix ext;}
+    import ietf-inet-types {prefix inet;}
+    import ietf-yang-types {prefix yang;}
+    import opendaylight-inventory {prefix inv;}
+
+    revision "2013-10-04" {
+        description "Initial revision of queue  model";
+    }
+
+    grouping ofp-queue-properties {
+        leaf property {
+            type enumeration {
+                enum OFPQT_MIN_RATE;
+                enum OFPQT_MAX_RATE;
+                enum OFPQT_EXPERIMENTER;
+            }
+        }
+    }
+
+    grouping queue-properties {
+        choice queue-properties {
+            case OFPQT_MIN_RATE {
+
+                leaf rate {
+                    type uint16;
+                }
+            }
+
+            case OFPQT_MAX_RATE {
+
+                leaf rate {
+                    type uint16;
+                }
+            }
+
+            case OFPQT_EXPERIMENTER {
+
+                leaf experimenter {
+                    type uint32;
+                }
+
+                leaf-list exp-data {
+                    type uint8;
+                    description "Experimenter data ID";
+                }
+            }
+        }
+    }
+
+    grouping ofp-packet-queue {
+        leaf queue-id {
+            type uint32;
+            description "id for the specific queue";
+            mandatory true;
+        }
+
+        leaf port {
+            type uint32;
+            description "Port this queue is attached to";
+            mandatory true;
+        }
+
+        container queue-prop-header {
+            list queue-prop-header {
+                key "order";
+                leaf order {
+                    type int32;
+                }
+
+                container ofp-queue-properties {
+                    uses ofp-queue-properties;
+                }
+
+                uses queue-properties;
+            }
+        }
+
+    }
+
+}
