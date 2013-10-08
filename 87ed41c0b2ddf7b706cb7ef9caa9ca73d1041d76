@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa5d592f_f8fb7345",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-08T21:54:33Z",
+      "side": 1,
+      "message": "Can you please remove the \"broadcast\" from this variable name.\nThis is effectively the THA which for ARP request messages is discarded by receiver. Therefore it was passed an all-zero MAC.\nThere is no broadcast notion in an all-zero MAC. In all ARP requests (broadcast or unicast) the THA is going to be discarded by receiver.",
+      "revId": "87ed41c0b2ddf7b706cb7ef9caa9ca73d1041d76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_18ff6736",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-08T21:54:33Z",
+      "side": 1,
+      "message": "Can you pelase reuse NetUtils.BroadcastMACAddr after make it public ?",
+      "revId": "87ed41c0b2ddf7b706cb7ef9caa9ca73d1041d76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_d8f8af4b",
+        "filename": "opendaylight/arphandler/src/main/java/org/opendaylight/controller/arphandler/internal/ArpHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-08T21:54:33Z",
+      "side": 1,
+      "message": "Just curious, why are you removing the cascaded form here and for Ethernet. Was that pointed out by sonar ?",
+      "revId": "87ed41c0b2ddf7b706cb7ef9caa9ca73d1041d76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
