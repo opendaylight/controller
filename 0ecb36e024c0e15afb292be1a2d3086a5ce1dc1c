@@ -34,6 +34,24 @@
       "revId": "0ecb36e024c0e15afb292be1a2d3086a5ce1dc1c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa5d592f_b84dfb74",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-08T04:58:13Z",
+      "side": 0,
+      "message": "Do not store the return of the write on subnetFileName, if nobody cares for it...\nJust do not skip saving a configuration because of a static analysis fix.\n\nReturn INTERNALERROR only if all three save to file failed.\nIf any failed and at least one was successfull, return SUCCESS with description \"Partial save\".\nIf all three were saved to file, return a clean SUCCESS.",
+      "parentUuid": "fa5d592f_5b3b9ceb",
+      "revId": "0ecb36e024c0e15afb292be1a2d3086a5ce1dc1c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
