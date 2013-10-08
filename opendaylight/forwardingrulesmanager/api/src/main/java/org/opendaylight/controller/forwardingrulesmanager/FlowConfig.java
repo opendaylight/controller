@@ -22,7 +22,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Controller;
@@ -862,6 +861,9 @@ public class FlowConfig implements Serializable {
                                     return new Status(StatusCode.BADREQUEST, msg);
                                 }
                             }
+                        } else {
+                            String msg = String.format("Output port %s is not valid", t);
+                            return new Status(StatusCode.BADREQUEST, msg);
                         }
                     }
                     continue;
