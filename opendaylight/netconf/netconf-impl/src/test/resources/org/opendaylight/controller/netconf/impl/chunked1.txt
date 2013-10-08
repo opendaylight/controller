@@ -1,0 +1,35 @@
+
+#24
+<rpc message-id="101" xm
+#28
+lns="urn:ietf:params:xml:ns:
+#2
+ne
+#33
+tconf:base:1.0">
+  <my-own-method
+#3
+ xm
+#13
+lns="http://e
+#34
+xample.net/me/my-own/1.0">
+    <my
+#8
+-first-p
+#21
+arameter>14</my-first
+#26
+-parameter>
+    <another-p
+#23
+arameter>fred</another-
+#31
+parameter>
+ </my-own-method>
+ <
+#2
+/r
+#3
+pc>
+##

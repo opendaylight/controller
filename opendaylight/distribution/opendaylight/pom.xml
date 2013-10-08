@@ -121,7 +121,7 @@
           <version>0.1.1-SNAPSHOT</version>
         </dependency>
 
-        <!-- config
+        <!-- config-->
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-api</artifactId>
@@ -172,7 +172,56 @@
           <artifactId>logback-config</artifactId>
           <version>${config.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>config-persister-api</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+         <!--       <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>config-persister-file-adapter</artifactId>
+          <version>${config.version}</version>
+        </dependency>
         -->
+
+       <!-- Netconf -->
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-api</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-impl</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-util</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-client</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-mapping-api</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>config-netconf-connector</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+         <!--       <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>config-persister-impl</artifactId>
+          <version>${config.version}</version>
+        </dependency>
+    -->
+
       </dependencies>
     </profile>
   </profiles>
@@ -923,8 +972,35 @@
      <groupId>org.opendaylight.bgpcep</groupId>
      <artifactId>util</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.bgpcep</groupId>
+      <artifactId>framework</artifactId>
+    </dependency>
 
-    <!-- testing dependencies I'm pretty sure we should trim -->
+    <!--Netty-->
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-handler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-codec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-buffer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-transport</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-common</artifactId>
+    </dependency>
+
+
+      <!-- testing dependencies I'm pretty sure we should trim -->
     <dependency>
      <groupId>org.opendaylight.controller</groupId>
      <artifactId>clustering.test</artifactId>
