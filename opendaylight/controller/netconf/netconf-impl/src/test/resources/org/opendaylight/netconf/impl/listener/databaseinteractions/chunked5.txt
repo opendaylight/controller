@@ -1,0 +1,42 @@
+
+#43
+<rpc message-id="101" xmlns="urn:ietf:param
+#41
+s:xml:ns:netconf:base:1.0">
+  <edit-confi
+#29
+g>
+    <target>
+          <ru
+#13
+nning/>
+    <
+#4
+/tar
+#18
+get>
+    <config>
+
+#41
+  <top xmlns="http://example.com/schema/1
+#32
+.2/config">
+        <interface>
+
+#29
+        <name>Ethernet0/0</na
+#30
+me>
+          <mtu>1500</mtu>
+
+#61
+</interface>
+      </top>
+          </config>
+            </e
+#9
+dit-confi
+#9
+g>
+</rpc>
+##

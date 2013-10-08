@@ -1,0 +1,6 @@
+<rpc message-id="2"
+     xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <get-schema xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">
+        <identifier>threadpool-api</identifier>
+    </get-schema>
+</rpc>

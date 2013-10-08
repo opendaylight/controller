@@ -1,0 +1,29 @@
+<config>
+    <jmxbean>
+        <mBean>org.opendaylight.controller:type=AppDeployer</mBean>
+        <type>EXEC</type>
+        <operation>lookupConfigBeans</operation>
+        <attribute>abc,bcd.aas</attribute>
+        <attribute>22</attribute>
+    </jmxbean>
+    <jmxbean>
+        <mBean>org.opendaylight.controller:type=AppDeployer</mBean>
+        <type>WRITE</type>
+        <attribute>attribute</attribute>
+        <value>22</value>
+    </jmxbean>
+    <jmxbean>
+        <mBean>org.opendaylight.controller:type=AppDeployer</mBean>
+        <type>EXEC</type>
+        <operation>lookupConfigBeans</operation>
+        <arguments>
+            <map>
+                <topology-registry>single</topology-registry>
+                <bgp-update>mock</bgp-update>
+            </map>
+            <array>2</array>
+            <array>22</array>
+            <anotherArg>arg</anotherArg>
+        </arguments>
+    </jmxbean>
+</config>

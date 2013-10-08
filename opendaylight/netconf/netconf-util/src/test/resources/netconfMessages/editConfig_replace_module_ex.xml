@@ -1,0 +1,16 @@
+<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <default-operation>replace</default-operation>
+        <config xmlns="top:level:namespace">
+            <modules operation="replace">
+                <module xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl" operation="merge">
+                    <type xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">impl-dep</type>
+                    <name>dep</name>
+                </module>
+            </modules>
+        </config>
+    </edit-config>
+</rpc>

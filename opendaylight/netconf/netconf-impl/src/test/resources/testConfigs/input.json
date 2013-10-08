@@ -1,0 +1,10 @@
+{
+   "value":null,
+   "status":200,
+   "request": {
+                "type":"exec",
+                "mbean":"java.util.logging:type=Logging",
+                "operation":"setLoggerLevel",
+                "arguments":["global","INFO"]
+              }
+}

@@ -1,0 +1,18 @@
+$ curl 'http://localhost:17777/jolokia/exec/org.opendaylight.controller:type=ConfigRegistry/lookupConfigBeans()' | jsonpp
+{
+    "request": {
+        "mbean": "org.opendaylight.controller:type=ConfigRegistry",
+        "operation": "lookupConfigBeans()",
+        "type": "exec"
+    },
+    "status": 200,
+    "timestamp": 1362417043,
+    "value": [
+        {
+            "objectName": "org.opendaylight.controller:instanceName=fixed1,interfaceName=modifiable-threadpool,type=ConfigBean"
+        },
+        {
+            "objectName": "org.opendaylight.controller:instanceName=fixed1,interfaceName=testing-threadpool,type=ConfigBean"
+        }
+    ]
+}
