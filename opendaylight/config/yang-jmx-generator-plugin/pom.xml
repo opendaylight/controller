@@ -9,51 +9,61 @@
     </parent>
     <artifactId>yang-jmx-generator-plugin</artifactId>
     <dependencies>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>yang-jmx-generator</artifactId>
             <version>0.2.1-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-maven-plugin-spi</artifactId>
             <version>${opendaylight.yang.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>binding-generator-impl</artifactId>
+            <artifactId>binding-type-provider</artifactId>
             <version>${opendaylight.binding.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.eclipse.jdt</groupId>
             <artifactId>core</artifactId>
             <version>3.3.0-v_771</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
             <version>2.3.20</version>
         </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
             <version>0.2.1-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
+
         <dependency>
             <!--FIXME two implementations of slf4j on classpath, logback classic from parent-->
             <groupId>com.googlecode.slf4j-maven-plugin-log</groupId>
             <artifactId>slf4j-maven-plugin-log</artifactId>
             <version>1.0.0</version>
         </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -66,21 +76,24 @@
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
+
         <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>jdt</artifactId>
             <version>3.3.0-v20070607-1300</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
             <version>0.2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-lang3</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
 

@@ -1,0 +1,40 @@
+
+#17
+<rpc message-id="
+#25
+101" xmlns="urn:ietf:para
+#19
+ms:xml:ns:netconf:b
+#3
+ase
+#19
+:1.0">
+  <get-confi
+#61
+g>
+    <source>
+          <running/>
+              </source>
+
+#43
+  <filter type="subtree">
+        <!-- requ
+#13
+est a text ve
+#22
+rsion of the configura
+#9
+tion -->
+
+#16
+   <config-text 
+#45
+xmlns="http://example.com/text/1.2/config"/>
+
+#22
+    </filter>
+      </
+#18
+get-config>
+</rpc>
+##

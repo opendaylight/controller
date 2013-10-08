@@ -1,0 +1,7 @@
+<jmxbean>
+    <mBean>org.opendaylight.controller:type=AppDeployer</mBean>
+    <type>EXEC</type>
+    <operation>lookupConfigBeans</operation>
+    <arguments>abc,bcd.aas</arguments>
+    <arguments>64</arguments>
+</jmxbean>

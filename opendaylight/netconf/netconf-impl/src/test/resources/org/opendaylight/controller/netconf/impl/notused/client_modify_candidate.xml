@@ -1,0 +1,20 @@
+<rpc message-id="103"
+     xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <default-operation>none</default-operation>
+        <test-option>test-then-set</test-option>
+        <error-option>stop-on-error</error-option>
+        <nc:config
+                xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                xmlns="uri-for-my-data-model-namespace">
+            <some-existing-node>
+                <my-new-node nc:operation="create">
+                    <my-new-leaf>7</my-new-leaf>
+                </my-new-node>
+            </some-existing-node>
+        </nc:config>
+    </edit-config>
+</rpc>

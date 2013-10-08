@@ -42,6 +42,9 @@
   <!-- OSGi logging bridge -->
   <logger name="org.opendaylight.controller.logging.bridge" level="WARN"/>
 
+  <!-- Netty -->
+  <logger name="io.netty" level="WARN"/>
+
   <!-- Openflow Protocol Plugin -->
   <logger name="org.opendaylight.controller.protocol_plugin.openflow" level="INFO"/>
   <logger name="org.opendaylight.controller.protocol_plugin.openflow.internal.DiscoveryService" level="INFO"/>

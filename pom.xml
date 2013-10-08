@@ -81,6 +81,7 @@
     <!-- md-sal -->
     <module>opendaylight/md-sal</module>
     <module>opendaylight/config</module>
+    <module>opendaylight/netconf</module>
     <!-- config -->
 
     <!--  Web bundles -->

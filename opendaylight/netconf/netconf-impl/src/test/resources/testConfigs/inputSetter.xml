@@ -1,0 +1,6 @@
+<jmxbean>
+    <mBean>org.opendaylight.controller:type=AppDeployer</mBean>
+    <type>WRITE</type>
+    <attribute>attribute</attribute>
+    <value>22</value>
+</jmxbean>
