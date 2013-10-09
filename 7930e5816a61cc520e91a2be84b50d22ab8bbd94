@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a9549dca",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastPortSelector.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-09T09:23:38Z",
+      "side": 1,
+      "message": "no need to mark interface method as public.",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
