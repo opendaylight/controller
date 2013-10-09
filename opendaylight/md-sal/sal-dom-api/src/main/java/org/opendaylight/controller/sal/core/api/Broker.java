@@ -9,15 +9,17 @@ package org.opendaylight.controller.sal.core.api;
 
 import java.util.concurrent.Future;
 
+import org.opendaylight.controller.md.sal.common.api.routing.RoutedRegistration;
 import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
-import org.opendaylight.controller.sal.core.api.notify.NotificationProviderService;
+import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationService;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
-
 
 /**
  * Core component of the SAL layer responsible for wiring the SAL consumers.
@@ -36,7 +38,7 @@ import org.osgi.framework.BundleContext;
  * {@link ProviderSession#addRpcImplementation(QName, RpcImplementation)} and
  * {@link RpcImplementation}
  * <li>Notification Service - see {@link NotificationService} and
- * {@link NotificationProviderService}
+ * {@link NotificationPublishService}
  * <li>Functionality and Data model
  * <li>Data Store access and modification - see {@link DataBrokerService} and
  * {@link DataProviderService}
@@ -78,7 +80,7 @@ public interface Broker {
      * 
      * @param cons
      *            Consumer to be registered.
-     * @param context 
+     * @param context
      * @return a session specific to consumer registration
      * @throws IllegalArgumentException
      *             If the consumer is <code>null</code>.
@@ -110,7 +112,7 @@ public interface Broker {
      * 
      * @param prov
      *            Provider to be registered.
-     * @param context 
+     * @param context
      * @return a session unique to the provider registration.
      * @throws IllegalArgumentException
      *             If the provider is <code>null</code>.
@@ -132,7 +134,7 @@ public interface Broker {
      * infrastructure services and other functionality provided by
      * {@link Provider}s.
      * 
-
+     * 
      * 
      */
     public interface ConsumerSession {
@@ -208,22 +210,12 @@ public interface Broker {
          * @throws IllegalArgumentException
          *             If the name of RPC is invalid
          */
-        void addRpcImplementation(QName rpcType,
-                RpcImplementation implementation)
+        RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
                 throws IllegalArgumentException;
 
-        /**
-         * Unregisters an Rpc implementation
-         * 
-         * @param rpcType
-         *            Name of Rpc
-         * @param implementation
-         *            Registered Implementation of the Rpc functionality
-         * @throws IllegalArgumentException
-         */
-        void removeRpcImplementation(QName rpcType,
-                RpcImplementation implementation)
-                throws IllegalArgumentException;
+        RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation);
+
+        RoutedRpcRegistration addMountedRpcImplementation(QName rpcType, RpcImplementation implementation);
 
         /**
          * Closes a session between provider and SAL.
@@ -237,5 +229,13 @@ public interface Broker {
 
         @Override
         boolean isClosed();
+    }
+
+    public interface RpcRegistration extends Registration<RpcImplementation> {
+        QName getType();
+    }
+
+    public interface RoutedRpcRegistration extends RpcRegistration,
+            RoutedRegistration<QName, InstanceIdentifier, RpcImplementation> {
     }
 }

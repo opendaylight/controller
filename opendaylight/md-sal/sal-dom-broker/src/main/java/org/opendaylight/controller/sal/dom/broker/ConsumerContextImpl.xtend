@@ -49,7 +49,7 @@ class ConsumerContextImpl implements ConsumerSession {
         val toStop = instantiatedServices.values();
         this.closed = true;
         for (BrokerService brokerService : toStop) {
-            brokerService.closeSession();
+            //brokerService.closeSession();
         }
         broker.consumerSessionClosed(this);
     }

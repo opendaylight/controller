@@ -29,7 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
  * 
  * 
  */
-public interface NotificationProviderService extends NotificationService {
+public interface NotificationPublishService extends NotificationService {
 
     /**
      * Publishes a notification.
@@ -41,6 +41,8 @@ public interface NotificationProviderService extends NotificationService {
      * @param notification
      *            Notification to publish
      */
+    @Deprecated
     void sendNotification(CompositeNode notification);
 
+    void publish(CompositeNode notification);
 }

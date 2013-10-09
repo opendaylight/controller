@@ -14,5 +14,5 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 public interface MountInstance extends NotificationService, DataBrokerService {
 
     <T extends RpcService> T getRpcService(Class<T> rpcService);
-    
+
 }

@@ -43,7 +43,7 @@ class OsgiProviderContext extends OsgiConsumerContext implements ProviderContext
         return salReg;
     }
 
-    override <T extends RpcService> addMountRpcImplementation(Class<T> type, InstanceIdentifier mount, T implementation) throws IllegalStateException {
+    override <T extends RpcService> addMountRpcImplementation(Class<T> type, InstanceIdentifier<?> mount, T implementation) throws IllegalStateException {
 
         val properties = new Hashtable<String, String>();
         properties.salServiceType = SAL_SERVICE_TYPE_PROVIDER

@@ -45,16 +45,16 @@ class RuntimeCodeHelper {
             throw new IllegalArgumentException("delegate class is not assignable to proxy");
     }
 
-    public static def Map<InstanceIdentifier, ? extends RpcService> getRoutingTable(RpcService target,
+    public static def Map<InstanceIdentifier<?>, ? extends RpcService> getRoutingTable(RpcService target,
         Class<? extends BaseIdentity> tableClass) {
         val field = target.class.getField(tableClass.routingTableField)
         if (field == null) throw new UnsupportedOperationException(
             "Unable to get routing table. Table field does not exists");
-        return field.get(target) as Map<InstanceIdentifier, ? extends RpcService>;
+        return field.get(target) as Map<InstanceIdentifier<? extends Object>, ? extends RpcService>;
     }
 
     public static def void setRoutingTable(RpcService target, Class<? extends BaseIdentity> tableClass,
-        Map<InstanceIdentifier, ? extends RpcService> routingTable) {
+        Map<InstanceIdentifier<?>, ? extends RpcService> routingTable) {
          val field = target.class.getField(tableClass.routingTableField)
         if (field == null) throw new UnsupportedOperationException(
             "Unable to set routing table. Table field does not exists");

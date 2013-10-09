@@ -152,12 +152,14 @@ module opendaylight-group-types {
             }
             
             uses group-types;
-            type capabilities {
-                enum select-weight;
-                enum select-liveness;
-                enum chaining;
-                enum chaining-checks;
-            }   
+            leaf capabilities { 
+                type enumeration {
+                    enum select-weight;
+                    enum select-liveness;
+                    enum chaining;
+                    enum chaining-checks;
+                }   
+            }
 
             leaf-list max-groups {
                 type uint32;

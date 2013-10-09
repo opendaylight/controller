@@ -4,7 +4,7 @@ module opendaylight-statistics-types {
 
     import ietf-yang-types {prefix yang;}
     import opendaylight-inventory {prefix inv;}
-    import opendaylight-port-inventory {prefix port-inv;}
+    //import opendaylight-port-inventory {prefix port-inv;}
     
     revision "2013-09-25" {
         description "Initial revision of flow service";
@@ -60,9 +60,5 @@ module opendaylight-statistics-types {
                 type yang:counter32;
             }
         }
-    }
-    
-    grouping ofp-port-description {
-        uses port-inv:ofp-port;
     }
 }

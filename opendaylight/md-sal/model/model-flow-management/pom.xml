@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <artifactId>model-parent</artifactId>
+        <groupId>org.opendaylight.controller.model</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <scm>
+      <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+      <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
+    </scm>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>model-flow-management</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>model-flow-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>model-inventory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools.model</groupId>
+            <artifactId>opendaylight-l2-types</artifactId>
+            <version>2013.08.27.0</version>
+        </dependency>
+    </dependencies>
+    <packaging>bundle</packaging>
+</project>

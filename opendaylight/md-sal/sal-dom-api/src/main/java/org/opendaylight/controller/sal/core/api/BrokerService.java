@@ -35,5 +35,4 @@ import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
  */
 public interface BrokerService {
 
-    void closeSession();
 }
