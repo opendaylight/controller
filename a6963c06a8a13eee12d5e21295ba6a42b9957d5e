@@ -34,6 +34,24 @@
       "revId": "a6963c06a8a13eee12d5e21295ba6a42b9957d5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2c9f9b05",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Bandwidth.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-09T21:08:49Z",
+      "side": 0,
+      "message": "Like I mentioned, this is a framework that people use to develop on top of (e.g. projects/bundles that use ODL code, but are not in the repo).\nAlso, the other BW* fields don\u0027t appear to be used anywhere except tests, aren\u0027t they dead code?\nWill writing a unit test that uses BW400Gbps make it non-dead code? :)",
+      "parentUuid": "da6255ed_ec53c36a",
+      "revId": "a6963c06a8a13eee12d5e21295ba6a42b9957d5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
