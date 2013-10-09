@@ -41,7 +41,7 @@ module opendaylight-inventory {
     }
 
     identity node-connector-context {
-
+        
     }
 
     grouping node {
@@ -56,9 +56,6 @@ module opendaylight-inventory {
         }
     }
 
-
-
-
     /** Base structure **/
     container nodes {
         list node {
@@ -70,7 +67,7 @@ module opendaylight-inventory {
             list "node-connector" {
                 key "id";
                 ext:context-instance "node-connector-context";
-                
+
                 use node-connector;
             }
         }
