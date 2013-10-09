@@ -106,7 +106,7 @@
           <version>${concepts.version}</version>
         </dependency>
 
-        <!-- config -->
+        <!-- config
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-api</artifactId>
@@ -157,6 +157,7 @@
           <artifactId>logback-config</artifactId>
           <version>${config.version}</version>
         </dependency>
+        -->
       </dependencies>
     </profile>
   </profiles>
