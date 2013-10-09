@@ -11,7 +11,7 @@ fi
 if [[ $platform == 'linux' ]]; then
    fullpath=`readlink -f $0`
 
-   [[ -z ${JAVA_HOME} ]] && [[ -x "/usr/lib/jvm/java-1.7.0" ]] && export JAVA_HOME=`/usr/lib/jvm/java-1.7.0`;
+   [[ -z ${JAVA_HOME} ]] && [[ -x "/usr/lib/jvm/java-1.7.0" ]] && export JAVA_HOME='/usr/lib/jvm/java-1.7.0';
 
 elif [[ $platform == 'osx' ]]; then
    TARGET_FILE=$0
