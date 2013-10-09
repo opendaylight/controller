@@ -124,6 +124,15 @@ public class ForwardingRulesManagerIT {
                         "sal.connection").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller",
                         "sal.connection.implementation").versionAsInProject(),
+                
+                mavenBundle("org.opendaylight.yangtools", "concepts").versionAsInProject(),
+                mavenBundle("org.opendaylight.yangtools", "yang-binding").versionAsInProject(),
+                mavenBundle("org.opendaylight.yangtools", "yang-common").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal-common-api").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal-binding-api").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal-binding-broker-impl").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal-common").versionAsInProject(),
+
 
                 // needed by hosttracker
                 mavenBundle("org.opendaylight.controller", "topologymanager")
