@@ -16,6 +16,24 @@
       "revId": "a6963c06a8a13eee12d5e21295ba6a42b9957d5e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ec53c36a",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Bandwidth.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-09T20:23:56Z",
+      "side": 0,
+      "message": "But why keep a dead code? If noone uses it - what is its purpose?\nIf someone needs it, it will be added again.",
+      "parentUuid": "da6255ed_0cecd7c6",
+      "revId": "a6963c06a8a13eee12d5e21295ba6a42b9957d5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
