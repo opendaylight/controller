@@ -30,9 +30,11 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
         }
         broker.addRpcImplementation(rpcType, implementation);
         rpcImpls.put(rpcType, implementation);
+        //FIXME: Return registration
+        return null;
     }
 
-    override removeRpcImplementation(QName rpcType, RpcImplementation implToRemove) throws IllegalArgumentException {
+    def removeRpcImplementation(QName rpcType, RpcImplementation implToRemove) throws IllegalArgumentException {
         val localImpl = rpcImpls.get(rpcType);
         if(localImpl != implToRemove) {
             throw new IllegalStateException(
@@ -42,5 +44,13 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
         broker.removeRpcImplementation(rpcType, implToRemove);
         rpcImpls.remove(rpcType);
     }
-
+    
+    override addMountedRpcImplementation(QName rpcType, RpcImplementation implementation) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+    
+    override addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
+        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    }
+    
 }

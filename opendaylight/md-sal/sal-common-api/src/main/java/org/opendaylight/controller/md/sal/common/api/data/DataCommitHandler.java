@@ -5,15 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.binding.api.data;
+package org.opendaylight.controller.md.sal.common.api.data;
 
-import java.util.Set;
-
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
+// FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
+// import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
 /**
  * Two phase commit handler (cohort) of the two-phase commit protocol of data.
  * 
@@ -74,88 +71,34 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * </ol>
  * 
  * <h4>Commit Rollback Phase</h4>
- * <li>For each <code>CommitTransaction</code> from Commit Request phase
+ * <li>For each <code>DataCommitTransaction</code> from Commit Request phase
  * <ol>
  * <li><code>Broker</code>
- * broker invokes a {@link CommitTransaction#finish()}
+ * broker invokes a {@link DataCommitTransaction#finish()}
  * <li>The provider rollbacks a commit and returns an {@link RpcResult} of
  * rollback. </ol>
  * <li>Broker returns a error result to the consumer.
  * 
- * 
- * <h3>Registration of functionality</h3>
- * The registration could be done by :
- * <ul>
- * <li>returning an instance of implementation in the return value of
- * {@link Provider#getProviderFunctionality()}
- * <li>passing an instance of implementation and {@link DataStoreIdentifier} of
- * rpc as arguments to the
- * {@link DataProviderService#addCommitHandler(DataStoreIdentifier, DataCommitHandler)}
- * </ul>
- * 
- * 
- * 
+ * @param <P> Class representing a path
+ * @param <D> Superclass from which all data objects are derived from.
  */
-public interface DataCommitHandler extends ProviderFunctionality {
-    /**
-     * A set of Data Stores supported by implementation.
-     * 
-     * The set of {@link DataStoreIdentifier}s which identifies target data
-     * stores which are supported by this commit handler. This set is used, when
-     * {@link Provider} is registered to the SAL, to register and expose the
-     * commit handler functionality to affected data stores.
-     * 
-     * @return Set of Data Store identifiers
-     */
-    @Deprecated
-    Set<DataStoreIdentifier> getSupportedDataStores();
+public interface DataCommitHandler<P/* extends Path<P> */,D> {
 
-    /**
-     * The provider (commit handler) starts a commit transaction.
-     * 
-     * <p>
-     * The commit handler (provider) prepares an commit scenario, rollback
-     * scenario and validates data.
-     * 
-     * <p>
-     * If the provider is aware that at this point the commit would not be
-     * successful, the transaction is not created, but list of errors which
-     * prevented the start of transaction are returned.
-     * 
-     * @param store
-     * @return Transaction object representing this commit, errors otherwise.
-     */
-    @Deprecated
-    RpcResult<CommitTransaction> requestCommit(DataStoreIdentifier store);
 
-    
-    RpcResult<CommitTransaction> requestCommit(DataModification modification);
-    
-    public interface CommitTransaction {
-        /**
-         * 
-         * @return Data store affected by the transaction
-         */
-        @Deprecated
-        DataStoreIdentifier getDataStore();
+    DataCommitTransaction<P, D> requestCommit(DataModification<P,D> modification);
 
-        /**
-         * Returns a modification transaction which is the source of this
-         * commit transaction.
-         * 
-         */
-        DataModification getModification();
-        
-        /**
-         * Returns the handler associated with this transaction.
-         * 
-         * @return Handler
-         */
-        DataCommitHandler getHandler();
+    public interface DataCommitTransaction<P/* extends Path<P> */,D> {
+
+        DataModification<P,D> getModification();
 
         /**
          * 
          * Finishes a commit.
+         * 
+         * This callback is invoked by commit coordinator to finish commit action.
+         * 
+         * The implementation is required to finish transaction or return unsuccessful
+         * rpc result if something went wrong.
          * 
          * The provider (commit handler) should apply all changes to its state
          * which are a result of data change-
@@ -166,6 +109,11 @@ public interface DataCommitHandler extends ProviderFunctionality {
 
         /**
          * Rollbacks a commit.
+         * 
+         * This callback is invoked by commit coordinator to finish commit action.
+         * 
+         * The provider (commit handler) should rollback all changes to its state
+         * which were a result of previous request commit.
          * 
          * @return
          * @throws IllegalStateException

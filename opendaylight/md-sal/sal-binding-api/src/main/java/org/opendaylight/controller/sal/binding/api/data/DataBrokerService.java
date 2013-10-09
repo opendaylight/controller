@@ -9,6 +9,9 @@ package org.opendaylight.controller.sal.binding.api.data;
 
 import java.util.concurrent.Future;
 
+import org.opendaylight.controller.md.sal.common.api.data.DataChangePublisher;
+import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransactionFactory;
+import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.binding.api.BindingAwareService;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -23,7 +26,11 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * 
  * @see DataProviderService
  */
-public interface DataBrokerService extends BindingAwareService {
+public interface DataBrokerService extends //
+        BindingAwareService, //
+        DataModificationTransactionFactory<InstanceIdentifier<? extends DataObject>, DataObject>, //
+        DataReader<InstanceIdentifier<? extends DataObject>, DataObject>, //
+        DataChangePublisher<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> {
 
     /**
      * Returns a data from specified Data Store.
@@ -36,6 +43,7 @@ public interface DataBrokerService extends BindingAwareService {
      *            Identifier of the store, from which will be data retrieved
      * @return data visible to the consumer
      */
+    @Deprecated
     <T extends DataRoot> T getData(DataStoreIdentifier store, Class<T> rootType);
 
     /**
@@ -139,21 +147,22 @@ public interface DataBrokerService extends BindingAwareService {
     @Deprecated
     Future<RpcResult<Void>> commit(DataStoreIdentifier store);
 
-    
-    DataObject getData(InstanceIdentifier data);
+    @Deprecated
+    DataObject getData(InstanceIdentifier<? extends DataObject> data);
 
-    DataObject getConfigurationData(InstanceIdentifier data);
-
-    
+    @Deprecated
+    DataObject getConfigurationData(InstanceIdentifier<?> data);
     /**
      * Creates a data modification transaction.
      * 
      * @return new blank data modification transaction.
      */
-    DataModification beginTransaction();
+    DataModificationTransaction beginTransaction();
 
-    public void registerChangeListener(InstanceIdentifier path, DataChangeListener changeListener);
-    
-    public void unregisterChangeListener(InstanceIdentifier path, DataChangeListener changeListener);
+    @Deprecated
+    public void registerChangeListener(InstanceIdentifier<? extends DataObject> path, DataChangeListener changeListener);
+
+    @Deprecated
+    public void unregisterChangeListener(InstanceIdentifier<? extends DataObject> path, DataChangeListener changeListener);
 
 }

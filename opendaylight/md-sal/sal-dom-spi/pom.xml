@@ -20,4 +20,5 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+    <packaging>bundle</packaging>
 </project>

@@ -9,7 +9,9 @@ import javassist.ClassPool;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper.*;
+
 import org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator;
 import org.opendaylight.controller.sal.binding.test.mock.FooService;
 import org.opendaylight.controller.sal.binding.test.mock.ReferencableObject;
@@ -17,6 +19,7 @@ import org.opendaylight.controller.sal.binding.test.mock.ReferencableObjectKey;
 import org.opendaylight.controller.sal.binding.test.mock.SimpleInput;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
@@ -51,7 +54,7 @@ public class RuntimeCodeGeneratorTest {
     }
 
     private void verifyRouting(FooService product) {
-        Map<InstanceIdentifier,FooService> routingTable = new HashMap<>();
+        Map<InstanceIdentifier<? extends Object>,FooService> routingTable = new HashMap<>();
         setRoutingTable(product, BaseIdentity.class, routingTable);
         
         assertSame("Returned routing table should be same instance",routingTable,getRoutingTable(product, BaseIdentity.class));
@@ -59,14 +62,14 @@ public class RuntimeCodeGeneratorTest {
         int servicesCount = 2;
         int instancesPerService = 3;
         
-        InstanceIdentifier[][] identifiers = identifiers(servicesCount,instancesPerService);
+        InstanceIdentifier<?>[][] identifiers = identifiers(servicesCount,instancesPerService);
         FooService service[] = new FooService[] {
                 mock(FooService.class, "Instance 0"),
                 mock(FooService.class,"Instance 1")
         };
         
         for(int i = 0;i<service.length;i++) {
-            for (InstanceIdentifier instance : identifiers[i]) {
+            for (InstanceIdentifier<?> instance : identifiers[i]) {
                 routingTable.put(instance, service[i]);
             }
         }
@@ -100,12 +103,12 @@ public class RuntimeCodeGeneratorTest {
         verify(service[1]).simple(instance_1_input[0]);
     }
 
-    private InstanceIdentifier[][] identifiers(int serviceSize, int instancesPerService) {
-        InstanceIdentifier[][] ret = new InstanceIdentifier[serviceSize][];
+    private InstanceIdentifier<?>[][] identifiers(int serviceSize, int instancesPerService) {
+        InstanceIdentifier<?>[][] ret = new InstanceIdentifier[serviceSize][];
         int service = 0;
         for (int i = 0;i<serviceSize;i++) {
             
-            InstanceIdentifier[] instanceIdentifiers = new InstanceIdentifier[instancesPerService];
+            InstanceIdentifier<?>[] instanceIdentifiers = new InstanceIdentifier[instancesPerService];
             ret[i] = instanceIdentifiers;
             for(int id = 0;id<instancesPerService;id++) {
                 instanceIdentifiers[id] = referencableIdentifier(service*instancesPerService+id);
@@ -116,16 +119,16 @@ public class RuntimeCodeGeneratorTest {
         return ret;
     }
 
-    private InstanceIdentifier referencableIdentifier(int i) {
+    private InstanceIdentifier<?> referencableIdentifier(int i) {
         ReferencableObjectKey key = new ReferencableObjectKey(i);
         IdentifiableItem<ReferencableObject,ReferencableObjectKey> pathArg = new IdentifiableItem<>(ReferencableObject.class,key);
-        return new InstanceIdentifier(Arrays.<PathArgument>asList(pathArg), ReferencableObject.class);
+        return new InstanceIdentifier<ReferencableObject>(Arrays.<PathArgument>asList(pathArg), ReferencableObject.class);
     }
 
     private static class SimpleInputImpl implements SimpleInput {
-        private final InstanceIdentifier identifier;
+        private final InstanceIdentifier<?> identifier;
 
-        public SimpleInputImpl(InstanceIdentifier _identifier) {
+        public SimpleInputImpl(InstanceIdentifier<?> _identifier) {
             this.identifier = _identifier;
         }
 
@@ -135,7 +138,7 @@ public class RuntimeCodeGeneratorTest {
         }
 
         @Override
-        public InstanceIdentifier getIdentifier() {
+        public InstanceIdentifier<?> getIdentifier() {
             return this.identifier;
         }
     }

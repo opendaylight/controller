@@ -7,17 +7,12 @@
  */
 package org.opendaylight.controller.sal.core.api.data;
 
-import java.util.Set;
-import java.util.concurrent.Future;
-
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
+import org.opendaylight.controller.md.sal.common.api.data.DataChangePublisher;
+import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransactionFactory;
+import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.opendaylight.controller.sal.core.api.Consumer;
-import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.MutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
 
 /**
@@ -28,109 +23,18 @@ import org.opendaylight.yangtools.yang.data.api.Node;
  * @see DataProviderService
  * 
  */
-public interface DataBrokerService extends BrokerService {
+public interface DataBrokerService extends 
+    BrokerService, //
+    DataReader<InstanceIdentifier, CompositeNode>, //
+    DataModificationTransactionFactory<InstanceIdentifier, CompositeNode>, //
+    DataChangePublisher<InstanceIdentifier, CompositeNode, DataChangeListener> {
 
-    
-    Set<DataStoreIdentifier> getDataStores();
-    
-    /**
-     * Returns a data from specified Data Store.
-     * 
-     * Returns all the data visible to the consumer from specified Data Store.
-     * 
-     * @param store
-     *            Identifier of the store, from which will be data retrieved
-     * @return data visible to the consumer
-     */
-    CompositeNode getData(DataStoreIdentifier store);
 
-    /**
-     * Returns a filtered subset of data from specified Data Store.
-     * 
-     * <p>
-     * The filter is modeled as an hierarchy of {@link Node} starting with
-     * {@link CompositeNode} representing data root. The semantics of the filter
-     * tree is the same as filter semantics defined in the NETCONF protocol for
-     * rpc operations <code>get</code> and <code>get-config</code> in Section 6
-     * of RFC6241.
-     * 
-     * 
-     * @see http://tools.ietf.org/html/rfc6241#section-6
-     * @param store
-     *            Identifier of the store, from which will be data retrieved
-     * @param filter
-     *            Data tree filter similar to the NETCONF filter
-     * @return
-     */
-    CompositeNode getData(DataStoreIdentifier store, CompositeNode filter);
+    @Override
+    public CompositeNode readConfigurationData(InstanceIdentifier path);
 
-    /**
-     * Returns a candidate data which are not yet commited.
-     * 
-     * 
-     * @param store
-     *            Identifier of the store, from which will be data retrieved
-     * @return
-     */
-    CompositeNode getCandidateData(DataStoreIdentifier store);
+    @Override
+    public CompositeNode readOperationalData(InstanceIdentifier path);
 
-    /**
-     * Returns a filtered subset of candidate data from specified Data Store.
-     * 
-     * <p>
-     * The filter is modeled as an hierarchy of {@link Node} starting with
-     * {@link CompositeNode} representing data root. The semantics of the filter
-     * tree is the same as filter semantics defined in the NETCONF protocol for
-     * rpc operations <code>get</code> and <code>get-config</code> in Section 6
-     * of RFC6241.
-     * 
-     * 
-     * @see http://tools.ietf.org/html/rfc6241#section-6
-     * @param store
-     *            Identifier of the store, from which will be data retrieved
-     * @param filter
-     *            A CompositeNode filter
-     * @return
-     */
-    CompositeNode getCandidateData(DataStoreIdentifier store,
-            CompositeNode filter);
-
-    /**
-     * 
-     * @param store
-     *            Identifier of the store, in which will be the candidate data
-     *            modified
-     * @param changeSet
-     *            Modification of data tree.
-     * @return Result object containing the modified data tree if the operation
-     *         was successful, otherwise list of the encountered errors.
-     */
-    RpcResult<CompositeNode> editCandidateData(DataStoreIdentifier store,
-            MutableCompositeNode changeSet);
-
-    /**
-     * Initiates a two-phase commit of candidate data.
-     * 
-     * <p>
-     * The {@link Consumer} could initiate a commit of candidate data
-     * 
-     * <p>
-     * The successful commit changes the state of the system and may affect
-     * several components.
-     * 
-     * <p>
-     * The effects of successful commit of data are described in the
-     * specifications and YANG models describing the {@link Provider} components
-     * of controller. It is assumed that {@link Consumer} has an understanding
-     * of this changes.
-     * 
-     * 
-     * @see DataCommitHandler for further information how two-phase commit is
-     *      processed.
-     * @param store
-     *            Identifier of the store, where commit should occur.
-     * @return Result of the commit, containing success information or list of
-     *         encountered errors, if commit was not successful.
-     */
-    Future<RpcResult<Void>> commit(DataStoreIdentifier store);
+    DataModificationTransaction beginTransaction();
 }

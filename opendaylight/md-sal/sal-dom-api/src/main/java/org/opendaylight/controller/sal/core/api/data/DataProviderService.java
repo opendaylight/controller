@@ -7,10 +7,16 @@
  */
 package org.opendaylight.controller.sal.core.api.data;
 
+import org.opendaylight.controller.md.sal.common.api.data.DataProvisionService;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Provider;
+import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 
-public interface DataProviderService extends DataBrokerService {
+public interface DataProviderService extends 
+    DataBrokerService, //
+    DataProvisionService<InstanceIdentifier, CompositeNode>
+    {
 
     /**
      * Adds {@link DataValidator} for specified Data Store
@@ -31,23 +37,6 @@ public interface DataProviderService extends DataBrokerService {
      */
     public void removeValidator(DataStoreIdentifier store,
             DataValidator validator);
-
-    /**
-     * Adds {@link DataCommitHandler} for specified data store
-     * 
-     * @param store
-     * @param provider
-     */
-    void addCommitHandler(DataStoreIdentifier store, DataCommitHandler provider);
-
-    /**
-     * Removes {@link DataCommitHandler} from specified data store
-     * 
-     * @param store
-     * @param provider
-     */
-    void removeCommitHandler(DataStoreIdentifier store,
-            DataCommitHandler provider);
 
     /**
      * Adds {@link DataRefresher} for specified data store

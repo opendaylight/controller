@@ -14,6 +14,7 @@ import org.opendaylight.controller.sal.binding.api.NotificationListener
 import com.google.common.collect.HashMultimap
 import java.util.concurrent.ExecutorService
 import java.util.Collection
+import org.opendaylight.yangtools.concepts.Registration
 
 class NotificationBrokerImpl implements NotificationProviderService {
 
@@ -36,9 +37,7 @@ class NotificationBrokerImpl implements NotificationProviderService {
     }
 
     override notify(Notification notification) {
-        notification.notificationTypes.forEach [
-            listeners.get(it as Class<? extends Notification>)?.notifyAll(notification)
-        ]
+        publish(notification)
     }
 
     def getNotificationTypes(Notification notification) {
@@ -49,17 +48,65 @@ class NotificationBrokerImpl implements NotificationProviderService {
     def notifyAll(Collection<NotificationListener<?>> listeners, Notification notification) {
         listeners.forEach[(it as NotificationListener).onNotification(notification)]
     }
-    
+
     override addNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
-        
+
     }
-    
+
     override removeNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
-    
+
     override notify(Notification notification, ExecutorService service) {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        publish(notification)
+    }
+
+    override publish(Notification notification) {
+        notification.notificationTypes.forEach [
+            listeners.get(it as Class<? extends Notification>)?.notifyAll(notification)
+        ]
+    }
+
+    override publish(Notification notification, ExecutorService service) {
+        publish(notification)
+    }
+
+    override <T extends Notification> registerNotificationListener(Class<T> notificationType,
+        NotificationListener<T> listener) {
+        val reg = new GenericNotificationRegistration<T>(notificationType,listener,this);
+        listeners.put(notificationType,listener);
+        return reg;
+    }
+
+    override registerNotificationListener(
+        org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
+            
+    }
+    
+    
+    protected def unregisterListener(GenericNotificationRegistration<?> reg) {
+        listeners.remove(reg.type,reg.instance);
+    }
+}
+class GenericNotificationRegistration<T extends Notification> implements Registration<NotificationListener<T>> {
+    
+    @Property
+    var NotificationListener<T> instance;
+    
+    @Property
+    val Class<T> type;
+    
+    
+    val NotificationBrokerImpl notificationBroker;
+    
+    public new(Class<T> type, NotificationListener<T> instance,NotificationBrokerImpl broker) {
+        _instance = instance;
+        _type = type;
+        notificationBroker = broker;
+    }
+    
+    override close() {
+        notificationBroker.unregisterListener(this);
     }
 }

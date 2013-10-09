@@ -11,6 +11,7 @@ import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 
 
@@ -40,15 +41,6 @@ public interface NotificationService extends BrokerService {
      * @param notification
      * @param listener
      */
-    void addNotificationListener(QName notification,
-            NotificationListener listener);
-
-    /**
-     * Removes a notification listener for supplied notification type.
-     * 
-     * @param notification
-     * @param listener
-     */
-    void removeNotificationListener(QName notification,
+    Registration<NotificationListener> addNotificationListener(QName notification,
             NotificationListener listener);
 }

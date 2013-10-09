@@ -1,13 +1,22 @@
-module sal-flow-config {
+module flow-management {
     namespace "urn:opendaylight:flow:config";
     prefix flow-cfg;
 
-    import sal-flow {prefix flow;}
+    import yang-ext {prefix ext;}
+    import opendaylight-inventory {prefix inv;}
+    import opendaylight-flow-types {prefix flow;}
 
     revision "2013-08-19" {
         description "Initial revision of flow service";
     }
 
+
+    grouping flow-entry {
+        leaf node {
+            type inv:node-ref;
+        }
+        uses flow:flow;
+    }
 
     container flows {
         list flow {
@@ -16,11 +25,7 @@ module sal-flow-config {
             leaf id {
                 type string;
             }
-            uses flow:node-flow;
-            /**
-                container match;
-            
-            **/
+            uses flow:flow-entry;
         }
     }
 }

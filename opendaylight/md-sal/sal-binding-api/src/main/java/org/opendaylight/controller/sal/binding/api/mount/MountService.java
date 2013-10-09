@@ -12,6 +12,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public interface MountService extends BindingAwareService {
 
-    MountInstance getMountPoint(InstanceIdentifier path);
+    MountInstance getMountPoint(InstanceIdentifier<?> path);
 
 }

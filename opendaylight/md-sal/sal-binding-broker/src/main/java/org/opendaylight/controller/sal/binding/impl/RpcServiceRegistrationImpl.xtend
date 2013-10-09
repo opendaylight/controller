@@ -26,8 +26,12 @@ class RpcServiceRegistrationImpl<T extends RpcService> implements RpcRegistratio
     override getService() {
         this.service
     }
+    
+    override getInstance() {
+        this.service
+    }
 
-    override unregister() {
+    override close() {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 }

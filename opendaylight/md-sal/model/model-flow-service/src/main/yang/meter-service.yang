@@ -11,7 +11,7 @@ module sal-meter {
         description "Initial revision of meter service";
     }        
     
-    metering node-meter {
+    grouping node-meter {
         leaf node {
             type inv:node-ref;
         }
@@ -20,7 +20,7 @@ module sal-meter {
     }
 
     /** Base configuration structure **/
-    metering meter-update {
+    grouping meter-update {
         container original-meter {
             uses meter-type:meter;
         }
