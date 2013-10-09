@@ -54,4 +54,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <packaging>bundle</packaging>
 </project>

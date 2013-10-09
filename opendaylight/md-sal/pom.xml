@@ -12,21 +12,30 @@
     </scm>
 
     <modules>
+        <!--  Common APIs & Implementation -->
         <module>sal-common</module>
+        <module>sal-common-api</module>
+        <module>sal-common-impl</module>
         <module>sal-common-util</module>
+
         <!-- Binding Independent -->
         <module>sal-dom-api</module>
         <module>sal-dom-broker</module>
         <module>sal-dom-spi</module>
+
         <!-- Binding Aware -->
         <module>sal-binding-api</module>
         <module>sal-binding-broker</module>
+
         <!-- Samples -->
         <module>samples</module>
+
         <!-- Base Models -->
         <module>model</module>
+
         <!-- Compability Packages -->
         <module>sal-compability</module>
+
         <!-- Connectors -->
         <module>sal-connector-api</module>
         <module>sal-rest-connector</module>
@@ -45,8 +54,9 @@
 
         <!-- Dependency Versions -->
         <slf4j.version>1.7.2</slf4j.version>
-        <yang.version>0.5.8</yang.version>
-        <yang.codegen.version>0.5.8</yang.codegen.version>
+        <yang.version>0.5.9-SNAPSHOT</yang.version>
+        <yang.binding.version>0.6.0-SNAPSHOT</yang.binding.version>
+        <yang.codegen.version>0.6.0-SNAPSHOT</yang.codegen.version>
         <guava.version>14.0.1</guava.version>
         <osgi.core.version>5.0.0</osgi.core.version>
         <junit.version>4.8.1</junit.version>
@@ -64,6 +74,11 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
+        </pluginRepository>
+        <pluginRepository>
+            <id>opendaylight-snapshot</id>
+            <name>opendaylight-snapshot</name>
+            <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
         </pluginRepository>
         <pluginRepository>
             <id>opendaylight.release</id>
@@ -132,7 +147,7 @@
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-binding</artifactId>
-                <version>${yang.version}</version>
+                <version>${yang.binding.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
@@ -206,7 +221,7 @@
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>${bundle.plugin.version}</version>
                     <extensions>true</extensions>
-                    <executions>
+                    <!--executions>
                         <execution>
                             <id>bundle-manifest</id>
                             <phase>process-classes</phase>
@@ -214,7 +229,7 @@
                                 <goal>manifest</goal>
                             </goals>
                         </execution>
-                    </executions>
+                    </executions-->
                     <configuration>
                         <instructions>
                             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>

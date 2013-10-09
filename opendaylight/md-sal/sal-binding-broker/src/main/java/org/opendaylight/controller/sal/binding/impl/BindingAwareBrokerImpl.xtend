@@ -39,6 +39,7 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
     private var RuntimeCodeGenerator generator;
     private Map<Class<? extends RpcService>, RpcProxyContext> managedProxies = new HashMap();
     private var NotificationBrokerImpl notifyBroker
+    private var DataBrokerImpl dataBroker
     private var ServiceRegistration<NotificationProviderService> notifyBrokerRegistration
 
     @Property
@@ -126,7 +127,7 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         return new RpcServiceRegistrationImpl<T>(type, service, osgiReg);
     }
 
-    def <T extends RpcService> RpcRegistration<T> registerMountedRpcImplementation(Class<T> tyoe, T service, InstanceIdentifier identifier,
+    def <T extends RpcService> RpcRegistration<T> registerMountedRpcImplementation(Class<T> tyoe, T service, InstanceIdentifier<?> identifier,
         OsgiProviderContext context, Hashtable<String, String> properties) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }

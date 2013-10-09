@@ -28,8 +28,6 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  */
 public interface BindingAwareProvider {
 
-    void onSessionInitialized(ConsumerContext session);
-
     /**
      * Returns a set of provided implementations of YANG modules and their rpcs.
      * 
@@ -65,5 +63,7 @@ public interface BindingAwareProvider {
     }
 
     void onSessionInitiated(ProviderContext session);
+
+    void onSessionInitialized(ConsumerContext session);
 
 }

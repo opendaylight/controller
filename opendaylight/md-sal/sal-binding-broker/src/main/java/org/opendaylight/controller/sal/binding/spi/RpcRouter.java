@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.sal.binding.spi;
 
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
@@ -44,7 +51,7 @@ public interface RpcRouter<T extends RpcService> {
      * @return instance of RpcService which is responsible for processing
      *         particular path.
      */
-    T getService(Class<? extends BaseIdentity> context, InstanceIdentifier path);
+    T getService(Class<? extends BaseIdentity> context, InstanceIdentifier<?> path);
 
     /**
      * Returns a default fallback instance of RpcService which is responsible

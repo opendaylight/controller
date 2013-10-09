@@ -7,5 +7,5 @@ import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 public interface Grouping {
 
     @RoutingContext(BaseIdentity.class)
-    InstanceIdentifier getInheritedIdentifier();
+    InstanceIdentifier<?> getInheritedIdentifier();
 }

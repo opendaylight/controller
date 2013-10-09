@@ -30,55 +30,51 @@ import org.osgi.framework.ServiceReference;
 @RunWith(PaxExam.class)
 public class ToasterTest {
 
-	public static final String ODL = "org.opendaylight.controller";
-	public static final String YANG = "org.opendaylight.yangtools";
-	public static final String SAMPLE = "org.opendaylight.controller.samples";
+    public static final String ODL = "org.opendaylight.controller";
+    public static final String YANG = "org.opendaylight.yangtools";
+    public static final String SAMPLE = "org.opendaylight.controller.samples";
 
-	@Test
-	public void properInitialized() throws Exception {
+    @Test
+    public void properInitialized() throws Exception {
 
-		Collection<ServiceReference<ToasterService>> references = ctx
-				.getServiceReferences(ToasterService.class, null);
-		assertEquals(2, references.size());
-		
-		consumer.createToast(WhiteBread.class, 5);
-		
-	}
+        Collection<ServiceReference<ToasterService>> references = ctx.getServiceReferences(ToasterService.class, null);
+        assertEquals(2, references.size());
 
-	@Inject
-	BindingAwareBroker broker;
+        consumer.createToast(WhiteBread.class, 5);
 
-	@Inject
-	ToastConsumer consumer;
+    }
 
-	@Inject
-	BundleContext ctx;
+    @Inject
+    BindingAwareBroker broker;
 
-	@Configuration
-	public Option[] config() {
-		return options(systemProperty("osgi.console").value("2401"),
-				mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(),
-				mavenBundle("org.slf4j", "log4j-over-slf4j")
-						.versionAsInProject(),
-				mavenBundle("ch.qos.logback", "logback-core")
-						.versionAsInProject(),
-				mavenBundle("ch.qos.logback", "logback-classic")
-						.versionAsInProject(),
-				mavenBundle(ODL, "sal-binding-api").versionAsInProject(),
-				mavenBundle(ODL, "sal-binding-broker-impl")
-						.versionAsInProject(), mavenBundle(ODL, "sal-common")
-						.versionAsInProject(),
-				mavenBundle(ODL, "sal-common-util").versionAsInProject(),
-				mavenBundle(SAMPLE, "sample-toaster").versionAsInProject(),
-				mavenBundle(SAMPLE, "sample-toaster-consumer")
-						.versionAsInProject(),
-				mavenBundle(SAMPLE, "sample-toaster-provider")
-						.versionAsInProject(),
-				mavenBundle(YANG, "yang-binding").versionAsInProject(),
-				mavenBundle(YANG, "yang-common").versionAsInProject(),
-				mavenBundle("com.google.guava", "guava").versionAsInProject(),
-				junitBundles(), mavenBundle("org.javassist", "javassist")
-						.versionAsInProject());
-	}
+    @Inject
+    ToastConsumer consumer;
+
+    @Inject
+    BundleContext ctx;
+
+    @Configuration
+    public Option[] config() {
+        return options(systemProperty("osgi.console").value("2401"), 
+                mavenBundle("org.slf4j", "slf4j-api").versionAsInProject(), //
+                mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
+                mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
+                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
+                mavenBundle(ODL, "sal-binding-api").versionAsInProject(), //
+                mavenBundle(ODL, "sal-binding-broker-impl").versionAsInProject(), //
+                mavenBundle(ODL, "sal-common").versionAsInProject(), //
+                mavenBundle(ODL, "sal-common-api").versionAsInProject(),
+                mavenBundle(ODL, "sal-common-util").versionAsInProject(), //
+                mavenBundle(SAMPLE, "sample-toaster").versionAsInProject(), //
+                mavenBundle(SAMPLE, "sample-toaster-consumer").versionAsInProject(), //
+                mavenBundle(SAMPLE, "sample-toaster-provider").versionAsInProject(), //
+                mavenBundle(YANG, "concepts").versionAsInProject(),
+                mavenBundle(YANG, "yang-binding").versionAsInProject(), //
+                mavenBundle(YANG, "yang-common").versionAsInProject(), //
+                mavenBundle("com.google.guava", "guava").versionAsInProject(), //
+                mavenBundle("org.javassist", "javassist").versionAsInProject(),
+                junitBundles()
+                );
+    }
 
 }

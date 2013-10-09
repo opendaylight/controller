@@ -18,28 +18,27 @@ import org.slf4j.LoggerFactory;
 
 public class BrokerActivator implements BundleActivator {
 
-	private static final Logger log = LoggerFactory.getLogger(BrokerActivator.class);
-	private BindingAwareBrokerImpl baSal;
-	private ServiceRegistration<BindingAwareBroker> baSalRegistration;
-	
-	
-	@Override
-	public void start(BundleContext context) throws Exception {
-		log.info("Binding Aware Broker initialized");
-		baSal = new BindingAwareBrokerImpl();
-		baSal.setBrokerBundleContext(context);
-		baSal.start();
-		
-		BindingAwareBroker baSalService = baSal;
-		Hashtable<String, String> properties = new Hashtable<>();
-		this.baSalRegistration = context.registerService(BindingAwareBroker.class,baSalService, properties);
-		
-	}
+    private static final Logger log = LoggerFactory.getLogger(BrokerActivator.class);
+    private BindingAwareBrokerImpl baSal;
+    private ServiceRegistration<BindingAwareBroker> baSalRegistration;
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		log.info("Binding Aware Broker stopped");
-		baSalRegistration.unregister();
-	}
+    @Override
+    public void start(BundleContext context) throws Exception {
+        log.info("Binding Aware Broker initialized");
+        baSal = new BindingAwareBrokerImpl();
+        baSal.setBrokerBundleContext(context);
+        baSal.start();
+
+        BindingAwareBroker baSalService = baSal;
+        Hashtable<String, String> properties = new Hashtable<>();
+        this.baSalRegistration = context.registerService(BindingAwareBroker.class, baSalService, properties);
+
+    }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        log.info("Binding Aware Broker stopped");
+        baSalRegistration.unregister();
+    }
 
 }

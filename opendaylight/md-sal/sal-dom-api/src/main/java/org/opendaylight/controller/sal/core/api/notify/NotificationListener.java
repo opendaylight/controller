@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.core.api.notify;
 
+import java.util.EventListener;
 import java.util.Set;
 
 import org.opendaylight.controller.sal.core.api.Consumer;
@@ -17,7 +18,7 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 /**
  * Notification listener for SAL notifications.
  */
-public interface NotificationListener extends Consumer.ConsumerFunctionality {
+public interface NotificationListener extends Consumer.ConsumerFunctionality, EventListener {
     /**
      * A set of notification types supported by listeners.
      * 

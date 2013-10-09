@@ -56,6 +56,16 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-common-api</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-common-impl</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-api</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
@@ -104,6 +114,11 @@
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>concepts</artifactId>
           <version>${concepts.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>concepts</artifactId>
+          <version>0.1.1-SNAPSHOT</version>
         </dependency>
 
         <!-- config
@@ -948,6 +963,7 @@
     <dependency>
      <groupId>org.opendaylight.yangtools</groupId>
      <artifactId>yang-binding</artifactId>
+     <version>0.6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
      <groupId>org.opendaylight.yangtools</groupId>
