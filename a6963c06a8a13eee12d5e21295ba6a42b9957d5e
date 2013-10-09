@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0cecd7c6",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Bandwidth.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-09T19:16:54Z",
+      "side": 0,
+      "message": "Please don\u0027t remove this. I believe this should\u0027ve been an enum if you\u0027d like to refactor.\nDon\u0027t forget ODL is a framework, many of those other BW fields are not currently used anywhere except tests.",
+      "revId": "a6963c06a8a13eee12d5e21295ba6a42b9957d5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
