@@ -11,6 +11,23 @@ module flow-node-inventory {
         description "Flow Capable Node extensions to the nventory model";
     }
     
+    
+    grouping queue {
+         leaf queue-id {
+            type uint32;
+            description "id for the specific queue";
+            mandatory true; 
+        }
+        container properties {
+            leaf minimum-rate {
+                type uint32;
+            }
+            leaf maximum-rate{
+                type uint32;
+            }
+        }
+    }
+
     grouping flow-capable-node-capabilities {
         container tables {
             leaf support-state {
@@ -59,12 +76,20 @@ module flow-node-inventory {
         }
     }
     
-    augment "/inv:nodes/inv:node" {
-        augment-identifier "flow-capable-node";
+    grouping flow-capable-node-connector {
+        
+    }
+
+    notification node-capabilities-updated {
         uses flow-capable-node-capabilities;
     }
-    
-    notification node-capabilities-updated {
+
+    notification node-connector-capabilities-updated {
+        uses flow-capable-node-connector;
+    }
+
+    augment "/inv:nodes/inv:node" {
+        augment-identifier "flow-capable-node";
         uses flow-capable-node-capabilities;
     }
 }

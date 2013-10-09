@@ -27,7 +27,7 @@ module opendaylight-group-types {
     
     grouping group {
         
-        uses group-types;       
+        uses group-types;
         
         leaf group-id {
             type group-ref;

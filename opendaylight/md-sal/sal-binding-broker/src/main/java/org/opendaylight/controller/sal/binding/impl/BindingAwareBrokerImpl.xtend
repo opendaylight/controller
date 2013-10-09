@@ -31,6 +31,8 @@ import org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration
+import org.opendaylight.controller.sal.binding.api.data.DataProviderService
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
 
 class BindingAwareBrokerImpl implements BindingAwareBroker {
     private static val log = LoggerFactory.getLogger(BindingAwareBrokerImpl)
@@ -50,10 +52,14 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
 
         // Initialization of notificationBroker
         notifyBroker = new NotificationBrokerImpl(null);
+        dataBroker = new DataBrokerImpl();
         val brokerProperties = newProperties();
         notifyBrokerRegistration = brokerBundleContext.registerService(NotificationProviderService, notifyBroker,
             brokerProperties)
         brokerBundleContext.registerService(NotificationService, notifyBroker, brokerProperties)
+        brokerBundleContext.registerService(DataProviderService,dataBroker,brokerProperties)
+        brokerBundleContext.registerService(DataBrokerService,dataBroker,brokerProperties)
+        
     }
 
     def initGenerator() {
