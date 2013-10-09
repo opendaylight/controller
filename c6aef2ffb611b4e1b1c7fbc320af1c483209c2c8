@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_c947d11c",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-09T09:23:28Z",
+      "side": 1,
+      "message": "I think we should aim towards more correct naming and comply with Java standards.\nContinuing adding non conventional naming will lead the project to continue  looking like it\u0027s not written in Java. I would change the existing ones to a more correct naming - of course not as part of this patch.\nBut we can wait and here more reviewers opinion on this of course.",
+      "parentUuid": "fa5d592f_36bb5d74",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa5d592f_76cc3536",
         "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
         "patchSetId": 1
@@ -100,6 +118,24 @@
       "side": 1,
       "message": "unfortunately setInterface takes a Dictionary.",
       "parentUuid": "fa5d592f_769af515",
+      "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_09460924",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-09T09:23:28Z",
+      "side": 1,
+      "message": "yes, saw it\u0027s coming from a third party :(",
+      "parentUuid": "fa5d592f_16b0598a",
       "revId": "c6aef2ffb611b4e1b1c7fbc320af1c483209c2c8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
