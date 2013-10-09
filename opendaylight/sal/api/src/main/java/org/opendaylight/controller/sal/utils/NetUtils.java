@@ -43,7 +43,7 @@ public abstract class NetUtils {
     /**
      * Constant holding the broadcast MAC address
      */
-    private static final byte[] BroadcastMACAddr = {-1, -1, -1, -1, -1, -1};
+    public static final byte[] BroadcastMACAddr = {-1, -1, -1, -1, -1, -1};
 
     /**
      * Converts a 4 bytes array into an integer number
