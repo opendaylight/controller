@@ -1063,10 +1063,9 @@
             <executable>java</executable>
             <arguments>
                 <argument>-cp</argument>
-                <argument>../sanitytest/target/classes</argument>
+                <argument>./target/dependency/*</argument>
                 <argument>org.opendaylight.controller.distribution.Sanity</argument>
             </arguments>
-            <workingDirectory>${exec.workingdir}/../../sanitytest</workingDirectory>
           </configuration>
       </plugin>
     </plugins>
