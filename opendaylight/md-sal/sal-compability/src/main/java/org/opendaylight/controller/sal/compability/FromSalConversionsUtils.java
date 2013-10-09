@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.opendaylight.controller.sal.action.*;
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
@@ -23,6 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.VlanCfi;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.Address;
@@ -30,6 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.addres
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv6Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.ActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
@@ -81,6 +85,51 @@ public class FromSalConversionsUtils {
             return targetFlow.build();
         }
         return null;
+    }
+
+    public static GetFlowStatisticsInput flowStatisticsInputFrom(Flow sourceFlow) {
+        GetFlowStatisticsInputBuilder targetFlow = new GetFlowStatisticsInputBuilder();
+        targetFlow.setHardTimeout((int) sourceFlow.getHardTimeout());
+        targetFlow.setIdleTimeout((int) sourceFlow.getIdleTimeout());
+        targetFlow.setPriority((int) sourceFlow.getPriority());
+        targetFlow.setCookie(new BigInteger(String.valueOf(sourceFlow.getId())));
+
+        List<org.opendaylight.controller.sal.action.Action> sourceActions = sourceFlow.getActions();
+        List<Action> targetActions = new ArrayList<>();
+        for (org.opendaylight.controller.sal.action.Action sourceAction : sourceActions) {
+            targetActions.add(actionFrom(sourceAction));
+        }
+        targetFlow.setAction(targetActions);
+
+        targetFlow.setMatch(matchFrom(sourceFlow.getMatch()));
+        // TODO: setNode
+        // targetFlow.setNode(value);
+
+        return targetFlow.build();
+    }
+
+    public static GetNodeConnectorStatisticsInput nodeConnectorStatisticsFrom(NodeConnector connector) {
+        GetNodeConnectorStatisticsInputBuilder target = new GetNodeConnectorStatisticsInputBuilder();
+
+        NodeRef nodeRef = nodeRefFrom(connector.getNode());
+        target.setNode(nodeRef);
+
+        NodeConnectorRef nodeConnectorRef = nodeConnectorRefFrom(connector);
+        target.setNodeConnector(nodeConnectorRef);
+
+        return target.build();
+    }
+
+    // TODO: implement correct conversion
+    private static NodeRef nodeRefFrom(Node node) {
+        NodeRef nodeRef = null;
+        return nodeRef;
+    }
+
+    // TODO: implement correct conversion
+    private static NodeConnectorRef nodeConnectorRefFrom(NodeConnector nodeConnector) {
+        NodeConnectorRef nodeConnectorRef = null;
+        return nodeConnectorRef;
     }
 
     private static Action actionFrom(org.opendaylight.controller.sal.action.Action sourceAction) {
