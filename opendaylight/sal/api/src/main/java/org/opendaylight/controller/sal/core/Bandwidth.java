@@ -40,7 +40,6 @@ public class Bandwidth extends Property {
     public static final long BW10Gbps = (long) Math.pow(10, 10);
     public static final long BW40Gbps = 4 * (long) Math.pow(10, 10);
     public static final long BW100Gbps = (long) Math.pow(10, 11);
-    public static final long BW400Gbps = 4 * (long) Math.pow(10, 11);
     public static final long BW1Tbps = (long) Math.pow(10, 12);
     public static final long BW1Pbps = (long) Math.pow(10, 15);
 

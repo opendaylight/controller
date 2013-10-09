@@ -24,26 +24,17 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
 
 import org.opendaylight.controller.clustering.services.CacheConfigException;
 import org.opendaylight.controller.clustering.services.CacheExistException;
-import org.opendaylight.controller.clustering.services.CacheListenerAddException;
-import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterServices;
 import org.opendaylight.controller.clustering.services.IClusterServicesCommon;
-import org.opendaylight.controller.clustering.services.ICoordinatorChangeAware;
-import org.opendaylight.controller.clustering.services.IListenRoleChange;
-import org.opendaylight.controller.clustering.services.ListenRoleChangeAddException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
-import java.util.Collections;
-import java.util.HashSet;
 import org.apache.felix.dm.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class ClusterManagerCommon implements IClusterServicesCommon {
     protected String containerName = "";

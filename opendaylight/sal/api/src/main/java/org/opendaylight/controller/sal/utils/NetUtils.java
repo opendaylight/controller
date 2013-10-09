@@ -36,11 +36,6 @@ public abstract class NetUtils {
     public static final int MACAddrLengthInBytes = 6;
 
     /**
-     * Constant holding the number of words in MAC Address
-     */
-    public static final int MACAddrLengthInWords = 3;
-
-    /**
      * Constant holding the broadcast MAC address
      */
     private static final byte[] BroadcastMACAddr = {-1, -1, -1, -1, -1, -1};

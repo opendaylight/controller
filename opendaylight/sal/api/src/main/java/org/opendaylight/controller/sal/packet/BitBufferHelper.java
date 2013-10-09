@@ -383,7 +383,6 @@ public abstract class BitBufferHelper {
         long ret = 0;
         int value = 0;
 
-        value = array[startOffset - 1] & getLSBMask(bitsRest);
         value = (array[startOffset - 1] < 0) ? (array[startOffset - 1] + 256)
                 : array[startOffset - 1];
         ret = ret

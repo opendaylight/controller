@@ -19,8 +19,6 @@ public class ConfigRegistryConstants {
 
     public static final ObjectName OBJECT_NAME = createONWithDomainAndType(TYPE_CONFIG_REGISTRY);
 
-    public static String GET_AVAILABLE_MODULE_NAMES_ATTRIBUT_NAME = "AvailableModuleNames";
-
     public static ObjectName createONWithDomainAndType(String type) {
         return createON(ON_DOMAIN, TYPE_KEY, type);
     }
