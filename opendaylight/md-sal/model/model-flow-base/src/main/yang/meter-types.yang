@@ -16,21 +16,21 @@ module opendaylight-meter-types {
     
     grouping meter-flags {
         leaf flags {
-            type enumeration {
-                enum meter-kbps;
-                enum meter_pktps;
-                enum meter_burst;
-                enum meter_stats;
+            type bits {
+                bit meter-kbps;
+                bit meter_pktps;
+                bit meter_burst;
+                bit meter_stats;
             }
         }
     }
     
     grouping meter-band-type {
         leaf flags {
-            type enumeration {
-                enum ofpmbt-drop;
-                enum ofpmbt-dscp-remark;
-                enum ofpmbt-experimenter;               
+            type bits {
+                bit ofpmbt-drop;
+                bit ofpmbt-dscp-remark;
+                bit ofpmbt-experimenter;               
             }
         }
     }
