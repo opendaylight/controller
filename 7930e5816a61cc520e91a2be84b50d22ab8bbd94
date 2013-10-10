@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "da6255ed_1d49a38b",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-10T16:59:05Z",
+      "side": 1,
+      "message": "Please add the copyright notice",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_fd5daf49",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastPortSelector.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-10T16:59:05Z",
+      "side": 1,
+      "message": "Copyright notice",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_a9549dca",
         "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastPortSelector.java",
         "patchSetId": 3
@@ -13,6 +47,57 @@
       "writtenOn": "2013-10-09T09:23:38Z",
       "side": 1,
       "message": "no need to mark interface method as public.",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_dd5aeb4f",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-10T16:59:05Z",
+      "side": 1,
+      "message": "Copyright notice",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_dd21cbb5",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-10T16:59:05Z",
+      "side": 1,
+      "message": "have you considered calling \ninvSvc.getUpNodeConnectors(Node node)\nit should return you all the ports in link up state for the specified switch and should not include the internal switch port SW.\n\nUnless you are intentionally broadcasting on all the switches. Then, please discard my comment.",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5d36fb04",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-10T16:59:05Z",
+      "side": 1,
+      "message": "Why these locking ?\nIn this container where SimpleBroadCast is being instantiated, there will be only one one dep mgr to call the callback set/unset functions.",
       "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
