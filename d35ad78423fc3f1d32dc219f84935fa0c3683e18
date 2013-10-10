@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_834d3275",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/NodeConnector.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-10T22:45:02Z",
+      "side": 0,
+      "message": "Please either keep the comment (w/o the empty else) or add the required functionality",
+      "revId": "d35ad78423fc3f1d32dc219f84935fa0c3683e18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
