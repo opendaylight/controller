@@ -5,6 +5,7 @@ module flow-node-inventory {
     import yang-ext {prefix ext;}
     import ietf-inet-types {prefix inet;}
     import ietf-yang-types {prefix yang;}
+    import opendaylight-port-types {prefix port;}
     import opendaylight-inventory {prefix inv;}
     
     revision "2013-08-19" {
@@ -12,6 +13,12 @@ module flow-node-inventory {
     }
     
     
+    grouping feature {
+        leaf support-state {
+            type inv:support-type;
+        }
+    }
+
     grouping queue {
          leaf queue-id {
             type uint32;
@@ -28,68 +35,80 @@ module flow-node-inventory {
         }
     }
 
-    grouping flow-capable-node-capabilities {
+    grouping table {
+
+
+    }
+
+    grouping flow-node {
         container tables {
-            leaf support-state {
-                type inv:support-type;
+            uses feature;
+            list table {
+                uses table;
             }
-            
         }
         
         container group-tables {
-        
+            uses feature;
         }
         
         container supported-match-types {
             list match-type {
+                uses feature;
                 leaf match {
                     type string; // FIXME: Add identity
                 }
-                leaf support-state {
-                    type inv:support-type;
-                }
+                
             }
         }
         
         container supported-instructions {
             list instruction-type {
+                uses feature;
                 leaf instruction {
                     type string; // FIXME: Add identity
-                }
-                
-                leaf support-state {
-                    type inv:support-type;
                 }
             }
         }
 
         container supported-actions {
             list action-type {
+                uses feature;
+
                 leaf action {
                     type string; // FIXME: Add identity
-                }
-                
-                leaf support-state {
-                    type inv:support-type;
                 }
             }
         }
     }
     
-    grouping flow-capable-node-connector {
-        
-    }
+    grouping flow-node-connector {
 
-    notification node-capabilities-updated {
-        uses flow-capable-node-capabilities;
-    }
-
-    notification node-connector-capabilities-updated {
-        uses flow-capable-node-connector;
+        uses port:flow-capable-port;
     }
 
     augment "/inv:nodes/inv:node" {
-        augment-identifier "flow-capable-node";
-        uses flow-capable-node-capabilities;
+        ext:augment-identifier "flow-capable-node";
+        uses flow-node;
+    }
+
+    augment "/inv:nodes/inv:node/inv:node-connector" {
+        ext:augment-identifier "flow-capable-node-connector";
+        uses flow-node-connector;
+    }
+
+    augment "/inv:node-updated" {
+        ext:augment-identifier "flow-capable-node-updated";
+        uses flow-node;
+    }
+
+    augment "/inv:node-updated/inv:node-connector" {
+        //ext:identical-augment "flow-capable-node-connector";
+        ext:augment-identifier "flow-capable-node-connector-update-fields";
+        uses flow-node-connector;
+    }
+
+    augment "/inv:node-connector-updated" {
+        ext:augment-identifier "flow-capable-node-connector-updated";   
     }
 }
