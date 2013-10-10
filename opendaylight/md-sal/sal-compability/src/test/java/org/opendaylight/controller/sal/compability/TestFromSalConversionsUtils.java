@@ -40,29 +40,29 @@ public class TestFromSalConversionsUtils {
     public void testFromSalConversion() {
 
         Flow salFlow = prepareSalFlowCommon();
-        NodeFlow odNodeFlow = FromSalConversionsUtils.flowFrom(salFlow);
+        NodeFlow odNodeFlow = FromSalConversionsUtils.flowAdded(salFlow);
 
         checkOdFlow(odNodeFlow);
 
-        odNodeFlow = FromSalConversionsUtils.flowFrom(prepareSalMatch(salFlow, MtchType.other));
+        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.other));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.other);
 
-        odNodeFlow = FromSalConversionsUtils.flowFrom(prepareSalMatch(salFlow, MtchType.arp));
+        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.arp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.arp);
 
-        odNodeFlow = FromSalConversionsUtils.flowFrom(prepareSalMatch(salFlow, MtchType.ipv4));
+        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.ipv4));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.ipv4);
 
-        odNodeFlow = FromSalConversionsUtils.flowFrom(prepareSalMatch(salFlow, MtchType.ipv6));
+        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.ipv6));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.ipv6);
 
-        odNodeFlow = FromSalConversionsUtils.flowFrom(prepareSalMatch(salFlow, MtchType.sctp));
+        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.sctp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.sctp);
 
-        odNodeFlow = FromSalConversionsUtils.flowFrom(prepareSalMatch(salFlow, MtchType.tcp));
+        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.tcp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.tcp);
 
-        odNodeFlow = FromSalConversionsUtils.flowFrom(prepareSalMatch(salFlow, MtchType.udp));
+        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.udp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.udp);
     }
 

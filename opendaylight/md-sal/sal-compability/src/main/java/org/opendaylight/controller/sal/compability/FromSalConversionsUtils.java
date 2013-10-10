@@ -14,6 +14,9 @@ import java.util.List;
 
 import org.opendaylight.controller.sal.action.*;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Node;
+
+
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchField;
@@ -21,8 +24,15 @@ import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.*;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.VlanCfi;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.Address;
@@ -30,6 +40,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.addres
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv6Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.ActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
@@ -49,10 +61,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819
 
 import com.google.common.net.InetAddresses;
 
-import static org.opendaylight.controller.sal.compability.ProtocolConstants.ETHERNET_ARP;
-import static org.opendaylight.controller.sal.compability.ProtocolConstants.SCTP;
-import static org.opendaylight.controller.sal.compability.ProtocolConstants.TCP;
-import static org.opendaylight.controller.sal.compability.ProtocolConstants.UDP;
+
+
+
+import static org.opendaylight.controller.sal.compability.ProtocolConstants.*;
+import static org.opendaylight.controller.sal.compability.NodeInventoryAdapter.*;
 
 public class FromSalConversionsUtils {
 
@@ -60,30 +73,100 @@ public class FromSalConversionsUtils {
 
     }
 
-    public static FlowAdded flowFrom(Flow sourceFlow) {
-        if (sourceFlow != null) {
-            final FlowAddedBuilder targetFlow = new FlowAddedBuilder();
+    public static FlowAdded flowAdded(Flow sourceFlow) {
+        if (sourceFlow == null)
+            throw new IllegalArgumentException();
+        final FlowAddedBuilder targetFlow = new FlowAddedBuilder();
+        targetFlow.setHardTimeout((int) sourceFlow.getHardTimeout());
+        targetFlow.setIdleTimeout((int) sourceFlow.getIdleTimeout());
+        targetFlow.setPriority((int) sourceFlow.getPriority());
+        targetFlow
+                .setCookie(new BigInteger(String.valueOf(sourceFlow.getId())));
 
-            targetFlow.setHardTimeout((int) sourceFlow.getHardTimeout());
-            targetFlow.setIdleTimeout((int) sourceFlow.getIdleTimeout());
-            targetFlow.setPriority((int) sourceFlow.getPriority());
-            targetFlow.setCookie(new BigInteger(String.valueOf(sourceFlow.getId())));
-
-            List<org.opendaylight.controller.sal.action.Action> sourceActions = sourceFlow.getActions();
-            List<Action> targetActions = new ArrayList<>();
-            for (org.opendaylight.controller.sal.action.Action sourceAction : sourceActions) {
-                targetActions.add(actionFrom(sourceAction));
-            }
-            targetFlow.setAction(targetActions);
-
-            targetFlow.setMatch(matchFrom(sourceFlow.getMatch()));
-
-            return targetFlow.build();
+        List<org.opendaylight.controller.sal.action.Action> sourceActions = sourceFlow
+                .getActions();
+        List<Action> targetActions = new ArrayList<>();
+        for (org.opendaylight.controller.sal.action.Action sourceAction : sourceActions) {
+            targetActions.add(action(sourceAction));
         }
-        return null;
+        targetFlow.setAction(targetActions);
+        targetFlow.setMatch(match(sourceFlow.getMatch()));
+        return targetFlow.build();
+
     }
 
-    private static Action actionFrom(org.opendaylight.controller.sal.action.Action sourceAction) {
+    public static GetFlowStatisticsInput flowStatisticsInput(
+            Node node,Flow sourceFlow) {
+        GetFlowStatisticsInputBuilder ret = new GetFlowStatisticsInputBuilder();
+        FlowAdded source = flowAdded(sourceFlow);
+        ret.setAction(source.getAction());
+        ret.setCookie(source.getCookie());
+        ret.setAction(source.getAction());
+        ret.setCookie(source.getCookie());
+        ret.setHardTimeout(source.getHardTimeout());
+        ret.setMatch(source.getMatch());
+        ret.setPriority(source.getPriority());
+        ret.setNode(nodeRef(node));
+        return ret.build();
+    }
+
+    public static RemoveFlowInput removeFlowInput(Node node,Flow sourceFlow) {
+        RemoveFlowInputBuilder ret = new RemoveFlowInputBuilder();
+        FlowAdded source = flowAdded(sourceFlow);
+        ret.setAction(source.getAction());
+        ret.setCookie(source.getCookie());
+        ret.setAction(source.getAction());
+        ret.setCookie(source.getCookie());
+        ret.setHardTimeout(source.getHardTimeout());
+        ret.setMatch(source.getMatch());
+        ret.setPriority(source.getPriority());
+        ret.setNode(nodeRef(node));
+        return ret.build();
+    }
+    
+    public static AddFlowInput addFlowInput(Node node,Flow sourceFlow) {
+        AddFlowInputBuilder ret = new AddFlowInputBuilder();
+        FlowAdded source = flowAdded(sourceFlow);
+        ret.setAction(source.getAction());
+        ret.setCookie(source.getCookie());
+        ret.setAction(source.getAction());
+        ret.setCookie(source.getCookie());
+        ret.setHardTimeout(source.getHardTimeout());
+        ret.setMatch(source.getMatch());
+        ret.setPriority(source.getPriority());
+        ret.setNode(nodeRef(node));
+        return ret.build();
+    }
+
+    public static UpdateFlowInput updateFlowInput(Node node, Flow oldFlow, Flow newFlow){
+        UpdateFlowInputBuilder ret = new UpdateFlowInputBuilder();
+        FlowAdded source = flowAdded(newFlow);
+        ret.setAction(source.getAction());
+        ret.setCookie(source.getCookie());
+        ret.setAction(source.getAction());
+        ret.setCookie(source.getCookie());
+        ret.setHardTimeout(source.getHardTimeout());
+        ret.setMatch(source.getMatch());
+        ret.setPriority(source.getPriority());
+        ret.setNode(nodeRef(node));
+        return ret.build();
+    }
+
+    public static GetNodeConnectorStatisticsInput nodeConnectorStatistics(
+            NodeConnector connector) {
+        GetNodeConnectorStatisticsInputBuilder target = new GetNodeConnectorStatisticsInputBuilder();
+
+        NodeRef nodeRef = nodeRef(connector.getNode());
+        target.setNode(nodeRef);
+
+        NodeConnectorRef nodeConnectorRef = nodeConnectorRef(connector);
+        target.setNodeConnector(nodeConnectorRef);
+
+        return target.build();
+    }
+
+    private static Action action(
+            org.opendaylight.controller.sal.action.Action sourceAction) {
 
         ActionBuilder targetActionBuilder = new ActionBuilder();
         org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.Action targetAction = null;
@@ -104,7 +187,8 @@ public class FromSalConversionsUtils {
             NodeConnector nodeConnector = ((Output) sourceAction).getPort();
 
             OutputActionBuilder outputActionBuilder = new OutputActionBuilder();
-            outputActionBuilder.setOutputNodeConnector(nodeConnectorToUri(nodeConnector));
+            outputActionBuilder
+                    .setOutputNodeConnector(nodeConnectorToUri(nodeConnector));
             targetAction = outputActionBuilder.build();
 
         } else if (sourceAction instanceof PopVlan) {
@@ -122,19 +206,22 @@ public class FromSalConversionsUtils {
             SetDlDst setDlDst = (SetDlDst) sourceAction;
             SetDlDstActionBuilder setDlDstActionBuilder = new SetDlDstActionBuilder();
 
-            setDlDstActionBuilder.setAddress(new MacAddress(new String(setDlDst.getDlAddress())));
+            setDlDstActionBuilder.setAddress(new MacAddress(new String(setDlDst
+                    .getDlAddress())));
             targetAction = setDlDstActionBuilder.build();
         } else if (sourceAction instanceof SetDlSrc) {
             SetDlSrc setDlSrc = (SetDlSrc) sourceAction;
             SetDlSrcActionBuilder setDlSrcActionBuilder = new SetDlSrcActionBuilder();
 
-            setDlSrcActionBuilder.setAddress(new MacAddress(new String(setDlSrc.getDlAddress())));
+            setDlSrcActionBuilder.setAddress(new MacAddress(new String(setDlSrc
+                    .getDlAddress())));
             targetAction = setDlSrcActionBuilder.build();
         } else if (sourceAction instanceof SetDlType) {
             SetDlType setDlType = (SetDlType) sourceAction;
             SetDlTypeActionBuilder setDlTypeActionBuilder = new SetDlTypeActionBuilder();
 
-            setDlTypeActionBuilder.setDlType(new EtherType(new Long(setDlType.getDlType())));
+            setDlTypeActionBuilder.setDlType(new EtherType(new Long(setDlType
+                    .getDlType())));
             targetAction = setDlTypeActionBuilder.build();
         } else if (sourceAction instanceof SetNextHop) {
             SetNextHop setNextHop = (SetNextHop) sourceAction;
@@ -184,7 +271,8 @@ public class FromSalConversionsUtils {
             SetVlanCfi setVlanCfi = (SetVlanCfi) sourceAction;
             SetVlanCfiActionBuilder setVlanCfiActionBuilder = new SetVlanCfiActionBuilder();
 
-            setVlanCfiActionBuilder.setVlanCfi(new VlanCfi(setVlanCfi.getCfi()));
+            setVlanCfiActionBuilder
+                    .setVlanCfi(new VlanCfi(setVlanCfi.getCfi()));
 
             targetAction = setVlanCfiActionBuilder.build();
         } else if (sourceAction instanceof SetVlanId) {
@@ -198,7 +286,8 @@ public class FromSalConversionsUtils {
             SetVlanPcp setVlanPcp = (SetVlanPcp) sourceAction;
             SetVlanPcpActionBuilder setVlanPcpActionBuilder = new SetVlanPcpActionBuilder();
 
-            setVlanPcpActionBuilder.setVlanPcp(new VlanPcp((short) setVlanPcp.getPcp()));
+            setVlanPcpActionBuilder.setVlanPcp(new VlanPcp((short) setVlanPcp
+                    .getPcp()));
 
             targetAction = setVlanPcpActionBuilder.build();
         } else if (sourceAction instanceof SwPath) {
@@ -229,14 +318,14 @@ public class FromSalConversionsUtils {
         return null;
     }
 
-    private static org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match matchFrom(
+    private static org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match match(
             Match sourceMatch) {
         if (sourceMatch != null) {
             org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.MatchBuilder targetBuilder = new org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.MatchBuilder();
 
-            targetBuilder.setEthernetMatch(ethernetMatchFrom(sourceMatch));
-            targetBuilder.setIpMatch(ipMatchFrom(sourceMatch));
-            targetBuilder.setVlanMatch(vlanMatchFrom(sourceMatch));
+            targetBuilder.setEthernetMatch(ethernetMatch(sourceMatch));
+            targetBuilder.setIpMatch(ipMatch(sourceMatch));
+            targetBuilder.setVlanMatch(vlanMatch(sourceMatch));
             targetBuilder.setLayer3Match(layer3Match(sourceMatch));
             targetBuilder.setLayer4Match(layer4Match(sourceMatch));
 
@@ -266,14 +355,16 @@ public class FromSalConversionsUtils {
     private static Layer4Match Layer4MatchAsSctp(final Match sourceMatch) {
         SctpMatchBuilder sctpMatchBuilder = new SctpMatchBuilder();
 
-        Integer sourcePort = transportPortFrom(sourceMatch, MatchType.TP_SRC);
-        Integer destinationPort = transportPortFrom(sourceMatch, MatchType.TP_DST);
+        Integer sourcePort = transportPort(sourceMatch, MatchType.TP_SRC);
+        Integer destinationPort = transportPort(sourceMatch,
+                MatchType.TP_DST);
 
         if (sourcePort != null) {
             sctpMatchBuilder.setSctpSourcePort(new PortNumber(sourcePort));
         }
         if (destinationPort != null) {
-            sctpMatchBuilder.setSctpDestinationPort(new PortNumber(destinationPort));
+            sctpMatchBuilder.setSctpDestinationPort(new PortNumber(
+                    destinationPort));
         }
 
         return sctpMatchBuilder.build();
@@ -282,15 +373,17 @@ public class FromSalConversionsUtils {
     private static Layer4Match Layer4MatchAsUdp(final Match sourceMatch) {
         UdpMatchBuilder udpMatchBuilder = new UdpMatchBuilder();
 
-        Integer sourcePort = transportPortFrom(sourceMatch, MatchType.TP_SRC);
-        Integer destinationPort = transportPortFrom(sourceMatch, MatchType.TP_DST);
+        Integer sourcePort = transportPort(sourceMatch, MatchType.TP_SRC);
+        Integer destinationPort = transportPort(sourceMatch,
+                MatchType.TP_DST);
 
         if (sourcePort != null) {
             udpMatchBuilder.setUdpSourcePort(new PortNumber(sourcePort));
         }
 
         if (destinationPort != null) {
-            udpMatchBuilder.setUdpDestinationPort(new PortNumber(destinationPort));
+            udpMatchBuilder.setUdpDestinationPort(new PortNumber(
+                    destinationPort));
         }
 
         return udpMatchBuilder.build();
@@ -299,87 +392,99 @@ public class FromSalConversionsUtils {
     private static Layer4Match Layer4MatchAsTcp(final Match sourceMatch) {
         TcpMatchBuilder tcpMatchBuilder = new TcpMatchBuilder();
 
-        Integer sourcePort = transportPortFrom(sourceMatch, MatchType.TP_SRC);
-        Integer destinationPort = transportPortFrom(sourceMatch, MatchType.TP_DST);
+        Integer sourcePort = transportPort(sourceMatch, MatchType.TP_SRC);
+        Integer destinationPort = transportPort(sourceMatch,
+                MatchType.TP_DST);
 
         if (sourcePort != null) {
             tcpMatchBuilder.setTcpSourcePort(new PortNumber(sourcePort));
         }
         if (destinationPort != null) {
-            tcpMatchBuilder.setTcpDestinationPort(new PortNumber(destinationPort));
+            tcpMatchBuilder.setTcpDestinationPort(new PortNumber(
+                    destinationPort));
         }
 
         return tcpMatchBuilder.build();
     }
 
-    private static Integer transportPortFrom(final Match sourceMatch, final MatchType matchType) {
+    private static Integer transportPort(final Match sourceMatch,
+            final MatchType matchType) {
         MatchField transportPort = sourceMatch.getField(matchType);
         if (transportPort != null && transportPort.getValue() != null
                 && transportPort.getValue().getClass().equals(Short.class)) {
-            return new Integer(NetUtils.getUnsignedShort((short) transportPort.getValue()));
+            return new Integer(NetUtils.getUnsignedShort((short) transportPort
+                    .getValue()));
         }
         return null;
     }
 
-    private static VlanMatch vlanMatchFrom(final Match sourceMatch) {
+    private static VlanMatch vlanMatch(final Match sourceMatch) {
         VlanMatchBuilder vlanMatchBuild = new VlanMatchBuilder();
 
         MatchField vlan = sourceMatch.getField(MatchType.DL_VLAN);
         if (vlan != null && vlan.getValue() != null) {
             VlanIdBuilder vlanIDBuilder = new VlanIdBuilder();
-            vlanIDBuilder.setVlanId(new VlanId((int) (NetUtils.getUnsignedShort((short) vlan.getValue()))));
+            vlanIDBuilder.setVlanId(new VlanId((int) (NetUtils
+                    .getUnsignedShort((short) vlan.getValue()))));
             vlanMatchBuild.setVlanId(vlanIDBuilder.build());
         }
 
         MatchField vlanPriority = sourceMatch.getField(MatchType.DL_VLAN_PR);
         if (vlanPriority != null && vlanPriority.getValue() != null) {
-            vlanMatchBuild.setVlanPcp(new VlanPcp((short) ((byte) vlanPriority.getValue())));
+            vlanMatchBuild.setVlanPcp(new VlanPcp((short) ((byte) vlanPriority
+                    .getValue())));
         }
 
         return vlanMatchBuild.build();
     }
 
-    private static IpMatch ipMatchFrom(final Match sourceMatch) {
+    private static IpMatch ipMatch(final Match sourceMatch) {
         IpMatchBuilder targetIpMatchBuild = new IpMatchBuilder();
         MatchField networkTos = sourceMatch.getField(MatchType.NW_TOS);
         if (networkTos != null && networkTos.getValue() != null) {
-            Dscp dscp = new Dscp((short) (NetUtils.getUnsignedByte((Byte) networkTos.getValue())));
+            Dscp dscp = new Dscp(
+                    (short) (NetUtils.getUnsignedByte((Byte) networkTos
+                            .getValue())));
             targetIpMatchBuild.setIpDscp(dscp);
         }
 
         MatchField protocol = sourceMatch.getField(MatchType.NW_PROTO);
         if (protocol != null && protocol.getValue() != null) {
-            targetIpMatchBuild.setIpProtocol((short) ((byte) protocol.getValue()));
+            targetIpMatchBuild.setIpProtocol((short) ((byte) protocol
+                    .getValue()));
         }
 
         return targetIpMatchBuild.build();
 
     }
 
-    private static EthernetMatch ethernetMatchFrom(final Match sourceMatch) {
+    private static EthernetMatch ethernetMatch(final Match sourceMatch) {
         final EthernetMatchBuilder targetEthMatchBuild = new EthernetMatchBuilder();
 
         EthernetSourceBuilder ethSourBuild = new EthernetSourceBuilder()
-                .setAddress(ethernetSourceAddressFrom(sourceMatch));
+                .setAddress(ethernetSourceAddress(sourceMatch));
         targetEthMatchBuild.setEthernetSource(ethSourBuild.build());
 
         EthernetDestinationBuilder ethDestBuild = new EthernetDestinationBuilder()
-                .setAddress(ethernetDestAddressFrom(sourceMatch));
+                .setAddress(ethernetDestAddress(sourceMatch));
         targetEthMatchBuild.setEthernetDestination(ethDestBuild.build());
 
         final MatchField dataLinkType = sourceMatch.getField(MatchType.DL_TYPE);
         if (dataLinkType != null && dataLinkType.getValue() != null) {
-            EtherType etherType = new EtherType(new Long(NetUtils.getUnsignedShort((Short) dataLinkType.getValue())));
-            EthernetTypeBuilder ethType = new EthernetTypeBuilder().setType(etherType);
+            EtherType etherType = new EtherType(new Long(
+                    NetUtils.getUnsignedShort((Short) dataLinkType.getValue())));
+            EthernetTypeBuilder ethType = new EthernetTypeBuilder()
+                    .setType(etherType);
             targetEthMatchBuild.setEthernetType(ethType.build());
         }
         return targetEthMatchBuild.build();
     }
 
-    private static MacAddress ethernetSourceAddressFrom(final Match sourceMatch) {
+    private static MacAddress ethernetSourceAddress(final Match sourceMatch) {
         final MatchField dataLinkSource = sourceMatch.getField(DL_SRC);
         if (dataLinkSource != null && dataLinkSource.getValue() != null) {
-            return new MacAddress(new MacAddress(new String((byte[]) dataLinkSource.getValue())));
+            return new MacAddress(new MacAddress(new String(
+                    (byte[]) dataLinkSource.getValue())));
         }
         return null;
 
@@ -398,32 +503,40 @@ public class FromSalConversionsUtils {
             inetDestAddress = (InetAddress) (netDest.getValue());
         }
 
-        if ((inetSourceAddress instanceof Inet4Address) && (inetDestAddress instanceof Inet4Address)) {
+        if ((inetSourceAddress instanceof Inet4Address)
+                && (inetDestAddress instanceof Inet4Address)) {
             MatchField dataLinkType = sourceMatch.getField(DL_TYPE);
             Short dLType = null;
             if (dataLinkType != null && dataLinkType.getValue() != null) {
                 dLType = (Short) (dataLinkType.getValue());
             }
             if (dLType != null && dLType.equals(ETHERNET_ARP)) {
-                return setLayer3MatchAsArp(sourceMatch, (Inet4Address) inetSourceAddress,
+                return setLayer3MatchAsArp(sourceMatch,
+                        (Inet4Address) inetSourceAddress,
                         (Inet4Address) inetDestAddress);
             } else {
-                return setLayer3MatchAsIpv4((Inet4Address) inetSourceAddress, (Inet4Address) inetDestAddress);
+                return setLayer3MatchAsIpv4((Inet4Address) inetSourceAddress,
+                        (Inet4Address) inetDestAddress);
             }
-        } else if ((inetSourceAddress instanceof Inet6Address) && (inetDestAddress instanceof Inet6Address)) {
-            return setLayer3MatchAsIpv6((Inet6Address) inetSourceAddress, (Inet6Address) inetDestAddress);
+        } else if ((inetSourceAddress instanceof Inet6Address)
+                && (inetDestAddress instanceof Inet6Address)) {
+            return setLayer3MatchAsIpv6((Inet6Address) inetSourceAddress,
+                    (Inet6Address) inetDestAddress);
         }
 
         return null;
 
     }
 
-    private static Layer3Match setLayer3MatchAsArp(final Match sourceMatch, final Inet4Address inetSourceAddress,
+    private static Layer3Match setLayer3MatchAsArp(final Match sourceMatch,
+            final Inet4Address inetSourceAddress,
             final Inet4Address inetDestAddress) {
-        String inetSourceAddressStr = InetAddresses.toAddrString(inetSourceAddress);
+        String inetSourceAddressStr = InetAddresses
+                .toAddrString(inetSourceAddress);
         Ipv4Prefix ipv4SourcePrefix = new Ipv4Prefix(inetSourceAddressStr);
 
-        String inetDestAddressValue = InetAddresses.toAddrString(inetDestAddress);
+        String inetDestAddressValue = InetAddresses
+                .toAddrString(inetDestAddress);
         Ipv4Prefix ipv4DestPrefix = new Ipv4Prefix(inetDestAddressValue);
 
         ArpMatchBuilder arpMatchBuilder = new ArpMatchBuilder();
@@ -432,45 +545,60 @@ public class FromSalConversionsUtils {
         arpMatchBuilder.setArpTargetTransportAddress(ipv4DestPrefix);
 
         ArpSourceHardwareAddressBuilder arpSourceHardwareAddressBuilder = new ArpSourceHardwareAddressBuilder();
-        arpSourceHardwareAddressBuilder.setAddress(ethernetSourceAddressFrom(sourceMatch));
-        arpMatchBuilder.setArpSourceHardwareAddress(arpSourceHardwareAddressBuilder.build());
+        arpSourceHardwareAddressBuilder
+                .setAddress(ethernetSourceAddress(sourceMatch));
+        arpMatchBuilder
+                .setArpSourceHardwareAddress(arpSourceHardwareAddressBuilder
+                        .build());
 
         ArpTargetHardwareAddressBuilder arpTargetHardwareAddressBuilder = new ArpTargetHardwareAddressBuilder();
-        arpTargetHardwareAddressBuilder.setAddress(ethernetDestAddressFrom(sourceMatch));
-        arpMatchBuilder.setArpTargetHardwareAddress(arpTargetHardwareAddressBuilder.build());
+        arpTargetHardwareAddressBuilder
+                .setAddress(ethernetDestAddress(sourceMatch));
+        arpMatchBuilder
+                .setArpTargetHardwareAddress(arpTargetHardwareAddressBuilder
+                        .build());
 
         return arpMatchBuilder.build();
 
     }
 
-    private static MacAddress ethernetDestAddressFrom(final Match sourceMatch) {
+    private static MacAddress ethernetDestAddress(final Match sourceMatch) {
         final MatchField dataLinkDest = sourceMatch.getField(DL_DST);
         if (dataLinkDest != null && dataLinkDest.getValue() != null) {
-            return new MacAddress(new String((byte[]) (dataLinkDest.getValue())));
+            return new MacAddress(
+                    new String((byte[]) (dataLinkDest.getValue())));
         }
         return null;
     }
 
-    private static Layer3Match setLayer3MatchAsIpv4(final Inet4Address inetSourceAddress,
+    private static Layer3Match setLayer3MatchAsIpv4(
+            final Inet4Address inetSourceAddress,
             final Inet4Address inetDestAddress) {
-        String inetSrcAddressString = InetAddresses.toAddrString(inetSourceAddress);
-        String inetDstAddressString = InetAddresses.toAddrString(inetDestAddress);
+        String inetSrcAddressString = InetAddresses
+                .toAddrString(inetSourceAddress);
+        String inetDstAddressString = InetAddresses
+                .toAddrString(inetDestAddress);
 
         Ipv4MatchBuilder layer4MatchBuild = new Ipv4MatchBuilder();
         layer4MatchBuild.setIpv4Source(new Ipv4Prefix(inetSrcAddressString));
-        layer4MatchBuild.setIpv4Destination(new Ipv4Prefix(inetDstAddressString));
+        layer4MatchBuild
+                .setIpv4Destination(new Ipv4Prefix(inetDstAddressString));
         return layer4MatchBuild.build();
 
     }
 
-    private static Layer3Match setLayer3MatchAsIpv6(final Inet6Address inetSourceAddress,
+    private static Layer3Match setLayer3MatchAsIpv6(
+            final Inet6Address inetSourceAddress,
             final Inet6Address inetDestAddress) {
-        String inetSrcAddressString = InetAddresses.toAddrString(inetSourceAddress);
-        String inetDstAddressString = InetAddresses.toAddrString(inetDestAddress);
+        String inetSrcAddressString = InetAddresses
+                .toAddrString(inetSourceAddress);
+        String inetDstAddressString = InetAddresses
+                .toAddrString(inetDestAddress);
         Ipv6MatchBuilder layer6MatchBuild = new Ipv6MatchBuilder();
 
         layer6MatchBuild.setIpv6Source(new Ipv6Prefix(inetSrcAddressString));
-        layer6MatchBuild.setIpv6Destination(new Ipv6Prefix(inetDstAddressString));
+        layer6MatchBuild
+                .setIpv6Destination(new Ipv6Prefix(inetDstAddressString));
         return layer6MatchBuild.build();
     }
 
