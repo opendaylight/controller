@@ -43,7 +43,7 @@ public abstract class NetUtils {
     /**
      * Constant holding the broadcast MAC address
      */
-    public static final byte[] BroadcastMACAddr = {-1, -1, -1, -1, -1, -1};
+    private static final byte[] BroadcastMACAddr = {-1, -1, -1, -1, -1, -1};
 
     /**
      * Converts a 4 bytes array into an integer number
@@ -515,7 +515,7 @@ public abstract class NetUtils {
     /**
      * Returns Broadcast MAC Address
      *
-     * @return the byte array containing  broadcaset mac address
+     * @return the byte array containing  broadcast mac address
      */
     public static byte[] getBroadcastMACAddr() {
         return Arrays.copyOf(BroadcastMACAddr, BroadcastMACAddr.length);

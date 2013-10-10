@@ -345,7 +345,7 @@ public class ArpHandler implements IHostFinder, IListenDataPacket, ICacheUpdateA
             byte[] targetIPByte = targetIP.getAddress();
             ARP arp = createARP(ARP.REQUEST, getControllerMAC(), senderIP, targetHardwareAddress, targetIPByte);
 
-            byte[] destMACAddress = NetUtils.BroadcastMACAddr;
+            byte[] destMACAddress = NetUtils.getBroadcastMACAddr();
             Ethernet ethernet = createEthernet(getControllerMAC(), destMACAddress, arp);
 
             // TODO For now send port-by-port, see how to optimize to
