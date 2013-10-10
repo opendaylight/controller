@@ -59,13 +59,13 @@ public class StaticRoute implements Serializable{
         }
     }
 
-    InetAddress networkAddress;
-    InetAddress mask;
-    NextHopType type;
-    InetAddress nextHopAddress;
-    Node node;
-    NodeConnector port;
-    HostNodeConnector host;
+    private InetAddress networkAddress;
+    private InetAddress mask;
+    private NextHopType type;
+    private InetAddress nextHopAddress;
+    private Node node;
+    private NodeConnector port;
+    private HostNodeConnector host;
 
     /**
      * Create a static route object with no specific information.

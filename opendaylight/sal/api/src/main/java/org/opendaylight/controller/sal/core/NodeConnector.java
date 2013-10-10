@@ -329,8 +329,6 @@ public class NodeConnector implements Serializable {
             } catch (Exception ex) {
                 return;
             }
-        } else {
-            // Lookup via OSGi service registry
         }
     }
 
