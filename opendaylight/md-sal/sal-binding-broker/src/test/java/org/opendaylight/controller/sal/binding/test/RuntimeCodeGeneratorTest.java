@@ -141,5 +141,10 @@ public class RuntimeCodeGeneratorTest {
         public InstanceIdentifier<?> getIdentifier() {
             return this.identifier;
         }
+
+        @Override
+        public Class<? extends DataObject> getImplementedInterface() {
+            return SimpleInput.class;
+        }
     }
 }
