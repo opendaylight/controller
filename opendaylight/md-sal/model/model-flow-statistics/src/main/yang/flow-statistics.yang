@@ -15,7 +15,7 @@ module opendaylight-flow-statistics {
     rpc get-node-connector-statistics {
         input {
             leaf node {
-                ext:context-reference "node-context";
+                ext:context-reference "inv:node-context";
                 type inv:node-ref;
             }
             leaf node-connector {
@@ -34,7 +34,7 @@ module opendaylight-flow-statistics {
     rpc get-flow-statistics {
         input {
             leaf node {
-                ext:context-reference "node-context";
+                ext:context-reference "inv:node-context";
                 type inv:node-ref;
             }
             uses flow-types:flow;
@@ -51,7 +51,7 @@ module opendaylight-flow-statistics {
     rpc get-flow-table-statistics {
         input {
             leaf node {
-                ext:context-reference "node-context";
+                ext:context-reference "inv:node-context";
                 type inv:node-ref;
             }
         }
