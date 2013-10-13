@@ -13,7 +13,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangePublisher;
 import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransactionFactory;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.binding.api.BindingAwareService;
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
+import org.opendaylight.controller.md.sal.common.api.DataStoreIdentifier;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;

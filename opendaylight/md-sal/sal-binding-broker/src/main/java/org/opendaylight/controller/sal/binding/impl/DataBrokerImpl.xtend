@@ -3,7 +3,7 @@ package org.opendaylight.controller.sal.binding.impl
 import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService
-import org.opendaylight.controller.sal.common.DataStoreIdentifier
+import org.opendaylight.controller.md.sal.common.api.DataStoreIdentifier
 import org.opendaylight.yangtools.yang.binding.DataObject
 import org.opendaylight.yangtools.yang.binding.DataRoot
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier

@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sample.toaster.provider.impl;
+package org.opendaylight.controller.sample.toaster.consumer.impl;
 
 import java.util.Hashtable;
 import java.util.concurrent.ExecutionException;
@@ -15,14 +15,10 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.common.GlobalDataStore;
-import org.opendaylight.controller.sample.toaster.provider.api.ToastConsumer;
+import org.opendaylight.controller.sample.toaster.consumer.api.ToastConsumer;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToastDone;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToastType;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.Toaster;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterData;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.osgi.framework.BundleActivator;

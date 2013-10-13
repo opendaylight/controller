@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.binding.api.data;
 
 
 import org.opendaylight.controller.md.sal.common.api.data.DataProvisionService;
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 

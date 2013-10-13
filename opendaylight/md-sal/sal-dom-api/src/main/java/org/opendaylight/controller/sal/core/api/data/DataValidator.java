@@ -9,7 +9,7 @@ package org.opendaylight.controller.sal.core.api.data;
 
 import java.util.Set;
 
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
+import org.opendaylight.controller.md.sal.common.api.DataStoreIdentifier;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
