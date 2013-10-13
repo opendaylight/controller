@@ -65,7 +65,7 @@ import com.google.common.net.InetAddresses;
 
 
 import static org.opendaylight.controller.sal.compability.ProtocolConstants.*;
-import static org.opendaylight.controller.sal.compability.NodeInventoryAdapter.*;
+import static org.opendaylight.controller.sal.compability.NodeMapping.*;
 
 public class FromSalConversionsUtils {
 
@@ -73,230 +73,17 @@ public class FromSalConversionsUtils {
 
     }
 
-    public static FlowAdded flowAdded(Flow sourceFlow) {
-        if (sourceFlow == null)
-            throw new IllegalArgumentException();
-        final FlowAddedBuilder targetFlow = new FlowAddedBuilder();
-        targetFlow.setHardTimeout((int) sourceFlow.getHardTimeout());
-        targetFlow.setIdleTimeout((int) sourceFlow.getIdleTimeout());
-        targetFlow.setPriority((int) sourceFlow.getPriority());
-        targetFlow
-                .setCookie(new BigInteger(String.valueOf(sourceFlow.getId())));
-
-        List<org.opendaylight.controller.sal.action.Action> sourceActions = sourceFlow
-                .getActions();
-        List<Action> targetActions = new ArrayList<>();
-        for (org.opendaylight.controller.sal.action.Action sourceAction : sourceActions) {
-            targetActions.add(action(sourceAction));
-        }
-        targetFlow.setAction(targetActions);
-        targetFlow.setMatch(match(sourceFlow.getMatch()));
-        return targetFlow.build();
-
-    }
-
-    public static GetFlowStatisticsInput flowStatisticsInput(
-            Node node,Flow sourceFlow) {
-        GetFlowStatisticsInputBuilder ret = new GetFlowStatisticsInputBuilder();
-        FlowAdded source = flowAdded(sourceFlow);
-        ret.setAction(source.getAction());
-        ret.setCookie(source.getCookie());
-        ret.setAction(source.getAction());
-        ret.setCookie(source.getCookie());
-        ret.setHardTimeout(source.getHardTimeout());
-        ret.setMatch(source.getMatch());
-        ret.setPriority(source.getPriority());
-        ret.setNode(nodeRef(node));
-        return ret.build();
-    }
-
-    public static RemoveFlowInput removeFlowInput(Node node,Flow sourceFlow) {
-        RemoveFlowInputBuilder ret = new RemoveFlowInputBuilder();
-        FlowAdded source = flowAdded(sourceFlow);
-        ret.setAction(source.getAction());
-        ret.setCookie(source.getCookie());
-        ret.setAction(source.getAction());
-        ret.setCookie(source.getCookie());
-        ret.setHardTimeout(source.getHardTimeout());
-        ret.setMatch(source.getMatch());
-        ret.setPriority(source.getPriority());
-        ret.setNode(nodeRef(node));
-        return ret.build();
-    }
-    
-    public static AddFlowInput addFlowInput(Node node,Flow sourceFlow) {
-        AddFlowInputBuilder ret = new AddFlowInputBuilder();
-        FlowAdded source = flowAdded(sourceFlow);
-        ret.setAction(source.getAction());
-        ret.setCookie(source.getCookie());
-        ret.setAction(source.getAction());
-        ret.setCookie(source.getCookie());
-        ret.setHardTimeout(source.getHardTimeout());
-        ret.setMatch(source.getMatch());
-        ret.setPriority(source.getPriority());
-        ret.setNode(nodeRef(node));
-        return ret.build();
-    }
-
-    public static UpdateFlowInput updateFlowInput(Node node, Flow oldFlow, Flow newFlow){
-        UpdateFlowInputBuilder ret = new UpdateFlowInputBuilder();
-        FlowAdded source = flowAdded(newFlow);
-        ret.setAction(source.getAction());
-        ret.setCookie(source.getCookie());
-        ret.setAction(source.getAction());
-        ret.setCookie(source.getCookie());
-        ret.setHardTimeout(source.getHardTimeout());
-        ret.setMatch(source.getMatch());
-        ret.setPriority(source.getPriority());
-        ret.setNode(nodeRef(node));
-        return ret.build();
-    }
-
     public static GetNodeConnectorStatisticsInput nodeConnectorStatistics(
             NodeConnector connector) {
         GetNodeConnectorStatisticsInputBuilder target = new GetNodeConnectorStatisticsInputBuilder();
 
-        NodeRef nodeRef = nodeRef(connector.getNode());
+        NodeRef nodeRef = toNodeRef(connector.getNode());
         target.setNode(nodeRef);
 
-        NodeConnectorRef nodeConnectorRef = nodeConnectorRef(connector);
+        NodeConnectorRef nodeConnectorRef = toNodeConnectorRef(connector);
         target.setNodeConnector(nodeConnectorRef);
 
         return target.build();
-    }
-
-    private static Action action(
-            org.opendaylight.controller.sal.action.Action sourceAction) {
-
-        ActionBuilder targetActionBuilder = new ActionBuilder();
-        org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.Action targetAction = null;
-
-        if (sourceAction instanceof Controller) {
-            targetAction = new ControllerActionBuilder().build();
-        } else if (sourceAction instanceof Drop) {
-            targetAction = new DropActionBuilder().build();
-        } else if (sourceAction instanceof Flood) {
-            targetAction = new FloodActionBuilder().build();
-        } else if (sourceAction instanceof FloodAll) {
-            targetAction = new FloodAllActionBuilder().build();
-        } else if (sourceAction instanceof HwPath) {
-            targetAction = new HwPathActionBuilder().build();
-        } else if (sourceAction instanceof Loopback) {
-            targetAction = new LoopbackActionBuilder().build();
-        } else if (sourceAction instanceof Output) {
-            NodeConnector nodeConnector = ((Output) sourceAction).getPort();
-
-            OutputActionBuilder outputActionBuilder = new OutputActionBuilder();
-            outputActionBuilder
-                    .setOutputNodeConnector(nodeConnectorToUri(nodeConnector));
-            targetAction = outputActionBuilder.build();
-
-        } else if (sourceAction instanceof PopVlan) {
-            targetAction = new PopVlanActionBuilder().build();
-        } else if (sourceAction instanceof PushVlan) {
-            PushVlan pushVlan = (PushVlan) sourceAction;
-            PushVlanActionBuilder pushVlanActionBuilder = new PushVlanActionBuilder();
-
-            pushVlanActionBuilder.setCfi(new VlanCfi(pushVlan.getCfi()));
-            pushVlanActionBuilder.setVlanId(new VlanId(pushVlan.getVlanId()));
-            pushVlanActionBuilder.setPcp(pushVlan.getPcp());
-            pushVlanActionBuilder.setTag(pushVlan.getTag());
-            targetAction = pushVlanActionBuilder.build();
-        } else if (sourceAction instanceof SetDlDst) {
-            SetDlDst setDlDst = (SetDlDst) sourceAction;
-            SetDlDstActionBuilder setDlDstActionBuilder = new SetDlDstActionBuilder();
-
-            setDlDstActionBuilder.setAddress(new MacAddress(new String(setDlDst
-                    .getDlAddress())));
-            targetAction = setDlDstActionBuilder.build();
-        } else if (sourceAction instanceof SetDlSrc) {
-            SetDlSrc setDlSrc = (SetDlSrc) sourceAction;
-            SetDlSrcActionBuilder setDlSrcActionBuilder = new SetDlSrcActionBuilder();
-
-            setDlSrcActionBuilder.setAddress(new MacAddress(new String(setDlSrc
-                    .getDlAddress())));
-            targetAction = setDlSrcActionBuilder.build();
-        } else if (sourceAction instanceof SetDlType) {
-            SetDlType setDlType = (SetDlType) sourceAction;
-            SetDlTypeActionBuilder setDlTypeActionBuilder = new SetDlTypeActionBuilder();
-
-            setDlTypeActionBuilder.setDlType(new EtherType(new Long(setDlType
-                    .getDlType())));
-            targetAction = setDlTypeActionBuilder.build();
-        } else if (sourceAction instanceof SetNextHop) {
-            SetNextHop setNextHop = (SetNextHop) sourceAction;
-            SetNextHopActionBuilder setNextHopActionBuilder = new SetNextHopActionBuilder();
-
-            InetAddress inetAddress = setNextHop.getAddress();
-            setNextHopActionBuilder.setAddress(addressFromAction(inetAddress));
-
-            targetAction = setNextHopActionBuilder.build();
-        } else if (sourceAction instanceof SetNwDst) {
-            SetNwDst setNwDst = (SetNwDst) sourceAction;
-            SetNwDstActionBuilder setNwDstActionBuilder = new SetNwDstActionBuilder();
-
-            InetAddress inetAddress = setNwDst.getAddress();
-            setNwDstActionBuilder.setAddress(addressFromAction(inetAddress));
-
-            targetAction = setNwDstActionBuilder.build();
-        } else if (sourceAction instanceof SetNwSrc) {
-            SetNwSrc setNwSrc = (SetNwSrc) sourceAction;
-            SetNwSrcActionBuilder setNwSrcActionBuilder = new SetNwSrcActionBuilder();
-
-            InetAddress inetAddress = setNwSrc.getAddress();
-            setNwSrcActionBuilder.setAddress(addressFromAction(inetAddress));
-
-            targetAction = setNwSrcActionBuilder.build();
-        } else if (sourceAction instanceof SetNwTos) {
-            SetNwTos setNwTos = (SetNwTos) sourceAction;
-            SetNwTosActionBuilder setNwTosActionBuilder = new SetNwTosActionBuilder();
-
-            setNwTosActionBuilder.setTos(setNwTos.getNwTos());
-            targetAction = setNwTosActionBuilder.build();
-        } else if (sourceAction instanceof SetTpDst) {
-            SetTpDst setTpDst = (SetTpDst) sourceAction;
-            SetTpDstActionBuilder setTpDstActionBuilder = new SetTpDstActionBuilder();
-
-            setTpDstActionBuilder.setPort(new PortNumber(setTpDst.getPort()));
-
-            targetAction = setTpDstActionBuilder.build();
-        } else if (sourceAction instanceof SetTpSrc) {
-            SetTpSrc setTpSrc = (SetTpSrc) sourceAction;
-            SetTpSrcActionBuilder setTpSrcActionBuilder = new SetTpSrcActionBuilder();
-
-            setTpSrcActionBuilder.setPort(new PortNumber(setTpSrc.getPort()));
-
-            targetAction = setTpSrcActionBuilder.build();
-        } else if (sourceAction instanceof SetVlanCfi) {
-            SetVlanCfi setVlanCfi = (SetVlanCfi) sourceAction;
-            SetVlanCfiActionBuilder setVlanCfiActionBuilder = new SetVlanCfiActionBuilder();
-
-            setVlanCfiActionBuilder
-                    .setVlanCfi(new VlanCfi(setVlanCfi.getCfi()));
-
-            targetAction = setVlanCfiActionBuilder.build();
-        } else if (sourceAction instanceof SetVlanId) {
-            SetVlanId setVlanId = (SetVlanId) sourceAction;
-            SetVlanIdActionBuilder setVlanIdActionBuilder = new SetVlanIdActionBuilder();
-
-            setVlanIdActionBuilder.setVlanId(new VlanId(setVlanId.getVlanId()));
-
-            targetAction = setVlanIdActionBuilder.build();
-        } else if (sourceAction instanceof SetVlanPcp) {
-            SetVlanPcp setVlanPcp = (SetVlanPcp) sourceAction;
-            SetVlanPcpActionBuilder setVlanPcpActionBuilder = new SetVlanPcpActionBuilder();
-
-            setVlanPcpActionBuilder.setVlanPcp(new VlanPcp((short) setVlanPcp
-                    .getPcp()));
-
-            targetAction = setVlanPcpActionBuilder.build();
-        } else if (sourceAction instanceof SwPath) {
-            targetAction = new SwPathActionBuilder().build();
-        }
-
-        targetActionBuilder.setAction(targetAction);
-
-        return targetActionBuilder.build();
     }
 
     private static Address addressFromAction(InetAddress inetAddress) {
@@ -313,12 +100,7 @@ public class FromSalConversionsUtils {
         return null;
     }
 
-    private static List<Uri> nodeConnectorToUri(NodeConnector nodeConnector) {
-        // TODO Define mapping
-        return null;
-    }
-
-    private static org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match match(
+    public static org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match toMatch(
             Match sourceMatch) {
         if (sourceMatch != null) {
             org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.MatchBuilder targetBuilder = new org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.MatchBuilder();

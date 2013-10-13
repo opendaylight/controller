@@ -41,6 +41,23 @@ module flow-node-inventory {
     }
 
     grouping flow-node {
+
+        leaf manufacturer {
+            type string;
+        }
+        leaf hardware {
+            type string;
+        }
+        leaf software {
+            type string;
+        }
+        leaf serial-number {
+            type string;
+        }
+        leaf description {
+            type string;
+        }
+
         container tables {
             uses feature;
             list table {

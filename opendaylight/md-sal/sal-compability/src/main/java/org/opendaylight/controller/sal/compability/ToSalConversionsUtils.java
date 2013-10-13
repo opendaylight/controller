@@ -56,7 +56,7 @@ public class ToSalConversionsUtils {
 
     }
 
-    public static Flow flowFrom(NodeFlow source) {
+    public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.Flow source) {
         final Flow target = new Flow();
 
         Integer hardTimeout = source.getHardTimeout();
@@ -74,7 +74,7 @@ public class ToSalConversionsUtils {
             target.setPriority(priority.shortValue());
         }
 
-        target.setMatch(matchFrom(source.getMatch()));
+        target.setMatch(toMatch(source.getMatch()));
 
         List<Action> actions = source.getAction();
         if (actions != null) {
@@ -276,7 +276,7 @@ public class ToSalConversionsUtils {
         return null;
     }
 
-    public static Match matchFrom(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match source) {
+    public static Match toMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match source) {
         Match target = new Match();
         if (source != null) {
             fillFrom(target, source.getVlanMatch());
