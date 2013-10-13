@@ -40,29 +40,29 @@ public class TestFromSalConversionsUtils {
     public void testFromSalConversion() {
 
         Flow salFlow = prepareSalFlowCommon();
-        NodeFlow odNodeFlow = FromSalConversionsUtils.flowAdded(salFlow);
+        NodeFlow odNodeFlow = MDFlowMapping.flowAdded(salFlow);
 
         checkOdFlow(odNodeFlow);
 
-        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.other));
+        odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.other));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.other);
 
-        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.arp));
+        odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.arp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.arp);
 
-        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.ipv4));
+        odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.ipv4));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.ipv4);
 
-        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.ipv6));
+        odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.ipv6));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.ipv6);
 
-        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.sctp));
+        odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.sctp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.sctp);
 
-        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.tcp));
+        odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.tcp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.tcp);
 
-        odNodeFlow = FromSalConversionsUtils.flowAdded(prepareSalMatch(salFlow, MtchType.udp));
+        odNodeFlow = MDFlowMapping.flowAdded(prepareSalMatch(salFlow, MtchType.udp));
         checkOdMatch(odNodeFlow.getMatch(), MtchType.udp);
     }
 
@@ -79,7 +79,7 @@ public class TestFromSalConversionsUtils {
                         .getArpSourceTransportAddress().getValue());
                 assertEquals("Destination IP address is wrong.", "192.168.100.101", ((ArpMatch) layer3Match)
                         .getArpTargetTransportAddress().getValue());
-                assertEquals("Source MAC address is wrong.", "aa:bb:cc:dd:ee:ff", ((ArpMatch) layer3Match)
+                assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ((ArpMatch) layer3Match)
                         .getArpSourceHardwareAddress().getAddress().getValue());
                 assertEquals("Destination MAC address is wrong.", "ff:ee:dd:cc:bb:aa", ((ArpMatch) layer3Match)
                         .getArpTargetHardwareAddress().getAddress().getValue());
@@ -114,9 +114,9 @@ public class TestFromSalConversionsUtils {
             assertNotNull("Ipv6 wasn't found", ipv6Found);
             break;
         case other:
-            assertEquals("Source MAC address is wrong.", "24:77:03:7C:C5:F1", match.getEthernetMatch()
+            assertEquals("Source MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
                     .getEthernetSource().getAddress().getValue());
-            assertEquals("Destinatio MAC address is wrong.", "3C:A9:F4:00:E0:C8", match.getEthernetMatch()
+            assertEquals("Destinatio MAC address is wrong.", "ff:ee:dd:cc:bb:aa", match.getEthernetMatch()
                     .getEthernetDestination().getAddress().getValue());
             assertEquals("Vlan ID is wrong.", (Integer) 0xfff, match.getVlanMatch().getVlanId().getVlanId().getValue());
             assertEquals("Vlan ID priority is wrong.", (short) 0x7, (short) match.getVlanMatch().getVlanPcp()
@@ -217,11 +217,11 @@ public class TestFromSalConversionsUtils {
                     assertEquals("Wrong value of vlad ID in PushVlanAction.", (Integer) 4095,
                             ((PushVlanAction) innerAction).getVlanId().getValue());
                 } else if (innerAction instanceof SetDlDstAction) {
-                    assertEquals("Wrong MAC destination address in SetDlDstAction.", "3C:A9:F4:00:E0:C8", new String(
-                            ((SetDlDstAction) innerAction).getAddress().getValue()));
+                    assertEquals("Wrong MAC destination address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa", 
+                            ((SetDlDstAction) innerAction).getAddress().getValue());
                 } else if (innerAction instanceof SetDlSrcAction) {
-                    assertEquals("Wrong MAC source address in SetDlDstAction.", "24:77:03:7C:C5:F1", new String(
-                            ((SetDlSrcAction) innerAction).getAddress().getValue()));
+                    assertEquals("Wrong MAC source address in SetDlDstAction.", "ff:ee:dd:cc:bb:aa", 
+                            ((SetDlSrcAction) innerAction).getAddress().getValue());
                 } else if (innerAction instanceof SetDlTypeAction) {
                     assertEquals("Wrong data link type in SetDlTypeAction.", (long) 513,
                             (long) ((SetDlTypeAction) innerAction).getDlType().getValue());
@@ -295,8 +295,8 @@ public class TestFromSalConversionsUtils {
             salMatch.setField(MatchType.DL_TYPE, ETHERNET_ARP);
             salMatch.setField(MatchType.NW_SRC, InetAddresses.forString("192.168.100.100"));
             salMatch.setField(MatchType.NW_DST, InetAddresses.forString("192.168.100.101"));
-            salMatch.setField(MatchType.DL_SRC, "aa:bb:cc:dd:ee:ff".getBytes());
-            salMatch.setField(MatchType.DL_DST, "ff:ee:dd:cc:bb:aa".getBytes());
+            salMatch.setField(MatchType.DL_SRC, new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa});
+            salMatch.setField(MatchType.DL_DST, new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa});
             break;
         case ipv4:
             salMatch.setField(MatchType.DL_TYPE, (short) 0xffff);
@@ -309,8 +309,8 @@ public class TestFromSalConversionsUtils {
             salMatch.setField(MatchType.NW_DST, InetAddresses.forString("2001:0db8:85a3:0000:0000:8a2e:0370:7336"));
             break;
         case other:
-            salMatch.setField(MatchType.DL_SRC, "24:77:03:7C:C5:F1".getBytes());
-            salMatch.setField(MatchType.DL_DST, "3C:A9:F4:00:E0:C8".getBytes());
+            salMatch.setField(MatchType.DL_SRC, new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa});
+            salMatch.setField(MatchType.DL_DST, new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa});
             salMatch.setField(MatchType.DL_VLAN, (short) 0xfff);
             salMatch.setField(MatchType.DL_VLAN_PR, (byte) 0x7);
             salMatch.setField(MatchType.NW_TOS, (byte) 0x3f);
@@ -348,8 +348,8 @@ public class TestFromSalConversionsUtils {
         // salActions.add(new Output //TODO: mapping is missing
         salActions.add(new PopVlan());
         salActions.add(new PushVlan(0x8100, 7, 1, 4095));
-        salActions.add(new SetDlDst("3C:A9:F4:00:E0:C8".getBytes()));
-        salActions.add(new SetDlSrc("24:77:03:7C:C5:F1".getBytes()));
+        salActions.add(new SetDlDst(new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa}));
+        salActions.add(new SetDlSrc(new byte[]{(byte )0xff,(byte )0xee,(byte )0xdd,(byte )0xcc,(byte )0xbb,(byte )0xaa}));
         salActions.add(new SetDlType(513));
         salActions.add(new SetNextHop(InetAddresses.forString("192.168.100.100")));
         salActions.add(new SetNwDst(InetAddresses.forString("192.168.100.101")));

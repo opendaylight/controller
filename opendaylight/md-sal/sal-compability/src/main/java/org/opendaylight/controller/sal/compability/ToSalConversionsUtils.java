@@ -56,7 +56,7 @@ public class ToSalConversionsUtils {
 
     }
 
-    public static Flow flowFrom(NodeFlow source) {
+    public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.Flow source) {
         final Flow target = new Flow();
 
         Integer hardTimeout = source.getHardTimeout();
@@ -74,7 +74,7 @@ public class ToSalConversionsUtils {
             target.setPriority(priority.shortValue());
         }
 
-        target.setMatch(matchFrom(source.getMatch()));
+        target.setMatch(toMatch(source.getMatch()));
 
         List<Action> actions = source.getAction();
         if (actions != null) {
@@ -136,18 +136,13 @@ public class ToSalConversionsUtils {
             } else if (sourceAction instanceof SetDlDstAction) {
                 MacAddress addressL2Dest = ((SetDlDstAction) sourceAction).getAddress();
                 if (addressL2Dest != null) {
-                    String addressValue = addressL2Dest.getValue();
-                    if (addressValue != null) {
-                        targetAction.add(new SetDlDst(addressValue.getBytes()));
-                    }
+                        targetAction.add(new SetDlDst(bytesFrom(addressL2Dest)));
                 }
             } else if (sourceAction instanceof SetDlSrcAction) {
                 MacAddress addressL2Src = ((SetDlSrcAction) sourceAction).getAddress();
                 if (addressL2Src != null) {
-                    String addressValue = addressL2Src.getValue();
-                    if (addressValue != null) {
-                        targetAction.add(new SetDlSrc(addressValue.getBytes()));
-                    }
+                        targetAction.add(new SetDlSrc(bytesFrom(addressL2Src)));
+                    
                 }
             } else if (sourceAction instanceof SetDlTypeAction) {
                 EtherType dlType = ((SetDlTypeAction) sourceAction).getDlType();
@@ -276,7 +271,7 @@ public class ToSalConversionsUtils {
         return null;
     }
 
-    public static Match matchFrom(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match source) {
+    public static Match toMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match source) {
         Match target = new Match();
         if (source != null) {
             fillFrom(target, source.getVlanMatch());
@@ -425,11 +420,11 @@ public class ToSalConversionsUtils {
         }
         ArpSourceHardwareAddress sourceHwAddress = source.getArpSourceHardwareAddress();
         if (sourceHwAddress != null) {
-            target.setField(DL_SRC, sourceHwAddress.getAddress().getValue().getBytes());
+            target.setField(DL_SRC, bytesFrom(sourceHwAddress.getAddress()));
         }
         ArpTargetHardwareAddress targetHwAddress = source.getArpTargetHardwareAddress();
         if (targetHwAddress != null) {
-            target.setField(DL_DST, targetHwAddress.getAddress().getValue().getBytes());
+            target.setField(DL_DST, bytesFrom(targetHwAddress.getAddress()));
         }
 
         target.setField(DL_TYPE, new Short(ETHERNET_ARP));
@@ -498,9 +493,11 @@ public class ToSalConversionsUtils {
     }
 
     private static byte[] bytesFrom(MacAddress address) {
-        if (address != null) {
-            return address.getValue().getBytes();
+        String[] mac = address.getValue().split(":");
+        byte[] macAddress = new byte[6];        // mac.length == 6 bytes
+        for(int i = 0; i < mac.length; i++) {
+            macAddress[i] = Integer.decode("0x" + mac[i]).byteValue();
         }
-        return null;
+        return macAddress;
     }
 }
