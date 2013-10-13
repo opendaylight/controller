@@ -75,6 +75,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp
 
 import static extension org.opendaylight.controller.sal.compability.FromSalConversionsUtils.*
 import static extension org.opendaylight.controller.sal.compability.NodeMapping.*
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.OriginalFlowBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlowBuilder
 
 public class MDFlowMapping {
 
@@ -106,8 +108,6 @@ public class MDFlowMapping {
     public static def flowStatisticsInput(Node sourceNode, Flow sourceFlow) {
         val it = new GetFlowStatisticsInputBuilder();
         val source = flowAdded(sourceFlow);
-        cookie = (source.getCookie());
-        action = (source.getAction());
         action = (source.getAction());
         cookie = (source.getCookie());
         hardTimeout = (source.getHardTimeout());
@@ -122,8 +122,6 @@ public class MDFlowMapping {
         val source = flowAdded(sourceFlow);
         action = (source.getAction());
         cookie = (source.getCookie());
-        action = (source.getAction());
-        cookie = (source.getCookie());
         hardTimeout = (source.getHardTimeout());
         match = (source.getMatch());
         priority = (source.getPriority());
@@ -136,8 +134,6 @@ public class MDFlowMapping {
         val source = flowAdded(sourceFlow);
         action = (source.getAction());
         cookie = (source.getCookie());
-        action = (source.getAction());
-        cookie = (source.getCookie());
         hardTimeout = (source.getHardTimeout());
         match = (source.getMatch());
         priority = (source.getPriority());
@@ -147,14 +143,28 @@ public class MDFlowMapping {
 
     public static def updateFlowInput(Node sourceNode, Flow oldFlow, Flow newFlow) {
         val it = new UpdateFlowInputBuilder();
-        val source = flowAdded(newFlow);
-        action = (source.getAction());
-        cookie = (source.getCookie());
-        action = (source.getAction());
-        cookie = (source.getCookie());
-        hardTimeout = (source.getHardTimeout());
-        match = (source.getMatch());
-        priority = (source.getPriority());
+
+        val original = new OriginalFlowBuilder();
+
+        val sourceOld = flowAdded(newFlow);
+
+        original.action = (sourceOld.getAction());
+        original.cookie = (sourceOld.getCookie());
+        original.hardTimeout = (sourceOld.getHardTimeout());
+        original.match = (sourceOld.getMatch());
+        original.priority = (sourceOld.getPriority());
+
+        val updated = new UpdatedFlowBuilder();
+        val sourceNew = flowAdded(newFlow);
+
+        updated.action = (sourceNew.getAction());
+        updated.cookie = (sourceNew.getCookie());
+        updated.hardTimeout = (sourceNew.getHardTimeout());
+        updated.match = (sourceNew.getMatch());
+        updated.priority = (sourceNew.getPriority());
+
+        originalFlow = original.build()
+        updatedFlow = updated.build();
         node = sourceNode.toNodeRef()
         return it.build();
     }
@@ -203,8 +213,6 @@ public class MDFlowMapping {
         return actionBuilder.build();
 
     }
-    
-
 
     public static dispatch def toAction(PopVlan sourceAction) {
         val actionBuilder = new ActionBuilder();
@@ -328,13 +336,13 @@ public class MDFlowMapping {
         actionBuilder.action = new SwPathActionBuilder().build();
         return actionBuilder.build();
     }
-    
+
     public static def dispatch Address toInetAddress(Inet4Address address) {
         val it = new Ipv4Builder
         ipv4Address = new Ipv4Prefix(InetAddresses.toAddrString(address))
         return it.build()
     }
-    
+
     public static def dispatch Address toInetAddress(Inet6Address address) {
         val it = new Ipv6Builder
         ipv6Address = new Ipv6Prefix(InetAddresses.toAddrString(address))
@@ -344,7 +352,7 @@ public class MDFlowMapping {
     public static def List<Uri> toUriList(NodeConnector connector) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
-    
+
     public static def MacAddress toMacAddress(byte[] bytes) {
         val sb = new StringBuilder(18);
         for (byte b : bytes) {

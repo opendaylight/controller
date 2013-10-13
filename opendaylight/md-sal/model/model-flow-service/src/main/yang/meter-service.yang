@@ -13,6 +13,7 @@ module sal-meter {
     
     grouping node-meter {
         leaf node {
+            ext:context-reference "inv:node-context";
             type inv:node-ref;
         }
         
@@ -43,7 +44,11 @@ module sal-meter {
 
     rpc update-meter {
         input {
-            uses node-meter;
+            leaf node {
+                ext:context-reference "inv:node-context";
+                type inv:node-ref;
+            }
+            uses meter-update;
         }
     }     
 }

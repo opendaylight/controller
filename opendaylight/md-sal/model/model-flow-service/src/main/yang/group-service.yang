@@ -13,9 +13,9 @@ module sal-group {
     
     grouping node-group {
         leaf node {
+            ext:context-reference "inv:node-context";
             type inv:node-ref;
         }
-        
         uses group-type:group;
     }
 
@@ -37,13 +37,17 @@ module sal-group {
 
     rpc remove-group {
         input {
-            uses node-group;
+            leaf node {
+                ext:context-reference "inv:node-context";
+                type inv:node-ref;
+            }
+            uses group-update;
         }
     }
 
     rpc update-group {
         input {
-            uses node-group;
+            uses group-update;
         }
     }     
 }
