@@ -19,6 +19,7 @@ module sal-flow {
     
     grouping node-flow {
         leaf node {
+            ext:context-reference "inv:node-context";
             type inv:node-ref;
         }
         leaf flow-table {
@@ -51,7 +52,11 @@ module sal-flow {
 
     rpc update-flow {
         input {
-            uses node-flow;
+            leaf node {
+                ext:context-reference "inv:node-context";
+                type inv:node-ref;
+            }
+            uses flow-update;
         }
     }
 
