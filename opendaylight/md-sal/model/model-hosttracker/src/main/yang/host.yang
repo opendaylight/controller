@@ -1,0 +1,22 @@
+module opendaylight-host {
+	namespace "urn:opendaylight:host";
+	prefix host;
+
+	import ietf-inet-types {prefix inet;}
+	import opendaylight-flow-types {prefix flow;}
+	import ietf-yang-types {prefix yang;}
+
+	revision "2013-10-13" {
+		description "Initial revision of host";
+	}
+
+	grouping host {
+		leaf datalink-address {
+			type yang:mac-address;
+		}
+
+		leaf network-address {
+			type inet:ip-address;
+		}
+	}
+}

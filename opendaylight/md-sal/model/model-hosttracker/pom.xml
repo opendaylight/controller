@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>model-parent</artifactId>
+    <groupId>org.opendaylight.controller.model</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>model-hosttracker</artifactId>
+  <groupId>org.opendaylight.controller.model</groupId>
+  <packaging>bundle</packaging>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <bundle.plugin.version>2.3.7</bundle.plugin.version>
+  </properties>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-base</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>

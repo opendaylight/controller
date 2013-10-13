@@ -39,6 +39,9 @@
         <!-- Connectors -->
         <module>sal-connector-api</module>
         <module>sal-rest-connector</module>
+        
+        <!-- MD-AD-SAL Adaptor -->
+        <module>sal-hosttracker-adapter</module>
     </modules>
 
     <properties>
