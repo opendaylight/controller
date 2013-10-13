@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-import org.opendaylight.controller.sal.common.DataStoreIdentifier;
+import org.opendaylight.controller.md.sal.common.api.DataStoreIdentifier;
 // FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
 // import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;

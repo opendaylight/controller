@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.impl
 
-import org.opendaylight.controller.sal.common.DataStoreIdentifier
+import org.opendaylight.controller.md.sal.common.api.DataStoreIdentifier
 import org.opendaylight.controller.sal.binding.api.data.RuntimeDataProvider
 
 class DataProviderContext {
