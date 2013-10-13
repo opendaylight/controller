@@ -43,7 +43,8 @@
               org.eclipse.osgi.framework.console,
               org.osgi.framework,
               org.eclipse.osgi.baseadaptor,
-              org.eclipse.osgi.framework.adaptor
+              org.eclipse.osgi.framework.adaptor,
+              org.osgi.framework.wiring
             </Import-Package>
             <Bundle-Activator>
               org.opendaylight.controller.sanitytest.internal.Activator
