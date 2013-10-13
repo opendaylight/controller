@@ -1,0 +1,71 @@
+module opendaylight-host-service {
+	namespace "urn:opendaylight:host-connector";
+	prefix host-service;
+
+	import ietf-inet-types {prefix inet;}
+	import opendaylight-flow-types {prefix flow;}
+	import ietf-yang-types {prefix yang;}
+	import opendaylight-l2-types {prefix l2t;}
+	import opendaylight-host-connector {prefix host-connector;}
+	import opendaylight-inventory {prefix inv;}
+
+	revision "2013-10-13" {
+		description "Initial revision of host-service";
+	}
+
+	notification host-added {
+		uses host-connector:host-connector;
+	}
+
+	notification  host-removed {
+		uses host-connector:host-connector;
+	}
+
+	rpc find-host {
+		input {
+			leaf network-address {
+				type inet:ip-address;
+			}
+		}
+	}
+
+	rpc query-host {
+		input  {
+			leaf network-address {
+				type inet:ip-address;
+			}
+		}
+	}
+
+	rpc get-host-network-hiearchy {
+		input {
+			leaf network-address {
+				type inet:ip-address;
+			}
+		}
+	}
+
+	rpc get-all-hosts {
+		output {
+			list host-node-connectors{
+				uses host-connector:host-connector;
+			}
+		}
+	}
+
+	rpc get-active-static-hosts {
+		output {
+			list host-node-connectors{
+				uses host-connector:host-connector;
+			}
+		}
+	}
+
+	rpc get-inactive-static-hosts {
+		output {
+			list host-node-connectors{
+				uses host-connector:host-connector;
+			}
+		}
+	}
+}

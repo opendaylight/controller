@@ -1,0 +1,31 @@
+module opendaylight-host-connector {
+	namespace "urn:opendaylight:host-connector";
+	prefix host-connector;
+
+	import opendaylight-l2-types {prefix l2t;}
+	import opendaylight-host {prefix host;}
+	import opendaylight-inventory {prefix inv;}
+
+	revision "2013-10-13" {
+		description "Initial revision of host-connector";
+	}
+
+	grouping host-connector {
+		uses host:host;
+
+		leaf staticHost{
+			type boolean;
+		}
+
+		leaf arp-send-countdown {
+			type int16;
+		}
+
+		leaf vlan-id {
+			type l2t:vlan-id;
+		}
+		leaf node-connector {
+			type inv:node-connector-id;
+		}
+	}
+}
