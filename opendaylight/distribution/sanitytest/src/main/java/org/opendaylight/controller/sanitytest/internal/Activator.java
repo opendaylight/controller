@@ -1,9 +1,12 @@
 package org.opendaylight.controller.sanitytest.internal;
 
-import org.osgi.framework.*;
-
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class Activator implements BundleActivator {
     //30 Second
@@ -32,6 +35,12 @@ public class Activator implements BundleActivator {
             public void run() {
                 boolean failed = false;
                 for(Bundle bundle : bundleContext.getBundles()){
+                    /*
+                     * A bundle should be ACTIVE, unless it a fragment, in which case it should be RESOLVED
+                     */
+                    if(!(bundle.getState() == Bundle.ACTIVE) ||
+                        (bundle.getState() != Bundle.RESOLVED &&
+                        (bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0))
                     if(bundle.getState() != Bundle.ACTIVE && bundle.getState() != Bundle.RESOLVED) {
                         System.out.println("------ Failed to activate/resolve bundle = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
                         failed = true;
