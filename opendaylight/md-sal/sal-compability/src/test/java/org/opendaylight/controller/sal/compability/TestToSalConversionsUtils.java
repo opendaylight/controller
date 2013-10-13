@@ -60,25 +60,25 @@ public class TestToSalConversionsUtils {
         FlowAddedBuilder odNodeFlowBuilder = new FlowAddedBuilder();
         odNodeFlowBuilder = prepareOdFlowCommon();
 
-        Flow salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.other));
+        Flow salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.other));
         checkSalMatch(salFlow.getMatch(), MtchType.other);
 
-        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.ipv4));
+        salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.ipv4));
         checkSalMatch(salFlow.getMatch(), MtchType.ipv4);
 
-        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.ipv6));
+        salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.ipv6));
         checkSalMatch(salFlow.getMatch(), MtchType.ipv6);
 
-        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.arp));
+        salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.arp));
         checkSalMatch(salFlow.getMatch(), MtchType.arp);
 
-        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.sctp));
+        salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.sctp));
         checkSalMatch(salFlow.getMatch(), MtchType.sctp);
 
-        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.tcp));
+        salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.tcp));
         checkSalMatch(salFlow.getMatch(), MtchType.tcp);
 
-        salFlow = ToSalConversionsUtils.flowFrom(prepareOdFlow(odNodeFlowBuilder, MtchType.udp));
+        salFlow = ToSalConversionsUtils.toFlow(prepareOdFlow(odNodeFlowBuilder, MtchType.udp));
         checkSalMatch(salFlow.getMatch(), MtchType.udp);
 
         checkSalFlow(salFlow);

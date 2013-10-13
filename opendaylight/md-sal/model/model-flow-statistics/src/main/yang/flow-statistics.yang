@@ -8,6 +8,7 @@ module opendaylight-flow-statistics {
     import sal-flow {prefix flow;}
     import opendaylight-statistics-types {prefix stat-types;}
 
+
     revision "2013-08-19" {
         description "Initial revision of flow service";
     }
@@ -27,10 +28,6 @@ module opendaylight-flow-statistics {
         }
     }
 
-    notification node-connector-statistics-updated {
-        uses stat-types:node-connector-statistics;
-    }
-
     rpc get-flow-statistics {
         input {
             leaf node {
@@ -41,6 +38,34 @@ module opendaylight-flow-statistics {
         }
         output {
             uses flow-types:flow-statistics;
+        }
+    }
+
+    rpc get-all-flow-statistics {
+        input {
+            leaf node {
+                ext:context-reference "inv:node-context";
+                type inv:node-ref;
+            }
+        }
+        output {
+            list flow-statistics {
+                uses flow-types:flow-statistics;
+            }
+        }
+    }
+
+    rpc get-all-node-connector-statistics {
+        input {
+            leaf node {
+                ext:context-reference "inv:node-context";
+                type inv:node-ref;
+            }
+        }
+        output {
+            list node-connector-statistics {
+                uses stat-types:node-connector-statistics;
+            }
         }
     }
 
@@ -66,5 +91,10 @@ module opendaylight-flow-statistics {
         }
         uses flow-types:flow-table-statistics;
     }
+
+    notification node-connector-statistics-updated {
+        uses stat-types:node-connector-statistics;
+    }
+
 
 }

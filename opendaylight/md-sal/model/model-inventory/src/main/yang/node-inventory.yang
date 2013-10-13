@@ -83,9 +83,10 @@ module opendaylight-inventory {
     }
 
     notification node-connector-updated {
-        /*leaf node-ref {
-            type node-ref;
-        }*/
+        leaf node-connector-ref {
+            ext:context-reference "node-connector-context";
+            type node-connector-ref;
+        }
         uses node-connector;
     }
 
@@ -99,7 +100,7 @@ module opendaylight-inventory {
     notification node-connector-removed {
         leaf node-connector-ref {
             ext:context-reference "node-connector-context";
-            type node-ref;
+            type node-connector-ref;
         }
     }
 }
