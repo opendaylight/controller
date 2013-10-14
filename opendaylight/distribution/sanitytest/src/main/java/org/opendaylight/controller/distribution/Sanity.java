@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Sanity {
 
     static void copy(InputStream in, OutputStream out) throws IOException {
@@ -20,16 +23,18 @@ public class Sanity {
         System.out.println("Current working directory = " + cwd);
 
         String os = System.getProperty("os.name").toLowerCase();
-        String script = "./run.sh";
+        List<String> script = new ArrayList<String>();
 
         if(os.contains("windows")){
-            System.out.println("Sorry no sanity testing on Windows yet");
-            System.exit(0);
-            return;
+            script.add("cmd.exe");
+            script.add("/c");
+            script.add("run.bat");
+        } else {
+            script.add("./run.sh");
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command(script);
+        processBuilder.inheritIO().command(script);
         Process p = processBuilder.start();
 
         copy(p.getInputStream(), System.out);
