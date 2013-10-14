@@ -9,8 +9,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleRevision;
 
 public class Activator implements BundleActivator {
-    //30 Second
-    private static final int DELAY = 30000;
+    //10 Second initial, 1 second subsequent
+    private static final int INITIAL_DELAY = 10000;
+    private static final int SUBSEQUENT_DELAY = 1000;
 
 
     private String stateToString(int state) {
@@ -23,8 +24,10 @@ public class Activator implements BundleActivator {
             return "RESOLVED";
         case Bundle.UNINSTALLED:
             return "UNINSTALLED";
+        case Bundle.STARTING:
+            return "STARTING";
         default:
-            return "Not CONVERTED";
+            return "Not CONVERTED: state value is " + state;
         }
     }
 
@@ -33,27 +36,61 @@ public class Activator implements BundleActivator {
         monitorTimer.schedule(new TimerTask() {
             @Override
             public void run() {
+                int countup = 0;
                 boolean failed = false;
-                for(Bundle bundle : bundleContext.getBundles()){
-                    /*
-                     * A bundle should be ACTIVE, unless it a fragment, in which case it should be RESOLVED
-                     */
-                    if(!(bundle.getState() == Bundle.ACTIVE) ||
-                        (bundle.getState() != Bundle.RESOLVED &&
-                        (bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0))
-                    if(bundle.getState() != Bundle.ACTIVE && bundle.getState() != Bundle.RESOLVED) {
-                        System.out.println("------ Failed to activate/resolve bundle = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
-                        failed = true;
+                boolean resolved = false;
+                while (!resolved) {
+                    resolved = true;
+                    failed = false;
+                    for(Bundle bundle : bundleContext.getBundles()){
+                        /*
+                         * A bundle should be ACTIVE, unless it a fragment, in which case it should be RESOLVED
+                         */
+                        int state = bundle.getState();
+                        if ((bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+                            //fragment
+                            if (state != Bundle.RESOLVED) {
+                                System.out.println("------ Failed to activate/resolve fragment = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
+                                failed = true;
+                                if (state == Bundle.STARTING)
+                                    resolved = false;
+                            }
+                        } else {
+                            if(state != Bundle.ACTIVE) {
+                                System.out.println("------ Failed to activate/resolve bundle = " + bundle.getSymbolicName() + " state = " + stateToString(bundle.getState()));
+                                failed = true;
+                                if (state == Bundle.STARTING)
+                                    resolved = false;
+                            }
+                        }
+                    }
+                    if (!resolved) {
+                        countup++;
+                        if (countup < 60) {
+                            System.out.println("all bundles haven't finished starting, will repeat");
+                            try {
+                                Thread.sleep(SUBSEQUENT_DELAY);
+                            } catch (Exception e) {
+                                ;
+                            }
+                        } else
+                            resolved = true;
                     }
                 }
 
                 if(failed){
-                    System.exit(-1);
+                    System.out.flush();
+                    System.out.println("exiting with 1 as failed");
+                    System.out.close();
+                    Runtime.getRuntime().exit(1);
                 } else {
-                    System.exit(0);
+                    System.out.flush();
+                    System.out.println("exiting with 0 as succeeded");
+                    System.out.close();
+                    Runtime.getRuntime().exit(0);
                 }
             }
-        }, DELAY);
+        }, INITIAL_DELAY);
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
