@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d14ac6ab",
+        "filename": "opendaylight/distribution/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-10-14T19:51:41Z",
+      "side": 1,
+      "message": "Core dependency for MD-SAL and generated models are derived from it, should be part of distro.",
+      "revId": "4d8d35216ef39cf07431e077c5a1f80bed4001b6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f14dcac5",
+        "filename": "opendaylight/distribution/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-10-14T19:51:41Z",
+      "side": 1,
+      "message": "Core dependency for MD-SAL, should be part of distro.",
+      "revId": "4d8d35216ef39cf07431e077c5a1f80bed4001b6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_11517e62",
+        "filename": "opendaylight/distribution/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-10-14T19:51:41Z",
+      "side": 1,
+      "message": "Core dependency for MD-SAL, should be part of distro.",
+      "revId": "4d8d35216ef39cf07431e077c5a1f80bed4001b6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_31548253",
+        "filename": "opendaylight/distribution/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-10-14T19:51:41Z",
+      "side": 1,
+      "message": "Core dependency for MD-SAL, should be part of distribution.",
+      "revId": "4d8d35216ef39cf07431e077c5a1f80bed4001b6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
