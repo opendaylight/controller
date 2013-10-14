@@ -20,7 +20,7 @@ module flow-management {
 
     container flows {
         list flow {
-            key "id";
+            key "id node";
             
             leaf id {
                 type string;
