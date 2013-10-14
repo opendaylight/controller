@@ -8,18 +8,21 @@
 
 package org.opendaylight.controller.netconf.util.osgi;
 
-import com.google.common.base.Optional;
-import org.opendaylight.controller.config.stat.ConfigProvider;
-import org.opendaylight.protocol.util.SSLUtil;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
-import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+
+import org.opendaylight.controller.config.stat.ConfigProvider;
+import org.opendaylight.protocol.util.SSLUtil;
+
+import com.google.common.base.Optional;
 
 public class NetconfConfigUtil {
     private static final String PREFIX_PROP = "netconf.";
@@ -69,7 +72,7 @@ public class NetconfConfigUtil {
             try {
                 try (InputStream keyStoreIS = new FileInputStream(keystoreFile)) {
                     try (InputStream trustStoreIS = new FileInputStream(keystoreFile)) {
-                        sslContext = SSLUtil.initializeSecureContext("password", keyStoreIS, trustStoreIS, "SunX509");
+                        sslContext = SSLUtil.initializeSecureContext("password", keyStoreIS, trustStoreIS, KeyManagerFactory.getDefaultAlgorithm());
                     }
                 }
             } catch (Exception e) {
