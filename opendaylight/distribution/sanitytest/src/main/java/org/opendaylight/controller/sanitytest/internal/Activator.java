@@ -48,9 +48,11 @@ public class Activator implements BundleActivator {
                 }
 
                 if(failed){
-                    System.exit(-1);
+                    System.out.close();
+                    Runtime.getRuntime().exit(1);
                 } else {
-                    System.exit(0);
+                    System.out.close();
+                    Runtime.getRuntime().exit(0);
                 }
             }
         }, DELAY);
