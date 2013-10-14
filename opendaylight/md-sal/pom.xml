@@ -39,6 +39,7 @@
         <!-- Connectors -->
         <module>sal-connector-api</module>
         <module>sal-rest-connector</module>
+        <module>flow-management-compatibility</module>
     </modules>
 
     <properties>
