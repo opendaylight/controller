@@ -222,6 +222,108 @@
         </dependency>
 
 
+          <!-- toaster example I'm pretty sure we should trim -->
+
+         <dependency>
+          <groupId>org.opendaylight.controller.samples</groupId>
+          <artifactId>sample-toaster</artifactId>
+          <version>${mdsal.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.controller.samples</groupId>
+          <artifactId>sample-toaster-consumer</artifactId>
+          <version>${mdsal.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.controller.samples</groupId>
+          <artifactId>sample-toaster-provider</artifactId>
+          <version>${mdsal.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.controller.samples</groupId>
+          <artifactId>sample-toaster-it</artifactId>
+          <version>${mdsal.version}</version>
+         </dependency>
+
+         <!-- yangtools dependencies I'm pretty sure we can trim -->
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-binding</artifactId>
+          <version>0.6.0-SNAPSHOT</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>binding-type-provider</artifactId>
+          <version>0.6.0-SNAPSHOT</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>binding-generator-util</artifactId>
+          <version>${yangtools.binding.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>binding-model-api</artifactId>
+          <version>${yangtools.binding.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>binding-generator-spi</artifactId>
+          <version>${yangtools.binding.version}</version>
+         </dependency>
+         <dependency>
+           <groupId>commons-lang</groupId>
+           <artifactId>commons-lang</artifactId>
+           <version>2.4</version>
+         </dependency>
+
+           <dependency>
+          <groupId>org.opendaylight.yangtools.thirdparty</groupId>
+          <artifactId>antlr-runtime-osgi</artifactId>
+          <version>4.0-SNAPSHOT</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools.thirdparty</groupId>
+          <artifactId>xtend-lib-osgi</artifactId>
+          <version>2.4.2-SNAPSHOT</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-parser-api</artifactId>
+          <version>${yangtools.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-model-util</artifactId>
+          <version>${yangtools.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-parser-impl</artifactId>
+          <version>${yangtools.version}</version>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-common</artifactId>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-data-api</artifactId>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-data-util</artifactId>
+         </dependency>
+         <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-model-api</artifactId>
+         </dependency>
+
+          <dependency>
+           <groupId>org.opendaylight.yangtools.model</groupId>
+           <artifactId>yang-ext</artifactId>
+          </dependency>
+
       </dependencies>
     </profile>
   </profiles>
@@ -975,10 +1077,6 @@
      <groupId>org.opendaylight.yangtools.model</groupId>
      <artifactId>opendaylight-l2-types</artifactId>
     </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools.model</groupId>
-     <artifactId>yang-ext</artifactId>
-    </dependency>
 
     <!-- bgppcep dependencies -->
     <dependency>
@@ -1029,108 +1127,12 @@
      <version>${commons.httpclient.version}</version>
     </dependency>
 
-     <!-- toaster example I'm pretty sure we should trim -->
-
-    <dependency>
-     <groupId>org.opendaylight.controller.samples</groupId>
-     <artifactId>sample-toaster</artifactId>
-     <version>${mdsal.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.controller.samples</groupId>
-     <artifactId>sample-toaster-consumer</artifactId>
-     <version>${mdsal.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.controller.samples</groupId>
-     <artifactId>sample-toaster-provider</artifactId>
-     <version>${mdsal.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.controller.samples</groupId>
-     <artifactId>sample-toaster-it</artifactId>
-     <version>${mdsal.version}</version>
-    </dependency>
-
-    <!-- yangtools dependencies I'm pretty sure we can trim -->
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-binding</artifactId>
-     <version>0.6.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>binding-type-provider</artifactId>
-     <version>0.6.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>binding-generator-util</artifactId>
-     <version>${yangtools.binding.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>binding-model-api</artifactId>
-     <version>${yangtools.binding.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>binding-generator-spi</artifactId>
-     <version>${yangtools.binding.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.4</version>
-    </dependency>
-
-      <dependency>
-     <groupId>org.opendaylight.yangtools.thirdparty</groupId>
-     <artifactId>antlr-runtime-osgi</artifactId>
-     <version>4.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools.thirdparty</groupId>
-     <artifactId>xtend-lib-osgi</artifactId>
-     <version>2.4.2-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-parser-api</artifactId>
-     <version>${yangtools.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-model-util</artifactId>
-     <version>${yangtools.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-parser-impl</artifactId>
-     <version>${yangtools.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-common</artifactId>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-data-api</artifactId>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-data-util</artifactId>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-model-api</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sanitytest</artifactId>
       <version>${controller.version}</version>
     </dependency>
+
 
   </dependencies>
 
