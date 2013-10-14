@@ -121,7 +121,7 @@ public class NetconfITTest extends AbstractConfigTest {
             IOException, UnrecoverableKeyException, KeyManagementException {
         final InputStream keyStore = getClass().getResourceAsStream("/keystore.jks");
         final InputStream trustStore = getClass().getResourceAsStream("/keystore.jks");
-        SSLContext sslContext = SSLUtil.initializeSecureContext("password", keyStore, trustStore, "SunX509");
+        SSLContext sslContext = SSLUtil.initializeSecureContext("password", keyStore, trustStore, KeyManagerFactory.getDefaultAlgorithm());
         keyStore.close();
         trustStore.close();
         return sslContext;

@@ -69,7 +69,7 @@ public class NetconfConfigUtil {
             try {
                 try (InputStream keyStoreIS = new FileInputStream(keystoreFile)) {
                     try (InputStream trustStoreIS = new FileInputStream(keystoreFile)) {
-                        sslContext = SSLUtil.initializeSecureContext("password", keyStoreIS, trustStoreIS, "SunX509");
+                        sslContext = SSLUtil.initializeSecureContext("password", keyStoreIS, trustStoreIS, KeyManagerFactory.getDefaultAlgorithm());
                     }
                 }
             } catch (Exception e) {
