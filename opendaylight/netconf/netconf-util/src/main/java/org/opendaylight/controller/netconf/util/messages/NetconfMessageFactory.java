@@ -11,9 +11,6 @@ package org.opendaylight.controller.netconf.util.messages;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandler;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import org.opendaylight.controller.netconf.api.NetconfDeserializerException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -44,9 +41,7 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
 
     public static final byte[] endOfChunk = "\n##\n".getBytes(Charsets.UTF_8);
 
-    private static final int MAX_CHUNK_SIZE = 1024; // Bytes
-
-    private FramingMechanism framing = FramingMechanism.EOM;
+    public static final int MAX_CHUNK_SIZE = 1024; // Bytes
 
     private final Optional<String> clientId;
 
@@ -56,10 +51,6 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
 
     public NetconfMessageFactory(Optional<String> clientId) {
         this.clientId = clientId;
-    }
-
-    public static ChannelHandler getDelimiterFrameDecoder() {
-        return new DelimiterBasedFrameDecoder(Integer.MAX_VALUE, Unpooled.copiedBuffer(endOfMessage));
     }
 
     @Override
@@ -90,52 +81,16 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
             Comment comment = netconfMessage.getDocument().createComment("clientId:" + clientId.get());
             netconfMessage.getDocument().appendChild(comment);
         }
-        byte[] bytes = (this.framing == FramingMechanism.EOM) ? this.putEOM(netconfMessage) : this
-                .putChunked(netconfMessage);
+        final ByteBuffer msgBytes = Charsets.UTF_8.encode(xmlToString(netconfMessage.getDocument()));
         String content = xmlToString(netconfMessage.getDocument());
 
         logger.trace("Putting message \n{}", content);
-        return bytes;
-    }
-
-    private byte[] putEOM(NetconfMessage msg) {
-        // create byte buffer from the String XML
-        // all Netconf messages are encoded using UTF-8
-        final ByteBuffer msgBytes = Charsets.UTF_8.encode(xmlToString(msg.getDocument()));
-        final ByteBuffer result = ByteBuffer.allocate(msgBytes.limit() + endOfMessage.length);
-        result.put(msgBytes);
-        // put end of message
-        result.put(endOfMessage);
-        return result.array();
-    }
-
-    private byte[] putChunked(NetconfMessage msg) {
-        final ByteBuffer msgBytes = Charsets.UTF_8.encode(xmlToString(msg.getDocument()));
-        final NetconfMessageHeader h = new NetconfMessageHeader();
-        if (msgBytes.limit() > MAX_CHUNK_SIZE)
-            logger.warn("Netconf message too long, should be split.");
-        h.setLength(msgBytes.limit());
-        final byte[] headerBytes = h.toBytes();
-        final ByteBuffer result = ByteBuffer.allocate(headerBytes.length + msgBytes.limit() + endOfChunk.length);
-        result.put(headerBytes);
-        result.put(msgBytes);
-        result.put(endOfChunk);
-        return result.array();
+        byte[] b = new byte[msgBytes.remaining()];
+        msgBytes.get(b);
+        return b;
     }
 
     private String xmlToString(Document doc) {
         return XmlUtil.toString(doc, false);
-    }
-
-    /**
-     * For Hello message the framing is always EOM, but the framing mechanism
-     * may change.
-     *
-     * @param fm
-     *            new framing mechanism
-     */
-    public void setFramingMechanism(final FramingMechanism fm) {
-        logger.debug("Framing mechanism changed to {}", fm);
-        this.framing = fm;
     }
 }
