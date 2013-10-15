@@ -10,7 +10,7 @@ import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
 import static extension org.opendaylight.controller.sal.common.util.Arguments.*
 import static extension org.opendaylight.controller.sal.compability.NodeMapping.*
 import static org.opendaylight.controller.sal.compability.MDFlowMapping.*
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow   .inventory.rev130819.FlowCapableNode
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeConnector
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef
@@ -33,8 +33,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRem
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.yangtools.yang.binding.DataObject
+import org.opendaylight.controller.sal.topology.IPluginOutTopologyService
+import org.opendaylight.controller.sal.topology.IPluginInTopologyService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryListener
+import org.opendaylight.controller.sal.core.Edge
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.Link
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkDiscovered
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkOverutilized
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkRemoved
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkUtilizationNormal
+import org.opendaylight.controller.sal.topology.TopoEdgeUpdate
+import org.opendaylight.controller.sal.discovery.IDiscoveryService
 
-class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventoryService,OpendaylightInventoryListener {
+class InventoryAndReadAdapter implements IPluginInTopologyService, IPluginInReadService, IPluginInInventoryService, OpendaylightInventoryListener, FlowTopologyDiscoveryListener {
 
     private static val LOG = LoggerFactory.getLogger(InventoryAndReadAdapter);
 
@@ -43,10 +55,18 @@ class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventor
 
     @Property
     OpendaylightFlowStatisticsService flowStatisticsService;
+
+    @Property
+    IPluginOutInventoryService inventoryPublisher;
+
+    @Property
+    IPluginOutTopologyService topologyPublisher;
     
     @Property
-    IPluginOutInventoryService adInventoryPublisher;
-    
+    IDiscoveryService discoveryPublisher;
+
+    @Property
+    FlowTopologyDiscoveryService topologyDiscovery;
 
     override getTransmitRate(NodeConnector connector) {
         val nodeConnector = readFlowCapableNodeConnector(connector.toNodeConnectorRef);
@@ -57,10 +77,10 @@ class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventor
         val input = new GetAllFlowStatisticsInputBuilder;
         input.setNode(node.toNodeRef);
         val result = flowStatisticsService.getAllFlowStatistics(input.build)
-        
+
         val statistics = result.get.result;
         val output = new ArrayList<FlowOnNode>();
-        for(stat : statistics.flowStatistics) {
+        for (stat : statistics.flowStatistics) {
             // FIXME: Create FlowOnNode
         }
         return output;
@@ -72,7 +92,7 @@ class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventor
         val result = flowStatisticsService.getAllNodeConnectorStatistics(input.build());
         val statistics = result.get.result.nodeConnectorStatistics;
         val ret = new ArrayList<NodeConnectorStatistics>();
-        for(stat : statistics) {
+        for (stat : statistics) {
             ret.add(stat.toNodeConnectorStatistics())
         }
         return ret;
@@ -109,7 +129,7 @@ class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventor
                 return it;
             }
         } catch (Exception e) {
-             LOG.error("Read flow not processed", e);
+            LOG.error("Read flow not processed", e);
         }
         return null;
     }
@@ -137,30 +157,30 @@ class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventor
     }
 
     override onNodeRemoved(NodeRemoved notification) {
-        
         // NOOP
     }
 
     override onNodeConnectorUpdated(NodeConnectorUpdated update) {
         val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
-        adInventoryPublisher.updateNodeConnector(update.nodeConnectorRef.toADNodeConnector,UpdateType.CHANGED,properties);
+        inventoryPublisher.updateNodeConnector(update.nodeConnectorRef.toADNodeConnector, UpdateType.CHANGED, properties);
     }
 
     override onNodeUpdated(NodeUpdated notification) {
         val properties = Collections.<org.opendaylight.controller.sal.core.Property>emptySet();
-        adInventoryPublisher.updateNode(notification.nodeRef.toADNode,UpdateType.CHANGED,properties);
+        inventoryPublisher.updateNode(notification.nodeRef.toADNode, UpdateType.CHANGED, properties);
     }
 
-    override  getNodeProps() {
+    override getNodeProps() {
+
         // FIXME: Read from MD-SAL inventory service
         return null;
     }
 
-    override  getNodeConnectorProps(Boolean refresh) {
+    override getNodeConnectorProps(Boolean refresh) {
+
         // FIXME: Read from MD-SAL Invcentory Service
         return null;
     }
-
 
     override readNodeTable(NodeTable table, boolean cached) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
@@ -200,4 +220,33 @@ class InventoryAndReadAdapter implements IPluginInReadService, IPluginInInventor
         transmitByteCount = output.getBytes().getTransmitted().longValue();
         return it;
     }
+
+    override sollicitRefresh() {
+        topologyDiscovery.solicitRefresh
+    }
+    
+    override onLinkDiscovered(LinkDiscovered notification) {
+        val update = new TopoEdgeUpdate(notification.toADEdge,Collections.emptySet(),UpdateType.ADDED);
+        discoveryPublisher.notifyEdge(notification.toADEdge,UpdateType.ADDED,Collections.emptySet());
+        topologyPublisher.edgeUpdate(Collections.singletonList(update))
+    }
+    
+    override onLinkOverutilized(LinkOverutilized notification) {
+        topologyPublisher.edgeOverUtilized(notification.toADEdge)
+    }
+    
+    override onLinkRemoved(LinkRemoved notification) {
+        val update = new TopoEdgeUpdate(notification.toADEdge,Collections.emptySet(),UpdateType.REMOVED);
+        topologyPublisher.edgeUpdate(Collections.singletonList(update))
+    }
+    
+    override onLinkUtilizationNormal(LinkUtilizationNormal notification) {
+        topologyPublisher.edgeUtilBackToNormal(notification.toADEdge)
+    }
+    
+    
+    def Edge toADEdge(Link link) {
+        new Edge(link.source.toADNodeConnector,link.destination.toADNodeConnector)
+    }
+
 }

@@ -27,6 +27,9 @@ import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService
 import org.osgi.framework.BundleContext
 import org.opendaylight.controller.sal.reader.IPluginOutReadService
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService
+import org.opendaylight.controller.sal.discovery.IDiscoveryService
+import org.opendaylight.controller.sal.topology.IPluginOutTopologyService
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.FlowTopologyDiscoveryService
 
 class ComponentActivator extends ComponentActivatorAbstractBase implements BindingAwareConsumer {
 
@@ -68,6 +71,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
         // Inventory Service
         inventory.dataService = session.getSALService(DataBrokerService);
         inventory.flowStatisticsService = session.getRpcService(OpendaylightFlowStatisticsService);
+        inventory.topologyDiscovery = session.getRpcService(FlowTopologyDiscoveryService);
 
         subscribe.registerNotificationListener(dataPacket)
 
@@ -93,7 +97,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
             createServiceDependency() //
             .setService(IPluginOutDataPacketService) //
             .setCallbacks("setDataPacketPublisher", "setDataPacketPublisher") //
-            .setRequired(true))
+            .setRequired(false))
     }
 
     private def dispatch configure(FlowProgrammerAdapter imp, Component it) {
@@ -102,7 +106,7 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
             createServiceDependency() //
             .setService(IPluginOutFlowProgrammerService) //
             .setCallbacks("setFlowProgrammerPublisher", "setFlowProgrammerPublisher") //
-            .setRequired(true))
+            .setRequired(false))
     }
 
     private def dispatch configure(InventoryAndReadAdapter imp, Component it) {
@@ -111,12 +115,23 @@ class ComponentActivator extends ComponentActivatorAbstractBase implements Bindi
             createServiceDependency() //
             .setService(IPluginOutReadService) //
             .setCallbacks("setReadPublisher", "setReadPublisher") //
-            .setRequired(true))
+            .setRequired(false))
         add(
             createServiceDependency() //
             .setService(IPluginOutInventoryService) //
             .setCallbacks("setInventoryPublisher", "setInventoryPublisher") //
-            .setRequired(true))
+            .setRequired(false))
+        add(
+            createServiceDependency() //
+            .setService(IPluginOutTopologyService) //
+            .setCallbacks("setTopologyPublisher", "setTopologyPublisher") //
+            .setRequired(false))
+        add(
+            createServiceDependency() //
+            .setService(IDiscoveryService) //
+            .setCallbacks("setDiscoveryPublisher", "setDiscoveryPublisher") //
+            .setRequired(false))
+        
     }
 
     private def Dictionary<String, Object> properties() {
