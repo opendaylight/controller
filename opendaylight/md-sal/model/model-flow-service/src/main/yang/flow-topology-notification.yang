@@ -1,0 +1,47 @@
+module flow-topology-discovery {
+    namespace "urn:opendaylight:flow:topology:discovery";
+    prefix flow-node-topo;
+
+    import yang-ext {prefix ext;}
+    import ietf-inet-types {prefix inet;}
+    import ietf-yang-types {prefix yang;}
+    import opendaylight-port-types {prefix port;}
+    import opendaylight-inventory {prefix inv;}
+    import flow-node-inventory {prefix flowinv;}
+    
+    revision "2013-08-19" {
+        description "Flow Capable Node extensions to the Inventory model";
+    }
+    
+
+    grouping link {
+        leaf source {
+            type inv:node-connector-ref;
+        }
+        leaf destination {
+            type inv:node-connector-ref;
+        }
+    }
+
+
+    notification link-discovered {
+        uses link;
+    }
+    
+    notification link-overutilized {
+        uses link;
+    }
+    
+    notification link-removed {
+        uses link;
+    }
+    
+    notification link-utilization-normal {
+        uses link;
+    }
+
+    rpc solicit-refresh {
+    
+    }
+
+}
