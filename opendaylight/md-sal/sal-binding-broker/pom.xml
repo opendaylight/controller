@@ -28,9 +28,6 @@
                             org.opendaylight.controller.sal.binding.impl,
                             org.opendaylight.controller.sal.binding.impl.*,
                             org.opendaylight.controller.sal.binding.codegen.*,
-                            org.eclipse.xtend2.lib,
-                            org.eclipse.xtend.lib,
-                            org.eclipse.xtext.xbase.*
                         </Private-Package>
                     </instructions>
                 </configuration>

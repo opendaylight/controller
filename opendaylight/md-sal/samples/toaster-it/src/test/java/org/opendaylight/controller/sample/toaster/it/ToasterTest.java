@@ -71,6 +71,7 @@ public class ToasterTest {
                 mavenBundle(YANG, "concepts").versionAsInProject(),
                 mavenBundle(YANG, "yang-binding").versionAsInProject(), //
                 mavenBundle(YANG, "yang-common").versionAsInProject(), //
+                mavenBundle(YANG+".thirdparty", "xtend-lib-osgi").versionAsInProject(),
                 mavenBundle("com.google.guava", "guava").versionAsInProject(), //
                 mavenBundle("org.javassist", "javassist").versionAsInProject(),
                 junitBundles()

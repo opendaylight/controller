@@ -56,9 +56,6 @@
                         <Bundle-Activator>org.opendaylight.controller.sal.dom.broker.BrokerActivator</Bundle-Activator>
                         <Private-Package>
                             org.opendaylight.controller.sal.dom.broker,
-                            org.eclipse.xtend2.lib,
-                            org.eclipse.xtend.lib,
-                            org.eclipse.xtext.xbase.*
                         </Private-Package>
                     </instructions>
                 </configuration>

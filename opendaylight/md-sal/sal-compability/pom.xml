@@ -74,11 +74,6 @@
           <instructions>
             <Bundle-Name>${project.name}</Bundle-Name>
             <Bundle-Activator>org.opendaylight.controller.sal.compability.ComponentActivator</Bundle-Activator>
-            <Private-Package>
-              org.eclipse.xtend2.lib,
-              org.eclipse.xtend.lib,
-              org.eclipse.xtext.xbase.*
-            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
