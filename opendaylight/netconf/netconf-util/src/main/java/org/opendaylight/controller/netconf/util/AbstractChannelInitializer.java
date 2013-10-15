@@ -13,6 +13,9 @@ import javax.net.ssl.SSLEngine;
 
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
+import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
+import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
+import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageFactory;
 import org.opendaylight.protocol.framework.ProtocolHandlerFactory;
 import org.opendaylight.protocol.framework.ProtocolMessageDecoder;
@@ -40,9 +43,10 @@ public abstract class AbstractChannelInitializer {
             initSsl(ch);
         }
 
-        ch.pipeline().addLast("frameDecoder", NetconfMessageFactory.getDelimiterFrameDecoder());
+        ch.pipeline().addLast("aggregator", new NetconfMessageAggregator(FramingMechanism.EOM));
         ch.pipeline().addLast(handlerFactory.getDecoders());
         initializeAfterDecoder(ch, promise);
+        ch.pipeline().addLast("frameEncoder", FramingMechanismHandlerFactory.createHandler(FramingMechanism.EOM));
         ch.pipeline().addLast(handlerFactory.getEncoders());
     }
 
