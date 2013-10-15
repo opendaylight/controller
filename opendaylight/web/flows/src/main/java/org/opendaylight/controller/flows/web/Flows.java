@@ -212,6 +212,7 @@ public class Flows implements IDaylightWeb {
         return nodes;
     }
 
+
     @RequestMapping(value = "/flow", method = RequestMethod.POST)
     @ResponseBody
     public String actionFlow(@RequestParam(required = true) String action, @RequestParam(required = false) String body,
@@ -241,6 +242,12 @@ public class Flows implements IDaylightWeb {
             result = frm.addStaticFlow(flow);
             if (result.isSuccess()) {
                 DaylightWebUtil.auditlog("Flow Entry", userName, "added", flow.getName() + " on Node "
+                        + DaylightWebUtil.getNodeDesc(node, containerName, this), containerName);
+            }
+        } else if (action.equals("edit")){
+            result = frm.modifyStaticFlow(flow);
+            if (result.isSuccess()) {
+                DaylightWebUtil.auditlog("Flow Entry", userName, "updated", flow.getName() + " on Node "
                         + DaylightWebUtil.getNodeDesc(node, containerName, this), containerName);
             }
         }
