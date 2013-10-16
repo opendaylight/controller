@@ -18,4 +18,7 @@ class RoutingPair {
     val Class<? extends BaseIdentity> context;
     @Property
     val CtMethod getter;
+    
+    @Property
+    val boolean encapsulated;
 }

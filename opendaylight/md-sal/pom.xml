@@ -26,6 +26,7 @@
         <!-- Binding Aware -->
         <module>sal-binding-api</module>
         <module>sal-binding-broker</module>
+        <module>sal-binding-it</module>
 
         <!-- Samples -->
         <module>samples</module>
