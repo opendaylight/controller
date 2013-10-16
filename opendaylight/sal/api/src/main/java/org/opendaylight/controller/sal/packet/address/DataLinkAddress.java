@@ -26,7 +26,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
  *
  */
 @XmlRootElement
-@XmlSeeAlso( { EthernetAddress.class })
 abstract public class DataLinkAddress implements Serializable {
     private static final long serialVersionUID = 1L;
     private String name;
@@ -53,6 +52,7 @@ abstract public class DataLinkAddress implements Serializable {
      *
      * @return A clone of this DataLinkAddress
      */
+    @Override
     abstract public DataLinkAddress clone();
 
     /**
