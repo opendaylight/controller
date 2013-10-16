@@ -31,11 +31,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlSeeAlso({ Config.class, Name.class, State.class, TimeStamp.class,
-    Latency.class, Bandwidth.class, Tier.class, Actions.class,
-    AdvertisedBandwidth.class, Buffers.class, Capabilities.class,
-    MacAddress.class, PeerBandwidth.class, SupportedBandwidth.class,
-    Tables.class, Description.class, ForwardingMode.class })
 abstract public class Property implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
     private final String name;

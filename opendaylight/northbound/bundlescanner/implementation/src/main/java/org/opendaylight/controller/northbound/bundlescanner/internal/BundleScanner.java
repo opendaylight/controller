@@ -73,7 +73,8 @@ import org.slf4j.LoggerFactory;
         Pattern pattern = mergePatterns(annotations, false);
         List<Class<?>> result = null;
         if (includeDependentBundleClasses) {
-            result = info.getAnnotatedClasses(bundleAnnotations.values(), pattern);
+            result = info.getAnnotatedClasses(bundleAnnotations.values(),
+                    pattern, context.getBundle());
         } else {
             result = info.getAnnotatedClasses(pattern);
         }
@@ -238,15 +239,21 @@ import org.slf4j.LoggerFactory;
     }
 
     public static List<Class<?>> loadClasses(Bundle bundle,
-            Collection<String> annotatedClasses)
+            Collection<String> annotatedClasses,
+            Bundle initBundle)
     {
         List<Class<?>> result = new ArrayList<Class<?>>();
+        StringBuilder errors = new StringBuilder();
         for (String name : annotatedClasses) {
             try {
-                result.add(bundle.loadClass(name));
-            } catch (Exception e) {
-                LOGGER.error("Unable to load class: {}", name, e);
+                result.add(initBundle.loadClass(name));
+            } catch (ClassNotFoundException e) {
+                errors.append(name).append(", ");
             }
+        }
+        if (LOGGER.isDebugEnabled() && errors.length() > 0) {
+            LOGGER.debug("Bundle: {} could not load classes: {}",
+                    initBundle.getSymbolicName(), errors.toString());
         }
         return result;
     }
