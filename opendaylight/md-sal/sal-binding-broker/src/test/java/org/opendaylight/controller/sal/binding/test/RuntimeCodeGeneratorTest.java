@@ -13,6 +13,8 @@ import org.junit.Test;
 import static org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper.*;
 
 import org.opendaylight.controller.sal.binding.codegen.impl.RuntimeCodeGenerator;
+import org.opendaylight.controller.sal.binding.spi.RpcRouter;
+import org.opendaylight.controller.sal.binding.spi.RpcRoutingTable;
 import org.opendaylight.controller.sal.binding.test.mock.FooService;
 import org.opendaylight.controller.sal.binding.test.mock.ReferencableObject;
 import org.opendaylight.controller.sal.binding.test.mock.ReferencableObjectKey;
@@ -39,25 +41,25 @@ public class RuntimeCodeGeneratorTest {
     
     @Test
     public void testGenerateDirectProxy() {
-        Class<? extends FooService> product = codeGenerator.generateDirectProxy(FooService.class);
+        FooService product = codeGenerator.getDirectProxyFor(FooService.class);
         assertNotNull(product);
     }
 
     @Test
     public void testGenerateRouter() throws Exception {
-        Class<? extends FooService> product = codeGenerator.generateRouter(FooService.class);
+        RpcRouter<FooService> product = codeGenerator.getRouterFor(FooService.class);
         assertNotNull(product);
-        assertNotNull(product.getSimpleName());
-        assertEquals("2 fields should be generated.",2,product.getFields().length);
+        assertNotNull(product.getInvocationProxy());
         
-        verifyRouting(product.newInstance());
+        assertEquals("2 fields should be generated.",2,product.getInvocationProxy().getClass().getFields().length);
+        
+        verifyRouting(product);
     }
 
-    private void verifyRouting(FooService product) {
-        Map<InstanceIdentifier<? extends Object>,FooService> routingTable = new HashMap<>();
-        setRoutingTable(product, BaseIdentity.class, routingTable);
+    private void verifyRouting(RpcRouter<FooService> product) {
+        assertNotNull("Routing table should be initialized",product.getRoutingTable(BaseIdentity.class));
         
-        assertSame("Returned routing table should be same instance",routingTable,getRoutingTable(product, BaseIdentity.class));
+        RpcRoutingTable<BaseIdentity, FooService> routingTable = product.getRoutingTable(BaseIdentity.class);
         
         int servicesCount = 2;
         int instancesPerService = 3;
@@ -70,11 +72,11 @@ public class RuntimeCodeGeneratorTest {
         
         for(int i = 0;i<service.length;i++) {
             for (InstanceIdentifier<?> instance : identifiers[i]) {
-                routingTable.put(instance, service[i]);
+                routingTable.updateRoute(instance, service[i]);
             }
         }
         
-        assertEquals("All instances should be registered.", servicesCount*instancesPerService, routingTable.size());
+        assertEquals("All instances should be registered.", servicesCount*instancesPerService, routingTable.getRoutes().size());
         
         SimpleInput[] instance_0_input = new SimpleInputImpl[] {
             new SimpleInputImpl(identifiers[0][0]),
@@ -90,16 +92,19 @@ public class RuntimeCodeGeneratorTest {
         
         // We test sending mock messages
         
-        product.simple(instance_0_input[0]);
+        product.getInvocationProxy().simple(instance_0_input[0]);
         verify(service[0]).simple(instance_0_input[0]);
         
-        product.simple(instance_0_input[1]);
-        product.simple(instance_0_input[2]);
+        product.getInvocationProxy().simple(instance_0_input[1]);
+        product.getInvocationProxy().simple(instance_0_input[2]);
         
         verify(service[0]).simple(instance_0_input[1]);
         verify(service[0]).simple(instance_0_input[2]);
         
-        product.simple(instance_1_input[0]);
+        
+        product.getInvocationProxy().simple(instance_1_input[0]);
+        
+        // We should have call to instance 1
         verify(service[1]).simple(instance_1_input[0]);
     }
 

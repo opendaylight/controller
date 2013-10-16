@@ -33,13 +33,35 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcR
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService
+import org.opendaylight.controller.sal.binding.spi.RpcRouter
+import java.util.concurrent.ConcurrentHashMap
+import static com.google.common.base.Preconditions.*
+import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
+import org.opendaylight.yangtools.yang.binding.BaseIdentity
+import com.google.common.collect.Multimap
+import com.google.common.collect.HashMultimap
+import static org.opendaylight.controller.sal.binding.impl.osgi.ClassLoaderUtils.*
 
 class BindingAwareBrokerImpl implements BindingAwareBroker {
     private static val log = LoggerFactory.getLogger(BindingAwareBrokerImpl)
 
     private val clsPool = ClassPool.getDefault()
     private var RuntimeCodeGenerator generator;
-    private Map<Class<? extends RpcService>, RpcProxyContext> managedProxies = new HashMap();
+
+    /**
+     * Map of all Managed Direct Proxies
+     * 
+     */
+    private val Map<Class<? extends RpcService>, RpcProxyContext> managedProxies = new ConcurrentHashMap();
+
+    /**
+     * 
+     * Map of all available Rpc Routers
+     * 
+     * 
+     */
+    private val Map<Class<? extends RpcService>, RpcRouter<? extends RpcService>> rpcRouters = new ConcurrentHashMap();
+
     private var NotificationBrokerImpl notifyBroker
     private var DataBrokerImpl dataBroker
     private var ServiceRegistration<NotificationProviderService> notifyBrokerRegistration
@@ -57,9 +79,9 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         notifyBrokerRegistration = brokerBundleContext.registerService(NotificationProviderService, notifyBroker,
             brokerProperties)
         brokerBundleContext.registerService(NotificationService, notifyBroker, brokerProperties)
-        brokerBundleContext.registerService(DataProviderService,dataBroker,brokerProperties)
-        brokerBundleContext.registerService(DataBrokerService,dataBroker,brokerProperties)
-        
+        brokerBundleContext.registerService(DataProviderService, dataBroker, brokerProperties)
+        brokerBundleContext.registerService(DataBrokerService, dataBroker, brokerProperties)
+
     }
 
     def initGenerator() {
@@ -101,16 +123,16 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
      * 
      * If proxy class does not exist for supplied service class it will be generated automatically.
      */
-    def <T extends RpcService> getManagedDirectProxy(Class<T> service) {
+    private def <T extends RpcService> getManagedDirectProxy(Class<T> service) {
 
         var RpcProxyContext existing = null
-        if((existing = managedProxies.get(service)) != null) {
+        if ((existing = managedProxies.get(service)) != null) {
             return existing.proxy
         }
-        val proxyClass = generator.generateDirectProxy(service)
-        val rpcProxyCtx = new RpcProxyContext(proxyClass)
+        val proxyInstance = generator.getDirectProxyFor(service)
+        val rpcProxyCtx = new RpcProxyContext(proxyInstance.class)
         val properties = new Hashtable<String, String>()
-        rpcProxyCtx.proxy = proxyClass.newInstance as RpcService
+        rpcProxyCtx.proxy = proxyInstance as RpcService
 
         properties.salServiceType = SAL_SERVICE_TYPE_CONSUMER_PROXY
         rpcProxyCtx.registration = brokerBundleContext.registerService(service, rpcProxyCtx.proxy as T, properties)
@@ -125,22 +147,138 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
     def <T extends RpcService> registerRpcImplementation(Class<T> type, T service, OsgiProviderContext context,
         Hashtable<String, String> properties) {
         val proxy = getManagedDirectProxy(type)
-        if(proxy.delegate != null) {
-            throw new IllegalStateException("Service " + type + "is already registered");
-        }
+        checkState(proxy.delegate === null, "The Service for type {} is already registered", type)
+
         val osgiReg = context.bundleContext.registerService(type, service, properties);
         proxy.delegate = service;
         return new RpcServiceRegistrationImpl<T>(type, service, osgiReg);
     }
 
-    def <T extends RpcService> RpcRegistration<T> registerMountedRpcImplementation(Class<T> tyoe, T service, InstanceIdentifier<?> identifier,
-        OsgiProviderContext context, Hashtable<String, String> properties) {
+    def <T extends RpcService> RpcRegistration<T> registerMountedRpcImplementation(Class<T> type, T service,
+        InstanceIdentifier<?> identifier, OsgiProviderContext context) {
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
 
-    def <T extends RpcService> RoutedRpcRegistration<T> registerRoutedRpcImplementation(Class<T> type, T service, OsgiProviderContext context,
-        Hashtable<String, String> properties) {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+    def <T extends RpcService> RoutedRpcRegistration<T> registerRoutedRpcImplementation(Class<T> type, T service,
+        OsgiProviderContext context) {
+        val router = resolveRpcRouter(type);
+        checkState(router !== null)
+        return new RoutedRpcRegistrationImpl<T>(service, router, this)
+    }
+
+    private def <T extends RpcService> RpcRouter<T> resolveRpcRouter(Class<T> type) {
+
+        val router = rpcRouters.get(type);
+        if (router !== null) {
+            return router as RpcRouter<T>;
+        }
+
+        // We created Router
+        val newRouter = generator.getRouterFor(type);
+        checkState(newRouter !== null);
+        rpcRouters.put(type, newRouter);
+
+        // We create / update Direct Proxy for router
+        val proxy = getManagedDirectProxy(type);
+        proxy.delegate = newRouter.invocationProxy
+        return newRouter;
+
+    }
+
+    protected def <T extends RpcService> void registerPath(RoutedRpcRegistrationImpl<T> registration,
+        Class<? extends BaseIdentity> context, InstanceIdentifier<? extends Object> path) {
+
+        val router = registration.router;
+        val paths = registration.registeredPaths;
+
+        val routingTable = router.getRoutingTable(context)
+        checkState(routingTable != null);
+
+        // Updating internal structure of registration
+        routingTable.updateRoute(path, registration.instance)
+        val success = paths.put(context, path);
+    }
+
+    protected def <T extends RpcService> void unregisterPath(RoutedRpcRegistrationImpl<T> registration,
+        Class<? extends BaseIdentity> context, InstanceIdentifier<? extends Object> path) {
+
+        val router = registration.router;
+        val paths = registration.registeredPaths;
+
+        val routingTable = router.getRoutingTable(context)
+        checkState(routingTable != null);
+
+        // Updating internal structure of registration
+        val target = routingTable.getRoute(path)
+        checkState(target === registration.instance)
+        routingTable.removeRoute(path)
+        checkState(paths.remove(context, path));
+    }
+
+    protected def <T extends RpcService> void unregisterRoutedRpcService(RoutedRpcRegistrationImpl<T> registration) {
+
+        val router = registration.router;
+        val paths = registration.registeredPaths;
+
+        for (ctxMap : registration.registeredPaths.entries) {
+            val context = ctxMap.key
+            val routingTable = router.getRoutingTable(context)
+            val path = ctxMap.value
+            routingTable.removeRoute(path)
+
+        }
+    }
+}
+
+class RoutedRpcRegistrationImpl<T extends RpcService> extends AbstractObjectRegistration<T> implements RoutedRpcRegistration<T> {
+
+    @Property
+    private val BindingAwareBrokerImpl broker;
+
+    @Property
+    private val RpcRouter<T> router;
+
+    @Property
+    private val Multimap<Class<? extends BaseIdentity>, InstanceIdentifier<?>> registeredPaths = HashMultimap.create();
+
+    private var closed = false;
+
+    new(T instance, RpcRouter<T> backingRouter, BindingAwareBrokerImpl broker) {
+        super(instance)
+        _router = backingRouter;
+        _broker = broker;
+    }
+
+    override protected removeRegistration() {
+        closed = true
+        broker.unregisterRoutedRpcService(this)
+    }
+
+    override registerInstance(Class<? extends BaseIdentity> context, InstanceIdentifier<? extends Object> instance) {
+        registerPath(context, instance);
+    }
+
+    override unregisterInstance(Class<? extends BaseIdentity> context, InstanceIdentifier<? extends Object> instance) {
+        unregisterPath(context, instance);
+    }
+
+    override getService() {
+        return instance;
+    }
+
+    override registerPath(Class<? extends BaseIdentity> context, InstanceIdentifier<? extends Object> path) {
+        checkClosed()
+        broker.registerPath(this, context, path);
+    }
+
+    override unregisterPath(Class<? extends BaseIdentity> context, InstanceIdentifier<? extends Object> path) {
+        checkClosed()
+        broker.unregisterPath(this, context, path);
+    }
+
+    private def checkClosed() {
+        if (closed)
+            throw new IllegalStateException("Registration was closed.");
     }
 
 }

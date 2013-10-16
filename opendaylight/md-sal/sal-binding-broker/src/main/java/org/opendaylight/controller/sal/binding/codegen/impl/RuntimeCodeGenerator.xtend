@@ -32,8 +32,11 @@ import java.util.Arrays
 
 import static extension org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper.*
 import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
+import java.util.HashSet
+import java.io.ObjectOutputStream.PutField
+import static org.opendaylight.controller.sal.binding.impl.osgi.ClassLoaderUtils.*
 
-class RuntimeCodeGenerator {
+class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator {
 
     val ClassPool classPool;
 
@@ -41,7 +44,7 @@ class RuntimeCodeGenerator {
         classPool = pool;
     }
 
-    def <T extends RpcService> Class<? extends T> generateDirectProxy(Class<T> iface) {
+    override <T extends RpcService> getDirectProxyFor(Class<T> iface) {
         val supertype = iface.asCtClass
         val targetCls = createClass(iface.directProxyName, supertype) [
             field(DELEGATE_FIELD, iface);
@@ -49,43 +52,53 @@ class RuntimeCodeGenerator {
                 body = '''return ($r) «DELEGATE_FIELD».«it.name»($$);'''
             ]
         ]
-        return targetCls.toClass(iface.classLoader)
+        return targetCls.toClass(iface.classLoader).newInstance as T
     }
 
-    def <T extends RpcService> Class<? extends T> generateRouter(Class<T> iface) {
-        val supertype = iface.asCtClass
-        val targetCls = createClass(iface.routerName, supertype) [
-            //field(ROUTING_TABLE_FIELD,Map)
-            field(DELEGATE_FIELD, iface)
-            val contexts = new HashMap<String, Class<? extends BaseIdentity>>();
-            // We search for routing pairs and add fields
-            supertype.methods.filter[declaringClass == supertype && parameterTypes.size === 1].forEach [ method |
-                val routingPair = method.routingContextInput;
-                if (routingPair !== null)
-                    contexts.put(routingPair.context.routingTableField, routingPair.context);
-            ]
-            for (ctx : contexts.entrySet) {
-                field(ctx.key, Map)
-            }
-            implementMethodsFrom(supertype) [
-                if (parameterTypes.size === 1) {
-                    val routingPair = routingContextInput;
-                    val bodyTmp = '''
-                    {
-                        final «InstanceIdentifier.name» identifier = $1.«routingPair.getter.name»();
-                        «supertype.name» instance = («supertype.name») «routingPair.context.routingTableField».get(identifier);
-                        if(instance == null) {
-                           instance = «DELEGATE_FIELD»;
-                        }
-                        return ($r) instance.«it.name»($$);
-                    }'''
-                    body = bodyTmp
-                } else if (parameterTypes.size === 0) {
-                    body = '''return ($r) «DELEGATE_FIELD».«it.name»($$);'''
+    override <T extends RpcService> getRouterFor(Class<T> iface) {
+        val contexts = new HashSet<Class<? extends BaseIdentity>>
+
+        val instance = <T>withClassLoader(iface.classLoader) [ |
+            val supertype = iface.asCtClass
+            val targetCls = createClass(iface.routerName, supertype) [
+                //field(ROUTING_TABLE_FIELD,Map)
+                field(DELEGATE_FIELD, iface)
+                val ctxMap = new HashMap<String, Class<? extends BaseIdentity>>();
+                // We search for routing pairs and add fields
+                supertype.methods.filter[declaringClass == supertype && parameterTypes.size === 1].forEach [ method |
+                    val routingPair = method.routingContextInput;
+                    if (routingPair !== null) {
+                        ctxMap.put(routingPair.context.routingTableField, routingPair.context);
+                        contexts.add(routingPair.context)
+                    }
+                ]
+                for (ctx : ctxMap.entrySet) {
+                    field(ctx.key, Map)
                 }
+                implementMethodsFrom(supertype) [
+                    if (parameterTypes.size === 1) {
+                        val routingPair = routingContextInput;
+                        val bodyTmp = '''
+                        {
+                            final «InstanceIdentifier.name» identifier = $1.«routingPair.getter.name»()«IF routingPair.encapsulated».getValue()«ENDIF»;
+                            «supertype.name» instance = («supertype.name») «routingPair.context.routingTableField».get(identifier);
+                            if(instance == null) {
+                               instance = «DELEGATE_FIELD»;
+                            }
+                            if(instance == null) {
+                                throw new java.lang.IllegalStateException("No provider is processing supplied message");
+                            }
+                            return ($r) instance.«it.name»($$);
+                        }'''
+                        body = bodyTmp
+                    } else if (parameterTypes.size === 0) {
+                        body = '''return ($r) «DELEGATE_FIELD».«it.name»($$);'''
+                    }
+                ]
             ]
-        ]
-        return targetCls.toClass(iface.classLoader)
+            return targetCls.toClass(iface.classLoader).newInstance as T
+        ];
+        return new RpcRouterCodegenInstance(iface, instance, contexts);
     }
 
     def Class<?> generateListenerInvoker(Class<? extends NotificationListener> iface) {
@@ -121,17 +134,19 @@ class RuntimeCodeGenerator {
 
     private def RoutingPair getContextInstance(CtClass dataClass) {
         for (method : dataClass.methods) {
-            if (method.parameterTypes.size === 0 && method.name.startsWith("get")) {
+            if (method.name.startsWith("get") && method.parameterTypes.size === 0) {
                 for (annotation : method.availableAnnotations) {
                     if (annotation instanceof RoutingContext) {
-                        return new RoutingPair((annotation as RoutingContext).value, method)
+                        val encapsulated = !method.returnType.equals(InstanceIdentifier.asCtClass);
+                        
+                        return new RoutingPair((annotation as RoutingContext).value, method,encapsulated);
                     }
                 }
             }
         }
         for (iface : dataClass.interfaces) {
             val ret = getContextInstance(iface);
-            if (ret != null) return ret;
+            if(ret != null) return ret;
         }
         return null;
     }

@@ -20,6 +20,7 @@ import static extension org.opendaylight.controller.sal.binding.impl.osgi.Proper
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality
+import static com.google.common.base.Preconditions.*
 
 class OsgiProviderContext extends OsgiConsumerContext implements ProviderContext {
 
@@ -44,30 +45,33 @@ class OsgiProviderContext extends OsgiConsumerContext implements ProviderContext
     }
 
     override <T extends RpcService> addMountRpcImplementation(Class<T> type, InstanceIdentifier<?> mount, T implementation) throws IllegalStateException {
+        checkNotNull(type, "Service type should not be null")
+        checkNotNull(mount,"Path to the mount should not be null")
+        checkNotNull(implementation, "Service instance should not be null")
 
         val properties = new Hashtable<String, String>();
         properties.salServiceType = SAL_SERVICE_TYPE_PROVIDER
 
         // Fill requirements
-        val salReg = broker.registerMountedRpcImplementation(type, implementation, mount, this, properties)
+        val salReg = broker.registerMountedRpcImplementation(type, implementation, mount, this)
         registeredServices.put(type, salReg)
         return salReg;
     }
 
     override <T extends RpcService> addRoutedRpcImplementation(Class<T> type, T implementation) throws IllegalStateException {
-        val properties = new Hashtable<String, String>();
-        properties.salServiceType = SAL_SERVICE_TYPE_PROVIDER
-
-        // Fill requirements
-        val salReg = broker.registerRoutedRpcImplementation(type, implementation, this, properties)
+        checkNotNull(type, "Service type should not be null")
+        checkNotNull(implementation, "Service type should not be null")
+        
+        val salReg = broker.registerRoutedRpcImplementation(type, implementation, this)
         registeredServices.put(type, salReg)
         return salReg;
     }
 
     override registerFunctionality(ProviderFunctionality functionality) {
-    
+        // NOOP for now
     }
 
     override unregisterFunctionality(ProviderFunctionality functionality) {
+        // NOOP for now
     }
 }
