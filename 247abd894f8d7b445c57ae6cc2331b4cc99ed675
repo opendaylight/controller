@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_2a93e0a4",
+        "filename": "opendaylight/connectionmanager/implementation/src/main/java/org/opendaylight/controller/connectionmanager/internal/ConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-16T17:30:07Z",
+      "side": 1,
+      "message": "Can this be made a conditional check to call addNode() only if the node doesn\u0027t exist? Appears like addNode() does this check within the scope of a transaction which would be expensive in the case the node already exists in the scheme.",
+      "revId": "247abd894f8d7b445c57ae6cc2331b4cc99ed675",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_0a901c94",
+        "filename": "opendaylight/northbound/connectionmanager/src/main/java/org/opendaylight/controller/connectionmanager/northbound/ConnectionManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-16T17:30:07Z",
+      "side": 1,
+      "message": "This appears to be a good case for using QueryParam instead of PathParam to represent the controllerAddress since you are filtering. \n\n/nodes?controller\u003d${controllerAddress}\n\nAlso, you can then merge both methods.",
+      "revId": "247abd894f8d7b445c57ae6cc2331b4cc99ed675",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
