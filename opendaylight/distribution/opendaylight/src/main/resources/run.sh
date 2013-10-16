@@ -11,8 +11,14 @@ fi
 if [[ $platform == 'linux' ]]; then
    fullpath=`readlink -f $0`
 
-   [[ -z ${JAVA_HOME} ]] && [[ -x "/usr/lib/jvm/java-1.7.0" ]] && export JAVA_HOME='/usr/lib/jvm/java-1.7.0';
-
+   if [[ -z ${JAVA_HOME} ]]; then
+      # Find the actual location of the Java launcher:
+      java_launcher=`which java`
+      java_launcher=`readlink -f "${java_launcher}"`
+      
+      # Compute the Java home from the location of the Java launcher:
+      export JAVA_HOME="${java_launcher%/bin/java}"
+   fi
 elif [[ $platform == 'osx' ]]; then
    TARGET_FILE=$0
    cd `dirname $TARGET_FILE`
