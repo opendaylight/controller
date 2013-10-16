@@ -608,6 +608,11 @@
       <artifactId>httpservice-bridge</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>connectionmanager.northbound</artifactId>
+      <version>${connectionmanager.version}</version>
+    </dependency>
 
     <!-- Debug and logging -->
 
