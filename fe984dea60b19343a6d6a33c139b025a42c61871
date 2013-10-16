@@ -16,6 +16,24 @@
       "revId": "fe984dea60b19343a6d6a33c139b025a42c61871",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_0ac81c73",
+        "filename": "opendaylight/northbound/bundlescanner/implementation/src/main/java/org/opendaylight/controller/northbound/bundlescanner/internal/BundleScanner.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-16T20:50:29Z",
+      "side": 1,
+      "message": "1) I will remove the bundle param. \n2) Yes, the initiating bundle is different from the BundleScanner bundle.",
+      "parentUuid": "da6255ed_aabfd0cf",
+      "revId": "fe984dea60b19343a6d6a33c139b025a42c61871",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

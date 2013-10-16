@@ -16,6 +16,24 @@
       "revId": "680f43a82118907693ec02db687efcaaf78a2734",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_8aabec88",
+        "filename": "opendaylight/sal/api/src/main/java/org/opendaylight/controller/sal/core/Property.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-16T20:50:29Z",
+      "side": 0,
+      "message": "Yes, bundles are scanned for JAXB annotations as they enter RESOLVED state. When we construct the JAXBContext, all bundle dependencies are traversed to construct a full list of JAXB types.",
+      "parentUuid": "da6255ed_eaedc8f0",
+      "revId": "680f43a82118907693ec02db687efcaaf78a2734",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
