@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.spi;
 
+import java.util.Set;
+
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
@@ -31,6 +33,16 @@ public interface RpcRouter<T extends RpcService> {
      * @return type of RpcService which is served by this instance of router.
      */
     Class<T> getRpcServiceType();
+    
+    
+    /**
+     * Returns a instance of T which is associated with this router instance
+     * and routes messages based on routing tables.
+     * 
+     * @return type of RpcService which is served by this instance of router.
+     */
+    T getInvocationProxy();
+    
 
     /**
      * Returns a routing table for particular route context
@@ -64,6 +76,8 @@ public interface RpcRouter<T extends RpcService> {
     /**
      * 
      */
-    void setDefaultService();
+    void setDefaultService(T service);
+
+    Set<Class<? extends BaseIdentity>> getContexts();
 
 }
