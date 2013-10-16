@@ -826,15 +826,12 @@ public class ContainerManager extends Authorization<String> implements IContaine
      * @param containerName
      * @param delete
      */
-    private void updateResourceGroups(String containerName, boolean delete) {
-        String containerProfile = System.getProperty("container.profile");
-        if (containerProfile == null) {
-            containerProfile = "Container";
-        }
+    private void updateResourceGroups(ContainerConfig containerConf, boolean delete) {
         // Container Roles and Container Resource Group
-        String groupName = containerProfile+"-" + containerName;
-        String containerAdminRole = containerProfile+"-" + containerName + "-Admin";
-        String containerOperatorRole = containerProfile+"-" + containerName + "-Operator";
+        String containerName = containerConf.getContainer();
+        String groupName = containerConf.getContainerGroupName();
+        String containerAdminRole = containerConf.getContainerAdminRole();
+        String containerOperatorRole = containerConf.getContainerOperatorRole();
         Set<String> allContainerSet = resourceGroups.get(allResourcesGroupName);
         if (delete) {
             resourceGroups.remove(groupName);
@@ -1218,7 +1215,7 @@ public class ContainerManager extends Authorization<String> implements IContaine
         }
 
         // Automatically create and populate user and resource groups
-        updateResourceGroups(containerName, delete);
+        updateResourceGroups(containerConf, delete);
 
         // Notify global and local listeners
         UpdateType update = (delete) ? UpdateType.REMOVED : UpdateType.ADDED;

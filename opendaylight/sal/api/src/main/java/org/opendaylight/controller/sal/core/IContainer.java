@@ -64,4 +64,18 @@ public interface IContainer {
      * @return The array of Nodes that are part of the container
      */
     public Set<Node> getNodes();
+
+    /**
+     * Return the well known administrator role for this container
+     *
+     * @return The administrator role for this container
+     */
+    public String getContainerAdminRole();
+
+    /**
+     * Return the well known operator role for this container
+     *
+     * @return The operator role for this container
+     */
+    public String getContainerOperatorRole();
 }

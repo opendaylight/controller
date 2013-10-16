@@ -16,22 +16,20 @@
  */
 package org.opendaylight.controller.containermanager.internal;
 
-import java.util.concurrent.ConcurrentMap;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.felix.dm.Component;
+import org.opendaylight.controller.containermanager.ContainerData;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-
-import org.opendaylight.controller.containermanager.ContainerData;
-
-import java.util.Set;
-import java.util.List;
 
 public class ContainerImpl implements IContainer {
     private String containerName = null;
@@ -113,5 +111,15 @@ public class ContainerImpl implements IContainer {
             }
         }
         return set;
+    }
+
+    @Override
+    public String getContainerAdminRole() {
+        return iContainerInternal.getContainerData(containerName).getContainerAdminRole();
+    }
+
+    @Override
+    public String getContainerOperatorRole() {
+        return iContainerInternal.getContainerData(containerName).getContainerOperatorRole();
     }
 }

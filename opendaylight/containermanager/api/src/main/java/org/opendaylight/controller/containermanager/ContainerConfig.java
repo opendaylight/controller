@@ -40,6 +40,10 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 public class ContainerConfig implements Serializable {
     private static final long serialVersionUID = 2L;
     private static final String regexName = "^\\w+$";
+    private static final String containerProfile = System.getProperty("container.profile") == null ? "Container"
+            : System.getProperty("container.profile");
+    private static final String ADMIN_SUFFIX = "Admin";
+    private static final String OPERATOR_SUFFIX = "Operator";
 
     @XmlElement
     private String container;
@@ -610,5 +614,31 @@ public class ContainerConfig implements Serializable {
             }
         }
         return list;
+    }
+
+    private String getContainerRole(boolean admin) {
+        return String.format("%s-%s-%s", containerProfile, container, (admin ? ADMIN_SUFFIX : OPERATOR_SUFFIX));
+    }
+
+    /**
+     * Return the well known administrator role for this container
+     *
+     * @return The administrator role for this container
+     */
+    public String getContainerAdminRole() {
+        return getContainerRole(true);
+    }
+
+    /**
+     * Return the well known operator role for this container
+     *
+     * @return The operator role for this container
+     */
+    public String getContainerOperatorRole() {
+        return getContainerRole(false);
+    }
+
+    public String getContainerGroupName() {
+        return String.format("%s-%s", containerProfile, container);
     }
 }

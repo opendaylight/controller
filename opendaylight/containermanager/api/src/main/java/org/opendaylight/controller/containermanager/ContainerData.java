@@ -30,24 +30,12 @@ import org.opendaylight.controller.sal.core.NodeConnector;
  */
 public class ContainerData implements Serializable {
     private static final long serialVersionUID = 1L;
-
+    private String containerAdminRole;
+    private String containerOperatorRole;
     private String name;
     private ConcurrentMap<Node, Set<NodeConnector>> swPorts;
     private short staticVlan;
     private List<ContainerFlow> cFlowList;
-
-    /**
-     * Default constructor
-
-     *
-     * @return constructed ContainerData
-     */
-    public ContainerData() {
-        name = null;
-        swPorts = new ConcurrentHashMap<Node, Set<NodeConnector>>();
-        staticVlan = 0;
-        cFlowList = new ArrayList<ContainerFlow>();
-    }
 
     /**
      * Build a ContainerData from container configuration
@@ -64,6 +52,8 @@ public class ContainerData implements Serializable {
         swPorts = new ConcurrentHashMap<Node, Set<NodeConnector>>();
         cFlowList = new ArrayList<ContainerFlow>();
         staticVlan = conf.getStaticVlanValue();
+        containerAdminRole = conf.getContainerAdminRole();
+        containerOperatorRole = conf.getContainerOperatorRole();
     }
 
     /**
@@ -237,5 +227,13 @@ public class ContainerData implements Serializable {
             set.addAll(entry.getValue());
         }
         return set;
+    }
+
+    public String getContainerAdminRole() {
+        return containerAdminRole;
+    }
+
+    public String getContainerOperatorRole() {
+        return containerOperatorRole;
     }
 }

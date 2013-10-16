@@ -28,6 +28,8 @@ import org.opendaylight.controller.sal.core.IContainer;
 
 public class ContainerImpl implements IContainer {
     private String containerName = null;
+    private String containerAdminRole;
+    private String containerOperatorRole;
 
     /**
      * Function called by the dependency manager when all the required
@@ -64,5 +66,15 @@ public class ContainerImpl implements IContainer {
     @Override
     public Set<Node> getNodes() {
         return null;
+    }
+
+    @Override
+    public String getContainerAdminRole() {
+        return containerAdminRole;
+    }
+
+    @Override
+    public String getContainerOperatorRole() {
+        return containerOperatorRole;
     }
 }
