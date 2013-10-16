@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
                 result.add(entry.getKey());
             }
         }
-        return BundleScanner.loadClasses(bundle, result);
+        return BundleScanner.loadClasses(result, bundle);
     }
 
     private boolean matches(Pattern pattern, Set<String> values) {
@@ -81,13 +81,22 @@ import org.slf4j.LoggerFactory;
         return false;
     }
 
+    /**
+     * Get classes with annotations matching a pattern
+     *
+     * @param allbundles - all bundles
+     * @param pattern - annotation pattern to match
+     * @param initBundle - the bundle which initiated this call
+     *
+     * @return list of annotated classes matching the pattern
+     */
     public List<Class<?>> getAnnotatedClasses(
             Collection<BundleInfo> allbundles,
-            Pattern pattern)
+            Pattern pattern, Bundle initBundle)
     {
         List<Class<?>> classes = getAnnotatedClasses(pattern);
         processAnnotatedClassesInternal(this, allbundles, pattern,
-                new HashSet<BundleInfo>(), classes);
+                new HashSet<BundleInfo>(), classes, initBundle);
         return classes;
     }
 
@@ -115,17 +124,18 @@ import org.slf4j.LoggerFactory;
             Collection<BundleInfo> bundlesToScan,
             Pattern pattern,
             Collection<BundleInfo> visited,
-            List<Class<?>> classes)
+            List<Class<?>> classes,
+            Bundle initBundle)
     {
         for (BundleInfo other : bundlesToScan) {
             if (other.getId() == target.getId()) continue;
             if (target.isDependantOn(other)) {
                 if (!visited.contains(other)) {
-                    classes.addAll(BundleScanner.loadClasses(other.getBundle(),
-                            other.getExportedAnnotatedClasses(pattern)));
+                    classes.addAll(BundleScanner.loadClasses(
+                            other.getExportedAnnotatedClasses(pattern), initBundle));
                     visited.add(other);
                     processAnnotatedClassesInternal(other, bundlesToScan,
-                            pattern, visited, classes);
+                            pattern, visited, classes, initBundle);
                 }
             }
         }
