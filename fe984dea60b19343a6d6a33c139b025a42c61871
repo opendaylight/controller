@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_aabfd0cf",
+        "filename": "opendaylight/northbound/bundlescanner/implementation/src/main/java/org/opendaylight/controller/northbound/bundlescanner/internal/BundleScanner.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-16T20:38:13Z",
+      "side": 1,
+      "message": "with this change, the bundle param is unused ?\n\nAlso, it will help if this change can be documented.\nI dont quite understand the usage/functionality of passing in the initBundle to this method.\nIs it because the classloader that initiates the call could be different from the classloader that loads this BundleScanner bundle ?",
+      "revId": "fe984dea60b19343a6d6a33c139b025a42c61871",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
