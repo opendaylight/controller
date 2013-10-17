@@ -276,6 +276,30 @@ public class ForwardingRulesManager implements
         }
 
         /*
+         * Redundant Check: Check if the request is a redundant one from the
+         * same application the flowEntry is equal to an existing one.Given we
+         * do not have an application signature in the requested FlowEntry yet,
+         * we are here detecting the above condition by comparing the flow
+         * names. If they are equal to the installed flow, most likely this is a
+         * redundant installation request from the same application and we can
+         * silently return success
+         *
+         * TODO: in future a sort of application reference list mechanism will
+         * be added to the FlowEntry so that exact flow can be used by different
+         * applications.
+         */
+        FlowEntry present = this.originalSwView.get(flowEntry);
+        if (present != null) {
+            boolean sameFlow = present.getFlow().equals(flowEntry.getFlow());
+            boolean sameApp = present.getFlowName().equals(flowEntry.getFlowName());
+            if (sameFlow && sameApp) {
+                log.trace("Skipping redundant request for flow {} on node {}", flowEntry.getFlowName(),
+                        flowEntry.getNode());
+                return new Status(StatusCode.SUCCESS, "Entry is already present");
+            }
+        }
+
+        /*
          * Derive the container flow merged entries to install In presence of N
          * container flows, we may end up with N different entries to install...
          */
