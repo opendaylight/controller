@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_aa659046",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/AbstractBrokerAwareActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 19
+      },
+      "writtenOn": "2013-10-17T08:42:42Z",
+      "side": 1,
+      "message": "Tony it\u0027s much more efficient and less error prone to use the Apache Dependency Manager, instead to extend BundleActivator extend the org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase and you can then express the necessary dependencies. \nOr if you want to use apache dependency manager raw you can also extend the activator from:\norg.apache.felix.dm.DependencyActivatorBase\n\nthis way you save a lot of boiler plate code to track services.",
+      "revId": "e49e56e9b7dde81452dcdec6129f3dd767d4ca18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
