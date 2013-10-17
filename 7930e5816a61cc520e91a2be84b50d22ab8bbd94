@@ -19,6 +19,40 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_054b6f5a",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-17T12:57:25Z",
+      "side": 1,
+      "message": "I dont know if it is a convention that is followed in other projects. But atleast in Controller project, we dont add authors.",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e5473b4a",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-17T12:57:25Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_fd5daf49",
         "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastPortSelector.java",
         "patchSetId": 3
@@ -64,6 +98,57 @@
       "writtenOn": "2013-10-10T16:59:05Z",
       "side": 1,
       "message": "Copyright notice",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_05900f94",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-17T12:57:25Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c5e9d71b",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-17T12:57:25Z",
+      "side": 1,
+      "message": "How about ARP Requests ?\nThe ARP Handler doesn\u0027t consume the requests, but processes it based on the Subnet configurations.\nShould we continue to process it here ?\nOr the order of packet reception can differ as well.",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a5eee320",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-17T12:57:25Z",
+      "side": 1,
+      "message": "This is an AI on the Controller developers (all of us :) ) to make sure the Protocol-plugin does proper filtering of data-packet based on Container\u0027s FlowSpec. The existing TODO in DataPacketMuxDemux code proves that the the broadcast packet received on Container1 WILL get leaked and flooded into Container2.\n\n                            // TODO add filtering on a per-flowSpec base\n                            s.receiveDataPacket(dataPacket);",
       "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
