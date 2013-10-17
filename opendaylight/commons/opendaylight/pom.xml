@@ -88,6 +88,9 @@
     <concepts.version>0.5.1-SNAPSHOT</concepts.version>
     <jolokia.bridge.version>0.0.1-SNAPSHOT</jolokia.bridge.version>
     <netty.version>4.0.9.Final</netty.version>
+    <!-- Sonar properties using jacoco to retrieve integration test results -->
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <sonar.language>java</sonar.language>
   </properties>
 
   <dependencyManagement>
