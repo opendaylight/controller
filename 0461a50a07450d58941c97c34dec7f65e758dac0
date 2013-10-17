@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_aa68f0f5",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/AbstractBrokerAwareActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 536
+      },
+      "writtenOn": "2013-10-17T10:24:51Z",
+      "side": 1,
+      "message": "ODL used the apache felix dependency manager to manage bundles/services.  Why are we not utilising apache felix DM here? Is there any reason behind this? Thanks.",
+      "revId": "0461a50a07450d58941c97c34dec7f65e758dac0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
