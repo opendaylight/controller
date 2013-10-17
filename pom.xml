@@ -114,6 +114,7 @@
     <module>opendaylight/northbound/networkconfiguration/bridgedomain</module>
     <module>opendaylight/northbound/httpservice-bridge</module>
     <module>opendaylight/northbound/connectionmanager</module>
+    <module>opendaylight/northbound/usermanager</module>
 
     <!-- Northbound integration tests -->
     <module>opendaylight/northbound/integrationtest</module>

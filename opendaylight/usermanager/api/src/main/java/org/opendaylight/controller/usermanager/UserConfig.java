@@ -18,21 +18,48 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.opendaylight.controller.sal.authorization.AuthResultEnum;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.usermanager.AuthResponse;
 
 /**
  * Configuration Java Object which represents a Local AAA user configuration
  * information for User Manager.
  */
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.NONE)
 public class UserConfig implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * User Id
+     */
+    @XmlElement
     protected String user;
+
+    /**
+     * List of roles a user can have
+     * example
+     * System-Admin
+     * Network-Admin
+     * Netowrk-Operator
+     */
+    @XmlElement
     protected List<String> roles;
+
+    /**
+     * Password
+     * Should be 8 to 256 characters long,
+     * contain both upper and lower case letters, at least one number,
+     * and at least one non alphanumeric character.
+     */
+    @XmlElement
     private String password;
 
     private static final boolean strongPasswordCheck = Boolean.getBoolean("enableStrongPasswordCheck");
@@ -41,6 +68,7 @@ public class UserConfig implements Serializable {
     protected static final String PASSWORD_REGEX = "(?=.*[^a-zA-Z0-9])(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,256}$";
     private static final Pattern INVALID_USERNAME_CHARACTERS = Pattern.compile("([/\\s\\.\\?#%;\\\\]+)");
     private static MessageDigest oneWayFunction = null;
+
     static {
         try {
             UserConfig.oneWayFunction = MessageDigest.getInstance("SHA-1");
