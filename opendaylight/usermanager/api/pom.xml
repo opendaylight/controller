@@ -47,7 +47,8 @@
               org.apache.commons.lang3,
               org.springframework.security.authentication,
               org.springframework.security.core.authority,
-              org.springframework.security.core.userdetails
+              org.springframework.security.core.userdetails,
+              javax.xml.bind.annotation
             </Import-Package>
             <Export-Package>
               org.opendaylight.controller.usermanager,
