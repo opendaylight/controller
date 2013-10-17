@@ -269,10 +269,34 @@ public class ForwardingRulesManager implements
     private Status addEntry(FlowEntry flowEntry, boolean async) {
 
         // Sanity Check
-        if (flowEntry == null || flowEntry.getNode() == null) {
+        if (flowEntry == null || flowEntry.getNode() == null || flowEntry.getFlow() == null) {
             String logMsg = INVALID_FLOW_ENTRY + ": {}";
             log.warn(logMsg, flowEntry);
             return new Status(StatusCode.NOTACCEPTABLE, INVALID_FLOW_ENTRY);
+        }
+
+        /*
+         * Redundant Check: Check if the request is a redundant one from the
+         * same application the flowEntry is equal to an existing one. Given we
+         * do not have an application signature in the requested FlowEntry yet,
+         * we are here detecting the above condition by comparing the flow
+         * names, if set. If they are equal to the installed flow, most likely
+         * this is a redundant installation request from the same application
+         * and we can silently return success
+         *
+         * TODO: in future a sort of application reference list mechanism will
+         * be added to the FlowEntry so that exact flow can be used by different
+         * applications.
+         */
+        FlowEntry present = this.originalSwView.get(flowEntry);
+        if (present != null) {
+            boolean sameFlow = present.getFlow().equals(flowEntry.getFlow());
+            boolean sameApp = present.getFlowName() != null && present.getFlowName().equals(flowEntry.getFlowName());
+            if (sameFlow && sameApp) {
+                log.trace("Skipping redundant request for flow {} on node {}", flowEntry.getFlowName(),
+                        flowEntry.getNode());
+                return new Status(StatusCode.SUCCESS, "Entry is already present");
+            }
         }
 
         /*
@@ -387,7 +411,7 @@ public class ForwardingRulesManager implements
 
         // Sanity checks
         if (currentFlowEntry == null || currentFlowEntry.getNode() == null || newFlowEntry == null
-                || newFlowEntry.getNode() == null) {
+                || newFlowEntry.getNode() == null || newFlowEntry.getFlow() == null) {
             String msg = "Modify: " + INVALID_FLOW_ENTRY;
             String logMsg = msg + ": {} or {}";
             log.warn(logMsg, currentFlowEntry, newFlowEntry);
@@ -608,7 +632,7 @@ public class ForwardingRulesManager implements
         Status error = new Status(null, null);
 
         // Sanity Check
-        if (flowEntry == null || flowEntry.getNode() == null) {
+        if (flowEntry == null || flowEntry.getNode() == null || flowEntry.getFlow() == null) {
             String logMsg = INVALID_FLOW_ENTRY + ": {}";
             log.warn(logMsg, flowEntry);
             return new Status(StatusCode.NOTACCEPTABLE, INVALID_FLOW_ENTRY);
