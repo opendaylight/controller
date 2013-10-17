@@ -157,10 +157,8 @@
   </dependencies>
   <properties>
     <!-- Sonar jacoco plugin to get integration test coverage info -->
-    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.jacoco.reportPath>../implementation/target/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.jacoco.itReportPath>../implementation/target/jacoco-it.exec</sonar.jacoco.itReportPath>
-    <sonar.language>java</sonar.language>
   </properties>
   <build>
     <pluginManagement>

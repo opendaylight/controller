@@ -85,6 +85,9 @@
     <networkconfig.bridgedomain.northbound.version>0.0.2-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <commons.httpclient.version>0.1.1-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.1-SNAPSHOT</concepts.version>
+    <!-- Sonar properties using jacoco to retrieve integration test results -->
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <sonar.language>java</sonar.language>
   </properties>
 
   <dependencyManagement>
