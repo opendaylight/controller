@@ -71,7 +71,8 @@ public class Activator implements BundleActivator {
                             try {
                                 Thread.sleep(SUBSEQUENT_DELAY);
                             } catch (Exception e) {
-                                ;
+                                System.out.println("Thread.sleep interuptted.");
+                                break;
                             }
                         } else
                             resolved = true;
