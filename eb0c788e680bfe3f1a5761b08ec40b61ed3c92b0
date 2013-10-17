@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_85099f2e",
+        "filename": "opendaylight/northbound/usermanager/src/main/java/org/opendaylight/controller/usermanager/northbound/UserManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-17T11:47:51Z",
+      "side": 1,
+      "message": "Copy+Paste error ? :-)\nPlease rename the method appropriately.",
+      "revId": "eb0c788e680bfe3f1a5761b08ec40b61ed3c92b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_650eab36",
+        "filename": "opendaylight/northbound/usermanager/src/main/java/org/opendaylight/controller/usermanager/northbound/UserManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-17T11:47:51Z",
+      "side": 1,
+      "message": "In addition to add \u0026 delete. I believe it will be useful to have a GET list of users and the corresponding roles (without the password).",
+      "revId": "eb0c788e680bfe3f1a5761b08ec40b61ed3c92b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_4513a75c",
+        "filename": "opendaylight/northbound/usermanager/src/main/resources/WEB-INF/web.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-17T11:47:51Z",
+      "side": 1,
+      "message": "Please add DELETE",
+      "revId": "eb0c788e680bfe3f1a5761b08ec40b61ed3c92b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2510b34d",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-17T11:47:51Z",
+      "side": 1,
+      "message": "please take care of the whitespaces.",
+      "revId": "eb0c788e680bfe3f1a5761b08ec40b61ed3c92b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
