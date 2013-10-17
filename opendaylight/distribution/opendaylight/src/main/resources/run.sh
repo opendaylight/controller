@@ -15,7 +15,7 @@ if [[ $platform == 'linux' ]]; then
       # Find the actual location of the Java launcher:
       java_launcher=`which java`
       java_launcher=`readlink -f "${java_launcher}"`
-      
+
       # Compute the Java home from the location of the Java launcher:
       export JAVA_HOME="${java_launcher%/bin/java}"
    fi
