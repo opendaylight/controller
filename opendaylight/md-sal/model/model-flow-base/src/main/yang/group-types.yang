@@ -6,7 +6,7 @@ module opendaylight-group-types {
     import ietf-yang-types {prefix yang;}
     import opendaylight-flow-types {prefix flow-types;}
 
-    revision "2013-09-18" {
+    revision "2013-10-18" {
         description "Initial revision of group service";
     }
 
@@ -31,6 +31,14 @@ module opendaylight-group-types {
         
         leaf group-id {
             type group-ref;
+        }
+        
+        leaf group-name {
+            type string;
+        }
+        
+        leaf container-name {
+            type string; 
         }
         
         container buckets {
