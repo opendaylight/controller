@@ -178,6 +178,15 @@ module opendaylight-flow-types {
         }
     }
 
+    typedef flow-mod-flags {
+        type bits {
+            bit CHECK_OVERLAP;
+            bit RESET_COUNTS;
+            bit NO_PKT_COUNTS;
+            bit NO_BYT_COUNTS;
+        }
+    }
+    
     grouping flow {
         container match {
             uses match:match;
@@ -203,6 +212,38 @@ module opendaylight-flow-types {
         
         leaf cookie {
             type uint64;
+        }
+        
+        leaf container-name {
+            type string; 
+        }
+        
+        leaf cookie_mask {
+            type uint8;
+        }
+        
+        leaf table_id {
+            type uint64;
+        }
+        
+        leaf buffer_id {
+            type uint32;
+        }
+        
+        leaf out_port {
+            type uint64;
+        }
+        
+        leaf out_group {
+            type uint32;
+        }
+        
+        leaf flags{
+            type flow-mod-flags;
+        }
+        
+        leaf flow-name{
+            type string;
         }
     }
 

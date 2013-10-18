@@ -128,8 +128,16 @@ module opendaylight-port-types {
                 leaf mask {
                     type uint32;
                     description "Bitmap of OFPPC-* flags to be changed";
-                }       
-            }
+                }      
+                
+                leaf container-name {
+                    type string; 
+                }
+            
+                leaf port-name {
+                    type string; 
+                }                
+            }            
         }    
     }
 }
