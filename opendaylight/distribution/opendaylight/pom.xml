@@ -609,6 +609,16 @@
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-osgi</artifactId>
+      <version>${jolokia.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>jolokia-bridge</artifactId>
+      <version>${jolokia.bridge.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>connectionmanager.northbound</artifactId>
       <version>${connectionmanager.version}</version>
