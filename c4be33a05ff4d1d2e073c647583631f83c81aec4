@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_6548ea2d",
+        "filename": "opendaylight/distribution/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-10-18T19:39:41Z",
+      "side": 1,
+      "message": "Please capture the jolokia bridge in the commons/opendaylight/pom.xml and use the ${jolokia.bridge.version} here :)",
+      "revId": "c4be33a05ff4d1d2e073c647583631f83c81aec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
