@@ -113,6 +113,7 @@
     <module>opendaylight/northbound/containermanager</module>
     <module>opendaylight/northbound/networkconfiguration/bridgedomain</module>
     <module>opendaylight/northbound/httpservice-bridge</module>
+    <module>opendaylight/northbound/jolokia</module>
     <module>opendaylight/northbound/connectionmanager</module>
     <module>opendaylight/northbound/usermanager</module>
 
