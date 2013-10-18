@@ -42,13 +42,13 @@ public class NetconfClient implements Closeable {
 
     // TODO test reconnecting constructor
     public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectionAttempts,
-            int attemptMsTimeout) {
+            int attemptMsTimeout) throws InterruptedException {
         this(clientLabelForLogging, address, getReconnectStrategy(connectionAttempts, attemptMsTimeout), Optional
                 .<SSLContext> absent());
     }
 
     private NetconfClient(String clientLabelForLogging, InetSocketAddress address, ReconnectStrategy strat,
-            Optional<SSLContext> maybeSSLContext) {
+            Optional<SSLContext> maybeSSLContext) throws InterruptedException {
         this.label = clientLabelForLogging;
         dispatch = new NetconfClientDispatcher(maybeSSLContext);
 
@@ -59,10 +59,10 @@ public class NetconfClient implements Closeable {
         this.sessionId = clientSession.getSessionId();
     }
 
-    private NetconfClientSession get(Future<NetconfClientSession> clientFuture) {
+    private NetconfClientSession get(Future<NetconfClientSession> clientFuture) throws InterruptedException {
         try {
             return clientFuture.get();
-        } catch (InterruptedException | CancellationException e) {
+        } catch (CancellationException e) {
             throw new RuntimeException("Netconf client interrupted", e);
         } catch (ExecutionException e) {
             throw new IllegalStateException("Unable to create netconf client", e);
@@ -70,23 +70,25 @@ public class NetconfClient implements Closeable {
     }
 
     public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs,
-            Optional<SSLContext> maybeSSLContext) {
+            Optional<SSLContext> maybeSSLContext) throws InterruptedException {
         this(clientLabelForLogging, address,
                 new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, connectTimeoutMs), maybeSSLContext);
     }
 
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs) {
+    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, int connectTimeoutMs)
+            throws InterruptedException {
         this(clientLabelForLogging, address,
                 new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, connectTimeoutMs), Optional
                         .<SSLContext> absent());
     }
 
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address) {
+    public NetconfClient(String clientLabelForLogging, InetSocketAddress address) throws InterruptedException {
         this(clientLabelForLogging, address, new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
                 DEFAULT_CONNECT_TIMEOUT), Optional.<SSLContext> absent());
     }
 
-    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, Optional<SSLContext> maybeSSLContext) {
+    public NetconfClient(String clientLabelForLogging, InetSocketAddress address, Optional<SSLContext> maybeSSLContext)
+            throws InterruptedException {
         this(clientLabelForLogging, address, new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE,
                 DEFAULT_CONNECT_TIMEOUT), maybeSSLContext);
     }
