@@ -1142,6 +1142,12 @@
       <version>${controller.version}</version>
     </dependency>
 
+      <dependency>
+          <groupId>org.jolokia</groupId>
+          <artifactId>jolokia-osgi</artifactId>
+          <version>1.1.4</version>
+      </dependency>
+
 
   </dependencies>
 
