@@ -61,8 +61,10 @@
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.sal.connection,
+              org.opendaylight.controller.sal.reader,
               org.opendaylight.controller.forwardingrulesmanager,
               org.opendaylight.controller.connectionmanager,
+              org.opendaylight.controller.statisticsmanager,
               javax.xml.bind.annotation,
               javax.xml.bind,
               org.apache.felix.dm,
@@ -140,7 +142,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwardingrulesmanager</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>0.5.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -155,6 +157,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
       <version>0.5.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>statisticsmanager</artifactId>
+      <version>0.5.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

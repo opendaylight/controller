@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,6 +46,7 @@ import org.opendaylight.controller.forwardingrulesmanager.FlowEntry;
 import org.opendaylight.controller.forwardingrulesmanager.FlowEntryInstall;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManagerAware;
+import org.opendaylight.controller.forwardingrulesmanager.InconsistentFlows;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroup;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupChangeListener;
 import org.opendaylight.controller.forwardingrulesmanager.PortGroupConfig;
@@ -70,6 +72,7 @@ import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerListener;
 import org.opendaylight.controller.sal.flowprogrammer.IFlowProgrammerService;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.reader.FlowOnNode;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -81,6 +84,7 @@ import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.controller.statisticsmanager.IStatisticsManager;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.ISwitchManagerAware;
@@ -159,6 +163,8 @@ public class ForwardingRulesManager implements
 
     // Distributes FRM programming in the cluster
     private IConnectionManager connectionManager;
+
+    private IStatisticsManager statisticsManager;
 
     /*
      * Name clustered caches used to support FRM entry distribution these are by
@@ -3124,6 +3130,17 @@ public class ForwardingRulesManager implements
         this.processErrorEvent(event);
     }
 
+    public void _frmCheckFlowConsistency(CommandInterpreter ci) throws UnknownHostException {
+        String nodeId = ci.nextArgument();
+        Node node = Node.fromString(nodeId);
+        if (node == null) {
+            ci.print("Node id not specified");
+            return;
+        }
+        InconsistentFlows flows = this.checkFlowConsistency(node);
+        ci.println("InconsistentFlows : " + flows.toString());
+    }
+
     @Override
     public void flowRemoved(Node node, Flow flow) {
         log.trace("Received flow removed notification on {} for {}", node, flow);
@@ -3315,5 +3332,88 @@ public class ForwardingRulesManager implements
         /*
          * Do nothing
          */
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<FlowEntry> getFlowEntriesForNode(Node node) {
+        List<FlowEntry> list = new ArrayList<FlowEntry>();
+        if (node != null) {
+            for (Map.Entry<FlowEntry, FlowEntry> entry : this.originalSwView.entrySet()) {
+                if (node.equals(entry.getKey().getNode())) {
+                    list.add(entry.getKey().clone());
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<FlowEntry> getInstalledFlowEntriesForNode(Node node) {
+        List<FlowEntry> list = new ArrayList<FlowEntry>();
+        if (node != null) {
+            List<FlowEntryInstall> flowEntryInstallList = this.nodeFlows.get(node);
+            if(flowEntryInstallList != null) {
+                for(FlowEntryInstall fi: flowEntryInstallList) {
+                    list.add(fi.getInstall().clone());
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public InconsistentFlows checkFlowConsistency(Node node) {
+        // the logic in this method is as follows.
+        // get the list of flow entries(A) for the node from frm db.
+        // get the list of flow on nodes(B) from the statistics manager.
+        // iterate over list A.
+        // for every element in list A if its exists in list B,
+        // delete it from both Lists.
+        // at the end of iteration,
+        // list A contains elements in A but not B,
+        // and list B contains elements in B but not A.
+        List<FlowEntry> flowEntryList = this.getInstalledFlowEntriesForNode(node);
+        List<Flow> flowList = new ArrayList<Flow>();
+        if(this.statisticsManager != null) {
+            List<FlowOnNode> flowOnNodeList = this.statisticsManager.getFlowsNoCache(node);
+            for(FlowOnNode fn : flowOnNodeList) {
+                flowList.add(fn.getFlow().clone());
+            }
+            // now comes the main logic
+            // described at the beginning.
+            // using an iterator here as I will be removing elements
+            // while iterating over the list
+            Iterator<FlowEntry> flowEntryListIte = flowEntryList.iterator();
+            while(flowEntryListIte.hasNext()) {
+                FlowEntry fe = flowEntryListIte.next();
+                if(flowList.contains(fe.getFlow())) {
+                    flowEntryListIte.remove();
+                    flowList.remove(fe.getFlow());
+                }
+            }
+            return new InconsistentFlows(new Status(StatusCode.SUCCESS), node, flowEntryList, flowList);
+        }
+        // if we reach here, it means we were not able to do a consistency check
+        List<FlowEntry> emptyList = Collections.emptyList();
+        return new InconsistentFlows(new Status(StatusCode.INTERNALERROR, "Statistics Manager Not Available"), node, emptyList, flowList);
+    }
+
+    public void setStatisticsManager(IStatisticsManager statisticsManager) {
+        log.trace("Got statistics manager set request {}", statisticsManager);
+        this.statisticsManager = statisticsManager;
+    }
+
+    public void unsetStatisticsManager(IStatisticsManager statisticsManager) {
+        log.trace("Got statistics manager UNset request");
+        this.statisticsManager = null;
     }
 }

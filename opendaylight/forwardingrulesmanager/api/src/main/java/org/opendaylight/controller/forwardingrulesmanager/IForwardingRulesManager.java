@@ -433,4 +433,38 @@ public interface IForwardingRulesManager {
 
     public PortGroupProvider getPortGroupProvider();
 
+    /**
+     * Returns the list of Flow entries for a network node.
+     * This list contains the flows as they were
+     * requested to be installed by the applications, before any merging with
+     * container flow is done.
+     *
+     * @param node
+     * @return the original list of flow entries belonging to the specified node
+     */
+    public List<FlowEntry> getFlowEntriesForNode(Node node);
+
+    /**
+     * Returns the list of Flow entries installed in a network node.
+     * This list contains the effective flows installed
+     * on the nodes after the merging with any possible container flow was performed.
+     * If no container flow are specified, this method returns the same list as returned
+     * by getFlowEntriesForNode(Node node).
+     *
+     * @param node
+     * @return the list of container flow merged flow entries belonging to the specified node
+     */
+    public List<FlowEntry> getInstalledFlowEntriesForNode(Node node);
+
+    /**
+     * This method checks if the flows on the controller
+     * and on the node are consistent. The method returns the object of
+     * type InconsistentFlows that has the list of flows that exist
+     * on the controller but not on the node and also the list of flows
+     * that exist on the node but not on the controller.
+     * @param node
+     * @return InconsistentFlows
+     */
+    public InconsistentFlows checkFlowConsistency(Node node);
+
 }

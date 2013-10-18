@@ -406,7 +406,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>statisticsmanager</artifactId>
-      <version>${controller.version}</version>
+      <version>${statisticsmanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -446,7 +446,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwardingrulesmanager</artifactId>
-      <version>${controller.version}</version>
+      <version>${forwardingrulesmanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

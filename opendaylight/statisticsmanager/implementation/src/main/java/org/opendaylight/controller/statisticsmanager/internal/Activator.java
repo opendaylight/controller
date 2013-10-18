@@ -9,8 +9,15 @@
 
 package org.opendaylight.controller.statisticsmanager.internal;
 
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
+
 import org.apache.felix.dm.Component;
+import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
+import org.opendaylight.controller.connectionmanager.IConnectionManager;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainer;
 import org.opendaylight.controller.sal.inventory.IListenInventoryUpdates;
@@ -56,10 +63,20 @@ public class Activator extends ComponentActivatorAbstractBase {
     public void configureInstance(Component c, Object imp, String containerName) {
         if (imp.equals(StatisticsManager.class)) {
             // export the service
-            c.setInterface(new String[] {
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Set<String> propSet = new HashSet<String>();
+            // trigger cache
+            propSet.add(StatisticsManager.TRIGGERS_CACHE);
+            // flow statistics cache
+            propSet.add(StatisticsManager.FLOW_STATISTICS_CACHE);
+            props.put("cachenames", propSet);
+
+            String interfaces[] = new String[] {
                     IStatisticsManager.class.getName(),
                     IReadServiceListener.class.getName(),
-                    IListenInventoryUpdates.class.getName() }, null);
+                    IListenInventoryUpdates.class.getName(),
+                    ICacheUpdateAware.class.getName() };
+            c.setInterface(interfaces, props);
 
             c.add(createContainerServiceDependency(containerName).setService(IReadService.class)
                     .setCallbacks("setReaderService", "unsetReaderService").setRequired(true));
@@ -67,6 +84,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setClusterContainerService", "unsetClusterContainerService").setRequired(true));
             c.add(createContainerServiceDependency(containerName).setService(IContainer.class)
                     .setCallbacks("setIContainer", "unsetIContainer").setRequired(true));
+            c.add(createServiceDependency().setService(IConnectionManager.class)
+                    .setCallbacks("setIConnectionManager", "unsetIConnectionManager").setRequired(false));
 
         }
     }
