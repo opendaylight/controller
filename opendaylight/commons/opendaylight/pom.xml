@@ -52,6 +52,7 @@
     <jersey.version>1.17</jersey.version>
     <virgo.version>3.6.0.RELEASE</virgo.version>
     <geminiweb.version>2.2.0.RELEASE</geminiweb.version>
+    <jolokia.version>1.1.4</jolokia.version>
     <checkstyle.version>2.10</checkstyle.version>
     <testvm.argLine>-Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
     <yang.version>0.5.9-SNAPSHOT</yang.version>
@@ -85,6 +86,7 @@
     <networkconfig.bridgedomain.northbound.version>0.0.2-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <commons.httpclient.version>0.1.1-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.1-SNAPSHOT</concepts.version>
+    <jolokia.bridge.version>0.0.1-SNAPSHOT</jolokia.bridge.version>
   </properties>
 
   <dependencyManagement>
@@ -713,6 +715,11 @@
         <version>4.2.0</version>
         <!-- the all bundle includes all the necessary plugins -->
         <classifier>all</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-osgi</artifactId>
+        <version>${jolokia.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
