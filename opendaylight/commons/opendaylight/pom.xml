@@ -85,6 +85,8 @@
     <networkconfig.bridgedomain.northbound.version>0.0.2-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <commons.httpclient.version>0.1.1-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.1-SNAPSHOT</concepts.version>
+    <forwardingrulesmanager.version>0.5.0-SNAPSHOT</forwardingrulesmanager.version>
+    <statisticsmanager.version>0.5.0-SNAPSHOT</statisticsmanager.version>
   </properties>
 
   <dependencyManagement>

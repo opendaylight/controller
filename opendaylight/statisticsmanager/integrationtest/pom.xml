@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>statisticsmanager</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>0.5.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -96,6 +96,26 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>topologymanager</artifactId>
       <version>0.4.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>connectionmanager</artifactId>
+      <version>0.1.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>connectionmanager.implementation</artifactId>
+      <version>0.1.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal.connection</artifactId>
+      <version>0.1.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal.connection.implementation</artifactId>
+      <version>0.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
