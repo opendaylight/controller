@@ -16,6 +16,24 @@
       "revId": "5ea79188252acad20ea0c19ad6e8f01580d0c568",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c5dd5644",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-18T21:21:40Z",
+      "side": 1,
+      "message": "Thanks, you are correct about the action part. Missed that. Will take care of it shortly, and add the TODO.",
+      "parentUuid": "da6255ed_451a8618",
+      "revId": "5ea79188252acad20ea0c19ad6e8f01580d0c568",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
