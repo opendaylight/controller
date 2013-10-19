@@ -12,6 +12,7 @@ public class Activator implements BundleActivator {
     //10 Second initial, 1 second subsequent
     private static final int INITIAL_DELAY = 10000;
     private static final int SUBSEQUENT_DELAY = 1000;
+    private static final int MAX_ATTEMPTS = 120;
 
 
     private String stateToString(int state) {
@@ -66,7 +67,7 @@ public class Activator implements BundleActivator {
                     }
                     if (!resolved) {
                         countup++;
-                        if (countup < 60) {
+                        if (countup < MAX_ATTEMPTS) {
                             System.out.println("all bundles haven't finished starting, will repeat");
                             try {
                                 Thread.sleep(SUBSEQUENT_DELAY);
