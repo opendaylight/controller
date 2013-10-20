@@ -17,11 +17,11 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener
  */
 class RuntimeCodeSpecification {
 
-    public static val PACKAGE_PREFIX = "_gen.";
+    //public static val PACKAGE_PREFIX = "_gen.";
 
     public static val DIRECT_PROXY_SUFFIX = "DirectProxy";
     public static val ROUTER_SUFFIX = "Router";
-    public static val INVOKER_SUFFIX = "Invoker";
+    public static val INVOKER_SUFFIX = "ListenerInvoker";
 
     public static val DELEGATE_FIELD = "_delegate"
     public static val ROUTING_TABLE_FIELD_PREFIX = "_routes_"
@@ -52,7 +52,7 @@ class RuntimeCodeSpecification {
      * 
      */
     public static def getGeneratedName(Class<?> cls, String suffix) {
-        '''«PACKAGE_PREFIX»«cls.package.name».«cls.simpleName»$«suffix»'''.toString()
+        '''«cls.name»$$Broker$«suffix»'''.toString()
     }
 
     /**

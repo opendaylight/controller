@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.binding.codegen;
 
 import org.opendaylight.controller.sal.binding.spi.DelegateProxy;
+import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.controller.sal.binding.spi.RpcRouter;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
@@ -55,28 +56,30 @@ public interface RuntimeCodeGenerator {
      * 
      * <p>
      * Returned instance:
-     * <ul><li>Implements:
-     *     <ul><li>{@link DelegateProxy}
-     *         <li>{@link RpcRouter}
-     *     </ul>
-     *     <li>
-     *     routes all invocations of methods, which are defined in RpcService
-     *     subtype based on method arguments and routing information defined in the
-     *     RpcRoutingTables for this instance
-     *     {@link RpcRouter#getRoutingTable(Class)}.
-     *     <ul>
-     *     <li>
-     *     Implementation uses
-     *     {@link RpcRouter#getService(Class, InstanceIdentifier)} method to
-     *     retrieve particular instance to which call will be routed.
-     *    <li>
-     *    Instance of {@link InstanceIdentifier} is determined by first argument of
-     *    method and is retrieved via method which is annotated with
-     *    {@link RoutingContext}. Class representing Routing Context Identifier is
-     *    retrieved by {@link RoutingContext}.
-     *    <li>If first argument is not defined / {@link RoutingContext} annotation
-     *    is not present on any field invocation will be delegated to default
-     *    service {@link RpcRouter#getDefaultService()}.
+     * <ul>
+     * <li>Implements:
+     * <ul>
+     * <li>{@link DelegateProxy}
+     * <li>{@link RpcRouter}
+     * </ul>
+     * <li>
+     * routes all invocations of methods, which are defined in RpcService
+     * subtype based on method arguments and routing information defined in the
+     * RpcRoutingTables for this instance
+     * {@link RpcRouter#getRoutingTable(Class)}.
+     * <ul>
+     * <li>
+     * Implementation uses
+     * {@link RpcRouter#getService(Class, InstanceIdentifier)} method to
+     * retrieve particular instance to which call will be routed.
+     * <li>
+     * Instance of {@link InstanceIdentifier} is determined by first argument of
+     * method and is retrieved via method which is annotated with
+     * {@link RoutingContext}. Class representing Routing Context Identifier is
+     * retrieved by {@link RoutingContext}.
+     * <li>If first argument is not defined / {@link RoutingContext} annotation
+     * is not present on any field invocation will be delegated to default
+     * service {@link RpcRouter#getDefaultService()}.
      * </ul>
      * 
      * @param serviceType
@@ -85,4 +88,6 @@ public interface RuntimeCodeGenerator {
      *         also {@link RpcRouter}<T> and {@link DelegateProxy}
      */
     <T extends RpcService> RpcRouter<T> getRouterFor(Class<T> serviceType) throws IllegalArgumentException;
+
+    NotificationInvokerFactory getInvokerFactory();
 }

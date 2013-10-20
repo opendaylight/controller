@@ -41,6 +41,7 @@ import org.opendaylight.yangtools.yang.binding.BaseIdentity
 import com.google.common.collect.Multimap
 import com.google.common.collect.HashMultimap
 import static org.opendaylight.controller.sal.binding.impl.osgi.ClassLoaderUtils.*
+import java.util.concurrent.Executors
 
 class BindingAwareBrokerImpl implements BindingAwareBroker {
     private static val log = LoggerFactory.getLogger(BindingAwareBrokerImpl)
@@ -72,8 +73,10 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
     def start() {
         initGenerator();
 
+        val executor = Executors.newCachedThreadPool;
         // Initialization of notificationBroker
-        notifyBroker = new NotificationBrokerImpl(null);
+        notifyBroker = new NotificationBrokerImpl(executor);
+        notifyBroker.invokerFactory = generator.invokerFactory;
         dataBroker = new DataBrokerImpl();
         val brokerProperties = newProperties();
         notifyBrokerRegistration = brokerBundleContext.registerService(NotificationProviderService, notifyBroker,
