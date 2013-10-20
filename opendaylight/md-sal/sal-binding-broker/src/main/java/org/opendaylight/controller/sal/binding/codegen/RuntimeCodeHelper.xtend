@@ -44,6 +44,23 @@ class RuntimeCodeHelper {
         } else
             throw new IllegalArgumentException("delegate class is not assignable to proxy");
     }
+    
+        /**
+     * Helper method to set delegate to ManagedDirectedProxy with use of reflection.
+     * 
+     * Note: This method uses reflection, but setting delegate field should not occur too much
+     * to introduce any significant performance hits.
+     * 
+     */
+    public static def void setDelegate(Object proxy, Object delegate) {
+        val field = proxy.class.getField(DELEGATE_FIELD)
+        if (field == null) throw new UnsupportedOperationException("Unable to set delegate to proxy");
+        if (field.type.isAssignableFrom(delegate.class)) {
+            field.set(proxy, delegate)
+        } else
+            throw new IllegalArgumentException("delegate class is not assignable to proxy");
+    }
+    
 
     public static def Map<InstanceIdentifier<?>, ? extends RpcService> getRoutingTable(RpcService target,
         Class<? extends BaseIdentity> tableClass) {

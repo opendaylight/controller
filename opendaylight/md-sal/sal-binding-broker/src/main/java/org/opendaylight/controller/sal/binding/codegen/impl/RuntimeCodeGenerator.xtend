@@ -35,13 +35,25 @@ import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeC
 import java.util.HashSet
 import java.io.ObjectOutputStream.PutField
 import static org.opendaylight.controller.sal.binding.impl.osgi.ClassLoaderUtils.*
+import javax.xml.ws.spi.Invoker
+import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory
+import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
+import java.util.Set
+import java.util.Collections
+import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper
+import java.util.WeakHashMap
+import javassist.ClassClassPath
 
-class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator {
+class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
 
+    val CtClass BROKER_NOTIFICATION_LISTENER;
     val ClassPool classPool;
+    val Map<Class<? extends NotificationListener>, RuntimeGeneratedInvokerPrototype> invokerClasses;
 
     public new(ClassPool pool) {
         classPool = pool;
+        invokerClasses = new WeakHashMap();
+        BROKER_NOTIFICATION_LISTENER = org.opendaylight.controller.sal.binding.api.NotificationListener.asCtClass;
     }
 
     override <T extends RpcService> getDirectProxyFor(Class<T> iface) {
@@ -80,7 +92,8 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
                         val routingPair = routingContextInput;
                         val bodyTmp = '''
                         {
-                            final «InstanceIdentifier.name» identifier = $1.«routingPair.getter.name»()«IF routingPair.encapsulated».getValue()«ENDIF»;
+                            final «InstanceIdentifier.name» identifier = $1.«routingPair.getter.name»()«IF routingPair.
+                            encapsulated».getValue()«ENDIF»;
                             «supertype.name» instance = («supertype.name») «routingPair.context.routingTableField».get(identifier);
                             if(instance == null) {
                                instance = «DELEGATE_FIELD»;
@@ -101,24 +114,31 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
         return new RpcRouterCodegenInstance(iface, instance, contexts);
     }
 
-    def Class<?> generateListenerInvoker(Class<? extends NotificationListener> iface) {
-        val targetCls = createClass(iface.invokerName) [
+    protected def generateListenerInvoker(Class<? extends NotificationListener> iface) {
+        val callbacks = iface.methods.filter[notificationCallback]
+
+        val supportedNotification = callbacks.map[parameterTypes.get(0) as Class<? extends Notification>].toSet;
+
+        val targetCls = createClass(iface.invokerName,BROKER_NOTIFICATION_LISTENER ) [
             field(DELEGATE_FIELD, iface)
-            it.method(Void, "invoke", Notification) [
-                val callbacks = iface.methods.filter[notificationCallback]
+            implementMethodsFrom(BROKER_NOTIFICATION_LISTENER) [
                 body = '''
                     {
                         «FOR callback : callbacks SEPARATOR " else "»
-                            if($1 instanceof «val cls = callback.parameterTypes.get(0).name») {
+                        «val cls = callback.parameterTypes.get(0).name»
+                            if($1 instanceof «cls») {
                                 «DELEGATE_FIELD».«callback.name»((«cls») $1);
-                                return;
+                                return null;
                             }
                         «ENDFOR»
+                        return null;
                     }
                 '''
             ]
         ]
-        return targetCls.toClass(iface.classLoader);
+        val finalClass = targetCls.toClass(iface.classLoader,iface.protectionDomain)
+        return new RuntimeGeneratedInvokerPrototype(supportedNotification,
+            finalClass as Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener>);
     }
 
     def void method(CtClass it, Class<?> returnType, String name, Class<?> parameter, MethodGenerator function1) {
@@ -138,8 +158,8 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
                 for (annotation : method.availableAnnotations) {
                     if (annotation instanceof RoutingContext) {
                         val encapsulated = !method.returnType.equals(InstanceIdentifier.asCtClass);
-                        
-                        return new RoutingPair((annotation as RoutingContext).value, method,encapsulated);
+
+                        return new RoutingPair((annotation as RoutingContext).value, method, encapsulated);
                     }
                 }
             }
@@ -195,7 +215,73 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
             return pool.get(cls.name)
         } catch (NotFoundException e) {
             pool.appendClassPath(new LoaderClassPath(cls.classLoader));
-            return pool.get(cls.name)
+            try {
+                return pool.get(cls.name)
+
+            } catch (NotFoundException ef) {
+                pool.appendClassPath(new ClassClassPath(cls));
+                return pool.get(cls.name)
+            }
         }
     }
+
+    override getInvokerFactory() {
+        return this;
+    }
+
+    override invokerFor(NotificationListener instance) {
+        val cls = instance.class
+        val prototype = resolveInvokerClass(cls);
+        
+        return new RuntimeGeneratedInvoker(instance,prototype)
+    }
+
+    def resolveInvokerClass(Class<? extends NotificationListener> class1) {
+        val invoker = invokerClasses.get(class1);
+        if (invoker !== null) {
+            return invoker;
+        }
+        val newInvoker = generateListenerInvoker(class1);
+        invokerClasses.put(class1, newInvoker);
+        return newInvoker
+    }
+}
+
+@Data
+class RuntimeGeneratedInvoker implements NotificationInvoker {
+    
+    @Property
+    val NotificationListener delegate;
+
+    
+    @Property
+    var org.opendaylight.controller.sal.binding.api.NotificationListener invocationProxy;
+
+    @Property
+    var RuntimeGeneratedInvokerPrototype prototype;
+
+    new(NotificationListener delegate,RuntimeGeneratedInvokerPrototype prototype) {
+        _delegate = delegate;
+        _prototype = prototype;
+        _invocationProxy = prototype.protoClass.newInstance;
+        RuntimeCodeHelper.setDelegate(_invocationProxy, delegate);
+    }
+
+    override getSupportedNotifications() {
+        prototype.supportedNotifications;
+    }
+
+    override close() {
+        
+    }
+}
+
+@Data
+class RuntimeGeneratedInvokerPrototype {
+
+    @Property
+    val Set<Class<? extends Notification>> supportedNotifications;
+
+    @Property
+    val Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener> protoClass;
 }
