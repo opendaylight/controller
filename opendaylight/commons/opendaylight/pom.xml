@@ -87,6 +87,7 @@
     <commons.httpclient.version>0.1.1-SNAPSHOT</commons.httpclient.version>
     <concepts.version>0.5.1-SNAPSHOT</concepts.version>
     <jolokia.bridge.version>0.0.1-SNAPSHOT</jolokia.bridge.version>
+    <netty.version>4.0.9.Final</netty.version>
   </properties>
 
   <dependencyManagement>
@@ -647,27 +648,27 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-handler</artifactId>
-            <version>4.0.9.Final</version>
+            <version>${netty.version}</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec</artifactId>
-            <version>4.0.9.Final</version>
+            <version>${netty.version}</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-buffer</artifactId>
-            <version>4.0.9.Final</version>
+            <version>${netty.version}</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-transport</artifactId>
-            <version>4.0.9.Final</version>
+            <version>${netty.version}</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-common</artifactId>
-            <version>4.0.9.Final</version>
+            <version>${netty.version}</version>
         </dependency>
 
       <!-- yangtools dependencies -->
