@@ -7,13 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.spi.ModuleFactory;
 
 /**
  * Defines contract between {@link ConfigTransactionControllerImpl} (producer)
@@ -22,11 +25,15 @@ import org.opendaylight.controller.config.api.ValidationException;
 interface ConfigTransactionControllerInternal extends
         ConfigTransactionControllerImplMXBean {
 
+
+
     /**
-     * Copy already committed module to current transaction.
+     * 1, Copy already committed modules to current transaction.
+     * 2, Diff: compute added and removed factories from last run, then create new modules using
+     * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory)}
+     * and remove modules belonging to removed factories.
      */
-    void copyExistingModule(ModuleInternalInfo oldConfigBeanInfo)
-            throws InstanceAlreadyExistsException;
+    void copyExistingModulesAndProcessFactoryDiff(Collection<ModuleInternalInfo> entries, List<ModuleFactory> lastListOfFactories);
 
     /**
      * Call {@link org.opendaylight.controller.config.spi.Module#validate()} on
@@ -62,4 +69,5 @@ interface ConfigTransactionControllerInternal extends
      */
     boolean isClosed();
 
+    List<ModuleFactory> getCurrentlyRegisteredFactories();
 }

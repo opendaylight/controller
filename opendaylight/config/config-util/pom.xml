@@ -4,7 +4,7 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>0.2.2-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>config-util</artifactId>
@@ -16,7 +16,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jolokia</groupId>

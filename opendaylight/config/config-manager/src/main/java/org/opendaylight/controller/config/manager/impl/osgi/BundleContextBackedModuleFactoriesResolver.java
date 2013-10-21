@@ -30,7 +30,7 @@ public class BundleContextBackedModuleFactoriesResolver implements
     }
 
     @Override
-    public List<? extends ModuleFactory> getAllFactories() {
+    public List<ModuleFactory> getAllFactories() {
         Collection<ServiceReference<ModuleFactory>> serviceReferences;
         try {
             serviceReferences = bundleContext.getServiceReferences(

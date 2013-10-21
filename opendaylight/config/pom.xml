@@ -10,8 +10,7 @@
     </parent>
 
 
-    <groupId>org.opendaylight.controller</groupId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.2.2-SNAPSHOT</version>
     <artifactId>config-subsystem</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
@@ -114,6 +113,96 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons.lang.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>config-api</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>config-util</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>config-util</artifactId>
+                <version>${config.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>config-manager</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>config-manager</artifactId>
+                <version>${config.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>config-persister-api</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.bgpcep</groupId>
+                <artifactId>mockito-configuration</artifactId>
+                <version>${bgpcep.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>binding-generator-spi</artifactId>
+                <version>${opendaylight.binding.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>binding-generator-util</artifactId>
+                <version>${opendaylight.binding.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-parser-impl</artifactId>
+                <version>${opendaylight.yang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>binding-generator-impl</artifactId>
+                <version>${opendaylight.binding.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yang-test</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>yang-jmx-generator</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>yang-jmx-generator</artifactId>
+                <version>${config.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>binding-type-provider</artifactId>
+                <version>${opendaylight.binding.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-maven-plugin-spi</artifactId>
+                <version>${opendaylight.yang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yang-store-api</artifactId>
+                <version>${config.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -167,6 +256,9 @@
                 <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
         </plugins>
+
+
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -200,7 +292,7 @@
                         <dependency>
                             <groupId>org.opendaylight.controller</groupId>
                             <artifactId>yang-jmx-generator-plugin</artifactId>
-                            <version>0.2.1-SNAPSHOT</version>
+                            <version>${config.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>

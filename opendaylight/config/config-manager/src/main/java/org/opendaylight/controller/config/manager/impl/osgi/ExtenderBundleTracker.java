@@ -14,6 +14,8 @@ import java.net.URL;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.opendaylight.controller.config.api.jmx.CommitStatus;
+import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -24,20 +26,20 @@ import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.ObjectName;
+
 /**
  * OSGi extender that listens for bundle activation events. Reads file
  * META-INF/services/org.opendaylight.controller.config.spi.ModuleFactory, each
  * line should contain an implementation of ModuleFactory interface. Creates new
  * instance with default constructor and registers it into OSGi service
  * registry. There is no need for listening for implementing removedBundle as
- * the services are unregistered automatically. Code based on
- * http://www.toedter.com/blog/?p=236
+ * the services are unregistered automatically.
+ * Code based on http://www.toedter.com/blog/?p=236
  */
-
 public class ExtenderBundleTracker extends BundleTracker<Object> {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(ExtenderBundleTracker.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExtenderBundleTracker.class);
 
     public ExtenderBundleTracker(BundleContext context) {
         super(context, Bundle.ACTIVE, null);
@@ -46,10 +48,8 @@ public class ExtenderBundleTracker extends BundleTracker<Object> {
 
     @Override
     public Object addingBundle(Bundle bundle, BundleEvent event) {
-        URL resource = bundle.getEntry("META-INF/services/"
-                + ModuleFactory.class.getName());
-        logger.trace(
-                "Got addingBundle event of bundle {}, resource {}, event {}",
+        URL resource = bundle.getEntry("META-INF/services/" + ModuleFactory.class.getName());
+        logger.trace("Got addingBundle event of bundle {}, resource {}, event {}",
                 bundle, resource, event);
         if (resource != null) {
             try (InputStream inputStream = resource.openStream()) {
@@ -58,29 +58,20 @@ public class ExtenderBundleTracker extends BundleTracker<Object> {
                     registerFactory(factoryClassName, bundle);
                 }
             } catch (Exception e) {
-                logger.error("Error while reading {}, stopping bundle {}",
-                        resource, bundle, e);
-                stopBundleQuietly(bundle);
+                logger.error("Error while reading {}", resource, e);
                 throw new RuntimeException(e);
             }
-
         }
         return bundle;
     }
 
-    private static void stopBundleQuietly(Bundle bundle) {
-        try {
-            bundle.stop();
-        } catch (BundleException e2) {
-            logger.warn(
-                    "Ignoring fact that bundle.stop failed on {}, reason {}",
-                    bundle, e2.toString());
-        }
+    @Override
+    public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
+        super.removedBundle(bundle,event,object);
     }
 
     // TODO:test
-    private static ServiceRegistration<?> registerFactory(
-            String factoryClassName, Bundle bundle) {
+    private static ServiceRegistration<?> registerFactory(String factoryClassName, Bundle bundle) {
         String errorMessage;
         try {
             Class<?> clazz = bundle.loadClass(factoryClassName);

@@ -8,9 +8,12 @@
 package org.opendaylight.controller.config.manager.testingservices.threadpool;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
@@ -61,5 +64,10 @@ public class TestingFixedThreadPoolModuleFactory implements ModuleFactory {
     public boolean isModuleImplementingServiceInterface(
             Class<? extends AbstractServiceInterface> serviceInterface) {
         return ifc.contains(serviceInterface);
+    }
+
+    @Override
+    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory) {
+        return new HashSet<Module>();
     }
 }

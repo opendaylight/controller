@@ -49,19 +49,20 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
     public static class MockedThreadPoolModule implements Module,
             MockedTestingThreadPoolConfigMXBean,
             TestingThreadPoolServiceInterface {
+
+        private final ModuleIdentifier moduleIdentifier;
+
         int threadCount;
 
-        public MockedThreadPoolModule() {
-        }
-
         public MockedThreadPoolModule(
-                DynamicMBeanWithInstance dynamicMBeanWithInstance) {
+                DynamicMBeanWithInstance dynamicMBeanWithInstance, ModuleIdentifier moduleIdentifier) {
             // no reconfiguration / reuse is supported
+            this.moduleIdentifier = moduleIdentifier;
         }
 
         @Override
         public ModuleIdentifier getName() {
-            return new ModuleIdentifier("a", "b");
+            return moduleIdentifier;
         }
 
         @Override
