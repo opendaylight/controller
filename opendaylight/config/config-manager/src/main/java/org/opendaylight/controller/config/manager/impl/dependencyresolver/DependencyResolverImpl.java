@@ -105,14 +105,6 @@ final class DependencyResolverImpl implements DependencyResolver,
         }
     }
 
-    @Override
-    public void validateDependency(
-            Class<? extends AbstractServiceInterface> expectedServiceInterface,
-            ObjectName objectName, String attributeNameForErrorReporting) {
-        validateDependency(expectedServiceInterface, objectName,
-                new JmxAttribute(attributeNameForErrorReporting));
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -153,13 +145,6 @@ final class DependencyResolverImpl implements DependencyResolver,
                     instance.getClass(), expectedType, jmxAttribute);
             throw new JmxAttributeValidationException(message, e, jmxAttribute);
         }
-    }
-
-    @Deprecated
-    @Override
-    public <T> T resolveInstance(Class<T> expectedType, ObjectName objectName) {
-        return resolveInstance(expectedType, objectName, new JmxAttribute(
-                "unknown attribute"));
     }
 
     @Override

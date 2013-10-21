@@ -38,12 +38,6 @@ public interface DependencyResolver {
             Class<? extends AbstractServiceInterface> expectedServiceInterface,
             ObjectName objectName, JmxAttribute jmxAttribute);
 
-    @Deprecated
-    // TODO remove once all config code is generated
-    void validateDependency(
-            Class<? extends AbstractServiceInterface> expectedServiceInterface,
-            ObjectName objectName, String attributeNameForErrorReporting);
-
     /**
      * To be used during commit phase to wire actual dependencies.
      *
@@ -53,8 +47,5 @@ public interface DependencyResolver {
      */
     <T> T resolveInstance(Class<T> expectedType, ObjectName objectName,
             JmxAttribute jmxAttribute);
-
-    @Deprecated
-    <T> T resolveInstance(Class<T> expectedType, ObjectName objectName);
 
 }
