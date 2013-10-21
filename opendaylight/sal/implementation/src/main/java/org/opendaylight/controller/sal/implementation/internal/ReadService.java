@@ -12,6 +12,7 @@ package org.opendaylight.controller.sal.implementation.internal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -201,7 +202,7 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -213,7 +214,7 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -276,7 +277,7 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -288,7 +289,7 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
-        return null;
+        return Collections.emptyList();
     }
 
 
@@ -327,7 +328,7 @@ public class ReadService implements IReadService, CommandProvider, IPluginOutRea
             }
         }
         logger.warn("Plugin {} unavailable", node.getType());
-        return null;
+        return Collections.emptyList();
     }
 
     @Override

@@ -189,7 +189,7 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
         List<FlowOnNode> flowOnNodeList = new FlowStatisticsConverter(ofList).getFlowOnNodeList(node);
         List<FlowOnNode> filteredList = filterFlowListPerContainer(container, node, flowOnNodeList);
 
-        return (filteredList == null || filteredList.isEmpty()) ? null : filteredList.get(0);
+        return (filteredList.isEmpty()) ? null : filteredList.get(0);
     }
 
     @Override
@@ -203,10 +203,8 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
 
         // Convert and filter the statistics per container
         List<FlowOnNode> flowOnNodeList = new FlowStatisticsConverter(ofList).getFlowOnNodeList(node);
-        List<FlowOnNode> filteredList = filterFlowListPerContainer(container, node, flowOnNodeList);
 
-        return (filteredList == null) ? null : filteredList;
-
+        return filterFlowListPerContainer(container, node, flowOnNodeList);
     }
 
     @Override
@@ -233,10 +231,10 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
      * @param list
      * @return
      */
-    public List<FlowOnNode> filterFlowListPerContainer(String container,
+    private List<FlowOnNode> filterFlowListPerContainer(String container,
             Node nodeId, List<FlowOnNode> list) {
         if (list == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         // Create new filtered list of flows
@@ -260,9 +258,9 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
      * @param list
      * @return
      */
-    public List<OFStatistics> filterPortListPerContainer(String container, long switchId, List<OFStatistics> list) {
+    private List<OFStatistics> filterPortListPerContainer(String container, long switchId, List<OFStatistics> list) {
         if (list == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         // Create new filtered list of flows
@@ -281,10 +279,10 @@ public class ReadServiceFilter implements IReadServiceFilter, IContainerListener
     }
 
 
-    public List<OFStatistics> filterTableListPerContainer(
+    private List<OFStatistics> filterTableListPerContainer(
             String container, long switchId, List<OFStatistics> list) {
         if (list == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         // Create new filtered list of node tables

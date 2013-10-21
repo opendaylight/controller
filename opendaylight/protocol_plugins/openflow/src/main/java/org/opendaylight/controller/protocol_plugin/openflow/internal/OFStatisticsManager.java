@@ -86,7 +86,6 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
     private ConcurrentMap<Long, List<OFStatistics>> descStatistics;
     private ConcurrentMap<Long, List<OFStatistics>> portStatistics;
     private ConcurrentMap<Long, List<OFStatistics>> tableStatistics;
-    private List<OFStatistics> dummyList;
     private ConcurrentMap<Long, StatisticsTicks> statisticsTimerTicks;
     protected BlockingQueue<StatsRequest> pendingStatsRequests;
     protected BlockingQueue<Long> switchPortStatsUpdated;
@@ -191,7 +190,6 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
         descStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
         portStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
         tableStatistics = new ConcurrentHashMap<Long, List<OFStatistics>>();
-        dummyList = new ArrayList<OFStatistics>(1);
         pendingStatsRequests = new LinkedBlockingQueue<StatsRequest>(getStatsQueueSize());
         statisticsTimerTicks = new ConcurrentHashMap<Long, StatisticsTicks>(INITIAL_SIZE);
         switchPortStatsUpdated = new LinkedBlockingQueue<Long>(INITIAL_SIZE);
@@ -522,7 +520,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
         List<OFStatistics> values = this.fetchStatisticsFromSwitch(switchId, statType, null);
 
         // If got a valid response update local cache and notify listeners
-        if (values != null && !values.isEmpty()) {
+        if (!values.isEmpty()) {
             switch (statType) {
                 case FLOW:
                 case VENDOR:
@@ -589,7 +587,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
     @SuppressWarnings("unchecked")
     private List<OFStatistics> fetchStatisticsFromSwitch(Long switchId,
             OFStatisticsType statsType, Object target) {
-        List<OFStatistics> values = null;
+        List<OFStatistics> values = Collections.emptyList();
         String type = null;
         ISwitch sw = controller.getSwitch(switchId);
 
@@ -608,7 +606,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
                     // Malformed request
                     log.warn("Invalid target type for Flow stats request: {}",
                             target.getClass());
-                    return null;
+                    return Collections.emptyList();
                 } else {
                     // Specific flow request
                     match = (OFMatch) target;
@@ -649,7 +647,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
                     // Malformed request
                     log.warn("Invalid target type for Port stats request: {}",
                             target.getClass());
-                    return null;
+                    return Collections.emptyList();
                 } else {
                     // Specific port request
                     targetPort = (Short) target;
@@ -676,7 +674,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
                         // Malformed request
                         log.warn("Invalid table id for table stats request: {}",
                                 target.getClass());
-                        return null;
+                        return Collections.emptyList();
                     }
                     byte targetTable = (Byte) target;
                     OFTableStatistics specificReq = new OFTableStatistics();
@@ -719,7 +717,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
          * Check on emptiness as interference between add and get is still
          * possible on the inner list (the concurrentMap entry's value)
          */
-        return (list == null || list.isEmpty()) ? this.dummyList
+        return (list == null || list.isEmpty()) ? Collections.<OFStatistics>emptyList()
                 : (list.get(0) instanceof OFVendorStatistics) ? this
                         .v6StatsListToOFStatsList(list) : list;
     }
@@ -733,7 +731,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
          * possible on the inner list (the concurrentMap entry's value)
          */
         if (statsList == null || statsList.isEmpty()) {
-            return this.dummyList;
+            return Collections.emptyList();
         }
 
         if (statsList.get(0) instanceof OFVendorStatistics) {
@@ -766,22 +764,22 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
                 }
             }
         }
-        return this.dummyList;
+        return Collections.emptyList();
     }
 
     /*
      * Converts the v6 vendor statistics to the OFStatistics
      */
-    private List<OFStatistics> v6StatsListToOFStatsList(
-            List<OFStatistics> statistics) {
+    private List<OFStatistics> v6StatsListToOFStatsList(List<OFStatistics> statistics) {
+        if (statistics == null || statistics.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<OFStatistics> v6statistics = new ArrayList<OFStatistics>();
-        if (statistics != null && !statistics.isEmpty()) {
-            for (OFStatistics stats : statistics) {
-                if (stats instanceof OFVendorStatistics) {
-                    List<OFStatistics> r = getV6ReplyStatistics((OFVendorStatistics) stats);
-                    if (r != null) {
-                        v6statistics.addAll(r);
-                    }
+        for (OFStatistics stats : statistics) {
+            if (stats instanceof OFVendorStatistics) {
+                List<OFStatistics> r = getV6ReplyStatistics((OFVendorStatistics) stats);
+                if (r != null) {
+                    v6statistics.addAll(r);
                 }
             }
         }
@@ -792,8 +790,10 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
             OFVendorStatistics stat) {
         int length = stat.getLength();
         List<OFStatistics> results = new ArrayList<OFStatistics>();
-        if (length < 12)
-            return null; // Nicira Hdr is 12 bytes. We need atleast that much
+        if (length < 12) {
+            // Nicira Hdr is 12 bytes. We need at least that much
+            return Collections.emptyList();
+        }
         ByteBuffer data = ByteBuffer.allocate(length);
         stat.writeTo(data);
         data.rewind();
@@ -805,7 +805,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
         int vendor = data.getInt(); // first 4 bytes is vendor id.
         if (vendor != V6StatsRequest.NICIRA_VENDOR_ID) {
             log.warn("Unexpected vendor id: 0x{}", Integer.toHexString(vendor));
-            return null;
+            return Collections.emptyList();
         } else {
             // go ahead by 8 bytes which is 8 bytes of 0
             data.getLong(); // should be all 0's
@@ -818,12 +818,14 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
         while (length > 0) {
             v6statsreply = new V6StatsReply();
             min_len = v6statsreply.getLength();
-            if (length < v6statsreply.getLength())
+            if (length < v6statsreply.getLength()) {
                 break;
+            }
             v6statsreply.setActionFactory(stat.getActionFactory());
             v6statsreply.readFrom(data);
-            if (v6statsreply.getLength() < min_len)
+            if (v6statsreply.getLength() < min_len) {
                 break;
+            }
             v6statsreply.setVendorId(vendor);
             log.trace("V6StatsReply: {}", v6statsreply);
             length -= v6statsreply.getLength();
@@ -845,17 +847,16 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
             }
         }
 
-        List<OFStatistics> list = this.fetchStatisticsFromSwitch(switchId, statType,
-                target);
+        List<OFStatistics> list = this.fetchStatisticsFromSwitch(switchId, statType, target);
 
-        return (list == null) ? null :
-            (statType == OFStatisticsType.VENDOR) ? v6StatsListToOFStatsList(list) : list;
+        return (statType == OFStatisticsType.VENDOR) ? v6StatsListToOFStatsList(list) : list;
     }
 
     @Override
     public List<OFStatistics> getOFDescStatistics(Long switchId) {
-        if (!descStatistics.containsKey(switchId))
-            return this.dummyList;
+        if (!descStatistics.containsKey(switchId)) {
+            return Collections.emptyList();
+        }
 
         return descStatistics.get(switchId);
     }
@@ -863,7 +864,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
     @Override
     public List<OFStatistics> getOFPortStatistics(Long switchId) {
         if (!portStatistics.containsKey(switchId)) {
-            return this.dummyList;
+            return Collections.emptyList();
         }
 
         return portStatistics.get(switchId);
@@ -872,7 +873,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
     @Override
     public List<OFStatistics> getOFPortStatistics(Long switchId, short portId) {
         if (!portStatistics.containsKey(switchId)) {
-            return this.dummyList;
+            return Collections.emptyList();
         }
         List<OFStatistics> list = new ArrayList<OFStatistics>(1);
         for (OFStatistics stats : portStatistics.get(switchId)) {
@@ -887,7 +888,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
     @Override
     public List<OFStatistics> getOFTableStatistics(Long switchId) {
         if (!tableStatistics.containsKey(switchId)) {
-            return this.dummyList;
+            return Collections.emptyList();
         }
 
         return tableStatistics.get(switchId);
@@ -896,7 +897,7 @@ public class OFStatisticsManager implements IOFStatisticsManager, IInventoryShim
     @Override
     public List<OFStatistics> getOFTableStatistics(Long switchId, Byte tableId) {
         if (!tableStatistics.containsKey(switchId)) {
-            return this.dummyList;
+            return Collections.emptyList();
         }
 
         List<OFStatistics> list = new ArrayList<OFStatistics>(1);

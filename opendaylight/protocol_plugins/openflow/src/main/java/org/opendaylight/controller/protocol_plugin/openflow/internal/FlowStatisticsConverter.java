@@ -9,6 +9,7 @@
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6StatsReply;
@@ -34,11 +35,10 @@ public class FlowStatisticsConverter {
     private List<FlowOnNode> flowOnNodeList;
 
     public FlowStatisticsConverter(List<OFStatistics> statsList) {
-        if (statsList == null) {// || statsList.isEmpty()) {
-            this.ofStatsList = new ArrayList<OFStatistics>(1); // dummy list
+        if (statsList == null) {
+            this.ofStatsList = Collections.emptyList();
         } else {
-            this.ofStatsList = statsList; // new
-                                          // ArrayList<OFStatistics>(statsList);
+            this.ofStatsList = statsList;
         }
         this.flowOnNodeList = null;
     }

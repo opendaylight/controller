@@ -9,6 +9,7 @@
 
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Set;
@@ -122,12 +123,12 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
     public List<FlowOnNode> readAllFlow(Node node, boolean cached) {
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             logger.error("Invalid node type");
-            return null;
+            return Collections.emptyList();
         }
 
         if (!connectionOutService.isLocal(node)) {
             logger.debug("This Controller is not the master for the node : " + node);
-            return null;
+            return Collections.emptyList();
         }
 
         return filter.readAllFlow(containerName, node, cached);
@@ -170,12 +171,12 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
             boolean cached) {
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             logger.error("Invalid node type");
-            return null;
+            return Collections.emptyList();
         }
 
         if (!connectionOutService.isLocal(node)) {
             logger.debug("This Controller is not the master for node : " + node);
-            return null;
+            return Collections.emptyList();
         }
 
         return filter.readAllNodeConnector(containerName, node, cached);
@@ -217,12 +218,12 @@ public class ReadService implements IPluginInReadService, IReadFilterInternalLis
     public List<NodeTableStatistics> readAllNodeTable(Node node, boolean cached) {
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             logger.error("Invalid node type");
-            return null;
+            return Collections.emptyList();
         }
 
         if (!connectionOutService.isLocal(node)) {
             logger.debug("This Controller is not the master for node : " + node);
-            return null;
+            return Collections.emptyList();
         }
 
         return filter.readAllNodeTable(containerName, node, cached);
