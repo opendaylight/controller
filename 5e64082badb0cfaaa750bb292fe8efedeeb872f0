@@ -16,6 +16,24 @@
       "revId": "5e64082badb0cfaaa750bb292fe8efedeeb872f0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_8802d33c",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-21T16:07:59Z",
+      "side": 1,
+      "message": "The existing code following this check will detect the conflicting flow.\n\nI think you meant to say \"...the match and priority are the same\".\nIf sameFlow is true, it means the two Flow objects are exactly the same: Same match, same actions.\n\nAs the comment says, we are here only interested in intercepting a redundant install request from the same app, and while waiting for proper application id in FlowEntry, we try to infer from the flow name if request come from same app. I understand your concerns in relaying on the flow name is pretty fragile, was thinking of matching against group name as well. But please consider this is a stop gap until FRM assigns an app ID to each requester and the TODO clearly states that.",
+      "parentUuid": "da6255ed_a8d6b7c3",
+      "revId": "5e64082badb0cfaaa750bb292fe8efedeeb872f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
