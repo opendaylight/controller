@@ -9,6 +9,7 @@
 package org.opendaylight.controller.protocol_plugin.openflow.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.controller.sal.core.Node;
@@ -36,7 +37,7 @@ public class PortStatisticsConverter {
     public PortStatisticsConverter(long switchId, List<OFStatistics> statsList) {
         this.switchId = switchId;
         if (statsList == null || statsList.isEmpty()) {
-            this.ofStatsList = new ArrayList<OFStatistics>(1); // dummy list
+            this.ofStatsList = Collections.emptyList();
         } else {
             this.ofStatsList = new ArrayList<OFStatistics>(statsList);
         }

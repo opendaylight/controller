@@ -10,6 +10,7 @@
 package org.opendaylight.controller.statisticsmanager.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,7 +68,6 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
         descriptionStatistics = new ConcurrentHashMap<Node, NodeDescription>();
     }
 
-    @SuppressWarnings("deprecation")
     private void allocateCaches() {
         if (clusterContainerService == null) {
             nonClusterObjectCreate();
@@ -91,7 +91,7 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
             log.debug("Skipping statistics cache creation - already present");
         }
     }
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         ConcurrentMap<?, ?> map;
 
@@ -326,7 +326,7 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
     @Override
     public List<NodeConnectorStatistics> getNodeConnectorStatistics(Node node) {
         if (node == null){
-            return null;
+            return Collections.emptyList();
         }
 
         List<NodeConnectorStatistics> statList = new ArrayList<NodeConnectorStatistics>();
@@ -356,7 +356,7 @@ public class StatisticsManager implements IStatisticsManager, IReadServiceListen
     @Override
     public List<NodeTableStatistics> getNodeTableStatistics(Node node){
         if (node == null){
-            return null;
+            return Collections.emptyList();
         }
         List<NodeTableStatistics> statList = new ArrayList<NodeTableStatistics>();
         List<NodeTableStatistics> cachedList = tableStatistics.get(node);
