@@ -36,6 +36,7 @@
         <slf4j.version>1.7.2</slf4j.version>
         <java.version.source>1.7</java.version.source>
         <java.version.target>1.7</java.version.target>
+        <netconf.netty.version>4.0.10.Final</netconf.netty.version>
     </properties>
 
     <dependencies>

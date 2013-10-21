@@ -19,11 +19,6 @@
             <artifactId>jsr305</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.bgpcep</groupId>
-            <artifactId>concepts</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
         </dependency>

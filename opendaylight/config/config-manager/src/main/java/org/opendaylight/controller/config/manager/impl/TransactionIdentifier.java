@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import org.opendaylight.protocol.concepts.Identifier;
-
-public class TransactionIdentifier implements Identifier {
+public class TransactionIdentifier {
     private final String name;
 
     public TransactionIdentifier(String name) {

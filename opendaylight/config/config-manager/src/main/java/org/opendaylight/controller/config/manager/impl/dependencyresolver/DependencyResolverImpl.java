@@ -25,7 +25,6 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.protocol.concepts.NamedObject;
 
 /**
  * Protect {@link org.opendaylight.controller.config.spi.Module#getInstance()}
@@ -33,7 +32,7 @@ import org.opendaylight.protocol.concepts.NamedObject;
  * during validation. Tracks dependencies for ordering purposes.
  */
 final class DependencyResolverImpl implements DependencyResolver,
-        NamedObject<ModuleIdentifier>, Comparable<DependencyResolverImpl> {
+       Comparable<DependencyResolverImpl> {
     private final ModulesHolder modulesHolder;
     private final ModuleIdentifier name;
     private final TransactionStatus transactionStatus;
@@ -47,7 +46,6 @@ final class DependencyResolverImpl implements DependencyResolver,
         this.modulesHolder = modulesHolder;
     }
 
-    @Override
     public ModuleIdentifier getName() {
         return name;
     }

@@ -8,14 +8,13 @@
 
 package org.opendaylight.controller.netconf.api;
 
-import org.opendaylight.protocol.framework.ProtocolMessage;
 import org.w3c.dom.Document;
 
 /**
  * NetconfMessage represents a wrapper around org.w3c.dom.Document. Needed for
  * implementing ProtocolMessage interface.
  */
-public final class NetconfMessage implements ProtocolMessage {
+public final class NetconfMessage {
 
     private static final long serialVersionUID = 462175939836367285L;
 

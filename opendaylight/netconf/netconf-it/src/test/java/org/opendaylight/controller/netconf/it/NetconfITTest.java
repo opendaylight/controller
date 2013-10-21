@@ -171,7 +171,6 @@ public class NetconfITTest extends AbstractConfigTest {
     protected List<ModuleFactory> getModuleFactories() {
         return getModuleFactoriesS();
     }
-
     static List<ModuleFactory> getModuleFactoriesS() {
         return Lists.newArrayList(new TestImplModuleFactory(), new DepTestImplModuleFactory(),
                 new NetconfTestImplModuleFactory());

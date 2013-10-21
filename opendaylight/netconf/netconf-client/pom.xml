@@ -26,6 +26,7 @@
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>framework</artifactId>
+            <version>${bgpcep.version}</version>
         </dependency>
 
         <dependency>

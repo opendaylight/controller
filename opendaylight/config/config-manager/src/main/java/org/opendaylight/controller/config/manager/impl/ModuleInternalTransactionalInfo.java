@@ -16,10 +16,8 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
         .TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.protocol.concepts.NamedObject;
 
-public class ModuleInternalTransactionalInfo implements
-        NamedObject<ModuleIdentifier> {
+public class ModuleInternalTransactionalInfo {
     private final ModuleIdentifier name;
     private final Module module;
     private final ModuleFactory moduleFactory;
@@ -38,7 +36,6 @@ public class ModuleInternalTransactionalInfo implements
         this.transactionModuleJMXRegistration = transactionModuleJMXRegistration;
     }
 
-    @Override
     public ModuleIdentifier getName() {
         return name;
     }

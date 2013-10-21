@@ -39,7 +39,6 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.protocol.concepts.NamedObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 class ConfigTransactionControllerImpl implements
         ConfigTransactionControllerInternal,
-        ConfigTransactionControllerImplMXBean,
-        NamedObject<TransactionIdentifier> {
+        ConfigTransactionControllerImplMXBean {
     private static final Logger logger = LoggerFactory
             .getLogger(ConfigTransactionControllerImpl.class);
 
@@ -394,7 +392,6 @@ class ConfigTransactionControllerImpl implements
         return txModuleJMXRegistrator;
     }
 
-    @Override
     public TransactionIdentifier getName() {
         return transactionIdentifier;
     }
