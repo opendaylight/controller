@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a8d6b7c3",
+        "filename": "opendaylight/forwardingrulesmanager/implementation/src/main/java/org/opendaylight/controller/forwardingrulesmanager/internal/ForwardingRulesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-21T15:49:28Z",
+      "side": 1,
+      "message": "I still dont see the case of action conflict handled properly.\nWhat if the Flow is the same and the name is the same\n(though I dont understand why it is called as sameApp ?) but the action is different and conflicting ?\nWont this check incorrectly allow that conflicting programming to happen ?",
+      "revId": "5e64082badb0cfaaa750bb292fe8efedeeb872f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
