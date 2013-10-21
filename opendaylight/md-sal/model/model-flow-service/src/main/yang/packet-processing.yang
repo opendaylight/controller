@@ -11,11 +11,15 @@ module packet-processing {
         description "";
     }
 
+    typedef cookie {
+        type uint32;
+    }
+
     grouping raw-packet {
     	leaf ingress {
     		type inv:node-connector-ref;
     	}
-    	leaf payload {
+        leaf payload {
     		type binary;
     	}
     }
@@ -32,11 +36,17 @@ module packet-processing {
 
 
     notification packet-received {
-    	uses raw-packet;
+    	leaf cookie {
+                type cookie;
+        }
+        uses raw-packet;
     }
 
     rpc transmit-packet {
     	input {
+            leaf cookie {
+                type cookie;
+            }
     		leaf egress {
     			type inv:node-connector-ref;
     		}
