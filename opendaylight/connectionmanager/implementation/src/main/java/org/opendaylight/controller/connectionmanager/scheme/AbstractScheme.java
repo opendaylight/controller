@@ -2,6 +2,7 @@ package org.opendaylight.controller.connectionmanager.scheme;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,11 +68,7 @@ public abstract class AbstractScheme {
         return controllerNodesMap;
     }
 
-    public Set<InetAddress> getCareOfClusterMembers(Node node){
-        if (nodeConnections == null) return null;
-        return nodeConnections.get(node);
-    }
-
+    
     public boolean isConnectionAllowed (Node node) {
         if (clusterServices == null || nodeConnections == null) {
             return false;
@@ -139,7 +136,7 @@ public abstract class AbstractScheme {
 
     public Set<InetAddress> getControllers(Node node) {
         if (nodeConnections != null) return nodeConnections.get(node);
-        return null;
+        return Collections.emptySet();
     }
 
     public ConcurrentMap<Node, Set<InetAddress>> getNodeConnections() {
