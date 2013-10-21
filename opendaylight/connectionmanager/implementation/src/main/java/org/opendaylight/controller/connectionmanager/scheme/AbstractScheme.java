@@ -67,6 +67,11 @@ public abstract class AbstractScheme {
         return controllerNodesMap;
     }
 
+    public Set<InetAddress> getCareOfClusterMembers(Node node){
+        if (nodeConnections == null) return null;
+        return nodeConnections.get(node);
+    }
+
     public boolean isConnectionAllowed (Node node) {
         if (clusterServices == null || nodeConnections == null) {
             return false;

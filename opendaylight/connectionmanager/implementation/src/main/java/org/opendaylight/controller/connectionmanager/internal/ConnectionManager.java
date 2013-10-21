@@ -408,4 +408,11 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
         help.append("\t printNodes [<controller>]            - Print connected nodes\n");
         return help.toString();
     }
+
+    @Override
+    public Set<InetAddress> getCareOfClusterMembers(Node node) {
+        AbstractScheme scheme = schemes.get(activeScheme);
+        if (scheme == null) return null;
+        return scheme.getCareOfClusterMembers(node);
+    }
 }
