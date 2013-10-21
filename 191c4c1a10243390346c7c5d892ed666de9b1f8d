@@ -16,6 +16,23 @@
       "revId": "191c4c1a10243390346c7c5d892ed666de9b1f8d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_48b97b2d",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/flow-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 664
+      },
+      "writtenOn": "2013-10-21T09:16:10Z",
+      "side": 1,
+      "message": "grouping flow doesn\u0027t correspond to flow-mod message in OF-spec (page 65) - types and some fields are incorrect/missing",
+      "revId": "191c4c1a10243390346c7c5d892ed666de9b1f8d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
