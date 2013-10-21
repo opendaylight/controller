@@ -93,7 +93,7 @@
                   <override>false</override>
                 </artfiact>
                 <artfiact>
-                  <id>commons-io:commons-io:2.3</id>
+                  <id>commons-io:commons-io:2.4</id>
                   <transitive>false</transitive>
                   <override>false</override>
                 </artfiact>
