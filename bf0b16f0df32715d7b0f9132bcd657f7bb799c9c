@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_885e5344",
+        "filename": "opendaylight/connectionmanager/api/src/main/java/org/opendaylight/controller/connectionmanager/IConnectionManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2013-10-21T17:50:18Z",
+      "side": 1,
+      "message": "Madhu,\n\nLets make sure we also remember that there will be more going on than just OF... I\u0027m not sure \u0027Controllers\u0027 is the right concept for LISP or BGP-LS/PCEP, etc.",
+      "parentUuid": "da6255ed_e84f0f91",
+      "revId": "bf0b16f0df32715d7b0f9132bcd657f7bb799c9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_484e1bc3",
         "filename": "opendaylight/connectionmanager/api/src/main/java/org/opendaylight/controller/connectionmanager/NodeAccessPermission.java",
         "patchSetId": 4
