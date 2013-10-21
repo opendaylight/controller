@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_484e1bc3",
+        "filename": "opendaylight/connectionmanager/api/src/main/java/org/opendaylight/controller/connectionmanager/NodeAccessPermission.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-21T15:37:24Z",
+      "side": 1,
+      "message": "Copyright notice missing for new file.",
+      "revId": "bf0b16f0df32715d7b0f9132bcd657f7bb799c9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_88541355",
+        "filename": "opendaylight/connectionmanager/implementation/src/main/java/org/opendaylight/controller/connectionmanager/internal/ConnectionManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-21T15:37:24Z",
+      "side": 1,
+      "message": "Could we return a Collections.emptySet() instead of null.\n\n(We are planning to replace the null return with the proper empty collection across the code, so up to you if you want to take care of this now)",
+      "revId": "bf0b16f0df32715d7b0f9132bcd657f7bb799c9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_6851df61",
+        "filename": "opendaylight/connectionmanager/implementation/src/main/java/org/opendaylight/controller/connectionmanager/scheme/AbstractScheme.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-21T15:37:24Z",
+      "side": 1,
+      "message": "Could we return a Collections.emptySet() instead of null",
+      "revId": "bf0b16f0df32715d7b0f9132bcd657f7bb799c9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
