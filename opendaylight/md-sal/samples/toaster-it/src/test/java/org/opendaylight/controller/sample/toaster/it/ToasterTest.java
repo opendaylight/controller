@@ -26,6 +26,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.*;
 
 @RunWith(PaxExam.class)
 public class ToasterTest {
@@ -59,20 +60,13 @@ public class ToasterTest {
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
-                mavenBundle(ODL, "sal-binding-api").versionAsInProject(), //
-                mavenBundle(ODL, "sal-binding-broker-impl").versionAsInProject(), //
-                mavenBundle(ODL, "sal-common").versionAsInProject(), //
-                mavenBundle(ODL, "sal-common-api").versionAsInProject(),
-                mavenBundle(ODL, "sal-common-util").versionAsInProject(), //
+                
+                mdSalCoreBundles(),
+                bindingAwareSalBundles(),
+                
                 mavenBundle(SAMPLE, "sample-toaster").versionAsInProject(), //
                 mavenBundle(SAMPLE, "sample-toaster-consumer").versionAsInProject(), //
                 mavenBundle(SAMPLE, "sample-toaster-provider").versionAsInProject(), //
-                mavenBundle(YANG, "concepts").versionAsInProject(),
-                mavenBundle(YANG, "yang-binding").versionAsInProject(), //
-                mavenBundle(YANG, "yang-common").versionAsInProject(), //
-                mavenBundle(YANG+".thirdparty", "xtend-lib-osgi").versionAsInProject(),
-                mavenBundle("com.google.guava", "guava").versionAsInProject(), //
-                mavenBundle("org.javassist", "javassist").versionAsInProject(),
                 junitBundles()
                 );
     }
