@@ -22,6 +22,7 @@ package org.opendaylight.controller.connectionmanager.internal;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -407,5 +408,12 @@ public class ConnectionManager implements IConnectionManager, IConnectionListene
         help.append("\t scheme [<name>]                      - Print / Set scheme\n");
         help.append("\t printNodes [<controller>]            - Print connected nodes\n");
         return help.toString();
+    }
+
+    @Override
+    public Set<InetAddress> getCareOfClusterMembers(Node node) {
+        AbstractScheme scheme = schemes.get(activeScheme);
+        if (scheme == null) return Collections.emptySet();
+        return scheme.getControllers(node);
     }
 }
