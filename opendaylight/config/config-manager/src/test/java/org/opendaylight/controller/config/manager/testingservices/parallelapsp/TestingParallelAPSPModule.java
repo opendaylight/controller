@@ -17,6 +17,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
 import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
@@ -87,19 +88,22 @@ public class TestingParallelAPSPModule implements Module,
         return instance.getMaxNumberOfThreads();
     }
 
+    // this would be generated:
+    private final JmxAttribute threadPoolONJMXAttribute = new JmxAttribute("threadPoolON");
+
     @Override
     public void validate() {
         checkNotNull(threadPoolON, "Parameter 'threadPool' must be set");
         dependencyResolver.validateDependency(
                 TestingThreadPoolServiceInterface.class, threadPoolON,
-                "threadPoolON");
+                threadPoolONJMXAttribute);
 
         checkState(Strings.isNullOrEmpty(someParam) == false,
                 "Parameter 'SomeParam' is blank");
         // check that calling resolveInstance fails
         try {
             dependencyResolver.resolveInstance(TestingThreadPoolIfc.class,
-                    threadPoolON);
+                    threadPoolON, threadPoolONJMXAttribute);
             throw new RuntimeException("fail");
         } catch (IllegalStateException e) {
             checkState("Commit was not triggered".equals(e.getMessage()),
@@ -111,7 +115,7 @@ public class TestingParallelAPSPModule implements Module,
     public Closeable getInstance() {
         if (instance == null) {
             TestingThreadPoolIfc threadPoolInstance = dependencyResolver
-                    .resolveInstance(TestingThreadPoolIfc.class, threadPoolON);
+                    .resolveInstance(TestingThreadPoolIfc.class, threadPoolON, threadPoolONJMXAttribute);
 
             if (oldInstance != null) {
                 // changing thread pool is not supported

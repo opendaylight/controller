@@ -117,16 +117,6 @@ public abstract class AbstractConfigTest extends
                 .size());
     }
 
-    @Deprecated
-    protected ObjectName createTestConfigBean(
-            ConfigTransactionJMXClient transaction, String implementationName,
-            String name, Class<?> clz) throws InstanceAlreadyExistsException {
-        ObjectName nameCreated = transaction.createModule(implementationName,
-                name);
-        transaction.newMXBeanProxy(nameCreated, clz);
-        return nameCreated;
-    }
-
     protected ObjectName createTestConfigBean(
             ConfigTransactionJMXClient transaction, String implementationName,
             String name) throws InstanceAlreadyExistsException {
