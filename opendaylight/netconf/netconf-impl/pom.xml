@@ -39,11 +39,13 @@
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>util</artifactId>
+            <version>${bgpcep.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>framework</artifactId>
+            <version>${bgpcep.version}</version>
         </dependency>
 
         <dependency>
@@ -63,6 +65,7 @@
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
+            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

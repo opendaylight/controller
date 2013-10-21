@@ -14,13 +14,11 @@ import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicReada
 import org.opendaylight.controller.config.manager.impl.jmx.ModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
-import org.opendaylight.protocol.concepts.NamedObject;
 
 /**
  * Provides metadata about Module from controller to registry.
  */
-public class ModuleInternalInfo implements NamedObject<ModuleIdentifier>,
-        Comparable<ModuleInternalInfo> {
+public class ModuleInternalInfo implements Comparable<ModuleInternalInfo> {
 
     private final ModuleIdentifier name;
     // this registrator is passed to runtime bean registrator and config
@@ -87,7 +85,6 @@ public class ModuleInternalInfo implements NamedObject<ModuleIdentifier>,
         return osgiRegistration;
     }
 
-    @Override
     public ModuleIdentifier getName() {
         return name;
     }
