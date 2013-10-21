@@ -5,19 +5,22 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-subsystem</artifactId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>${config.version}</version>
     </parent>
 
     <artifactId>yang-test</artifactId>
 
     <description>Artifact that contains only generated code from yang files. Suitable for testing.
     </description>
+    <name>${project.artifactId}</name>
+    <prerequisites>
+        <maven>3.0.4</maven>
+    </prerequisites>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -29,10 +32,7 @@
         </dependency>
     </dependencies>
 
-    <name>${project.artifactId}</name>
-    <prerequisites>
-        <maven>3.0.4</maven>
-    </prerequisites>
+
 
     <build>
         <plugins>

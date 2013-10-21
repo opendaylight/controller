@@ -45,6 +45,7 @@ import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceMan
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.spi.Module;
+import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,10 +55,8 @@ import org.slf4j.LoggerFactory;
  * Transactions. It is registered in Platform MBean Server.
  */
 @ThreadSafe
-public class ConfigRegistryImpl implements AutoCloseable,
-        ConfigRegistryImplMXBean {
-    private static final Logger logger = LoggerFactory
-            .getLogger(ConfigRegistryImpl.class);
+public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBean {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigRegistryImpl.class);
 
     private final ModuleFactoriesResolver resolver;
     private final MBeanServer configMBeanServer;
@@ -98,6 +97,9 @@ public class ConfigRegistryImpl implements AutoCloseable,
     // internal jmx server shared by all transactions
     private final MBeanServer transactionsMBeanServer;
 
+    @GuardedBy("this")
+    private List<ModuleFactory> lastListOfFactories = Collections.emptyList();
+
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
             BundleContext bundleContext, MBeanServer configMBeanServer) {
@@ -130,30 +132,21 @@ public class ConfigRegistryImpl implements AutoCloseable,
 
     private synchronized ConfigTransactionControllerInternal beginConfigInternal() {
         versionCounter++;
-        String transactionName = "ConfigTransaction-" + version + "-"
-                + versionCounter;
+        String transactionName = "ConfigTransaction-" + version + "-" + versionCounter;
         TransactionJMXRegistrator transactionRegistrator = baseJMXRegistrator
                 .createTransactionJMXRegistrator(transactionName);
+        List<ModuleFactory> allCurrentFactories = Collections.unmodifiableList(resolver.getAllFactories());
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
                 transactionName, transactionRegistrator, version,
-                versionCounter, resolver.getAllFactories(),
-                transactionsMBeanServer, configMBeanServer);
+                versionCounter, allCurrentFactories, transactionsMBeanServer, configMBeanServer);
         try {
-            transactionRegistrator.registerMBean(transactionController, transactionController.getControllerObjectName
-                    ());
+            transactionRegistrator.registerMBean(transactionController, transactionController.getControllerObjectName());
         } catch (InstanceAlreadyExistsException e) {
             throw new IllegalStateException(e);
         }
 
-        // copy old configuration to this server
-        for (ModuleInternalInfo oldConfigInfo : currentConfig.getEntries()) {
-            try {
-                transactionController.copyExistingModule(oldConfigInfo);
-            } catch (InstanceAlreadyExistsException e) {
-                throw new IllegalStateException("Error while copying "
-                        + oldConfigInfo, e);
-            }
-        }
+        transactionController.copyExistingModulesAndProcessFactoryDiff(currentConfig.getEntries(), lastListOfFactories);
+
         transactionsHolder.add(transactionName, transactionController);
         return transactionController;
     }
@@ -162,20 +155,15 @@ public class ConfigRegistryImpl implements AutoCloseable,
      * {@inheritDoc}
      */
     @Override
-    public synchronized CommitStatus commitConfig(
-            ObjectName transactionControllerON)
+    public synchronized CommitStatus commitConfig(ObjectName transactionControllerON)
             throws ConflictingVersionException, ValidationException {
         final String transactionName = ObjectNameUtil
                 .getTransactionName(transactionControllerON);
-        logger.info(
-                "About to commit {}. Current parentVersion: {}, versionCounter {}",
-                transactionName, version, versionCounter);
+        logger.info("About to commit {}. Current parentVersion: {}, versionCounter {}", transactionName, version, versionCounter);
 
         // find ConfigTransactionController
-        Map<String, ConfigTransactionControllerInternal> transactions = transactionsHolder
-                .getCurrentTransactions();
-        ConfigTransactionControllerInternal configTransactionController = transactions
-                .get(transactionName);
+        Map<String, ConfigTransactionControllerInternal> transactions = transactionsHolder.getCurrentTransactions();
+        ConfigTransactionControllerInternal configTransactionController = transactions.get(transactionName);
         if (configTransactionController == null) {
             throw new IllegalArgumentException(String.format(
                     "Transaction with name '%s' not found", transactionName));
@@ -190,33 +178,28 @@ public class ConfigRegistryImpl implements AutoCloseable,
         }
         // optimistic lock ok
 
-        CommitInfo commitInfo = configTransactionController
-                .validateBeforeCommitAndLockTransaction();
-        final ConfigRegistryImpl a = this;
+        CommitInfo commitInfo = configTransactionController.validateBeforeCommitAndLockTransaction();
+        lastListOfFactories = Collections.unmodifiableList(configTransactionController.getCurrentlyRegisteredFactories());
         // non recoverable from here:
         try {
-            final CommitStatus secondPhaseCommitStatus = secondPhaseCommit(
+            return secondPhaseCommit(
                     configTransactionController, commitInfo);
-
-            return secondPhaseCommitStatus;
         } catch (Throwable t) { // some libs throw Errors: e.g.
                                 // javax.xml.ws.spi.FactoryFinder$ConfigurationError
             isHealthy = false;
-            logger.error(
-                    "Configuration Transaction failed on 2PC, server is unhealthy",
-                    t);
-            if (t instanceof RuntimeException)
+            logger.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
+            if (t instanceof RuntimeException) {
                 throw (RuntimeException) t;
-            else if (t instanceof Error)
+            } else if (t instanceof Error) {
                 throw (Error) t;
-            else
+            } else {
                 throw new RuntimeException(t);
+            }
         }
     }
 
-    private CommitStatus secondPhaseCommit(
-            ConfigTransactionControllerInternal configTransactionController,
-            CommitInfo commitInfo) {
+    private CommitStatus secondPhaseCommit(ConfigTransactionControllerInternal configTransactionController,
+                                           CommitInfo commitInfo) {
 
         // close instances which were destroyed by the user, including
         // (hopefully) runtime beans

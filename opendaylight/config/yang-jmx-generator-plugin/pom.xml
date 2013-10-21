@@ -4,10 +4,11 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>${config.version}</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>yang-jmx-generator-plugin</artifactId>
+
     <dependencies>
 
         <dependency>
@@ -18,19 +19,16 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>yang-jmx-generator</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-maven-plugin-spi</artifactId>
-            <version>${opendaylight.yang.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>binding-type-provider</artifactId>
-            <version>${opendaylight.binding.version}</version>
         </dependency>
 
         <dependency>
@@ -49,7 +47,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -58,7 +55,6 @@
         </dependency>
 
         <dependency>
-            <!--FIXME two implementations of slf4j on classpath, logback classic from parent-->
             <groupId>com.googlecode.slf4j-maven-plugin-log</groupId>
             <artifactId>slf4j-maven-plugin-log</artifactId>
             <version>1.0.0</version>
@@ -72,7 +68,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>yang-jmx-generator</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -87,7 +82,6 @@
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
 

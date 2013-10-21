@@ -4,7 +4,7 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>${config.version}</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>yang-store-impl</artifactId>
@@ -15,7 +15,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yang-store-api</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -28,12 +27,10 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yang-jmx-generator</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>binding-type-provider</artifactId>
-            <version>${opendaylight.binding.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -46,7 +43,6 @@
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

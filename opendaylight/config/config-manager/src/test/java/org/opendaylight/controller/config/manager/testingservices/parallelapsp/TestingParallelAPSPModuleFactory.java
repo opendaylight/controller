@@ -11,10 +11,15 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.management.ObjectName;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @ThreadSafe
 public class TestingParallelAPSPModuleFactory implements ModuleFactory {
@@ -58,5 +63,10 @@ public class TestingParallelAPSPModuleFactory implements ModuleFactory {
     public boolean isModuleImplementingServiceInterface(
             Class<? extends AbstractServiceInterface> serviceInterface) {
         return false;
+    }
+
+    @Override
+    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory) {
+        return new HashSet<Module>();
     }
 }

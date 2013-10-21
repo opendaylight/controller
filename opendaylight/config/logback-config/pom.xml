@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-subsystem</artifactId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>${config.version}</version>
     </parent>
     <artifactId>logback-config</artifactId>
     <name>${project.artifactId}</name>
@@ -19,7 +19,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -28,12 +27,10 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
         </dependency>
 
         <dependency>
@@ -50,26 +47,22 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-manager</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-manager</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-util</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

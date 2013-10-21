@@ -9,10 +9,8 @@ package org.opendaylight.controller.config.manager.impl;
 
 import static java.lang.String.format;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
@@ -50,8 +48,7 @@ import org.slf4j.LoggerFactory;
 class ConfigTransactionControllerImpl implements
         ConfigTransactionControllerInternal,
         ConfigTransactionControllerImplMXBean {
-    private static final Logger logger = LoggerFactory
-            .getLogger(ConfigTransactionControllerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConfigTransactionControllerImpl.class);
 
     private final TransactionIdentifier transactionIdentifier;
     private final ObjectName controllerON;
@@ -62,6 +59,7 @@ class ConfigTransactionControllerImpl implements
     private final DependencyResolverManager dependencyResolverManager;
     private final TransactionStatus transactionStatus;
     private final MBeanServer transactionsMBeanServer;
+    private final List<ModuleFactory> currentlyRegisteredFactories;
 
     /**
      * Disables ability of {@link DynamicWritableWrapper} to change attributes
@@ -77,7 +75,7 @@ class ConfigTransactionControllerImpl implements
     public ConfigTransactionControllerImpl(String transactionName,
             TransactionJMXRegistrator transactionRegistrator,
             long parentVersion, long currentVersion,
-            List<? extends ModuleFactory> currentlyRegisteredFactories,
+            List<ModuleFactory> currentlyRegisteredFactories,
             MBeanServer transactionsMBeanServer, MBeanServer configMBeanServer) {
 
         this.transactionIdentifier = new TransactionIdentifier(transactionName);
@@ -88,17 +86,69 @@ class ConfigTransactionControllerImpl implements
                 .createTransactionModuleJMXRegistrator();
         this.parentVersion = parentVersion;
         this.currentVersion = currentVersion;
-        this.factoriesHolder = new HierarchicalConfigMBeanFactoriesHolder(
-                currentlyRegisteredFactories);
+        this.currentlyRegisteredFactories = currentlyRegisteredFactories;
+        this.factoriesHolder = new HierarchicalConfigMBeanFactoriesHolder(currentlyRegisteredFactories);
         this.transactionStatus = new TransactionStatus();
-        this.dependencyResolverManager = new DependencyResolverManager(
-                transactionName, transactionStatus);
+        this.dependencyResolverManager = new DependencyResolverManager(transactionName, transactionStatus);
         this.transactionsMBeanServer = transactionsMBeanServer;
         this.configMBeanServer = configMBeanServer;
     }
 
     @Override
-    public synchronized void copyExistingModule(
+    public void copyExistingModulesAndProcessFactoryDiff(Collection<ModuleInternalInfo> existingModules, List<ModuleFactory> lastListOfFactories) {
+        // copy old configuration to this server
+        for (ModuleInternalInfo oldConfigInfo : existingModules) {
+            try {
+                copyExistingModule(oldConfigInfo);
+            } catch (InstanceAlreadyExistsException e) {
+                throw new IllegalStateException("Error while copying " + oldConfigInfo, e);
+            }
+        }
+        processDefaultBeans(lastListOfFactories);
+    }
+
+    private synchronized void processDefaultBeans(List<ModuleFactory> lastListOfFactories) {
+        transactionStatus.checkNotCommitStarted();
+        transactionStatus.checkNotAborted();
+
+        Set<ModuleFactory> oldSet = new HashSet<>(lastListOfFactories);
+        Set<ModuleFactory> newSet = new HashSet<>(currentlyRegisteredFactories);
+
+        List<ModuleFactory> toBeAdded = new ArrayList<>();
+        List<ModuleFactory> toBeRemoved = new ArrayList<>();
+        for(ModuleFactory moduleFactory: currentlyRegisteredFactories) {
+            if (oldSet.contains(moduleFactory) == false){
+                toBeAdded.add(moduleFactory);
+            }
+        }
+        for(ModuleFactory moduleFactory: lastListOfFactories){
+            if (newSet.contains(moduleFactory) == false) {
+                toBeRemoved.add(moduleFactory);
+            }
+        }
+        // add default modules
+        for (ModuleFactory moduleFactory : toBeAdded) {
+            Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager);
+            for (Module module : defaultModules) {
+                try {
+                    putConfigBeanToJMXAndInternalMaps(module.getName(), module, moduleFactory, null);
+                } catch (InstanceAlreadyExistsException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
+
+        // remove modules belonging to removed factories
+        for(ModuleFactory removedFactory: toBeRemoved){
+            List<ModuleIdentifier> modulesOfRemovedFactory = dependencyResolverManager.findAllByFactory(removedFactory);
+            for (ModuleIdentifier name : modulesOfRemovedFactory) {
+                destroyModule(name);
+            }
+        }
+    }
+
+
+    private synchronized void copyExistingModule(
             ModuleInternalInfo oldConfigBeanInfo)
             throws InstanceAlreadyExistsException {
         transactionStatus.checkNotCommitStarted();
@@ -121,8 +171,7 @@ class ConfigTransactionControllerImpl implements
                     "Error while copying old configuration from %s to %s",
                     oldConfigBeanInfo, moduleFactory), e);
         }
-        putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module,
-                moduleFactory, oldConfigBeanInfo);
+        putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module, moduleFactory, oldConfigBeanInfo);
     }
 
     @Override
@@ -131,17 +180,13 @@ class ConfigTransactionControllerImpl implements
 
         transactionStatus.checkNotCommitStarted();
         transactionStatus.checkNotAborted();
-        ModuleIdentifier moduleIdentifier = new ModuleIdentifier(factoryName,
-                instanceName);
+        ModuleIdentifier moduleIdentifier = new ModuleIdentifier(factoryName, instanceName);
         dependencyResolverManager.assertNotExists(moduleIdentifier);
 
         // find factory
-        ModuleFactory moduleFactory = factoriesHolder
-                .findByModuleName(factoryName);
-        DependencyResolver dependencyResolver = dependencyResolverManager
-                .getOrCreate(moduleIdentifier);
-        Module module = moduleFactory.createModule(instanceName,
-                dependencyResolver);
+        ModuleFactory moduleFactory = factoriesHolder.findByModuleName(factoryName);
+        DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
+        Module module = moduleFactory.createModule(instanceName, dependencyResolver);
         return putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module,
                 moduleFactory, null);
     }
@@ -151,7 +196,11 @@ class ConfigTransactionControllerImpl implements
             ModuleFactory moduleFactory,
             @Nullable ModuleInternalInfo maybeOldConfigBeanInfo)
             throws InstanceAlreadyExistsException {
-
+        logger.debug("Adding module {} to transaction {}", moduleIdentifier, this);
+        if (moduleIdentifier.equals(module.getName())==false) {
+            throw new IllegalStateException("Incorrect name reported by module. Expected "
+             + moduleIdentifier + ", got " + module.getName());
+        }
         DynamicMBean writableDynamicWrapper = new DynamicWritableWrapper(
                 module, moduleIdentifier, transactionIdentifier,
                 readOnlyAtomicBoolean, transactionsMBeanServer,
@@ -180,11 +229,15 @@ class ConfigTransactionControllerImpl implements
                     + objectName);
         }
         ObjectNameUtil.checkDomain(objectName);
-        transactionStatus.checkNotAborted();
         ModuleIdentifier moduleIdentifier = ObjectNameUtil.fromON(objectName,
                 ObjectNameUtil.TYPE_MODULE);
-        ModuleInternalTransactionalInfo removedTInfo = dependencyResolverManager
-                .destroyModule(moduleIdentifier);
+        destroyModule(moduleIdentifier);
+    }
+
+    private void destroyModule(ModuleIdentifier moduleIdentifier) {
+        logger.debug("Destroying module {} in transaction {}", moduleIdentifier, this);
+        transactionStatus.checkNotAborted();
+        ModuleInternalTransactionalInfo removedTInfo = dependencyResolverManager.destroyModule(moduleIdentifier);
         // remove from jmx
         removedTInfo.getTransactionModuleJMXRegistration().close();
     }
@@ -394,5 +447,10 @@ class ConfigTransactionControllerImpl implements
 
     public TransactionIdentifier getName() {
         return transactionIdentifier;
+    }
+
+    @Override
+    public List<ModuleFactory> getCurrentlyRegisteredFactories() {
+        return currentlyRegisteredFactories;
     }
 }

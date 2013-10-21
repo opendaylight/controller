@@ -12,16 +12,15 @@ import java.util.List;
 
 import org.opendaylight.controller.config.spi.ModuleFactory;
 
-public class HardcodedModuleFactoriesResolver implements
-        ModuleFactoriesResolver {
-    private final List<? extends ModuleFactory> list;
+public class HardcodedModuleFactoriesResolver implements ModuleFactoriesResolver {
+    private final List<ModuleFactory> list;
 
     public HardcodedModuleFactoriesResolver(ModuleFactory... list) {
         this.list = Arrays.asList(list);
     }
 
     @Override
-    public List<? extends ModuleFactory> getAllFactories() {
+    public List<ModuleFactory> getAllFactories() {
         return list;
     }
 

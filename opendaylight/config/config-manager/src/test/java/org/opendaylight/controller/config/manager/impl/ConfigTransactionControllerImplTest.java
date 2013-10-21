@@ -61,7 +61,7 @@ public class ConfigTransactionControllerImplTest extends
         baseJMXRegistrator = new BaseJMXRegistrator(
                 ManagementFactory.getPlatformMBeanServer());
         transactionsMBeanServer = MBeanServerFactory.createMBeanServer();
-        List<? extends ModuleFactory> currentlyRegisteredFactories = new ArrayList<>();
+        List<ModuleFactory> currentlyRegisteredFactories = new ArrayList<>();
         TransactionJMXRegistrator jmxRegistrator123 = baseJMXRegistrator
                 .createTransactionJMXRegistrator(transactionName123);
 

@@ -6,7 +6,7 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>${config.version}</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>config-persister-file-adapter</artifactId>
@@ -18,7 +18,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-persister-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -37,7 +36,6 @@
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
