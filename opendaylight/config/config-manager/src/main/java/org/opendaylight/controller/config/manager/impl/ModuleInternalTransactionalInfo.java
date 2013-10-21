@@ -46,7 +46,7 @@ public class ModuleInternalTransactionalInfo {
 
     public DestroyedModule toDestroyedModule() {
         if (maybeOldInternalInfo == null) {
-            throw new IllegalStateException("Cannot destoy uncommitted module");
+            throw new IllegalStateException("Cannot destroy uncommitted module");
         }
         DynamicReadableWrapper oldModule = maybeOldInternalInfo
                 .getReadableModule();

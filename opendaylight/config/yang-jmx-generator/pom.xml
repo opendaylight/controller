@@ -6,7 +6,7 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>0.2.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>yang-jmx-generator</artifactId>
@@ -22,15 +22,11 @@
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>binding-generator-spi</artifactId>
-            <version>${opendaylight.binding.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>binding-generator-util</artifactId>
-            <version>${opendaylight.binding.version}</version>
         </dependency>
-
-
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -39,25 +35,21 @@
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-parser-impl</artifactId>
-            <version>${opendaylight.yang.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>binding-generator-impl</artifactId>
-            <version>${opendaylight.binding.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

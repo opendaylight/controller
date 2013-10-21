@@ -7,15 +7,13 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.InstanceAlreadyExistsException;
 
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.CommitInfo;
@@ -29,7 +27,7 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
  * transaction. Observes usage of DependencyResolver within modules to figure
  * out dependency tree.
  */
-public class DependencyResolverManager implements TransactionHolder {
+public class DependencyResolverManager implements TransactionHolder, DependencyResolverFactory {
     @GuardedBy("this")
     private final Map<ModuleIdentifier, DependencyResolverImpl> moduleIdentifiersToDependencyResolverMap = new HashMap<>();
     private final ModulesHolder modulesHolder;
@@ -39,6 +37,11 @@ public class DependencyResolverManager implements TransactionHolder {
             TransactionStatus transactionStatus) {
         this.modulesHolder = new ModulesHolder(transactionName);
         this.transactionStatus = transactionStatus;
+    }
+
+    @Override
+    public DependencyResolver createDependencyResolver(ModuleIdentifier moduleIdentifier) {
+        return getOrCreate(moduleIdentifier);
     }
 
     public synchronized DependencyResolverImpl getOrCreate(ModuleIdentifier name) {
@@ -127,5 +130,15 @@ public class DependencyResolverManager implements TransactionHolder {
     public void assertNotExists(ModuleIdentifier moduleIdentifier)
             throws InstanceAlreadyExistsException {
         modulesHolder.assertNotExists(moduleIdentifier);
+    }
+
+    public List<ModuleIdentifier> findAllByFactory(ModuleFactory factory) {
+        List<ModuleIdentifier> result = new ArrayList<>();
+        for( ModuleInternalTransactionalInfo  info : modulesHolder.getAllInfos()) {
+            if (factory.equals(info.getModuleFactory())) {
+                result.add(info.getName());
+            }
+        }
+        return result;
     }
 }

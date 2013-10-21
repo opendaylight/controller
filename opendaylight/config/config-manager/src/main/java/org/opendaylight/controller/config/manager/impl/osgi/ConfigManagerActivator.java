@@ -13,8 +13,10 @@ import javax.management.MBeanServer;
 
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
+import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,21 +30,24 @@ public class ConfigManagerActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        extenderBundleTracker = new ExtenderBundleTracker(context);
-        extenderBundleTracker.open();
-        BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
-                context);
-
-        MBeanServer configMBeanServer = ManagementFactory
-                .getPlatformMBeanServer();
+        BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver =
+                new BundleContextBackedModuleFactoriesResolver(context);
+        MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
         configRegistry = new ConfigRegistryImpl(
                 bundleContextBackedModuleFactoriesResolver, context,
                 configMBeanServer);
-        // register config registry to jmx
 
-        configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(
-                configMBeanServer);
+        // register config registry to jmx
+        configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
         configRegistryJMXRegistrator.registerToJMX(configRegistry);
+
+        // track bundles containing factories
+        extenderBundleTracker = new ExtenderBundleTracker(context);
+        extenderBundleTracker.open();
+
+        BlankTransactionServiceTracker customizer = new BlankTransactionServiceTracker(configRegistry);
+        ServiceTracker<?, ?> serviceTracker = new ServiceTracker(context, ModuleFactory.class, customizer);
+        serviceTracker.open();
     }
 
     @Override

@@ -10,8 +10,11 @@ package org.opendaylight.controller.config.spi;
 import javax.management.DynamicMBean;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+
+import java.util.Set;
 
 /**
  * Factory which creates {@link Module instances. An instance of this interface
@@ -87,5 +90,16 @@ public interface ModuleFactory {
 
     boolean isModuleImplementingServiceInterface(
             Class<? extends AbstractServiceInterface> serviceInterface);
+
+    /**
+     * Called when ModuleFactory is registered to config manager.
+     * Useful for populating the registry with pre-existing state. Since
+     * the method is called for each ModuleFactory separately and transaction
+     * is committed automatically, returned modules MUST be valid and commitable
+     * without any manual intervention.
+     * @param dependencyResolverFactory factory for getting dependency resolvers for each module.
+     * @return set of default modules. Null is not allowed.
+     */
+    public Set<? extends Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory);
 
 }

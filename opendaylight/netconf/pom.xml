@@ -93,12 +93,12 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>yang-store-api</artifactId>
-                <version>${config.yangstore.version}</version>
+                <version>${config.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>yang-store-impl</artifactId>
-                <version>${config.yangstore.version}</version>
+                <version>${config.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>

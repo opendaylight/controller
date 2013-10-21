@@ -6,12 +6,13 @@
     <parent>
         <artifactId>config-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>0.2.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>config-api</artifactId>
     <name>${project.artifactId}</name>
     <packaging>bundle</packaging>
+
 
     <dependencies>
         <dependency>

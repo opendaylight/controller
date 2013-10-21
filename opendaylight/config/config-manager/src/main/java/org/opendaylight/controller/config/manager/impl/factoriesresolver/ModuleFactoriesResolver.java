@@ -20,6 +20,6 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
  */
 public interface ModuleFactoriesResolver {
 
-    List<? extends ModuleFactory> getAllFactories();
+    List<ModuleFactory> getAllFactories();
 
 }

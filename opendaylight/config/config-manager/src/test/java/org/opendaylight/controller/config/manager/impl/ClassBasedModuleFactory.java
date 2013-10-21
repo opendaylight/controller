@@ -8,11 +8,16 @@
 package org.opendaylight.controller.config.manager.impl;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
@@ -21,8 +26,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
 /**
- * Creates new Config beans by calling {@link Class#newInstance()} on provided
- * config bean class.
+ * Creates new modules by reflection. Provided class must have this constructor:
+ * ctor(DynamicMBeanWithInstance.class, ModuleIdentifier.class).
+ * When reconfiguring, both parameters will be non null. When creating new
+ * instance first parameter will be null.
  *
  */
 public class ClassBasedModuleFactory implements ModuleFactory {
@@ -51,28 +58,32 @@ public class ClassBasedModuleFactory implements ModuleFactory {
     public Module createModule(String instanceName,
             DependencyResolver dependencyResolver, DynamicMBeanWithInstance old)
             throws Exception {
-        Preconditions.checkNotNull(dependencyResolver);
         Preconditions.checkNotNull(old);
+        return constructModule(instanceName, dependencyResolver, old);
+    }
+
+    private Module constructModule(String instanceName, DependencyResolver dependencyResolver, DynamicMBeanWithInstance old) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        Preconditions.checkNotNull(dependencyResolver);
+        ModuleIdentifier moduleIdentifier = new ModuleIdentifier(implementationName, instanceName);
         Constructor<? extends Module> declaredConstructor;
         try {
-            declaredConstructor = configBeanClass
-                    .getDeclaredConstructor(DynamicMBeanWithInstance.class);
+            declaredConstructor = configBeanClass.getDeclaredConstructor(DynamicMBeanWithInstance.class, ModuleIdentifier.class);
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException(
                     "Did not find constructor with parameters (DynamicMBeanWithInstance) in "
                             + configBeanClass, e);
         }
         Preconditions.checkState(declaredConstructor != null);
-        return declaredConstructor.newInstance(old);
+        return declaredConstructor.newInstance(old, moduleIdentifier);
     }
 
     @Override
     public Module createModule(String instanceName,
             DependencyResolver dependencyResolver) {
         try {
-            return configBeanClass.newInstance();
-        } catch (Exception e) {
-            throw Throwables.propagate(e);
+            return constructModule(instanceName, dependencyResolver, null);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -91,5 +102,10 @@ public class ClassBasedModuleFactory implements ModuleFactory {
             }
         }
         return false;
+    }
+
+    @Override
+    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory) {
+        return new HashSet<Module>();
     }
 }

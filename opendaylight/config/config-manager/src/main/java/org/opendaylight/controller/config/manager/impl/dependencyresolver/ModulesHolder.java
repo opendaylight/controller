@@ -7,13 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.management.InstanceAlreadyExistsException;
@@ -119,5 +113,9 @@ class ModulesHolder implements TransactionHolder {
                     "There is an instance registered with name "
                             + moduleIdentifier);
         }
+    }
+
+    public Collection<ModuleInternalTransactionalInfo> getAllInfos(){
+        return commitMap.values();
     }
 }

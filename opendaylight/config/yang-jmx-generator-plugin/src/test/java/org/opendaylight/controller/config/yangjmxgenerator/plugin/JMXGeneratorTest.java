@@ -24,14 +24,7 @@ import static org.mockito.Mockito.mock;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -476,8 +469,16 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
         assertEquals(2, fieldDeclarations.size());
 
-        assertEquals("Incorrenct number of generated methods", 5,
-                visitor.methods.size());
+
+        Set<String> expectedMethods = new HashSet<>(Arrays.asList("String getImplementationName()",
+                "org.opendaylight.controller.config.spi.Module createModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver)",
+                "org.opendaylight.controller.config.spi.Module createModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.opendaylight.controller.config.api.DynamicMBeanWithInstance old)",
+                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule handleChangedClass(org.opendaylight.controller.config.api.DynamicMBeanWithInstance old)",
+                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule instantiateModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule oldModule,java.lang.AutoCloseable oldInstance)",
+                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule instantiateModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver)",
+                "java.util.Set<org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory)",
+                "boolean isModuleImplementingServiceInterface(Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface> serviceInterface)"));
+        assertEquals("Incorrenct number of generated methods", expectedMethods, visitor.methods);
         assertEquals("Incorrenct number of generated method descriptions", 0,
                 visitor.methodDescriptions.size());
         assertEquals("Incorrenct number of generated method javadoc", 0,
@@ -536,8 +537,8 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 visitor.methodDescriptions.size());
         assertEquals("Incorrenct number of generated method javadoc", 3,
                 visitor.methodJavadoc.size());
-        assertNotNull("Missing javadoc for setMaximumSize method",
-                visitor.methodJavadoc.get("setMaximumSize"));
+        assertNotNull("Missing javadoc for setMaximumSize method " + visitor.methodJavadoc,
+                visitor.methodJavadoc.get("void setMaximumSize(java.lang.Long maximumSize)"));
     }
 
     private void assertDeclaredField(Set<String> fieldDeclarations,
@@ -602,7 +603,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         private String implmts;
         private final Set<String> fieldDeclarations = Sets.newHashSet();
         private final Set<String> constructors = Sets.newHashSet();
-        private final Map<String, String> methods = Maps.newHashMap();
+        private final Set<String> methods = new HashSet<String>();
         private final Map<String, String> requireIfc = Maps.newHashMap();
         private final Map<String, String> methodJavadoc = Maps.newHashMap();
 
@@ -631,10 +632,21 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
             if (node.isConstructor())
                 constructors.add(node.toString());
             else {
-                String methodName = node.getName().toString();
-                if (node.getJavadoc() != null)
-                    methodJavadoc.put(methodName, node.getJavadoc().toString());
-                methods.put(methodName, node.toString());
+                String methodSignature = node.getReturnType2() + " " + node.getName() + "(";
+                boolean first = true;
+                for (Object o : node.parameters()) {
+                    if (first){
+                        first = false;
+                    } else {
+                        methodSignature += ",";
+                    }
+                    methodSignature += o.toString();
+                }
+                methodSignature += ")";
+                methods.add(methodSignature);
+                if (node.getJavadoc() != null) {
+                    methodJavadoc.put(methodSignature, node.getJavadoc().toString());
+                }
             }
             return super.visit(node);
         }

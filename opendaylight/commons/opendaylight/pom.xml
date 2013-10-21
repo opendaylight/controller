@@ -76,9 +76,8 @@
     <yangtools.binding.version>0.6.0-SNAPSHOT</yangtools.binding.version>
     <!--versions for bits of the controller -->
     <controller.version>0.4.1-SNAPSHOT</controller.version>
-    <config.version>0.2.1-SNAPSHOT</config.version>
+    <config.version>0.2.2-SNAPSHOT</config.version>
     <netconf.version>0.2.2-SNAPSHOT</netconf.version>
-    <config.yangstore.version>0.2.2-SNAPSHOT</config.yangstore.version>
     <mdsal.version>1.0-SNAPSHOT</mdsal.version>
     <containermanager.version>0.5.1-SNAPSHOT</containermanager.version>
     <switchmanager.api.version>0.5.1-SNAPSHOT</switchmanager.api.version>

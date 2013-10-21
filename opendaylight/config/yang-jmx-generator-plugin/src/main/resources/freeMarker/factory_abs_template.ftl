@@ -60,4 +60,9 @@ package ${packageName};
         throw new UnsupportedOperationException("Class reloading is not supported");
     }
 
+    @Override
+    public java.util.Set<${moduleInstanceType}> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory) {
+        return new java.util.HashSet<${moduleInstanceType}>();
+    }
+
 }
