@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.config.api;
 
-import org.opendaylight.protocol.concepts.Identifier;
-
-public class ModuleIdentifier implements Identifier {
+public class ModuleIdentifier {
     private static final long serialVersionUID = 1L;
     private final String factoryName, instanceName;
 

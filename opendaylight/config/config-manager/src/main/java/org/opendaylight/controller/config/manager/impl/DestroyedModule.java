@@ -10,7 +10,6 @@ package org.opendaylight.controller.config.manager.impl;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.jmx.ModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
-import org.opendaylight.protocol.concepts.NamedObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +19,8 @@ import org.slf4j.LoggerFactory;
  * were created. Module instances should be closed in order defined by the
  * compareTo method.
  */
-public class DestroyedModule implements NamedObject<ModuleIdentifier>,
-        AutoCloseable, Comparable<DestroyedModule> {
+public class DestroyedModule implements AutoCloseable,
+        Comparable<DestroyedModule> {
     private static final Logger logger = LoggerFactory
             .getLogger(DestroyedModule.class);
 
@@ -41,7 +40,6 @@ public class DestroyedModule implements NamedObject<ModuleIdentifier>,
         this.orderingIdx = orderingIdx;
     }
 
-    @Override
     public ModuleIdentifier getName() {
         return name;
     }

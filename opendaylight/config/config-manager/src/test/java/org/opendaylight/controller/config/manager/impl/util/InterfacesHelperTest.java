@@ -48,7 +48,7 @@ public class InterfacesHelperTest {
     @Test
     public void testGetAllInterfaces() {
         Set<Class<?>> expected = Sets.<Class<?>> newHashSet(SuperA.class, SuperBMXBean.class, SuperC.class,
-                SubA.class, Module.class, org.opendaylight.protocol.concepts.NamedObject.class);
+                SubA.class, Module.class);
         assertEquals(expected,
                 InterfacesHelper.getAllInterfaces(SubClass.class));
     }

@@ -11,7 +11,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
-import org.opendaylight.protocol.concepts.NamedObject;
+
 
 /**
  * Represents one service that is to be configured. These methods need to be
@@ -28,7 +28,7 @@ import org.opendaylight.protocol.concepts.NamedObject;
  * </p>
  */
 @NotThreadSafe
-public interface Module extends NamedObject<ModuleIdentifier> {
+public interface Module {
     /**
      * This method will be called as first phase in two phase commit. Instance
      * can check attributes, but is not allowed to do any kind of work that
@@ -54,5 +54,7 @@ public interface Module extends NamedObject<ModuleIdentifier> {
      *         call close().
      */
     AutoCloseable getInstance();
+
+    ModuleIdentifier getName();
 
 }

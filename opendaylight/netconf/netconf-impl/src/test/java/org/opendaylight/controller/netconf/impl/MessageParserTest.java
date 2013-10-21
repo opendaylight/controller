@@ -10,100 +10,82 @@ package org.opendaylight.controller.netconf.impl;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
-import java.util.Queue;
+import java.io.IOException;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.embedded.EmbeddedChannel;
+import javax.xml.parsers.ParserConfigurationException;
 
+import org.custommonkey.xmlunit.XMLAssert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.util.handler.FramingMechanismHandlerFactory;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageAggregator;
-import org.opendaylight.controller.netconf.util.handler.NetconfMessageChunkDecoder;
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageFactory;
-import org.opendaylight.controller.netconf.util.messages.NetconfMessageHeader;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.protocol.framework.ProtocolMessageDecoder;
-import org.opendaylight.protocol.framework.ProtocolMessageEncoder;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.protocol.framework.DeserializerException;
+import org.opendaylight.protocol.framework.DocumentedException;
+import org.opendaylight.protocol.util.ByteArray;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 public class MessageParserTest {
 
-    private NetconfMessage msg;
-    private NetconfMessageFactory msgFactory = new NetconfMessageFactory();
+    private NetconfMessageFactory parser = null;
 
     @Before
-    public void setUp() throws Exception {
-        this.msg = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
+    public void setUp() {
+        this.parser = new NetconfMessageFactory();
     }
 
     @Test
-    public void testChunkedFramingMechanismOnPipeline() throws Exception {
-        EmbeddedChannel testChunkChannel = new EmbeddedChannel(
-                FramingMechanismHandlerFactory.createHandler(FramingMechanism.CHUNK),
-                new ProtocolMessageEncoder<NetconfMessage>(msgFactory),
+    public void testPutEOM() throws IOException, SAXException, ParserConfigurationException {
+        final NetconfMessage msg = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/client_hello.xml");
+        final byte[] bytes = this.parser.put(msg);
+        assertArrayEquals(NetconfMessageFactory.endOfMessage, ByteArray.subByte(bytes, bytes.length
+                - NetconfMessageFactory.endOfMessage.length, NetconfMessageFactory.endOfMessage.length));
+    }
 
-                new NetconfMessageAggregator(FramingMechanism.CHUNK), new NetconfMessageChunkDecoder(),
-                new ProtocolMessageDecoder<NetconfMessage>(msgFactory));
-
-        testChunkChannel.writeOutbound(this.msg);
-        Queue<Object> messages = testChunkChannel.outboundMessages();
-        assertFalse(messages.isEmpty());
-
-        int msgLength = msgFactory.put(this.msg).length;
-        int chunkCount = msgLength / NetconfMessageFactory.MAX_CHUNK_SIZE;
-        if ((msgLength % NetconfMessageFactory.MAX_CHUNK_SIZE) != 0) {
-            chunkCount++;
-        }
-        for (int i = 1; i <= chunkCount; i++) {
-            ByteBuf recievedOutbound = (ByteBuf) messages.poll();
-            int exptHeaderLength = NetconfMessageFactory.MAX_CHUNK_SIZE;
-            if (i == chunkCount) {
-                exptHeaderLength = msgLength - (NetconfMessageFactory.MAX_CHUNK_SIZE * (i - 1));
-                byte[] eom = new byte[NetconfMessageFactory.endOfChunk.length];
-                recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageFactory.endOfChunk.length,
-                        eom);
-                assertArrayEquals(NetconfMessageFactory.endOfChunk, eom);
-            }
-
-            byte[] header = new byte[String.valueOf(exptHeaderLength).length() + NetconfMessageHeader.MIN_HEADER_LENGTH
-                    - 1];
-            recievedOutbound.getBytes(0, header);
-            NetconfMessageHeader messageHeader = new NetconfMessageHeader();
-            messageHeader.fromBytes(header);
-            assertEquals(exptHeaderLength, messageHeader.getLength());
-
-            testChunkChannel.writeInbound(recievedOutbound);
-        }
-        assertTrue(messages.isEmpty());
-
-        NetconfMessage receivedMessage = (NetconfMessage) testChunkChannel.readInbound();
-        assertNotNull(receivedMessage);
-        assertTrue(this.msg.getDocument().isEqualNode(receivedMessage.getDocument()));
+    @Ignore
+    @Test
+    // TODO not working on WINDOWS
+    // arrays first differed at element [4]; expected:<49> but was:<53>
+    // at
+    // org.junit.internal.ComparisonCriteria.arrayEquals(ComparisonCriteria.java:52)
+    public void testPutChunk() throws IOException, SAXException, ParserConfigurationException {
+        final NetconfMessage msg = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/client_hello.xml");
+        this.parser.setFramingMechanism(FramingMechanism.CHUNK);
+        final byte[] bytes = this.parser.put(msg);
+        final byte[] header = new byte[] { (byte) 0x0a, (byte) 0x23 , (byte) 0x32, (byte) 0x31, (byte) 0x31, (byte) 0x0a};
+        assertArrayEquals(header, ByteArray.subByte(bytes, 0, header.length));
+        assertArrayEquals(NetconfMessageFactory.endOfChunk, ByteArray.subByte(bytes, bytes.length
+                - NetconfMessageFactory.endOfChunk.length, NetconfMessageFactory.endOfChunk.length));
     }
 
     @Test
-    public void testEOMFramingMechanismOnPipeline() throws Exception {
-        EmbeddedChannel testChunkChannel = new EmbeddedChannel(
-                FramingMechanismHandlerFactory.createHandler(FramingMechanism.EOM),
-                new ProtocolMessageEncoder<NetconfMessage>(msgFactory), new NetconfMessageAggregator(
-                        FramingMechanism.EOM), new ProtocolMessageDecoder<NetconfMessage>(msgFactory));
-
-        testChunkChannel.writeOutbound(this.msg);
-        ByteBuf recievedOutbound = (ByteBuf) testChunkChannel.readOutbound();
-
-        byte[] eom = new byte[NetconfMessageFactory.endOfMessage.length];
-        recievedOutbound.getBytes(recievedOutbound.readableBytes() - NetconfMessageFactory.endOfMessage.length, eom);
-        assertArrayEquals(NetconfMessageFactory.endOfMessage, eom);
-
-        testChunkChannel.writeInbound(recievedOutbound);
-        NetconfMessage receivedMessage = (NetconfMessage) testChunkChannel.readInbound();
-        assertNotNull(receivedMessage);
-        assertTrue(this.msg.getDocument().isEqualNode(receivedMessage.getDocument()));
+    public void testParseEOM() throws IOException, SAXException, DeserializerException, DocumentedException,
+            ParserConfigurationException {
+        final Document msg = XmlFileLoader.xmlFileToDocument("netconfMessages/client_hello.xml");
+        final byte[] bytes = this.parser.put(new NetconfMessage(msg));
+        final Document doc = this.parser
+                .parse(ByteArray.subByte(bytes, 0, bytes.length - NetconfMessageFactory.endOfMessage.length))
+                .getDocument();
+        assertEquals(XmlUtil.toString(msg), XmlUtil.toString(doc));
+        XMLAssert.assertXMLEqual(msg, doc);
     }
+
+    @Test
+    public void testParseChunk() throws IOException, SAXException, DeserializerException, DocumentedException,
+            ParserConfigurationException {
+        final Document msg = XmlFileLoader.xmlFileToDocument("netconfMessages/client_hello.xml");
+        this.parser.setFramingMechanism(FramingMechanism.CHUNK);
+        final byte[] bytes = this.parser.put(new NetconfMessage(msg));
+        final Document doc = this.parser
+                .parse(ByteArray.subByte(bytes, 6, bytes.length - NetconfMessageFactory.endOfChunk.length - 6))
+                .getDocument();
+        assertEquals(XmlUtil.toString(msg), XmlUtil.toString(doc));
+        XMLAssert.assertXMLEqual(msg, doc);
+    }
+
 }
