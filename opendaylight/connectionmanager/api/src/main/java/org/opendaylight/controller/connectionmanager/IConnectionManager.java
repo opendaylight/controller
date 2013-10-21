@@ -107,4 +107,13 @@ public interface IConnectionManager {
      *  @return Status of the Connect Operation.
      */
     public Node connect(String type, String connectionIdentifier, Map<ConnectionConstants, String> params);
+    
+    /**
+     * Retrieve list of cluster-members to which Node is connected to
+     *
+     * @param node Node for which cluster-members to be retrieved
+     * 
+     *  @return Set<InetAddress> List of cluster-member addresses to which the node is connected
+     */
+    public Set<InetAddress> getCareOfClusterMembers(Node node);
 }
