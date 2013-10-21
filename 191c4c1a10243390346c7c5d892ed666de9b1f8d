@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_a87357b0",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/flow-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 664
+      },
+      "writtenOn": "2013-10-21T08:55:39Z",
+      "side": 1,
+      "message": "OFPFF_SEND_FLOW_REM is missing according to OF-spec on position 0",
+      "revId": "191c4c1a10243390346c7c5d892ed666de9b1f8d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
