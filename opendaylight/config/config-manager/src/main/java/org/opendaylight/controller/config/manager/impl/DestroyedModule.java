@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.manager.impl;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.jmx.ModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * compareTo method.
  */
 public class DestroyedModule implements AutoCloseable,
-        Comparable<DestroyedModule> {
+        Comparable<DestroyedModule>, Identifiable<ModuleIdentifier> {
     private static final Logger logger = LoggerFactory
             .getLogger(DestroyedModule.class);
 
@@ -40,6 +41,7 @@ public class DestroyedModule implements AutoCloseable,
         this.orderingIdx = orderingIdx;
     }
 
+    @Deprecated
     public ModuleIdentifier getName() {
         return name;
     }
@@ -67,5 +69,10 @@ public class DestroyedModule implements AutoCloseable,
     @Override
     public int compareTo(DestroyedModule o) {
         return Integer.compare(orderingIdx, o.orderingIdx);
+    }
+
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return name;
     }
 }

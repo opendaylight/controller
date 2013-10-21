@@ -9,6 +9,8 @@
  */
 package org.opendaylight.controller.config.yang.test.impl;
 
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+
 /**
 *
 */
@@ -42,5 +44,10 @@ public final class NetconfTestImplModule
             public void close() throws Exception {
             }
         };
+    }
+
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return getIdentifier();
     }
 }

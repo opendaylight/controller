@@ -29,10 +29,12 @@
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>framework</artifactId>
+            <version>${bgpcep.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>util</artifactId>
+            <version>${bgpcep.version}</version>
         </dependency>
 
         <dependency>
@@ -50,6 +52,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-handler</artifactId>
+            <version>${netconf.netty.version}</version>
         </dependency>
     </dependencies>
 

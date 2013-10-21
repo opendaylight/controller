@@ -56,11 +56,6 @@ public class TestingParallelAPSPModule implements Module,
     }
 
     @Override
-    public ModuleIdentifier getName() {
-        return name;
-    }
-
-    @Override
     public ObjectName getThreadPool() {
         return threadPoolON;
     }
@@ -141,5 +136,15 @@ public class TestingParallelAPSPModule implements Module,
             }
         }
         return instance;
+    }
+
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return name;
+    }
+
+    @Override
+    public ModuleIdentifier getName() {
+        return name;
     }
 }

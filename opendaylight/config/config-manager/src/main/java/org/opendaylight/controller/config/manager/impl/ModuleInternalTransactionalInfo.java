@@ -16,8 +16,9 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
         .TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.concepts.Identifiable;
 
-public class ModuleInternalTransactionalInfo {
+public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdentifier> {
     private final ModuleIdentifier name;
     private final Module module;
     private final ModuleFactory moduleFactory;
@@ -56,6 +57,7 @@ public class ModuleInternalTransactionalInfo {
                 maybeOldInternalInfo.getOrderingIdx());
     }
 
+    @Deprecated
     public Module getModule() {
         return module;
     }
@@ -73,5 +75,10 @@ public class ModuleInternalTransactionalInfo {
 
     public TransactionModuleJMXRegistration getTransactionModuleJMXRegistration() {
         return transactionModuleJMXRegistration;
+    }
+
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return name;
     }
 }

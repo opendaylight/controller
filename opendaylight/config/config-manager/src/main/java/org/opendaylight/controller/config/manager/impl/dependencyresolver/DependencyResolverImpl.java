@@ -25,6 +25,7 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.concepts.Identifiable;
 
 /**
  * Protect {@link org.opendaylight.controller.config.spi.Module#getInstance()}
@@ -32,7 +33,7 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
  * during validation. Tracks dependencies for ordering purposes.
  */
 final class DependencyResolverImpl implements DependencyResolver,
-       Comparable<DependencyResolverImpl> {
+       Identifiable<ModuleIdentifier>, Comparable<DependencyResolverImpl> {
     private final ModulesHolder modulesHolder;
     private final ModuleIdentifier name;
     private final TransactionStatus transactionStatus;
@@ -46,6 +47,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         this.modulesHolder = modulesHolder;
     }
 
+    @Deprecated
     public ModuleIdentifier getName() {
         return name;
     }
@@ -198,5 +200,10 @@ final class DependencyResolverImpl implements DependencyResolver,
         }
         impl.maxDependencyDepth = maxDepth;
         return maxDepth;
+    }
+
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return name;
     }
 }
