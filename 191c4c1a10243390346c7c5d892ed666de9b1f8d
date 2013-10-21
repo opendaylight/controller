@@ -33,6 +33,24 @@
       "revId": "191c4c1a10243390346c7c5d892ed666de9b1f8d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e8638faf",
+        "filename": "opendaylight/md-sal/model/model-flow-base/src/main/yang/flow-types.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2013-10-21T09:56:49Z",
+      "side": 1,
+      "message": "This is not intended state, this APIs are to be more generic then in OF-spec.",
+      "parentUuid": "da6255ed_48b97b2d",
+      "revId": "191c4c1a10243390346c7c5d892ed666de9b1f8d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
