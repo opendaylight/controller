@@ -80,11 +80,10 @@
 
     <!-- md-sal -->
     <module>opendaylight/md-sal</module>
-    <!--
-    <module>opendaylight/config</module>
-    -->
-    <module>opendaylight/netconf</module>
     <!-- config -->
+    <module>opendaylight/config</module>
+    <!-- netconf -->
+    <module>opendaylight/netconf</module>
 
     <!--  Web bundles -->
     <module>opendaylight/web/root</module>
