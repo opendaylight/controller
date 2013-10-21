@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "da6255ed_e84f0f91",
+        "filename": "opendaylight/connectionmanager/api/src/main/java/org/opendaylight/controller/connectionmanager/IConnectionManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-21T17:42:25Z",
+      "side": 1,
+      "message": "We have a method named getControllers() in AbstractScheme which is NOT exposed via Connection Manager.\n\nIf there is a need for it, I would recommend follow the same naming convention of getControllers() in IConnectionManager as well to make it easy to ready and consistent with  other APIs.",
+      "revId": "bf0b16f0df32715d7b0f9132bcd657f7bb799c9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_484e1bc3",
         "filename": "opendaylight/connectionmanager/api/src/main/java/org/opendaylight/controller/connectionmanager/NodeAccessPermission.java",
         "patchSetId": 4
@@ -30,6 +47,23 @@
       "writtenOn": "2013-10-21T15:37:24Z",
       "side": 1,
       "message": "Could we return a Collections.emptySet() instead of null.\n\n(We are planning to replace the null return with the proper empty collection across the code, so up to you if you want to take care of this now)",
+      "revId": "bf0b16f0df32715d7b0f9132bcd657f7bb799c9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_084b8388",
+        "filename": "opendaylight/connectionmanager/implementation/src/main/java/org/opendaylight/controller/connectionmanager/scheme/AbstractScheme.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-21T17:42:25Z",
+      "side": 1,
+      "message": "Why do we need this method ? Cant we use getControllers instead ?",
       "revId": "bf0b16f0df32715d7b0f9132bcd657f7bb799c9c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
