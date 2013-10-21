@@ -88,6 +88,7 @@
     <concepts.version>0.5.1-SNAPSHOT</concepts.version>
     <jolokia.bridge.version>0.0.1-SNAPSHOT</jolokia.bridge.version>
     <netty.version>4.0.9.Final</netty.version>
+    <commons.io.version>2.4</commons.io.version>
   </properties>
 
   <dependencyManagement>
@@ -168,7 +169,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.4</version>
+        <version>${commons.io.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>
