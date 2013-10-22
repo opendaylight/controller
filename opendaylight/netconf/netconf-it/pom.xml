@@ -7,7 +7,7 @@
     <parent>
         <artifactId>netconf-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>${netconf.version}</version>
     </parent>
 
     <artifactId>netconf-it</artifactId>
@@ -18,43 +18,36 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
-            <version>${config.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-util</artifactId>
-            <version>${config.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yang-store-api</artifactId>
-            <version>${config.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-api</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>util</artifactId>
-            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-client</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-netconf-connector</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -70,32 +63,27 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-persister-impl</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-manager</artifactId>
-            <version>${config.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-impl</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-mapping-api</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-util</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -107,25 +95,20 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yang-store-impl</artifactId>
-            <version>${config.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>logback-config</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

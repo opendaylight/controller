@@ -188,37 +188,37 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-api</artifactId>
-          <version>${config.version}</version>
+          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-impl</artifactId>
-          <version>${config.version}</version>
+          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-util</artifactId>
-          <version>${config.version}</version>
+          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-client</artifactId>
-          <version>${config.version}</version>
+          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netconf-mapping-api</artifactId>
-          <version>${config.version}</version>
+          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-netconf-connector</artifactId>
-          <version>${config.version}</version>
+          <version>${netconf.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-persister-impl</artifactId>
-          <version>${config.version}</version>
+          <version>${netconf.version}</version>
         </dependency>
 
 

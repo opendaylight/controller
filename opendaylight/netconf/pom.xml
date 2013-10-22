@@ -9,8 +9,7 @@
         <relativePath>../commons/opendaylight</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>${netconf.version}</version>
     <artifactId>netconf-subsystem</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
@@ -77,6 +76,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>config-manager</artifactId>
+                <version>${config.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>yang-jmx-generator</artifactId>
                 <version>${config.version}</version>
             </dependency>
@@ -97,7 +102,74 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>yang-store-impl</artifactId>
+                <version>${config.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>yang-test</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-api</artifactId>
+                <version>${netconf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-util</artifactId>
+                <version>${netconf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-util</artifactId>
+                <version>${netconf.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-mapping-api</artifactId>
+                <version>${netconf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-impl</artifactId>
+                <version>${netconf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>config-persister-api</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>config-persister-file-adapter</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-client</artifactId>
+                <version>${netconf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xmlunit</groupId>
+                <artifactId>xmlunit</artifactId>
+                <version>1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>config-netconf-connector</artifactId>
+                <version>${netconf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>config-persister-impl</artifactId>
+                <version>${netconf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>logback-config</artifactId>
                 <version>${config.version}</version>
             </dependency>
         </dependencies>
@@ -135,15 +207,4 @@
 
         </pluginManagement>
     </build>
-    <!--
-    <repositories>
-        <repository>
-            <id>opendaylight-snapshot</id>
-            <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot</url>
-            <snapshots>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-    -->
 </project>

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>netconf-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>${netconf.version}</version>
     </parent>
     <artifactId>config-netconf-connector</artifactId>
     <name>${project.artifactId}</name>
@@ -20,7 +20,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -32,28 +31,23 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-
             <artifactId>yang-jmx-generator</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-
             <artifactId>config-util</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-util</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-
             <artifactId>yang-store-api</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-mapping-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -63,47 +57,39 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-util</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-
             <artifactId>yang-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-
             <artifactId>config-manager</artifactId>
-            <version>${config.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-
             <artifactId>config-manager</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-impl</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-
             <artifactId>yang-store-impl</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

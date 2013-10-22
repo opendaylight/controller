@@ -5,7 +5,7 @@
     <parent>
         <artifactId>netconf-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>${netconf.version}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>netconf-impl</artifactId>
@@ -18,34 +18,28 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-util</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-util</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-mapping-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>util</artifactId>
-            <version>${bgpcep.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>framework</artifactId>
-            <version>${bgpcep.version}</version>
         </dependency>
 
         <dependency>
@@ -65,7 +59,6 @@
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
             <artifactId>mockito-configuration</artifactId>
-            <version>${bgpcep.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -76,27 +69,23 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-
             <artifactId>yang-store-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>xmlunit</groupId>
             <artifactId>xmlunit</artifactId>
-            <version>1.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-util</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-client</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

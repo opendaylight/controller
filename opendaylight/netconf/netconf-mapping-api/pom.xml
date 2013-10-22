@@ -6,7 +6,7 @@
     <parent>
         <artifactId>netconf-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>${netconf.version}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>netconf-mapping-api</artifactId>
@@ -18,7 +18,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>netconf-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
