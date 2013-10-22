@@ -155,12 +155,12 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-store-api</artifactId>
-          <version>${config.version}</version>
+          <version>${config.yangstore.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>yang-store-impl</artifactId>
-          <version>${config.version}</version>
+          <version>${config.yangstore.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
