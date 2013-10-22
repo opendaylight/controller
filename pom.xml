@@ -130,8 +130,6 @@
     <module>opendaylight/samples/loadbalancer</module>
     <module>opendaylight/samples/northbound/loadbalancer</module>
 
-    <module>opendaylight/distribution/sanitytest/</module>
-
     <!-- Parents -->
     <module>opendaylight/commons/concepts</module>
     <module>opendaylight/commons/httpclient</module>
