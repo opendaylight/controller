@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_6ba0b990",
+        "filename": "opendaylight/netconf/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2013-10-22T07:36:45Z",
+      "side": 1,
+      "message": "Please bump this to 4.0.10.Final.",
+      "revId": "2e6b71e23b5f161285fdbdf1b046686f1425d46b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
