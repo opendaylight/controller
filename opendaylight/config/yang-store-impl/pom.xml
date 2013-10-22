@@ -66,6 +66,7 @@
 
                         <Import-Package>
                             org.opendaylight.controller.config.yang.store.api,
+                            org.opendaylight.controller.config.yang.store.spi,
                             org.opendaylight.controller.config.yangjmxgenerator,
                             com.google.common.base,
                             com.google.common.collect,
@@ -74,7 +75,6 @@
                             org.osgi.framework,
                             org.osgi.util.tracker,
                             org.slf4j,
-                            javax.*,
                             <!-- YANGTOOLS -->
                             org.opendaylight.yangtools.sal.binding.yang.types,
                             org.opendaylight.yangtools.yang.common,
