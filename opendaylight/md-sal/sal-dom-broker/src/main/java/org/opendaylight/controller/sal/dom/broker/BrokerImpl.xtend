@@ -7,25 +7,26 @@
  */
 package org.opendaylight.controller.sal.dom.broker;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.opendaylight.controller.sal.core.api.Consumer;
-import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.sal.core.spi.BrokerModule;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.osgi.framework.BundleContext;
-import org.slf4j.LoggerFactory;
+import java.util.Collections
+import java.util.HashMap
+import java.util.HashSet
+import java.util.Map
+import java.util.Set
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import org.opendaylight.controller.sal.core.api.Broker
+import org.opendaylight.controller.sal.core.api.BrokerService
+import org.opendaylight.controller.sal.core.api.Consumer
+import org.opendaylight.controller.sal.core.api.Provider
+import org.opendaylight.controller.sal.core.api.RpcImplementation
+import org.opendaylight.controller.sal.core.spi.BrokerModule
+import org.opendaylight.yangtools.yang.common.QName
+import org.opendaylight.yangtools.yang.common.RpcResult
+import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.osgi.framework.BundleContext
+import org.slf4j.LoggerFactory
 
 public class BrokerImpl implements Broker {
     private static val log = LoggerFactory.getLogger(BrokerImpl);
@@ -44,7 +45,7 @@ public class BrokerImpl implements Broker {
 
     // Implementation specific
     @Property
-    private var ExecutorService executor;
+    private var ExecutorService executor = Executors.newFixedThreadPool(5);
     @Property
     private var BundleContext bundleContext;
 
@@ -99,10 +100,8 @@ public class BrokerImpl implements Broker {
         rpcImpls.put(rpcType, implementation);
     }
 
-    protected def void removeRpcImplementation(QName rpcType, RpcImplementation implToRemove) {
-        if(implToRemove == rpcImpls.get(rpcType)) {
-            rpcImpls.remove(rpcType);
-        }
+    protected def void removeRpcImplementation(QName rpcType) {
+        rpcImpls.remove(rpcType);
     }
 
     protected def Future<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
