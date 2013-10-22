@@ -230,6 +230,10 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
                     if(configManager.vipExists(vip)){
                         VIP vipWithPoolName = configManager.getVIPWithPoolName(vip);
                         String poolMemberIp = null;
+                        if(vipWithPoolName.getPoolName() == null){
+                            lbsLogger.error("No pool attached. Please attach pool with the VIP -- {}",vip);
+                            return PacketResult.IGNORED;
+                        }
                         if(configManager.getPool(vipWithPoolName.getPoolName()).getLbMethod().equalsIgnoreCase(LBConst.ROUND_ROBIN_LB_METHOD)){
 
                             poolMemberIp = rrLBMethod.getPoolMemberForClient(client,vipWithPoolName);
@@ -250,11 +254,23 @@ public class LoadBalancerService implements IListenDataPacket, IConfigManager{
                             lbsLogger.debug("Destination pool machine is connected to switch : {}",destNode.toString());
 
                             //Get path between both the nodes
-                            Path route = this.routing.getRoute(clientNode, destNode);
+                            NodeConnector forwardPort = null;
 
-                            lbsLogger.info("Path between source (client) and destination switch nodes : {}",route.toString());
+                            if(clientNode.getNodeIDString().equals(destNode.getNodeIDString())){
 
-                            NodeConnector forwardPort = route.getEdges().get(0).getTailNodeConnector();
+                                forwardPort = hnConnector.getnodeConnector();
+
+                                lbsLogger.info("Both source (client) and destination pool machine is connected to same switch nodes. Respective ports are - {},{}",forwardPort,inPkt.getIncomingNodeConnector());
+
+                            }else{
+
+                                Path route = this.routing.getRoute(clientNode, destNode);
+
+                                lbsLogger.info("Path between source (client) and destination switch nodes : {}",route.toString());
+
+                                forwardPort = route.getEdges().get(0).getTailNodeConnector();
+
+                            }
 
                             if(installLoadBalancerFlow(client,
                                                             vip,
