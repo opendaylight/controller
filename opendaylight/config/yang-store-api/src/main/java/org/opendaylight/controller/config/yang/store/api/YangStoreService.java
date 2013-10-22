@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.config.yang.store.api;
 
+import org.opendaylight.controller.config.yang.store.spi.YangStoreListener;
+
 /**
  * Yang store OSGi service
  */
@@ -18,5 +20,11 @@ public interface YangStoreService {
      * @return actual view of what is available in OSGi service registry.
      */
     YangStoreSnapshot getYangStoreSnapshot() throws YangStoreException;
+
+
+    /**
+     * Allows for registering for change notifications.
+     */
+    YangStoreListenerRegistration registerListener(YangStoreListener listener);
 
 }

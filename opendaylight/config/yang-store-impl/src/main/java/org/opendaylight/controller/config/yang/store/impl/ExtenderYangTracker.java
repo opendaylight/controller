@@ -10,13 +10,13 @@ package org.opendaylight.controller.config.yang.store.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Set;
+import java.util.*;
 
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
+import org.opendaylight.controller.config.yang.store.api.YangStoreListenerRegistration;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
+import org.opendaylight.controller.config.yang.store.spi.YangStoreListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -43,6 +43,7 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements
             .create();
     private final YangStoreCache cache = new YangStoreCache();
     private final MbeParser mbeParser;
+    private final List<YangStoreListener> listeners = new ArrayList<>();
 
     public ExtenderYangTracker(BundleContext context) {
         this(context, new MbeParser());
@@ -59,38 +60,54 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements
     @Override
     public Object addingBundle(Bundle bundle, BundleEvent event) {
 
-        // Ignore system bundle
-        //
-        // system bundle has config-api on classpath &&
+        // Ignore system bundle:
+        // system bundle might have config-api on classpath &&
         // config-api contains yang files =>
-        // system bundle contains yang files from that bundle
+        // system bundle might contain yang files from that bundle
         if (bundle.getBundleId() == 0)
             return bundle;
 
-        Enumeration<URL> yangURLs = bundle.findEntries("META-INF/yang",
-                "*.yang", false);
-
-        if (yangURLs == null)
-            return bundle;
-
-        synchronized (this) {
-            while (yangURLs.hasMoreElements()) {
-                URL yang = yangURLs.nextElement();
-                logger.debug("Bundle {} found yang file {}", bundle, yang);
-                bundlesToYangURLs.put(bundle, yang);
+        Enumeration<URL> yangURLs = bundle.findEntries("META-INF/yang", "*.yang", false);
+        if (yangURLs != null) {
+            synchronized (this) {
+                while (yangURLs.hasMoreElements()) {
+                    URL url = yangURLs.nextElement();
+                    logger.debug("Bundle {} found yang file {}", bundle, url);
+                    bundlesToYangURLs.put(bundle, url);
+                }
+                Collection<URL> urls = bundlesToYangURLs.get(bundle);
+                notifyListeners(urls, true);
             }
         }
-
         return bundle;
     }
 
+    private void notifyListeners(Collection<URL> urls, boolean adding) {
+        if (urls.size() > 0) {
+            RuntimeException potential = new RuntimeException("Error while notifying listeners");
+            for (YangStoreListener listener : listeners) {
+                try {
+                    if (adding) {
+                        listener.onAddedYangURL(urls);
+                    } else {
+                        listener.onRemovedYangURL(urls);
+                    }
+                } catch(RuntimeException e) {
+                    potential.addSuppressed(e);
+                }
+            }
+            if (potential.getSuppressed().length > 0) {
+                throw potential;
+            }
+        }
+    }
+
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-        synchronized (this) {
-            Collection<URL> urls = bundlesToYangURLs.removeAll(bundle);
-            logger.debug(
-                    "Removed following yang URLs {} because of removed bundle {}",
-                    urls, bundle);
+    public synchronized void removedBundle(Bundle bundle, BundleEvent event, Object object) {
+        Collection<URL> urls = bundlesToYangURLs.removeAll(bundle);
+        if (urls.size() > 0) {
+            logger.debug("Removed following yang URLs {} because of removed bundle {}", urls, bundle);
+            notifyListeners(urls, false);
         }
     }
 
@@ -137,6 +154,17 @@ public class ExtenderYangTracker extends BundleTracker<Object> implements
                         }
                     }
                 });
+    }
+
+    @Override
+    public synchronized YangStoreListenerRegistration registerListener(final YangStoreListener listener) {
+        listeners.add(listener);
+        return new YangStoreListenerRegistration() {
+            @Override
+            public void close() {
+                listeners.remove(listener);
+            }
+        };
     }
 
     private static final class YangStoreCache {
