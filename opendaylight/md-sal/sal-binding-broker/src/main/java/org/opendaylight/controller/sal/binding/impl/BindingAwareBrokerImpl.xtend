@@ -199,6 +199,8 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
 
         // Updating internal structure of registration
         routingTable.updateRoute(path, registration.instance)
+        // Update routing table / send announce to message bus
+        
         val success = paths.put(context, path);
     }
 
@@ -231,6 +233,11 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
 
         }
     }
+    
+    def createDelegate(Class<? extends RpcService> type) {
+        getManagedDirectProxy(type);
+    }
+    
 }
 
 class RoutedRpcRegistrationImpl<T extends RpcService> extends AbstractObjectRegistration<T> implements RoutedRpcRegistration<T> {
