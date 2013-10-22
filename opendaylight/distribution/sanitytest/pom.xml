@@ -17,11 +17,49 @@
   <artifactId>sanitytest</artifactId>
   <version>0.4.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
+
+  <properties>
+    <distro.dir>${project.basedir}/../opendaylight/target/distribution.opendaylight-osgipackage/opendaylight</distro.dir>
+    <distro.script>${distro.dir}/run.bat</distro.script>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>non-windows</id>
+      <activation>
+        <os>
+          <family>!windows</family>
+        </os>
+      </activation>
+      <properties>
+        <distro.script>${distro.dir}/run.sh</distro.script>
+      </properties>
+    </profile>
+  </profiles>
+
   <dependencies>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope>
+    </dependency>
+
+  <dependency>
+    <groupId>org.osgi</groupId>
+    <artifactId>org.osgi.enterprise</artifactId>
+    <version>4.2.0</version>
+  </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.chameleon.management</groupId>
+      <artifactId>chameleon-mbeans</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
@@ -53,6 +91,59 @@
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
+
+      <plugin>
+        <!-- start/stop the controller -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <configuration>
+          <workingDir>${distro.dir}</workingDir>
+          <executable>${distro.script}</executable>
+        </configuration>
+        <executions>
+          <execution>
+            <id>start-controller</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <outputFile>${distro.dir}/logs/controller.out</outputFile>
+              <arguments>
+                <argument>-start</argument>
+                <argument>-jmx</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-controller</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <arguments>
+                <argument>-stop</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${failsafe.version}</version>
+        <configuration>
+          <systemPropertyVariables>
+            <ctrl.home>${distro.dir}</ctrl.home>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+
     </plugins>
+
+
   </build>
 </project>
