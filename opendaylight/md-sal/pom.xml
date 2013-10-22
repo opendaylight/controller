@@ -63,6 +63,17 @@
         <osgi.core.version>5.0.0</osgi.core.version>
         <junit.version>4.8.1</junit.version>
         <xtend.version>2.4.3</xtend.version>
+        <jacoco.version>0.5.3.201107060350</jacoco.version>
+        <!-- Sonar properties using jacoco to retrieve integration test results -->
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <!-- Sonar properties using jacoco to retrieve integration test results -->
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.jacoco.Reportpath>target/jacoco.exec</sonar.jacoco.Reportpath>
+        <sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
+        <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
+        <sonar.branch>${user.name}-private-view</sonar.branch>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.language>java</sonar.language>
     </properties>
 
     <pluginRepositories>
@@ -267,6 +278,11 @@
                         </filesets>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -294,6 +310,28 @@
                         </goals>
                         <phase>site</phase>
                     </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                  <includes>org.opendaylight.controller.*</includes>
+                </configuration>
+                <executions>
+                  <execution>
+                    <id>pre-test</id>
+                    <goals>
+                      <goal>prepare-agent</goal>
+                    </goals>
+                  </execution>
+                  <execution>
+                    <id>post-test</id>
+                    <phase>test</phase>
+                    <goals>
+                      <goal>report</goal>
+                    </goals>
+                  </execution>
                 </executions>
             </plugin>
         </plugins>

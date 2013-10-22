@@ -16,6 +16,9 @@
   <properties>
     <exam.version>3.0.0</exam.version>
     <url.version>1.5.0</url.version>
+    <!-- Sonar jacoco plugin to get integration test coverage info -->
+    <sonar.jacoco.reportPath>../sal-binding-broker/target/jacoco.exec</sonar.jacoco.reportPath>
+    <sonar.jacoco.itReportPath>../sal-binding-broker/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
   <build>
@@ -36,7 +39,7 @@
     </plugins>
     <pluginManagement>
       <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings 
+        <!--This plugin's configuration is used to store Eclipse m2e settings
           only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -69,6 +72,29 @@
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.version}</version>
+          <configuration>
+            <destFile>../sal-binding-broker/target/jacoco-it.exec</destFile>
+            <includes>org.opendaylight.controller.*</includes>
+          </configuration>
+          <executions>
+            <execution>
+              <id>pre-test</id>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>post-test</id>
+              <configuration>
+                <skip>true</skip>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
