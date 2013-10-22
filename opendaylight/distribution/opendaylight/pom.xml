@@ -109,6 +109,11 @@
           <artifactId>model-flow-statistics</artifactId>
           <version>${mdsal.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller.model</groupId>
+          <artifactId>model-flow-management</artifactId>
+          <version>${mdsal.version}</version>
+        </dependency>
 
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
