@@ -1,6 +1,7 @@
 package org.opendaylight.controller.test.sal.binding.it;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -10,14 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.binding.api.NotificationService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAdded;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowRemoved;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowUpdated;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener;
+import org.opendaylight.controller.sal.binding.api.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.*;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 
@@ -29,7 +24,7 @@ public class NoficationTest extends AbstractTest {
     private Registration<NotificationListener> listener1Reg;
     private Registration<NotificationListener> listener2Reg;
 
-    private NotificationProviderService notifyService;
+    private NotificationProviderService notifyProviderService;
 
     @Before
     public void setUp() throws Exception {
@@ -39,21 +34,24 @@ public class NoficationTest extends AbstractTest {
     public void notificationTest() throws Exception {
         /**
          * 
-         * We register Provider 1 which retrieves Notification Service from MD-SAL
+         * The registration of the Provider 1.
          * 
          */
-        AbstractTestProvider provider = new AbstractTestProvider() {
+        AbstractTestProvider provider1 = new AbstractTestProvider() {
             @Override
             public void onSessionInitiated(ProviderContext session) {
-                notifyService = session.getSALService(NotificationProviderService.class);
+                notifyProviderService = session.getSALService(NotificationProviderService.class);
             }
         };
-        broker.registerProvider(provider, getBundleContext());
+
+        // registerProvider method calls onSessionInitiated method above
+        broker.registerProvider(provider1, getBundleContext());
+        assertNotNull(notifyProviderService);
 
         /**
          * 
-         * We register Consumer 1 which retrieves Notification Service from MD-SAL
-         * and registers SalFlowListener as notification listener
+         * The registration of the Consumer 1. It retrieves Notification Service
+         * from MD-SAL and registers SalFlowListener as notification listener
          * 
          */
         BindingAwareConsumer consumer1 = new BindingAwareConsumer() {
@@ -64,27 +62,29 @@ public class NoficationTest extends AbstractTest {
                 listener1Reg = notificationService.registerNotificationListener(listener1);
             }
         };
-
+        // registerConsumer method calls onSessionInitialized method above
         broker.registerConsumer(consumer1, getBundleContext());
 
         assertNotNull(listener1Reg);
 
         /**
-         * We wait 100ms for to make sure broker threads delivered notifications
+         * The notification of type FlowAdded with cookie ID 0 is created. The
+         * delay 100ms to make sure that the notification was delivered to
+         * listener.
          */
-        notifyService.publish(flowAdded(0));
+        notifyProviderService.publish(flowAdded(0));
         Thread.sleep(100);
-        
-        /** 
-         * We verify one notification was delivered
+
+        /**
+         * Check that one notification was delivered and has correct cookie.
          * 
          */
         assertEquals(1, listener1.addedFlows.size());
         assertEquals(0, listener1.addedFlows.get(0).getCookie().intValue());
 
-        
         /**
-         * We also register second consumerm and it's SalFlowListener
+         * The registration of the Consumer 2. SalFlowListener is registered
+         * registered as notification listener.
          */
         BindingAwareConsumer consumer2 = new BindingAwareConsumer() {
             @Override
@@ -94,50 +94,52 @@ public class NoficationTest extends AbstractTest {
             }
         };
 
+        // registerConsumer method calls onSessionInitialized method above
         broker.registerConsumer(consumer2, getBundleContext());
 
         /**
-         * We publish 3 notifications
+         * 3 notifications are published
          */
-        notifyService.publish(flowAdded(5));
-        notifyService.publish(flowAdded(10));
-        notifyService.publish(flowAdded(2));
+        notifyProviderService.publish(flowAdded(5));
+        notifyProviderService.publish(flowAdded(10));
+        notifyProviderService.publish(flowAdded(2));
 
         /**
-         * We wait 100ms for to make sure broker threads delivered notifications
+         * The delay 100ms to make sure that the notifications were delivered to
+         * listeners.
          */
         Thread.sleep(100);
-        
-        /** 
-         * We verify 3 notification was delivered to both listeners
-         * (first one received 4 total, second 3 in total).
+
+        /**
+         * Check that 3 notification was delivered to both listeners (first one
+         * received 4 in total, second 3 in total).
          * 
          */
-
         assertEquals(4, listener1.addedFlows.size());
         assertEquals(3, listener2.addedFlows.size());
 
         /**
-         * We close / unregister second listener
+         * The second listener is closed (unregistered)
          * 
          */
         listener2Reg.close();
-  
+
         /**
          * 
-         * We punblish 5th notification
+         * The notification 5 is published
          */
-        notifyService.publish(flowAdded(10));
-        
+        notifyProviderService.publish(flowAdded(10));
+
         /**
-         * We wait 100ms for to make sure broker threads delivered notifications
+         * The delay 100ms to make sure that the notification was delivered to
+         * listener.
          */
         Thread.sleep(100);
-        
+
         /**
-         * We verify that first consumer received 5 notifications in total,
-         * second consumer only three. Last notification was never received,
-         * because it already unregistered listener.
+         * Check that first consumer received 5 notifications in total, second
+         * consumer received only three. Last notification was never received by
+         * second consumer because its listener was unregistered.
          * 
          */
         assertEquals(5, listener1.addedFlows.size());
@@ -145,12 +147,30 @@ public class NoficationTest extends AbstractTest {
 
     }
 
+    /**
+     * Creates instance of the type FlowAdded. Only cookie value is set. It is
+     * used only for testing purpose.
+     * 
+     * @param i
+     *            cookie value
+     * @return instance of the type FlowAdded
+     */
     public static FlowAdded flowAdded(int i) {
         FlowAddedBuilder ret = new FlowAddedBuilder();
         ret.setCookie(BigInteger.valueOf(i));
         return ret.build();
     }
 
+    /**
+     * 
+     * Implements
+     * {@link org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowListener
+     * SalFlowListener} and contains attributes which keep lists of objects of
+     * the type
+     * {@link org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819. NodeFlow
+     * NodeFlow}. The lists are defined for flows which were added, removed or
+     * updated.
+     */
     private static class FlowListener implements SalFlowListener {
 
         List<FlowAdded> addedFlows = new ArrayList<>();
