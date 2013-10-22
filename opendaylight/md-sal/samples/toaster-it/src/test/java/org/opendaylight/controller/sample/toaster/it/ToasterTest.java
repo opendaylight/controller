@@ -37,10 +37,9 @@ public class ToasterTest {
     @Test
     public void properInitialized() throws Exception {
 
-        Collection<ServiceReference<ToasterService>> references = ctx.getServiceReferences(ToasterService.class, null);
-        assertEquals(2, references.size());
+        Thread.sleep(500); // Waiting for services to get wired.
 
-        consumer.createToast(WhiteBread.class, 5);
+        assertTrue(consumer.createToast(WhiteBread.class, 5));
 
     }
 
