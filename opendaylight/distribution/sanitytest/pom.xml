@@ -16,43 +16,115 @@
 
   <artifactId>sanitytest</artifactId>
   <version>0.4.1-SNAPSHOT</version>
-  <packaging>bundle</packaging>
+  <packaging>jar</packaging>
+
+  <properties>
+    <distro.dir>${project.basedir}/../opendaylight/target/distribution.opendaylight-osgipackage/opendaylight</distro.dir>
+    <distro.script>${distro.dir}/run.bat</distro.script>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>non-windows</id>
+      <activation>
+        <os>
+          <family>!windows</family>
+        </os>
+      </activation>
+      <properties>
+        <distro.script>${distro.dir}/run.sh</distro.script>
+      </properties>
+    </profile>
+  </profiles>
+
   <dependencies>
+<!--
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>distribution.opendaylight</artifactId>
+      <version>0.1.1-SNAPSHOT</version>
+      <type>zip</type>
+      <classifier>osgipackage</classifier>
+      <scope>provided</scope>
+    </dependency>
+-->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.chameleon.management</groupId>
+      <artifactId>chameleon-mbeans</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>${bundle.plugin.version}</version>
-        <extensions>true</extensions>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
         <configuration>
-          <instructions>
-            <Export-Package>
-              org.opendaylight.controller.sanitytest
-            </Export-Package>
-            <Import-Package>
-              javax.xml.bind.annotation,
-              org.osgi.service.component,
-              org.slf4j,
-              org.eclipse.osgi.framework.console,
-              org.osgi.framework,
-              org.eclipse.osgi.baseadaptor,
-              org.eclipse.osgi.framework.adaptor,
-              org.osgi.framework.wiring
-            </Import-Package>
-            <Bundle-Activator>
-              org.opendaylight.controller.sanitytest.internal.Activator
-            </Bundle-Activator>
-          </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+          <workingDir>${distro.dir}</workingDir>
+          <executable>${distro.script}</executable>
+        </configuration>
+        <executions>
+          <execution>
+            <!-- start the controller -->
+            <id>start-controller</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <outputFile>${distro.dir}/logs/controller.out</outputFile>
+              <arguments>
+                <argument>-start</argument>
+                <argument>-jmx</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <!-- stop the controller -->
+            <id>stop-controller</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <arguments>
+                <argument>-stop</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${failsafe.version}</version>
+        <configuration>
+          <systemPropertyVariables>
+            <ctrl.home>${distro.dir}</ctrl.home>
+            <!--
+            <ctrl.host>127.0.0.1</ctrl.host>
+            <sanitytest.timeout.secs>300</sanitytest.timeout.secs>
+            -->
+          </systemPropertyVariables>
         </configuration>
       </plugin>
+
     </plugins>
+
+
   </build>
 </project>
