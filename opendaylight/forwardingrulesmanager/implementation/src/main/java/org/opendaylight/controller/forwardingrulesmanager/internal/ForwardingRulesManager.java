@@ -11,7 +11,6 @@ package org.opendaylight.controller.forwardingrulesmanager.internal;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,10 +51,7 @@ import org.opendaylight.controller.forwardingrulesmanager.PortGroupProvider;
 import org.opendaylight.controller.forwardingrulesmanager.implementation.data.FlowEntryDistributionOrder;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
-import org.opendaylight.controller.sal.action.Controller;
-import org.opendaylight.controller.sal.action.Flood;
 import org.opendaylight.controller.sal.action.Output;
-import org.opendaylight.controller.sal.action.PopVlan;
 import org.opendaylight.controller.sal.connection.ConnectionLocality;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ContainerFlow;
@@ -72,10 +68,7 @@ import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
-import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.IObjectReader;
-import org.opendaylight.controller.sal.utils.IPProtocols;
-import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.opendaylight.controller.sal.utils.ObjectReader;
 import org.opendaylight.controller.sal.utils.ObjectWriter;
@@ -2090,26 +2083,6 @@ public class ForwardingRulesManager implements
     public void subnetNotify(Subnet sub, boolean add) {
     }
 
-    private void installImplicitARPReplyPunt(Node node) {
-
-        if (node == null) {
-            return;
-        }
-
-        List<String> puntAction = new ArrayList<String>();
-        puntAction.add(ActionType.CONTROLLER.toString());
-
-        FlowConfig allowARP = new FlowConfig();
-        allowARP.setInstallInHw(true);
-        allowARP.setName(FlowConfig.INTERNALSTATICFLOWBEGIN + "Punt ARP Reply" + FlowConfig.INTERNALSTATICFLOWEND);
-        allowARP.setPriority("500");
-        allowARP.setNode(node);
-        allowARP.setEtherType("0x" + Integer.toHexString(EtherTypes.ARP.intValue()).toUpperCase());
-        allowARP.setDstMac(HexEncode.bytesToHexString(switchManager.getControllerMAC()));
-        allowARP.setActions(puntAction);
-        addStaticFlowInternal(allowARP, true); // skip validation on internal static flow name
-    }
-
     /**
      * (non-Javadoc)
      *
@@ -2432,17 +2405,6 @@ public class ForwardingRulesManager implements
         }
         portGroupConfigs.remove(name);
         return true;
-    }
-
-    private void usePortGroupConfig(String name) {
-        PortGroupConfig config = portGroupConfigs.get(name);
-        if (config == null) {
-            return;
-        }
-        if (portGroupProvider != null) {
-            Map<Node, PortGroup> data = portGroupProvider.getPortGroupData(config);
-            portGroupData.put(config, data);
-        }
     }
 
     @Override
@@ -2922,119 +2884,7 @@ public class ForwardingRulesManager implements
     @Override
     public String getHelp() {
         StringBuffer help = new StringBuffer();
-        help.append("---FRM Matrix Application---\n");
-        help.append("\t printMatrixData        - Prints the Matrix Configs\n");
-        help.append("\t addMatrixConfig <name> <regex>\n");
-        help.append("\t delMatrixConfig <name>\n");
-        help.append("\t useMatrixConfig <name>\n");
         return help.toString();
-    }
-
-    public void _printMatrixData(CommandInterpreter ci) {
-        ci.println("Configs : ");
-        ci.println("---------");
-        ci.println(portGroupConfigs);
-
-        ci.println("Data : ");
-        ci.println("------");
-        ci.println(portGroupData);
-    }
-
-    public void _addMatrixConfig(CommandInterpreter ci) {
-        String name = ci.nextArgument();
-        String regex = ci.nextArgument();
-        addPortGroupConfig(name, regex, false);
-    }
-
-    public void _delMatrixConfig(CommandInterpreter ci) {
-        String name = ci.nextArgument();
-        delPortGroupConfig(name);
-    }
-
-    public void _useMatrixConfig(CommandInterpreter ci) {
-        String name = ci.nextArgument();
-        usePortGroupConfig(name);
-    }
-
-    public void _arpPunt(CommandInterpreter ci) {
-        String switchId = ci.nextArgument();
-        long swid = HexEncode.stringToLong(switchId);
-        Node node = NodeCreator.createOFNode(swid);
-        installImplicitARPReplyPunt(node);
-    }
-
-    public void _frmaddflow(CommandInterpreter ci) throws UnknownHostException {
-        Node node = null;
-        String nodeId = ci.nextArgument();
-        if (nodeId == null) {
-            ci.print("Node id not specified");
-            return;
-        }
-        try {
-            node = NodeCreator.createOFNode(Long.valueOf(nodeId));
-        } catch (NumberFormatException e) {
-            ci.print("Node id not a number");
-            return;
-        }
-        ci.println(this.programmer.addFlow(node, getSampleFlow(node)));
-    }
-
-    public void _frmremoveflow(CommandInterpreter ci) throws UnknownHostException {
-        Node node = null;
-        String nodeId = ci.nextArgument();
-        if (nodeId == null) {
-            ci.print("Node id not specified");
-            return;
-        }
-        try {
-            node = NodeCreator.createOFNode(Long.valueOf(nodeId));
-        } catch (NumberFormatException e) {
-            ci.print("Node id not a number");
-            return;
-        }
-        ci.println(this.programmer.removeFlow(node, getSampleFlow(node)));
-    }
-
-    private Flow getSampleFlow(Node node) throws UnknownHostException {
-        NodeConnector port = NodeConnectorCreator.createOFNodeConnector((short) 24, node);
-        NodeConnector oport = NodeConnectorCreator.createOFNodeConnector((short) 30, node);
-        byte srcMac[] = { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78, (byte) 0x9a, (byte) 0xbc };
-        byte dstMac[] = { (byte) 0x1a, (byte) 0x2b, (byte) 0x3c, (byte) 0x4d, (byte) 0x5e, (byte) 0x6f };
-        InetAddress srcIP = InetAddress.getByName("172.28.30.50");
-        InetAddress dstIP = InetAddress.getByName("171.71.9.52");
-        InetAddress ipMask = InetAddress.getByName("255.255.255.0");
-        InetAddress ipMask2 = InetAddress.getByName("255.0.0.0");
-        short ethertype = EtherTypes.IPv4.shortValue();
-        short vlan = (short) 27;
-        byte vlanPr = 3;
-        Byte tos = 4;
-        byte proto = IPProtocols.TCP.byteValue();
-        short src = (short) 55000;
-        short dst = 80;
-
-        /*
-         * Create a SAL Flow aFlow
-         */
-        Match match = new Match();
-        match.setField(MatchType.IN_PORT, port);
-        match.setField(MatchType.DL_SRC, srcMac);
-        match.setField(MatchType.DL_DST, dstMac);
-        match.setField(MatchType.DL_TYPE, ethertype);
-        match.setField(MatchType.DL_VLAN, vlan);
-        match.setField(MatchType.DL_VLAN_PR, vlanPr);
-        match.setField(MatchType.NW_SRC, srcIP, ipMask);
-        match.setField(MatchType.NW_DST, dstIP, ipMask2);
-        match.setField(MatchType.NW_TOS, tos);
-        match.setField(MatchType.NW_PROTO, proto);
-        match.setField(MatchType.TP_SRC, src);
-        match.setField(MatchType.TP_DST, dst);
-
-        List<Action> actions = new ArrayList<Action>();
-        actions.add(new Output(oport));
-        actions.add(new PopVlan());
-        actions.add(new Flood());
-        actions.add(new Controller());
-        return new Flow(match, actions);
     }
 
     @Override
