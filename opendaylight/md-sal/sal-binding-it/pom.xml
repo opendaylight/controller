@@ -147,5 +147,11 @@
       <version>1.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+        <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-management</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 </project>

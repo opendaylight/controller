@@ -62,7 +62,8 @@ public class ToasterTest {
                 mavenBundle(ODL, "sal-binding-api").versionAsInProject(), //
                 mavenBundle(ODL, "sal-binding-broker-impl").versionAsInProject(), //
                 mavenBundle(ODL, "sal-common").versionAsInProject(), //
-                mavenBundle(ODL, "sal-common-api").versionAsInProject(),
+                mavenBundle(ODL, "sal-common-api").versionAsInProject(),//
+                mavenBundle(ODL, "sal-common-impl").versionAsInProject(), //
                 mavenBundle(ODL, "sal-common-util").versionAsInProject(), //
                 mavenBundle(SAMPLE, "sample-toaster").versionAsInProject(), //
                 mavenBundle(SAMPLE, "sample-toaster-consumer").versionAsInProject(), //

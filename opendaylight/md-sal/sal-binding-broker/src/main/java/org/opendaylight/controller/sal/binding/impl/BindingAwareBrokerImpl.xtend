@@ -48,6 +48,7 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
 
     private val clsPool = ClassPool.getDefault()
     private var RuntimeCodeGenerator generator;
+    
 
     /**
      * Map of all Managed Direct Proxies
@@ -63,8 +64,12 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
      */
     private val Map<Class<? extends RpcService>, RpcRouter<? extends RpcService>> rpcRouters = new ConcurrentHashMap();
 
+    @Property
     private var NotificationBrokerImpl notifyBroker
+    
+    @Property
     private var DataBrokerImpl dataBroker
+    
     private var ServiceRegistration<NotificationProviderService> notifyBrokerRegistration
 
     @Property
@@ -78,12 +83,15 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
         notifyBroker = new NotificationBrokerImpl(executor);
         notifyBroker.invokerFactory = generator.invokerFactory;
         dataBroker = new DataBrokerImpl();
+        dataBroker.executor = executor;
         val brokerProperties = newProperties();
         notifyBrokerRegistration = brokerBundleContext.registerService(NotificationProviderService, notifyBroker,
             brokerProperties)
         brokerBundleContext.registerService(NotificationService, notifyBroker, brokerProperties)
         brokerBundleContext.registerService(DataProviderService, dataBroker, brokerProperties)
         brokerBundleContext.registerService(DataBrokerService, dataBroker, brokerProperties)
+        
+        
 
     }
 
