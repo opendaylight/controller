@@ -23,10 +23,11 @@
   </scm>
 
   <properties>
-
     <!-- Java Versions -->
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
+    <!-- ODL repository / plugin repository -->
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
 
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
