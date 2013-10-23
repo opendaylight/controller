@@ -1182,8 +1182,40 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
     @Override
     public Set<Node> getNodes() {
-        return (nodeProps != null) ? new HashSet<Node>(nodeProps.keySet())
-                : new HashSet<Node>();
+        return (nodeProps != null) ? new HashSet<Node>(nodeProps.keySet()) : new HashSet<Node>();
+    }
+
+    @Override
+    public Map<String, Property> getControllerProperties() {
+        return new HashMap<String, Property>(this.controllerProps);
+    }
+
+    @Override
+    public Property getControllerProperty(String propertyName) {
+        if (propertyName != null) {
+            HashMap<String, Property> propertyMap =  new HashMap<String, Property>(this.controllerProps);
+            return propertyMap.get(propertyName);
+        }
+        return null;
+    }
+
+    @Override
+    public Status setControllerProperty(Property property) {
+        if (property != null) {
+            this.controllerProps.put(property.getName(), property);
+            return new Status(StatusCode.SUCCESS);
+        }
+        return new Status(StatusCode.BADREQUEST, "Null property");
+    }
+
+    @Override
+    public Status removeControllerProperty(String propertyName) {
+        if (propertyName != null) {
+            this.controllerProps.remove(propertyName);
+            return new Status(StatusCode.SUCCESS);
+        }
+        String msg = "Unable to remove property " + propertyName + " from Controller";
+        return new Status(StatusCode.CONFLICT, msg);
     }
 
     /*
@@ -2080,7 +2112,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             } else if (propName.equalsIgnoreCase(ForwardingMode.name)) {
                 int mode = Integer.parseInt(propValue);
                 return new ForwardingMode(mode);
-            } else {
+            } else if (propName.equalsIgnoreCase(MacAddress.name)){
+                return new MacAddress(propValue);
+            }
+            else {
                 log.debug("Not able to create {} property", propName);
             }
         } catch (Exception e) {
@@ -2089,6 +2124,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
         return null;
     }
+
 
     @SuppressWarnings("deprecation")
     @Override
