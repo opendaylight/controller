@@ -209,7 +209,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                                    // runtime jmx registrator),
             // also closes osgi registration and ModuleJMXRegistrator
             // registration
-            currentConfig.remove(toBeDestroyed.getName());
+            currentConfig.remove(toBeDestroyed.getIdentifier());
         }
 
         // set RuntimeBeanRegistrators on beans implementing

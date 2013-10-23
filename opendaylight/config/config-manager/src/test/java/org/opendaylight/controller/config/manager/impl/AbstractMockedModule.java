@@ -34,9 +34,5 @@ public abstract class AbstractMockedModule implements Module {
         return instance;
     }
 
-    @Override
-    public ModuleIdentifier getName() {
-        return new ModuleIdentifier(getClass().getCanonicalName(), "mock");
-    }
 
 }

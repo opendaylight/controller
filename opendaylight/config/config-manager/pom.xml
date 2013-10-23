@@ -64,6 +64,11 @@
             <artifactId>guava</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>concepts</artifactId>
+            <version>${opendaylight.yangtools.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -85,7 +90,7 @@
                             org.slf4j,
                             javax.management,
                             org.osgi.framework,
-                            org.opendaylight.protocol.concepts,
+                            org.opendaylight.yangtools.concepts.*,
                             org.apache.commons.io,
                             org.osgi.util.tracker,
                         </Import-Package>

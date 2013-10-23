@@ -11,6 +11,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
+import org.opendaylight.yangtools.concepts.Identifiable;
 
 
 /**
@@ -28,7 +29,7 @@ import org.opendaylight.controller.config.api.annotations.RequireInterface;
  * </p>
  */
 @NotThreadSafe
-public interface Module {
+public interface Module extends Identifiable<ModuleIdentifier>{
     /**
      * This method will be called as first phase in two phase commit. Instance
      * can check attributes, but is not allowed to do any kind of work that
@@ -54,7 +55,5 @@ public interface Module {
      *         call close().
      */
     AutoCloseable getInstance();
-
-    ModuleIdentifier getName();
 
 }

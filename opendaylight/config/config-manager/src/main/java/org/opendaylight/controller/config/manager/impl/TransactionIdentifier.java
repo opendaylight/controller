@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-public class TransactionIdentifier {
+import org.opendaylight.yangtools.concepts.Identifier;
+
+public class TransactionIdentifier implements Identifier {
+
     private final String name;
 
     public TransactionIdentifier(String name) {

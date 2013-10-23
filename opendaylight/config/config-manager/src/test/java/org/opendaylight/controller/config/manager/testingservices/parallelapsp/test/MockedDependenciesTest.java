@@ -61,11 +61,6 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         }
 
         @Override
-        public ModuleIdentifier getName() {
-            return moduleIdentifier;
-        }
-
-        @Override
         public int getThreadCount() {
             return threadCount;
         }
@@ -83,6 +78,11 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         @Override
         public Closeable getInstance() {
             return new MockedThreadPool(threadCount);
+        }
+
+        @Override
+        public ModuleIdentifier getIdentifier() {
+            return moduleIdentifier;
         }
     }
 

@@ -30,7 +30,7 @@ public class TestingScheduledThreadPoolModule implements Module,
         RuntimeBeanRegistratorAwareModule,
         TestingScheduledThreadPoolServiceInterface {
 
-    private final ModuleIdentifier name;
+    private final ModuleIdentifier identifier;
     @Nullable
     private final AutoCloseable oldCloseable;
     @Nullable
@@ -41,17 +41,12 @@ public class TestingScheduledThreadPoolModule implements Module,
     private RootRuntimeBeanRegistrator runtimeBeanRegistrator;
     private boolean recreate;
 
-    public TestingScheduledThreadPoolModule(ModuleIdentifier name,
+    public TestingScheduledThreadPoolModule(ModuleIdentifier identifier,
             @Nullable AutoCloseable oldCloseable,
             @Nullable TestingScheduledThreadPoolImpl oldInstance) {
-        this.name = name;
+        this.identifier = identifier;
         this.oldCloseable = oldCloseable;
         this.oldInstance = oldInstance;
-    }
-
-    @Override
-    public ModuleIdentifier getName() {
-        return name;
     }
 
     @Override
@@ -107,5 +102,11 @@ public class TestingScheduledThreadPoolModule implements Module,
     public void setRecreate(boolean recreate) {
         this.recreate = recreate;
     }
+
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return identifier;
+    }
+
 
 }
