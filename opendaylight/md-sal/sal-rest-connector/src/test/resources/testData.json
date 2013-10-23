@@ -1,0 +1,92 @@
+{
+  "interfaces": {
+    "interface": [
+      {
+        "name": "eth0",
+        "type": "ethernetCsmacd",
+        "enabled": false
+      },
+      {
+        "name": "eth1",
+        "type": "ethernetCsmacd",
+        "enabled": true,
+        "vlan-tagging": true
+      },
+      {
+        "name": "eth1.10",
+        "type": "l2vlan",
+        "enabled": true,
+        "base-interface": "eth1",
+        "vlan-id": 10
+      },
+      {
+        "name": "lo1",
+        "type": "softwareLoopback",
+        "enabled": true
+      }
+    ]
+  },
+  "interfaces-state": {
+    "interface": [
+      {
+        "name": "eth0",
+        "type": "ethernetCsmacd",
+        "admin-status": "down",
+        "oper-status": "down",
+        "if-index": 2,
+        "phys-address": "00:01:02:03:04:05",
+        "statistics": {
+          "discontinuity-time": "2013-04-01T03:00:00+00:00"
+        }
+      },
+      {
+        "name": "eth1",
+        "type": "ethernetCsmacd",
+        "admin-status": "up",
+        "oper-status": "up",
+        "if-index": 7,
+        "phys-address": "00:01:02:03:04:06",
+        "higher-layer-if": [
+          "eth1.10"
+        ],
+        "statistics": {
+          "discontinuity-time": "2013-04-01T03:00:00+00:00"
+        }
+      },
+      {
+        "name": "eth1.10",
+        "type": "l2vlan",
+        "admin-status": "up",
+        "oper-status": "up",
+        "if-index": 9,
+        "lower-layer-if": [
+          "eth1"
+        ],
+        "statistics": {
+          "discontinuity-time": "2013-04-01T03:00:00+00:00"
+        }
+      },
+      {
+        "name": "eth2",
+        "type": "ethernetCsmacd",
+        "admin-status": "down",
+        "oper-status": "down",
+        "if-index": 8,
+        "phys-address": "00:01:02:03:04:07",
+        "statistics": {
+          "discontinuity-time": "2013-04-01T03:00:00+00:00"
+        }
+      },
+      {
+        "name": "lo1",
+        "type": "softwareLoopback",
+        "admin-status": "up",
+        "oper-status": "up",
+        "if-index": 1,
+        "statistics": {
+          "discontinuity-time": "2013-04-01T03:00:00+00:00"
+        }
+      }
+    ]
+  }
+}
