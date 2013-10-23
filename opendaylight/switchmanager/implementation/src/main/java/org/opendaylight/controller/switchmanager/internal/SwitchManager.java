@@ -1843,7 +1843,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
         help.append("---Switch Manager---\n");
         help.append("\t pencs <node id>        - Print enabled node connectors for a given node\n");
         help.append("\t pdm <node id>          - Print switch ports in device map\n");
-        help.append("\t snt <node id> <tier>   - Set node tier number\n");
         return help.toString();
     }
 
@@ -1924,29 +1923,6 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             ci.println("Total number of NodeConnectors: "
                     + nodeConnectorSet.size());
         }
-    }
-
-    public void _snt(CommandInterpreter ci) {
-        String st = ci.nextArgument();
-        if (st == null) {
-            ci.println("Please enter node id");
-            return;
-        }
-
-        Node node = Node.fromString(st);
-        if (node == null) {
-            ci.println("Please enter node id");
-            return;
-        }
-
-        st = ci.nextArgument();
-        if (st == null) {
-            ci.println("Please enter tier number");
-            return;
-        }
-        Integer tid = Integer.decode(st);
-        Tier tier = new Tier(tid);
-        setNodeProp(node, tier);
     }
 
     @Override
