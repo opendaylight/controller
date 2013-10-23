@@ -16,7 +16,7 @@
   </scm>
 
   <properties>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <nexusdeploy>http://nexus.opendaylight.org/content</nexusdeploy>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <releaseplugin.version>2.3.2</releaseplugin.version>
   </properties>
@@ -33,12 +33,12 @@
     <!-- OpenDayLight Released artifact -->
     <repository>
       <id>opendaylight-release</id>
-      <url>${nexusproxy}/repositories/opendaylight.release/</url>
+      <url>${nexusdeploy}/repositories/opendaylight.release/</url>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <snapshotRepository>
       <id>opendaylight-snapshot</id>
-      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+      <url>${nexusdeploy}/repositories/opendaylight.snapshot/</url>
     </snapshotRepository>
     <!-- Site deployment -->
     <site>
