@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_19907742",
+        "filename": "opendaylight/connectionmanager/api/src/main/java/org/opendaylight/controller/connectionmanager/NodeAccessPermission.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-23T19:02:09Z",
+      "side": 1,
+      "message": "Please add the IBM copyright and the Eclipse license notice.",
+      "revId": "a6404bf52976c9c9793bf9447dee7f5e1f7c7938",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
