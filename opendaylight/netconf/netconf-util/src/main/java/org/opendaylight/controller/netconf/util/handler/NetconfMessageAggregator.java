@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.util.handler;
 import java.util.List;
 
 import org.opendaylight.controller.netconf.util.messages.FramingMechanism;
-import org.opendaylight.controller.netconf.util.messages.NetconfMessageFactory;
+import org.opendaylight.controller.netconf.util.messages.NetconfMessageConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +23,11 @@ public class NetconfMessageAggregator extends ByteToMessageDecoder {
 
     private final static Logger logger = LoggerFactory.getLogger(NetconfMessageAggregator.class);
 
-    private byte[] eom = NetconfMessageFactory.endOfMessage;
+    private byte[] eom = NetconfMessageConstants.endOfMessage;
 
     public NetconfMessageAggregator(FramingMechanism framingMechanism) {
         if (framingMechanism == FramingMechanism.CHUNK) {
-            eom = NetconfMessageFactory.endOfChunk;
+            eom = NetconfMessageConstants.endOfChunk;
         }
     }
 
@@ -41,7 +41,7 @@ public class NetconfMessageAggregator extends ByteToMessageDecoder {
             ByteBuf msg = in.readBytes(index);
             in.readBytes(eom.length);
             in.discardReadBytes();
-            logger.debug("Message is complete. {}", msg.readableBytes());
+            logger.debug("Message is complete.");
             out.add(msg);
         }
     }
