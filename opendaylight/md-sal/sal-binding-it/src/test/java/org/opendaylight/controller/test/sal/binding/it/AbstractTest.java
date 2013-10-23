@@ -59,4 +59,5 @@ public abstract class AbstractTest {
                 // BASE Models
                 baseModelBundles(), flowCapableModelBundles(), junitAndMockitoBundles());
     }
+    
 }
