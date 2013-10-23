@@ -15,6 +15,7 @@ import javax.management.MXBean;
 
 import org.junit.Test;
 import org.opendaylight.controller.config.spi.Module;
+import org.opendaylight.yangtools.concepts.Identifiable;
 
 import com.google.common.collect.Sets;
 
@@ -48,7 +49,7 @@ public class InterfacesHelperTest {
     @Test
     public void testGetAllInterfaces() {
         Set<Class<?>> expected = Sets.<Class<?>> newHashSet(SuperA.class, SuperBMXBean.class, SuperC.class,
-                SubA.class, Module.class);
+                SubA.class, Identifiable.class, Module.class);
         assertEquals(expected,
                 InterfacesHelper.getAllInterfaces(SubClass.class));
     }

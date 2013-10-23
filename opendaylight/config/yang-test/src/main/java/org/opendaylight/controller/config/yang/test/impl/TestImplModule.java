@@ -9,6 +9,7 @@
  */
 package org.opendaylight.controller.config.yang.test.impl;
 
+
 /**
 *
 */
@@ -43,4 +44,5 @@ public final class TestImplModule
             }
         };
     }
+
 }

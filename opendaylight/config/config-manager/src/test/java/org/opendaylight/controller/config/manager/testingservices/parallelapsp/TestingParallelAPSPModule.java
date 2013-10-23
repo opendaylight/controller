@@ -40,24 +40,19 @@ public class TestingParallelAPSPModule implements Module,
     private final DependencyResolver dependencyResolver;
     private final AutoCloseable oldCloseable;
     private final TestingParallelAPSPImpl oldInstance;
-    private final ModuleIdentifier name;
+    private final ModuleIdentifier identifier;
     private ObjectName threadPoolON;
     private TestingParallelAPSPImpl instance;
     private String someParam;
 
-    public TestingParallelAPSPModule(ModuleIdentifier name,
+    public TestingParallelAPSPModule(ModuleIdentifier identifier,
             DependencyResolver dependencyResolver,
             @Nullable AutoCloseable oldCloseable,
             @Nullable TestingParallelAPSPImpl oldInstance) {
-        this.name = name;
+        this.identifier = identifier;
         this.dependencyResolver = dependencyResolver;
         this.oldCloseable = oldCloseable;
         this.oldInstance = oldInstance;
-    }
-
-    @Override
-    public ModuleIdentifier getName() {
-        return name;
     }
 
     @Override
@@ -142,4 +137,11 @@ public class TestingParallelAPSPModule implements Module,
         }
         return instance;
     }
+
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return identifier;
+    }
+
+
 }

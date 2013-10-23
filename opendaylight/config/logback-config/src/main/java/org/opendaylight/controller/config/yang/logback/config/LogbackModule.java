@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 
 import com.google.common.collect.Sets;
 
@@ -149,4 +150,5 @@ public final class LogbackModule
 
         return setter;
     }
+
 }
