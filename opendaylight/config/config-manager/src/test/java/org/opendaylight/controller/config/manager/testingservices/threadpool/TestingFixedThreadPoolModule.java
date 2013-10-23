@@ -37,10 +37,6 @@ public class TestingFixedThreadPoolModule implements
         this.oldInstance = oldInstance;
     }
 
-    @Override
-    public ModuleIdentifier getName() {
-        return name;
-    }
 
     // attributes
     @Override
@@ -98,6 +94,11 @@ public class TestingFixedThreadPoolModule implements
             }
         }
         return instance;
+    }
+
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return name;
     }
 
 }

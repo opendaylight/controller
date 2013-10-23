@@ -15,20 +15,20 @@ package ${packageName};
     private final ${instanceType} oldInstance;
     private ${instanceType} instance;
     private final ${dependencyResolverType} dependencyResolver;
-    private final ${moduleNameType} name;
+    private final ${moduleNameType} identifier;
     <#if runtime=true>
     private ${registratorType} rootRuntimeBeanRegistratorWrapper;
     </#if>
 
-    public ${typeDeclaration.name}(${moduleNameType} name, ${dependencyResolverType} dependencyResolver) {
-        this.name = name;
+    public ${typeDeclaration.name}(${moduleNameType} identifier, ${dependencyResolverType} dependencyResolver) {
+        this.identifier = identifier;
         this.dependencyResolver = dependencyResolver;
         this.oldInstance = null;
         this.oldModule = null;
     }
 
-    public ${typeDeclaration.name}(${moduleNameType} name, ${dependencyResolverType} dependencyResolver, ${typeDeclaration.name} oldModule, ${instanceType} oldInstance) {
-        this.name = name;
+    public ${typeDeclaration.name}(${moduleNameType} identifier, ${dependencyResolverType} dependencyResolver, ${typeDeclaration.name} oldModule, ${instanceType} oldInstance) {
+        this.identifier = identifier;
         this.dependencyResolver = dependencyResolver;
         this.oldInstance = oldInstance;
         this.oldModule = oldModule;
@@ -104,8 +104,8 @@ package ${packageName};
     }
 
     @Override
-    public final ${moduleNameType} getName() {
-        return name;
+    public ${moduleNameType} getIdentifier() {
+        return identifier;
     }
 
     public boolean canReuseInstance(${typeDeclaration.name} oldModule){

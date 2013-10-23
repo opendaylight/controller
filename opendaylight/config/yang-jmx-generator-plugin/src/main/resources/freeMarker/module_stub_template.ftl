@@ -5,12 +5,12 @@ package ${packageName};
 <@typeDeclarationD object=typeDeclaration/>
 {
 
-    public ${typeDeclaration.name}(${moduleNameType} name, ${dependencyResolverType} dependencyResolver) {
-        super(name, dependencyResolver);
+    public ${typeDeclaration.name}(${moduleNameType} identifier, ${dependencyResolverType} dependencyResolver) {
+        super(identifier, dependencyResolver);
     }
 
-    public ${typeDeclaration.name}(${moduleNameType} name, ${dependencyResolverType} dependencyResolver, ${typeDeclaration.name} oldModule, ${instanceType} oldInstance) {
-        super(name, dependencyResolver, oldModule, oldInstance);
+    public ${typeDeclaration.name}(${moduleNameType} identifier, ${dependencyResolverType} dependencyResolver, ${typeDeclaration.name} oldModule, ${instanceType} oldInstance) {
+        super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
     @Override

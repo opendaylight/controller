@@ -37,6 +37,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,8 @@ import org.slf4j.LoggerFactory;
  */
 class ConfigTransactionControllerImpl implements
         ConfigTransactionControllerInternal,
-        ConfigTransactionControllerImplMXBean {
+        ConfigTransactionControllerImplMXBean,
+        Identifiable<TransactionIdentifier>{
     private static final Logger logger = LoggerFactory.getLogger(ConfigTransactionControllerImpl.class);
 
     private final TransactionIdentifier transactionIdentifier;
@@ -131,7 +133,7 @@ class ConfigTransactionControllerImpl implements
             Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager);
             for (Module module : defaultModules) {
                 try {
-                    putConfigBeanToJMXAndInternalMaps(module.getName(), module, moduleFactory, null);
+                    putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, null);
                 } catch (InstanceAlreadyExistsException e) {
                     throw new IllegalStateException(e);
                 }
@@ -197,9 +199,9 @@ class ConfigTransactionControllerImpl implements
             @Nullable ModuleInternalInfo maybeOldConfigBeanInfo)
             throws InstanceAlreadyExistsException {
         logger.debug("Adding module {} to transaction {}", moduleIdentifier, this);
-        if (moduleIdentifier.equals(module.getName())==false) {
+        if (moduleIdentifier.equals(module.getIdentifier())==false) {
             throw new IllegalStateException("Incorrect name reported by module. Expected "
-             + moduleIdentifier + ", got " + module.getName());
+             + moduleIdentifier + ", got " + module.getIdentifier());
         }
         DynamicMBean writableDynamicWrapper = new DynamicWritableWrapper(
                 module, moduleIdentifier, transactionIdentifier,
@@ -452,5 +454,10 @@ class ConfigTransactionControllerImpl implements
     @Override
     public List<ModuleFactory> getCurrentlyRegisteredFactories() {
         return currentlyRegisteredFactories;
+    }
+
+    @Override
+    public TransactionIdentifier getIdentifier() {
+        return transactionIdentifier;
     }
 }
