@@ -13,41 +13,44 @@ import java.util.Hashtable;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class YangStoreActivator implements BundleActivator {
 
-    private ExtenderYangTracker extender;
+    private BundleTracker bundleTracker;
     private ServiceRegistration<YangStoreService> registration;
     private static final Logger logger = LoggerFactory
             .getLogger(YangStoreActivator.class);
 
     @Override
     public void start(BundleContext context) throws Exception {
-        extender = new ExtenderYangTracker(context);
-        extender.open();
+        ExtenderYangTrackerCustomizer customizerAndService = new ExtenderYangTrackerCustomizer();
+        bundleTracker = new BundleTracker(context, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, customizerAndService);
+        bundleTracker.open();
 
         Dictionary<String, ?> properties = new Hashtable<>();
         registration = context.registerService(YangStoreService.class,
-                extender, properties);
+                customizerAndService, properties);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         try {
-            extender.close();
+            bundleTracker.close();
         } catch (Exception e) {
-            logger.warn("Exception while closing extender", e);
+            logger.warn("Exception while closing bundleTracker", e);
         }
-
-        if (registration != null)
+        if (registration != null) {
             try {
                 registration.unregister();
             } catch (Exception e) {
                 logger.warn("Exception while unregistring yang store service",
                         e);
             }
+        }
     }
 }

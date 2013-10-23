@@ -9,11 +9,7 @@ package org.opendaylight.controller.config.yang.store.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -32,11 +28,10 @@ import org.osgi.framework.BundleContext;
 
 import com.google.common.collect.Lists;
 
-public class ExtenderYangTrackerTest {
+public class ExtenderYangTrackerCustomizerTest {
 
-    @Mock
-    private BundleContext context;
-    private ExtenderYangTracker tested;
+
+    private ExtenderYangTrackerCustomizer tested;
     @Mock
     private MbeParser parser;
     @Mock
@@ -45,12 +40,13 @@ public class ExtenderYangTrackerTest {
     @Before
     public void setUp() throws YangStoreException {
         MockitoAnnotations.initMocks(this);
-        doReturn("context").when(context).toString();
-        tested = new ExtenderYangTracker(context, parser);
+
+        tested = new ExtenderYangTrackerCustomizer(parser);
         doReturn(yangStoreSnapshot).when(parser).parseYangFiles(
                 anyCollectionOf(InputStream.class));
         doReturn(22).when(yangStoreSnapshot).countModuleMXBeanEntries();
         doReturn("mock yang store").when(yangStoreSnapshot).toString();
+        doNothing().when(yangStoreSnapshot).close();
     }
 
     @Test
@@ -74,9 +70,11 @@ public class ExtenderYangTrackerTest {
         bundle = getMockedBundle(10, false);
         tested.addingBundle(bundle, null);
 
-        tested.getYangStoreSnapshot();
+        for(int i = 0; i< 10; i++){
+            tested.getYangStoreSnapshot();
+        }
 
-        verify(parser, times(3)).parseYangFiles(
+        verify(parser, times(5)).parseYangFiles(
                 anyCollectionOf(InputStream.class));
 
         returnedStore = tested.getYangStoreSnapshot();
@@ -90,6 +88,7 @@ public class ExtenderYangTrackerTest {
     private Bundle getMockedBundle(int sizeOfUrls, boolean system)
             throws MalformedURLException {
         Bundle mock = mock(Bundle.class);
+        doReturn(32).when(mock).getState();//mock just for logging
 
         List<URL> urls = Lists.newArrayList();
         for (int i = 0; i < sizeOfUrls; i++) {
