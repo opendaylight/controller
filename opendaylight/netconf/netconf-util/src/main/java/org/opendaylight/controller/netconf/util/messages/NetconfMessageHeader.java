@@ -27,10 +27,6 @@ public final class NetconfMessageHeader {
 
     private static final byte headerEnd = (byte) 0x0a;
 
-    public static final int MIN_HEADER_LENGTH = 4; // bytes
-
-    public static final int MAX_HEADER_LENGTH = 13; // bytes
-
     private boolean parsed = false;
 
     public NetconfMessageHeader() {

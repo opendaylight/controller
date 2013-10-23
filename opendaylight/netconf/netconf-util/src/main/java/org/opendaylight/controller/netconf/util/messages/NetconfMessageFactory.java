@@ -37,12 +37,6 @@ public final class NetconfMessageFactory implements ProtocolMessageFactory<Netco
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfMessageFactory.class);
 
-    public static final byte[] endOfMessage = "]]>]]>".getBytes(Charsets.UTF_8);
-
-    public static final byte[] endOfChunk = "\n##\n".getBytes(Charsets.UTF_8);
-
-    public static final int MAX_CHUNK_SIZE = 1024; // Bytes
-
     private final Optional<String> clientId;
 
     public NetconfMessageFactory() {
