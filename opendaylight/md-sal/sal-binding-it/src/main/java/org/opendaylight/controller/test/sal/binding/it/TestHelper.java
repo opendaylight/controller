@@ -23,6 +23,7 @@ public class TestHelper {
                 mavenBundle(YANGTOOLS, "yang-common").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common-api").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(), //
                 mavenBundle("com.google.guava", "guava").versionAsInProject(), //
                 mavenBundle(YANGTOOLS + ".thirdparty", "xtend-lib-osgi").versionAsInProject() //
         );
@@ -65,7 +66,7 @@ public class TestHelper {
 
     public static Option junitAndMockitoBundles() {
         return new DefaultCompositeOption(
-        // Repository required to load harmcrest (OSGi-fied version).
+                // Repository required to load harmcrest (OSGi-fied version).
                 repository("http://repository.springsource.com/maven/bundles/external").id(
                         "com.springsource.repository.bundles.external"),
 

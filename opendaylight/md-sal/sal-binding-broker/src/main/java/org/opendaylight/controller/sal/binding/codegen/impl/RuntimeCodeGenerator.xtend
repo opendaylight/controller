@@ -33,16 +33,16 @@ import java.util.Arrays
 import static extension org.opendaylight.controller.sal.binding.codegen.YangtoolsMappingHelper.*
 import static extension org.opendaylight.controller.sal.binding.codegen.RuntimeCodeSpecification.*
 import java.util.HashSet
-import java.io.ObjectOutputStream.PutField
 import static org.opendaylight.controller.sal.binding.impl.osgi.ClassLoaderUtils.*
-import javax.xml.ws.spi.Invoker
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker
 import java.util.Set
-import java.util.Collections
 import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeHelper
 import java.util.WeakHashMap
 import javassist.ClassClassPath
+import org.opendaylight.yangtools.yang.binding.annotations.QName
+import org.opendaylight.yangtools.yang.binding.DataContainer
+import org.opendaylight.yangtools.yang.binding.RpcImplementation
 
 class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator, NotificationInvokerFactory {
 
@@ -70,31 +70,26 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
     override <T extends RpcService> getRouterFor(Class<T> iface) {
         val contexts = new HashSet<Class<? extends BaseIdentity>>
 
-        val instance = <T>withClassLoader(iface.classLoader) [ |
+        val instance = <RpcRouterCodegenInstance<T>>withClassLoader(iface.classLoader) [ |
             val supertype = iface.asCtClass
+            val metadata = supertype.rpcMetadata;
             val targetCls = createClass(iface.routerName, supertype) [
-                //field(ROUTING_TABLE_FIELD,Map)
+                addInterface(RpcImplementation.asCtClass)
+                
                 field(DELEGATE_FIELD, iface)
-                val ctxMap = new HashMap<String, Class<? extends BaseIdentity>>();
-                // We search for routing pairs and add fields
-                supertype.methods.filter[declaringClass == supertype && parameterTypes.size === 1].forEach [ method |
-                    val routingPair = method.routingContextInput;
-                    if (routingPair !== null) {
-                        ctxMap.put(routingPair.context.routingTableField, routingPair.context);
-                        contexts.add(routingPair.context)
-                    }
-                ]
-                for (ctx : ctxMap.entrySet) {
-                    field(ctx.key, Map)
+                //field(REMOTE_INVOKER_FIELD,iface);
+                
+                for (ctx : metadata.contexts) {
+                    field(ctx.routingTableField, Map)
                 }
                 implementMethodsFrom(supertype) [
                     if (parameterTypes.size === 1) {
-                        val routingPair = routingContextInput;
+                        val rpcMeta = metadata.rpcMethods.get(name);
                         val bodyTmp = '''
                         {
-                            final «InstanceIdentifier.name» identifier = $1.«routingPair.getter.name»()«IF routingPair.
-                            encapsulated».getValue()«ENDIF»;
-                            «supertype.name» instance = («supertype.name») «routingPair.context.routingTableField».get(identifier);
+                            final «InstanceIdentifier.name» identifier = $1.«rpcMeta.inputRouteGetter.name»()«IF rpcMeta.
+                            routeEncapsulated».getValue()«ENDIF»;
+                            «supertype.name» instance = («supertype.name») «rpcMeta.context.routingTableField».get(identifier);
                             if(instance == null) {
                                instance = «DELEGATE_FIELD»;
                             }
@@ -108,10 +103,90 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
                         body = '''return ($r) «DELEGATE_FIELD».«it.name»($$);'''
                     }
                 ]
+                implementMethodsFrom(RpcImplementation.asCtClass) [
+                    switch (name) {
+                        case "getSupportedInputs":
+                            body = '''
+                            {
+                                throw new java.lang.UnsupportedOperationException("Not implemented yet");
+                                return ($r) null;
+                            }'''
+                        case "invoke": {
+                            val tmpBody = '''
+                            {
+                                «FOR input : metadata.supportedInputs SEPARATOR " else "»
+                                «val rpcMetadata = metadata.rpcInputs.get(input)»
+                                if(«input.name».class.equals($1)) {
+                                    return ($r) this.«rpcMetadata.methodName»((«input.name») $2);
+                                }
+                                «ENDFOR»
+                                throw new java.lang.IllegalArgumentException("Not supported message type");
+                                return ($r) null;
+                            }
+                            '''
+                            body = tmpBody
+                        }
+                    }
+                ]
             ]
-            return targetCls.toClass(iface.classLoader).newInstance as T
+            val instance = targetCls.toClass(iface.classLoader,iface.protectionDomain).newInstance as T
+            return new RpcRouterCodegenInstance(iface, instance, metadata.contexts,metadata.supportedInputs);
         ];
-        return new RpcRouterCodegenInstance(iface, instance, contexts);
+        return instance;
+    }
+
+    private def RpcServiceMetadata getRpcMetadata(CtClass iface) {
+        val metadata = new RpcServiceMetadata;
+        
+        iface.methods.filter[declaringClass == iface && parameterTypes.size === 1].forEach [ method |
+            val routingPair = method.rpcMetadata;
+            if (routingPair !== null) {
+                metadata.contexts.add(routingPair.context)
+                metadata.rpcMethods.put(method.name,routingPair)
+                val input = routingPair.inputType.javaClass as Class<? extends DataContainer>;
+                metadata.supportedInputs.add(input);
+                metadata.rpcInputs.put(input,routingPair);
+            }
+        ]
+        return metadata;
+    }
+
+    private def getRpcMetadata(CtMethod method) {
+        val inputClass = method.parameterTypes.get(0); 
+        return inputClass.rpcMethodMetadata(inputClass,method.name);
+    }
+
+    private def RpcMetadata rpcMethodMetadata(CtClass dataClass,CtClass inputClass,String rpcMethod) {
+        for (method : dataClass.methods) {
+            if (method.name.startsWith("get") && method.parameterTypes.size === 0) {
+                for (annotation : method.availableAnnotations) {
+                    if (annotation instanceof RoutingContext) {
+                        val encapsulated = !method.returnType.equals(InstanceIdentifier.asCtClass);
+                        return new RpcMetadata(null,rpcMethod,(annotation as RoutingContext).value, method, encapsulated,inputClass);
+                    }
+                }
+            }
+        }
+        for (iface : dataClass.interfaces) {
+            val ret = rpcMethodMetadata(iface,inputClass,rpcMethod);
+            if(ret != null) return ret;
+        }
+        return null;
+    }
+
+    private def getJavaClass(CtClass cls) {
+        Thread.currentThread.contextClassLoader.loadClass(cls.name)
+    }
+
+    override getInvokerFactory() {
+        return this;
+    }
+
+    override invokerFor(NotificationListener instance) {
+        val cls = instance.class
+        val prototype = resolveInvokerClass(cls);
+
+        return new RuntimeGeneratedInvoker(instance, prototype)
     }
 
     protected def generateListenerInvoker(Class<? extends NotificationListener> iface) {
@@ -119,56 +194,32 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
 
         val supportedNotification = callbacks.map[parameterTypes.get(0) as Class<? extends Notification>].toSet;
 
-        val targetCls = createClass(iface.invokerName,BROKER_NOTIFICATION_LISTENER ) [
+        val targetCls = createClass(iface.invokerName, BROKER_NOTIFICATION_LISTENER) [
             field(DELEGATE_FIELD, iface)
             implementMethodsFrom(BROKER_NOTIFICATION_LISTENER) [
                 body = '''
                     {
                         «FOR callback : callbacks SEPARATOR " else "»
-                        «val cls = callback.parameterTypes.get(0).name»
-                            if($1 instanceof «cls») {
-                                «DELEGATE_FIELD».«callback.name»((«cls») $1);
-                                return null;
-                            }
+                            «val cls = callback.parameterTypes.get(0).name»
+                                if($1 instanceof «cls») {
+                                    «DELEGATE_FIELD».«callback.name»((«cls») $1);
+                                    return null;
+                                }
                         «ENDFOR»
                         return null;
                     }
                 '''
             ]
         ]
-        val finalClass = targetCls.toClass(iface.classLoader,iface.protectionDomain)
+        val finalClass = targetCls.toClass(iface.classLoader, iface.protectionDomain)
         return new RuntimeGeneratedInvokerPrototype(supportedNotification,
             finalClass as Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener>);
     }
 
-    def void method(CtClass it, Class<?> returnType, String name, Class<?> parameter, MethodGenerator function1) {
+    private def void method(CtClass it, Class<?> returnType, String name, Class<?> parameter, MethodGenerator function1) {
         val method = new CtMethod(returnType.asCtClass, name, Arrays.asList(parameter.asCtClass), it);
         function1.process(method);
         it.addMethod(method);
-    }
-
-    private def routingContextInput(CtMethod method) {
-        val inputClass = method.parameterTypes.get(0);
-        return inputClass.contextInstance;
-    }
-
-    private def RoutingPair getContextInstance(CtClass dataClass) {
-        for (method : dataClass.methods) {
-            if (method.name.startsWith("get") && method.parameterTypes.size === 0) {
-                for (annotation : method.availableAnnotations) {
-                    if (annotation instanceof RoutingContext) {
-                        val encapsulated = !method.returnType.equals(InstanceIdentifier.asCtClass);
-
-                        return new RoutingPair((annotation as RoutingContext).value, method, encapsulated);
-                    }
-                }
-            }
-        }
-        for (iface : dataClass.interfaces) {
-            val ret = getContextInstance(iface);
-            if(ret != null) return ret;
-        }
-        return null;
     }
 
     private def void implementMethodsFrom(CtClass target, CtClass source, MethodGenerator function1) {
@@ -225,18 +276,7 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
         }
     }
 
-    override getInvokerFactory() {
-        return this;
-    }
-
-    override invokerFor(NotificationListener instance) {
-        val cls = instance.class
-        val prototype = resolveInvokerClass(cls);
-        
-        return new RuntimeGeneratedInvoker(instance,prototype)
-    }
-
-    def resolveInvokerClass(Class<? extends NotificationListener> class1) {
+    protected def resolveInvokerClass(Class<? extends NotificationListener> class1) {
         val invoker = invokerClasses.get(class1);
         if (invoker !== null) {
             return invoker;
@@ -248,19 +288,18 @@ class RuntimeCodeGenerator implements org.opendaylight.controller.sal.binding.co
 }
 
 @Data
-class RuntimeGeneratedInvoker implements NotificationInvoker {
-    
+package class RuntimeGeneratedInvoker implements NotificationInvoker {
+
     @Property
     val NotificationListener delegate;
 
-    
     @Property
     var org.opendaylight.controller.sal.binding.api.NotificationListener invocationProxy;
 
     @Property
     var RuntimeGeneratedInvokerPrototype prototype;
 
-    new(NotificationListener delegate,RuntimeGeneratedInvokerPrototype prototype) {
+    new(NotificationListener delegate, RuntimeGeneratedInvokerPrototype prototype) {
         _delegate = delegate;
         _prototype = prototype;
         _invocationProxy = prototype.protoClass.newInstance;
@@ -272,16 +311,52 @@ class RuntimeGeneratedInvoker implements NotificationInvoker {
     }
 
     override close() {
-        
     }
 }
 
 @Data
-class RuntimeGeneratedInvokerPrototype {
+package class RuntimeGeneratedInvokerPrototype {
 
     @Property
     val Set<Class<? extends Notification>> supportedNotifications;
 
     @Property
     val Class<? extends org.opendaylight.controller.sal.binding.api.NotificationListener> protoClass;
+}
+
+package class RpcServiceMetadata {
+
+    @Property
+    val contexts = new HashSet<Class<? extends BaseIdentity>>();
+
+    @Property
+    val rpcMethods = new HashMap<String, RpcMetadata>();
+    
+    @Property
+    val rpcInputs = new HashMap<Class<? extends DataContainer>, RpcMetadata>();
+    
+    
+    @Property
+    val supportedInputs = new HashSet<Class<? extends DataContainer>>();
+}
+
+@Data
+package class RpcMetadata {
+
+    @Property
+    val QName qname;
+
+    @Property
+    val String methodName;
+
+    @Property
+    val Class<? extends BaseIdentity> context;
+    @Property
+    val CtMethod inputRouteGetter;
+
+    @Property
+    val boolean routeEncapsulated;
+    
+    @Property
+    val CtClass inputType;
 }
