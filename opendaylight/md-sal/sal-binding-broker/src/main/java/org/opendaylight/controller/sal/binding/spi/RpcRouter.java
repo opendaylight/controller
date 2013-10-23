@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.RpcImplementation;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
 /**
@@ -25,14 +26,14 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  *            Type of RpcService for which router provides routing information
  *            and route selection.
  */
-public interface RpcRouter<T extends RpcService> {
+public interface RpcRouter<T extends RpcService> extends RpcImplementation{
 
     /**
      * Returns a type of RpcService which is served by this instance of router.
      * 
      * @return type of RpcService which is served by this instance of router.
      */
-    Class<T> getRpcServiceType();
+    Class<T> getServiceType();
     
     
     /**
@@ -42,7 +43,6 @@ public interface RpcRouter<T extends RpcService> {
      * @return type of RpcService which is served by this instance of router.
      */
     T getInvocationProxy();
-    
 
     /**
      * Returns a routing table for particular route context
