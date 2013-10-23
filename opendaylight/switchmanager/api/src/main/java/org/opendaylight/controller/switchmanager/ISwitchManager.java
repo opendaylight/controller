@@ -385,4 +385,44 @@ public interface ISwitchManager {
      */
     @Deprecated
     public String getNodeDescription(Node node);
+
+    /**
+     * Return all the properties of the controller
+     *
+     * @return map of {@link org.opendaylight.controller.sal.core.Property} such
+     *         as {@link org.opendaylight.controller.sal.core.Description}
+     *         and/or {@link org.opendaylight.controller.sal.core.Tier} etc.
+     */
+    public Map<String, Property> getControllerProperties();
+
+    /**
+     * Return a specific property of the controller given the property name
+     *
+     * @param propName
+     *            the property name specified by
+     *            {@link org.opendaylight.controller.sal.core.Property} and its
+     *            extended classes
+     * @return {@link org.opendaylight.controller.sal.core.Property}
+     */
+    public Property getControllerProperty(String propertyName);
+
+    /**
+     * Set a specific property of the controller
+     *
+     * @param property
+     *            {@link org.opendaylight.controller.sal.core.Property}
+     * @return
+     */
+    public Status setControllerProperty(Property property);
+
+    /**
+     * Remove a property of a node
+     *
+     * @param propertyName
+     *            the property name specified by
+     *            {@link org.opendaylight.controller.sal.core.Property} and its
+     *            extended classes
+     * @return success or failed reason
+     */
+    public Status removeControllerProperty(String propertyName);
 }
