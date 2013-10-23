@@ -27,13 +27,12 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            org.opendaylight.controller.containermanager,
                             org.opendaylight.controller.sal.authorization,
                             org.opendaylight.controller.sal.utils,
                             org.opendaylight.controller.usermanager,
                             org.slf4j,
                             org.apache.felix.dm,
-                             org.apache.commons.lang3.builder,
-                            org.eclipse.osgi.framework.console
                         </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.appauth,
@@ -52,6 +51,11 @@
          <groupId>org.opendaylight.controller</groupId>
            <artifactId>sal</artifactId>
           <version>0.5.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+         <groupId>org.opendaylight.controller</groupId>
+         <artifactId>containermanager</artifactId>
+         <version>0.5.1-SNAPSHOT</version>
         </dependency>
         <dependency>
          <groupId>org.opendaylight.controller</groupId>
