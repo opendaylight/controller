@@ -115,6 +115,7 @@
     <module>opendaylight/northbound/jolokia</module>
     <module>opendaylight/northbound/connectionmanager</module>
     <module>opendaylight/northbound/usermanager</module>
+    <module>opendaylight/northbound/controllermanager</module>
 
     <!-- Northbound integration tests -->
     <module>opendaylight/northbound/integrationtest</module>
