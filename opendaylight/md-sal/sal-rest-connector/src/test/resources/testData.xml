@@ -1,0 +1,120 @@
+<rpc-reply
+    xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"
+    message-id="101">
+  <data>
+
+    <interfaces
+        xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"
+        xmlns:vlan="http://example.com/vlan">
+
+      <interface>
+        <name>eth0</name>
+        <type>ethernetCsmacd</type>
+        <enabled>false</enabled>
+      </interface>
+
+      <interface>
+        <name>eth1</name>
+        <type>ethernetCsmacd</type>
+        <enabled>true</enabled>
+        <vlan:vlan-tagging>true</vlan:vlan-tagging>
+      </interface>
+
+      <interface>
+        <name>eth1.10</name>
+        <type>l2vlan</type>
+        <enabled>true</enabled>
+        <vlan:base-interface>eth1</vlan:base-interface>
+        <vlan:vlan-id>10</vlan:vlan-id>
+      </interface>
+
+      <interface>
+        <name>lo1</name>
+        <type>softwareLoopback</type>
+        <enabled>true</enabled>
+      </interface>
+
+    </interfaces>
+
+    <interfaces-state
+        xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+
+      <interface>
+        <name>eth0</name>
+       <type>ethernetCsmacd</type>
+        <admin-status>down</admin-status>
+        <oper-status>down</oper-status>
+        <if-index>2</if-index>
+        <phys-address>00:01:02:03:04:05</phys-address>
+        <statistics>
+          <discontinuity-time>
+            2013-04-01T03:00:00+00:00
+          </discontinuity-time>
+          <!-- counters now shown here -->
+        </statistics>
+      </interface>
+
+      <interface>
+        <name>eth1</name>
+        <type>ethernetCsmacd</type>
+        <admin-status>up</admin-status>
+        <oper-status>up</oper-status>
+        <if-index>7</if-index>
+        <phys-address>00:01:02:03:04:06</phys-address>
+        <higher-layer-if>eth1.10</higher-layer-if>
+        <statistics>
+          <discontinuity-time>
+            2013-04-01T03:00:00+00:00
+          </discontinuity-time>
+          <!-- counters now shown here -->
+        </statistics>
+      </interface>
+
+      <interface>
+        <name>eth1.10</name>
+        <type>l2vlan</type>
+        <admin-status>up</admin-status>
+        <oper-status>up</oper-status>
+        <if-index>9</if-index>
+        <lower-layer-if>eth1</lower-layer-if>
+        <statistics>
+          <discontinuity-time>
+            2013-04-01T03:00:00+00:00
+          </discontinuity-time>
+          <!-- counters now shown here -->
+        </statistics>
+      </interface>
+
+      <!-- This interface is not configured -->
+      <interface>
+        <name>eth2</name>
+        <type>ethernetCsmacd</type>
+       <admin-status>down</admin-status>
+        <oper-status>down</oper-status>
+        <if-index>8</if-index>
+        <phys-address>00:01:02:03:04:07</phys-address>
+        <statistics>
+          <discontinuity-time>
+            2013-04-01T03:00:00+00:00
+          </discontinuity-time>
+          <!-- counters now shown here -->
+        </statistics>
+      </interface>
+
+      <interface>
+        <name>lo1</name>
+        <type>softwareLoopback</type>
+        <admin-status>up</admin-status>
+        <oper-status>up</oper-status>
+        <if-index>1</if-index>
+        <statistics>
+          <discontinuity-time>
+            2013-04-01T03:00:00+00:00
+          </discontinuity-time>
+          <!-- counters now shown here -->
+        </statistics>
+      </interface>
+
+    </interfaces-state>
+  </data>
+</rpc-reply>

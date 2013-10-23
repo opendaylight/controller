@@ -1,16 +1,14 @@
 package org.opendaylight.controller.sal.restconf.impl
 
 import org.opendaylight.controller.md.sal.common.api.data.DataReader
-import java.net.URI
-import org.opendaylight.yangtools.yang.data.api.CompositeNode
-import org.opendaylight.controller.sal.core.api.data.DataBrokerService
-import org.opendaylight.controller.sal.core.api.model.SchemaService
-import static com.google.common.base.Preconditions.*;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession
+import org.opendaylight.controller.sal.core.api.data.DataBrokerService
+import org.opendaylight.yangtools.yang.common.QName
 import org.opendaylight.yangtools.yang.common.RpcResult
-import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransactionFactory
+import org.opendaylight.yangtools.yang.data.api.CompositeNode
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
 
-class BrokerFacade implements DataReader<String, CompositeNode> {
+class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
 
     @Property
     private ConsumerSession context;
@@ -18,48 +16,29 @@ class BrokerFacade implements DataReader<String, CompositeNode> {
     @Property
     private DataBrokerService dataService;
     
-    @Property
-    private SchemaService schemaService;
-
-    @Property
-    private extension ControllerContext schemaContext;
-
-
-    def void init() {
-        checkState(dataService !== null)
-        checkState(schemaService !== null)
-        schemaContext = new ControllerContext();
-        schemaContext.schemas = schemaService.globalContext;
+    override readConfigurationData(InstanceIdentifier path) {
+        return dataService.readConfigurationData(path);
     }
 
-    override readConfigurationData(String path) {
-        val processedPath = path.removePrefixes();
-        return dataService.readConfigurationData(processedPath.toInstanceIdentifier);
-    }
-
-    override readOperationalData(String path) {
-        val processedPath = path.removePrefixes();
-        return dataService.readOperationalData(processedPath.toInstanceIdentifier);
+    override readOperationalData(InstanceIdentifier path) {
+        return dataService.readOperationalData(path);
     }
     
-    def RpcResult<CompositeNode> invokeRpc(String type,CompositeNode payload) {
-        val future = context.rpc(type.toRpcQName(),payload);
+    def RpcResult<CompositeNode> invokeRpc(QName type, CompositeNode payload) {
+        val future = context.rpc(type, payload);
         return future.get;
     }
     
-    def commitConfigurationDataUpdate(String path, CompositeNode payload) {
+    def commitConfigurationDataUpdate(InstanceIdentifier path, CompositeNode payload) {
         val transaction = dataService.beginTransaction;
-        transaction.putConfigurationData(path.toInstanceIdentifier,payload);
+        transaction.putConfigurationData(path, payload);
         return transaction.commit()
     }
     
-    def commitConfigurationDataCreate(String path, CompositeNode payload) {
+    def commitConfigurationDataCreate(InstanceIdentifier path, CompositeNode payload) {
         val transaction = dataService.beginTransaction;
-        transaction.putConfigurationData(path.toInstanceIdentifier,payload);
+        transaction.putConfigurationData(path, payload);
         return transaction.commit()
     }
     
-    private def String removePrefixes(String path) {
-        return path;
-    }
 }

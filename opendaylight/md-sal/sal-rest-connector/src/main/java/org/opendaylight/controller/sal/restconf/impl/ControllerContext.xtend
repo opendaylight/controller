@@ -1,30 +1,29 @@
 package org.opendaylight.controller.sal.restconf.impl
 
-import org.opendaylight.yangtools.yang.model.api.SchemaContext
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates
-import java.net.URI
-import java.util.Map
-import java.util.HashMap
-import org.opendaylight.yangtools.yang.common.QName
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
-import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode
-import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode
-import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
-
-import java.net.URLEncoder
-import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
-import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder
-import java.util.List
-import static com.google.common.base.Preconditions.*;
-import com.google.common.collect.Collections2
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
-import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
+import java.net.URI
 import java.net.URLDecoder
+import java.net.URLEncoder
+import java.util.HashMap
+import java.util.List
+import java.util.Map
+import org.opendaylight.yangtools.yang.common.QName
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.InstanceIdentifierBuilder
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifier
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.NodeIdentifierWithPredicates
+import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.PathArgument
+import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode
+import org.opendaylight.yangtools.yang.model.api.ChoiceNode
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode
+import org.opendaylight.yangtools.yang.model.api.DataNodeContainer
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
+import org.opendaylight.yangtools.yang.model.api.SchemaContext
+
+import static com.google.common.base.Preconditions.*
 
 class ControllerContext {
 
@@ -34,15 +33,20 @@ class ControllerContext {
     private val BiMap<URI, String> uriToModuleName = HashBiMap.create();
     private val Map<String, URI> moduleNameToUri = uriToModuleName.inverse();
 
-    public def InstanceIdentifier toInstanceIdentifier(String restconfInstance) {
+    public def InstanceIdWithSchemaNode toInstanceIdentifier(String restconfInstance) {
         val ret = InstanceIdentifier.builder();
+        val pathArgs = restconfInstance.split("/");
+        val schemaNode = ret.collectPathArguments(pathArgs, restconfInstance.findModule);
+        new InstanceIdWithSchemaNode(ret.toInstance, schemaNode)
+    }
+    
+    def findModule(String restconfInstance) {
         val pathArgs = restconfInstance.split("/");
         val first = pathArgs.get(0);
         val startModule = first.toModuleName();
         val module = schemas.findModuleByNamespace(moduleNameToUri.get(startModule));
         checkArgument(module.size == 1); // Only one version supported now
-        ret.collectPathArguments(pathArgs, module.iterator.next);
-        return ret.toInstance
+        module.iterator.next
     }
 
     def String toFullRestconfIdentifier(InstanceIdentifier path) {
@@ -133,10 +137,10 @@ class ControllerContext {
         return URLEncoder.encode(object.toString)
     }
 
-    def void collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings, DataNodeContainer parentNode) {
+    def DataSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings, DataNodeContainer parentNode) {
         checkNotNull(strings)
         if (strings.length == 0) {
-            return;
+            return null;
         }
         val nodeRef = strings.get(0);
 
@@ -173,8 +177,11 @@ class ControllerContext {
         }
         if (targetNode instanceof DataNodeContainer) {
             val remaining = strings.subList(consumed, strings.length - 1);
-            builder.collectPathArguments(remaining, targetNode as DataNodeContainer);
+            val result = builder.collectPathArguments(remaining, targetNode as DataNodeContainer);
+            return result
         }
+        
+        return targetNode
     }
 
     def void addKeyValue(HashMap<QName, Object> map, DataSchemaNode node, String uriValue) {

@@ -83,5 +83,5 @@ public interface RestconfService {
     @POST
     @Path("/operations/{identifier}")
     @Produces(API+XML)
-    public RpcResult<CompositeNode> invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
+    public Object invokeRpc(@PathParam("identifier") String identifier, CompositeNode payload);
 }
