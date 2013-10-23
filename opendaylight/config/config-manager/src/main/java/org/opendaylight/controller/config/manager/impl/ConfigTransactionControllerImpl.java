@@ -37,6 +37,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,8 @@ import org.slf4j.LoggerFactory;
  */
 class ConfigTransactionControllerImpl implements
         ConfigTransactionControllerInternal,
-        ConfigTransactionControllerImplMXBean {
+        ConfigTransactionControllerImplMXBean,
+        Identifiable<TransactionIdentifier>{
     private static final Logger logger = LoggerFactory.getLogger(ConfigTransactionControllerImpl.class);
 
     private final TransactionIdentifier transactionIdentifier;
@@ -452,5 +454,10 @@ class ConfigTransactionControllerImpl implements
     @Override
     public List<ModuleFactory> getCurrentlyRegisteredFactories() {
         return currentlyRegisteredFactories;
+    }
+
+    @Override
+    public TransactionIdentifier getIdentifier() {
+        return transactionIdentifier;
     }
 }

@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.config.api;
 
-public class ModuleIdentifier {
+import org.opendaylight.yangtools.concepts.Identifier;
+
+public class ModuleIdentifier implements Identifier {
     private static final long serialVersionUID = 1L;
     private final String factoryName, instanceName;
 

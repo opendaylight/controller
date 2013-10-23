@@ -50,11 +50,6 @@ public class TestingScheduledThreadPoolModule implements Module,
     }
 
     @Override
-    public ModuleIdentifier getName() {
-        return name;
-    }
-
-    @Override
     public void setRuntimeBeanRegistrator(
             RootRuntimeBeanRegistrator runtimeBeanRegistrator) {
         this.runtimeBeanRegistrator = runtimeBeanRegistrator;
@@ -106,6 +101,16 @@ public class TestingScheduledThreadPoolModule implements Module,
     @Override
     public void setRecreate(boolean recreate) {
         this.recreate = recreate;
+    }
+
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return name;
+    }
+
+    @Override
+    public ModuleIdentifier getName() {
+        return name;
     }
 
 }

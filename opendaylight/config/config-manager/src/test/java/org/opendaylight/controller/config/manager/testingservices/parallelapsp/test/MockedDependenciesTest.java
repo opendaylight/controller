@@ -84,6 +84,11 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         public Closeable getInstance() {
             return new MockedThreadPool(threadCount);
         }
+
+        @Override
+        public ModuleIdentifier getIdentifier() {
+            return moduleIdentifier;
+        }
     }
 
     public static class MockedThreadPool implements TestingThreadPoolIfc,

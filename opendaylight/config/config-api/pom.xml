@@ -23,6 +23,11 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>concepts</artifactId>
+            <version>${opendaylight.yangtools.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -34,7 +39,7 @@
                     <instructions>
                         <Import-Package>
                             javax.management,
-                            org.opendaylight.protocol.concepts,
+                            org.opendaylight.yangtools.concepts,
                             org.osgi.framework,
                         </Import-Package>
                         <Export-Package>
