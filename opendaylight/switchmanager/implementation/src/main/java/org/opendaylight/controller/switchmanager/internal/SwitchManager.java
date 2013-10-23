@@ -1182,8 +1182,46 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
     @Override
     public Set<Node> getNodes() {
-        return (nodeProps != null) ? new HashSet<Node>(nodeProps.keySet())
-                : new HashSet<Node>();
+        return (nodeProps != null) ? new HashSet<Node>(nodeProps.keySet()) : new HashSet<Node>();
+    }
+
+    @Override
+    public Map<String, Property> getControllerProperties() {
+        return new HashMap<String, Property>(this.controllerProps);
+    }
+
+    @Override
+    public Property getControllerProperty(String propertyName) {
+        if (propertyName != null) {
+            HashMap<String, Property> propertyMap =  new HashMap<String, Property>(this.controllerProps);
+            return propertyMap.get(propertyName);
+        }
+        return null;
+    }
+
+    @Override
+    public Status setControllerProperty(Property property) {
+        if (property != null) {
+            this.controllerProps.put(property.getName(), property);
+            return new Status(StatusCode.SUCCESS);
+        }
+        return new Status(StatusCode.BADREQUEST, "Invalid property provided when setting property");
+    }
+
+    @Override
+    public Status removeControllerProperty(String propertyName) {
+        if (propertyName != null) {
+            if (this.controllerProps.containsKey(propertyName)) {
+                this.controllerProps.remove(propertyName);
+                if (!this.controllerProps.containsKey(propertyName)) {
+                    return new Status(StatusCode.SUCCESS);
+                }
+            }
+            String msg = "Unable to remove property " + propertyName + " from Controller";
+            return new Status(StatusCode.BADREQUEST, msg);
+        }
+        String msg = "Invalid property provided when removing property from Controller";
+        return new Status(StatusCode.BADREQUEST, msg);
     }
 
     /*
@@ -2024,8 +2062,9 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
     }
 
     /**
-     * Creates a Name/Tier/Bandwidth Property object based on given property
-     * name and value. Other property types are not supported yet.
+     * Creates a Name/Tier/Bandwidth/MacAddress(controller property) Property
+     * object based on given property name and value. Other property types are
+     * not supported yet.
      *
      * @param propName
      *            Name of the Property
@@ -2056,7 +2095,10 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
             } else if (propName.equalsIgnoreCase(ForwardingMode.name)) {
                 int mode = Integer.parseInt(propValue);
                 return new ForwardingMode(mode);
-            } else {
+            } else if (propName.equalsIgnoreCase(MacAddress.name)){
+                return new MacAddress(propValue);
+            }
+            else {
                 log.debug("Not able to create {} property", propName);
             }
         } catch (Exception e) {
@@ -2065,6 +2107,7 @@ public class SwitchManager implements ISwitchManager, IConfigurationContainerAwa
 
         return null;
     }
+
 
     @SuppressWarnings("deprecation")
     @Override
