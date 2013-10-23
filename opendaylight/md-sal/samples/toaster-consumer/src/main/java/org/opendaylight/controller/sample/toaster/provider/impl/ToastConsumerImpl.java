@@ -72,8 +72,6 @@ public class ToastConsumerImpl extends AbstractBindingAwareConsumer implements B
         this.session = session;
         NotificationService notificationService = session.getSALService(NotificationService.class);
         notificationService.addNotificationListener(ToastDone.class, this);
-        
-        
     }
 
     @Override

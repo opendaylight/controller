@@ -28,6 +28,7 @@ import org.opendaylight.controller.sal.binding.test.mock.FlowDelete;
 import org.opendaylight.controller.sal.binding.test.mock.FooListener;
 import org.opendaylight.controller.sal.binding.test.mock.FooService;
 import org.opendaylight.controller.sal.binding.test.mock.FooUpdate;
+import org.opendaylight.controller.sal.binding.test.mock.InheritedContextInput;
 import org.opendaylight.controller.sal.binding.test.mock.ReferencableObject;
 import org.opendaylight.controller.sal.binding.test.mock.ReferencableObjectKey;
 import org.opendaylight.controller.sal.binding.test.mock.SimpleInput;
@@ -64,6 +65,9 @@ public class RuntimeCodeGeneratorTest {
         assertNotNull(product);
         assertNotNull(product.getInvocationProxy());
 
+        assertNotNull(product.getSupportedInputs());
+        assertTrue(product.getSupportedInputs().contains(SimpleInput.class));
+        assertTrue(product.getSupportedInputs().contains(InheritedContextInput.class));
         assertEquals("2 fields should be generated.", 2, product.getInvocationProxy().getClass().getFields().length);
 
         verifyRouting(product);

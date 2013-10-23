@@ -11,6 +11,6 @@ public interface FooService extends RpcService {
     
     Future<RpcResult<Void>> simple(SimpleInput obj);
     
-    Future<RpcResult<Void>> inheritedContextInput(InheritedContextInput obj);
+    Future<RpcResult<Void>> inheritedContext(InheritedContextInput obj);
 
 }

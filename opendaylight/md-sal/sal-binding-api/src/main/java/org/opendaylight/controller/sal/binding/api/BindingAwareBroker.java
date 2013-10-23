@@ -126,7 +126,7 @@ public interface BindingAwareBroker {
      * 
      * 
      */
-    public interface ConsumerContext {
+    public interface ConsumerContext extends RpcConsumerRegistry {
 
         /**
          * Returns a session specific instance (implementation) of requested
@@ -138,15 +138,7 @@ public interface BindingAwareBroker {
          */
         <T extends BindingAwareService> T getSALService(Class<T> service);
 
-        /**
-         * Returns a session specific instance (implementation) of requested
-         * YANG module implentation / service provided by consumer.
-         * 
-         * @param service
-         *            Broker service
-         * @return Session specific implementation of service
-         */
-        <T extends RpcService> T getRpcService(Class<T> module);
+
     }
 
     /**
@@ -165,25 +157,12 @@ public interface BindingAwareBroker {
      * functionality provided by other {@link BindingAwareConsumer}s.
      * 
      */
-    public interface ProviderContext extends ConsumerContext {
-        /**
-         * Registers an global RpcService implementation.
-         * 
-         * @param type
-         * @param implementation
-         * @return
-         */
-        <T extends RpcService> RpcRegistration<T> addRpcImplementation(Class<T> type, T implementation)
-                throws IllegalStateException;
+    public interface ProviderContext extends ConsumerContext, RpcProviderRegistry {
 
-        <T extends RpcService> RpcRegistration<T> addMountRpcImplementation(Class<T> type, InstanceIdentifier<?> mount,
-                T implementation) throws IllegalStateException;
-
-        <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(Class<T> type, T implementation)
-                throws IllegalStateException;
-
+        @Deprecated
         void registerFunctionality(ProviderFunctionality functionality);
 
+        @Deprecated
         void unregisterFunctionality(ProviderFunctionality functionality);
     }
 

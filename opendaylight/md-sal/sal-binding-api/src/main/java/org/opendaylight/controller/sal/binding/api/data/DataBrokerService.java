@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransa
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.binding.api.BindingAwareService;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.DataRoot;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -165,4 +166,31 @@ public interface DataBrokerService extends //
     @Deprecated
     public void unregisterChangeListener(InstanceIdentifier<? extends DataObject> path, DataChangeListener changeListener);
 
+    /**
+     * Reads data subtree from configurational store. 
+     * (Store which is populated by consumer, which is usually used to 
+     * inject state into providers. E.g. Flow configuration)-
+     * 
+     */
+    @Override
+    public DataObject readConfigurationData(InstanceIdentifier<? extends DataObject> path);
+    
+    /**
+     * Reads data subtree from operational store. 
+     * (Store which is populated by providers, which is usually used to 
+     * capture state of providers. E.g. Topology)
+     * 
+     */
+    @Override
+    public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path);
+    
+    /**
+     * Register a data change listener for particular subtree. 
+     * 
+     * Callback is invoked each time data in subtree changes.
+     * 
+     */
+    @Override
+    public ListenerRegistration<DataChangeListener> registerDataChangeListener(
+            InstanceIdentifier<? extends DataObject> path, DataChangeListener listener);
 }
