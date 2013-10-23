@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_59c82f74",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/sal/binding/api/data/DataProviderService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2013-10-23T18:24:43Z",
+      "side": 1,
+      "message": "Please add javadoc, so we can get an idea of what DataProviderService is.",
+      "revId": "f2457bdcf9f823fa85e69d771c03fab63db9e9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
