@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_59626fd9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "artefact --\u003e artifact.\n\nperhaps I missed it, but in which pom in this patch the version was upgraded to 0.2.2?",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_793773e4",
+        "filename": "opendaylight/config/config-api/.gitignore",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "Hi, why is this included in this patch and not in a separate patch?",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d9577f01",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/DestroyedModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "why not rename the name class member to be called identifier? it\u0027s confusing like this.",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9941073c",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/TransactionIdentifier.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "why is there a need for an entire class just to hold a single string member?",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_793e53ba",
+        "filename": "opendaylight/config/config-manager/src/test/java/org/opendaylight/controller/config/manager/testingservices/parallelapsp/TestingParallelAPSPModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "Why is there a need here for different methods (getIdentifier and getName) with different names that return exactly the same information? It looks completely redundant and confusing to whoever should consume this code.",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_594b8f59",
+        "filename": "opendaylight/config/config-manager/src/test/java/org/opendaylight/controller/config/manager/testingservices/scheduledthreadpool/TestingScheduledThreadPoolModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "same here as in another similar place - 2 methods with different names returning exactly the same information.",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3948db5a",
+        "filename": "opendaylight/netconf/netconf-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "why is the version defined here? it should be inherited from a parent pom (for example - commons)",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_19751798",
+        "filename": "opendaylight/netconf/netconf-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "same as above.",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f9792394",
+        "filename": "opendaylight/netconf/netconf-it/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "same here - version should be inherited from a common place/parent pom",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d96e5fc9",
+        "filename": "opendaylight/netconf/netconf-util/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-23T13:51:01Z",
+      "side": 1,
+      "message": "version inheritance",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
