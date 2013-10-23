@@ -9,7 +9,7 @@
         <relativePath>../commons/opendaylight</relativePath>
     </parent>
 
-    <version>${netconf.version}</version>
+    <version>0.2.2-SNAPSHOT</version>
     <artifactId>netconf-subsystem</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>

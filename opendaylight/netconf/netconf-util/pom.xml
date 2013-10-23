@@ -5,7 +5,7 @@
     <parent>
         <artifactId>netconf-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>${netconf.version}</version>
+        <version>0.2.2-SNAPSHOT</version>
     </parent>
     <artifactId>netconf-util</artifactId>
     <name>${project.artifactId}</name>
