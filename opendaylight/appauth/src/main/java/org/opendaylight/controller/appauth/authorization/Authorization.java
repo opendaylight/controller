@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
+import org.opendaylight.controller.containermanager.IContainerAuthorization;
 import org.opendaylight.controller.sal.authorization.AppRoleLevel;
 import org.opendaylight.controller.sal.authorization.IResourceAuthorization;
 import org.opendaylight.controller.sal.authorization.Privilege;
@@ -66,6 +67,11 @@ private static final Logger logger = LoggerFactory.getLogger(Authorization.class
                     "Controller roles cannot be explicitely "
                             + "created in App context");
         }
+        if (isContainerRole(role)) {
+            return new Status(StatusCode.NOTALLOWED,
+                    "Container roles cannot be explicitely "
+                            + "created in App context");
+        }
         if (isRoleInUse(role)) {
             return new Status(StatusCode.CONFLICT, "Role already in use");
         }
@@ -96,7 +102,10 @@ private static final Logger logger = LoggerFactory.getLogger(Authorization.class
             return new Status(StatusCode.NOTALLOWED,
                     "Controller roles cannot be removed");
         }
-
+        if (isContainerRole(role)) {
+            return new Status(StatusCode.NOTALLOWED,
+                    "Container roles cannot be removed");
+        }
         return removeRoleInternal(role);
     }
 
@@ -597,6 +606,15 @@ private static final Logger logger = LoggerFactory.getLogger(Authorization.class
         return (role.equals(UserLevel.NETWORKADMIN.toString())
                 || role.equals(UserLevel.SYSTEMADMIN.toString()) || role
                     .equals(UserLevel.NETWORKOPERATOR.toString()));
+    }
+
+    private boolean isContainerRole(String role) {
+        IContainerAuthorization containerAuth = (IContainerAuthorization) ServiceHelper.getGlobalInstance(
+                IContainerAuthorization.class, this);
+        if (containerAuth == null) {
+            return false;
+        }
+        return containerAuth.isApplicationRole(role);
     }
 
     private boolean isRoleInUse(String role) {
