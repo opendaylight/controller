@@ -143,7 +143,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>statisticsmanager</artifactId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>0.5.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

@@ -116,6 +116,14 @@ public class StatisticsManagerIT {
                     .versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "forwardingrulesmanager")
                     .versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "connectionmanager.implementation").
+                    versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",  "connectionmanager").
+                    versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",  "sal.connection").
+                    versionAsInProject(),
+                mavenBundle("org.opendaylight.controller",  "sal.connection.implementation").
+                    versionAsInProject(),
 
                 // needed by hosttracker
                 mavenBundle("org.opendaylight.controller", "topologymanager")

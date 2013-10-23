@@ -40,6 +40,17 @@ public interface IStatisticsManager {
     List<FlowOnNode> getFlows(Node node);
 
     /**
+     * Same as the getFlows method.
+     * The only difference is that this method does not return cached flows.
+     * It will always make a request to the node to get all the flows for that node.
+     * If the request times out or gets an error, we revert to getting the cached flows.
+     * @see IStatisticsManager#getFlows
+     * @param node
+     * @return List of flows installed on the network node.
+     */
+    List<FlowOnNode> getFlowsNoCache(Node node);
+
+    /**
      * Returns the statistics for the flows specified in the list
      *
      * @param flows
