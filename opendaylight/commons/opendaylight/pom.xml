@@ -94,6 +94,7 @@
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.language>java</sonar.language>
+    <forwardingrulesmanager.version>0.5.0-SNAPSHOT</forwardingrulesmanager.version>
   </properties>
 
   <dependencyManagement>

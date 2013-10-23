@@ -3316,4 +3316,37 @@ public class ForwardingRulesManager implements
          * Do nothing
          */
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<FlowEntry> getFlowEntriesForNode(Node node) {
+        List<FlowEntry> list = new ArrayList<FlowEntry>();
+        if (node != null) {
+            for (Map.Entry<FlowEntry, FlowEntry> entry : this.originalSwView.entrySet()) {
+                if (node.equals(entry.getKey().getNode())) {
+                    list.add(entry.getKey().clone());
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<FlowEntry> getInstalledFlowEntriesForNode(Node node) {
+        List<FlowEntry> list = new ArrayList<FlowEntry>();
+        if (node != null) {
+            List<FlowEntryInstall> flowEntryInstallList = this.nodeFlows.get(node);
+            if(flowEntryInstallList != null) {
+                for(FlowEntryInstall fi: flowEntryInstallList) {
+                    list.add(fi.getInstall().clone());
+                }
+            }
+        }
+        return list;
+    }
 }

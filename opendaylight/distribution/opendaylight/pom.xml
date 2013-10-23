@@ -451,7 +451,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwardingrulesmanager</artifactId>
-      <version>${controller.version}</version>
+      <version>${forwardingrulesmanager.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
