@@ -34,11 +34,13 @@
               javax.servlet,
               javax.servlet.http,
               org.apache.catalina.filters,
-              org.apache.juli.logging,
               org.apache.tomcat.util.res,
               org.apache.catalina.comet,
               org.apache.tomcat.util
             </Import-Package>
+            <Export-Package>
+              org.apache.juli.*
+            </Export-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
