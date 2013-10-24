@@ -36,6 +36,40 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_b4b5f2ce",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "Please follow the project convention of using IName and not IfName",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_34c1022f",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "Just for my info, what\u0027s the purpose of the lines above this one (in this method)?",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_74a09a90",
         "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
         "patchSetId": 1
@@ -47,6 +81,74 @@
       "writtenOn": "2013-10-24T16:53:00Z",
       "side": 1,
       "message": "Use plural for listings - .../properties",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f4092a96",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "This method should have a @Produces annotation",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_94f8ae7d",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "the getter above already did this check",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_94266e15",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "the map can\u0027t be null here",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7423fa05",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "so you get a map, convert it to a set and then convert the set back to a map in the constructor? Why not just have a map in the ControllerProperties wrapper?\n\nIf you decide not to, you don\u0027t need to create a new set here just pass the .values()",
       "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +172,57 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_1405de79",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "This method should have a @Produces annotation",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d40ce696",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "Please give a helpful message.\nRestMessages is pretty useless, it\u0027s ok to give literal messages.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b43a9234",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "this check is redundant",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_34aa2271",
         "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
         "patchSetId": 1
@@ -81,6 +234,40 @@
       "writtenOn": "2013-10-24T16:53:00Z",
       "side": 1,
       "message": "Is a resource not found situation? Appears like we are unable to create the property.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_147a7ef1",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "The docs for this method are confusing, but the use should be:\nauditLog(\"Controller Property\" , username, \"removed\", propertyName)\nPlease read the method and feel free to fix the javadoc :)",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d483c6ca",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "This a ServiceUnavailable situation and specify the service (ContainerManager)",
       "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -166,6 +353,57 @@
       "writtenOn": "2013-10-24T16:53:00Z",
       "side": 1,
       "message": "Remove this file.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_34efc2b2",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1208,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "You should provide context and more details.\ne.g. \"Invalid property provided when adding\" or \"Can\u0027t add a null property\" etc.\nI\u0027ll send you the guidelines.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_142cbe01",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1218,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "This would be BADREQUEST\nand mention that the specified prop is invalid",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f4300a58",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2083,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:29:48Z",
+      "side": 1,
+      "message": "Update this doc with the new option and mention it\u0027s a contrller prop (this method was here for switch props)",
       "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
