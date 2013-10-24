@@ -80,7 +80,7 @@
     <containermanager.version>0.5.1-SNAPSHOT</containermanager.version>
     <switchmanager.api.version>0.5.1-SNAPSHOT</switchmanager.api.version>
     <connectionmanager.version>0.1.1-SNAPSHOT</connectionmanager.version>
-    <sal.version>0.5.1-SNAPSHOT</sal.version>
+    <sal.version>0.6.0-SNAPSHOT</sal.version>
     <sal.networkconfiguration.version>0.0.2-SNAPSHOT</sal.networkconfiguration.version>
     <sal.connection.version>0.1.1-SNAPSHOT</sal.connection.version>
     <networkconfig.bridgedomain.northbound.version>0.0.2-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
