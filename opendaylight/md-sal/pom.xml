@@ -63,6 +63,7 @@
         <osgi.core.version>5.0.0</osgi.core.version>
         <junit.version>4.8.1</junit.version>
         <xtend.version>2.4.3</xtend.version>
+        <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
         <jacoco.version>0.5.3.201107060350</jacoco.version>
         <!-- Sonar properties using jacoco to retrieve integration test results -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -267,6 +268,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven.clean.plugin.version}</version>
                     <configuration>
                         <filesets>
                             <fileset>
