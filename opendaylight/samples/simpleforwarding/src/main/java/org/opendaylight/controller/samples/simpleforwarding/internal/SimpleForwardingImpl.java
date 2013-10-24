@@ -166,8 +166,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         destroyCaches();
     }
 
-    @SuppressWarnings("deprecation")
-        private void allocateCaches() {
+    private void allocateCaches() {
         if (this.clusterContainerService == null) {
             log.info("un-initialized clusterContainerService, can't create cache");
             return;
@@ -183,7 +182,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         }
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     private void retrieveCaches() {
         if (this.clusterContainerService == null) {
             log.info("un-initialized clusterContainerService, can't retrieve cache");
@@ -197,8 +196,7 @@ public class SimpleForwardingImpl implements IfNewHostNotify,
         }
     }
 
-    @SuppressWarnings("deprecation")
-        private void destroyCaches() {
+    private void destroyCaches() {
         if (this.clusterContainerService == null) {
             log.info("un-initialized clusterContainerService, can't destroy cache");
             return;
