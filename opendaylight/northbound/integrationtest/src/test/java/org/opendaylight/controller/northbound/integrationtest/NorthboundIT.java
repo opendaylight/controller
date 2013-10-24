@@ -153,7 +153,7 @@ public class NorthboundIT {
 
             request.setUri(restUrl);
             request.setMethod(method);
-            request.setTimeout(5000);  // HostTracker doesn't respond within 3 seconds
+            request.setTimeout(0);  // HostTracker doesn't respond within 3 seconds
 
             Map<String, List<String>> headers = new HashMap<String, List<String>>();
             String authString = "admin:admin";
