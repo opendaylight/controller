@@ -45,8 +45,8 @@ public class EthernetAddress extends DataLinkAddress {
     }
 
     /* Private constructor to satisfy JAXB */
+    @SuppressWarnings("unused")
     private EthernetAddress() {
-
     }
 
     /**

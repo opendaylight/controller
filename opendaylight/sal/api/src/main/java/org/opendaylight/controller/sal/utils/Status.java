@@ -16,6 +16,7 @@ import java.io.Serializable;
  * a string which describes a failure reason (if any) in human readable form.
  */
 public class Status implements Serializable {
+    private static final long serialVersionUID = 0L;
     private StatusCode code;
     private String description;
     private long requestId;
