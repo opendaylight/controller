@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.config.manager.impl.jmx;
 
-import java.util.Set;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-
-import org.opendaylight.controller.config.api.ModuleIdentifier;
+import java.util.Set;
 
 public class BaseJMXRegistrator implements AutoCloseable {
 
@@ -39,7 +38,7 @@ public class BaseJMXRegistrator implements AutoCloseable {
 
     public RootRuntimeBeanRegistratorImpl createRuntimeBeanRegistrator(
             ModuleIdentifier moduleIdentifier) {
-        return new RootRuntimeBeanRegistratorImpl(internalJMXRegistrator,
+        return new RootRuntimeBeanRegistratorImpl(internalJMXRegistrator.createChild(),
                 moduleIdentifier);
     }
 

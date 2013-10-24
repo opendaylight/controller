@@ -14,15 +14,21 @@ import org.opendaylight.controller.config.spi.Module;
 public abstract class AbstractMockedModule implements Module {
 
     protected final AutoCloseable instance;
-
-    public AbstractMockedModule() throws Exception {
-        instance = prepareMockedInstance();
-    }
+    private final ModuleIdentifier id;
 
     protected abstract AutoCloseable prepareMockedInstance() throws Exception;
 
-    public AbstractMockedModule(DynamicMBeanWithInstance old) {
-        instance = old.getInstance();
+    public AbstractMockedModule(DynamicMBeanWithInstance old, ModuleIdentifier id) {
+        if(old!=null)
+            instance = old.getInstance();
+        else
+            try {
+                instance = prepareMockedInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        this.id = id==null ? new ModuleIdentifier(getClass().getCanonicalName(), "mock") : id;
     }
 
     @Override
@@ -34,5 +40,9 @@ public abstract class AbstractMockedModule implements Module {
         return instance;
     }
 
+    @Override
+    public ModuleIdentifier getIdentifier() {
+        return id;
+    }
 
 }
