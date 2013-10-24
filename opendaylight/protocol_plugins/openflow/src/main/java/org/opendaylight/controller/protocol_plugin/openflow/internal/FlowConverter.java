@@ -454,10 +454,8 @@ public class FlowConverter {
             if (command == OFFlowMod.OFPFC_ADD
                     || command == OFFlowMod.OFPFC_MODIFY
                     || command == OFFlowMod.OFPFC_MODIFY_STRICT) {
-                if (flow.getIdleTimeout() != 0 || flow.getHardTimeout() != 0) {
                     // Instruct switch to let controller know when flow expires
-                    ((OFFlowMod) fm).setFlags((short) 1);
-                }
+                ((OFFlowMod) fm).setFlags((short) 1);
             }
         } else {
             ((V6FlowMod) fm).setVendor();
@@ -478,10 +476,8 @@ public class FlowConverter {
             if (command == OFFlowMod.OFPFC_ADD
                     || command == OFFlowMod.OFPFC_MODIFY
                     || command == OFFlowMod.OFPFC_MODIFY_STRICT) {
-                if (flow.getIdleTimeout() != 0 || flow.getHardTimeout() != 0) {
                     // Instruct switch to let controller know when flow expires
-                    ((V6FlowMod) fm).setFlags((short) 1);
-                }
+                ((V6FlowMod) fm).setFlags((short) 1);
             }
         }
         logger.trace("Openflow Match: {} Openflow Actions: {}", ofMatch,
