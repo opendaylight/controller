@@ -1,0 +1,31 @@
+module group-management {
+    namespace "urn:opendaylight:group:config";
+    prefix group-cfg;
+
+    import yang-ext {prefix ext;}
+    import opendaylight-inventory {prefix inv;}    
+    import opendaylight-group-types {prefix group;}
+
+    revision "2013-10-24" {
+        description "Initial revision of group service";
+    }
+
+    grouping group-entry {
+        leaf node {
+            type inv:node-ref;
+        }
+        uses group:group;
+    }   
+     
+    container groups {
+        list group {
+            key "id node"; 
+                        
+            leaf id {
+                type string;
+            }                       
+            
+            uses group-entry;
+        }
+    }    
+}

@@ -1,0 +1,31 @@
+module port-management {
+    namespace "urn:opendaylight:port:config";
+    prefix port-cfg;
+
+    import yang-ext {prefix ext;}
+    import opendaylight-inventory {prefix inv;}    
+    import opendaylight-port-types {prefix port;}
+
+    revision "2013-10-24" {
+        description "Initial revision of port service";
+    }
+
+    grouping port-entry {
+        leaf node {
+            type inv:node-ref;
+        }
+        uses port:ofp-port-mod;
+    }   
+     
+    container ports {
+        list port {
+            key "id node"; 
+                        
+            leaf id {
+                type string;
+            }                       
+            
+            uses port-entry;
+        }
+    }    
+}
