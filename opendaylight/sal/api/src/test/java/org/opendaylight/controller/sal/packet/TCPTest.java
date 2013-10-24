@@ -12,7 +12,6 @@ package org.opendaylight.controller.sal.packet;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.opendaylight.controller.sal.packet.TCP;
 
 public class TCPTest {
 
@@ -21,7 +20,7 @@ public class TCPTest {
         TCP tcp = new TCP();
         short tcpSourcePort = 118;
         tcp.setSourcePort(tcpSourcePort);
-        byte[] sourcePort = tcp.hdrFieldsMap.get("SourcePort");
+        byte[] sourcePort = tcp.hdrFieldsMap.get(TCP.SRCPORT);
         Assert.assertTrue(sourcePort[0] == 0);
         Assert.assertTrue(sourcePort[1] == 118);
 
@@ -32,7 +31,7 @@ public class TCPTest {
         TCP tcp = new TCP();
         short tcpDestinationPort = 443;
         tcp.setDestinationPort(tcpDestinationPort);
-        byte[] destinationPort = tcp.hdrFieldsMap.get("DestinationPort");
+        byte[] destinationPort = tcp.hdrFieldsMap.get(TCP.DESTPORT);
         Assert.assertTrue(destinationPort[0] == 1);
         Assert.assertTrue(destinationPort[1] == -69);
 
@@ -43,7 +42,7 @@ public class TCPTest {
         TCP tcp = new TCP();
         short tcpSequenceNumber = 700;
         tcp.setSequenceNumber(tcpSequenceNumber);
-        byte[] sequenceNumber = tcp.hdrFieldsMap.get("SequenceNumber");
+        byte[] sequenceNumber = tcp.hdrFieldsMap.get(TCP.SEQNUMBER);
         Assert.assertTrue(sequenceNumber[0] == 0);
         Assert.assertTrue(sequenceNumber[1] == 0);
         Assert.assertTrue(sequenceNumber[2] == 2);
@@ -55,7 +54,7 @@ public class TCPTest {
         TCP tcp = new TCP();
         short tcpAckNumber = 697;
         tcp.setAckNumber(tcpAckNumber);
-        byte[] ackNumber = tcp.hdrFieldsMap.get("AcknoledgementNumber");
+        byte[] ackNumber = tcp.hdrFieldsMap.get(TCP.ACKNUMBER);
         Assert.assertTrue(ackNumber[0] == 0);
         Assert.assertTrue(ackNumber[1] == 0);
         Assert.assertTrue(ackNumber[2] == 2);
@@ -67,7 +66,7 @@ public class TCPTest {
         TCP tcp = new TCP();
         short tcpFlags = 26;
         tcp.setHeaderLenFlags(tcpFlags);
-        byte[] headerLenFlags = tcp.hdrFieldsMap.get("HeaderLenFlags");
+        byte[] headerLenFlags = tcp.hdrFieldsMap.get(TCP.HEADERLENFLAGS);
         Assert.assertTrue(headerLenFlags[0] == 0);
         Assert.assertTrue(headerLenFlags[1] == 26);
 
@@ -78,7 +77,7 @@ public class TCPTest {
         TCP tcp = new TCP();
         short tcpWindowSize = 100;
         tcp.setWindowSize(tcpWindowSize);
-        byte[] windowSize = tcp.hdrFieldsMap.get("WindowSize");
+        byte[] windowSize = tcp.hdrFieldsMap.get(TCP.WINDOWSIZE);
         Assert.assertTrue(windowSize[0] == 0);
         Assert.assertTrue(windowSize[1] == 100);
 
@@ -89,7 +88,7 @@ public class TCPTest {
         TCP tcp = new TCP();
         short tcpChecksum = 134;
         tcp.setChecksum(tcpChecksum);
-        byte[] checksum = tcp.hdrFieldsMap.get("Checksum");
+        byte[] checksum = tcp.hdrFieldsMap.get(TCP.CHECKSUM);
         Assert.assertTrue(checksum[0] == 0);
         Assert.assertTrue(checksum[1] == -122);
 
@@ -100,7 +99,7 @@ public class TCPTest {
         TCP tcp = new TCP();
         short tcpUrgentPointer = 25098;
         tcp.setUrgentPointer(tcpUrgentPointer);
-        byte[] urgentPointer = tcp.hdrFieldsMap.get("UrgentPointer");
+        byte[] urgentPointer = tcp.hdrFieldsMap.get(TCP.URGENTPOINTER);
         Assert.assertTrue(urgentPointer[0] == 98);
         Assert.assertTrue(urgentPointer[1] == 10);
 
