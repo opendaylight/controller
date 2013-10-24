@@ -376,6 +376,23 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_946d4e35",
+        "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1214,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T17:33:40Z",
+      "side": 1,
+      "message": "I would also check for the removed value to make sure it actually existed and was removed. If not, return notfound",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_142cbe01",
         "filename": "opendaylight/switchmanager/implementation/src/main/java/org/opendaylight/controller/switchmanager/internal/SwitchManager.java",
         "patchSetId": 1
