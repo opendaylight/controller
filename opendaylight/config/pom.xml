@@ -9,7 +9,6 @@
         <relativePath>../commons/opendaylight</relativePath>
     </parent>
 
-
     <version>0.2.2-SNAPSHOT</version>
     <artifactId>config-subsystem</artifactId>
     <packaging>pom</packaging>
