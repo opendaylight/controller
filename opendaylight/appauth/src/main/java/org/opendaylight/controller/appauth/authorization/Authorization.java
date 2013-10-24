@@ -144,6 +144,7 @@ private static final Logger logger = LoggerFactory.getLogger(Authorization.class
             try {
                 toBeAdded.add((T) obj);
             } catch (ClassCastException e) {
+                logger.debug("Attempt to add a resource with invalid type");
                 allAdded = false;
             }
         }
@@ -152,23 +153,48 @@ private static final Logger logger = LoggerFactory.getLogger(Authorization.class
             new Status(StatusCode.SUCCESS, "One or more resources couldn't be added"));
     }
 
-    public Status addResourceToGroup(String groupName, T resource) {
+    @SuppressWarnings("unchecked")
+    @Override
+    public Status addResourceToGroup(String groupName, Object resource) {
         if (groupName == null || groupName.trim().isEmpty()) {
             return new Status(StatusCode.BADREQUEST, "Invalid group name");
         }
 
-        Set<T> group = resourceGroups.get(groupName);
-        if (group != null && resource != null) {
-            group.add(resource);
-            // Update cluster
-            resourceGroups.put(groupName, group);
-            return new Status(StatusCode.SUCCESS, "Resource added successfully");
+        if (resource == null) {
+            return new Status(StatusCode.BADREQUEST, "Null resource");
         }
 
-        return new Status(StatusCode.NOTFOUND, "Group not found or incompatible resource");
+        T castedResource = null;
+        try {
+            castedResource = (T) resource;
+        } catch (ClassCastException e) {
+            logger.debug("Attempt to add a resource with invalid type");
+            return new Status(StatusCode.BADREQUEST, "Incompatible resource");
+        }
+
+        Set<T> group = resourceGroups.get(groupName);
+        if (group == null) {
+            return new Status(StatusCode.NOTFOUND, "Group not found");
+        }
+
+        return addResourceToGroupInternal(groupName, castedResource);
     }
 
-    public Status removeRoleResourceGroupMapping(String groupName) {
+    /*
+     * Method child classes can overload if they need application specific
+     * checks on the resource
+     */
+    protected Status addResourceToGroupInternal(String groupName, T resource) {
+        Set<T> group = resourceGroups.get(groupName);
+        // Update group and cluster
+        group.add(resource);
+        resourceGroups.put(groupName, group);
+
+        return new Status(StatusCode.SUCCESS, "Resource added successfully");
+
+    }
+
+    private Status removeRoleResourceGroupMapping(String groupName) {
         List<String> affectedRoles = new ArrayList<String>();
         Status result;
         for (Entry<String, Set<ResourceGroup>> pairs : groupsAuthorizations.entrySet()) {
@@ -215,7 +241,8 @@ private static final Logger logger = LoggerFactory.getLogger(Authorization.class
     }
 
 
-    public Status removeResourceFromGroup(String groupName, T resource) {
+    @Override
+    public Status removeResourceFromGroup(String groupName, Object resource) {
         if (groupName == null || groupName.trim().isEmpty()) {
             return new Status(StatusCode.BADREQUEST, "Invalid group name");
         }
@@ -533,6 +560,24 @@ private static final Logger logger = LoggerFactory.getLogger(Authorization.class
             return false;
         }
         return roles.containsKey(roleName);
+    }
+
+    @Override
+    public boolean isApplicationUser(String userName) {
+        IUserManager userManager = (IUserManager) ServiceHelper
+                .getGlobalInstance(IUserManager.class, this);
+        if (userManager == null) {
+            return false;
+        }
+        List<String> roles = userManager.getUserRoles(userName);
+        if (roles != null && !roles.isEmpty()) {
+            for (String role : roles) {
+                if (isApplicationRole(role)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
