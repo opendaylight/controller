@@ -186,6 +186,24 @@
       "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_45ce0785",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2013-10-24T17:35:43Z",
+      "side": 1,
+      "message": "This is so that they can\u0027t be pulled out from under us while we\u0027re in the middle of something which would cause an NPE, right?",
+      "parentUuid": "da6255ed_5d36fb04",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
