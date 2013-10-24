@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7f10734e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-24T21:01:08Z",
+      "side": 1,
+      "message": "hander --\u003e handler :)",
+      "revId": "770bd445c5de20e24f176533404da193761a7af9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3f1afb6e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-24T21:01:08Z",
+      "side": 1,
+      "message": "enabbling - shouldn\u0027t it be enabling?",
+      "revId": "770bd445c5de20e24f176533404da193761a7af9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_df207f9d",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-24T21:01:08Z",
+      "side": 1,
+      "message": "Please don\u0027t start the interface with capital \"I\" - it\u0027s very non standard in Java.",
+      "revId": "770bd445c5de20e24f176533404da193761a7af9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_1f4e1770",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-24T21:01:08Z",
+      "side": 1,
+      "message": "AFAIK, enum is static anyway, no need to define it as static.\nAlso, can you please give it a more meaningful name ? maybe broadcast mode?\nAnother thought/question - is this enum to be used only with this interface?\nBecause if there are other components/classes that can reuse it, it will be better to declare it in a separate file to be on its own, so other places won\u0027t depend on this interface.",
+      "revId": "770bd445c5de20e24f176533404da193761a7af9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ff2b4380",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/IBroadcastPortSelector.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-24T21:01:08Z",
+      "side": 1,
+      "message": "Please don\u0027t start the interface with capital \"I\" - it\u0027s very non standard in Java.",
+      "revId": "770bd445c5de20e24f176533404da193761a7af9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_bf5cab26",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-24T21:01:08Z",
+      "side": 1,
+      "message": "why there\u0027s no public/private/protected modifier on this method and all the methods below? it\u0027s means they are package protected which is very fragile. please define them with a proper modifier. thank you",
+      "revId": "770bd445c5de20e24f176533404da193761a7af9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
