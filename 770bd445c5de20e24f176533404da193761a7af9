@@ -173,6 +173,24 @@
       "revId": "770bd445c5de20e24f176533404da193761a7af9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7fdab379",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T23:16:32Z",
+      "side": 1,
+      "message": "Hi Colin, there are indeed a few places left where package access is (wrongfully) used, but we should try to eliminate these occurrences whenever we touch that code.\n\nEither way, here it\u0027s clearly a mistake to use package, and IMHO when you have an opportunity to write clean code you should take it :)",
+      "parentUuid": "da6255ed_bfaa6bd2",
+      "revId": "770bd445c5de20e24f176533404da193761a7af9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
