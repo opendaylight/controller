@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_14b71eda",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "Can you add a bit more detail to the javadoc. This gets documented any any additional details should help usability.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_14defe11",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "Appears like this API only allows property management and not any other aspects of the controller. Do you expect this NB to evolve in the future to allow managing other aspects?",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_74a09a90",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "Use plural for listings - .../properties",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_54ad9687",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "This is filtering. Use a QueryParam instead. You can likely collapse this and the previous retrieve methods into a single one.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_34aa2271",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerManagerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "Is a resource not found situation? Appears like we are unable to create the property.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f4bb6ac2",
+        "filename": "opendaylight/northbound/controllermanager/src/main/java/org/opendaylight/controller/controllermanager/northbound/ControllerProperties.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "Javadoc this element, it gets documented.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d4b066df",
+        "filename": "opendaylight/northbound/controllermanager/src/main/resources/META-INF/spring.factories",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "This file is not needed.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_94caee4d",
+        "filename": "opendaylight/northbound/controllermanager/src/main/resources/META-INF/spring.handlers",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "This file is not necessary. I understand that you used another NB as a template, but the spring related files are not required. You can remove them.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_74c77a46",
+        "filename": "opendaylight/northbound/controllermanager/src/main/resources/META-INF/spring.schemas",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "This file can be removed as well.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_54c4763f",
+        "filename": "opendaylight/northbound/controllermanager/src/main/resources/META-INF/spring.tooling",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-24T16:53:00Z",
+      "side": 1,
+      "message": "Remove this file.",
+      "revId": "1e0fd9450f4bfddbfca7b2e86a14c9448a733e40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
