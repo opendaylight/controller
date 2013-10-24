@@ -204,6 +204,24 @@
       "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7f48732d",
+        "filename": "opendaylight/samples/simpleforwarding/src/main/java/org/opendaylight/controller/samples/simpleforwarding/internal/SimpleBroadcastHandlerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-24T23:16:23Z",
+      "side": 1,
+      "message": "It\u0027s probably not a good idea to block a DM thread (the one that executes the dependency callbacks) to wait for an application method.\nSince you need all three services anyway (I don\u0027t see bps used anywhere?) just make them required deps and you won\u0027t need all this unhealthy locking :)\nP.S. In the entire history of this controller I haven\u0027t encountered the problem you\u0027re anticipating here.",
+      "parentUuid": "da6255ed_45ce0785",
+      "revId": "7930e5816a61cc520e91a2be84b50d22ab8bbd94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
