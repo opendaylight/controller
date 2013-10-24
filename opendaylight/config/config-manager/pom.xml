@@ -85,7 +85,6 @@
                             org.slf4j,
                             javax.management,
                             org.osgi.framework,
-                            org.opendaylight.protocol.concepts,
                             org.apache.commons.io,
                             org.osgi.util.tracker,
                         </Import-Package>

@@ -34,7 +34,6 @@
                     <instructions>
                         <Import-Package>
                             javax.management,
-                            org.opendaylight.protocol.concepts,
                             org.osgi.framework,
                         </Import-Package>
                         <Export-Package>
