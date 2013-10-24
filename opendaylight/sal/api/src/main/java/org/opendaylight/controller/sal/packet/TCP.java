@@ -21,16 +21,16 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class TCP extends Packet {
 
-    private static final String SRCPORT = "SourcePort";
-    private static final String DESTPORT = "DestinationPort";
-    private static final String SEQNUMBER = "SequenceNumber";
-    private static final String ACKNUMBER = "AcknoledgementNumber";
-    private static final String DATAOFFSET = "DataOffset";
-    private static final String RESERVED = "Reserved";
-    private static final String HEADERLENFLAGS = "HeaderLenFlags";
-    private static final String WINDOWSIZE = "WindowSize";
-    private static final String CHECKSUM = "Checksum";
-    private static final String URGENTPOINTER = "UrgentPointer";
+    public static final String SRCPORT = "SourcePort";
+    public static final String DESTPORT = "DestinationPort";
+    public static final String SEQNUMBER = "SequenceNumber";
+    public static final String ACKNUMBER = "AcknowledgementNumber";
+    public static final String DATAOFFSET = "DataOffset";
+    public static final String RESERVED = "Reserved";
+    public static final String HEADERLENFLAGS = "HeaderLenFlags";
+    public static final String WINDOWSIZE = "WindowSize";
+    public static final String CHECKSUM = "Checksum";
+    public static final String URGENTPOINTER = "UrgentPointer";
 
     private static Map<String, Pair<Integer, Integer>> fieldCoordinates = new LinkedHashMap<String, Pair<Integer, Integer>>() {
         private static final long serialVersionUID = 1L;
