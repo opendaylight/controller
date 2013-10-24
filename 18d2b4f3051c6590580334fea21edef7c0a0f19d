@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_39b69b3e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-10-24T09:04:43Z",
+      "side": 1,
+      "message": "I had prepared bump in fix with commit message before rebasign to dependend fix - haven\u0027t noticed that previous fix resolved this bump to version 0.2.2",
+      "parentUuid": "da6255ed_59626fd9",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_793773e4",
         "filename": "opendaylight/config/config-api/.gitignore",
         "patchSetId": 1
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_99afc7e3",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/DestroyedModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-10-24T09:04:43Z",
+      "side": 1,
+      "message": "It\u0027s because of getName method which has to be deprecated and still returns name property.",
+      "parentUuid": "da6255ed_d9577f01",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_9941073c",
         "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/TransactionIdentifier.java",
         "patchSetId": 1
@@ -64,6 +100,24 @@
       "writtenOn": "2013-10-23T13:51:01Z",
       "side": 1,
       "message": "why is there a need for an entire class just to hold a single string member?",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_1983d757",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/TransactionIdentifier.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-10-24T09:04:43Z",
+      "side": 1,
+      "message": "This is typeSafe solution, object has to be used for logging and deeper integration of identifier concept in the future.",
+      "parentUuid": "da6255ed_9941073c",
       "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_d9b65f8a",
+        "filename": "opendaylight/config/config-manager/src/test/java/org/opendaylight/controller/config/manager/testingservices/parallelapsp/TestingParallelAPSPModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-10-24T09:04:43Z",
+      "side": 1,
+      "message": "Will fix that.",
+      "parentUuid": "da6255ed_793e53ba",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_594b8f59",
         "filename": "opendaylight/config/config-manager/src/test/java/org/opendaylight/controller/config/manager/testingservices/scheduledthreadpool/TestingScheduledThreadPoolModule.java",
         "patchSetId": 1
@@ -98,6 +170,24 @@
       "writtenOn": "2013-10-23T13:51:01Z",
       "side": 1,
       "message": "same here as in another similar place - 2 methods with different names returning exactly the same information.",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b9bbab71",
+        "filename": "opendaylight/config/config-manager/src/test/java/org/opendaylight/controller/config/manager/testingservices/scheduledthreadpool/TestingScheduledThreadPoolModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-10-24T09:04:43Z",
+      "side": 1,
+      "message": "Will fix that.",
+      "parentUuid": "da6255ed_594b8f59",
       "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_79ad3331",
+        "filename": "opendaylight/netconf/netconf-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-10-24T09:04:43Z",
+      "side": 1,
+      "message": "Will fix that.",
+      "parentUuid": "da6255ed_3948db5a",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_19751798",
         "filename": "opendaylight/netconf/netconf-impl/pom.xml",
         "patchSetId": 1
@@ -132,6 +240,24 @@
       "writtenOn": "2013-10-23T13:51:01Z",
       "side": 1,
       "message": "same as above.",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_99b0e78c",
+        "filename": "opendaylight/netconf/netconf-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-10-24T09:04:43Z",
+      "side": 1,
+      "message": "Will fix that.",
+      "parentUuid": "da6255ed_19751798",
       "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_59aa6f1a",
+        "filename": "opendaylight/netconf/netconf-it/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-10-24T09:04:43Z",
+      "side": 1,
+      "message": "Will fix that.",
+      "parentUuid": "da6255ed_f9792394",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_d96e5fc9",
         "filename": "opendaylight/netconf/netconf-util/pom.xml",
         "patchSetId": 1
@@ -166,6 +310,24 @@
       "writtenOn": "2013-10-23T13:51:01Z",
       "side": 1,
       "message": "version inheritance",
+      "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_39a7bb51",
+        "filename": "opendaylight/netconf/netconf-util/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 917
+      },
+      "writtenOn": "2013-10-24T09:04:43Z",
+      "side": 1,
+      "message": "Will fix that.",
+      "parentUuid": "da6255ed_d96e5fc9",
       "revId": "18d2b4f3051c6590580334fea21edef7c0a0f19d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
