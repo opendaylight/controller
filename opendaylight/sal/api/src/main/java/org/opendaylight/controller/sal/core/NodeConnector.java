@@ -97,42 +97,42 @@ public class NodeConnector implements Serializable {
         // for Unit Testing coverage
         static {
             compatibleType.put(CONTROLLER,
-                               new ImmutablePair(Short.class, null));
+                               new ImmutablePair<Class<? extends Object>, String>(Short.class, null));
             compatibleType.put(ALL,
-                               new ImmutablePair(Short.class, null));
+                               new ImmutablePair<Class<? extends Object>, String>(Short.class, null));
             compatibleType.put(SWSTACK,
-                               new ImmutablePair(Short.class, null));
+                               new ImmutablePair<Class<? extends Object>, String>(Short.class, null));
             compatibleType.put(HWPATH,
-                               new ImmutablePair(Short.class, null));
+                               new ImmutablePair<Class<? extends Object>, String>(Short.class, null));
             compatibleType.put(OPENFLOW,
-                               new ImmutablePair(Short.class,
+                               new ImmutablePair<Class<? extends Object>, String>(Short.class,
                                                  Node.NodeIDType.OPENFLOW));
             compatibleType.put(PCEP,
-                               new ImmutablePair(Integer.class,
+                               new ImmutablePair<Class<? extends Object>, String>(Integer.class,
                                                  Node.NodeIDType.PCEP));
             compatibleType.put(ONEPK,
-                               new ImmutablePair(String.class,
+                               new ImmutablePair<Class<? extends Object>, String>(String.class,
                                                  Node.NodeIDType.ONEPK));
             compatibleType.put(OPENFLOW2PCEP,
-                               new ImmutablePair(Short.class,
+                               new ImmutablePair<Class<? extends Object>, String>(Short.class,
                                                  Node.NodeIDType.OPENFLOW));
             compatibleType.put(OPENFLOW2ONEPK,
-                               new ImmutablePair(Short.class,
+                               new ImmutablePair<Class<? extends Object>, String>(Short.class,
                                                  Node.NodeIDType.OPENFLOW));
             compatibleType.put(PCEP2OPENFLOW,
-                               new ImmutablePair(Integer.class,
+                               new ImmutablePair<Class<? extends Object>, String>(Integer.class,
                                                  Node.NodeIDType.PCEP));
             compatibleType.put(PCEP2ONEPK,
-                               new ImmutablePair(Integer.class,
+                               new ImmutablePair<Class<? extends Object>, String>(Integer.class,
                                                  Node.NodeIDType.PCEP));
             compatibleType.put(ONEPK2OPENFLOW,
-                               new ImmutablePair(String.class,
+                               new ImmutablePair<Class<? extends Object>, String>(String.class,
                                                  Node.NodeIDType.ONEPK));
             compatibleType.put(ONEPK2PCEP,
-                               new ImmutablePair(String.class,
+                               new ImmutablePair<Class<? extends Object>, String>(String.class,
                                                  Node.NodeIDType.ONEPK));
             compatibleType.put(PRODUCTION,
-                               new ImmutablePair(String.class,
+                               new ImmutablePair<Class<? extends Object>, String>(String.class,
                                                  Node.NodeIDType.PRODUCTION));
         }
 
@@ -186,7 +186,7 @@ public class NodeConnector implements Serializable {
             if (compatibleType.get(type) != null) {
                 return false;
             }  else {
-                compatibleType.put(type, new ImmutablePair(compatibleID,
+                compatibleType.put(type, new ImmutablePair<Class<? extends Object>, String>(compatibleID,
                                                            compatibleNode));
                 return true;
             }
@@ -340,6 +340,7 @@ public class NodeConnector implements Serializable {
      *
      * @param type of node to be set
      */
+    @SuppressWarnings("unused")
     private void setType(String type) {
         this.nodeConnectorType = type;
         if (this.nodeConnectorIDString != null) {
@@ -373,6 +374,7 @@ public class NodeConnector implements Serializable {
      *
      * @param nodeConnectorIDString String representation for NodeConnectorID
      */
+    @SuppressWarnings("unused")
     private void setNodeConnectorIDString(String IDStr) {
         this.nodeConnectorIDString = IDStr;
         if (this.nodeConnectorType != null) {
