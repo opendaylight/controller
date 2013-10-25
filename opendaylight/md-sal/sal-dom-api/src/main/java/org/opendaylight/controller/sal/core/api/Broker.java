@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.core.api;
 
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RoutedRegistration;
@@ -14,6 +15,7 @@ import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationPublishService;
 import org.opendaylight.controller.sal.core.api.notify.NotificationService;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -229,6 +231,10 @@ public interface Broker {
 
         @Override
         boolean isClosed();
+
+        Set<QName> getSupportedRpcs();
+        
+        ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener);
     }
 
     public interface RpcRegistration extends Registration<RpcImplementation> {
