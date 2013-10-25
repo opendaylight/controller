@@ -12,10 +12,10 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
 
     @Property
     private ConsumerSession context;
-    
+
     @Property
     private DataBrokerService dataService;
-    
+
     override readConfigurationData(InstanceIdentifier path) {
         return dataService.readConfigurationData(path);
     }
@@ -23,22 +23,22 @@ class BrokerFacade implements DataReader<InstanceIdentifier, CompositeNode> {
     override readOperationalData(InstanceIdentifier path) {
         return dataService.readOperationalData(path);
     }
-    
+
     def RpcResult<CompositeNode> invokeRpc(QName type, CompositeNode payload) {
         val future = context.rpc(type, payload);
         return future.get;
     }
-    
+
     def commitConfigurationDataUpdate(InstanceIdentifier path, CompositeNode payload) {
         val transaction = dataService.beginTransaction;
         transaction.putConfigurationData(path, payload);
         return transaction.commit()
     }
-    
+
     def commitConfigurationDataCreate(InstanceIdentifier path, CompositeNode payload) {
         val transaction = dataService.beginTransaction;
         transaction.putConfigurationData(path, payload);
         return transaction.commit()
     }
-    
+
 }
