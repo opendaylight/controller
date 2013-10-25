@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_7fcbd372",
+        "filename": "opendaylight/protocol_plugins/openflow/src/main/java/org/opendaylight/controller/protocol_plugin/openflow/internal/FlowConverter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 457,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2013-10-25T01:34:55Z",
+      "side": 1,
+      "message": "\"... when flow is removed for any reason (e.g. expired, manually removed, etc.)\"",
+      "revId": "63d60b52f14c8714928ddcab90acdb1f813bed73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
