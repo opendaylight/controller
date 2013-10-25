@@ -9,6 +9,10 @@ import org.opendaylight.yangtools.yang.common.QName
 import org.osgi.framework.BundleContext
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration
+import static java.util.Collections.*
+import java.util.Collections
+import java.util.HashMap
+import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
 
 class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession {
 
@@ -41,7 +45,7 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
             throw new IllegalStateException(
                 "Implementation was not registered in this session");
         }
-        broker.removeRpcImplementation(implToRemove.type);
+        broker.removeRpcImplementation(implToRemove.type,localImpl);
         rpcImpls.remove(implToRemove.type);
     }
     
@@ -53,7 +57,7 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
     private def removeAllRpcImlementations() {
     	if (!rpcImpls.empty) {
     		for (entry : rpcImpls.entrySet) {
-    			broker.removeRpcImplementation(entry.key);
+    			broker.removeRpcImplementation(entry.key,entry.value);
     		}
     		rpcImpls.clear
     	}
@@ -67,6 +71,13 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
     
+    override getSupportedRpcs() {
+        broker.getSupportedRpcs();
+    }
+    
+    override addRpcRegistrationListener(RpcRegistrationListener listener) {
+        broker.addRpcRegistrationListener(listener);
+    }
 }
 
 class RpcRegistrationImpl extends AbstractObjectRegistration<RpcImplementation> implements RpcRegistration {
