@@ -20,8 +20,8 @@ module flow-management {
 
     container flows {
         list flow {
-            key "id node";
-            
+            key "node priority table_id"; 
+
             leaf id {
                 type string;
             }
