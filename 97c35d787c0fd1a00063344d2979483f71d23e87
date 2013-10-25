@@ -16,6 +16,24 @@
       "revId": "97c35d787c0fd1a00063344d2979483f71d23e87",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ba87190f",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/run.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2013-10-25T21:41:43Z",
+      "side": 1,
+      "message": "yes it should be ODL_DATADIR. The way run.sh is right now they are both the same which is why it was working.",
+      "parentUuid": "da6255ed_fa8d9132",
+      "revId": "97c35d787c0fd1a00063344d2979483f71d23e87",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
