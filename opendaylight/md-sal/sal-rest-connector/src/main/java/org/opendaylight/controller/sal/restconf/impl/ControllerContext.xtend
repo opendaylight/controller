@@ -24,6 +24,7 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
 
 import static com.google.common.base.Preconditions.*
+import java.util.Date
 
 class ControllerContext {
 
@@ -36,17 +37,35 @@ class ControllerContext {
     public def InstanceIdWithSchemaNode toInstanceIdentifier(String restconfInstance) {
         val ret = InstanceIdentifier.builder();
         val pathArgs = restconfInstance.split("/");
+        if (pathArgs.empty) {
+            return null;
+        }
         val schemaNode = ret.collectPathArguments(pathArgs, restconfInstance.findModule);
         new InstanceIdWithSchemaNode(ret.toInstance, schemaNode)
     }
-    
+
     def findModule(String restconfInstance) {
+        checkNotNull(restconfInstance);
         val pathArgs = restconfInstance.split("/");
-        val first = pathArgs.get(0);
-        val startModule = first.toModuleName();
-        val module = schemas.findModuleByNamespace(moduleNameToUri.get(startModule));
-        checkArgument(module.size == 1); // Only one version supported now
-        module.iterator.next
+        if (pathArgs.empty) {
+            return null;
+        }
+        val modulWithFirstYangStatement = pathArgs.filter[s|s.contains(":")].head
+        val startModule = modulWithFirstYangStatement.toModuleName();
+        schemas.getLatestModule(startModule)
+    }
+
+    private def getLatestModule(SchemaContext schema, String moduleName) {
+        checkNotNull(schema)
+        checkArgument(moduleName != null && !moduleName.empty)
+        val modules = schema.modules.filter[m|m.name == moduleName]
+        var latestModule = modules.head
+        for (module : modules) {
+            if (module.revision.after(latestModule.revision)) {
+                latestModule = module
+            }
+        }
+        return latestModule
     }
 
     def String toFullRestconfIdentifier(InstanceIdentifier path) {
@@ -137,30 +156,27 @@ class ControllerContext {
         return URLEncoder.encode(object.toString)
     }
 
-    def DataSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings, DataNodeContainer parentNode) {
+    def DataSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings,
+        DataNodeContainer parentNode) {
         checkNotNull(strings)
-        if (strings.length == 0) {
-            return null;
+        if (strings.empty) {
+            return parentNode as DataSchemaNode;
         }
-        val nodeRef = strings.get(0);
+        val nodeRef = strings.head;
 
         //val moduleName = nodeRef.toModuleName();
         val nodeName = nodeRef.toNodeName();
-        val naiveTargetNode = parentNode.getDataChildByName(nodeName);
+        val targetNode = parentNode.getDataChildByName(nodeName);
+        if (targetNode == null) {
+            return null
+        }
 
-        //var URI namespace;
-        var DataSchemaNode targetNode = naiveTargetNode;
-
-        /*if(moduleName !== null) {
-            namespace = moduleNameToUri.get(moduleName);
-            
-        }*/
         // Number of consumed elements
         var consumed = 1;
         if (targetNode instanceof ListSchemaNode) {
             val listNode = targetNode as ListSchemaNode;
             val keysSize = listNode.keyDefinition.size
-            val uriKeyValues = strings.subList(1, keysSize);
+            val uriKeyValues = strings.subList(consumed, consumed + keysSize);
             val keyValues = new HashMap<QName, Object>();
             var i = 0;
             for (key : listNode.keyDefinition) {
@@ -176,11 +192,11 @@ class ControllerContext {
             builder.node(targetNode.QName);
         }
         if (targetNode instanceof DataNodeContainer) {
-            val remaining = strings.subList(consumed, strings.length - 1);
+            val remaining = strings.subList(consumed, strings.length);
             val result = builder.collectPathArguments(remaining, targetNode as DataNodeContainer);
             return result
         }
-        
+
         return targetNode
     }
 
@@ -193,6 +209,7 @@ class ControllerContext {
     }
 
     def String toModuleName(String str) {
+        checkNotNull(str)
         if (str.contains(":")) {
             val args = str.split(":");
             checkArgument(args.size === 2);
@@ -211,9 +228,7 @@ class ControllerContext {
             return str;
         }
     }
-    
+
     public def QName toRpcQName(String name) {
-        
-        
     }
 }

@@ -4,10 +4,10 @@ import org.opendaylight.yangtools.yang.data.api.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 public class InstanceIdWithSchemaNode {
-    
+
     private final InstanceIdentifier instanceIdentifier;
     private final DataSchemaNode schemaNode;
-    
+
     public InstanceIdWithSchemaNode(InstanceIdentifier instanceIdentifier, DataSchemaNode schemaNode) {
         this.instanceIdentifier = instanceIdentifier;
         this.schemaNode = schemaNode;
@@ -20,5 +20,5 @@ public class InstanceIdWithSchemaNode {
     public DataSchemaNode getSchemaNode() {
         return schemaNode;
     }
-    
+
 }
