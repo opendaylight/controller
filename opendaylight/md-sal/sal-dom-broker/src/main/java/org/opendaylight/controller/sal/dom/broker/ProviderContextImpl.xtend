@@ -8,6 +8,7 @@ import org.osgi.framework.BundleContext
 import static java.util.Collections.*
 import java.util.Collections
 import java.util.HashMap
+import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
 
 class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession {
 
@@ -53,4 +54,11 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
         throw new UnsupportedOperationException("TODO: auto-generated method stub")
     }
     
+    override getSupportedRpcs() {
+        broker.getSupportedRpcs();
+    }
+    
+    override addRpcRegistrationListener(RpcRegistrationListener listener) {
+        broker.addRpcRegistrationListener(listener);
+    }
 }
