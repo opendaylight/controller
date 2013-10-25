@@ -8,35 +8,11 @@
 
 package org.opendaylight.controller.netconf.it;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.internal.util.Checks.checkNotNull;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.HashedWheelTimer;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import javax.management.ObjectName;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -51,21 +27,11 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.impl.HardcodedYangStoreService;
-import org.opendaylight.controller.config.yang.test.impl.Asdf;
-import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
-import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
-import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
-import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeMXBean;
-import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplRuntimeRegistrator;
-import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
+import org.opendaylight.controller.config.yang.test.impl.*;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClient;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
-import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
-import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
-import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
-import org.opendaylight.controller.netconf.impl.SessionIdProvider;
+import org.opendaylight.controller.netconf.impl.*;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
@@ -78,9 +44,27 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import javax.management.ObjectName;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.internal.util.Checks.checkNotNull;
 
 public class NetconfITTest extends AbstractConfigTest {
 
@@ -174,6 +158,21 @@ public class NetconfITTest extends AbstractConfigTest {
     static List<ModuleFactory> getModuleFactoriesS() {
         return Lists.newArrayList(new TestImplModuleFactory(), new DepTestImplModuleFactory(),
                 new NetconfTestImplModuleFactory());
+    }
+
+    @Test
+    public void testNetconfClientDemonstration() throws Exception {
+        try (NetconfClient netconfClient = new NetconfClient("client", tcpAddress, 4000)) {
+
+            Set<String> capabilitiesFromNetconfServer = netconfClient.getCapabilities();
+            long sessionId = netconfClient.getSessionId();
+
+            // NetconfMessage can be created :
+            // new NetconfMessage(XmlUtil.readXmlToDocument("<xml/>"));
+
+            NetconfMessage response = netconfClient.sendMessage(getConfig);
+            response.getDocument();
+        }
     }
 
     @Test
