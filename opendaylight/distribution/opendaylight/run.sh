@@ -8,6 +8,7 @@ cwd=`pwd`
 cd ./target/distribution.opendaylight-osgipackage/opendaylight/
 
 # Run the controller
+./run.sh -stop
 ./run.sh
 
 # Store the exit value of the controller in a variable
