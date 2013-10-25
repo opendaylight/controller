@@ -26,6 +26,7 @@ public class NodeConnectorTest {
     public void testNodeConnectorOpenFlowOfWrongType() {
         try {
             Node n1 = new Node(Node.NodeIDType.OPENFLOW, new Long(110L));
+            @SuppressWarnings("unused")
             NodeConnector of1 = new NodeConnector(
                     NodeConnector.NodeConnectorIDType.OPENFLOW, new String(
                             "0xDEADBEEFCAFE0001L"), n1);
@@ -45,6 +46,7 @@ public class NodeConnectorTest {
     public void testNodeConnectorONEPKOfWrongType() {
         try {
             Node n1 = new Node(Node.NodeIDType.ONEPK, new String("Router1"));
+            @SuppressWarnings("unused")
             NodeConnector onepk1 = new NodeConnector(
                     NodeConnector.NodeConnectorIDType.ONEPK, new Long(
                             0xDEADBEEFCAFE0001L), n1);
@@ -64,6 +66,7 @@ public class NodeConnectorTest {
     public void testNodeConnectorPCEPOfWrongType() {
         try {
             Node n1 = new Node(Node.NodeIDType.PCEP, new UUID(0L, 0L));
+            @SuppressWarnings("unused")
             NodeConnector pcep1 = new NodeConnector(
                     NodeConnector.NodeConnectorIDType.PCEP, new Long(
                             0xDEADBEEFCAFE0001L), n1);
@@ -310,6 +313,7 @@ public class NodeConnectorTest {
         }
     }
 
+    @SuppressWarnings("unused")
     @Test
     public void testIncompatibleNodes() {
         try {

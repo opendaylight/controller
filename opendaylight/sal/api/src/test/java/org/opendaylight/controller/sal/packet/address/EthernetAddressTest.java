@@ -23,6 +23,7 @@ import org.opendaylight.controller.sal.core.ConstructionException;
 public class EthernetAddressTest {
     @Test
     public void testNonValidConstructor() {
+        @SuppressWarnings("unused")
         EthernetAddress ea1;
         // Null input array
         try {

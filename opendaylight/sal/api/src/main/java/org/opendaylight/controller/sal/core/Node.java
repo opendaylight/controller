@@ -244,6 +244,7 @@ public class Node implements Serializable {
      *
      * @param type of node to be set
      */
+    @SuppressWarnings("unused")
     private void setType(String type) {
         this.nodeType = type;
         if (this.nodeIDString != null) {
@@ -280,6 +281,7 @@ public class Node implements Serializable {
      *
      * @param nodeIDString String representation for NodeID
      */
+    @SuppressWarnings("unused")
     private void setNodeIDString(String nodeIDString) {
         this.nodeIDString = nodeIDString;
         if (this.nodeType != null) {

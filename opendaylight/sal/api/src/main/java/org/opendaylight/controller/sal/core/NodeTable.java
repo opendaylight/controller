@@ -176,11 +176,12 @@ public class NodeTable implements Serializable {
     }
 
     /**
-     * @param type the nodeTableType to set
-     *
      * Private setter for nodeConnectorType to be called by JAXB not by anyone
      * else, NodeConnector is immutable
+     *
+     * @param type the nodeTableType to set
      */
+    @SuppressWarnings("unused")
     private void setType(String type) {
         this.nodeTableType = type;
         if (this.nodeTableIDString != null) {

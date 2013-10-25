@@ -44,6 +44,7 @@ public class Edge implements Serializable {
     /**
      * Private constructor used for JAXB mapping
      */
+    @SuppressWarnings("unused")
     private Edge() {
         this.tailNodeConnector = null;
         this.headNodeConnector = null;

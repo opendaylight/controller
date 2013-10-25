@@ -41,6 +41,7 @@ public class Path implements Serializable {
     /**
      * Private constructor used for JAXB mapping
      */
+    @SuppressWarnings("unused")
     private Path() {
         this.edges = null;
     }
