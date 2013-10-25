@@ -24,6 +24,7 @@ import org.opendaylight.controller.sal.packet.address.EthernetAddress;
 public class EthernetAddressTest {
     @Test
     public void testNonValidConstructor() {
+        @SuppressWarnings("unused")
         EthernetAddress ea1;
         // Null input array
         try {

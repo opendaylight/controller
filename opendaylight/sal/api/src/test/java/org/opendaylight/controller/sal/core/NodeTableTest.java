@@ -16,6 +16,7 @@ public class NodeTableTest {
     public void testNodeTableOpenFlowOfWrongType() {
         try {
             Node node = NodeCreator.createOFNode((long) 20);
+            @SuppressWarnings("unused")
             NodeTable of1 = new NodeTable(NodeTable.NodeTableIDType.OPENFLOW, "name", node);
 
             // If we reach this point the exception was not raised

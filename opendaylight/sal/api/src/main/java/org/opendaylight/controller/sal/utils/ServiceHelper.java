@@ -67,7 +67,7 @@ public class ServiceHelper {
     public static boolean registerGlobalService(Class<?> clazz,
                                                 Object instance,
                                                 Dictionary<String, Object> properties) {
-        ServiceRegistration registration = registerGlobalServiceWReg(clazz, instance, properties);
+        ServiceRegistration<?> registration = registerGlobalServiceWReg(clazz, instance, properties);
         if (registration == null) {
             logger.error("Failed to register {} for instance {}", clazz, instance);
             return false;
@@ -87,7 +87,7 @@ public class ServiceHelper {
      * registration
      * @return the ServiceRegistration if registration happened, null otherwise
      */
-    public static ServiceRegistration registerServiceWReg(Class<?> clazz, String containerName,
+    public static ServiceRegistration<?> registerServiceWReg(Class<?> clazz, String containerName,
                                                           Object instance, Dictionary<String, Object> properties) {
         if (properties == null) {
             properties = (Dictionary<String, Object>) new Hashtable<String, Object>();
@@ -107,7 +107,7 @@ public class ServiceHelper {
      * registration
      * @return the ServiceRegistration if registration happened, null otherwise
      */
-    public static ServiceRegistration registerGlobalServiceWReg(Class<?> clazz,
+    public static ServiceRegistration<?> registerGlobalServiceWReg(Class<?> clazz,
                                                                 Object instance,
                                                                 Dictionary<String, Object> properties) {
         try {
@@ -117,7 +117,7 @@ public class ServiceHelper {
                 return null;
             }
 
-            ServiceRegistration registration = bCtx.registerService(clazz.getName(), instance, properties);
+            ServiceRegistration<?> registration = bCtx.registerService(clazz.getName(), instance, properties);
             return registration;
         } catch (Exception e) {
             logger.error("Exception {} while registering the service {}",
@@ -206,7 +206,7 @@ public class ServiceHelper {
             BundleContext bCtx = FrameworkUtil.getBundle(bundle.getClass())
                     .getBundleContext();
 
-            ServiceReference[] services = null;
+            ServiceReference<?>[] services = null;
             if (serviceFilter != null) {
                 services = bCtx.getServiceReferences(clazz.getName(),
                         "(&(containerName=" + containerName + ")"
@@ -244,7 +244,7 @@ public class ServiceHelper {
             BundleContext bCtx = FrameworkUtil.getBundle(bundle.getClass())
                     .getBundleContext();
 
-            ServiceReference[] services = bCtx.getServiceReferences(clazz
+            ServiceReference<?>[] services = bCtx.getServiceReferences(clazz
                     .getName(), serviceFilter);
 
             if (services != null) {

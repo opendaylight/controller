@@ -71,6 +71,7 @@ public class PathTest {
         }
 
         try {
+            @SuppressWarnings("unused")
             Path res = new Path(edges);
         } catch (ConstructionException e) {
             // Exception is NOT expected if raised test will fail
@@ -83,6 +84,7 @@ public class PathTest {
         edges.remove(2);
 
         try {
+            @SuppressWarnings("unused")
             Path res = new Path(edges);
             // Exception is expected if not raised test will fail
             Assert.assertTrue(false);
@@ -236,7 +238,8 @@ public class PathTest {
     @Test
     public void testPathEmpty() {
         try {
-            Path path = new Path(new LinkedList());
+            @SuppressWarnings("unused")
+            Path path = new Path(new LinkedList<Edge>());
             // Exception is expected if not raised test will fail
             Assert.assertTrue(false);
         } catch (ConstructionException e) {
@@ -258,6 +261,7 @@ public class PathTest {
 
             Edge e0 = new Edge(c0, c1);
 
+            @SuppressWarnings("unused")
             Path path = new Path(Arrays.asList(e0));
         } catch (ConstructionException e) {
             // Exception is NOT expected if raised test will fail

@@ -201,6 +201,7 @@ abstract public class ComponentActivatorAbstractBase implements
                         //Set the service properties to include the containerName
                         //in the service, that is fundamental for supporting
                         //multiple services just distinguished via a container
+                        @SuppressWarnings("unchecked")
                         Dictionary<String, String> serviceProps = c
                                 .getServiceProperties();
                         if (serviceProps != null) {
