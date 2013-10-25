@@ -46,7 +46,17 @@ fi
 [[ ! -x ${JAVA_HOME}/bin/java ]] && echo "Cannot find an executable \
 JVM at path ${JAVA_HOME}/bin/java check your JAVA_HOME" && exit -1;
 
-basedir=`dirname ${fullpath}`
+if [ -z ${ODL_BASEDIR} ]; then
+    basedir=`dirname ${fullpath}`
+else
+    basedir=${ODL_BASEDIR}
+fi
+
+if [ -z ${ODL_DATADIR} ]; then
+    datadir=`dirname ${fullpath}`
+else
+    datadir=${ODL_DATADIR}
+fi
 
 function usage {
     echo "Usage: $0 [-jmx] [-jmxport <num>] [-debug] [-debugsuspend] [-debugport <num>] [-start [<console port>]] [-stop] [-status] [-console] [-help] [<other args will automatically be used for the JVM>]"
@@ -192,9 +202,9 @@ if [ "${startdaemon}" -eq 1 ]; then
         exit -1
     fi
     $JAVA_HOME/bin/java ${extraJVMOpts} \
-        -Djava.io.tmpdir=${basedir}/work/tmp \
+        -Djava.io.tmpdir=${datadir}/work/tmp \
         -Dosgi.install.area=${basedir} \
-        -Dosgi.configuration.area=${basedir}/configuration \
+        -Dosgi.configuration.area=${datadir}/configuration \
         -Dosgi.frameworkClassPath=${FWCLASSPATH} \
         -Dosgi.framework=file:${basedir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar \
         -classpath ${CLASSPATH} \
@@ -209,9 +219,9 @@ elif [ "${consolestart}" -eq 1 ]; then
         exit -1
     fi
     $JAVA_HOME/bin/java ${extraJVMOpts} \
-        -Djava.io.tmpdir=${basedir}/work/tmp \
+        -Djava.io.tmpdir=${datadir}/work/tmp \
         -Dosgi.install.area=${basedir} \
-        -Dosgi.configuration.area=${basedir}/configuration \
+        -Dosgi.configuration.area=${datadir}/configuration \
         -Dosgi.frameworkClassPath=${FWCLASSPATH} \
         -Dosgi.framework=file:${basedir}/lib/org.eclipse.osgi-3.8.1.v20120830-144521.jar \
         -classpath ${CLASSPATH} \
