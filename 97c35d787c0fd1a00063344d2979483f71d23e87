@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_fa8d9132",
+        "filename": "opendaylight/distribution/opendaylight/src/main/resources/run.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-25T21:34:38Z",
+      "side": 1,
+      "message": "Shouldnt this be \ndatadir\u003d${ODL_DATADIR} ?",
+      "revId": "97c35d787c0fd1a00063344d2979483f71d23e87",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
