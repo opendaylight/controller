@@ -6,8 +6,8 @@ module opendaylight-match-types {
     import ietf-yang-types {prefix yang;}
     import opendaylight-l2-types {prefix l2t;}
 
-    revision "2013-08-19" {
-        description "Initial revision of flow service";
+    revision "2013-10-26" {
+        description "Initial revision of macth types";
     }
 
     grouping "mac-address-filter" {
@@ -75,9 +75,15 @@ module opendaylight-match-types {
             description "IP DSCP (6 bits in ToS field).";
             type inet:dscp; 
         }
+        
         leaf ip-ecn {
             description "IP ECN (2 bits in ToS field).";
             type uint8; 
+        }
+        
+        leaf ip-proto {
+            description "IP Proto (IPv4 or IPv6 Protocol Number).";
+            type inet:ip-version; 
         }
     }
 
@@ -97,9 +103,34 @@ module opendaylight-match-types {
             description "IPv6 source address.";
             type inet:ipv6-prefix;
         }
+        
         leaf ipv6-destination {
             description "IPv6 destination address.";
             type inet:ipv6-prefix;
+        }
+        
+        leaf ipv6-nd-target {
+            description "IPv6 target address for neighbour discovery message";
+            type inet:ipv6-prefix;
+        }
+        
+        leaf ipv6-flabel {
+            type inet:ipv6-flow-label;
+        }
+        
+        leaf ipv6-nd-sll {
+            description "Link layer source address for neighbour discovery message";
+            type yang:mac-address;
+        }
+        
+        leaf ipv6-nd-tll {
+            description "Link layer target address for neighbour discovery message";
+            type yang:mac-address;
+        }
+            
+        leaf ipv6-exthdr {
+            description "IPv6 Extension Header field";
+            type uint16;
         }
     }
 
@@ -114,6 +145,29 @@ module opendaylight-match-types {
         }
     }
 
+    grouping "protocol-match-fields" {
+        leaf mpls-label {
+            description "Label in the first MPLS shim header";
+            type uint32;
+        }
+        
+        leaf mpls-tc {
+            description "TC in the first MPLS shim header";
+            type uint8;
+        }
+        
+        leaf mpls-bos {
+            description "BoS bit in the first MPLS shim header";
+            type uint8;
+        }
+        
+        leaf pbb-isid {
+            description "I-SID in the first PBB service instance tag";
+            type uint32;
+        }   
+        
+    }
+    
     grouping "tcp-match-fields" {
         leaf tcp-source-port {
             description "TCP source port.";
@@ -146,8 +200,23 @@ module opendaylight-match-types {
             type uint8; // Define ICMP Code
         }
     }
+    
+    grouping "icmpv6-match-fields" {
+        leaf icmpv6-type {
+        description "ICMP type.";
+            type uint8; // Define ICMP Type
+        }
+        description "ICMP code.";
+        leaf icmpv6-code {
+            type uint8; // Define ICMP Code
+        }
+    }
 
     grouping "arp-match-fields" {
+        leaf arp-op {
+            type uint16;
+        }
+        
         leaf arp-source-transport-address {
             description "ARP source IPv4 address.";
             type inet:ipv4-prefix;
@@ -160,79 +229,41 @@ module opendaylight-match-types {
         container arp-source-hardware-address {
             description "ARP source hardware address.";
             presence "Match field is active and set";
-        uses mac-address-filter;
+            uses mac-address-filter;
         }
         container arp-target-hardware-address {
             description "ARP target hardware address.";
             presence "Match field is active and set";
-        uses mac-address-filter;
+            uses mac-address-filter;
         }
     }
-
-    grouping action {
-        choice action {
-            case output-action {
-                leaf-list output-node-connector {
-                    type string;
-                }
-            }
-
-            case controller-action {
-                leaf max-length {
-                    type uint16 {
-                        range "0..65294";
-                    }
-                }
-            }
-
-            case set-queue-action {
-                leaf queue {
-                    type string; // TODO: define queues
-                }
-            }
-
-            case pop-mpls-action {
-                container pop-mpls {
-                    leaf ethernet-type {
-                        type uint16; // TODO: define ethertype type
-                    }
-                }
-            }
-
-            case set-mpls-ttl-action {
-                leaf mpls-ttl {
-                    type uint8;
-                }
-            }
-
-            case set-nw-ttl-action {
-                leaf nw-ttl {
-                    type uint8;
-                }
-            }
-
-            case push-pbb-action {
-
-            }
-
-            case push-mpls-action {
-
-            }
-
-            case push-vlan-action {
-
-            }
-        }
-    }
-
-
+    
     grouping match {
+        leaf in-port {
+            type uint32;
+        }
+        
+        leaf in-phy-port {
+            type uint32;
+        }
+        
+        leaf metadata {
+            type uint64;
+        }
+        
+        leaf tunnel-id {
+            description "Metadata associated in the logical port";
+            type uint64;
+        }
+        
         container "ethernet-match" {
             uses "ethernet-match-fields";
         }
+        
         container "vlan-match" {
             uses "vlan-match-fields";
         }
+        
         container "ip-match" {
             uses "ip-match-fields";
         }
@@ -260,8 +291,17 @@ module opendaylight-match-types {
                 uses "sctp-match-fields";
             }
         }
+        
         container "icmpv4-match" {
             uses "icmpv4-match-fields";
+        }
+        
+        container "icmpv6-match" {
+            uses "icmpv6-match-fields";
+        }
+        
+        container "protocol-match-fields" {
+            uses "protocol-match-fields";
         }
     }
 }
