@@ -286,12 +286,14 @@ module opendaylight-flow-types {
             uses match:match;
         }
         
-        list instruction {
-            key "order";
-            leaf order {
-                type int32;
+        container instructions {
+            list instruction {
+                key "order";
+                leaf order {
+                    type int32;
+                }
+                uses instruction;
             }
-            uses instruction;
         }
                 
         leaf priority {
