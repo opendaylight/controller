@@ -7,7 +7,7 @@ module opendaylight-flow-types {
     import ietf-yang-types {prefix yang;}
     import opendaylight-l2-types {prefix l2t;}
 
-    revision "2013-08-19" {
+    revision "2013-10-26" {
         description "Initial revision of flow service";
     }
     
@@ -31,12 +31,74 @@ module opendaylight-flow-types {
         }
     }    
 
+    grouping instruction {
+        choice instruction {
+            case go-to-table {
+                leaf table_id {
+                    type uint8;
+                }
+            }
+            
+            case write-metadata {
+                leaf metadata {
+                    type uint64;
+                }
+                
+                leaf metadata-mask {
+                    type uint64;
+                }
+            }
+            
+            case write-actions {
+                list action {
+                    key "order";
+                    leaf order {
+                        type int32;
+                    }
+                    uses action;
+                }
+            }
+            
+            case apply-actions {
+                list action {
+                    key "order";
+                    leaf order {
+                        type int32;
+                    }
+                    uses action;
+                }
+            }
+            
+            case clear-actions {
+                list action {
+                    key "order";
+                    leaf order {
+                        type int32;
+                    }
+                    uses action;
+                }
+            }
+            
+            case meter {
+                leaf meter {
+                    type string;
+                }
+            }   
+        }
+    }
+    
     grouping action {
         choice action {
             case output-action {
                 leaf-list output-node-connector {
                     type inet:uri;
                 }
+                
+                leaf max-length {
+                    type uint16 {
+                        range "0..65294";
+                    }
+                }                
             }
 
             case controller-action {
@@ -49,13 +111,13 @@ module opendaylight-flow-types {
 
             case set-queue-action {
                 leaf queue {
-                    type string; // TODO: define queues
+                    type string; 
                 }
             }
 
             case pop-mpls-action {
                 leaf ethernet-type {
-                        type uint16; // TODO: define ethertype type
+                    type uint16; // TODO: define ethertype type
                 }
             }
 
@@ -72,13 +134,27 @@ module opendaylight-flow-types {
             }
 
             case push-pbb-action {
-
+                leaf ethernet-type {
+                    type uint16; // TODO: define ethertype type
+                }
             }
 
+            case pop-pbb-action {
+                
+            }
+            
             case push-mpls-action {
-
+                leaf ethernet-type {
+                    type uint16; // TODO: define ethertype type
+                }
             }
-
+            
+            case dec-mpls-ttl {                
+            }
+            
+            case dec-nw-ttl {                
+            }
+            
             case drop-action {
             }
             
@@ -115,6 +191,13 @@ module opendaylight-flow-types {
 //                leaf header {            //header = [TPID + TCI] 
 //                }
             }
+            
+            case copy-ttl-out {
+            }
+            
+            case copy-ttl-in {
+            }
+            
             case set-dl-dst-action {
                 leaf address {
                     type yang:mac-address;
@@ -126,20 +209,30 @@ module opendaylight-flow-types {
                     type yang:mac-address;
                 }
             }
+            case group-action {
+                leaf group {
+                    type string;
+                }
+            }
+            
             case set-dl-type-action {
                 leaf dl-type {
                     type l2t:ether-type;
                 }
             }
+            
             case set-next-hop-action {
                 uses address;
             }
+            
             case set-nw-dst-action {
                 uses address;            
             }
+            
             case set-nw-src-action{
                 uses address;            
             }
+            
             case set-nw-tos-action {
                 leaf tos {
                     type int32;
@@ -161,20 +254,21 @@ module opendaylight-flow-types {
                     type vlan-cfi;
                 }
             }
+            
             case set-vlan-id-action {
                 leaf vlan-id {
                     type l2t:vlan-id;
                 } 
             }
+            
             case set-vlan-pcp-action {
                 leaf vlan-pcp {
                     type l2t:vlan-pcp;
                 }            
             }
+            
             case sw-path-action {            
-            }
-            
-            
+            }  
         }
     }
 
@@ -191,13 +285,15 @@ module opendaylight-flow-types {
         container match {
             uses match:match;
         }
-        list action {
+        
+        list instruction {
             key "order";
             leaf order {
                 type int32;
             }
-            uses action;
+            uses instruction;
         }
+                
         leaf priority {
             type uint16;
         }
@@ -223,7 +319,7 @@ module opendaylight-flow-types {
         }
         
         leaf table_id {
-            type uint64;
+            type uint8;
         }
         
         leaf buffer_id {
