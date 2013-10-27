@@ -75,10 +75,10 @@ public class TopologyManagerImpl implements
         IListenTopoUpdates,
         IObjectReader,
         CommandProvider {
-    static final String TOPOEDGESDB = "topologymanager.edgesDB";
-    static final String TOPOHOSTSDB = "topologymanager.hostsDB";
-    static final String TOPONODECONNECTORDB = "topologymanager.nodeConnectorDB";
-    static final String TOPOUSERLINKSDB = "topologymanager.userLinksDB";
+    public static final String TOPOEDGESDB = "topologymanager.edgesDB";
+    public static final String TOPOHOSTSDB = "topologymanager.hostsDB";
+    public static final String TOPONODECONNECTORDB = "topologymanager.nodeConnectorDB";
+    public static final String TOPOUSERLINKSDB = "topologymanager.userLinksDB";
     private static final Logger log = LoggerFactory.getLogger(TopologyManagerImpl.class);
     private ITopologyService topoService;
     private IClusterContainerServices clusterContainerService;
