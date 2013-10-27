@@ -39,7 +39,7 @@ public class TopologyManagerIT {
     // get the OSGI bundle context
     @Inject
     private BundleContext bc;
-
+    @Inject
     private ITopologyManager manager = null;
 
     // Configure the OSGi container
@@ -131,38 +131,6 @@ public class TopologyManagerIT {
             return "Not CONVERTED";
         }
     }
-
-    @Before
-    public void areWeReady() {
-        assertNotNull(bc);
-        boolean debugit = false;
-        Bundle b[] = bc.getBundles();
-        for (int i = 0; i < b.length; i++) {
-            int state = b[i].getState();
-            if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
-                log.debug("Bundle:" + b[i].getSymbolicName() + " state:"
-                        + stateToString(state));
-                debugit = true;
-            }
-        }
-        if (debugit) {
-            log.debug("Do some debugging because some bundle is "
-                    + "unresolved");
-        }
-
-        // Assert if true, if false we are good to go!
-        assertFalse(debugit);
-
-        ServiceReference r = bc.getServiceReference(ITopologyManager.class
-                .getName());
-        if (r != null) {
-            this.manager = (ITopologyManager) bc.getService(r);
-        }
-        // If StatisticsManager is null, cannot run tests.
-        assertNotNull(this.manager);
-
-    }
-
 
     /**
      *  This test verifies that the isInternal method of the TopologyManager returns true when a node is internal and
