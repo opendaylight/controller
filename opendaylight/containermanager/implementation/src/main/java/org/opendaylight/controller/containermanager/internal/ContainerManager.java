@@ -621,9 +621,9 @@ public class ContainerManager extends Authorization<String> implements IContaine
                     String msg = null;
                     ContainerData other = containerData.get(otherContainerName);
                     if (flowSpecList.isEmpty()) {
-                        msg = String.format("Port %s is shared and flow spec is emtpy for this container", port);
+                        msg = String.format("Port %s is shared and flow spec is empty for this container", port);
                     } else if (other.isFlowSpecEmpty()) {
-                        msg = String.format("Port %s is shared and flow spec is emtpy for the other container", port);
+                        msg = String.format("Port %s is shared and flow spec is empty for the other container", port);
                     } else if (!checkCommonContainerFlow(flowSpecList, other.getContainerFlowSpecs()).isSuccess()) {
                         msg = String.format("Port %s is shared and other container has common flow spec", port);
                     }
@@ -761,7 +761,7 @@ public class ContainerManager extends Authorization<String> implements IContaine
         File directory = new File(startupLocation);
         String[] fileList = directory.list();
 
-        logger.trace("Deleteing startup configuration files for container {}", containerName);
+        logger.trace("Deleting startup configuration files for container {}", containerName);
         if (fileList != null) {
             for (String fileName : fileList) {
                 if (fileName.contains(containerPrint)) {
@@ -929,7 +929,7 @@ public class ContainerManager extends Authorization<String> implements IContaine
 
     private Status addRemoveContainerEntries(String containerName, List<String> nodeConnectorsString, boolean delete) {
         // Construct action message
-        String action = String.format("Node conenctor(s) %s container %s: %s", delete ? "removal from" : "addition to",
+        String action = String.format("Node connector(s) %s container %s: %s", delete ? "removal from" : "addition to",
                 containerName, nodeConnectorsString);
 
         // Validity Check
