@@ -202,45 +202,30 @@ public class TopologyManagerImpl implements
 
     @SuppressWarnings({ "unchecked" })
     private void allocateCaches() {
-        try {
             this.edgesDB =
-                    (ConcurrentMap<Edge, Set<Property>>) this.clusterContainerService.createCache(TOPOEDGESDB,
-                            EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-        } catch (CacheExistException cee) {
-            log.debug(TOPOEDGESDB + " Cache already exists - destroy and recreate if needed");
-        } catch (CacheConfigException cce) {
-            log.error(TOPOEDGESDB + " Cache configuration invalid - check cache mode");
-        }
+                    (ConcurrentMap<Edge, Set<Property>>) allocateCache(TOPOEDGESDB,EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
-        try {
             this.hostsDB =
-                    (ConcurrentMap<NodeConnector, Set<ImmutablePair<Host, Set<Property>>>>) this.clusterContainerService.createCache(
-                            TOPOHOSTSDB, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-        } catch (CacheExistException cee) {
-            log.debug(TOPOHOSTSDB + " Cache already exists - destroy and recreate if needed");
-        } catch (CacheConfigException cce) {
-            log.error(TOPOHOSTSDB + " Cache configuration invalid - check cache mode");
-        }
+                    (ConcurrentMap<NodeConnector, Set<ImmutablePair<Host, Set<Property>>>>) allocateCache(TOPOHOSTSDB, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
 
-        try {
             this.nodeConnectorsDB =
-                    (ConcurrentMap<NodeConnector, Set<Property>>) this.clusterContainerService.createCache(
+                    (ConcurrentMap<NodeConnector, Set<Property>>) allocateCache(
                             TOPONODECONNECTORDB, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-        } catch (CacheExistException cee) {
-            log.debug(TOPONODECONNECTORDB + " Cache already exists - destroy and recreate if needed");
-        } catch (CacheConfigException cce) {
-            log.error(TOPONODECONNECTORDB + " Cache configuration invalid - check cache mode");
-        }
-
-        try {
             this.userLinksDB =
-                    (ConcurrentMap<String, TopologyUserLinkConfig>) this.clusterContainerService.createCache(
+                    (ConcurrentMap<String, TopologyUserLinkConfig>) allocateCache(
                             TOPOUSERLINKSDB, EnumSet.of(IClusterServices.cacheMode.TRANSACTIONAL));
-        } catch (CacheExistException cee) {
-            log.debug(TOPOUSERLINKSDB + " Cache already exists - destroy and recreate if needed");
-        } catch (CacheConfigException cce) {
-            log.error(TOPOUSERLINKSDB + " Cache configuration invalid - check cache mode");
+    }
+
+    private ConcurrentMap<?, ?> allocateCache(String cacheName, Set<IClusterServices.cacheMode> cacheModes) {
+        ConcurrentMap<?, ?> cache = null;
+        try {
+            cache = this.clusterContainerService.createCache(cacheName, cacheModes);
+        } catch (CacheExistException e) {
+            log.debug(cacheName + " cache already exists - destroy and recreate if needed");
+        } catch (CacheConfigException e) {
+            log.error(cacheName + " cache configuration invalid - check cache mode");
         }
+        return cache;
     }
 
     @SuppressWarnings({ "unchecked" })
