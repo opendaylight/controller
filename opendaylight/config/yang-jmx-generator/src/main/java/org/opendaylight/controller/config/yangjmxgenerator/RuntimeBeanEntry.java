@@ -10,10 +10,7 @@ package org.opendaylight.controller.config.yangjmxgenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.*;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -219,9 +216,13 @@ public class RuntimeBeanEntry {
                     attributes.add(listAttribute);
                 }
 
+            } else if (child instanceof LeafListSchemaNode) {
+                ListAttribute listAttribute = ListAttribute.create(
+                        (LeafListSchemaNode) child, typeProviderWrapper);
+                attributes.add(listAttribute);
             } else {
-                throw new IllegalStateException("Unknown running-data node "
-                        + child + " , " + "" + "expected leaf or container");
+                throw new IllegalStateException("Unexpected running-data node "
+                        + child);
             }
         }
         Set<Rpc> rpcs = new HashSet<>();
@@ -245,29 +246,15 @@ public class RuntimeBeanEntry {
                 for (RpcDefinition rpcDefinition : rpcDefinitions) {
                     String name = ModuleMXBeanEntry
                             .findJavaParameter(rpcDefinition);
-                    String returnType;
+                    AttributeIfc returnType;
                     if (rpcDefinition.getOutput() == null
                             || rpcDefinition.getOutput().getChildNodes().size() == 0) {
-                        returnType = "void";
+                        returnType = VoidAttribute.getInstance();
                     } else if (rpcDefinition.getOutput().getChildNodes().size() == 1) {
                         DataSchemaNode returnDSN = rpcDefinition.getOutput()
                                 .getChildNodes().iterator().next();
-                        checkArgument(
-                                returnDSN instanceof LeafSchemaNode,
-                                "Unexpected type of rpc return type. "
-                                        + "Currently only leafs and empty output nodes are supported, got "
-                                        + returnDSN);
-                        LeafSchemaNode returnLeaf = (LeafSchemaNode) returnDSN;
-                        // We currently expect leaf defined in output element in yang to be named result
-                        // FIXME: value of result is fully qualified name - should be extended to accept TOs
-                        String localName = returnLeaf.getQName().getLocalName();
-                        checkArgument(
-                                localName.equals("result"),
-                                "Unexpected name of leaf in output element, expected leaf named result, was %s at %s",
-                                localName, currentModule.getName());
+                        returnType = getReturnTypeAttribute(returnDSN, typeProviderWrapper);
 
-                        returnType = typeProviderWrapper.getType(returnLeaf)
-                                .getFullyQualifiedName();
                     } else {
                         throw new IllegalArgumentException(
                                 "More than one child node in rpc output is not supported. "
@@ -295,6 +282,23 @@ public class RuntimeBeanEntry {
         }
         return new AttributesRpcsAndRuntimeBeans(runtimeBeanEntries,
                 attributes, rpcs);
+    }
+
+    private static AttributeIfc getReturnTypeAttribute(DataSchemaNode child, TypeProviderWrapper typeProviderWrapper) {
+        if (child instanceof LeafSchemaNode) {
+            LeafSchemaNode leaf = (LeafSchemaNode) child;
+            return new JavaAttribute(leaf, typeProviderWrapper);
+        } else if (child instanceof ContainerSchemaNode) {
+            ContainerSchemaNode container = (ContainerSchemaNode) child;
+            TOAttribute toAttribute = TOAttribute.create(container, typeProviderWrapper);
+            return toAttribute;
+        } else if (child instanceof ListSchemaNode) {
+            return ListAttribute.create((ListSchemaNode) child, typeProviderWrapper);
+        } else if (child instanceof LeafListSchemaNode) {
+            return ListAttribute.create((LeafListSchemaNode) child, typeProviderWrapper);
+        } else {
+            throw new IllegalStateException("Unknown output data node " + child + " for rpc");
+        }
     }
 
     private static Collection<DataSchemaNode> sortAttributes(Set<DataSchemaNode> childNodes) {
@@ -438,10 +442,10 @@ public class RuntimeBeanEntry {
     public static class Rpc {
         private final String name;
         private final List<JavaAttribute> parameters;
-        private final String returnType;
+        private final AttributeIfc returnType;
         private final String yangName;
 
-        Rpc(String returnType, String name, String yangName,
+        Rpc(AttributeIfc returnType, String name, String yangName,
                 List<JavaAttribute> parameters) {
             this.returnType = returnType;
             this.name = name;
@@ -461,7 +465,7 @@ public class RuntimeBeanEntry {
             return parameters;
         }
 
-        public String getReturnType() {
+        public AttributeIfc getReturnType() {
             return returnType;
         }
     }

@@ -8,19 +8,17 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.collect.Maps;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.*;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
 
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
-
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.*;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
-
-import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingStrategy<?, ? extends OpenType<?>>> {
 
@@ -41,7 +39,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
         return strategies;
     }
 
-    private AttributeMappingStrategy<?, ? extends OpenType<?>> prepareStrategy(AttributeIfc attributeIfc) {
+    public AttributeMappingStrategy<?, ? extends OpenType<?>> prepareStrategy(AttributeIfc attributeIfc) {
         return switchAttribute(attributeIfc);
     }
 

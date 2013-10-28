@@ -407,12 +407,15 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         Element response = get();
 
+        System.err.println(XmlUtil.toString(response));
+
         assertEquals(2, getElementsSize(response, "instance"));
         assertEquals(2, getElementsSize(response, "asdf"));
         assertEquals(5, getElementsSize(response, "inner-running-data"));
         assertEquals(5, getElementsSize(response, "deep2"));
         assertEquals(11, getElementsSize(response, "inner-inner-running-data"));
         assertEquals(11, getElementsSize(response, "deep3"));
+        assertEquals(11 * 2, getElementsSize(response, "list-of-strings"));
         assertEquals(4, getElementsSize(response, "inner-running-data-additional"));
         assertEquals(4, getElementsSize(response, "deep4"));
         // TODO assert keys
@@ -427,6 +430,10 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         response = executeOp(netconf, "netconfMessages/rpcInnerInner.xml");
         assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("true"));
+
+        response = executeOp(netconf, "netconfMessages/rpcInnerInner_complex_output.xml");
+        assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("1"));
+        assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("2"));
     }
 
     private Element get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
@@ -504,8 +511,28 @@ public class NetconfMappingTest extends AbstractConfigTest {
             }
 
             @Override
+            public List<String> getListOfStrings() {
+                return Lists.newArrayList("l1", "l2");
+            }
+
+            @Override
+            public List<RetValList> listOutput() {
+                return Lists.newArrayList(new RetValList());
+            }
+
+            @Override
             public Boolean noArgInnerInner(Integer integer, Boolean aBoolean) {
                 return aBoolean;
+            }
+
+            @Override
+            public RetValContainer containerOutput() {
+                return new RetValContainer();
+            }
+
+            @Override
+            public List<String> leafListOutput() {
+                return Lists.newArrayList("1", "2");
             }
 
         }
