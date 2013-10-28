@@ -47,6 +47,10 @@ module packet-processing {
             leaf cookie {
                 type cookie;
             }
+            leaf node {
+                ext:context-reference "inv:node-context";
+                type inv:node-ref;
+            }
     		leaf egress {
     			type inv:node-connector-ref;
     		}

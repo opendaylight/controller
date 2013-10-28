@@ -47,6 +47,10 @@ module sal-group {
 
     rpc update-group {
         input {
+            leaf node {
+                ext:context-reference "inv:node-context";
+                type inv:node-ref;
+            }
             uses group-update;
         }
     }     
