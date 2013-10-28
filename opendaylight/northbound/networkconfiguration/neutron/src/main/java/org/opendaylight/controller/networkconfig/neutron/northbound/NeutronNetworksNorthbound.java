@@ -29,6 +29,7 @@ import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
@@ -88,7 +89,7 @@ public class NeutronNetworksNorthbound {
             @QueryParam("page_reverse") String pageReverse
             // sorting not supported
         ) {
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -142,7 +143,7 @@ public class NeutronNetworksNorthbound {
             // return fields
             @QueryParam("fields") List<String> fields
             ) {
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -169,7 +170,7 @@ public class NeutronNetworksNorthbound {
             @ResponseCode(code = 400, condition = "Bad Request"),
             @ResponseCode(code = 401, condition = "Unauthorized") })
     public Response createNetworks(final NeutronNetworkRequest input) {
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -261,7 +262,7 @@ public class NeutronNetworksNorthbound {
     public Response updateNetwork(
             @PathParam("netUUID") String netUUID, final NeutronNetworkRequest input
             ) {
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -319,7 +320,7 @@ public class NeutronNetworksNorthbound {
             @ResponseCode(code = 409, condition = "Network In Use") })
     public Response deleteNetwork(
             @PathParam("netUUID") String netUUID) {
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());

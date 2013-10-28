@@ -30,6 +30,7 @@ import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
@@ -88,7 +89,7 @@ public class NeutronSubnetsNorthbound {
             @QueryParam("page_reverse") String pageReverse
             // sorting not supported
             ) {
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default", this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD( this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -133,7 +134,7 @@ public class NeutronSubnetsNorthbound {
             @PathParam("subnetUUID") String subnetUUID,
             // return fields
             @QueryParam("fields") List<String> fields) {
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default",this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -165,12 +166,12 @@ public class NeutronSubnetsNorthbound {
             @ResponseCode(code = 409, condition = "Conflict"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response createSubnets(final NeutronSubnetRequest input) {
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default",this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -282,7 +283,7 @@ public class NeutronSubnetsNorthbound {
     public Response updateSubnet(
             @PathParam("subnetUUID") String subnetUUID, final NeutronSubnetRequest input
             ) {
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default", this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD( this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -344,7 +345,7 @@ public class NeutronSubnetsNorthbound {
             @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response deleteSubnet(
             @PathParam("subnetUUID") String subnetUUID) {
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default", this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD( this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());

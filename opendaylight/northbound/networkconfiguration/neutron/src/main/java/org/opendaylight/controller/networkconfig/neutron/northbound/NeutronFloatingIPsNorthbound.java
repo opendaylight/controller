@@ -30,6 +30,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronFloatingIP;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
@@ -89,7 +90,7 @@ public class NeutronFloatingIPsNorthbound {
             @QueryParam("page_reverse") String pageReverse
             // sorting not supported
             ) {
-        INeutronFloatingIPCRUD floatingIPInterface = NeutronNBInterfaces.getIfNBFloatingIPCRUD("default",this);
+        INeutronFloatingIPCRUD floatingIPInterface = NeutronCRUDInterfaces.getINeutronFloatingIPCRUD(this);
         if (floatingIPInterface == null) {
             throw new ServiceUnavailableException("Floating IP CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -132,7 +133,7 @@ public class NeutronFloatingIPsNorthbound {
             @PathParam("floatingipUUID") String floatingipUUID,
             // return fields
             @QueryParam("fields") List<String> fields ) {
-        INeutronFloatingIPCRUD floatingIPInterface = NeutronNBInterfaces.getIfNBFloatingIPCRUD("default",this);
+        INeutronFloatingIPCRUD floatingIPInterface = NeutronCRUDInterfaces.getINeutronFloatingIPCRUD(this);
         if (floatingIPInterface == null) {
             throw new ServiceUnavailableException("Floating IP CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -162,22 +163,22 @@ public class NeutronFloatingIPsNorthbound {
         @ResponseCode(code = 409, condition = "Conflict"),
         @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response createFloatingIPs(final NeutronFloatingIPRequest input) {
-        INeutronFloatingIPCRUD floatingIPInterface = NeutronNBInterfaces.getIfNBFloatingIPCRUD("default",this);
+        INeutronFloatingIPCRUD floatingIPInterface = NeutronCRUDInterfaces.getINeutronFloatingIPCRUD(this);
         if (floatingIPInterface == null) {
             throw new ServiceUnavailableException("Floating IP CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default", this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD( this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronPortCRUD portInterface = NeutronNBInterfaces.getIfNBPortCRUD("default", this);
+        INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD( this);
         if (portInterface == null) {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -281,22 +282,22 @@ public class NeutronFloatingIPsNorthbound {
             @PathParam("floatingipUUID") String floatingipUUID,
             NeutronFloatingIPRequest input
             ) {
-        INeutronFloatingIPCRUD floatingIPInterface = NeutronNBInterfaces.getIfNBFloatingIPCRUD("default",this);
+        INeutronFloatingIPCRUD floatingIPInterface = NeutronCRUDInterfaces.getINeutronFloatingIPCRUD(this);
         if (floatingIPInterface == null) {
             throw new ServiceUnavailableException("Floating IP CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default", this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD( this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronPortCRUD portInterface = NeutronNBInterfaces.getIfNBPortCRUD("default", this);
+        INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD( this);
         if (portInterface == null) {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -396,7 +397,7 @@ public class NeutronFloatingIPsNorthbound {
             @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response deleteFloatingIP(
             @PathParam("floatingipUUID") String floatingipUUID) {
-        INeutronFloatingIPCRUD floatingIPInterface = NeutronNBInterfaces.getIfNBFloatingIPCRUD("default",this);
+        INeutronFloatingIPCRUD floatingIPInterface = NeutronCRUDInterfaces.getINeutronFloatingIPCRUD(this);
         if (floatingIPInterface == null) {
             throw new ServiceUnavailableException("Floating IP CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
