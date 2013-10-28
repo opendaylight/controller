@@ -22,6 +22,8 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
+import static junit.framework.Assert.fail;
+
 public class StaticRouteTest {
 
         @Test
@@ -36,7 +38,7 @@ public class StaticRouteTest {
                         nextHopAddress = InetAddress.getByName("200.0.0.1");
 
                 } catch (UnknownHostException e) {
-                        Assert.assertTrue(false);
+                        fail("Failed due to unknown host " + e.getMessage());
                 }
                 staticRoute.setNetworkAddress(networkAddress);
                 Assert.assertEquals(networkAddress.getHostAddress(), staticRoute.getNetworkAddress().getHostAddress());
@@ -57,12 +59,12 @@ public class StaticRouteTest {
         try {
             ip1 = InetAddress.getByName("192.1.1.1");
         } catch (UnknownHostException e) {
-            Assert.assertTrue(false);
+            fail("Failed due to unknown host " + e.getMessage());
         }
         try {
             h1 = new HostNodeConnector(ip1);
         } catch (ConstructionException e) {
-            Assert.assertTrue(false);
+            fail("Failed to construct host " + e.getMessage());
         }
         staticRoute.setHost(h1);
         Assert.assertEquals(h1, staticRoute.getHost());
@@ -99,11 +101,11 @@ public class StaticRouteTest {
                         ip1 = InetAddress.getByName("10.1.0.2");
                         ip2 = InetAddress.getByName("10.1.1.2");
                 } catch (UnknownHostException e) {
-                        Assert.assertTrue(false);
+                        fail("Test failed due to unknown host " + e.getMessage());
                 }
         InetAddress rxdIp1 = staticRoute1.longestPrefixMatch(ip1);
         InetAddress rxdIp2 = staticRoute1.longestPrefixMatch(ip2);
-                Assert.assertEquals(null, rxdIp1);
+                Assert.assertNull(rxdIp1);
                 Assert.assertEquals("10.1.1.0", rxdIp2.getHostAddress());
         }
 }

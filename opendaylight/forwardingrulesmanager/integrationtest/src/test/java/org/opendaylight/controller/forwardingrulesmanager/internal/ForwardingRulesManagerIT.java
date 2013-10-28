@@ -1,5 +1,6 @@
 package org.opendaylight.controller.forwardingrulesmanager.internal;
 
+import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
@@ -209,7 +210,7 @@ public class ForwardingRulesManagerIT {
             Assert.assertTrue(stat.getCode() == StatusCode.SUCCESS);
         } catch (ConstructionException e) {
             // Got a failure while allocating the node
-            Assert.assertTrue(false);
+            fail("Failed while allocating the node " + e.getMessage());
         }
     }
 }
