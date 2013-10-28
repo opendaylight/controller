@@ -7,28 +7,6 @@
  */
 package org.opendaylight.controller.sal.dom.broker;
 
-<<<<<<< HEAD
-import java.util.Collections
-import java.util.HashMap
-import java.util.HashSet
-import java.util.Map
-import java.util.Set
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import org.opendaylight.controller.sal.core.api.Broker
-import org.opendaylight.controller.sal.core.api.BrokerService
-import org.opendaylight.controller.sal.core.api.Consumer
-import org.opendaylight.controller.sal.core.api.Provider
-import org.opendaylight.controller.sal.core.api.RpcImplementation
-import org.opendaylight.controller.sal.core.spi.BrokerModule
-import org.opendaylight.yangtools.yang.common.QName
-import org.opendaylight.yangtools.yang.common.RpcResult
-import org.opendaylight.yangtools.yang.data.api.CompositeNode
-import org.osgi.framework.BundleContext
-import org.slf4j.LoggerFactory
-=======
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.opendaylight.yangtools.concepts.ListenerRegistration
 import org.opendaylight.controller.sal.core.api.RpcRegistrationListener
 import org.opendaylight.controller.md.sal.common.impl.ListenerRegistry
->>>>>>> eda08c9... Added listener for rpc registrations.
+import java.util.concurrent.Executors
 
 public class BrokerImpl implements Broker {
     private static val log = LoggerFactory.getLogger(BrokerImpl);
@@ -136,10 +114,6 @@ public class BrokerImpl implements Broker {
         }
     }
 
-<<<<<<< HEAD
-    protected def void removeRpcImplementation(QName rpcType) {
-        rpcImpls.remove(rpcType);
-=======
     protected def void removeRpcImplementation(QName rpcType, RpcImplementation implToRemove) {
         if(implToRemove == rpcImpls.get(rpcType)) {
             rpcImpls.remove(rpcType);
@@ -152,7 +126,6 @@ public class BrokerImpl implements Broker {
                 log.error("Unhandled exception during invoking listener",e);
             }
         }
->>>>>>> eda08c9... Added listener for rpc registrations.
     }
 
     protected def Future<RpcResult<CompositeNode>> invokeRpc(QName rpc, CompositeNode input) {
