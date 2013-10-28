@@ -41,34 +41,34 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Flow
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInputBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.UpdateFlowInputBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.GetFlowStatisticsInputBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.VlanCfi
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.ControllerActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.DropActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.FloodActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.FloodAllActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.HwPathActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.LoopbackActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.OutputActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.PopVlanActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.PushVlanActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetDlDstActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetDlSrcActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetDlTypeActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetNextHopActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetNwDstActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetNwSrcActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetNwTosActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetTpDstActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetTpSrcActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetVlanCfiActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetVlanIdActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SetVlanPcpActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.SwPathActionBuilder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.Address
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv4Builder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv6Builder
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.ActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.VlanCfi
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.ControllerActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.DropActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.FloodActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.FloodAllActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.HwPathActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.LoopbackActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.OutputActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.PopVlanActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.PushVlanActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetDlDstActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetDlSrcActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetDlTypeActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetNextHopActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetNwDstActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetNwSrcActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetNwTosActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetTpDstActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetTpSrcActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetVlanCfiActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetVlanIdActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SetVlanPcpActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.SwPathActionBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.Address
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv4Builder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv6Builder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.list.Action
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.list.ActionBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp
@@ -77,6 +77,12 @@ import static extension org.opendaylight.controller.sal.compability.FromSalConve
 import static extension org.opendaylight.controller.sal.compability.NodeMapping.*
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.OriginalFlowBuilder
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlowBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder
+import java.util.Collections
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsBuilder
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder
 
 public class MDFlowMapping {
 
@@ -99,70 +105,46 @@ public class MDFlowMapping {
         for (sourceAction : sourceActions) {
             targetActions.add(sourceAction.toAction());
         }
-        action = targetActions;
+        instructions = targetActions.toApplyInstruction();
         match = sourceFlow.match.toMatch();
         return it.build();
 
     }
+    
+    public static def Instructions toApplyInstruction(ArrayList<Action> actions) {
+        val it = new InstructionsBuilder;
+        val applyActions = new InstructionBuilder;
+        applyActions.instruction = new ApplyActionsBuilder().setAction(actions).build()
+        instruction = Collections.<Instruction>singletonList(applyActions.build)
+        return it.build;
+    }
 
     public static def flowStatisticsInput(Node sourceNode, Flow sourceFlow) {
-        val it = new GetFlowStatisticsInputBuilder();
         val source = flowAdded(sourceFlow);
-        action = (source.getAction());
-        cookie = (source.getCookie());
-        hardTimeout = (source.getHardTimeout());
-        match = (source.getMatch());
-        priority = (source.getPriority());
+        val it = new GetFlowStatisticsInputBuilder(source);
         node = sourceNode.toNodeRef();
         return it.build();
     }
 
     public static def removeFlowInput(Node sourceNode, Flow sourceFlow) {
-        val it = new RemoveFlowInputBuilder();
         val source = flowAdded(sourceFlow);
-        action = (source.getAction());
-        cookie = (source.getCookie());
-        hardTimeout = (source.getHardTimeout());
-        match = (source.getMatch());
-        priority = (source.getPriority());
-        node = sourceNode.toNodeRef();
+        val it = new RemoveFlowInputBuilder(source);
         return it.build();
     }
 
     public static def addFlowInput(Node sourceNode, Flow sourceFlow) {
-        val it = new AddFlowInputBuilder();
         val source = flowAdded(sourceFlow);
-        action = (source.getAction());
-        cookie = (source.getCookie());
-        hardTimeout = (source.getHardTimeout());
-        match = (source.getMatch());
-        priority = (source.getPriority());
-        node = sourceNode.toNodeRef()
+        val it = new AddFlowInputBuilder(source);
         return it.build();
     }
 
     public static def updateFlowInput(Node sourceNode, Flow oldFlow, Flow newFlow) {
         val it = new UpdateFlowInputBuilder();
-
-        val original = new OriginalFlowBuilder();
-
         val sourceOld = flowAdded(newFlow);
 
-        original.action = (sourceOld.getAction());
-        original.cookie = (sourceOld.getCookie());
-        original.hardTimeout = (sourceOld.getHardTimeout());
-        original.match = (sourceOld.getMatch());
-        original.priority = (sourceOld.getPriority());
-
-        val updated = new UpdatedFlowBuilder();
+        val original = new OriginalFlowBuilder(sourceOld);
         val sourceNew = flowAdded(newFlow);
-
-        updated.action = (sourceNew.getAction());
-        updated.cookie = (sourceNew.getCookie());
-        updated.hardTimeout = (sourceNew.getHardTimeout());
-        updated.match = (sourceNew.getMatch());
-        updated.priority = (sourceNew.getPriority());
-
+        val updated = new UpdatedFlowBuilder(sourceNew);
         originalFlow = original.build()
         updatedFlow = updated.build();
         node = sourceNode.toNodeRef()

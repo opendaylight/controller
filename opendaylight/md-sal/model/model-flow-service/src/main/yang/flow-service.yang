@@ -71,16 +71,4 @@ module sal-flow {
     notification flow-removed {
         uses node-flow;
     }
-
-    augment "/inv:nodes/inv:node" {
-        ext:augment-identifier "flow-capable-node";
-        container flow-tables {
-            list table {
-                key "id";
-                leaf "id" {
-                    type inet:uri;
-                }
-            }
-        }
-    }
 }

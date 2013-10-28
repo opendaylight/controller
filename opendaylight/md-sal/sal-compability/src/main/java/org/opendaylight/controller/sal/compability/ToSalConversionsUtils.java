@@ -18,6 +18,7 @@ import static org.opendaylight.controller.sal.match.MatchType.TP_SRC;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.controller.sal.action.*;
@@ -26,27 +27,28 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.*;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.VlanCfi;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.Address;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv4;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv6;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.ActionList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.VlanCfi;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.Address;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv4;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv6;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.list.Action;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.MacAddressFilter;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.arp.match.fields.ArpSourceHardwareAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.arp.match.fields.ArpTargetHardwareAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.ethernet.match.fields.EthernetType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.ArpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv6Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.SctpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.TcpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.UdpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.vlan.match.fields.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.MacAddressFilter;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpSourceHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpTargetHardwareAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.SctpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanId;
 
 import com.google.common.net.InetAddresses;
 
@@ -56,7 +58,7 @@ public class ToSalConversionsUtils {
 
     }
 
-    public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.Flow source) {
+    public static Flow toFlow(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source) {
         final Flow target = new Flow();
 
         Integer hardTimeout = source.getHardTimeout();
@@ -76,7 +78,7 @@ public class ToSalConversionsUtils {
 
         target.setMatch(toMatch(source.getMatch()));
 
-        List<Action> actions = source.getAction();
+        List<Action> actions = getAction(source);
         if (actions != null) {
             target.setActions(actionFrom(actions));
         }
@@ -85,10 +87,23 @@ public class ToSalConversionsUtils {
         return target;
     }
 
+    public static List<Action> getAction(
+            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow source) {
+        if (source.getInstructions() != null) {
+            for (Instruction instruction : source.getInstructions().getInstruction()) {
+                if (instruction.getInstruction() instanceof ActionList) {
+                    return (((ActionList) instruction.getInstruction()).getAction());
+                }
+            }
+        }
+        // TODO Auto-generated method stub
+        return Collections.emptyList();
+    }
+
     public static List<org.opendaylight.controller.sal.action.Action> actionFrom(List<Action> actions) {
         List<org.opendaylight.controller.sal.action.Action> targetAction = new ArrayList<>();
         for (Action action : actions) {
-            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.Action sourceAction = action
+            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.Action sourceAction = action
                     .getAction();
 
             if (sourceAction instanceof ControllerAction) {
@@ -136,13 +151,13 @@ public class ToSalConversionsUtils {
             } else if (sourceAction instanceof SetDlDstAction) {
                 MacAddress addressL2Dest = ((SetDlDstAction) sourceAction).getAddress();
                 if (addressL2Dest != null) {
-                        targetAction.add(new SetDlDst(bytesFrom(addressL2Dest)));
+                    targetAction.add(new SetDlDst(bytesFrom(addressL2Dest)));
                 }
             } else if (sourceAction instanceof SetDlSrcAction) {
                 MacAddress addressL2Src = ((SetDlSrcAction) sourceAction).getAddress();
                 if (addressL2Src != null) {
-                        targetAction.add(new SetDlSrc(bytesFrom(addressL2Src)));
-                    
+                    targetAction.add(new SetDlSrc(bytesFrom(addressL2Src)));
+
                 }
             } else if (sourceAction instanceof SetDlTypeAction) {
                 EtherType dlType = ((SetDlTypeAction) sourceAction).getDlType();
@@ -271,7 +286,7 @@ public class ToSalConversionsUtils {
         return null;
     }
 
-    public static Match toMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match source) {
+    public static Match toMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match source) {
         Match target = new Match();
         if (source != null) {
             fillFrom(target, source.getVlanMatch());
@@ -494,8 +509,8 @@ public class ToSalConversionsUtils {
 
     private static byte[] bytesFrom(MacAddress address) {
         String[] mac = address.getValue().split(":");
-        byte[] macAddress = new byte[6];        // mac.length == 6 bytes
-        for(int i = 0; i < mac.length; i++) {
+        byte[] macAddress = new byte[6]; // mac.length == 6 bytes
+        for (int i = 0; i < mac.length; i++) {
             macAddress[i] = Integer.decode("0x" + mac[i]).byteValue();
         }
         return macAddress;

@@ -17,17 +17,17 @@ import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.Address;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv4;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.Layer3Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.Layer4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.ArpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv6Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.SctpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.TcpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.UdpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.Address;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv4;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.SctpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatch;
 
 import com.google.common.net.InetAddresses;
 
@@ -66,7 +66,7 @@ public class TestFromSalConversionsUtils {
         checkOdMatch(odNodeFlow.getMatch(), MtchType.udp);
     }
 
-    private void checkOdMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match match,
+    private void checkOdMatch(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match match,
             MtchType mt) {
         switch (mt) {
         case arp:
@@ -172,11 +172,11 @@ public class TestFromSalConversionsUtils {
         assertEquals("Iddle timeout is incorrect.", 32766, odNodeFlow.getIdleTimeout().shortValue());
         assertEquals("Priority is incorrect.", 32767, odNodeFlow.getPriority().shortValue());
 
-        checkOdActions(odNodeFlow.getAction());
+        checkOdActions(ToSalConversionsUtils.getAction(odNodeFlow));
     }
 
     private void checkOdActions(
-            List<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action> actions) {
+            List<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.list.Action> actions) {
         checkOdAction(actions, FloodAction.class, false);
         checkOdAction(actions, FloodAllAction.class, false);
         checkOdAction(actions, HwPathAction.class, false);
@@ -199,11 +199,11 @@ public class TestFromSalConversionsUtils {
     }
 
     private void checkOdAction(
-            List<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action> actions, Class<?> cl,
+            List<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.list.Action> actions, Class<?> cl,
             boolean b) {
         int numOfFoundActions = 0;
-        for (org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action action : actions) {
-            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.Action innerAction = action
+        for (org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.list.Action action : actions) {
+            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.Action innerAction = action
                     .getAction();
             if (cl.isInstance(innerAction)) {
                 numOfFoundActions++;

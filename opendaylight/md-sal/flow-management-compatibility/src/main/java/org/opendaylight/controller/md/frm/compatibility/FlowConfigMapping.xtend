@@ -16,16 +16,15 @@ import org.opendaylight.yangtools.yang.binding.Identifiable
 class FlowConfigMapping {
 
     static def toConfigurationFlow(FlowConfig sourceCfg) {
-        val it = new FlowBuilder();
         val source = flowAdded(sourceCfg.flow);
-
-        action = source.action;
+        val it = new FlowBuilder();
+        instructions = source.instructions;
         cookie = source.cookie;
         hardTimeout = source.hardTimeout
         idleTimeout = source.idleTimeout
         match = source.match
         node = source.node
-        key = new FlowKey(sourceCfg.name, node)
+        key = new FlowKey(sourceCfg.name,node);
         return it.build();
     }
 
