@@ -1016,6 +1016,19 @@ public class ContainerManager extends Authorization<String> implements IContaine
         notifyContainerModeChange(delete, notifyLocal);
         // Notify listeners
         notifyContainerAwareListeners(container, delete);
+
+        /*
+         * This is a quick fix until configuration service becomes the
+         * centralized configuration management place. Here container manager
+         * will remove the startup files for all the bundles that are present in
+         * the container being deleted. Do the cleanup here in Container manger
+         * as do not want to put this temporary code in Configuration manager
+         * yet which is ODL.
+         */
+        if (delete) {
+            // TODO: remove when Config Mgr takes over
+            removeComponentsStartUpfiles(containerName);
+        }
     }
 
     private void notifyContainerEntryChangeInternal(String containerName, List<NodeConnector> ncList, UpdateType update, boolean notifyLocal) {
@@ -1189,19 +1202,6 @@ public class ContainerManager extends Authorization<String> implements IContaine
         // Abort and exit here if back-end database update failed
         if (!status.isSuccess()) {
             return status;
-        }
-
-        /*
-         * This is a quick fix until configuration service becomes the
-         * centralized configuration management place. Here container manager will
-         * remove the startup files for all the bundles that are present in the
-         * container being deleted. Do the cleanup here in Container manger as do not
-         * want to put this temporary code in Configuration manager yet which is
-         * ODL.
-         */
-        if (delete) {
-            // TODO: remove when Config Mgr takes over
-            removeComponentsStartUpfiles(containerName);
         }
 
         /*
