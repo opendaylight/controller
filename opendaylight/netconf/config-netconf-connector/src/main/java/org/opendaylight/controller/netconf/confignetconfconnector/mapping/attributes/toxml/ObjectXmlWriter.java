@@ -39,7 +39,7 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
         return preparedWriting;
     }
 
-    private AttributeWritingStrategy prepareWritingStrategy(String key, AttributeIfc expectedAttr, Document document) {
+    public AttributeWritingStrategy prepareWritingStrategy(String key, AttributeIfc expectedAttr, Document document) {
         Preconditions.checkNotNull(expectedAttr, "Mbean attributes mismatch, unable to find expected attribute for %s",
                 key);
         this.document = document;

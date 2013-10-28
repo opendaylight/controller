@@ -83,7 +83,7 @@ public final class InstanceRuntimeRpc {
         return rpc.getName();
     }
 
-    public String getReturnType() {
+    public AttributeIfc getReturnType() {
         return rpc.getReturnType();
     }
 

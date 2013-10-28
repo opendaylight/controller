@@ -291,6 +291,7 @@ module config-test-impl {
                     config:inner-state-bean;
 
                     rpcx:rpc-context-instance "inner-inner-test-rpc";
+                    rpcx:rpc-context-instance "complex-output-rpc";
 
                     key "simple-int3";
 
@@ -327,6 +328,8 @@ module config-test-impl {
     identity inner-test-rpc;
     identity inner-inner-test-rpc;
 
+    identity complex-output-rpc;
+
     rpc no-arg {
         input {
             uses rpcx:rpc-context-ref {
@@ -342,6 +345,66 @@ module config-test-impl {
         output {
             leaf result {
                 type string;
+            }
+        }
+    }
+
+    rpc container-output {
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance complex-output-rpc;
+                }
+            }
+        }
+
+        output {
+            container retValContainer {
+                leaf v1 {
+                    type string;
+                }
+
+                leaf v2 {
+                    type uint32;
+                }
+            }
+        }
+    }
+
+    rpc leaf-list-output {
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance complex-output-rpc;
+                }
+            }
+        }
+
+        output {
+            leaf-list ret-val {
+                type string;
+            }
+        }
+    }
+
+    rpc list-output {
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance complex-output-rpc;
+                }
+            }
+        }
+
+        output {
+            list ret-val-list {
+                leaf v2 {
+                    type uint32;
+                }
+
+                leaf v1 {
+                    type boolean;
+                }
             }
         }
     }
