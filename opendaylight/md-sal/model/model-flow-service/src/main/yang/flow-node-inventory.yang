@@ -126,6 +126,7 @@ module flow-node-inventory {
     }
 
     augment "/inv:node-connector-updated" {
-        ext:augment-identifier "flow-capable-node-connector-updated";   
+        ext:augment-identifier "flow-capable-node-connector-updated";
+        uses flow-node-connector;
     }
 }

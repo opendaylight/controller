@@ -2,6 +2,7 @@ module packet-processing {
     namespace "urn:opendaylight:packet:service";
     prefix flow;
 
+    import yang-ext {prefix ext;}
     import opendaylight-inventory {prefix inv;}
     import ietf-inet-types {prefix inet;}
     import ietf-yang-types {prefix yang;} 
@@ -46,6 +47,10 @@ module packet-processing {
     	input {
             leaf cookie {
                 type cookie;
+            }
+            leaf node {
+                ext:context-reference "inv:node-context";
+                type inv:node-ref;
             }
     		leaf egress {
     			type inv:node-connector-ref;
