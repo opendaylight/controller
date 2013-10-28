@@ -407,6 +407,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         Element response = get();
 
+
         assertEquals(2, getElementsSize(response, "instance"));
         assertEquals(2, getElementsSize(response, "asdf"));
         assertEquals(5, getElementsSize(response, "inner-running-data"));
@@ -427,6 +428,10 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         response = executeOp(netconf, "netconfMessages/rpcInnerInner.xml");
         assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("true"));
+
+        response = executeOp(netconf, "netconfMessages/rpcInnerInner_complex_output.xml");
+        assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("1"));
+        assertThat(XmlUtil.toString(response), JUnitMatchers.containsString("2"));
     }
 
     private Element get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
@@ -504,8 +509,23 @@ public class NetconfMappingTest extends AbstractConfigTest {
             }
 
             @Override
+            public List<RetValList> listOutput() {
+                return Lists.newArrayList(new RetValList());
+            }
+
+            @Override
             public Boolean noArgInnerInner(Integer integer, Boolean aBoolean) {
                 return aBoolean;
+            }
+
+            @Override
+            public RetValContainer containerOutput() {
+                return new RetValContainer();
+            }
+
+            @Override
+            public List<String> leafListOutput() {
+                return Lists.newArrayList("1", "2");
             }
 
         }

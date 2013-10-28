@@ -7,17 +7,18 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+
 public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
+
     private final Type type;
     private final String nullableDescription, nullableDefault;
 
