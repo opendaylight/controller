@@ -40,8 +40,7 @@ import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 
 import com.google.common.collect.Lists;
 
-public class LogbackModuleWithInitialConfigurationTest extends
-        AbstractConfigTest {
+public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTest {
 
     private LogbackModuleFactory factory;
 
@@ -49,36 +48,32 @@ public class LogbackModuleWithInitialConfigurationTest extends
     public void setUp() throws IOException, ClassNotFoundException {
 
         factory = new LogbackModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
-                factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
     }
 
     /**
      * Tests that initial configuration was changed. Changed attributes:
-     * location, fileName, duplicateInsertTries
-     *
+     * location, fileName, duplicateInsertTries. Added new FileAppender.
      */
     @Test
     public void test() throws Exception {
 
         createBeans();
 
-        ConfigTransactionClient transaction = configRegistryClient
-                .createTransaction();
+        ConfigTransactionClient transaction = configRegistryClient.createTransaction();
 
-        LogbackModuleMXBean bean = JMX.newMXBeanProxy(
-                ManagementFactory.getPlatformMBeanServer(),
-                transaction.lookupConfigBean("logback", "singleton"),
-                LogbackModuleMXBean.class);
+        LogbackModuleMXBean bean = JMX.newMXBeanProxy(ManagementFactory.getPlatformMBeanServer(),
+                transaction.lookupConfigBean("logback", "singleton"), LogbackModuleMXBean.class);
         assertEquals(1, bean.getConsoleAppenderTO().size());
         assertEquals(1, bean.getRollingFileAppenderTO().size());
+        assertEquals(0, bean.getFileAppenderTO().size());
         assertEquals(1, bean.getLoggerTO().size());
 
         RollingFileAppenderTO rolling = new RollingFileAppenderTO();
-        RollingFileAppenderTO old = bean
-                .getRollingFileAppenderTO().get(0);
+        RollingFileAppenderTO old = bean.getRollingFileAppenderTO().get(0);
         rolling.setAppend(old.getAppend());
         rolling.setEncoderPattern(old.getEncoderPattern());
+        rolling.setRollingPolicyType(old.getRollingPolicyType());
         rolling.setFileName("target/logFile1.log");
         rolling.setFileNamePattern("target/%i.log");
         rolling.setMaxFileSize(old.getMaxFileSize());
@@ -91,56 +86,69 @@ public class LogbackModuleWithInitialConfigurationTest extends
         console.setName("SYSTEM");
         console.setThresholdFilter("DEBUG");
 
+        FileAppenderTO file = new FileAppenderTO();
+        file.setName("FILE_APPENDER");
+        file.setAppend(true);
+        file.setEncoderPattern("%-4relative [%thread] %-5level %logger{35} - %msg%n");
+        file.setFileName("target/testFile.log");
+
         bean.setConsoleAppenderTO(Lists.newArrayList(console));
         bean.setRollingFileAppenderTO(Lists.newArrayList(rolling));
+        bean.setFileAppenderTO(Lists.newArrayList(file));
 
         LoggerTO logger = new LoggerTO();
         logger.setLevel("INFO");
         logger.setLoggerName("logger");
         logger.setAppenders(Lists.newArrayList("SYSTEM"));
-        List<LoggerTO> loggers = Lists
-                .newArrayList(logger);
+
+        LoggerTO fileLogger = new LoggerTO();
+        fileLogger.setLevel("DEBUG");
+        fileLogger.setLoggerName("fileLogger");
+        fileLogger.setAppenders(Lists.newArrayList("FILE_APPENDER"));
+
+        List<LoggerTO> loggers = Lists.newArrayList(logger, fileLogger);
         bean.setLoggerTO(loggers);
 
         transaction.commit();
 
         LogbackModuleMXBean logback = configRegistryClient.newMXBeanProxy(
-                ObjectNameUtil.createReadOnlyModuleON("logback", "singleton"),
-                LogbackModuleMXBean.class);
+                ObjectNameUtil.createReadOnlyModuleON("logback", "singleton"), LogbackModuleMXBean.class);
 
-
-        List<RollingFileAppenderTO> rollingList = logback
-                .getRollingFileAppenderTO();
+        List<RollingFileAppenderTO> rollingList = logback.getRollingFileAppenderTO();
         assertEquals(1, rollingList.size());
 
-        RollingFileAppenderTO rollingApp = rollingList
-                .get(0);
+        RollingFileAppenderTO rollingApp = rollingList.get(0);
         assertEquals(rollingApp.getFileName(), "target/logFile1.log");
         assertEquals(rollingApp.getName(), "FILE");
 
-        List<ConsoleAppenderTO> consoleList = logback
-                .getConsoleAppenderTO();
+        List<ConsoleAppenderTO> consoleList = logback.getConsoleAppenderTO();
         assertEquals(1, consoleList.size());
 
-        ConsoleAppenderTO consoleApp = consoleList
-                .get(0);
+        ConsoleAppenderTO consoleApp = consoleList.get(0);
         assertEquals(consoleApp.getThresholdFilter(), "DEBUG");
         assertEquals(consoleApp.getName(), "SYSTEM");
 
+        List<FileAppenderTO> fileList = logback.getFileAppenderTO();
+        assertEquals(1, fileList.size());
+
+        FileAppenderTO fileApp = fileList.get(0);
+        assertEquals(fileApp.getFileName(), "target/testFile.log");
+        assertEquals(fileApp.getName(), "FILE_APPENDER");
+
         loggers = logback.getLoggerTO();
-        assertEquals(1, loggers.size());
+        assertEquals(2, loggers.size());
+        assertEquals("logger", loggers.get(0).getLoggerName());
+        assertEquals("fileLogger", loggers.get(1).getLoggerName());
 
     }
 
-    public ObjectName createBeans() throws JoranException,
-            InstanceAlreadyExistsException, IOException {
+    public ObjectName createBeans() throws JoranException, InstanceAlreadyExistsException, IOException {
 
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
-        configurator
-                .doConfigure("src/test/resources/simple_config_logback.xml");
+        configurator.doConfigure("src/test/resources/simple_config_logback.xml");
         File f = new File("target/it");
         if (f.exists())
             FileUtils.cleanDirectory(f);
@@ -155,12 +163,11 @@ public class LogbackModuleWithInitialConfigurationTest extends
         List<RollingFileAppenderTO> rollingAppenders = new ArrayList<>();
         RollingFileAppenderTO rollingApp = new RollingFileAppenderTO();
         rollingApp.setAppend(fileAppender.isAppend());
-        PatternLayoutEncoder enc = (PatternLayoutEncoder) fileAppender
-                .getEncoder();
+        PatternLayoutEncoder enc = (PatternLayoutEncoder) fileAppender.getEncoder();
         rollingApp.setEncoderPattern(enc.getPattern());
         rollingApp.setFileName(fileAppender.getFile());
-        FixedWindowRollingPolicy rollingPolicy = (FixedWindowRollingPolicy) fileAppender
-                .getRollingPolicy();
+        FixedWindowRollingPolicy rollingPolicy = (FixedWindowRollingPolicy) fileAppender.getRollingPolicy();
+        rollingApp.setRollingPolicyType("FixedWindowRollingPolicy");
         rollingApp.setMaxIndex(rollingPolicy.getMaxIndex());
         rollingApp.setMinIndex(rollingPolicy.getMinIndex());
         SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = (SizeBasedTriggeringPolicy<ILoggingEvent>) fileAppender
@@ -182,25 +189,24 @@ public class LogbackModuleWithInitialConfigurationTest extends
         consoleApp.setThresholdFilter("ALL");
         consoleAppenders.add(consoleApp);
 
+        List<FileAppenderTO> fileAppenders = new ArrayList<>();
+
         List<LoggerTO> loggersDTOs = new ArrayList<>();
         LoggerTO log = new LoggerTO();
-        log.setAppenders(Arrays.asList(fileAppender.getName(),
-                consoleApp.getName()));
+        log.setAppenders(Arrays.asList(fileAppender.getName(), consoleApp.getName()));
 
         log.setLevel(logger.getLevel().toString());
         log.setLoggerName(logger.getName());
         loggersDTOs.add(log);
 
-        ConfigTransactionJMXClient transaction = configRegistryClient
-                .createTransaction();
-        ObjectName nameCreated = transaction.createModule(
-                factory.getImplementationName(), "singleton");
-        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameCreated,
-                LogbackModuleMXBean.class);
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), "singleton");
+        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameCreated, LogbackModuleMXBean.class);
 
         bean.setLoggerTO(loggersDTOs);
         bean.setRollingFileAppenderTO(rollingAppenders);
         bean.setConsoleAppenderTO(consoleAppenders);
+        bean.setFileAppenderTO(fileAppenders);
 
         transaction.commit();
 

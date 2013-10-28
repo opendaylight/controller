@@ -39,10 +39,9 @@
         <encoder>
             <pattern>[%d{HH:mm:ss.SSS}] [%thread] %-5level %logger - %msg%n</pattern>
         </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>/opt/Demo1/logs/bgp.log.%i.gz</fileNamePattern>
-            <minIndex>1</minIndex>
-            <maxIndex>5</maxIndex>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/opt/Demo1/logs/bgp.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
         </rollingPolicy>
 
         <triggeringPolicy
@@ -51,7 +50,13 @@
         </triggeringPolicy>
 
     </appender>
-
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>target/testFile.log</file>
+        <append>true</append>
+        <encoder>
+           <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
     <!-- Increase to INFO to see content of REST messages -->
     <logger name="org.apache.cxf.interceptor.LoggingInInterceptor"
@@ -71,6 +76,7 @@
         -->
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="VARLOGFILE"/>
+        <appender-ref ref="FILE"/>
     </root>
 
 </configuration>

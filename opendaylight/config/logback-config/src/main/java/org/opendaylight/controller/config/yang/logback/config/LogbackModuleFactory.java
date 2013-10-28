@@ -24,6 +24,7 @@ import ch.qos.logback.classic.spi.LoggerComparator;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
+import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -31,24 +32,23 @@ import com.google.common.collect.Lists;
 /**
 *
 */
-public class LogbackModuleFactory
-        extends
+public class LogbackModuleFactory extends
         org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModuleFactory {
 
     private static final String INSTANCE_NAME = "singleton";
     private Map<String, LoggerTO> loggersDTOs;
     private Map<String, RollingFileAppenderTO> rollingDTOs;
     private Map<String, ConsoleAppenderTO> consoleDTOs;
+    private Map<String, FileAppenderTO> fileDTOs;
 
     @Override
-    public LogbackModule instantiateModule(String instanceName,
-            DependencyResolver dependencyResolver) {
+    public LogbackModule instantiateModule(String instanceName, DependencyResolver dependencyResolver) {
         Preconditions.checkArgument(instanceName.equals(INSTANCE_NAME),
-                "There should be just one instance of logback, named "
-                        + INSTANCE_NAME);
+                "There should be just one instance of logback, named " + INSTANCE_NAME);
         prepareDTOs();
-        LogbackModule module = new LogbackModule(new ModuleIdentifier(
-                getImplementationName(), INSTANCE_NAME), dependencyResolver);
+        LogbackModule module = new LogbackModule(new ModuleIdentifier(getImplementationName(), INSTANCE_NAME),
+                dependencyResolver);
+        module.setFileAppenderTO(Lists.newArrayList(fileDTOs.values()));
         module.setConsoleAppenderTO(Lists.newArrayList(consoleDTOs.values()));
         module.setRollingFileAppenderTO(Lists.newArrayList(rollingDTOs.values()));
         module.setLoggerTO(Lists.newArrayList(loggersDTOs.values()));
@@ -56,28 +56,25 @@ public class LogbackModuleFactory
     }
 
     @Override
-    public LogbackModule instantiateModule(String instanceName,
-            DependencyResolver dependencyResolver, LogbackModule oldModule,
-            AutoCloseable oldInstance) {
+    public LogbackModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
+            LogbackModule oldModule, AutoCloseable oldInstance) {
         Preconditions.checkArgument(instanceName.equals(INSTANCE_NAME),
-                "There should be just one instance of logback, named "
-                        + INSTANCE_NAME);
+                "There should be just one instance of logback, named " + INSTANCE_NAME);
         prepareDTOs();
-        LogbackModule module = new LogbackModule(new ModuleIdentifier(
-                getImplementationName(), INSTANCE_NAME), dependencyResolver,
-                oldModule, oldInstance);
+        LogbackModule module = new LogbackModule(new ModuleIdentifier(getImplementationName(), INSTANCE_NAME),
+                dependencyResolver, oldModule, oldInstance);
         module.setConsoleAppenderTO(Lists.newArrayList(consoleDTOs.values()));
         /*
          * module.setJCloudsAppender(Lists.newArrayList(jcloudsDTOs.values()));
          */
+        module.setFileAppenderTO(Lists.newArrayList(fileDTOs.values()));
         module.setRollingFileAppenderTO(Lists.newArrayList(rollingDTOs.values()));
         module.setLoggerTO(Lists.newArrayList(loggersDTOs.values()));
         return module;
     }
 
     private void prepareDTOs() {
-        LoggerContext context = (LoggerContext) LoggerFactory
-                .getILoggerFactory();
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         this.loggersDTOs = prepareLoggersDTOs(context);
         prepareAppendersDTOs(context);
     }
@@ -85,8 +82,10 @@ public class LogbackModuleFactory
     private void prepareAppendersDTOs(LoggerContext context) {
         this.rollingDTOs = new HashMap<>();
         this.consoleDTOs = new HashMap<>();
+        this.fileDTOs = new HashMap<>();
         ch.qos.logback.core.rolling.RollingFileAppender<ILoggingEvent> rollingApp;
         ch.qos.logback.core.ConsoleAppender<ILoggingEvent> consoleApp;
+        ch.qos.logback.core.FileAppender<ILoggingEvent> fileApp;
         Map<Logger, List<Appender<ILoggingEvent>>> appendersAll = new HashMap<>();
         for (Logger log : context.getLoggerList()) {
             List<Appender<ILoggingEvent>> appenders = new ArrayList<>();
@@ -101,45 +100,58 @@ public class LogbackModuleFactory
             for (ch.qos.logback.core.Appender<ILoggingEvent> appender : appEntry) {
                 if (appender instanceof ch.qos.logback.core.rolling.RollingFileAppender<?>) {
                     RollingFileAppenderTO app = new RollingFileAppenderTO();
-                    rollingApp = (ch.qos.logback.core.rolling.RollingFileAppender< ILoggingEvent >) appender;
+                    rollingApp = (ch.qos.logback.core.rolling.RollingFileAppender<ILoggingEvent>) appender;
                     app.setAppend(rollingApp.isAppend());
-                    PatternLayoutEncoder encoder = (PatternLayoutEncoder) rollingApp
-                            .getEncoder();
+                    PatternLayoutEncoder encoder = (PatternLayoutEncoder) rollingApp.getEncoder();
                     app.setEncoderPattern(encoder.getPattern());
                     app.setFileName(rollingApp.getFile());
-                    FixedWindowRollingPolicy rollingPolicy = (FixedWindowRollingPolicy) rollingApp
-                            .getRollingPolicy();
-                    app.setMaxIndex(rollingPolicy.getMaxIndex());
-                    app.setMinIndex(rollingPolicy.getMinIndex());
+                    if (rollingApp.getRollingPolicy() instanceof FixedWindowRollingPolicy) {
+                        FixedWindowRollingPolicy rollingPolicy = (FixedWindowRollingPolicy) rollingApp
+                                .getRollingPolicy();
+                        app.setMaxIndex(rollingPolicy.getMaxIndex());
+                        app.setMinIndex(rollingPolicy.getMinIndex());
+                        app.setFileNamePattern(rollingPolicy.getFileNamePattern());
+                        app.setRollingPolicyType("FixedWindowRollingPolicy");
+                    } else if (rollingApp.getRollingPolicy() instanceof TimeBasedRollingPolicy<?>) {
+                        TimeBasedRollingPolicy rollingPolicy = (TimeBasedRollingPolicy) rollingApp.getRollingPolicy();
+                        app.setRollingPolicyType("TimeBasedRollingPolicy");
+                        app.setFileNamePattern(rollingPolicy.getFileNamePattern());
+                        app.setMaxHistory(rollingPolicy.getMaxHistory());
+                        app.setCleanHistoryOnStart(rollingPolicy.isCleanHistoryOnStart());
+                    }
                     SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = (SizeBasedTriggeringPolicy<ILoggingEvent>) rollingApp
                             .getTriggeringPolicy();
                     app.setMaxFileSize(triggeringPolicy.getMaxFileSize());
-                    app.setFileNamePattern(rollingPolicy.getFileNamePattern());
                     app.setName(rollingApp.getName());
                     this.rollingDTOs.put(rollingApp.getName(), app);
+                } else if (appender instanceof ch.qos.logback.core.FileAppender<?>) {
+                    FileAppenderTO app = new FileAppenderTO();
+                    fileApp = (ch.qos.logback.core.FileAppender<ILoggingEvent>) appender;
+                    app.setName(fileApp.getName());
+                    app.setAppend(fileApp.isAppend());
+                    app.setFileName(fileApp.getFile());
+                    PatternLayoutEncoder encoder = (PatternLayoutEncoder) fileApp.getEncoder();
+                    app.setEncoderPattern(encoder.getPattern());
+                    this.fileDTOs.put(fileApp.getName(), app);
                 }
                 if (appender instanceof ch.qos.logback.core.ConsoleAppender<?>) {
                     ConsoleAppenderTO app = new ConsoleAppenderTO();
                     consoleApp = (ch.qos.logback.core.ConsoleAppender<ILoggingEvent>) appender;
                     consoleApp.getCopyOfAttachedFiltersList();
-                    PatternLayoutEncoder encoder = (PatternLayoutEncoder) consoleApp
-                            .getEncoder();
+                    PatternLayoutEncoder encoder = (PatternLayoutEncoder) consoleApp.getEncoder();
                     app.setEncoderPattern(encoder.getPattern());
                     app.setName(consoleApp.getName());
-                    app.setThresholdFilter(context.getLogger(
-                            Logger.ROOT_LOGGER_NAME).getEffectiveLevel().levelStr);
+                    app.setThresholdFilter(context.getLogger(Logger.ROOT_LOGGER_NAME).getEffectiveLevel().levelStr);
                     this.consoleDTOs.put(consoleApp.getName(), app);
                 }
             }
         }
     }
 
-    private Map<String, LoggerTO> prepareLoggersDTOs(
-            LoggerContext context) {
+    private Map<String, LoggerTO> prepareLoggersDTOs(LoggerContext context) {
         Map<String, LoggerTO> DTOs = new HashMap<>();
         List<String> appenders = new ArrayList<>();
-        List<org.slf4j.Logger> loggersToBeAdd = removeUnusableLoggers(
-                context.getLoggerList(),
+        List<org.slf4j.Logger> loggersToBeAdd = removeUnusableLoggers(context.getLoggerList(),
                 context.getLogger(Logger.ROOT_LOGGER_NAME));
         for (org.slf4j.Logger log : loggersToBeAdd) {
             LoggerTO logger = new LoggerTO();
@@ -148,8 +160,7 @@ public class LogbackModuleFactory
             else
                 logger.setLevel(((Logger) log).getEffectiveLevel().levelStr);
             logger.setLoggerName(log.getName());
-            Iterator<Appender<ILoggingEvent>> iter = ((Logger) log)
-                    .iteratorForAppenders();
+            Iterator<Appender<ILoggingEvent>> iter = ((Logger) log).iteratorForAppenders();
             while (iter.hasNext()) {
                 Appender<ILoggingEvent> element = iter.next();
                 appenders.add(element.getName());
@@ -162,42 +173,35 @@ public class LogbackModuleFactory
         return DTOs;
     }
 
-    private List<org.slf4j.Logger> removeUnusableLoggers(
-            List<Logger> loggerList, Logger rootLogger) {
+    private List<org.slf4j.Logger> removeUnusableLoggers(List<Logger> loggerList, Logger rootLogger) {
         Collections.sort(loggerList, new LoggerComparator());
         Map<String, org.slf4j.Logger> loggersToReturn = new HashMap<>();
 
         for (org.slf4j.Logger log : loggerList) {
             boolean shouldAdd = true;
-            for (Entry<String, org.slf4j.Logger> entry : loggersToReturn
-                    .entrySet()) {
+            for (Entry<String, org.slf4j.Logger> entry : loggersToReturn.entrySet()) {
                 if (StringUtils.contains(log.getName(), entry.getKey())) {
                     if (((Logger) log).getLevel() != null
-                            && ((Logger) log).getLevel().equals(
-                                    ((Logger) entry.getValue()).getLevel())
+                            && ((Logger) log).getLevel().equals(((Logger) entry.getValue()).getLevel())
                             && !((Logger) log).iteratorForAppenders().hasNext()) {
                         shouldAdd = false;
                         break;
                     }
                     if (((Logger) log).getLevel() == null
                             && ((Logger) log).getEffectiveLevel().equals(
-                                    ((Logger) entry.getValue())
-                                            .getEffectiveLevel())
+                                    ((Logger) entry.getValue()).getEffectiveLevel())
                             && !((Logger) log).iteratorForAppenders().hasNext()) {
                         shouldAdd = false;
                         break;
                     }
                 }
-                if (((Logger) log).getLevel() != null
-                        && ((Logger) log).getLevel().equals(
-                                rootLogger.getLevel())
+                if (((Logger) log).getLevel() != null && ((Logger) log).getLevel().equals(rootLogger.getLevel())
                         && !((Logger) log).iteratorForAppenders().hasNext()) {
                     shouldAdd = false;
                     break;
                 }
                 if (((Logger) log).getLevel() == null
-                        && ((Logger) log).getEffectiveLevel().equals(
-                                rootLogger.getEffectiveLevel())
+                        && ((Logger) log).getEffectiveLevel().equals(rootLogger.getEffectiveLevel())
                         && !((Logger) log).iteratorForAppenders().hasNext()) {
                     shouldAdd = false;
                     break;

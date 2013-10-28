@@ -44,8 +44,7 @@ public class ContextSetterImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         LogbackRuntimeRegistration reg = mock(LogbackRuntimeRegistration.class);
-        doReturn(reg).when(runtimeRegistratorMock).register(
-                any(LogbackRuntimeMXBean.class));
+        doReturn(reg).when(runtimeRegistratorMock).register(any(LogbackRuntimeMXBean.class));
     }
 
     @Test
@@ -97,8 +96,7 @@ public class ContextSetterImplTest {
         List<ConsoleAppenderTO> consoleAppenders = Lists.newArrayList();
 
         for (String loggerName : loggersToAppenders.keySet()) {
-            LoggerTO l1 = createLogger(loggerName,
-                    loggersToAppenders.get(loggerName));
+            LoggerTO l1 = createLogger(loggerName, loggersToAppenders.get(loggerName));
             logger.add(l1);
             for (String appenderName : loggersToAppenders.get(loggerName)) {
                 consoleAppenders.add(createConsoleAppender(appenderName));
@@ -106,14 +104,12 @@ public class ContextSetterImplTest {
 
         }
 
-        LogbackModule logbackModule = createLogbackModule(logger,
-                consoleAppenders);
+        LogbackModule logbackModule = createLogbackModule(logger, consoleAppenders);
         setter.updateContext(logbackModule);
     }
 
     private void assertLoggerWithAppenders(String name, String... appenders) {
-        LoggerContext context = (LoggerContext) LoggerFactory
-                .getILoggerFactory();
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         ch.qos.logback.classic.Logger logger = context.getLogger(name);
         Iterator<Appender<ILoggingEvent>> it = logger.iteratorForAppenders();
 
@@ -129,22 +125,18 @@ public class ContextSetterImplTest {
 
         for (String appender : appenders) {
             boolean isPresent = foundAppenders.get(appender).isEmpty();
-            assertFalse(
-                    "Appender " + appender + " for logger " + name
-                            + " was not present, present appenders: "
-                            + foundAppenders.keys(), isPresent);
+            assertFalse("Appender " + appender + " for logger " + name + " was not present, present appenders: "
+                    + foundAppenders.keys(), isPresent);
         }
 
     }
 
-    private LogbackModule createLogbackModule(List<LoggerTO> logger,
-            List<ConsoleAppenderTO> consoleAppenders) {
-        LogbackModule logbackModule = new LogbackModule(new ModuleIdentifier(
-                "fact", "first"), dependencyResolverMock);
+    private LogbackModule createLogbackModule(List<LoggerTO> logger, List<ConsoleAppenderTO> consoleAppenders) {
+        LogbackModule logbackModule = new LogbackModule(new ModuleIdentifier("fact", "first"), dependencyResolverMock);
         logbackModule.setLoggerTO(logger);
         logbackModule.setConsoleAppenderTO(consoleAppenders);
-        logbackModule.setRollingFileAppenderTO(Lists
-                .<RollingFileAppenderTO> newArrayList());
+        logbackModule.setRollingFileAppenderTO(Lists.<RollingFileAppenderTO> newArrayList());
+        logbackModule.setFileAppenderTO(Lists.<FileAppenderTO> newArrayList());
         return logbackModule;
     }
 
