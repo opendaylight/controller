@@ -19,18 +19,14 @@ import com.google.common.collect.Sets;
 /**
 *
 */
-public final class LogbackModule
-        extends
-        org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModule {
+public final class LogbackModule extends org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModule {
 
-    public LogbackModule(
-            org.opendaylight.controller.config.api.ModuleIdentifier name,
+    public LogbackModule(org.opendaylight.controller.config.api.ModuleIdentifier name,
             org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(name, dependencyResolver);
     }
 
-    public LogbackModule(
-            org.opendaylight.controller.config.api.ModuleIdentifier name,
+    public LogbackModule(org.opendaylight.controller.config.api.ModuleIdentifier name,
             org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
             org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModule oldModule,
             java.lang.AutoCloseable oldInstance) {
@@ -43,37 +39,27 @@ public final class LogbackModule
         Set<String> appenderNames = Sets.newHashSet();
         validateRollingObjects(appenderNames);
         validateConsoleObjects(appenderNames);
+        validateFileObjects(appenderNames);
         validateLoggersObjects(appenderNames);
     }
 
     private void validateLoggersObjects(Set<String> appenderNames) {
-        JmxAttributeValidationException.checkNotNull(getLoggerTO(),
-                loggersJmxAttribute);
+        JmxAttributeValidationException.checkNotNull(getLoggerTO(), loggersJmxAttribute);
 
         for (LoggerTO loggerToValidate : getLoggerTO()) {
-            JmxAttributeValidationException.checkNotNull(
-                    loggerToValidate.getLoggerName(), "LoggerName is null",
+            JmxAttributeValidationException.checkNotNull(loggerToValidate.getLoggerName(), "LoggerName is null",
                     loggersJmxAttribute);
-            JmxAttributeValidationException.checkNotNull(
-                    loggerToValidate.getLevel(), "Level is null",
+            JmxAttributeValidationException.checkNotNull(loggerToValidate.getLevel(), "Level is null",
                     loggersJmxAttribute);
-            JmxAttributeValidationException.checkCondition(!loggerToValidate
-                    .getLoggerName().isEmpty(), "LoggerName needs to be set",
-                    loggersJmxAttribute);
-            JmxAttributeValidationException.checkCondition(!loggerToValidate
-                    .getLevel().isEmpty(), "Level needs to be set",
-                    loggersJmxAttribute);
+            JmxAttributeValidationException.checkCondition(!loggerToValidate.getLoggerName().isEmpty(),
+                    "LoggerName needs to be set", loggersJmxAttribute);
+            JmxAttributeValidationException.checkCondition(!loggerToValidate.getLevel().isEmpty(),
+                    "Level needs to be set", loggersJmxAttribute);
 
             for (String appenderName : loggerToValidate.getAppenders()) {
-                JmxAttributeValidationException
-                        .checkCondition(
-                                appenderNames.contains(appenderName),
-                                "Appender "
-                                        + appenderName
-                                        + " referenced by logger "
-                                        + loggerToValidate.getLoggerName()
-                                        + " not present in configuration, present appenders: "
-                                        + appenderNames, loggersJmxAttribute);
+                JmxAttributeValidationException.checkCondition(appenderNames.contains(appenderName), "Appender "
+                        + appenderName + " referenced by logger " + loggerToValidate.getLoggerName()
+                        + " not present in configuration, present appenders: " + appenderNames, loggersJmxAttribute);
             }
 
         }
@@ -81,70 +67,91 @@ public final class LogbackModule
 
     private void validateConsoleObjects(Set<String> appenderNames) {
 
-        JmxAttributeValidationException.checkNotNull(getConsoleAppenderTO(),
-                consoleAppendersJmxAttribute);
+        JmxAttributeValidationException.checkNotNull(getConsoleAppenderTO(), consoleAppendersJmxAttribute);
         for (ConsoleAppenderTO object : getConsoleAppenderTO()) {
-            JmxAttributeValidationException.checkNotNull(
-                    object.getEncoderPattern(), "EncoderPattern is null",
+            JmxAttributeValidationException.checkNotNull(object.getEncoderPattern(), "EncoderPattern is null",
                     consoleAppendersJmxAttribute);
 
-            validateAppenderName(appenderNames, object.getName(),
-                    consoleAppendersJmxAttribute);
+            validateAppenderName(appenderNames, object.getName(), consoleAppendersJmxAttribute);
 
-            JmxAttributeValidationException.checkNotNull(
-                    object.getThresholdFilter(), "Filterlevel is null",
+            JmxAttributeValidationException.checkNotNull(object.getThresholdFilter(), "Filterlevel is null",
                     consoleAppendersJmxAttribute);
+        }
+    }
+
+    private void validateFileObjects(Set<String> appenderNames) {
+        JmxAttributeValidationException.checkNotNull(getFileAppenderTO(), fileAppendersJmxAttribute);
+        for (FileAppenderTO object : getFileAppenderTO()) {
+            JmxAttributeValidationException.checkNotNull(object.getEncoderPattern(), "EncoderPattern is null",
+                    fileAppendersJmxAttribute);
+
+            validateAppenderName(appenderNames, object.getName(), fileAppendersJmxAttribute);
+
+            JmxAttributeValidationException.checkNotNull(object.getFileName(), "FileName is null",
+                    fileAppendersJmxAttribute);
+            JmxAttributeValidationException.checkCondition(!object.getEncoderPattern().isEmpty(),
+                    "EncoderPattern needs to be set", fileAppendersJmxAttribute);
+            JmxAttributeValidationException.checkCondition(!object.getFileName().isEmpty(), "FileName needs to be set",
+                    fileAppendersJmxAttribute);
+
         }
     }
 
     private void validateRollingObjects(Set<String> appenderNames) {
 
-        JmxAttributeValidationException.checkNotNull(getRollingFileAppenderTO(),
-                rollingAppendersJmxAttribute);
+        JmxAttributeValidationException.checkNotNull(getRollingFileAppenderTO(), rollingAppendersJmxAttribute);
         for (RollingFileAppenderTO object : getRollingFileAppenderTO()) {
-            JmxAttributeValidationException.checkNotNull(
-                    object.getEncoderPattern(), "EncoderPattern is null",
+            JmxAttributeValidationException.checkNotNull(object.getEncoderPattern(), "EncoderPattern is null",
                     rollingAppendersJmxAttribute);
 
-            validateAppenderName(appenderNames, object.getName(),
+            validateAppenderName(appenderNames, object.getName(), rollingAppendersJmxAttribute);
+
+            JmxAttributeValidationException.checkNotNull(object.getFileName(), "FileName is null",
                     rollingAppendersJmxAttribute);
 
-            JmxAttributeValidationException.checkNotNull(object.getFileName(),
-                    "FileName is null", rollingAppendersJmxAttribute);
-            JmxAttributeValidationException.checkNotNull(
-                    object.getMaxFileSize(), "MaxFileSize is null",
+            JmxAttributeValidationException.checkNotNull(object.getFileNamePattern(), "FileNamePattern is null",
                     rollingAppendersJmxAttribute);
-            JmxAttributeValidationException.checkNotNull(object.getMinIndex(),
-                    "MinIndex is null", rollingAppendersJmxAttribute);
-            JmxAttributeValidationException.checkNotNull(object.getMaxIndex(),
-                    "MaxIndex is null", rollingAppendersJmxAttribute);
-            JmxAttributeValidationException.checkCondition(!object
-                    .getEncoderPattern().isEmpty(),
-                    "EncoderPattern needs to be set",
+            JmxAttributeValidationException.checkNotNull(object.getRollingPolicyType(), "RollingPolicyType is null",
                     rollingAppendersJmxAttribute);
-            JmxAttributeValidationException.checkCondition(!object
-                    .getFileName().isEmpty(), "FileName needs to be set",
+            JmxAttributeValidationException.checkCondition(!object.getFileNamePattern().isEmpty(),
+                    "FileNamePattern is not set", rollingAppendersJmxAttribute);
+            JmxAttributeValidationException.checkCondition(!object.getRollingPolicyType().isEmpty(),
+                    "RollingPolicyType is not set", rollingAppendersJmxAttribute);
+            JmxAttributeValidationException.checkCondition(
+                    (object.getRollingPolicyType().equals("FixedWindowRollingPolicy") || object.getRollingPolicyType()
+                            .equals("TimeBasedRollingPolicy")), object.getRollingPolicyType()
+                            + " RollingPolicyType is not supported", rollingAppendersJmxAttribute);
+
+            if (object.getRollingPolicyType().equals("FixedWindowRollingPolicy")) {
+                JmxAttributeValidationException.checkNotNull(object.getMinIndex(), "MinIndex is null",
+                        rollingAppendersJmxAttribute);
+                JmxAttributeValidationException.checkNotNull(object.getMaxIndex(), "MaxIndex is null",
+                        rollingAppendersJmxAttribute);
+            } else if (object.getRollingPolicyType().equals("TimeBasedRollingPolicy")) {
+                JmxAttributeValidationException.checkNotNull(object.getMaxHistory(), "MaxHistory is null",
+                        rollingAppendersJmxAttribute);
+            }
+            JmxAttributeValidationException.checkNotNull(object.getMaxFileSize(), "MaxFileSize is null",
+                    rollingAppendersJmxAttribute);
+            JmxAttributeValidationException.checkCondition(!object.getEncoderPattern().isEmpty(),
+                    "EncoderPattern needs to be set", rollingAppendersJmxAttribute);
+            JmxAttributeValidationException.checkCondition(!object.getFileName().isEmpty(), "FileName needs to be set",
                     rollingAppendersJmxAttribute);
 
         }
     }
 
-    private void validateAppenderName(Set<String> appenderNames,
-            String appenderName, JmxAttribute jmxAttribute) {
-        JmxAttributeValidationException.checkNotNull(appenderName,
-                "Name is null", jmxAttribute);
-        JmxAttributeValidationException.checkCondition(
-                appenderNames.contains(appenderName) == false,
+    private void validateAppenderName(Set<String> appenderNames, String appenderName, JmxAttribute jmxAttribute) {
+        JmxAttributeValidationException.checkNotNull(appenderName, "Name is null", jmxAttribute);
+        JmxAttributeValidationException.checkCondition(appenderNames.contains(appenderName) == false,
                 "Duplicate appender name " + appenderName, jmxAttribute);
         appenderNames.add(appenderName);
-        JmxAttributeValidationException.checkCondition(!appenderName.isEmpty(),
-                "Name needs to be set", jmxAttribute);
+        JmxAttributeValidationException.checkCondition(!appenderName.isEmpty(), "Name needs to be set", jmxAttribute);
     }
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        ContextSetterImpl setter = new ContextSetterImpl(
-                getRootRuntimeBeanRegistratorWrapper());
+        ContextSetterImpl setter = new ContextSetterImpl(getRootRuntimeBeanRegistratorWrapper());
 
         setter.updateContext(this);
 

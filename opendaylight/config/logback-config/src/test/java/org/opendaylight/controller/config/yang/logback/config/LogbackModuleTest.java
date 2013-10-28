@@ -37,22 +37,18 @@ public class LogbackModuleTest extends AbstractConfigTest {
     private LogbackModuleFactory factory;
 
     @Before
-    public void setUp() throws IOException, ClassNotFoundException,
-            InterruptedException {
+    public void setUp() throws IOException, ClassNotFoundException, InterruptedException {
 
         factory = new LogbackModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
-                factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
     }
 
     @Test
     public void testCreateBean() throws InstanceAlreadyExistsException {
 
-        CommitStatus status = createBeans(
-        true, "target/rollingApp",
-                "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB",
-                1, 5, "target/%i.log", "rolling", "consoleName", "ALL",
-                "logger1", "DEBUG").commit();
+        CommitStatus status = createBeans(true, "target/rollingApp",
+                "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1, 5, "target/%i.log", "rolling",
+                "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy", 0, "FileAppender").commit();
 
         assertBeanCount(1, factory.getImplementationName());
         assertStatus(status, 1, 0, 0);
@@ -60,16 +56,13 @@ public class LogbackModuleTest extends AbstractConfigTest {
 
     @Test
     public void testReusingInstance() throws InstanceAlreadyExistsException {
-        createBeans(
-        true, "target/rollingApp",
-                "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB",
-                1, 5, "target/%i.log", "rolling", "consoleName", "ALL",
-                "logger1", "DEBUG").commit();
+        createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1, 5,
+                "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy", 0,
+                "FileAppender").commit();
 
         assertBeanCount(1, factory.getImplementationName());
 
-        ConfigTransactionJMXClient transaction = configRegistryClient
-                .createTransaction();
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         CommitStatus status = transaction.commit();
 
         assertBeanCount(1, factory.getImplementationName());
@@ -77,23 +70,17 @@ public class LogbackModuleTest extends AbstractConfigTest {
     }
 
     @Test
-    public void testRecreateInstance() throws InstanceAlreadyExistsException,
-            ValidationException, ConflictingVersionException,
-            InstanceNotFoundException {
-        createBeans(
-        true, "target/rollingApp",
-                "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB",
-                1, 5, "target/%i.log", "rolling", "consoleName", "ALL",
-                "logger1", "DEBUG").commit();
+    public void testRecreateInstance() throws InstanceAlreadyExistsException, ValidationException,
+            ConflictingVersionException, InstanceNotFoundException {
+        createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1, 5,
+                "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy", 0,
+                "FileAppender").commit();
 
         assertBeanCount(1, LogbackModuleFactory.NAME);
-        ConfigTransactionJMXClient transaction = configRegistryClient
-                .createTransaction();
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
 
-        ObjectName logback = transaction.lookupConfigBean(
-                LogbackModuleFactory.NAME, "singleton");
-        LogbackModuleMXBean nwBean = transaction.newMXBeanProxy(logback,
-                LogbackModuleMXBean.class);
+        ObjectName logback = transaction.lookupConfigBean(LogbackModuleFactory.NAME, "singleton");
+        LogbackModuleMXBean nwBean = transaction.newMXBeanProxy(logback, LogbackModuleMXBean.class);
         CommitStatus status = transaction.commit();
         assertBeanCount(1, LogbackModuleFactory.NAME);
 
@@ -101,19 +88,14 @@ public class LogbackModuleTest extends AbstractConfigTest {
     }
 
     @Test
-    public void testDestroyInstance() throws InstanceNotFoundException,
-            InstanceAlreadyExistsException {
-        createBeans(
-        true, "target/rollingApp",
-                "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB",
-                1, 5, "target/%i.log", "rolling", "consoleName", "ALL",
-                "logger1", "DEBUG").commit();
+    public void testDestroyInstance() throws InstanceNotFoundException, InstanceAlreadyExistsException {
+        createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1, 5,
+                "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy", 0,
+                "FileAppender").commit();
         assertBeanCount(1, factory.getImplementationName());
 
-        ConfigTransactionJMXClient transaction = configRegistryClient
-                .createTransaction();
-        transaction.destroyConfigBean(factory.getImplementationName(),
-                INSTANCE_NAME);
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        transaction.destroyConfigBean(factory.getImplementationName(), INSTANCE_NAME);
         CommitStatus status = transaction.commit();
 
         assertBeanCount(0, factory.getImplementationName());
@@ -124,58 +106,47 @@ public class LogbackModuleTest extends AbstractConfigTest {
     @Test
     public void testValidation1() throws InstanceAlreadyExistsException {
         try {
-            createBeans(
-            true, "target/rollingApp",
-                    "%-4relative [%thread] %-5level %logger{35} - %msg%n",
-                    "30MB", 1, 5, "target/%i.log", "rolling", "consoleName",
-                    "ALL", "logger1", "DEBUG").commit();
+            createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1, 5,
+                    "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy",
+                    0, "FileAppender").commit();
             fail();
         } catch (ValidationException e) {
-            assertThat(e.getFailedValidations().toString(),
-                    containsString("FileName is null"));
+            assertThat(e.getFailedValidations().toString(), containsString("FileName is null"));
         }
     }
 
     @Test
     public void testValidation2() throws InstanceAlreadyExistsException {
         try {
-            createBeans(
-            true, "target/rollingApp", null, "30MB", 1, 5, "target/%i.log",
-                    "rolling", "consoleName", "ALL", "logger1", "DEBUG")
-                    .commit();
+            createBeans(true, "target/rollingApp", null, "30MB", 1, 5, "target/%i.log", "rolling", "consoleName",
+                    "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
         } catch (ValidationException e) {
-            assertThat(e.getFailedValidations().toString(),
-                    containsString("EncoderPattern is null"));
+            assertThat(e.getFailedValidations().toString(), containsString("EncoderPattern is null"));
         }
     }
 
     @Test
     public void testValidation4() throws InstanceAlreadyExistsException {
         try {
-            createBeans(
-            true, "target/rollingApp",
-                    "%-4relative [%thread] %-5level %logger{35} - %msg%n",
-                    null, 1, 5, "target/%i.log", "rolling", "consoleName",
-                    "ALL", "logger1", "DEBUG").commit();
+            createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", null, 1, 5,
+                    "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy",
+                    0, "FileAppender").commit();
             fail();
         } catch (ValidationException e) {
-            assertThat(e.getFailedValidations().toString(),
-                    containsString("MaxFileSize is null"));
+            assertThat(e.getFailedValidations().toString(), containsString("MaxFileSize is null"));
         }
     }
 
     @Test
     public void testValidation6() throws InstanceAlreadyExistsException {
         try {
-            createBeans(
-            true, "", "%-4relative [%thread] %-5level %logger{35} - %msg%n",
-                    "30MB", 1, 5, "target/%i.log", "rolling", "consoleName",
-                    "ALL", "logger1", "DEBUG").commit();
+            createBeans(true, "", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1, 5, "target/%i.log",
+                    "rolling", "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy", 0, "FileAppender")
+                    .commit();
             fail();
         } catch (ValidationException e) {
-            assertThat(e.getFailedValidations().toString(),
-                    containsString("FileName needs to be set"));
+            assertThat(e.getFailedValidations().toString(), containsString("FileName needs to be set"));
         }
     }
 
@@ -184,88 +155,112 @@ public class LogbackModuleTest extends AbstractConfigTest {
         try {
             createBeans(
 
-            true, "target/rollingApp", "", "30MB", 1, 5, "target/%i.log",
-                    "rolling", "consoleName", "ALL", "logger1", "DEBUG")
-                    .commit();
+            true, "target/rollingApp", "", "30MB", 1, 5, "target/%i.log", "rolling", "consoleName", "ALL", "logger1",
+                    "DEBUG", "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
         } catch (ValidationException e) {
-            assertThat(e.getFailedValidations().toString(),
-                    containsString("EncoderPattern needs to be set"));
+            assertThat(e.getFailedValidations().toString(), containsString("EncoderPattern needs to be set"));
         }
     }
 
     @Test
     public void testValidation8() throws InstanceAlreadyExistsException {
         try {
-            createBeans(
-            true, "target/rollingApp",
-                    "%-4relative [%thread] %-5level %logger{35} - %msg%n",
-                    "30MB", 1, 5, "target/%i.log", "rolling", "consoleName",
-                    "ALL", null, "DEBUG").commit();
+            createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1, 5,
+                    "target/%i.log", "rolling", "consoleName", "ALL", null, "DEBUG", "FixedWindowRollingPolicy", 0,
+                    "FileAppender").commit();
             fail();
         } catch (ValidationException e) {
-            assertThat(e.getFailedValidations().toString(),
-                    containsString("LoggerName is null"));
+            assertThat(e.getFailedValidations().toString(), containsString("LoggerName is null"));
         }
     }
 
     @Test
     public void testValidation9() throws InstanceAlreadyExistsException {
         try {
-            createBeans(
-            true, "target/rollingApp",
-                    "%-4relative [%thread] %-5level %logger{35} - %msg%n",
-                    "30MB", 1, 5, "target/%i.log", "rolling", "consoleName",
-                    "ALL", "", "DEBUG").commit();
+            createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1, 5,
+                    "target/%i.log", "rolling", "consoleName", "ALL", "", "DEBUG", "FixedWindowRollingPolicy", 0,
+                    "FileAppender").commit();
             fail();
         } catch (ValidationException e) {
-            assertThat(e.getFailedValidations().toString(),
-                    containsString("LoggerName needs to be set"));
+            assertThat(e.getFailedValidations().toString(), containsString("LoggerName needs to be set"));
         }
     }
 
     @Test
     public void testValidation10() throws InstanceAlreadyExistsException {
         try {
-            createBeans(
-            true, "target/rollingApp",
-                    "%-4relative [%thread] %-5level %logger{35} - %msg%n",
-                    "30MB", null, 5, "target/%i.log", "rolling", "consoleName",
-                    "ALL", "logger1", "DEBUG").commit();
+            createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", null,
+                    5, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG",
+                    "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
         } catch (ValidationException e) {
-            assertThat(e.getFailedValidations().toString(),
-                    containsString("MinIndex is null"));
+            assertThat(e.getFailedValidations().toString(), containsString("MinIndex is null"));
         }
     }
 
     @Test
     public void testValidation11() throws InstanceAlreadyExistsException {
         try {
-            createBeans(
-            true, "target/rollingApp",
-                    "%-4relative [%thread] %-5level %logger{35} - %msg%n",
-                    "30MB", 1, null, "target/%i.log", "rolling", "consoleName",
-                    "ALL", "logger1", "DEBUG").commit();
+            createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1,
+                    null, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG",
+                    "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
         } catch (ValidationException e) {
-            assertThat(e.getFailedValidations().toString(),
-                    containsString("MaxIndex is null"));
+            assertThat(e.getFailedValidations().toString(), containsString("MaxIndex is null"));
         }
     }
 
-    private ConfigTransactionJMXClient createBeans(
-    Boolean isAppend, String rollingFileName, String encoderPattern,
-            String maxFileSize, Integer minIndex, Integer maxIndex,
-            String fileNamePattern, String rollingName, String consoleName,
-            String thresholdFilter, String loggerName, String level )
-            throws InstanceAlreadyExistsException {
-        ConfigTransactionJMXClient transaction = configRegistryClient
-                .createTransaction();
-        ObjectName nameCreated = transaction.createModule(
-                factory.getImplementationName(), INSTANCE_NAME);
-        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameCreated,
-                LogbackModuleMXBean.class);
+    @Test
+    public void testValidation12() throws InstanceAlreadyExistsException {
+        try {
+            createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1,
+                    null, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", null, 1, "FileAppender")
+                    .commit();
+            fail();
+        } catch (ValidationException e) {
+            assertThat(e.getFailedValidations().toString(), containsString("RollingPolicyType is null"));
+        }
+    }
+
+    @Test
+    public void testValidation13() throws InstanceAlreadyExistsException {
+        try {
+            createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1,
+                    null, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "", 1, "FileAppender")
+                    .commit();
+            fail();
+        } catch (ValidationException e) {
+            assertThat(e.getFailedValidations().toString(), containsString("RollingPolicyType is not set"));
+        }
+    }
+
+    @Test
+    public void testValidation14() throws InstanceAlreadyExistsException {
+        try {
+            createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", 1,
+                    null, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "RollingPolicy", 1,
+                    "FileAppender").commit();
+            fail();
+        } catch (ValidationException e) {
+            assertThat(e.getFailedValidations().toString(), containsString("RollingPolicyType is not supported"));
+        }
+    }
+
+    @Test
+    public void testTimeBasedRollingPolicy() throws InstanceAlreadyExistsException {
+        createBeans(true, "target/rollingApp", "%-4relative [%thread] %-5level %logger{35} - %msg%n", "30MB", null,
+                null, "target/%d.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "TimeBasedRollingPolicy",
+                1, "FileAppender").commit();
+    }
+
+    private ConfigTransactionJMXClient createBeans(Boolean isAppend, String rollingFileName, String encoderPattern,
+            String maxFileSize, Integer minIndex, Integer maxIndex, String fileNamePattern, String rollingName,
+            String consoleName, String thresholdFilter, String loggerName, String level, String rollingPolicyType,
+            int maxHistory, String fileAppName) throws InstanceAlreadyExistsException {
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), INSTANCE_NAME);
+        LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameCreated, LogbackModuleMXBean.class);
 
         List<RollingFileAppenderTO> rollingAppenders = new ArrayList<>();
         RollingFileAppenderTO rollingAppender = new RollingFileAppenderTO();
@@ -277,6 +272,8 @@ public class LogbackModuleTest extends AbstractConfigTest {
         rollingAppender.setMinIndex(minIndex);
         rollingAppender.setFileNamePattern(fileNamePattern);
         rollingAppender.setName(rollingName);
+        rollingAppender.setRollingPolicyType(rollingPolicyType);
+        rollingAppender.setMaxHistory(maxHistory);
         rollingAppenders.add(rollingAppender);
 
         List<ConsoleAppenderTO> consoleAppenders = new ArrayList<>();
@@ -285,6 +282,14 @@ public class LogbackModuleTest extends AbstractConfigTest {
         consoleAppender.setName(consoleName);
         consoleAppender.setThresholdFilter(thresholdFilter);
         consoleAppenders.add(consoleAppender);
+
+        List<FileAppenderTO> fileAppenders = new ArrayList<>();
+        FileAppenderTO fileAppender = new FileAppenderTO();
+        fileAppender.setName(fileAppName);
+        fileAppender.setAppend(isAppend);
+        fileAppender.setEncoderPattern(encoderPattern);
+        fileAppender.setFileName(rollingFileName);
+        fileAppenders.add(fileAppender);
 
         List<LoggerTO> loggers = new ArrayList<>();
 
@@ -298,6 +303,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
         bean.setLoggerTO(loggers);
         bean.setRollingFileAppenderTO(rollingAppenders);
         bean.setConsoleAppenderTO(consoleAppenders);
+        bean.setFileAppenderTO(fileAppenders);
 
         transaction.validateConfig();
 

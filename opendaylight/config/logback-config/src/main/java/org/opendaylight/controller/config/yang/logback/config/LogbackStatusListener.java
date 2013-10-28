@@ -23,15 +23,13 @@ import ch.qos.logback.core.status.StatusBase;
 import ch.qos.logback.core.status.StatusListener;
 import ch.qos.logback.core.status.StatusManager;
 
-public class LogbackStatusListener implements StatusListener,
-        LogbackRuntimeMXBean, Closeable {
+public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBean, Closeable {
 
     private final List<StatusTO> receivedStatuses;
     private final LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper;
     private LogbackRuntimeRegistration reg;
 
-    public LogbackStatusListener(
-            LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
+    public LogbackStatusListener(LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
         receivedStatuses = new ArrayList<>();
         this.rootRuntimeBeanRegistratorWrapper = rootRuntimeBeanRegistratorWrapper;
     }
@@ -52,14 +50,12 @@ public class LogbackStatusListener implements StatusListener,
         return reg;
     }
 
-    private LogbackRuntimeRegistration registerToJMX(
-            LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
+    private LogbackRuntimeRegistration registerToJMX(LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
         return rootRuntimeBeanRegistratorWrapper.register(this);
     }
 
     private synchronized void registerToLogback() {
-        LoggerContext context = (LoggerContext) LoggerFactory
-                .getILoggerFactory();
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         final StatusManager statusManager = context.getStatusManager();
 
         statusManager.remove(this);
@@ -70,15 +66,13 @@ public class LogbackStatusListener implements StatusListener,
     }
 
     private void addInitialStatuses(StatusManager statusManager) {
-        for (ch.qos.logback.core.status.Status status : statusManager
-                .getCopyOfStatusList()) {
+        for (ch.qos.logback.core.status.Status status : statusManager.getCopyOfStatusList()) {
             addStatusEvent(status);
         }
     }
 
     @Override
-    public synchronized void addStatusEvent(
-            ch.qos.logback.core.status.Status status) {
+    public synchronized void addStatusEvent(ch.qos.logback.core.status.Status status) {
         receivedStatuses.add(transformStatus(status));
     }
 
@@ -113,8 +107,7 @@ public class LogbackStatusListener implements StatusListener,
     }
 
     private void unregisterFromLogback() {
-        LoggerContext context = (LoggerContext) LoggerFactory
-                .getILoggerFactory();
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         final StatusManager statusManager = context.getStatusManager();
         statusManager.remove(this);
     }
