@@ -7,20 +7,6 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doReturn;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import javax.management.openmbean.SimpleType;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
@@ -29,6 +15,13 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
+
+import javax.management.openmbean.SimpleType;
+import java.util.*;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.doReturn;
 
 public class RuntimeBeanEntryTest extends AbstractYangTest {
 
@@ -111,7 +104,8 @@ public class RuntimeBeanEntryTest extends AbstractYangTest {
         RuntimeBeanEntry.Rpc rpc = getRpcByName(rpcs, SLEEP_RPC_NAME);
         assertNotNull(rpc);
         assertThat(rpc.getYangName(), is(SLEEP_RPC_NAME));
-        assertThat(rpc.getReturnType().endsWith(SLEEP_RPC_OUTPUT), is(true));
+
+        assertThat(((JavaAttribute)rpc.getReturnType()).getType().getFullyQualifiedName().endsWith(SLEEP_RPC_OUTPUT),  is(true));
 
         // get sleep rpc input attribute and test it
         List<JavaAttribute> attributes = rpc.getParameters();

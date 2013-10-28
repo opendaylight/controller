@@ -16,10 +16,13 @@ import org.opendaylight.controller.config.yang.store.api.YangStoreSnapshot;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.SimpleTypeResolver;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.VoidAttribute;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.SimpleAttributeMappingStrategy;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.AttributeMappingStrategy;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectMapper;
+import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.ObjectXmlWriter;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.InstanceRuntimeRpc;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.ModuleRpcs;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.Rpcs;
@@ -27,14 +30,14 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.Abs
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.management.ObjectName;
-import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.OpenType;
 import java.util.Map;
 
 public class RuntimeRpc extends AbstractConfigNetconfOperation {
@@ -50,10 +53,22 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         this.yangStoreSnapshot = yangStoreSnapshot;
     }
 
-    private String getStringRepresentation(final Object result) {
-        final SimpleType<?> simpleType = SimpleTypeResolver.getSimpleType(result.getClass().getName());
-        final Optional<String> mappedAttributeOpt = new SimpleAttributeMappingStrategy(simpleType).mapAttribute(result);
-        return mappedAttributeOpt.isPresent() ? mappedAttributeOpt.get() : "";
+    private Element toXml(Document doc, Object result, AttributeIfc returnType, String namespace, String elementName) {
+        AttributeMappingStrategy<?, ? extends OpenType<?>> mappingStrategy = new ObjectMapper(null).prepareStrategy(returnType);
+        Optional<?> mappedAttributeOpt = mappingStrategy.mapAttribute(result);
+        Preconditions.checkState(mappedAttributeOpt.isPresent(), "Unable to map return value %s as %s", result, returnType.getOpenType());
+
+        // FIXME: multiple return values defined as leaf-list and list in yang should not be wrapped in output xml element,
+        // they need to be appended directly under rpc-reply element
+        //
+        // Either allow List of Elements to be returned from NetconfOperation or
+        // pass reference to parent output xml element for netconf operations to
+        // append result(s) on their own
+        Element tempParent = doc.createElementNS(XmlNetconfConstants.RFC4741_TARGET_NAMESPACE, "output");
+        new ObjectXmlWriter().prepareWritingStrategy(elementName, returnType, doc).writeElement(tempParent, namespace, mappedAttributeOpt.get());
+
+        XmlElement xmlElement = XmlElement.fromDomElement(tempParent);
+        return xmlElement.getChildElements().size() > 1 ? tempParent : xmlElement.getOnlyChildElement().getDomElement();
     }
 
     private Object executeOperation(final ConfigRegistryClient configRegistryClient, final ObjectName on,
@@ -161,12 +176,11 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         logger.info("Operation {} called successfully on {} with arguments {} with result {}", execution.operationName,
                 execution.on, execution.attributes, result);
 
-        if (execution.returnType.equals("void")) {
+        if (execution.isVoid()) {
             return document.createElement("ok");
         } else {
-            final Element output = XmlUtil.createTextElement(document, "result", getStringRepresentation(result));
-            XmlUtil.addNamespaceAttr(output, execution.namespace);
-            return output;
+            return toXml(document, result, execution.returnType, execution.namespace,
+                    execution.returnType.getAttributeYangName());
         }
     }
 
@@ -175,16 +189,20 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         private final ObjectName on;
         private final String operationName;
         private final Map<String, AttributeConfigElement> attributes;
-        private final String returnType;
+        private final AttributeIfc returnType;
         private final String namespace;
 
         public NetconfOperationExecution(final ObjectName on, final String name,
-                final Map<String, AttributeConfigElement> attributes, final String returnType, final String namespace) {
+                final Map<String, AttributeConfigElement> attributes, final AttributeIfc returnType, final String namespace) {
             this.on = on;
             this.operationName = name;
             this.attributes = attributes;
             this.returnType = returnType;
             this.namespace = namespace;
+        }
+
+        boolean isVoid() {
+            return returnType == VoidAttribute.getInstance();
         }
 
     }

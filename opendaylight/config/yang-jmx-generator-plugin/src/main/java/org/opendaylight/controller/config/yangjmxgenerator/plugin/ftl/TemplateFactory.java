@@ -7,15 +7,11 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.api.runtime.RuntimeBean;
@@ -25,29 +21,17 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute;
+import org.opendaylight.controller.config.yangjmxgenerator.attribute.*;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.DependencyAttribute.Dependency;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.*;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation.Parameter;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDeclaration;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.ModuleField;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
 import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.sal.binding.model.api.Type;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import javax.management.openmbean.SimpleType;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class TemplateFactory {
 
@@ -107,40 +91,18 @@ public class TemplateFactory {
             List<String> extendedInterfaces = Arrays.asList(RuntimeBean.class
                     .getCanonicalName());
             List<MethodDeclaration> methods = new ArrayList<>();
+
             // convert attributes to getters
             for (AttributeIfc attributeIfc : entry.getAttributes()) {
                 String returnType = null;
-                if (attributeIfc instanceof TypedAttribute) {
-                    returnType = ((TypedAttribute) attributeIfc).getType()
-                            .getFullyQualifiedName();
-                } else if (attributeIfc instanceof TOAttribute) {
-                    String fullyQualifiedName = FullyQualifiedNameHelper
-                            .getFullyQualifiedName(entry.getPackageName(),
-                                    attributeIfc.getUpperCaseCammelCase());
-
-                    returnType = fullyQualifiedName;
-                } else if (attributeIfc instanceof ListAttribute) {
-                    AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
-                            .getInnerAttribute();
-
-                    String innerTpe = innerAttr instanceof TypedAttribute ? ((TypedAttribute) innerAttr)
-                            .getType().getFullyQualifiedName()
-                            : FullyQualifiedNameHelper.getFullyQualifiedName(
-                                    entry.getPackageName(),
-                                    attributeIfc.getUpperCaseCammelCase());
-
-                    returnType = "java.util.List<" + innerTpe + ">";
-                } else {
-                    throw new UnsupportedOperationException(
-                            "Attribute not supported: "
-                                    + attributeIfc.getClass());
-                }
+                returnType = getReturnType(entry, attributeIfc);
                 String getterName = "get"
                         + attributeIfc.getUpperCaseCammelCase();
                 MethodDeclaration getter = new MethodDeclaration(returnType,
                         getterName, Collections.<Field> emptyList());
                 methods.add(getter);
             }
+
             // add rpc methods
             for (Rpc rpc : entry.getRpcs()) {
                 // convert JavaAttribute parameters into fields
@@ -152,7 +114,7 @@ public class TemplateFactory {
                     fields.add(field);
                 }
                 MethodDeclaration operation = new MethodDeclaration(
-                        rpc.getReturnType(), rpc.getName(), fields);
+                        getReturnType(entry, rpc.getReturnType()), rpc.getName(), fields);
                 methods.add(operation);
             }
 
@@ -168,6 +130,38 @@ public class TemplateFactory {
         result.putAll(TemplateFactory.tOsFromRbe(entry));
 
         return result;
+    }
+
+    private static String getReturnType(RuntimeBeanEntry entry, AttributeIfc attributeIfc) {
+        String returnType;
+        if (attributeIfc instanceof TypedAttribute) {
+            returnType = ((TypedAttribute) attributeIfc).getType()
+                    .getFullyQualifiedName();
+        } else if (attributeIfc instanceof TOAttribute) {
+            String fullyQualifiedName = FullyQualifiedNameHelper
+                    .getFullyQualifiedName(entry.getPackageName(),
+                            attributeIfc.getUpperCaseCammelCase());
+
+            returnType = fullyQualifiedName;
+        } else if (attributeIfc instanceof ListAttribute) {
+            AttributeIfc innerAttr = ((ListAttribute) attributeIfc)
+                    .getInnerAttribute();
+
+            String innerTpe = innerAttr instanceof TypedAttribute ? ((TypedAttribute) innerAttr)
+                    .getType().getFullyQualifiedName()
+                    : FullyQualifiedNameHelper.getFullyQualifiedName(
+                            entry.getPackageName(),
+                            attributeIfc.getUpperCaseCammelCase());
+
+            returnType = "java.util.List<" + innerTpe + ">";
+        } else if (attributeIfc == VoidAttribute.getInstance()) {
+            return "void";
+        } else {
+            throw new UnsupportedOperationException(
+                    "Attribute not supported: "
+                            + attributeIfc.getClass());
+        }
+        return returnType;
     }
 
     public static GeneralInterfaceTemplate serviceInterfaceFromSie(
@@ -315,8 +309,25 @@ public class TemplateFactory {
             RuntimeBeanEntry rbe) {
         Map<String, GeneralClassTemplate> retVal = Maps.newHashMap();
         TOAttributesProcessor processor = new TOAttributesProcessor();
-        processor.processAttributes(rbe.getYangPropertiesToTypesMap(),
-                rbe.getPackageName());
+        Map<String, AttributeIfc> yangPropertiesToTypesMap = Maps.newHashMap(rbe.getYangPropertiesToTypesMap());
+
+        // Add TOs from output parameters
+        for (Rpc rpc : rbe.getRpcs()) {
+            AttributeIfc returnType = rpc.getReturnType();
+
+            if (returnType == VoidAttribute.getInstance())
+                continue;
+            if (returnType instanceof JavaAttribute)
+                continue;
+            if (returnType instanceof ListAttribute && returnType.getOpenType() instanceof SimpleType)
+                continue;
+
+            Preconditions.checkState(yangPropertiesToTypesMap.containsKey(returnType.getAttributeYangName()) == false,
+                    "Duplicate TO %s for %s", returnType.getAttributeYangName(), rbe);
+            yangPropertiesToTypesMap.put(returnType.getAttributeYangName(), returnType);
+        }
+
+        processor.processAttributes(yangPropertiesToTypesMap, rbe.getPackageName());
         for (org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.TemplateFactory.TOAttributesProcessor.TOInternal to : processor
                 .getTOs()) {
             List<Constructor> constructors = Lists.newArrayList();
