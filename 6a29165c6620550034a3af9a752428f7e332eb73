@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_6e3fa226",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-28T13:42:12Z",
+      "side": 1,
+      "message": "Please elaborate more in the commit message. Keep in mind that this is shown in git log for all the users without the rest of the patch, kind of hard to figure out what is this change about from a single word. thank you.",
+      "revId": "6a29165c6620550034a3af9a752428f7e332eb73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_4e3cde2f",
+        "filename": "opendaylight/md-sal/sal-compability/src/main/java/org/opendaylight/controller/sal/compability/adsal/FlowServiceAdapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-28T13:42:12Z",
+      "side": 1,
+      "message": "Can you name v class member more clear and elaborate what is it used for?\nShould it be necessarily a class member of the adapter, or perhaps it can be a local variable in the below methods instead?",
+      "revId": "6a29165c6620550034a3af9a752428f7e332eb73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ee1272b3",
+        "filename": "opendaylight/md-sal/sal-compability/src/main/java/org/opendaylight/controller/sal/compability/adsal/FlowServiceAdapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-28T13:42:12Z",
+      "side": 1,
+      "message": "Why is this method empty with a todo comment? should it be an empty implementation?",
+      "revId": "6a29165c6620550034a3af9a752428f7e332eb73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2e49aad0",
+        "filename": "opendaylight/md-sal/sal-compability/src/main/java/org/opendaylight/controller/sal/compability/adsal/FlowServiceAdapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-10-28T13:42:12Z",
+      "side": 1,
+      "message": "you declared a logger in the class, however you are not using it to log errors.\nPlease replace all print stack traces with logging...",
+      "revId": "6a29165c6620550034a3af9a752428f7e332eb73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
