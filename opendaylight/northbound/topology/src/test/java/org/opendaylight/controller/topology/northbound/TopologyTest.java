@@ -47,14 +47,12 @@ public class TopologyTest {
         try {
             e12 = new Edge(nc12, nc21);
         } catch (ConstructionException e) {
-            logger.error("",e);
-            assertTrue(false);
+            fail("Failed to construct edge " + e.getMessage());
         }
         try {
             e23 = new Edge(nc23, nc32);
         } catch (ConstructionException e) {
-            logger.error("",e);
-            assertTrue(false);
+            fail("Failed to construct edge " + e.getMessage());
         }
 
         Set<Property> props = new HashSet<Property>();
