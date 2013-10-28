@@ -398,10 +398,12 @@ public class ClusterManager implements IClusterServices {
     @Override
     public boolean existCache(String containerName, String cacheName) {
         EmbeddedCacheManager manager = this.cm;
-        String realCacheName = "{" + containerName + "}_{" + cacheName + "}";
+
         if (manager == null) {
             return false;
         }
+
+        String realCacheName = "{" + containerName + "}_{" + cacheName + "}";
         return manager.cacheExists(realCacheName);
     }
 
