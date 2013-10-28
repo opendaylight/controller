@@ -39,6 +39,28 @@
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
             </plugin>
+            <plugin>
+                   <groupId>org.jacoco</groupId>
+                   <artifactId>jacoco-maven-plugin</artifactId>
+                   <configuration>
+                     <includes>org.opendaylight.controller.*</includes>
+                   </configuration>
+                   <executions>
+                     <execution>
+                       <id>pre-test</id>
+                       <goals>
+                         <goal>prepare-agent</goal>
+                       </goals>
+                     </execution>
+                     <execution>
+                       <id>post-test</id>
+                       <phase>test</phase>
+                       <goals>
+                         <goal>report</goal>
+                       </goals>
+                     </execution>
+                   </executions>
+               </plugin>
         </plugins>
     </build>
 
