@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_8ebbf671",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-28T16:13:02Z",
+      "side": 1,
+      "message": "Please use the parameterized form of the log:\nlog.debug(\"{} cache already exists [...]\", cacheName);\n\nThis way, the string concatenation will be performed only if the set log level allows this log to be printed.",
+      "revId": "1ca2f5d44f0b105409546d47a33aa654ef1abd7d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
