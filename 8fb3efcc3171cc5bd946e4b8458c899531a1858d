@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_4eadfe30",
+        "filename": "opendaylight/topologymanager/implementation/src/main/java/org/opendaylight/controller/topologymanager/internal/TopologyManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-28T16:17:25Z",
+      "side": 1,
+      "message": "The only place where these constants are needed is in the Activator class.\nThat\u0027s why they were made package protected, which is the minimum needed to make them visible in there.\n\nWhy are you making them public. Are you planning to use those constants in the test package ?",
+      "revId": "8fb3efcc3171cc5bd946e4b8458c899531a1858d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
