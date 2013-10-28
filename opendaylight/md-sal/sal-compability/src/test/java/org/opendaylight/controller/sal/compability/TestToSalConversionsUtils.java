@@ -8,6 +8,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -18,31 +19,38 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.FlowAddedBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.NodeFlow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.VlanCfi;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.action.action.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.Address;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv4Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.address.address.Ipv6Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Action;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.ActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev130819.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.VlanCfi;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.action.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.Address;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv4Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.address.address.Ipv6Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.list.Action;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.action.list.ActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanPcp;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.arp.match.fields.ArpSourceHardwareAddressBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.arp.match.fields.ArpTargetHardwareAddressBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.ethernet.match.fields.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.ArpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv4MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._3.match.Ipv6MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.SctpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.TcpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.match.layer._4.match.UdpMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev130819.vlan.match.fields.VlanIdBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpSourceHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpTargetHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.SctpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActions;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsBuilder;
 
 import com.google.common.net.InetAddresses;
+
 import static org.opendaylight.controller.sal.compability.ProtocolConstants.ETHERNET_ARP;
 import static org.opendaylight.controller.sal.compability.ProtocolConstants.SCTP;
 import static org.opendaylight.controller.sal.compability.ProtocolConstants.TCP;
@@ -254,7 +262,7 @@ public class TestToSalConversionsUtils {
         odNodeFlowBuilder.setHardTimeout(32767);
         odNodeFlowBuilder.setIdleTimeout(32767);
         odNodeFlowBuilder.setPriority(32767);
-        odNodeFlowBuilder.setAction(prepareOdActions());
+        odNodeFlowBuilder.setInstructions(prepareOdActions());
         return odNodeFlowBuilder;
     }
 
@@ -263,7 +271,7 @@ public class TestToSalConversionsUtils {
         return odNodeFlowBuilder.build();
     }
 
-    private List<Action> prepareOdActions() {
+    private Instructions prepareOdActions() {
         List<Action> odActions = new ArrayList<>();
 
         ControllerActionBuilder controllerActionBuilder = new ControllerActionBuilder();
@@ -333,7 +341,15 @@ public class TestToSalConversionsUtils {
         odActions.add(new ActionBuilder().setAction(setVlanPcpActionBuilder.build()).build());
         odActions.add(new ActionBuilder().setAction(swPathActionBuilder.build()).build());
 
-        return odActions;
+        
+        ApplyActions innerInst = new ApplyActionsBuilder().setAction(odActions).build();
+        Instruction applyActions = new InstructionBuilder().setInstruction(innerInst).build();
+        List<Instruction> instructions = Collections.singletonList(applyActions );
+        InstructionsBuilder instBuilder = new InstructionsBuilder();
+        
+        instBuilder.setInstruction(instructions);
+        
+        return instBuilder.build();
     }
 
     private void prepareActionSetVlanPcp(SetVlanPcpActionBuilder setVlanPcpActionBuilder) {
