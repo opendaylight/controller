@@ -30,6 +30,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
@@ -91,7 +92,7 @@ public class NeutronRoutersNorthbound {
             @QueryParam("page_reverse") String pageReverse
             // sorting not supported
             ) {
-        INeutronRouterCRUD routerInterface = NeutronNBInterfaces.getIfNBRouterCRUD("default",this);
+        INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
             throw new ServiceUnavailableException("Router CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -135,7 +136,7 @@ public class NeutronRoutersNorthbound {
             @PathParam("routerUUID") String routerUUID,
             // return fields
             @QueryParam("fields") List<String> fields) {
-        INeutronRouterCRUD routerInterface = NeutronNBInterfaces.getIfNBRouterCRUD("default",this);
+        INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
             throw new ServiceUnavailableException("Router CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -164,12 +165,12 @@ public class NeutronRoutersNorthbound {
             @ResponseCode(code = 401, condition = "Unauthorized"),
             @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response createRouters(final NeutronRouterRequest input) {
-        INeutronRouterCRUD routerInterface = NeutronNBInterfaces.getIfNBRouterCRUD("default",this);
+        INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
             throw new ServiceUnavailableException("Router CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -240,12 +241,12 @@ public class NeutronRoutersNorthbound {
             @PathParam("routerUUID") String routerUUID,
             NeutronRouterRequest input
             ) {
-        INeutronRouterCRUD routerInterface = NeutronNBInterfaces.getIfNBRouterCRUD("default",this);
+        INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
             throw new ServiceUnavailableException("Router CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -319,7 +320,7 @@ public class NeutronRoutersNorthbound {
             @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response deleteRouter(
             @PathParam("routerUUID") String routerUUID) {
-        INeutronRouterCRUD routerInterface = NeutronNBInterfaces.getIfNBRouterCRUD("default",this);
+        INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
             throw new ServiceUnavailableException("Router CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -371,17 +372,17 @@ public class NeutronRoutersNorthbound {
             @PathParam("routerUUID") String routerUUID,
             NeutronRouter_Interface input
             ) {
-        INeutronRouterCRUD routerInterface = NeutronNBInterfaces.getIfNBRouterCRUD("default",this);
+        INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
             throw new ServiceUnavailableException("Router CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronPortCRUD portInterface = NeutronNBInterfaces.getIfNBPortCRUD("default",this);
+        INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
         if (portInterface == null) {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default",this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -456,17 +457,17 @@ public class NeutronRoutersNorthbound {
             @PathParam("routerUUID") String routerUUID,
             NeutronRouter_Interface input
             ) {
-        INeutronRouterCRUD routerInterface = NeutronNBInterfaces.getIfNBRouterCRUD("default",this);
+        INeutronRouterCRUD routerInterface = NeutronCRUDInterfaces.getINeutronRouterCRUD(this);
         if (routerInterface == null) {
             throw new ServiceUnavailableException("Router CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronPortCRUD portInterface = NeutronNBInterfaces.getIfNBPortCRUD("default",this);
+        INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
         if (portInterface == null) {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default",this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD(this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());

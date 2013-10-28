@@ -31,6 +31,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronCRUDInterfaces;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
@@ -92,7 +93,7 @@ public class NeutronPortsNorthbound {
             @QueryParam("page_reverse") String pageReverse
             // sorting not supported
             ) {
-        INeutronPortCRUD portInterface = NeutronNBInterfaces.getIfNBPortCRUD("default",this);
+        INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
         if (portInterface == null) {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -138,7 +139,7 @@ public class NeutronPortsNorthbound {
             @PathParam("portUUID") String portUUID,
             // return fields
             @QueryParam("fields") List<String> fields ) {
-        INeutronPortCRUD portInterface = NeutronNBInterfaces.getIfNBPortCRUD("default",this);
+        INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
         if (portInterface == null) {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -171,17 +172,17 @@ public class NeutronPortsNorthbound {
             @ResponseCode(code = 501, condition = "Not Implemented"),
             @ResponseCode(code = 503, condition = "MAC generation failure") })
     public Response createPorts(final NeutronPortRequest input) {
-        INeutronPortCRUD portInterface = NeutronNBInterfaces.getIfNBPortCRUD("default",this);
+        INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
         if (portInterface == null) {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronNetworkCRUD networkInterface = NeutronNBInterfaces.getIfNBNetworkCRUD("default", this);
+        INeutronNetworkCRUD networkInterface = NeutronCRUDInterfaces.getINeutronNetworkCRUD( this);
         if (networkInterface == null) {
             throw new ServiceUnavailableException("Network CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default", this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD( this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -356,12 +357,12 @@ public class NeutronPortsNorthbound {
             @PathParam("portUUID") String portUUID,
             NeutronPortRequest input
             ) {
-        INeutronPortCRUD portInterface = NeutronNBInterfaces.getIfNBPortCRUD("default",this);
+        INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
         if (portInterface == null) {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
         }
-        INeutronSubnetCRUD subnetInterface = NeutronNBInterfaces.getIfNBSubnetCRUD("default", this);
+        INeutronSubnetCRUD subnetInterface = NeutronCRUDInterfaces.getINeutronSubnetCRUD( this);
         if (subnetInterface == null) {
             throw new ServiceUnavailableException("Subnet CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -441,7 +442,7 @@ public class NeutronPortsNorthbound {
         @ResponseCode(code = 501, condition = "Not Implemented") })
     public Response deletePort(
             @PathParam("portUUID") String portUUID) {
-        INeutronPortCRUD portInterface = NeutronNBInterfaces.getIfNBPortCRUD("default",this);
+        INeutronPortCRUD portInterface = NeutronCRUDInterfaces.getINeutronPortCRUD(this);
         if (portInterface == null) {
             throw new ServiceUnavailableException("Port CRUD Interface "
                     + RestMessages.SERVICEUNAVAILABLE.toString());
