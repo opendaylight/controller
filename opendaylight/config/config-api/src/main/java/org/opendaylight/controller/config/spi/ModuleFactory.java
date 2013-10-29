@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.config.spi;
 
-import javax.management.DynamicMBean;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.osgi.framework.BundleContext;
 
+import javax.management.DynamicMBean;
 import java.util.Set;
 
 /**
@@ -44,11 +44,15 @@ public interface ModuleFactory {
      * @param dependencyResolver
      *            This resolver will return actual config mbean based on its
      *            ObjectName.
+     * @param bundleContext Reference to OSGi bundleContext that can be used to
+     *                      acquire OSGi services, startup configuration and other
+     *                      OSGi related information.
+     *
      * @return newly created module
      *
      */
     public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver);
+            DependencyResolver dependencyResolver, BundleContext bundleContext);
 
     /**
      * Create a new Module instance. The returned object is expected to use the
@@ -78,15 +82,18 @@ public interface ModuleFactory {
      *            {@link ClassCastException} when OSGi bundle is being updated.
      *            In this case, implementation should revert to creating new
      *            instance.
+     * @param bundleContext Reference to OSGi bundleContext that can be used to
+     *                      acquire OSGi services, startup configuration and other
+     *                      OSGi related information.
+     *
      * @return newly created module
      * @throws Exception
      *             if it is not possible to recover configuration from old. This
      *             leaves server in a running state but no configuration
      *             transaction can be created.
      */
-    public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old)
-            throws Exception;
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver,
+            DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception;
 
     boolean isModuleImplementingServiceInterface(
             Class<? extends AbstractServiceInterface> serviceInterface);
@@ -97,9 +104,15 @@ public interface ModuleFactory {
      * the method is called for each ModuleFactory separately and transaction
      * is committed automatically, returned modules MUST be valid and commitable
      * without any manual intervention.
+     *
      * @param dependencyResolverFactory factory for getting dependency resolvers for each module.
+     * @param bundleContext Reference to OSGi bundleContext that can be used to
+     *                      acquire OSGi services, startup configuration and other
+     *                      OSGi related information.
+     *
      * @return set of default modules. Null is not allowed.
      */
-    public Set<? extends Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory);
+    public Set<? extends Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
+            BundleContext bundleContext);
 
 }

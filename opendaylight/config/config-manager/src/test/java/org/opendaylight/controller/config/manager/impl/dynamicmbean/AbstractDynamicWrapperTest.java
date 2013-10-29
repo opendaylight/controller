@@ -7,19 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
-import static org.junit.Assert.assertEquals;
-
-import java.lang.management.ManagementFactory;
-
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.DynamicMBean;
-import javax.management.JMX;
-import javax.management.MBeanInfo;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +18,11 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModule;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
 import org.opendaylight.controller.config.spi.Module;
+
+import javax.management.*;
+import java.lang.management.ManagementFactory;
+
+import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractDynamicWrapperTest extends
         AbstractLockedPlatformMBeanServerTest {
@@ -54,7 +46,7 @@ public abstract class AbstractDynamicWrapperTest extends
         internalServer = MBeanServerFactory.createMBeanServer();
         TestingFixedThreadPoolModuleFactory testingFixedThreadPoolConfigBeanFactory = new TestingFixedThreadPoolModuleFactory();
         threadPoolConfigBean = testingFixedThreadPoolConfigBeanFactory
-                .createModule("", null);
+                .createModule("", null, null);
 
         threadPoolConfigBean.setThreadCount(threadCount);
         AbstractDynamicWrapper dynamicWrapper = getDynamicWrapper(

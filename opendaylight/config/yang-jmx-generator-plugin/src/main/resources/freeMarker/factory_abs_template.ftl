@@ -21,19 +21,19 @@ package ${packageName};
     }
 
     @Override
-    public ${moduleType} createModule(String instanceName, ${dependencyResolverType} dependencyResolver) {
-        return instantiateModule(instanceName, dependencyResolver);
+    public ${moduleType} createModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${bundleContextType} bundleContext) {
+        return instantiateModule(instanceName, dependencyResolver, bundleContext);
     }
 
     @Override
-    public ${moduleType} createModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${dynamicMBeanWithInstanceType} old) throws Exception {
+    public ${moduleType} createModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${dynamicMBeanWithInstanceType} old, ${bundleContextType} bundleContext) throws Exception {
         ${moduleInstanceType} oldModule = null;
         try {
             oldModule = (${moduleInstanceType}) old.getModule();
         } catch(Exception e) {
             return handleChangedClass(old);
         }
-        ${moduleInstanceType} module = instantiateModule(instanceName, dependencyResolver, oldModule, old.getInstance());
+        ${moduleInstanceType} module = instantiateModule(instanceName, dependencyResolver, oldModule, old.getInstance(), bundleContext);
 
         <#list fields as attr>
         module.set${attr.name}(oldModule.get${attr.name}());
@@ -42,11 +42,11 @@ package ${packageName};
         return module;
     }
 
-    public ${moduleInstanceType} instantiateModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${moduleInstanceType} oldModule, ${instanceType} oldInstance) {
+    public ${moduleInstanceType} instantiateModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${moduleInstanceType} oldModule, ${instanceType} oldInstance, ${bundleContextType} bundleContext) {
         return new ${moduleInstanceType}(new ${moduleNameType}(NAME, instanceName), dependencyResolver, oldModule, oldInstance);
     }
 
-    public ${moduleInstanceType} instantiateModule(String instanceName, ${dependencyResolverType} dependencyResolver) {
+    public ${moduleInstanceType} instantiateModule(String instanceName, ${dependencyResolverType} dependencyResolver, ${bundleContextType} bundleContext) {
         return new ${moduleInstanceType}(new ${moduleNameType}(NAME, instanceName), dependencyResolver);
     }
 
@@ -61,7 +61,7 @@ package ${packageName};
     }
 
     @Override
-    public java.util.Set<${moduleInstanceType}> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory) {
+    public java.util.Set<${moduleInstanceType}> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory, ${bundleContextType} bundleContext) {
         return new java.util.HashSet<${moduleInstanceType}>();
     }
 

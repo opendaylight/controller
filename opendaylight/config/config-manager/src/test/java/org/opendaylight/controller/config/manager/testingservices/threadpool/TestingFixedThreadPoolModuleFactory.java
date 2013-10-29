@@ -7,11 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.threadpool;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -21,6 +16,12 @@ import org.opendaylight.controller.config.manager.testingservices.seviceinterfac
 import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class TestingFixedThreadPoolModuleFactory implements ModuleFactory {
     public static final String NAME = "fixed";
@@ -34,14 +35,14 @@ public class TestingFixedThreadPoolModuleFactory implements ModuleFactory {
 
     @Override
     public TestingFixedThreadPoolModule createModule(String instanceName,
-            DependencyResolver dependencyResolver) {
+            DependencyResolver dependencyResolver, BundleContext bundleContext) {
         return new TestingFixedThreadPoolModule(new ModuleIdentifier(NAME,
                 instanceName), null, null);
     }
 
     @Override
     public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old)
+            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old, BundleContext bundleContext)
             throws Exception {
         int threadCount = (Integer) old.getAttribute("ThreadCount");
         // is the instance compatible?
@@ -67,7 +68,7 @@ public class TestingFixedThreadPoolModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory) {
+    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
         return new HashSet<Module>();
     }
 }

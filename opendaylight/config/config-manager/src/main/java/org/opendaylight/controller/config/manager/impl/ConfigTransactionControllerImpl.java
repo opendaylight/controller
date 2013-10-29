@@ -7,20 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import static java.lang.String.format;
-
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
-import javax.management.DynamicMBean;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ValidationException;
@@ -32,14 +18,23 @@ import org.opendaylight.controller.config.manager.impl.dynamicmbean.ReadOnlyAtom
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HierarchicalConfigMBeanFactoriesHolder;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator;
-import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator
-        .TransactionModuleJMXRegistration;
+import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
+import javax.management.*;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.lang.String.format;
 
 /**
  * This is a JMX bean representing current transaction. It contains
@@ -74,11 +69,13 @@ class ConfigTransactionControllerImpl implements
             configBeanModificationDisabled);
     private final MBeanServer configMBeanServer;
 
+    private final BundleContext bundleContext;
+
     public ConfigTransactionControllerImpl(String transactionName,
-            TransactionJMXRegistrator transactionRegistrator,
-            long parentVersion, long currentVersion,
-            List<ModuleFactory> currentlyRegisteredFactories,
-            MBeanServer transactionsMBeanServer, MBeanServer configMBeanServer) {
+                                           TransactionJMXRegistrator transactionRegistrator,
+                                           long parentVersion, long currentVersion,
+                                           List<ModuleFactory> currentlyRegisteredFactories,
+                                           MBeanServer transactionsMBeanServer, MBeanServer configMBeanServer, BundleContext bundleContext) {
 
         this.transactionIdentifier = new TransactionIdentifier(transactionName);
         this.controllerON = ObjectNameUtil
@@ -94,6 +91,7 @@ class ConfigTransactionControllerImpl implements
         this.dependencyResolverManager = new DependencyResolverManager(transactionName, transactionStatus);
         this.transactionsMBeanServer = transactionsMBeanServer;
         this.configMBeanServer = configMBeanServer;
+        this.bundleContext = bundleContext;
     }
 
     @Override
@@ -130,7 +128,7 @@ class ConfigTransactionControllerImpl implements
         }
         // add default modules
         for (ModuleFactory moduleFactory : toBeAdded) {
-            Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager);
+            Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager, bundleContext);
             for (Module module : defaultModules) {
                 try {
                     putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, null);
@@ -167,7 +165,7 @@ class ConfigTransactionControllerImpl implements
         try {
             module = moduleFactory.createModule(
                     moduleIdentifier.getInstanceName(), dependencyResolver,
-                    oldConfigBeanInfo.getReadableModule());
+                    oldConfigBeanInfo.getReadableModule(), bundleContext);
         } catch (Exception e) {
             throw new IllegalStateException(format(
                     "Error while copying old configuration from %s to %s",
@@ -188,7 +186,7 @@ class ConfigTransactionControllerImpl implements
         // find factory
         ModuleFactory moduleFactory = factoriesHolder.findByModuleName(factoryName);
         DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
-        Module module = moduleFactory.createModule(instanceName, dependencyResolver);
+        Module module = moduleFactory.createModule(instanceName, dependencyResolver, bundleContext);
         return putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module,
                 moduleFactory, null);
     }

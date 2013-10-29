@@ -8,14 +8,6 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.slf4j.LoggerFactory;
-
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -25,9 +17,16 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.osgi.framework.BundleContext;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
 *
@@ -42,7 +41,8 @@ public class LogbackModuleFactory extends
     private Map<String, FileAppenderTO> fileDTOs;
 
     @Override
-    public LogbackModule instantiateModule(String instanceName, DependencyResolver dependencyResolver) {
+    public LogbackModule instantiateModule(String instanceName,
+            DependencyResolver dependencyResolver, BundleContext bundleContext) {
         Preconditions.checkArgument(instanceName.equals(INSTANCE_NAME),
                 "There should be just one instance of logback, named " + INSTANCE_NAME);
         prepareDTOs();
@@ -56,8 +56,9 @@ public class LogbackModuleFactory extends
     }
 
     @Override
-    public LogbackModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-            LogbackModule oldModule, AutoCloseable oldInstance) {
+    public LogbackModule instantiateModule(String instanceName,
+            DependencyResolver dependencyResolver, LogbackModule oldModule,
+            AutoCloseable oldInstance, BundleContext bundleContext) {
         Preconditions.checkArgument(instanceName.equals(INSTANCE_NAME),
                 "There should be just one instance of logback, named " + INSTANCE_NAME);
         prepareDTOs();

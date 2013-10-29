@@ -7,42 +7,17 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.*;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.annotations.Description;
@@ -58,11 +33,19 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.io.Files;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.*;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class JMXGeneratorTest extends AbstractGeneratorTest {
 
@@ -469,14 +452,13 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
         assertEquals(2, fieldDeclarations.size());
 
-
         Set<String> expectedMethods = new HashSet<>(Arrays.asList("String getImplementationName()",
-                "org.opendaylight.controller.config.spi.Module createModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver)",
-                "org.opendaylight.controller.config.spi.Module createModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.opendaylight.controller.config.api.DynamicMBeanWithInstance old)",
+                "org.opendaylight.controller.config.spi.Module createModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.osgi.framework.BundleContext bundleContext)",
+                "org.opendaylight.controller.config.spi.Module createModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.opendaylight.controller.config.api.DynamicMBeanWithInstance old,org.osgi.framework.BundleContext bundleContext)",
                 "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule handleChangedClass(org.opendaylight.controller.config.api.DynamicMBeanWithInstance old)",
-                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule instantiateModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule oldModule,java.lang.AutoCloseable oldInstance)",
-                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule instantiateModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver)",
-                "java.util.Set<org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory)",
+                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule instantiateModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule oldModule,java.lang.AutoCloseable oldInstance,org.osgi.framework.BundleContext bundleContext)",
+                "org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule instantiateModule(String instanceName,org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,org.osgi.framework.BundleContext bundleContext)",
+                "java.util.Set<org.opendaylight.controller.config.threads.java.NamingThreadFactoryModule> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory,org.osgi.framework.BundleContext bundleContext)",
                 "boolean isModuleImplementingServiceInterface(Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface> serviceInterface)"));
         assertEquals("Incorrenct number of generated methods", expectedMethods, visitor.methods);
         assertEquals("Incorrenct number of generated method descriptions", 0,

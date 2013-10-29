@@ -7,21 +7,21 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
-import org.opendaylight.controller.config.manager.testingservices.seviceinterface
-        .TestingScheduledThreadPoolServiceInterface;
+import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingScheduledThreadPoolServiceInterface;
 import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
     public static final String NAME = "scheduled";
@@ -42,14 +42,14 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
 
     @Override
     public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver) {
+            DependencyResolver dependencyResolver, BundleContext bundleContext) {
         return new TestingScheduledThreadPoolModule(new ModuleIdentifier(NAME,
                 instanceName), null, null);
     }
 
     @Override
     public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old)
+            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old, BundleContext bundleContext)
             throws Exception {
         TestingScheduledThreadPoolImpl oldInstance;
         try {
@@ -67,7 +67,7 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory) {
+    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
         return new HashSet<Module>();
     }
 }
