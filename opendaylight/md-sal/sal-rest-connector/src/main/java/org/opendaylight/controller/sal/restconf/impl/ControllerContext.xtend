@@ -24,9 +24,10 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode
 import org.opendaylight.yangtools.yang.model.api.SchemaContext
 
 import static com.google.common.base.Preconditions.*
-import java.util.Date
 
 class ControllerContext {
+    
+    val static NULL_VALUE = "null"
 
     @Property
     SchemaContext schemas;
@@ -40,11 +41,17 @@ class ControllerContext {
         if (pathArgs.empty) {
             return null;
         }
+        if (pathArgs.head.empty) {
+            pathArgs.remove(0)
+        }
         val schemaNode = ret.collectPathArguments(pathArgs, restconfInstance.findModule);
+        if (schemaNode == null) {
+            return null
+        }
         new InstanceIdWithSchemaNode(ret.toInstance, schemaNode)
     }
 
-    def findModule(String restconfInstance) {
+    private def findModule(String restconfInstance) {
         checkNotNull(restconfInstance);
         val pathArgs = restconfInstance.split("/");
         if (pathArgs.empty) {
@@ -95,7 +102,7 @@ class ControllerContext {
         throw new IllegalArgumentException("Conversion of generic path argument is not supported");
     }
 
-    public def CharSequence toRestconfIdentifier(QName qname) {
+    def CharSequence toRestconfIdentifier(QName qname) {
         var module = uriToModuleName.get(qname.namespace)
         if (module == null) {
             val moduleSchema = schemas.findModuleByNamespaceAndRevision(qname.namespace, qname.revision);
@@ -156,7 +163,7 @@ class ControllerContext {
         return URLEncoder.encode(object.toString)
     }
 
-    def DataSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings,
+    private def DataSchemaNode collectPathArguments(InstanceIdentifierBuilder builder, List<String> strings,
         DataNodeContainer parentNode) {
         checkNotNull(strings)
         if (strings.empty) {
@@ -164,10 +171,23 @@ class ControllerContext {
         }
         val nodeRef = strings.head;
 
-        //val moduleName = nodeRef.toModuleName();
         val nodeName = nodeRef.toNodeName();
         val targetNode = parentNode.getDataChildByName(nodeName);
         if (targetNode == null) {
+            val children = parentNode.childNodes
+            for (child : children) {
+                if (child instanceof ChoiceNode) {
+                    val choice = child as ChoiceNode
+                    for (caze : choice.cases) {
+                        val result = builder.collectPathArguments(strings, caze as DataNodeContainer);
+                        if (result != null)
+                            return result
+                    }
+                }
+            }
+            return null
+        }
+        if (targetNode instanceof ChoiceNode) {
             return null
         }
 
@@ -176,18 +196,25 @@ class ControllerContext {
         if (targetNode instanceof ListSchemaNode) {
             val listNode = targetNode as ListSchemaNode;
             val keysSize = listNode.keyDefinition.size
+            // every key has to be filled
+            if ((strings.length - consumed) < keysSize) {
+                return null;
+            }
             val uriKeyValues = strings.subList(consumed, consumed + keysSize);
             val keyValues = new HashMap<QName, Object>();
             var i = 0;
             for (key : listNode.keyDefinition) {
                 val uriKeyValue = uriKeyValues.get(i);
+                // key value cannot be NULL
+                if (uriKeyValue.equals(NULL_VALUE)) {
+                    return null
+                }
                 keyValues.addKeyValue(listNode.getDataChildByName(key), uriKeyValue);
                 i = i + 1;
             }
             consumed = consumed + i;
             builder.nodeWithKey(targetNode.QName, keyValues);
         } else {
-
             // Only one instance of node is allowed
             builder.node(targetNode.QName);
         }
@@ -200,7 +227,7 @@ class ControllerContext {
         return targetNode
     }
 
-    def void addKeyValue(HashMap<QName, Object> map, DataSchemaNode node, String uriValue) {
+    private def void addKeyValue(HashMap<QName, Object> map, DataSchemaNode node, String uriValue) {
         checkNotNull(uriValue);
         checkArgument(node instanceof LeafSchemaNode);
         val decoded = URLDecoder.decode(uriValue);
@@ -208,7 +235,7 @@ class ControllerContext {
 
     }
 
-    def String toModuleName(String str) {
+    private def String toModuleName(String str) {
         checkNotNull(str)
         if (str.contains(":")) {
             val args = str.split(":");
@@ -219,7 +246,7 @@ class ControllerContext {
         }
     }
 
-    def String toNodeName(String str) {
+    private def String toNodeName(String str) {
         if (str.contains(":")) {
             val args = str.split(":");
             checkArgument(args.size === 2);
