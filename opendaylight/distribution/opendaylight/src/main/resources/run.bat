@@ -16,8 +16,8 @@ set fwcp="file:\%basedir%lib\org.eclipse.osgi-3.8.1.v20120830-144521.jar,file:\%
 REM echo cp: %cp%
 REM echo fwcp: %fwcp%
 
-REM echo %JAVA_HOME%\bin\java.exe %* -Djava.io.tmpdir=%basedir%work\tmp -Dosgi.install.area=%basedir% -Dosgi.configuration.area=%basedir%configuration -Dosgi.frameworkClassPath=%fwcp% -Dosgi.framework=file:\%basedir%lib\org.eclipse.osgi-3.8.1.v20120830-144521.jar -classpath %cp% org.eclipse.equinox.launcher.Main -console -consoleLog
-"%JAVA_HOME%\bin\java.exe" %* -Djava.io.tmpdir="%basedir%work\tmp" -Dosgi.install.area=%basedir% -Dosgi.configuration.area="%basedir%configuration" -Dosgi.frameworkClassPath=%fwcp% -Dosgi.framework="file:\%basedir%lib\org.eclipse.osgi-3.8.1.v20120830-144521.jar" -classpath %cp% org.eclipse.equinox.launcher.Main -console -consoleLog
+REM echo %JAVA_HOME%\bin\java.exe %* -Djava.io.tmpdir=%basedir%work\tmp -Djava.awt.headless=true -Dosgi.install.area=%basedir% -Dosgi.configuration.area=%basedir%configuration -Dosgi.frameworkClassPath=%fwcp% -Dosgi.framework=file:\%basedir%lib\org.eclipse.osgi-3.8.1.v20120830-144521.jar -classpath %cp% org.eclipse.equinox.launcher.Main -console -consoleLog
+"%JAVA_HOME%\bin\java.exe" %* -Djava.io.tmpdir="%basedir%work\tmp" -Djava.awt.headless=true -Dosgi.install.area=%basedir% -Dosgi.configuration.area="%basedir%configuration" -Dosgi.frameworkClassPath=%fwcp% -Dosgi.framework="file:\%basedir%lib\org.eclipse.osgi-3.8.1.v20120830-144521.jar" -classpath %cp% org.eclipse.equinox.launcher.Main -console -consoleLog
 
 exit %ERRORLEVEL%
 
