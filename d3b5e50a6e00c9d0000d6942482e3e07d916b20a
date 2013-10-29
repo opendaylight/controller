@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_3120eff6",
+        "filename": "opendaylight/hosttracker/api/src/main/java/org/opendaylight/controller/hosttracker/IfIptoHost.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-29T15:51:31Z",
+      "side": 1,
+      "message": "Given you are making non bacward compatible changes to these interfaces, you should also bump the major number in host tracker version",
+      "revId": "d3b5e50a6e00c9d0000d6942482e3e07d916b20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_516fe392",
         "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
         "patchSetId": 1
