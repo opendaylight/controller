@@ -22,7 +22,6 @@ public class JsonMapperTest {
     @BeforeClass
     public static void init() throws FileNotFoundException {
         Set<Module> allModules = TestUtils.loadModules(JsonMapperTest.class.getResource("/full-versions/yangs").getPath());
-        assertEquals(4, allModules.size());
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext.setSchemas(schemaContext);
     }

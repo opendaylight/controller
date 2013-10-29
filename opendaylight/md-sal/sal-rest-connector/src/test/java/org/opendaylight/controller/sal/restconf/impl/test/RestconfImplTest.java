@@ -24,7 +24,6 @@ public class RestconfImplTest {
     @BeforeClass
     public static void init() throws FileNotFoundException {
         Set<Module> allModules = TestUtils.loadModules(RestconfImplTest.class.getResource("/full-versions/yangs").getPath());
-        assertEquals(4, allModules.size());
         SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         ControllerContext controllerContext = new ControllerContext();
         controllerContext.setSchemas(schemaContext);
