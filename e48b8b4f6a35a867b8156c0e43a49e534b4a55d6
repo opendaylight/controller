@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b1d17fcf",
+        "filename": "opendaylight/northbound/controllermanager/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-29T16:37:45Z",
+      "side": 1,
+      "message": "This NB is still called ControllerManager where in its actually managing properties. Can this be renamed appropriately.",
+      "revId": "e48b8b4f6a35a867b8156c0e43a49e534b4a55d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
