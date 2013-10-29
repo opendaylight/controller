@@ -95,7 +95,8 @@
                             com.google.common.base,
                             com.google.common.collect,
                             org.apache.commons.lang3,
-                            org.slf4j
+                            org.slf4j,
+                            org.osgi.framework
                         </Import-Package>
                         <Export-Package>
                             org.opendaylight.controller.config.yang.logback.config,

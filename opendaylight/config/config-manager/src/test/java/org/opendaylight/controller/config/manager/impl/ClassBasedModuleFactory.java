@@ -7,13 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -21,9 +15,14 @@ import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Creates new modules by reflection. Provided class must have this constructor:
@@ -56,7 +55,7 @@ public class ClassBasedModuleFactory implements ModuleFactory {
 
     @Override
     public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old)
+            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old, BundleContext bundleContext)
             throws Exception {
         Preconditions.checkNotNull(old);
         return constructModule(instanceName, dependencyResolver, old);
@@ -79,7 +78,7 @@ public class ClassBasedModuleFactory implements ModuleFactory {
 
     @Override
     public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver) {
+            DependencyResolver dependencyResolver, BundleContext bundleContext) {
         try {
             return constructModule(instanceName, dependencyResolver, null);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -105,7 +104,7 @@ public class ClassBasedModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory) {
+    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
         return new HashSet<Module>();
     }
 }

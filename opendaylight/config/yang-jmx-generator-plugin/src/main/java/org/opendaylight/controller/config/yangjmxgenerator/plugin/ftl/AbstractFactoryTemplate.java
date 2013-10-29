@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
@@ -20,8 +18,10 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Cons
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
+import org.osgi.framework.BundleContext;
 
-import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -81,6 +81,10 @@ public class AbstractFactoryTemplate extends GeneralClassTemplate {
 
     public String getDynamicMBeanWithInstanceType() {
         return DynamicMBeanWithInstance.class.getCanonicalName();
+    }
+
+    public String getBundleContextType() {
+        return BundleContext.class.getCanonicalName();
     }
 
     @Override

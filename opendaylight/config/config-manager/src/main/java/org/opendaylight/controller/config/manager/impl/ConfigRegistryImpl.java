@@ -7,26 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.NotThreadSafe;
-import javax.annotation.concurrent.ThreadSafe;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
@@ -50,6 +30,13 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.*;
+import java.util.*;
+import java.util.Map.Entry;
+
 /**
  * Singleton that is responsible for creating and committing Config
  * Transactions. It is registered in Platform MBean Server.
@@ -60,6 +47,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     private final ModuleFactoriesResolver resolver;
     private final MBeanServer configMBeanServer;
+
+    @GuardedBy("this")
+    private final BundleContext bundleContext;
+
     @GuardedBy("this")
     private long version = 0;
     @GuardedBy("this")
@@ -114,6 +105,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         this.resolver = resolver;
         this.beanToOsgiServiceManager = new BeanToOsgiServiceManager(
                 bundleContext);
+        this.bundleContext = bundleContext;
         this.configMBeanServer = configMBeanServer;
         this.baseJMXRegistrator = baseJMXRegistrator;
         this.registryMBeanServer = MBeanServerFactory
@@ -138,7 +130,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         List<ModuleFactory> allCurrentFactories = Collections.unmodifiableList(resolver.getAllFactories());
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
                 transactionName, transactionRegistrator, version,
-                versionCounter, allCurrentFactories, transactionsMBeanServer, configMBeanServer);
+                versionCounter, allCurrentFactories, transactionsMBeanServer, configMBeanServer, bundleContext);
         try {
             transactionRegistrator.registerMBean(transactionController, transactionController.getControllerObjectName());
         } catch (InstanceAlreadyExistsException e) {

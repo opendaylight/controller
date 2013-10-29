@@ -7,17 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import static org.junit.Assert.assertEquals;
-
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
-
+import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +18,15 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
 import org.opendaylight.controller.config.manager.impl.runtimembean.TestingRuntimeBean;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 
-import com.google.common.collect.Sets;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 
 public class ConfigTransactionControllerImplTest extends
         AbstractLockedPlatformMBeanServerTest {
@@ -68,7 +66,7 @@ public class ConfigTransactionControllerImplTest extends
         testedTxController = new ConfigTransactionControllerImpl(
                 transactionName123, jmxRegistrator123, 1, 1,
                 currentlyRegisteredFactories, transactionsMBeanServer,
-                ManagementFactory.getPlatformMBeanServer());
+                ManagementFactory.getPlatformMBeanServer(), null);
         TransactionModuleJMXRegistrator transactionModuleJMXRegistrator123 = testedTxController
                 .getTxModuleJMXRegistrator();
         transactionModuleJMXRegistrator123.registerMBean(

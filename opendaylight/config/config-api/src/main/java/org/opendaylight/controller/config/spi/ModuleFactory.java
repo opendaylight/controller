@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.config.spi;
 
-import javax.management.DynamicMBean;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.osgi.framework.BundleContext;
 
+import javax.management.DynamicMBean;
 import java.util.Set;
 
 /**
@@ -48,7 +48,7 @@ public interface ModuleFactory {
      *
      */
     public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver);
+            DependencyResolver dependencyResolver, BundleContext bundleContext);
 
     /**
      * Create a new Module instance. The returned object is expected to use the
@@ -84,9 +84,8 @@ public interface ModuleFactory {
      *             leaves server in a running state but no configuration
      *             transaction can be created.
      */
-    public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old)
-            throws Exception;
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver,
+            DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception;
 
     boolean isModuleImplementingServiceInterface(
             Class<? extends AbstractServiceInterface> serviceInterface);
@@ -100,6 +99,7 @@ public interface ModuleFactory {
      * @param dependencyResolverFactory factory for getting dependency resolvers for each module.
      * @return set of default modules. Null is not allowed.
      */
-    public Set<? extends Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory);
+    public Set<? extends Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
+            BundleContext bundleContext);
 
 }

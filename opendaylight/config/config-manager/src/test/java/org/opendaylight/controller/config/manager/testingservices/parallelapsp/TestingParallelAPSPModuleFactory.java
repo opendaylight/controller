@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.parallelapsp;
 
-import javax.annotation.concurrent.ThreadSafe;
-import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -17,7 +14,10 @@ import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.BundleContext;
 
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.ObjectName;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,14 +33,14 @@ public class TestingParallelAPSPModuleFactory implements ModuleFactory {
 
     @Override
     public TestingParallelAPSPModule createModule(String instanceName,
-            DependencyResolver dependencyResolver) {
+            DependencyResolver dependencyResolver, BundleContext bundleContext) {
         return new TestingParallelAPSPModule(new ModuleIdentifier(NAME,
                 instanceName), dependencyResolver, null, null);
     }
 
     @Override
     public TestingParallelAPSPModule createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old)
+            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old, BundleContext context)
             throws Exception {
         TestingParallelAPSPImpl oldInstance;
         try {
@@ -66,7 +66,7 @@ public class TestingParallelAPSPModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory) {
+    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext context) {
         return new HashSet<Module>();
     }
 }
