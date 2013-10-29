@@ -817,6 +817,12 @@
       <id>ebr-bundles-external</id>
       <name>ebr-bundles-external</name>
       <url>${nexusproxy}/repositories/ebr-bundles-external/</url>
+        <snapshots>
+           <enabled>false</enabled>
+        </snapshots>
+        <releases>
+           <enabled>true</enabled>
+        </releases>
     </repository>
     <repository>
       <id>central</id>
@@ -835,6 +841,12 @@
       <id>ops4j-releases</id>
       <name>ops4j-releases</name>
       <url>${nexusproxy}/repositories/ops4j-releases/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
     </repository>
     <!-- Third Packages hosted in local maven because not available in other
       places -->
@@ -842,6 +854,12 @@
       <id>thirdparty</id>
       <name>thirdparty</name>
       <url>${nexusproxy}/repositories/thirdparty/</url>
+      <snapshots>
+          <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <enabled>true</enabled>
+      </releases>
     </repository>
     <!-- Jboss mirror -->
     <!-- https://repository.jboss.org/nexus/content/repositories/releases -->
@@ -861,12 +879,24 @@
       <id>opendaylight-release</id>
       <name>opendaylight-release</name>
       <url>${nexusproxy}/repositories/opendaylight.release/</url>
+      <snapshots>
+          <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <enabled>true</enabled>
+      </releases>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <repository>
       <id>opendaylight-snapshot</id>
       <name>opendaylight-snapshot</name>
       <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+      <snapshots>
+          <enabled>true</enabled>
+      </snapshots>
+      <releases>
+          <enabled>false</enabled>
+      </releases>
     </repository>
   </repositories>
   <distributionManagement>

@@ -171,6 +171,12 @@
       <id>ebr-bundles-release</id>
       <name>ebr-bundles-release</name>
       <url>${nexusproxy}/repositories/ebr-bundles-release/</url>
+      <snapshots>
+          <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <enabled>true</enabled>
+      </releases>
     </repository>
     <!-- EBR external -->
     <!-- http://repository.springsource.com/maven/bundles/external -->
