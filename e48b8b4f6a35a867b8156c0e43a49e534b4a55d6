@@ -16,6 +16,24 @@
       "revId": "e48b8b4f6a35a867b8156c0e43a49e534b4a55d6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_51ada330",
+        "filename": "opendaylight/northbound/controllermanager/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-29T17:48:41Z",
+      "side": 1,
+      "message": "Even though they are called properties, this bundle allows to add controller specific run time settings like the MAC address the controller will use when acting as the subnet gateway.\n\nAs an example, currently controller cannot discover hosts when running in  a Windows VM, because it cannot find any good interface among the onesexposed by the VM from which to fetch the MAC address.",
+      "parentUuid": "da6255ed_b1d17fcf",
+      "revId": "e48b8b4f6a35a867b8156c0e43a49e534b4a55d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
