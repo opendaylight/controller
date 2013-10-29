@@ -105,17 +105,35 @@
             <id>opendaylight-release</id>
             <name>opendaylight-release</name>
             <url>${nexusproxy}/repositories/opendaylight.release/</url>
+            <snapshots>
+                 <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                 <enabled>true</enabled>
+            </releases>
         </repository>
         <!-- OpenDayLight Snapshot artifact -->
         <repository>
             <id>opendaylight-snapshot</id>
             <name>opendaylight-snapshot</name>
             <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
         <repository>
             <id>thirdparty</id>
             <name>thirdparty</name>
             <url>${nexusproxy}/repositories/thirdparty/</url>
+            <snapshots>
+                 <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                 <enabled>true</enabled>
+            </releases>
         </repository>
         <repository>
             <id>central</id>
