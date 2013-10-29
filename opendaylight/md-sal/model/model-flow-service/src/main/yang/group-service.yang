@@ -53,5 +53,17 @@ module sal-group {
             }
             uses group-update;
         }
-    }     
+    } 
+
+    notification group-added {
+        uses node-group;
+    }
+
+    notification group-updated {
+        uses node-group;
+    }
+
+    notification group-removed {
+        uses node-group;
+    }    
 }

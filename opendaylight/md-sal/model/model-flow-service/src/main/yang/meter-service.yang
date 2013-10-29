@@ -50,5 +50,17 @@ module sal-meter {
             }
             uses meter-update;
         }
-    }     
+    }
+        
+    notification meter-added {
+        uses node-meter;
+    }
+
+    notification meter-updated {
+        uses node-meter;
+    }
+
+    notification meter-removed {
+        uses node-meter;
+    }
 }
