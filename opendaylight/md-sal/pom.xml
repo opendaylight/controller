@@ -132,7 +132,8 @@
                  <enabled>false</enabled>
             </snapshots>
             <releases>
-                 <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <enabled>true</enabled>
             </releases>
         </repository>
         <repository>
@@ -143,6 +144,7 @@
                 <enabled>false</enabled>
             </snapshots>
             <releases>
+                <updatePolicy>never</updatePolicy>
                 <enabled>true</enabled>
             </releases>
         </repository>

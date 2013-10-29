@@ -166,10 +166,11 @@
       <name>central2</name>
       <url>http://repo2.maven.org/maven2</url>
       <snapshots>
-           <enabled>false</enabled>
+          <enabled>false</enabled>
       </snapshots>
       <releases>
-           <enabled>true</enabled>
+          <updatePolicy>never</updatePolicy>
+          <enabled>true</enabled>
       </releases>
     </repository>
     <repository>
@@ -180,7 +181,8 @@
            <enabled>false</enabled>
       </snapshots>
       <releases>
-           <enabled>true</enabled>
+          <updatePolicy>never</updatePolicy>
+          <enabled>true</enabled>
       </releases>
     </repository>
     <!-- Third Packages hosted in local maven because not available in
@@ -189,6 +191,13 @@
       <id>thirdparty</id>
       <name>thirdparty</name>
       <url>${nexusproxy}/repositories/thirdparty</url>
+      <snapshots>
+          <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <updatePolicy>never</updatePolicy>
+          <enabled>true</enabled>
+       </releases>
     </repository>
   </repositories>
   <distributionManagement>

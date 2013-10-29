@@ -175,6 +175,7 @@
           <enabled>false</enabled>
       </snapshots>
       <releases>
+          <updatePolicy>never</updatePolicy>
           <enabled>true</enabled>
       </releases>
     </repository>
@@ -184,6 +185,13 @@
       <id>ebr-bundles-external</id>
       <name>ebr-bundles-external</name>
       <url>${nexusproxy}/repositories/ebr-bundles-external/</url>
+      <snapshots>
+           <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <updatePolicy>never</updatePolicy>
+          <enabled>true</enabled>
+      </releases>
     </repository>
     <repository>
       <id>central</id>
@@ -193,6 +201,7 @@
         <enabled>false</enabled>
       </snapshots>
       <releases>
+        <updatePolicy>never</updatePolicy>
         <enabled>true</enabled>
       </releases>
     </repository>
@@ -202,6 +211,13 @@
       <id>ops4j-releases</id>
       <name>ops4j-releases</name>
       <url>${nexusproxy}/repositories/ops4j-releases/</url>
+      <snapshots>
+          <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <updatePolicy>never</updatePolicy>
+          <enabled>true</enabled>
+      </releases>
     </repository>
     <!-- Third Packages hosted in local maven because not available in other 
       places -->
@@ -209,6 +225,13 @@
       <id>thirdparty</id>
       <name>thirdparty</name>
       <url>${nexusproxy}/repositories/thirdparty/</url>
+      <snapshots>
+          <enabled>false</enabled>
+      </snapshots>
+      <releases>
+          <updatePolicy>never</updatePolicy>
+          <enabled>true</enabled>
+      </releases>
     </repository>
     <!-- Jboss mirror -->
     <!-- https://repository.jboss.org/nexus/content/repositories/releases -->
@@ -220,6 +243,7 @@
         <enabled>false</enabled>
       </snapshots>
       <releases>
+        <updatePolicy>never</updatePolicy>
         <enabled>true</enabled>
       </releases>
     </repository>
