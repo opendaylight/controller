@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_516fe392",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-29T10:23:52Z",
+      "side": 1,
+      "message": "With your changes, wont this API break ?",
+      "revId": "d3b5e50a6e00c9d0000d6942482e3e07d916b20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_316c6f9c",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-29T10:23:52Z",
+      "side": 1,
+      "message": "This API will also become unusable.",
+      "revId": "d3b5e50a6e00c9d0000d6942482e3e07d916b20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_11696b8b",
+        "filename": "opendaylight/hosttracker/implementation/src/main/java/org/opendaylight/controller/hosttracker/internal/HostTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-29T10:23:52Z",
+      "side": 1,
+      "message": "Again, this can be unreliable due to the support for duplicate ip-address and one can incorrectly assume the value.",
+      "revId": "d3b5e50a6e00c9d0000d6942482e3e07d916b20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f105b7c2",
+        "filename": "opendaylight/northbound/hosttracker/src/main/java/org/opendaylight/controller/hosttracker/northbound/HostTrackerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-29T10:23:52Z",
+      "side": 1,
+      "message": "What will be the effect of this change to the getHostDetails() method which handles the GET functionality ?",
+      "revId": "d3b5e50a6e00c9d0000d6942482e3e07d916b20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
