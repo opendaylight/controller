@@ -1240,12 +1240,17 @@
           </execution>
         </executions>
           <configuration>
-            <executable>java</executable>
+            <executable>${java.home}/bin/java</executable>
             <arguments>
                 <argument>-cp</argument>
                 <argument>./target/dependency/*</argument>
                 <argument>org.opendaylight.controller.distribution.Sanity</argument>
             </arguments>
+            <environmentVariables>
+              <JAVA_HOME>
+                ${java.home}
+              </JAVA_HOME>
+            </environmentVariables>
           </configuration>
       </plugin>
     </plugins>
