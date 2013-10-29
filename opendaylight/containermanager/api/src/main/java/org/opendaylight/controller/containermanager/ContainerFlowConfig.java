@@ -55,6 +55,10 @@ public class ContainerFlowConfig implements Serializable {
     @XmlElement
     private String name;
 
+    /** The vlan. */
+    @XmlElement
+    private String dlVlan;
+
     /** The network Source. */
     @XmlElement
     private String nwSrc;
@@ -101,6 +105,7 @@ public class ContainerFlowConfig implements Serializable {
     public ContainerFlowConfig(String name, String srcIP, String dstIP, String proto, String srcPort,
             String dstPort) {
         this.name = name;
+        this.dlVlan = null;
         this.nwSrc = srcIP;
         this.nwDst = dstIP;
         this.protocol = proto;
@@ -112,6 +117,7 @@ public class ContainerFlowConfig implements Serializable {
 
     public ContainerFlowConfig(ContainerFlowConfig containerFlowConfig) {
         this.name = containerFlowConfig.name;
+        this.dlVlan = containerFlowConfig.dlVlan;
         this.nwSrc = containerFlowConfig.nwSrc;
         this.nwDst = containerFlowConfig.nwDst;
         this.protocol = containerFlowConfig.protocol;
@@ -128,6 +134,15 @@ public class ContainerFlowConfig implements Serializable {
     public String getName() {
         // mandatory field
         return name;
+    }
+
+    /**
+     * Returns the vlan id.
+     *
+     * @return the Vlan Id
+     */
+    public String getVlan() {
+        return (dlVlan == null || dlVlan.isEmpty()) ? null : dlVlan;
     }
 
     /**
@@ -192,6 +207,7 @@ public class ContainerFlowConfig implements Serializable {
         result = prime * result
                 + ((protocol == null) ? 0 : protocol.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((dlVlan == null) ? 0 : dlVlan.hashCode());
         result = prime * result + ((nwDst == null) ? 0 : nwDst.hashCode());
         result = prime * result + ((tpDst == null) ? 0 : tpDst.hashCode());
         result = prime * result + ((nwSrc == null) ? 0 : nwSrc.hashCode());
@@ -221,7 +237,7 @@ public class ContainerFlowConfig implements Serializable {
             return false;
         }
         ContainerFlowConfig other = (ContainerFlowConfig) obj;
-        if (matchName(other) && matchSrcIP(other)
+        if (matchName(other) && matchDlVlan(other) && matchSrcIP(other)
                 && matchDstIP(other) && matchProtocol(other)
                 && matchSrcPort(other) && matchDstPort(other)) {
             return true;
@@ -280,6 +296,21 @@ public class ContainerFlowConfig implements Serializable {
         return name.equals(flowSpec.name);
     }
 
+    /**
+     * Match Source IP Address.
+     *
+     * @param flowSpec Flow Specification
+     * @return true, if successful
+     */
+    private boolean matchDlVlan(ContainerFlowConfig flowSpec) {
+        if (dlVlan == flowSpec.dlVlan) {
+            return true;
+        }
+        if (dlVlan == null || flowSpec.dlVlan == null) {
+            return false;
+        }
+        return dlVlan.equals(flowSpec.dlVlan);
+    }
 
     /**
      * Match Source IP Address.
@@ -359,6 +390,21 @@ public class ContainerFlowConfig implements Serializable {
             return false;
         }
         return this.tpDst.equals(flowSpec.tpDst);
+    }
+
+    /**
+     * Returns the vlan id number
+     *
+     * @return the vlan id number
+     */
+    public Short getVlanId() {
+        Short vlan = 0;
+        try {
+            vlan = Short.parseShort(dlVlan);
+        } catch (NumberFormatException e) {
+
+        }
+        return vlan;
     }
 
     /**
@@ -522,7 +568,11 @@ public class ContainerFlowConfig implements Serializable {
         if (!hasValidName()) {
             return new Status(StatusCode.BADREQUEST, "Invalid name");
         }
-        Status status = validateIPs();
+        Status status = validateVlan();
+        if (!status.isSuccess()) {
+            return status;
+        }
+        status = validateIPs();
         if (!status.isSuccess()) {
             return status;
         }
@@ -545,6 +595,26 @@ public class ContainerFlowConfig implements Serializable {
      */
     private boolean hasValidName() {
         return (name != null && !name.isEmpty() && name.matches(regexName));
+    }
+
+    /**
+     * Validates the vlan number
+     *
+     * @return the result of the check as Status object
+     */
+    private Status validateVlan() {
+        if (dlVlan != null) {
+            short vlanId = 0;
+            try {
+                vlanId = Short.parseShort(dlVlan);
+            } catch (NumberFormatException e) {
+                return new Status(StatusCode.BADREQUEST, "Invalid vlan id");
+            }
+            if (vlanId < 0 || vlanId > 0xfff) {
+                return new Status(StatusCode.BADREQUEST, "Invalid vlan id");
+            }
+        }
+        return new Status(StatusCode.SUCCESS);
     }
 
     /**
