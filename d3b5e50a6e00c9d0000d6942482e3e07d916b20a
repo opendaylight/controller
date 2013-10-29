@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "da6255ed_d19ab313",
+        "filename": "opendaylight/hosttracker/api/src/main/java/org/opendaylight/controller/hosttracker/HostID.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-29T17:19:01Z",
+      "side": 1,
+      "message": "Please add the IBM Copyright notice",
+      "revId": "d3b5e50a6e00c9d0000d6942482e3e07d916b20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b19f3f03",
+        "filename": "opendaylight/hosttracker/api/src/main/java/org/opendaylight/controller/hosttracker/HostID.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 13
+      },
+      "writtenOn": "2013-10-29T17:19:01Z",
+      "side": 1,
+      "message": "On the same line of Ed\u0027s comment, please do not use the HashCodeBuilder. Please opt for the eclipse generated one.",
+      "revId": "d3b5e50a6e00c9d0000d6942482e3e07d916b20a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_b1abbf88",
         "filename": "opendaylight/hosttracker/api/src/main/java/org/opendaylight/controller/hosttracker/HostID.java",
         "patchSetId": 1
