@@ -33,8 +33,6 @@
         <osgi.version>5.0.0</osgi.version>
         <maven.bundle.version>2.3.7</maven.bundle.version>
         <slf4j.version>1.7.2</slf4j.version>
-        <java.version.source>1.7</java.version.source>
-        <java.version.target>1.7</java.version.target>
         <netconf.netty.version>4.0.10.Final</netconf.netty.version>
     </properties>
 
@@ -181,13 +179,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
-                <configuration>
-                    <source>${java.version.source}</source>
-                    <target>${java.version.target}</target>
-                    <testSource>${java.version.source}</testSource>
-                    <testTarget>${java.version.target}</testTarget>
-                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
