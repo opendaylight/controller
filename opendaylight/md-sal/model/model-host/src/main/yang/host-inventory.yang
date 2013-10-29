@@ -1,0 +1,97 @@
+module host-node-inventory {
+	namespace "urn:opendaylight:host:inventory";
+	prefix host-node;
+
+	import yang-ext {prefix ext;}
+    import ietf-inet-types {prefix inet;}
+    import ietf-yang-types {prefix yang;}
+    import opendaylight-inventory {prefix inv;}
+    import opendaylight-l2-types {prefix l2t;}
+
+    revision "2013-10-29" {
+        description "Host Node extensions to the inventory model";
+    }
+
+    grouping datalink-address {
+		choice datalink-address {
+			case mac-address {
+				leaf mac-address {
+					type yang:mac-address;
+				}
+			}
+		}
+	}
+
+	grouping network-address {
+		choice network-address {
+			case ip-address {
+				leaf ip-address {
+					type inet:ip-address;
+				}
+			}
+		}
+	}
+
+	grouping host-node-connector-state {
+		choice state {
+			case up {
+				leaf up {
+					type empty;
+				}
+			}
+			case down {
+				leaf up {
+					type empty;
+				}
+			}
+		}
+	}
+
+	augment "/inv:nodes/inv:node" {
+        ext:augment-identifier "host-node";
+    }
+
+    augment "/inv:node-updated" {
+        ext:augment-identifier "host-node-updated";
+    }
+
+    grouping learning-mechanism {
+		choice learning-mechanism {
+			case discovered {
+				choice discovered {
+					case arp {
+						container arp {}
+					}
+				}
+			}
+			case programmed {
+				container programmed {}
+			}
+		}
+	}
+
+	grouping host-node-connector {
+		uses host-node-connector-state;
+		uses learning-mechanism;
+		uses datalink-address;
+		uses network-address;
+		leaf vlan-id {
+			type l2t:vlan-id;
+		}
+	}
+
+	augment "/inv:nodes/inv:node/inv:node-connector" {
+        ext:augment-identifier "host-node-connector";
+        uses host-node-connector;
+    }
+
+    augment "/inv:node-updated/inv:node-connector" {
+        ext:augment-identifier "host-node-connector-update-fields";
+        uses host-node-connector;
+    }
+
+    augment "/inv:node-connector-updated" {
+        ext:augment-identifier "host-node-connector-updated";
+    }
+
+}
