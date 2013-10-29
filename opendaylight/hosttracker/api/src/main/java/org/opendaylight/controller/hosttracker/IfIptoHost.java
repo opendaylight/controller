@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import org.opendaylight.controller.hosttracker.HostID;
 import org.opendaylight.controller.hosttracker.hostAware.HostNodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.packet.address.DataLinkAddress;
 import org.opendaylight.controller.sal.utils.Status;
 
 /**
@@ -72,7 +74,7 @@ public interface IfIptoHost {
      *            address of the Host encapsulated in InetAddress class
      * @return List of String ArrayList containing the Hierarchies.
      */
-    public List<List<String>> getHostNetworkHierarchy(InetAddress hostAddress);
+    public List<List<String>> getHostNetworkHierarchy(InetAddress hostAddress, DataLinkAddress macAddress);
 
     /**
      * Returns all the the Hosts either learned dynamically or added statically
@@ -124,15 +126,24 @@ public interface IfIptoHost {
      * @return The status object as described in {@code Status} indicating the
      *         result of this action.
      */
-    public Status addStaticHost(String networkAddress, String dataLayerAddress,
-            NodeConnector nc, String vlan);
+    public Status addStaticHost(String networkAddress, String dataLayerAddress, NodeConnector nc, String vlan);
 
     /**
      * Allows the deletion of statically learned Host
      *
      * @param networkAddress
+     * @param macAddress
      * @return The status object as described in {@code Status} indicating the
      *         result of this action.
      */
-    public Status removeStaticHost(String networkAddress);
+    public Status removeStaticHost(String networkAddress,String macAddress);
+
+    /**
+     * new API to query based on the HostID wrapper using IP and MAC Address.
+     *
+     * @param id
+     *            id of the host which is combination of MAC and IP
+     * @return The HostNodeConnector object of the host
+     */
+    public HostNodeConnector hostQueryByIPandMAC(HostID id);
 }

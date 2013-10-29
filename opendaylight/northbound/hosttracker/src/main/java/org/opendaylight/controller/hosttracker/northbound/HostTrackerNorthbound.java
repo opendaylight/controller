@@ -475,7 +475,7 @@ public class HostTrackerNorthbound {
      *
      */
 
-    @Path("/{containerName}/address/{networkAddress}")
+    @Path("/{containerName}/address/{networkAddress}/{macAddress}")
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
@@ -485,7 +485,7 @@ public class HostTrackerNorthbound {
             @ResponseCode(code = 503, condition = "One or more of Controller service is unavailable") })
     public Response deleteHost(
             @PathParam(value = "containerName") String containerName,
-            @PathParam(value = "networkAddress") String networkAddress) {
+            @PathParam(value = "networkAddress") String networkAddress,@PathParam(value = "macAddress") String macAddress ) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), containerName, Privilege.WRITE, this)) {
             return Response.status(Response.Status.UNAUTHORIZED)
@@ -495,7 +495,7 @@ public class HostTrackerNorthbound {
         handleDefaultDisabled(containerName);
         IfIptoHost hostTracker = getIfIpToHostService(containerName);
 
-        Status status = hostTracker.removeStaticHost(networkAddress);
+        Status status = hostTracker.removeStaticHost(networkAddress,macAddress);
         if (status.isSuccess()) {
             NorthboundUtils.auditlog("Static Host", username, "removed", networkAddress, containerName);
             return Response.noContent().build();

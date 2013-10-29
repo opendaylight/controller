@@ -36,6 +36,7 @@ import org.opendaylight.controller.clustering.services.CacheExistException;
 import org.opendaylight.controller.clustering.services.ICacheUpdateAware;
 import org.opendaylight.controller.clustering.services.IClusterContainerServices;
 import org.opendaylight.controller.clustering.services.IClusterServices;
+import org.opendaylight.controller.hosttracker.HostID;
 import org.opendaylight.controller.hosttracker.IfHostListener;
 import org.opendaylight.controller.hosttracker.IfIptoHost;
 import org.opendaylight.controller.hosttracker.IfNewHostNotify;
@@ -84,12 +85,12 @@ import org.slf4j.LoggerFactory;
  */
 
 public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAware, IInventoryListener,
-        ITopologyManagerAware, ICacheUpdateAware<InetAddress, HostNodeConnector>, CommandProvider {
+        ITopologyManagerAware, ICacheUpdateAware<HostID, HostNodeConnector>, CommandProvider {
     static final String ACTIVE_HOST_CACHE = "hosttracker.ActiveHosts";
     static final String INACTIVE_HOST_CACHE = "hosttracker.InactiveHosts";
     private static final Logger logger = LoggerFactory.getLogger(HostTracker.class);
     protected IHostFinder hostFinder;
-    protected ConcurrentMap<InetAddress, HostNodeConnector> hostsDB;
+    protected ConcurrentMap<HostID, HostNodeConnector> hostsDB;
     /*
      * Following is a list of hosts which have been requested by NB APIs to be
      * added, but either the switch or the port is not sup, so they will be
@@ -108,6 +109,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     protected boolean stopping;
     private static boolean hostRefresh = true;
     private static int hostRetryCount = 5;
+
     private static class ARPPending {
         protected InetAddress hostIP;
         protected short sent_count;
@@ -203,8 +205,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             return;
         }
         logger.debug("Retrieving cache for HostTrackerAH");
-        hostsDB = (ConcurrentMap<InetAddress, HostNodeConnector>) this.clusterContainerService
-                .getCache(ACTIVE_HOST_CACHE);
+        hostsDB = (ConcurrentMap<HostID, HostNodeConnector>) this.clusterContainerService.getCache(ACTIVE_HOST_CACHE);
         if (hostsDB == null) {
             logger.error("Cache couldn't be retrieved for HostTracker");
         }
@@ -219,7 +220,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     }
 
     public void nonClusterObjectCreate() {
-        hostsDB = new ConcurrentHashMap<InetAddress, HostNodeConnector>();
+        hostsDB = new ConcurrentHashMap<HostID, HostNodeConnector>();
         inactiveStaticHosts = new ConcurrentHashMap<NodeConnector, HostNodeConnector>();
         ARPPendingList = new ConcurrentHashMap<InetAddress, ARPPending>();
         failedARPReqList = new ConcurrentHashMap<InetAddress, ARPPending>();
@@ -259,12 +260,13 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     }
 
     private boolean hostExists(HostNodeConnector host) {
-        HostNodeConnector lhost = hostsDB.get(host.getNetworkAddress());
+        HostID id  = HostID.fromIPAndMac(host.getNetworkAddress(), host.getDataLayerAddress());
+        HostNodeConnector lhost = hostsDB.get(id);
         return host.equals(lhost);
     }
 
-    private HostNodeConnector getHostFromOnActiveDB(InetAddress networkAddress) {
-        return hostsDB.get(networkAddress);
+    private HostNodeConnector getHostFromOnActiveDB(HostID id) {
+        return hostsDB.get(id);
     }
 
     private Entry<NodeConnector, HostNodeConnector> getHostFromInactiveDB(InetAddress networkAddress) {
@@ -295,7 +297,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     }
 
     protected boolean hostMoved(HostNodeConnector host) {
-        if (hostQuery(host.getNetworkAddress()) != null) {
+        if (hostQueryByIPandMAC(HostID.fromIPAndMac(host.getNetworkAddress(), host.getDataLayerAddress())) != null) {
             return true;
         }
         return false;
@@ -304,6 +306,10 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     @Override
     public HostNodeConnector hostQuery(InetAddress networkAddress) {
         return hostsDB.get(networkAddress);
+    }
+
+    public HostNodeConnector hostQueryByIPandMAC(HostID id) {
+        return hostsDB.get(id);
     }
 
     @Override
@@ -357,7 +363,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     @Override
     public Set<HostNodeConnector> getActiveStaticHosts() {
         Set<HostNodeConnector> list = new HashSet<HostNodeConnector>();
-        for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
+        for (Entry<HostID, HostNodeConnector> entry : hostsDB.entrySet()) {
             HostNodeConnector host = entry.getValue();
             if (host.isStaticHost()) {
                 list.add(host);
@@ -417,7 +423,8 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     // Learn a new Host
     private void learnNewHost(HostNodeConnector host) {
         host.initArpSendCountDown();
-        HostNodeConnector rHost = hostsDB.putIfAbsent(host.getNetworkAddress(), host);
+        HostID hostkey = HostID.fromIPAndMac(host.getNetworkAddress(), host.getDataLayerAddress());
+        HostNodeConnector rHost = hostsDB.putIfAbsent(hostkey, host);
         if (rHost != null) {
             // Another host is already learned for this IP address, replace it
             replaceHost(host.getNetworkAddress(), rHost, host);
@@ -436,8 +443,14 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         }
 
         newHost.initArpSendCountDown();
-
-        if (hostsDB.replace(networkAddr, removedHost, newHost)) {
+        HostID id = null;
+        try {
+            id = HostID.fromIPAndMac(newHost.getNetworkAddress(),new EthernetAddress(newHost.getDataLayerAddressBytes()));
+        } catch (ConstructionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        if (hostsDB.replace(id, removedHost, newHost)) {
             logger.debug("Host move occurred: Old Host IP:{}, New Host IP: {}", removedHost.getNetworkAddress()
                     .getHostAddress(), newHost.getNetworkAddress().getHostAddress());
             logger.debug("Old Host MAC: {}, New Host MAC: {}",
@@ -449,25 +462,25 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             /*
              * Host replacement has failed, do the recovery
              */
-            hostsDB.put(networkAddr, newHost);
+            hostsDB.put(id, newHost);
             logger.error("Host replacement failed. Overwrite the host. Repalced Host: {}, New Host: {}", removedHost,
                     newHost);
         }
         notifyHostLearnedOrRemoved(removedHost, false);
         notifyHostLearnedOrRemoved(newHost, true);
         if (!newHost.isStaticHost()) {
-            processPendingARPReqs(networkAddr);
+            processPendingARPReqs(newHost.getNetworkAddress());
         }
     }
 
     // Remove known Host
-    private void removeKnownHost(InetAddress key) {
+    private void removeKnownHost(HostID key) {
         HostNodeConnector host = hostsDB.get(key);
         if (host != null) {
             logger.debug("Removing Host: IP:{}", host.getNetworkAddress().getHostAddress());
             hostsDB.remove(key);
         } else {
-            logger.error("removeKnownHost(): Host for IP address {} not found in hostsDB", key.getHostAddress());
+            logger.error("removeKnownHost(): Host for IP address {} not found in hostsDB", key.getIpAddress());
         }
     }
 
@@ -482,7 +495,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         @Override
         public void run() {
             HostNodeConnector removedHost = null;
-            InetAddress networkAddr = host.getNetworkAddress();
+            HostID id = HostID.fromIPAndMac(host.getNetworkAddress(), host.getDataLayerAddress());
 
             /* Check for Host Move case */
             if (hostMoved(host)) {
@@ -492,9 +505,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                  * location parameters with new information, and notify the
                  * applications listening to host move.
                  */
-                removedHost = hostsDB.get(networkAddr);
+                removedHost = hostsDB.get(id);
                 if (removedHost != null) {
-                    replaceHost(networkAddr, removedHost, host);
+                    replaceHost(id.getIpAddress(), removedHost, host);
                     return;
                 } else {
                     logger.error("Host to be removed not found in hostsDB");
@@ -505,7 +518,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             learnNewHost(host);
 
             /* check if there is an outstanding request for this host */
-            processPendingARPReqs(networkAddr);
+            processPendingARPReqs(id.getIpAddress());
             notifyHostLearnedOrRemoved(host, true);
         }
     }
@@ -516,10 +529,11 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         logger.debug("ARP received for Host: IP {}, MAC {}, {}", host.getNetworkAddress().getHostAddress(),
                 HexEncode.bytesToHexString(host.getDataLayerAddressBytes()), host);
         if (hostExists(host)) {
-            HostNodeConnector existinghost = hostsDB.get(host.getNetworkAddress());
+            HostNodeConnector existinghost = hostsDB.get(HostID.fromIPAndMac(host.getNetworkAddress(), host
+                    .getDataLayerAddress()));
             existinghost.initArpSendCountDown();
             // Update the host
-            hostsDB.put(host.getNetworkAddress(), existinghost);
+            hostsDB.put(new HostID(host.getNetworkAddress(),host.getDataLayerAddress()), existinghost);
             return;
         }
         new NotifyHostThread(host).start();
@@ -717,8 +731,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      *         Switch-Ids as String).
      */
     @Override
-    public List<List<String>> getHostNetworkHierarchy(InetAddress hostAddress) {
-        HostNodeConnector host = hostQuery(hostAddress);
+    public List<List<String>> getHostNetworkHierarchy(InetAddress hostAddress, DataLinkAddress macAddress) {
+        HostID id = HostID.fromIPAndMac(hostAddress, macAddress);
+        HostNodeConnector host = hostQueryByIPandMAC(id);
         if (host == null) {
             return null;
         }
@@ -989,7 +1004,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
                 logger.error("ARPRefreshHandler(): hostsDB is not allocated yet:");
                 return;
             }
-            for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
+            for (Entry<HostID, HostNodeConnector> entry : hostsDB.entrySet()) {
                 HostNodeConnector host = entry.getValue();
                 if (host.isStaticHost()) {
                     /* this host was learned via API3, don't age it out */
@@ -1067,7 +1082,8 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             if (hostExists(host)) {
                 // This host is already learned either via ARP or through a
                 // northbound request
-                HostNodeConnector transHost = hostsDB.get(networkAddr);
+                HostNodeConnector transHost = hostsDB
+                        .get(HostID.fromIPAndMac(networkAddr, new EthernetAddress(dataLayerAddress)));
                 transHost.setStaticHost(true);
                 return new Status(StatusCode.SUCCESS);
             }
@@ -1142,9 +1158,9 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             if (hostExists(host)) {
                 return new Status(StatusCode.BADREQUEST, "Host already exists");
             }
-
-            if ((tobeUpdatedHost = hostsDB.get(networkAddr)) != null) {
-                if (hostsDB.replace(networkAddr, tobeUpdatedHost, host)) {
+            HostID id = HostID.fromIPAndMac(host.getNetworkAddress(), host.getDataLayerAddress());
+            if ((tobeUpdatedHost = hostsDB.get(id)) != null) {
+                if (hostsDB.replace(id, tobeUpdatedHost, host)) {
                     logger.debug("Host replaced from hostsDB. Old host: {} New Host: {}", tobeUpdatedHost, host);
                     notifyHostLearnedOrRemoved(tobeUpdatedHost, false);
                     notifyHostLearnedOrRemoved(host, true);
@@ -1190,9 +1206,10 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
      *         otherwise
      */
 
-    public Status removeStaticHostReq(InetAddress networkAddress) {
+    public Status removeStaticHostReq(InetAddress networkAddress, DataLinkAddress mac) {
         // Check if host is in active hosts database
-        HostNodeConnector host = getHostFromOnActiveDB(networkAddress);
+        HostID id = HostID.fromIPAndMac(networkAddress, mac);
+        HostNodeConnector host = getHostFromOnActiveDB(id);
         if (host != null) {
             // Validation check
             if (!host.isStaticHost()) {
@@ -1200,7 +1217,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
             }
             // Remove and notify
             notifyHostLearnedOrRemoved(host, false);
-            removeKnownHost(networkAddress);
+            removeKnownHost(id);
             return new Status(StatusCode.SUCCESS, null);
         }
 
@@ -1234,7 +1251,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
         switch (type) {
         case REMOVED:
             logger.debug("Received removed node {}", node);
-            for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
+            for (Entry<HostID, HostNodeConnector> entry : hostsDB.entrySet()) {
                 HostNodeConnector host = entry.getValue();
                 if (host.getnodeconnectorNode().equals(node)) {
                     logger.debug("Node: {} is down, remove from Hosts_DB", node);
@@ -1302,10 +1319,21 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     }
 
     @Override
-    public Status removeStaticHost(String networkAddress) {
+    public Status removeStaticHost(String networkAddress,String macAddress) {
         try {
             InetAddress address = InetAddress.getByName(networkAddress);
-            return removeStaticHostReq(address);
+            EthernetAddress ethAddr = null;
+            try{
+             ethAddr = new EthernetAddress(HexEncode.bytesFromHexString(macAddress));
+            }
+            catch(ConstructionException e)
+            {
+                if(logger.isDebugEnabled())
+                {
+                    logger.debug("exception is ..{}",e);
+                }
+            }
+            return removeStaticHostReq(address,ethAddr);
         } catch (UnknownHostException e) {
             logger.debug("Invalid IP Address when trying to remove host", e);
             return new Status(StatusCode.BADREQUEST, "Invalid IP Address when trying to remove host");
@@ -1353,7 +1381,7 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     private void handleNodeConnectorStatusDown(NodeConnector nodeConnector) {
         logger.trace("handleNodeConnectorStatusDown {}", nodeConnector);
 
-        for (Entry<InetAddress, HostNodeConnector> entry : hostsDB.entrySet()) {
+        for (Entry<HostID, HostNodeConnector> entry : hostsDB.entrySet()) {
             HostNodeConnector host = entry.getValue();
             if (host.getnodeConnector().equals(nodeConnector)) {
                 logger.debug(" NodeConnector: {} is down, remove from Hosts_DB", nodeConnector);
@@ -1456,19 +1484,19 @@ public class HostTracker implements IfIptoHost, IfHostListener, ISwitchManagerAw
     }
 
     @Override
-    public void entryCreated(InetAddress key, String cacheName, boolean originLocal) {
+    public void entryCreated(HostID key, String cacheName, boolean originLocal) {
         if (originLocal) {
             return;
         }
-        processPendingARPReqs(key);
+        processPendingARPReqs(key.getIpAddress());
     }
 
     @Override
-    public void entryUpdated(InetAddress key, HostNodeConnector new_value, String cacheName, boolean originLocal) {
+    public void entryUpdated(HostID key, HostNodeConnector new_value, String cacheName, boolean originLocal) {
     }
 
     @Override
-    public void entryDeleted(InetAddress key, String cacheName, boolean originLocal) {
+    public void entryDeleted(HostID key, String cacheName, boolean originLocal) {
     }
 
     private void registerWithOSGIConsole() {

@@ -191,7 +191,7 @@ public class HostTrackerIT {
         Assert.assertFalse(hnci.hasNext());
 
         // test removeStaticHost()
-        st = this.hosttracker.removeStaticHost("192.168.0.8");
+        st = this.hosttracker.removeStaticHost("192.168.0.8","00:00:00:00:00:02");
         Assert.assertTrue(st.isSuccess());
 
         hnci = this.hosttracker.getInactiveStaticHosts().iterator();
