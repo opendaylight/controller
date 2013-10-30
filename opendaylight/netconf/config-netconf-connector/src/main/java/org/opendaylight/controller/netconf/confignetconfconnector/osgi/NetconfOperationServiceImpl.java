@@ -8,8 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
@@ -22,10 +25,8 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilter;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 /**
  * Manages life cycle of {@link YangStoreSnapshot}.
@@ -75,6 +76,8 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:operations:1.0"));
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:operations:1.1"));
+        capabilities.add(new BasicCapability(
+                "urn:ietf:params:netconf:capability:exi:1.0"));
         capabilities
                 .add(new BasicCapability(
                         "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04"));

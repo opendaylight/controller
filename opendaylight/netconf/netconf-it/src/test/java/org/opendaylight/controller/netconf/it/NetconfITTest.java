@@ -8,11 +8,35 @@
 
 package org.opendaylight.controller.netconf.it;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.internal.util.Checks.checkNotNull;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.HashedWheelTimer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import javax.management.ObjectName;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -42,11 +66,15 @@ import org.opendaylight.controller.netconf.impl.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionListenerFactory;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
+import org.opendaylight.controller.netconf.impl.mapping.ExiDecoderHandler;
+import org.opendaylight.controller.netconf.impl.mapping.ExiEncoderHandler;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationServiceFactoryListenerImpl;
 import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
+import org.opendaylight.controller.netconf.util.xml.ExiParameters;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.protocol.framework.ProtocolMessageEncoder;
 import org.opendaylight.protocol.util.SSLUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,43 +82,24 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import javax.management.ObjectName;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.internal.util.Checks.checkNotNull;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class NetconfITTest extends AbstractConfigTest {
 
     // private static final Logger logger =
     // LoggerFactory.getLogger(NetconfITTest.class);
     //
+
     private static final InetSocketAddress tcpAddress = new InetSocketAddress("127.0.0.1", 12023);
     private static final InetSocketAddress tlsAddress = new InetSocketAddress("127.0.0.1", 12024);
 
-    private NetconfMessage getConfig, getConfigCandidate, editConfig, closeSession;
+    private NetconfMessage getConfig, getConfigCandidate, editConfig,
+            closeSession, startExi, stopExi;
     private DefaultCommitNotificationProducer commitNot;
     private NetconfServerDispatcher dispatch, dispatchS;
+
 
     @Before
     public void setUp() throws Exception {
@@ -146,6 +155,10 @@ public class NetconfITTest extends AbstractConfigTest {
         this.editConfig = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/edit_config.xml");
         this.getConfig = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/getConfig.xml");
         this.getConfigCandidate = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/getConfig_candidate.xml");
+        this.startExi = XmlFileLoader
+                .xmlFileToNetconfMessage("netconfMessages/startExi.xml");
+        this.stopExi = XmlFileLoader
+                .xmlFileToNetconfMessage("netconfMessages/stopExi.xml");
         this.closeSession = XmlFileLoader.xmlFileToNetconfMessage("netconfMessages/closeSession.xml");
     }
 
@@ -213,7 +226,6 @@ public class NetconfITTest extends AbstractConfigTest {
         }
     }
 
-    @Ignore
     @Test
     public void waitingTest() throws Exception {
         final ConfigTransactionJMXClient transaction = this.configRegistryClient.createTransaction();
@@ -320,14 +332,38 @@ public class NetconfITTest extends AbstractConfigTest {
     }
 
     @Test
+    public void testStartExi() throws Exception {
+        try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
+
+
+            Document rpcReply = netconfClient.sendMessage(this.startExi)
+                    .getDocument();
+            assertIsOK(rpcReply);
+
+            ExiParameters exiParams = new ExiParameters();
+            exiParams.setParametersFromXmlElement(XmlElement.fromDomDocument(this.startExi.getDocument()));
+
+            netconfClient.getClientSession().addFirst(ExiDecoderHandler.HANDLER_NAME, new ExiDecoderHandler(exiParams));
+            netconfClient.getClientSession().addLast(new ExiEncoderHandler(exiParams));
+            netconfClient.getClientSession().remove(ProtocolMessageEncoder.class);
+            rpcReply = netconfClient.sendMessage(this.stopExi)
+                    .getDocument();
+            assertIsOK(rpcReply);
+
+        }
+    }
+
+    @Test
     public void testCloseSession() throws Exception {
         try (NetconfClient netconfClient = createSession(tcpAddress, "1")) {
 
             // edit config
-            Document rpcReply = netconfClient.sendMessage(this.editConfig).getDocument();
+            Document rpcReply = netconfClient.sendMessage(this.editConfig)
+                    .getDocument();
             assertIsOK(rpcReply);
 
-            rpcReply = netconfClient.sendMessage(this.closeSession).getDocument();
+            rpcReply = netconfClient.sendMessage(this.closeSession)
+                    .getDocument();
 
             assertIsOK(rpcReply);
         }
