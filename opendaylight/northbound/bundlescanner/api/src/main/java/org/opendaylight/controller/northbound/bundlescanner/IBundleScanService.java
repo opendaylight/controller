@@ -9,6 +9,7 @@
 package org.opendaylight.controller.northbound.bundlescanner;
 
 import java.util.List;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
@@ -30,5 +31,6 @@ public interface IBundleScanService {
     public List<Class<?>> getAnnotatedClasses(
             BundleContext context,
             String[] annotations,
+            Set<String> excludes,
             boolean includeDependentBundleClasses);
 }

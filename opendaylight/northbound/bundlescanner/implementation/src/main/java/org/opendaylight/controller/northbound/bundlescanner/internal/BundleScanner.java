@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -66,6 +68,7 @@ import org.slf4j.LoggerFactory;
 
     public List<Class<?>> getAnnotatedClasses(BundleContext context,
             String[] annotations,
+            Set<String> excludes,
             boolean includeDependentBundleClasses)
     {
         BundleInfo info = bundleAnnotations.get(context.getBundle().getBundleId());
@@ -74,9 +77,16 @@ import org.slf4j.LoggerFactory;
         List<Class<?>> result = null;
         if (includeDependentBundleClasses) {
             result = info.getAnnotatedClasses(bundleAnnotations.values(),
-                    pattern, context.getBundle());
+                    pattern, context.getBundle(), excludes);
         } else {
-            result = info.getAnnotatedClasses(pattern);
+            result = info.getAnnotatedClasses(pattern, excludes);
+        }
+        // reverse the list to give precedence to the types loaded from the
+        // initiating bundle
+        Collections.reverse(result);
+        if (includeDependentBundleClasses) {
+            // validate classes for conflicts
+            validate(result);
         }
         LOGGER.debug("Annotated classes detected: {} matching: {}", result, pattern);
         return result;
@@ -240,12 +250,13 @@ import org.slf4j.LoggerFactory;
 
     public static List<Class<?>> loadClasses(
             Collection<String> annotatedClasses,
-            Bundle initBundle)
+            Bundle initBundle, Set<String> excludes)
     {
         List<Class<?>> result = new ArrayList<Class<?>>();
         StringBuilder errors = new StringBuilder();
         for (String name : annotatedClasses) {
             try {
+                if (excludes != null && excludes.contains(name)) continue;
                 result.add(initBundle.loadClass(name));
             } catch (ClassNotFoundException e) {
                 errors.append(name).append(", ");
@@ -279,6 +290,33 @@ import org.slf4j.LoggerFactory;
             LOGGER.debug("Merged regex: [{}]", regex.toString());
         }
         return Pattern.compile(regex.toString());
+    }
+
+    private void validate(List<Class<?>> classes) {
+        if (classes == null || classes.size() == 0) return;
+        Map<String,String> names = new HashMap<String,String>();
+        StringBuilder conflictsMsg = new StringBuilder();
+        for (Class c : classes) {
+            XmlRootElement root = (XmlRootElement) c.getAnnotation(XmlRootElement.class);
+            if (root == null) continue;
+            String rootName = root.name();
+            if ("##default".equals(rootName)) {
+                String clsName = c.getSimpleName();
+                rootName = Character.toLowerCase(clsName.charAt(0)) + clsName.substring(1);
+            }
+            String other = names.get(rootName);
+            if (other != null && !other.equals(c.getName())) {
+                conflictsMsg.append(System.lineSeparator())
+                    .append("[").append(rootName).append(":")
+                    .append(c.getName()).append(",").append(other)
+                    .append("]");
+            } else {
+                names.put(rootName, c.getName());
+            }
+        }
+        if (conflictsMsg.length() > 0) {
+            LOGGER.info("JAXB type conflicts detected : {}", conflictsMsg.toString());
+        }
     }
 
 }

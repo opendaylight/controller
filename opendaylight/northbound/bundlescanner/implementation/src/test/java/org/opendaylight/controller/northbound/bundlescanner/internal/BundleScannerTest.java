@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.junit.AfterClass;
@@ -63,18 +65,18 @@ public class BundleScannerTest {
     public void testBundleEvents() throws Exception {
         MockBundle newBundle = new TestMockBundle("misc", "", "bundle_misc");
         assertTrue(bundleScanner.getAnnotatedClasses(
-                newBundle.getBundleContext(), null, false).size() == 0);
+                newBundle.getBundleContext(), null, null, false).size() == 0);
         BundleEvent event = new BundleEvent(BundleEvent.RESOLVED, newBundle);
         bundleScanner.bundleChanged(event);
         assertTrue(bundleScanner.getAnnotatedClasses(
-                newBundle.getBundleContext(), null, false).size() == 1);
+                newBundle.getBundleContext(), null, null, false).size() == 1);
     }
 
     @Test
     public void testAnnotatedClassesWithDependencies() throws Exception {
         for (Bundle bundle : bundles) {
             List<Class<?>> classes = bundleScanner.getAnnotatedClasses(
-                    bundle.getBundleContext(), null, true);
+                    bundle.getBundleContext(), null, null, true);
             String name = bundle.getSymbolicName();
             System.out.println("name:" + name + " classes:" + classes.size());
             if ("misc".equals(name)) {
@@ -94,7 +96,7 @@ public class BundleScannerTest {
         Bundle bundle = findBundle("sub1");
         String[] annos = { "javax.xml.bind.annotation.XmlTransient" };
         List<Class<?>> classes = bundleScanner.getAnnotatedClasses(
-                bundle.getBundleContext(), annos, true);
+                bundle.getBundleContext(), annos, null, true);
         assertTrue(classes.size() == 1);
     }
 
@@ -103,7 +105,7 @@ public class BundleScannerTest {
         Bundle bundle = findBundle("sub1");
         String[] annos = { "javax.xml.bind.annotation.*" };
         List<Class<?>> classes = bundleScanner.getAnnotatedClasses(
-                bundle.getBundleContext(), annos, true);
+                bundle.getBundleContext(), annos, null, true);
         assertTrue(classes.size() == 6);
     }
 
@@ -112,7 +114,7 @@ public class BundleScannerTest {
         Bundle bundle = findBundle("sub1");
         String[] annos = { "non.existent.pkg" };
         List<Class<?>> classes = bundleScanner.getAnnotatedClasses(
-                bundle.getBundleContext(), annos, true);
+                bundle.getBundleContext(), annos, null, true);
         assertTrue(classes.size() == 0);
     }
 
@@ -127,6 +129,17 @@ public class BundleScannerTest {
             );
         assertTrue(pattern.matcher("Ljavax/xml/bind/annotation/FOO;").find());
         assertFalse(pattern.matcher("Ljavax/servlet/FOO;").find());
+    }
+
+    @Test
+    public void testExclude() {
+        Set<String> excludes = new HashSet<String>();
+        excludes.add("bundle_base.Animal");
+        Bundle bundle = findBundle("sub1");
+        String[] annos = { "javax.xml.bind.annotation.*" };
+        List<Class<?>> classes = bundleScanner.getAnnotatedClasses(
+                bundle.getBundleContext(), annos, excludes, true);
+        assertTrue(classes.size() == 5);
     }
 
     private static Bundle findBundle(String symName) {
