@@ -16,6 +16,24 @@
       "revId": "9ecb37cef724a45045dca32c2e09c290e5f1fdb3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_075fe90f",
+        "filename": "opendaylight/northbound/bundlescanner/implementation/src/main/java/org/opendaylight/controller/northbound/bundlescanner/internal/BundleScanner.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-30T22:13:23Z",
+      "side": 1,
+      "message": "Good eye. The reverse should have been inside the if block :)",
+      "parentUuid": "da6255ed_4765e1df",
+      "revId": "9ecb37cef724a45045dca32c2e09c290e5f1fdb3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
