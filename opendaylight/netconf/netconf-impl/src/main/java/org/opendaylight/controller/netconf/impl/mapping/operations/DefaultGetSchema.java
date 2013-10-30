@@ -8,11 +8,14 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.impl.mapping.CapabilityProvider;
+import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -23,12 +26,13 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 
-public final class DefaultGetSchema extends AbstractNetconfOperation {
+public final class DefaultGetSchema extends AbstractNetconfOperation implements DefaultNetconfOperation {
 
     private final CapabilityProvider cap;
+    private NetconfSession netconfSession;
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultGetSchema.class);
 
@@ -115,5 +119,13 @@ public final class DefaultGetSchema extends AbstractNetconfOperation {
             }
 
         }
+    }
+
+    public void setNetconfSession(NetconfSession s) {
+        this.netconfSession = s;
+    }
+
+    public NetconfSession getNetconfSession() {
+        return netconfSession;
     }
 }

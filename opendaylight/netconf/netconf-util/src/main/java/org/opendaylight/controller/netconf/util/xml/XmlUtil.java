@@ -8,11 +8,12 @@
 
 package org.opendaylight.controller.netconf.util.xml;
 
-import com.google.common.base.Charsets;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -32,12 +33,13 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import com.google.common.base.Charsets;
 
 public class XmlUtil {
 
@@ -79,7 +81,6 @@ public class XmlUtil {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         factory.setCoalescing(true);
-        // factory.setValidating(true);
         factory.setIgnoringElementContentWhitespace(true);
         factory.setIgnoringComments(true);
         return factory;

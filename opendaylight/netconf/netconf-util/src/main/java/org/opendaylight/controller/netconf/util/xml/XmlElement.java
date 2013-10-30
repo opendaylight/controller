@@ -103,6 +103,9 @@ public class XmlElement {
     }
 
     public String getName() {
+        if (element.getLocalName()!=null && !element.getLocalName().equals("")){
+            return element.getLocalName();
+        }
         return element.getTagName();
     }
 
@@ -112,6 +115,10 @@ public class XmlElement {
 
     public String getAttribute(String attributeName, String namespace) {
         return element.getAttributeNS(namespace, attributeName);
+    }
+
+    public NodeList getElementsByTagName(String name) {
+        return element.getElementsByTagName(name);
     }
 
     public void appendChild(Element element) {

@@ -8,10 +8,11 @@
 
 package org.opendaylight.controller.netconf.impl;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import static com.google.common.base.Preconditions.checkState;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
@@ -24,7 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import static com.google.common.base.Preconditions.checkState;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 public class NetconfServerSessionListener implements
         SessionListener<NetconfMessage, NetconfServerSession, NetconfTerminationReason> {
@@ -66,7 +68,8 @@ public class NetconfServerSessionListener implements
             Preconditions.checkState(operationRouter != null, "Cannot handle message, session up was not yet received");
             // FIXME: there is no validation since the document may contain yang
             // schemas
-            final NetconfMessage message = processDocument(netconfMessage);
+            final NetconfMessage message = processDocument(netconfMessage,
+                    session);
             logger.debug("Respondign with message {}", XmlUtil.toString(message.getDocument()));
             session.sendMessage(message);
 
@@ -89,16 +92,18 @@ public class NetconfServerSessionListener implements
         logger.info("Session {} closed successfully", session.getSessionId());
     }
 
-    private NetconfMessage processDocument(final NetconfMessage netconfMessage) throws NetconfDocumentedException {
+    private NetconfMessage processDocument(final NetconfMessage netconfMessage,
+            NetconfSession session) throws NetconfDocumentedException {
 
         final Document incommingDocument = netconfMessage.getDocument();
         final Node rootNode = incommingDocument.getDocumentElement();
 
-        if (rootNode.getNodeName().equals(XmlNetconfConstants.RPC_KEY)) {
+        if (rootNode.getLocalName().equals(XmlNetconfConstants.RPC_KEY)) {
             final String messageId = rootNode.getAttributes().getNamedItem(MESSAGE_ID).getTextContent();
             checkState(messageId != null);
             final Document responseDocument = XmlUtil.newDocument();
-            Document rpcReply = operationRouter.onNetconfMessage(incommingDocument);
+            Document rpcReply = operationRouter.onNetconfMessage(
+                    incommingDocument, session);
             responseDocument.appendChild(responseDocument.importNode(rpcReply.getDocumentElement(), true));
             return new NetconfMessage(responseDocument);
         } else {
