@@ -42,9 +42,14 @@ import com.google.common.collect.Multimap
 import com.google.common.collect.HashMultimap
 import static org.opendaylight.controller.sal.binding.impl.osgi.ClassLoaderUtils.*
 import java.util.concurrent.Executors
+import java.util.Collections
+import org.opendaylight.yangtools.yang.binding.DataObject
 
-class BindingAwareBrokerImpl implements BindingAwareBroker {
+class BindingAwareBrokerImpl implements BindingAwareBroker, AutoCloseable {
     private static val log = LoggerFactory.getLogger(BindingAwareBrokerImpl)
+
+
+    private InstanceIdentifier<? extends DataObject> root = InstanceIdentifier.builder().toInstance();
 
     private val clsPool = ClassPool.getDefault()
     private var RuntimeCodeGenerator generator;
@@ -70,29 +75,52 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
     @Property
     private var DataBrokerImpl dataBroker
     
-    private var ServiceRegistration<NotificationProviderService> notifyBrokerRegistration
-
     @Property
     var BundleContext brokerBundleContext
+    
+    ServiceRegistration<NotificationProviderService> notifyProviderRegistration
+    
+    ServiceRegistration<NotificationService> notifyConsumerRegistration
+    
+    ServiceRegistration<DataProviderService> dataProviderRegistration
+    
+    ServiceRegistration<DataBrokerService> dataConsumerRegistration
+    
+    private HashMapDataStore store = new HashMapDataStore();
+    
+    public new(BundleContext bundleContext) {
+        _brokerBundleContext = bundleContext;
+    }
 
     def start() {
+        log.info("Starting MD-SAL: Binding Aware Broker");
         initGenerator();
 
         val executor = Executors.newCachedThreadPool;
         // Initialization of notificationBroker
+        log.info("Starting MD-SAL: Binding Aware Notification Broker");
         notifyBroker = new NotificationBrokerImpl(executor);
         notifyBroker.invokerFactory = generator.invokerFactory;
+
+        log.info("Starting MD-SAL: Binding Aware Data Broker");
         dataBroker = new DataBrokerImpl();
         dataBroker.executor = executor;
-        val brokerProperties = newProperties();
-        notifyBrokerRegistration = brokerBundleContext.registerService(NotificationProviderService, notifyBroker,
-            brokerProperties)
-        brokerBundleContext.registerService(NotificationService, notifyBroker, brokerProperties)
-        brokerBundleContext.registerService(DataProviderService, dataBroker, brokerProperties)
-        brokerBundleContext.registerService(DataBrokerService, dataBroker, brokerProperties)
-        
-        
 
+        val brokerProperties = newProperties();
+        
+        
+        log.info("Starting MD-SAL: Binding Aware Data Broker");
+        notifyProviderRegistration = brokerBundleContext.registerService(NotificationProviderService, notifyBroker,
+            brokerProperties)
+        notifyConsumerRegistration = brokerBundleContext.registerService(NotificationService, notifyBroker, brokerProperties)
+        dataProviderRegistration = brokerBundleContext.registerService(DataProviderService, dataBroker, brokerProperties)
+        dataConsumerRegistration = brokerBundleContext.registerService(DataBrokerService, dataBroker, brokerProperties)
+        
+        
+        getDataBroker().registerDataReader(root, store);
+        getDataBroker().registerCommitHandler(root, store)
+        
+        log.info("MD-SAL: Binding Aware Broker Started");
     }
 
     def initGenerator() {
@@ -162,12 +190,7 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
 
         val osgiReg = context.bundleContext.registerService(type, service, properties);
         proxy.delegate = service;
-        return new RpcServiceRegistrationImpl<T>(type, service, osgiReg);
-    }
-
-    def <T extends RpcService> RpcRegistration<T> registerMountedRpcImplementation(Class<T> type, T service,
-        InstanceIdentifier<?> identifier, OsgiProviderContext context) {
-        throw new UnsupportedOperationException("TODO: auto-generated method stub")
+        return new RpcServiceRegistrationImpl<T>(type, service, osgiReg,this);
     }
 
     def <T extends RpcService> RoutedRpcRegistration<T> registerRoutedRpcImplementation(Class<T> type, T service,
@@ -238,12 +261,32 @@ class BindingAwareBrokerImpl implements BindingAwareBroker {
             val routingTable = router.getRoutingTable(context)
             val path = ctxMap.value
             routingTable.removeRoute(path)
+        }
+    }
+    
+    protected def <T extends RpcService> void unregisterRpcService(RpcServiceRegistrationImpl<T> registration) {
 
+        val type = registration.serviceType;
+        
+        val proxy = managedProxies.get(type);
+        if(proxy.proxy.delegate === registration.instance) {
+            proxy.proxy.delegate = null;
         }
     }
     
     def createDelegate(Class<? extends RpcService> type) {
         getManagedDirectProxy(type);
+    }
+    
+    def getRpcRouters() {
+        return Collections.unmodifiableMap(rpcRouters);
+    }
+    
+    override close() {
+        dataConsumerRegistration.unregister()
+        dataProviderRegistration.unregister()
+        notifyConsumerRegistration.unregister()
+        notifyProviderRegistration.unregister()
     }
     
 }
@@ -280,10 +323,6 @@ class RoutedRpcRegistrationImpl<T extends RpcService> extends AbstractObjectRegi
         unregisterPath(context, instance);
     }
 
-    override getService() {
-        return instance;
-    }
-
     override registerPath(Class<? extends BaseIdentity> context, InstanceIdentifier<? extends Object> path) {
         checkClosed()
         broker.registerPath(this, context, path);
@@ -293,10 +332,35 @@ class RoutedRpcRegistrationImpl<T extends RpcService> extends AbstractObjectRegi
         checkClosed()
         broker.unregisterPath(this, context, path);
     }
+    
+    override getServiceType() {
+        return router.serviceType;
+    }
 
     private def checkClosed() {
         if (closed)
             throw new IllegalStateException("Registration was closed.");
     }
 
+}
+class RpcServiceRegistrationImpl<T extends RpcService> extends AbstractObjectRegistration<T> implements RpcRegistration<T>  {
+
+    val ServiceRegistration<T> osgiRegistration;
+    private var BindingAwareBrokerImpl broker;
+    
+    @Property
+    val Class<T> serviceType;
+
+    public new(Class<T> type, T service, ServiceRegistration<T> osgiReg,BindingAwareBrokerImpl broker) {
+        super(service);
+        this._serviceType = type;
+        this.osgiRegistration = osgiReg;
+        this.broker= broker;
+    }
+
+    override protected removeRegistration() {
+        broker.unregisterRpcService(this);
+        broker = null;
+    }
+    
 }
