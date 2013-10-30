@@ -44,6 +44,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 
 /**
@@ -373,8 +374,7 @@ public class FlowProgrammerNorthbound {
     }
 
     /**
-     * Add a flow configuration. If a flow by the given name already exists,
-     * this method will respond with a non-successful status response.
+     * Add or Modify a flow configuration. If the flow exists already, it will replace the current flow.
      *
      * @param containerName
      *            Name of the Container (Eg. 'default')
@@ -433,6 +433,7 @@ public class FlowProgrammerNorthbound {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @StatusCodes({
+        @ResponseCode(code = 200, condition = "Static Flow modified successfully"),
         @ResponseCode(code = 201, condition = "Flow Config processed successfully"),
         @ResponseCode(code = 400, condition = "Failed to create Static Flow entry due to invalid flow configuration"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation"),
@@ -441,7 +442,7 @@ public class FlowProgrammerNorthbound {
         @ResponseCode(code = 409, condition = "Failed to create Static Flow entry due to Conflicting Name or configuration"),
         @ResponseCode(code = 500, condition = "Failed to create Static Flow entry. Failure Reason included in HTTP Error response"),
         @ResponseCode(code = 503, condition = "One or more of Controller services are unavailable") })
-    public Response addFlow(@PathParam(value = "containerName") String containerName,
+    public Response addOrModifyFlow(@PathParam(value = "containerName") String containerName,
             @PathParam(value = "name") String name, @PathParam("nodeType") String nodeType,
             @PathParam(value = "nodeId") String nodeId, @TypeHint(FlowConfig.class) FlowConfig flowConfig) {
 
@@ -465,19 +466,23 @@ public class FlowProgrammerNorthbound {
         }
 
         Node node = handleNodeAvailability(containerName, nodeType, nodeId);
+        Status status;
 
         FlowConfig staticFlow = frm.getStaticFlow(name, node);
-        if (staticFlow != null) {
-            throw new ResourceConflictException(name + " already exists." + RestMessages.RESOURCECONFLICT.toString());
+
+        if (staticFlow == null) {
+          status = frm.addStaticFlow(flowConfig);
+        } else {
+          status = frm.modifyStaticFlow(flowConfig);
         }
-
-        Status status = frm.addStaticFlow(flowConfig);
-
         if (status.isSuccess()) {
-            NorthboundUtils.auditlog("Flow Entry", username, "added",
+            NorthboundUtils.auditlog("Flow Entry", username, staticFlow==null ? "added" : "updated",
                     name + " on Node " + NorthboundUtils.getNodeDesc(node, containerName, this), containerName);
-            return Response.status(Response.Status.CREATED).entity("Success").build();
+            if (staticFlow==null) {
+                return Response.status(Response.Status.CREATED).entity("Success").build();
+            }
         }
+
         return NorthboundUtils.getResponse(status);
     }
 
