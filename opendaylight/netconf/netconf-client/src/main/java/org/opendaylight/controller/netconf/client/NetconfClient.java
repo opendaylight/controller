@@ -8,16 +8,8 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.protocol.framework.NeverReconnectStrategy;
-import org.opendaylight.protocol.framework.ReconnectStrategy;
-import org.opendaylight.protocol.framework.TimedReconnectStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -25,6 +17,16 @@ import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+
+import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.protocol.framework.NeverReconnectStrategy;
+import org.opendaylight.protocol.framework.ReconnectStrategy;
+import org.opendaylight.protocol.framework.TimedReconnectStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 public class NetconfClient implements Closeable {
 
@@ -120,5 +122,9 @@ public class NetconfClient implements Closeable {
     public Set<String> getCapabilities() {
         Preconditions.checkState(clientSession != null, "Client was not initialized successfully");
         return Sets.newHashSet(clientSession.getServerCapabilities());
+    }
+
+    public NetconfClientSession getClientSession() {
+        return clientSession;
     }
 }

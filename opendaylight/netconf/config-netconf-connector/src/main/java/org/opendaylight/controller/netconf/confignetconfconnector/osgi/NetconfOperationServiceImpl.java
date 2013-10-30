@@ -8,8 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.yang.store.api.YangStoreException;
 import org.opendaylight.controller.config.yang.store.api.YangStoreService;
@@ -22,10 +25,8 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationFilter;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 /**
  * Manages life cycle of {@link YangStoreSnapshot}.
