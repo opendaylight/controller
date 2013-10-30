@@ -62,14 +62,14 @@ import org.slf4j.LoggerFactory;
         return bundle.getBundleId();
     }
 
-    public List<Class<?>> getAnnotatedClasses(Pattern pattern) {
+    public List<Class<?>> getAnnotatedClasses(Pattern pattern, Set<String> excludes) {
         List<String> result = new ArrayList<String>();
         for (Map.Entry<String, Set<String>> entry : annotatedClasses.entrySet()) {
             if (matches(pattern, entry.getValue())) {
                 result.add(entry.getKey());
             }
         }
-        return BundleScanner.loadClasses(result, bundle);
+        return BundleScanner.loadClasses(result, bundle, excludes);
     }
 
     private boolean matches(Pattern pattern, Set<String> values) {
@@ -87,16 +87,18 @@ import org.slf4j.LoggerFactory;
      * @param allbundles - all bundles
      * @param pattern - annotation pattern to match
      * @param initBundle - the bundle which initiated this call
+     * @param excludes - set of class names to be excluded
      *
      * @return list of annotated classes matching the pattern
      */
     public List<Class<?>> getAnnotatedClasses(
             Collection<BundleInfo> allbundles,
-            Pattern pattern, Bundle initBundle)
+            Pattern pattern, Bundle initBundle,
+            Set<String> excludes)
     {
-        List<Class<?>> classes = getAnnotatedClasses(pattern);
+        List<Class<?>> classes = getAnnotatedClasses(pattern, excludes);
         processAnnotatedClassesInternal(this, allbundles, pattern,
-                new HashSet<BundleInfo>(), classes, initBundle);
+                new HashSet<BundleInfo>(), classes, initBundle, excludes);
         return classes;
     }
 
@@ -125,17 +127,18 @@ import org.slf4j.LoggerFactory;
             Pattern pattern,
             Collection<BundleInfo> visited,
             List<Class<?>> classes,
-            Bundle initBundle)
+            Bundle initBundle, Set<String> excludes)
     {
         for (BundleInfo other : bundlesToScan) {
             if (other.getId() == target.getId()) continue;
             if (target.isDependantOn(other)) {
                 if (!visited.contains(other)) {
                     classes.addAll(BundleScanner.loadClasses(
-                            other.getExportedAnnotatedClasses(pattern), initBundle));
+                            other.getExportedAnnotatedClasses(pattern),
+                            initBundle, excludes));
                     visited.add(other);
                     processAnnotatedClassesInternal(other, bundlesToScan,
-                            pattern, visited, classes, initBundle);
+                            pattern, visited, classes, initBundle, excludes);
                 }
             }
         }

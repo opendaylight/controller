@@ -39,7 +39,23 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public class NorthboundApplication extends Application {
     public static final String JAXRS_RESOURCES_MANIFEST_NAME = "Jaxrs-Resources";
+    public static final String JAXRS_EXCLUDES_MANIFEST_NAME = "Jaxrs-Exclude-Types";
     private static final Logger LOGGER = LoggerFactory.getLogger(NorthboundApplication.class);
+    private final Set<Object> _singletons;
+
+    public NorthboundApplication() {
+        _singletons = new HashSet<Object>();
+        _singletons.add(new ContextResolver<JAXBContext>() {
+            JAXBContext jaxbContext = newJAXBContext();
+            @Override
+            public JAXBContext getContext(Class<?> type) {
+                return jaxbContext;
+            }
+
+        } );
+        _singletons.add(getJsonProvider());
+        _singletons.add(new JacksonJsonProcessingExceptionMapper());
+    }
 
     ////////////////////////////////////////////////////////////////
     //  Application overrides
@@ -47,17 +63,7 @@ public class NorthboundApplication extends Application {
 
     @Override
     public Set<Object> getSingletons() {
-        Set<Object> singletons = new HashSet<Object>();
-        singletons.add(new ContextResolver<JAXBContext>() {
-            @Override
-            public JAXBContext getContext(Class<?> type) {
-                return newJAXBContext();
-            }
-
-        } );
-        singletons.add(getJsonProvider());
-        singletons.add(new JacksonJsonProcessingExceptionMapper());
-        return singletons;
+        return _singletons;
     }
 
     @Override
@@ -102,6 +108,7 @@ public class NorthboundApplication extends Application {
         try {
             List<Class<?>> cls = svc.getAnnotatedClasses(ctx,
                     new String[] { XmlRootElement.class.getPackage().getName() },
+                    parseManifestEntry(ctx, JAXRS_EXCLUDES_MANIFEST_NAME),
                     true);
             return JAXBContext.newInstance(cls.toArray(new Class[cls.size()]));
         } catch (JAXBException je) {
@@ -118,29 +125,22 @@ public class NorthboundApplication extends Application {
         try {
             IBundleScanService svc = lookupBundleScanner(ctx);
             result.addAll(svc.getAnnotatedClasses(ctx,
-                    new String[] { javax.ws.rs.Path.class.getName() }, false));
+                    new String[] { javax.ws.rs.Path.class.getName() },
+                    null, false));
         } catch (ServiceException se) {
             recordException = se;
             LOGGER.debug("Error finding JAXRS resource annotated classes in " +
                     "bundle: {} error: {}.", bundleName, se.getMessage());
             // the bundle scan service cannot be lookedup. Lets attempt to
             // lookup the resources from the bundle manifest header
-            Dictionary<String,String> headers = ctx.getBundle().getHeaders();
-            String header = headers.get(JAXRS_RESOURCES_MANIFEST_NAME);
-            if (header != null) {
-                for (String s : header.split(",")) {
-                    s = s.trim();
-                    if (s.length() > 0) {
-                        try {
-                            result.add(ctx.getBundle().loadClass(s));
-                        } catch (ClassNotFoundException cnfe) {
-                            LOGGER.error("Cannot load class: {} in bundle: {} " +
-                                    "defined as MANIFEST JAX-RS resource", s, bundleName, cnfe);
-                        }
-                    }
+            for (String c : parseManifestEntry(ctx, JAXRS_RESOURCES_MANIFEST_NAME)) {
+                try {
+                    result.add(ctx.getBundle().loadClass(c));
+                } catch (ClassNotFoundException cnfe) {
+                    LOGGER.error("Cannot load class: {} in bundle: {} " +
+                            "defined as MANIFEST JAX-RS resource", c, bundleName, cnfe);
                 }
             }
-
         }
 
         if (result.size() == 0) {
@@ -149,6 +149,21 @@ public class NorthboundApplication extends Application {
             } else {
                 throw new ServiceException("No resource classes found in bundle:" +
                         ctx.getBundle().getSymbolicName());
+            }
+        }
+        return result;
+    }
+
+    private final Set<String> parseManifestEntry(BundleContext ctx, String name) {
+        Set<String> result = new HashSet<String>();
+        Dictionary<String,String> headers = ctx.getBundle().getHeaders();
+        String header = headers.get(name);
+        if (header != null) {
+            for (String s : header.split(",")) {
+                s = s.trim();
+                if (s.length() > 0) {
+                    result.add(s);
+                }
             }
         }
         return result;
