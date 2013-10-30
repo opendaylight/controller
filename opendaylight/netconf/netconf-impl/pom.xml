@@ -54,7 +54,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-
         <!-- test dependencies -->
         <dependency>
             <groupId>org.opendaylight.bgpcep</groupId>
@@ -106,6 +105,8 @@
                             io.netty.channel.socket,
                             io.netty.util,
                             io.netty.util.concurrent,
+                            io.netty.buffer,
+                            io.netty.handler.codec,
                             javax.management,
                             javax.net.ssl,
                             javax.xml.namespace,
@@ -117,6 +118,7 @@
                             org.opendaylight.controller.netconf.util.mapping,
                             org.opendaylight.controller.netconf.util.osgi,
                             org.opendaylight.controller.netconf.util.xml,
+                            org.opendaylight.controller.netconf.util.handler,
                             org.opendaylight.protocol.framework,
                             org.osgi.framework,
                             org.osgi.util.tracker,
@@ -124,7 +126,8 @@
                             org.w3c.dom,
                             org.xml.sax,
                             org.opendaylight.controller.netconf.util.messages,
-                            org.opendaylight.controller.config.stat
+                            org.opendaylight.controller.config.stat,
+                            com.siemens.ct.exi.exceptions
                         </Import-Package>
                     </instructions>
                 </configuration>

@@ -1,0 +1,9 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" a="64" message-id="a">
+<start-exi>
+<alignment>pre-compression</alignment>
+<fidelity>
+<dtd/>
+<lexical-values/>
+</fidelity>
+</start-exi>
+</rpc>
