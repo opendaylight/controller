@@ -168,12 +168,7 @@ public interface BindingAwareBroker {
 
     public interface RpcRegistration<T extends RpcService> extends Registration<T> {
 
-        /**
-         * 
-         * @return instance for which registration does exists.
-         */
-        @Deprecated
-        T getService();
+        Class<T> getServiceType();
     }
 
     public interface RoutedRpcRegistration<T extends RpcService> extends RpcRegistration<T>,
@@ -191,6 +186,15 @@ public interface BindingAwareBroker {
         @Deprecated
         void registerInstance(Class<? extends BaseIdentity> context, InstanceIdentifier<?> instance);
 
+        /**
+         * Unregister particular instance identifier to be processed by this
+         * RpcService
+         * 
+         * Deprecated in favor of {@link RoutedRegistration#unregisterPath(Object, Object)}. 
+         * 
+         * @param context
+         * @param instance
+         */
         @Deprecated
         void unregisterInstance(Class<? extends BaseIdentity> context, InstanceIdentifier<?> instance);
     }

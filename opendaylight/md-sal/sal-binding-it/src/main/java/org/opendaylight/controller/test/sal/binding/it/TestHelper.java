@@ -24,14 +24,24 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-common").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common-api").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(), //
+                
                 mavenBundle("com.google.guava", "guava").versionAsInProject(), //
                 mavenBundle(YANGTOOLS + ".thirdparty", "xtend-lib-osgi").versionAsInProject() //
         );
     }
 
+    public static Option configMinumumBundles() {
+        return new DefaultCompositeOption(
+            mavenBundle(CONTROLLER, "config-api").versionAsInProject(), //
+            mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), //
+            mavenBundle("commons-io", "commons-io").versionAsInProject()
+        );
+    }
+    
     public static Option bindingAwareSalBundles() {
         return new DefaultCompositeOption( //
                 mavenBundle(CONTROLLER, "sal-binding-api").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(),
                 mavenBundle(CONTROLLER, "sal-binding-broker-impl").versionAsInProject(), //
                 mavenBundle("org.javassist", "javassist").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject() //
