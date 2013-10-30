@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import com.google.common.collect.Maps;
+import java.io.InputStream;
+import java.util.Map;
+
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -24,8 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.InputStream;
-import java.util.Map;
+import com.google.common.collect.Maps;
 
 public class DefaultCommit implements NetconfOperationFilter {
 
@@ -78,13 +79,13 @@ public class DefaultCommit implements NetconfOperationFilter {
     }
 
     @Override
-    public int getSoringOrder() {
+    public int getSortingOrder() {
         return 0;
     }
 
     @Override
     public int compareTo(NetconfOperationFilter o) {
-        return Integer.compare(getSoringOrder(), o.getSoringOrder());
+        return Integer.compare(getSortingOrder(), o.getSortingOrder());
     }
 
     private boolean canHandle(OperationNameAndNamespace operationNameAndNamespace) {
@@ -117,7 +118,8 @@ public class DefaultCommit implements NetconfOperationFilter {
     }
 
     private Element getConfigSnapshot(NetconfOperationRouter opRouter) throws NetconfDocumentedException {
-        final Document responseDocument = opRouter.onNetconfMessage(getConfigMessage);
+        final Document responseDocument = opRouter.onNetconfMessage(
+                getConfigMessage, null);
 
         XmlElement dataElement;
         try {
