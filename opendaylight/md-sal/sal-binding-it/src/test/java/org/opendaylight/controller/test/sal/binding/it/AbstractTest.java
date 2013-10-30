@@ -52,6 +52,8 @@ public abstract class AbstractTest {
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
 
+                configMinumumBundles(),
+                
                 mdSalCoreBundles(),
 
                 bindingAwareSalBundles(),

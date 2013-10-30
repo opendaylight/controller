@@ -60,11 +60,19 @@ public class ToasterTest {
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
                 mavenBundle(ODL, "sal-binding-api").versionAsInProject(), //
+                mavenBundle(ODL, "sal-binding-config").versionAsInProject(), 
                 mavenBundle(ODL, "sal-binding-broker-impl").versionAsInProject(), //
+                
                 mavenBundle(ODL, "sal-common").versionAsInProject(), //
                 mavenBundle(ODL, "sal-common-api").versionAsInProject(),//
                 mavenBundle(ODL, "sal-common-impl").versionAsInProject(), //
                 mavenBundle(ODL, "sal-common-util").versionAsInProject(), //
+                
+                mavenBundle(ODL, "config-api").versionAsInProject(), //
+                mavenBundle(ODL, "config-manager").versionAsInProject(), //
+                mavenBundle("commons-io", "commons-io").versionAsInProject(),
+                
+                
                 mavenBundle(SAMPLE, "sample-toaster").versionAsInProject(), //
                 mavenBundle(SAMPLE, "sample-toaster-consumer").versionAsInProject(), //
                 mavenBundle(SAMPLE, "sample-toaster-provider").versionAsInProject(), //
