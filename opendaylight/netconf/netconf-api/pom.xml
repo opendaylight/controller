@@ -23,6 +23,10 @@
             <artifactId>framework</artifactId>
             <version>${bgpcep.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.siemens.ct.exi</groupId>
+            <artifactId>exificient</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -38,6 +42,8 @@
                             javax.management,
                             org.opendaylight.controller.config.api.jmx,
                             org.opendaylight.protocol.framework,
+                            io.netty.channel,
+                            io.netty.util.concurrent,
                             org.w3c.dom
                         </Import-Package>
                         <Export-Package>

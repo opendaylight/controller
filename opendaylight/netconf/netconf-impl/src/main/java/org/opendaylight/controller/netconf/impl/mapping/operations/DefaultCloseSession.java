@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfOperationRouter;
+import org.opendaylight.controller.netconf.api.NetconfSession;
+import org.opendaylight.controller.netconf.mapping.api.DefaultNetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -17,8 +19,9 @@ import org.opendaylight.controller.netconf.util.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class DefaultCloseSession extends AbstractNetconfOperation {
+public class DefaultCloseSession extends AbstractNetconfOperation implements DefaultNetconfOperation {
     public static final String CLOSE_SESSION = "close-session";
+    private NetconfSession netconfSession;
 
     public DefaultCloseSession(String netconfSessionIdForReporting) {
         super(netconfSessionIdForReporting);
@@ -44,5 +47,14 @@ public class DefaultCloseSession extends AbstractNetconfOperation {
             throws NetconfDocumentedException {
         opRouter.close();
         return document.createElement(XmlNetconfConstants.OK);
+    }
+
+    @Override
+    public void setNetconfSession(NetconfSession s) {
+        this.netconfSession = s;
+    }
+
+    public NetconfSession getNetconfSession() {
+        return netconfSession;
     }
 }

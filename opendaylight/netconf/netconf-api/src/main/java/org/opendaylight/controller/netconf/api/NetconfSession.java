@@ -8,9 +8,25 @@
 
 package org.opendaylight.controller.netconf.api;
 
+import io.netty.channel.ChannelHandler;
+
 import org.opendaylight.protocol.framework.AbstractProtocolSession;
 
 public abstract class NetconfSession extends AbstractProtocolSession<NetconfMessage> {
 
     public abstract void sendMessage(NetconfMessage netconfMessage);
+
+    public abstract <T extends ChannelHandler> T remove(Class<T> handlerType);
+
+    public abstract void removeAfterMessageSend(String name);
+
+    public abstract void addFirst(String name, ChannelHandler handler);
+
+    public abstract void addLast(ChannelHandler handler);
+
+    public abstract void addAfter(String baseName, String name,
+            ChannelHandler handler);
+
+    public abstract void addAfterMessageSend(String name, String baseName,
+            ChannelHandler handler);
 }
