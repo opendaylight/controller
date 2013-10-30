@@ -16,6 +16,40 @@
       "revId": "fba8955c044781baa03cc1a75b62bb1a482840dd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_44483f2d",
+        "filename": "opendaylight/northbound/flowprogrammer/src/main/java/org/opendaylight/controller/flowprogrammer/northbound/FlowProgrammerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-30T01:58:02Z",
+      "side": 1,
+      "message": "The 201 appears redundant. Its already defined below.",
+      "revId": "fba8955c044781baa03cc1a75b62bb1a482840dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e45e13e9",
+        "filename": "opendaylight/northbound/flowprogrammer/src/main/java/org/opendaylight/controller/flowprogrammer/northbound/FlowProgrammerNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 580
+      },
+      "writtenOn": "2013-10-30T01:58:02Z",
+      "side": 1,
+      "message": "Move this check inside the if block where addStaticFlow is being called. You may want to handle the success cases inside the above if/else block.",
+      "revId": "fba8955c044781baa03cc1a75b62bb1a482840dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
