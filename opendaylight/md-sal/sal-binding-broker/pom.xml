@@ -17,14 +17,70 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-maven-plugin</artifactId>
+                <version>0.5.9-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                        <configuration>
+                            <codeGenerators>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>${project.build.directory}/generated-sources/config</outputBaseDir>
+                                    <additionalConfiguration>
+                                        <namespaceToPackage1>
+                                            urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang
+                                        </namespaceToPackage1>
+                                    </additionalConfiguration>
+                                </generator>
+                            </codeGenerators>
+                            <inspectDependencies>true</inspectDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.opendaylight.controller</groupId>
+                        <artifactId>yang-jmx-generator-plugin</artifactId>
+                        <version>0.2.2-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/config</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-                        <Bundle-Activator>org.opendaylight.controller.sal.binding.impl.BrokerActivator</Bundle-Activator>
                         <Private-Package>
+                            org.opendaylight.controller.config.yang.md.sal.binding.impl,
+                            org.opendaylight.controller.sal.binding.spi,
+                            org.opendaylight.controller.sal.binding.spi.*,
                             org.opendaylight.controller.sal.binding.impl,
                             org.opendaylight.controller.sal.binding.impl.*,
                             org.opendaylight.controller.sal.binding.codegen.*,
@@ -40,27 +96,27 @@
                 <artifactId>maven-clean-plugin</artifactId>
             </plugin>
             <plugin>
-                   <groupId>org.jacoco</groupId>
-                   <artifactId>jacoco-maven-plugin</artifactId>
-                   <configuration>
-                     <includes>org.opendaylight.controller.*</includes>
-                   </configuration>
-                   <executions>
-                     <execution>
-                       <id>pre-test</id>
-                       <goals>
-                         <goal>prepare-agent</goal>
-                       </goals>
-                     </execution>
-                     <execution>
-                       <id>post-test</id>
-                       <phase>test</phase>
-                       <goals>
-                         <goal>report</goal>
-                       </goals>
-                     </execution>
-                   </executions>
-               </plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <includes>org.opendaylight.controller.*</includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pre-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>post-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -116,6 +172,11 @@
         <dependency>
             <groupId>org.eclipse.xtend</groupId>
             <artifactId>org.eclipse.xtend.lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-binding-config</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
